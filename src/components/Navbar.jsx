@@ -1,13 +1,15 @@
 import { useState, useCallback, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { NAV_CATEGORIES } from "../data/blogMock";
+import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import logoImg from "../assets/img/Positivo sin tagline@300x.png";
+import useI18n from "../i18n/useI18n";
 
 const MENU_ID = "se-header-menu";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { t } = useI18n();
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
@@ -65,26 +67,28 @@ export const Navbar = () => {
           aria-label="Navegación principal"
         >
           <ul className="se-header__nav-list">
-            {NAV_CATEGORIES.map((item) => (
-              <li key={item.slug}>
+            {PRIMARY_NAV.filter((item) => item.id !== "suscripcion").map((item) => (
+              <li key={item.id}>
                 <Link
-                  to={`/categoria/${item.slug}`}
+                  to={item.to}
                   className="se-header__nav-link"
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
         <div className="se-header__actions se-header__actions--desktop">
+          {PRIMARY_NAV.find((item) => item.id === "suscripcion")?.to && (
           <Link
-            to="/suscribirse"
+            to={PRIMARY_NAV.find((item) => item.id === "suscripcion").to}
             className="se-btn se-btn--secondary se-header__cta"
             aria-label="Suscribirse al newsletter"
           >
-            Suscribirse
+            {t("common.suscribirse")}
           </Link>
+          )}
         </div>
 
         <button
@@ -116,18 +120,18 @@ export const Navbar = () => {
           <div className="se-header__menu-panel">
             <nav className="se-header__nav" aria-label="Navegación principal">
               <ul className="se-header__nav-list">
-                {NAV_CATEGORIES.map((item, index) => (
+                {PRIMARY_NAV.filter((item) => item.id !== "suscripcion").map((item, index) => (
                   <li
-                    key={item.slug}
+                    key={item.id}
                     className="se-header__nav-item"
                     style={{ transitionDelay: `${index * 40}ms` }}
                   >
                     <Link
-                      to={`/categoria/${item.slug}`}
+                      to={item.to}
                       className="se-header__nav-link"
                       onClick={closeMenu}
                     >
-                      {item.label}
+                      {t(item.labelKey)}
                     </Link>
                   </li>
                 ))}
@@ -135,12 +139,12 @@ export const Navbar = () => {
             </nav>
             <div className="se-header__actions">
               <Link
-                to="/suscribirse"
+                to={PRIMARY_NAV.find((item) => item.id === "suscripcion").to}
                 className="se-btn se-btn--secondary se-header__cta"
                 onClick={closeMenu}
                 aria-label="Suscribirse al newsletter"
               >
-                Suscribirse
+                {t("common.suscribirse")}
               </Link>
             </div>
           </div>

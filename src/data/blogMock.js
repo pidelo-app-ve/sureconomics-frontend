@@ -35,6 +35,11 @@ export const HERO_FEATURED = {
   readTime: "8 min",
   imagePlaceholder: "chart",
   imageUrl: PEXELS.calculator,
+  author: "Oscar Doval",
+  contentType: "Divulgación / información",
+  mainTheme: "Economía",
+  regionGeo: "Latinoamérica",
+  sector: "Finanzas",
 };
 
 export const FEATURED_POSTS = [
@@ -50,6 +55,11 @@ export const FEATURED_POSTS = [
     readTime: "6 min",
     imagePlaceholder: "building",
     imageUrl: PEXELS.stockBoard,
+    author: "Juan Francisco Paz",
+    contentType: "Noticias",
+    mainTheme: "Política",
+    regionGeo: "Brasil",
+    sector: "Finanzas",
   },
   {
     id: "fp-2",
@@ -63,6 +73,11 @@ export const FEATURED_POSTS = [
     readTime: "5 min",
     imagePlaceholder: "growth",
     imageUrl: PEXELS.growth,
+    author: "Ariana Zambrano",
+    contentType: "Divulgación / información",
+    mainTheme: "Inversiones",
+    regionGeo: "Latinoamérica",
+    sector: "Otros",
   },
   {
     id: "fp-3",
@@ -76,6 +91,11 @@ export const FEATURED_POSTS = [
     readTime: "7 min",
     imagePlaceholder: "chart",
     imageUrl: PEXELS.charts,
+    author: "Pablo Quintero",
+    contentType: "Noticias",
+    mainTheme: "Economía",
+    regionGeo: "México",
+    sector: "Consumo discrecional",
   },
 ];
 
@@ -92,6 +112,11 @@ export const BLOG_FEED = [
     readTime: "9 min",
     imagePlaceholder: "building",
     imageUrl: PEXELS.office,
+    author: "Daniel Berconsky Da Ruos",
+    contentType: "Divulgación / información",
+    mainTheme: "Inversiones",
+    regionGeo: "Latinoamérica",
+    sector: "Energía",
   },
   {
     id: "bf-2",
@@ -105,6 +130,11 @@ export const BLOG_FEED = [
     readTime: "6 min",
     imagePlaceholder: "chart",
     imageUrl: PEXELS.charts,
+    author: "Juan Francisco Paz",
+    contentType: "Noticias",
+    mainTheme: "Finanzas",
+    regionGeo: "Latinoamérica",
+    sector: "Finanzas",
   },
   {
     id: "bf-3",
@@ -118,6 +148,11 @@ export const BLOG_FEED = [
     readTime: "5 min",
     imagePlaceholder: "growth",
     imageUrl: PEXELS.finance,
+    author: "Pablo Quintero",
+    contentType: "Opinión",
+    mainTheme: "Política",
+    regionGeo: "Latinoamérica",
+    sector: "Otros",
   },
   {
     id: "bf-4",
@@ -131,6 +166,11 @@ export const BLOG_FEED = [
     readTime: "7 min",
     imagePlaceholder: "building",
     imageUrl: PEXELS.stockBoard,
+    author: "María Fernanda Hernández",
+    contentType: "Divulgación / información",
+    mainTheme: "Economía",
+    regionGeo: "Colombia",
+    sector: "Industria",
   },
   {
     id: "bf-5",
@@ -144,6 +184,11 @@ export const BLOG_FEED = [
     readTime: "4 min",
     imagePlaceholder: "growth",
     imageUrl: PEXELS.calculator,
+    author: "Ariana Zambrano",
+    contentType: "Divulgación / información",
+    mainTheme: "Inversiones",
+    regionGeo: "Latinoamérica",
+    sector: "Otros",
   },
   {
     id: "bf-6",
@@ -157,6 +202,65 @@ export const BLOG_FEED = [
     readTime: "8 min",
     imagePlaceholder: "chart",
     imageUrl: PEXELS.growth,
+    author: "Daniel Berconsky Da Ruos",
+    contentType: "Noticias",
+    mainTheme: "Finanzas",
+    regionGeo: "Cono Sur",
+    sector: "Finanzas",
+  },
+  {
+    id: "bf-7",
+    slug: "telecom-tecnologia-inversion-usa",
+    category: "Tendencias",
+    categorySlug: "tendencias",
+    title: "Telecomunicaciones y tecnología: señales para invertir en USA",
+    excerpt:
+      "Un mapa de expectativas para infraestructura digital: demanda, regulación y sensibilidad a tasas en el ciclo actual.",
+    date: "2025-02-27",
+    readTime: "7 min",
+    imagePlaceholder: "building",
+    imageUrl: PEXELS.office,
+    author: "Oscar Doval",
+    contentType: "Divulgación / información",
+    mainTheme: "Inversiones",
+    regionGeo: "USA",
+    sector: "Telecomunicaciones",
+  },
+  {
+    id: "bf-8",
+    slug: "china-materia-prima-riesgo-volatilidad",
+    category: "Mercados",
+    categorySlug: "mercados",
+    title: "China y materia prima: riesgo, demanda y volatilidad",
+    excerpt:
+      "Cómo interpretar el ciclo industrial y su impacto en precios internacionales, inventarios y expectativas de oferta.",
+    date: "2025-02-25",
+    readTime: "6 min",
+    imagePlaceholder: "chart",
+    imageUrl: PEXELS.charts,
+    author: "Juan Francisco Paz",
+    contentType: "Noticias",
+    mainTheme: "Economía",
+    regionGeo: "Asia",
+    sector: "Materia prima",
+  },
+  {
+    id: "bf-9",
+    slug: "inmobiliario-construccion-mercados-argentinos",
+    category: "Análisis",
+    categorySlug: "analisis",
+    title: "Inmobiliario y construcción: lectura de precios y demanda en la región",
+    excerpt:
+      "Un análisis de comportamiento del sector, con foco en financiamiento, oferta y sensibilidad a expectativas macro.",
+    date: "2025-02-21",
+    readTime: "8 min",
+    imagePlaceholder: "building",
+    imageUrl: PEXELS.stockBoard,
+    author: "Pablo Quintero",
+    contentType: "Divulgación / información",
+    mainTheme: "Finanzas",
+    regionGeo: "América del Sur",
+    sector: "Construcción",
   },
 ];
 
@@ -207,8 +311,8 @@ export const formatDate = (dateStr) => {
   });
 };
 
-/** All posts flattened for lookup by slug (for single article view). */
-const ALL_POSTS = [
+/** All posts flattened for listing/filtering and lookup by slug. */
+export const ALL_POSTS = [
   { ...HERO_FEATURED },
   ...FEATURED_POSTS,
   ...BLOG_FEED,

@@ -10,6 +10,7 @@ export const PostCard = ({
   excerpt,
   date,
   readTime,
+  author,
   imagePlaceholder,
   imageUrl,
   variant = "default",
@@ -43,6 +44,7 @@ export const PostCard = ({
         <div className="se-card__meta">
           <time dateTime={date}>{formatDate(date)}</time>
           {readTime && <span className="se-card__read-time">{readTime}</span>}
+          {author && <span className="se-card__author">Por {author}</span>}
         </div>
         <Link to={url} className="se-link se-card__cta">
           Leer más
@@ -59,6 +61,7 @@ PostCard.propTypes = {
   excerpt: PropTypes.string,
   date: PropTypes.string.isRequired,
   readTime: PropTypes.string,
+  author: PropTypes.string,
   imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
   imageUrl: PropTypes.string,
   variant: PropTypes.oneOf(["default", "hero", "compact"]),

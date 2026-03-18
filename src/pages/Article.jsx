@@ -40,6 +40,7 @@ export const Article = () => {
               {post.readTime && (
                 <span className="se-article__read-time">{post.readTime} de lectura</span>
               )}
+              {post.author && <span className="se-article__author">Por {post.author}</span>}
             </div>
           </div>
         </header>

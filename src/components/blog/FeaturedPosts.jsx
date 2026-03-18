@@ -20,6 +20,7 @@ export const FeaturedPosts = () => {
               readTime={post.readTime}
               imagePlaceholder={post.imagePlaceholder}
               imageUrl={post.imageUrl}
+              author={post.author}
             />
           ))}
         </div>

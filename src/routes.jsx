@@ -12,6 +12,11 @@ import { Demo } from "./pages/Demo";
 import { Article } from "./pages/Article";
 import { Category } from "./pages/Category";
 import { Subscribe } from "./pages/Subscribe";
+import { QuienesSomos } from "./pages/QuienesSomos";
+import { Articulos } from "./pages/Articulos";
+import { Informes } from "./pages/Informes";
+import { Consultoria } from "./pages/Consultoria";
+import { Contacto } from "./pages/Contacto";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -29,6 +34,11 @@ export const router = createBrowserRouter(
         <Route path="/articulo/:slug" element={<Article />} />
         <Route path="/categoria/:slug" element={<Category />} />
         <Route path="/suscribirse" element={<Subscribe />} />
+        <Route path="/quienes-somos" element={<QuienesSomos />} />
+        <Route path="/articulos" element={<Articulos />} />
+        <Route path="/informes" element={<Informes />} />
+        <Route path="/consultoria" element={<Consultoria />} />
+        <Route path="/contacto" element={<Contacto />} />
         <Route path="/single/:theId" element={<Single />} />
         <Route path="/demo" element={<Demo />} />
       </Route>

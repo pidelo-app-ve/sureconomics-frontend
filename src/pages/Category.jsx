@@ -48,6 +48,7 @@ export const Category = () => {
                     readTime={post.readTime}
                     imagePlaceholder={post.imagePlaceholder}
                     imageUrl={post.imageUrl}
+                    author={post.author}
                   />
                 </li>
               ))}

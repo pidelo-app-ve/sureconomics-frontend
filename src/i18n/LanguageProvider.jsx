@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { SUPPORTED_LANGS, translations } from "./translations";
 import { I18nContext } from "./useI18nContext";
+import PropTypes from "prop-types";
 
 const getLangFromQuery = () => {
   try {
@@ -52,5 +53,9 @@ export const LanguageProvider = ({ children }) => {
       {children}
     </I18nContext.Provider>
   );
+};
+
+LanguageProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 

@@ -1,112 +1,123 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PostCard } from "../components/blog";
-import { ALL_POSTS } from "../data/blogMock";
-import { ArticleFilters } from "../components/articles/ArticleFilters";
 import { BRAND } from "../data/surEconomicsMock";
+import { contentService } from "../services/contentService";
+import { applyPageMeta } from "../lib/seo";
+import { ArticlesFiltersLite } from "../components/articles/ArticlesFiltersLite";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../components/content";
 
-const uniqSorted = (arr) =>
-  Array.from(new Set(arr.filter(Boolean))).sort((a, b) => a.localeCompare(b));
-
-const matchesDateFrom = (dateStr, dateFrom) => {
-  if (!dateFrom) return true;
-  if (!dateStr) return false;
-  const d = new Date(dateStr);
-  const from = new Date(dateFrom);
-  if (Number.isNaN(d.getTime()) || Number.isNaN(from.getTime())) return true;
-  return d >= from;
+const normalizeForCard = (post, idx = 0) => {
+  const firstCategory = post.categories?.[0]?.name || post.categories?.[0]?.slug || "Editorial";
+  const placeholders = ["chart", "building", "growth"];
+  return {
+    id: post.id || post.slug,
+    slug: post.slug,
+    category: firstCategory,
+    title: post.title,
+    excerpt: post.excerpt,
+    date: post.publishDate,
+    readTime: "",
+    imagePlaceholder: placeholders[idx % placeholders.length],
+    imageUrl: post.featuredImage || "",
+    author: post.author,
+  };
 };
 
 export const Articulos = () => {
   const [query, setQuery] = useState("");
-  const [contentType, setContentType] = useState("");
-  const [mainTheme, setMainTheme] = useState("");
-  const [regionGeo, setRegionGeo] = useState("");
-  const [sector, setSector] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [author, setAuthor] = useState("");
+  const [category, setCategory] = useState("");
+  const [tag, setTag] = useState("");
+  const [page, setPage] = useState(1);
 
-  const sortedPosts = useMemo(() => {
-    return [...ALL_POSTS].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+
+  const [postsState, setPostsState] = useState({
+    status: "idle",
+    items: [],
+    total: 0,
+    totalPages: 1,
+    error: null,
+  });
+
+  const LIMIT = 12;
+
+  const loadTaxonomies = async () => {
+    try {
+      const [cats, tgs] = await Promise.all([
+        contentService.getCategories(),
+        contentService.getTags(),
+      ]);
+      setCategories(cats);
+      setTags(tgs);
+    } catch {
+      setCategories([]);
+      setTags([]);
+    }
+  };
+
+  const loadPosts = async () => {
+    setPostsState((s) => ({ ...s, status: "loading", error: null }));
+    try {
+      const res = await contentService.getPosts({
+        page,
+        limit: LIMIT,
+        category,
+        tag,
+      });
+      setPostsState({
+        status: "success",
+        items: res.items ?? [],
+        total: res.total ?? 0,
+        totalPages: res.totalPages ?? 1,
+        error: null,
+      });
+    } catch (err) {
+      setPostsState((s) => ({ ...s, status: "error", error: err }));
+    }
+  };
+
+  useEffect(() => {
+    applyPageMeta({
+      title: `Artículos — ${BRAND.name}`,
+      description: "Explorador editorial de Sur Economics: artículos publicados y categorías.",
+    });
   }, []);
 
-  const options = useMemo(() => {
-    const REQUIRED_CONTENT_TYPES = [
-      "Opinión",
-      "Noticias",
-      "Divulgación / información",
-    ];
-    const REQUIRED_MAIN_THEMES = [
-      "Economía",
-      "Finanzas",
-      "Política",
-      "Inversiones",
-    ];
-    const REQUIRED_REGION_GEOS = [
-      "Latinoamérica",
-      "Brasil",
-      "México",
-      "Colombia",
-      "Cono Sur",
-      "USA",
-      "China",
-      "Asia",
-      "América del Sur",
-    ];
-    const REQUIRED_SECTORS = [
-      "Tecnología",
-      "Telecomunicaciones",
-      "Energía",
-      "Salud",
-      "Consumo básico",
-      "Consumo discrecional",
-      "Materia prima",
-      "Industria",
-      "Servicios públicos",
-      "Inmobiliario",
-      "Construcción",
-      "Finanzas",
-      "Otros",
-    ];
+  useEffect(() => {
+    loadTaxonomies();
+  }, []);
 
-    const mergeRequired = (required, available) => {
-      const merged = Array.from(new Set([...required, ...available]));
-      return merged.filter(Boolean);
-    };
+  useEffect(() => {
+    loadPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, category, tag]);
 
-    return {
-      authors: uniqSorted(sortedPosts.map((p) => p.author)),
-      contentTypes: mergeRequired(REQUIRED_CONTENT_TYPES, uniqSorted(sortedPosts.map((p) => p.contentType))),
-      mainThemes: mergeRequired(REQUIRED_MAIN_THEMES, uniqSorted(sortedPosts.map((p) => p.mainTheme))),
-      regionGeos: mergeRequired(REQUIRED_REGION_GEOS, uniqSorted(sortedPosts.map((p) => p.regionGeo))),
-      sectors: mergeRequired(REQUIRED_SECTORS, uniqSorted(sortedPosts.map((p) => p.sector))),
-    };
-  }, [sortedPosts]);
-
-  const filteredPosts = useMemo(() => {
+  const filteredItems = useMemo(() => {
+    const items = postsState.items ?? [];
     const q = query.trim().toLowerCase();
-    return sortedPosts.filter((p) => {
-      if (q) {
-        const haystack = `${p.title ?? ""} ${p.excerpt ?? ""}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      if (contentType && p.contentType !== contentType) return false;
-      if (mainTheme && p.mainTheme !== mainTheme) return false;
-      if (regionGeo && p.regionGeo !== regionGeo) return false;
-      if (sector && p.sector !== sector) return false;
-      if (author && p.author !== author) return false;
-      if (!matchesDateFrom(p.date, dateFrom)) return false;
-      return true;
+    if (!q) return items;
+    return items.filter((p) => {
+      const haystack = `${p.title ?? ""} ${p.excerpt ?? ""}`.toLowerCase();
+      return haystack.includes(q);
     });
-  }, [sortedPosts, query, contentType, mainTheme, regionGeo, sector, dateFrom, author]);
+  }, [postsState.items, query]);
 
   const handleReset = () => {
     setQuery("");
-    setContentType("");
-    setMainTheme("");
-    setRegionGeo("");
-    setSector("");
-    setDateFrom("");
-    setAuthor("");
+    setCategory("");
+    setTag("");
+    setPage(1);
+  };
+
+  const handleCategoryChange = (slug) => {
+    setCategory(slug);
+    setPage(1);
+  };
+
+  const handleTagChange = (slug) => {
+    setTag(slug);
+    setPage(1);
   };
 
   return (
@@ -116,59 +127,77 @@ export const Articulos = () => {
           <div className="se-page-head">
             <h1 className="se-heading-section">Artículos</h1>
             <p className="se-text-body">
-              Explorador editorial: filtra por tipo de contenido, tema principal, región, sector, fecha y autor para encontrar lecturas con criterio.
+              Explorador editorial: filtra por categoría y tags para encontrar lecturas publicadas con criterio.
             </p>
           </div>
         </div>
 
         <div className="se-container">
           <div className="se-articles-layout">
-            <ArticleFilters
+            <ArticlesFiltersLite
               query={query}
               onQueryChange={setQuery}
-              contentType={contentType}
-              onContentTypeChange={setContentType}
-              mainTheme={mainTheme}
-              onMainThemeChange={setMainTheme}
-              regionGeo={regionGeo}
-              onRegionGeoChange={setRegionGeo}
-              sector={sector}
-              onSectorChange={setSector}
-              dateFrom={dateFrom}
-              onDateFromChange={setDateFrom}
-              author={author}
-              onAuthorChange={setAuthor}
-              authors={options.authors}
-              contentTypes={options.contentTypes}
-              mainThemes={options.mainThemes}
-              regionGeos={options.regionGeos}
-              sectors={options.sectors}
+              category={category}
+              onCategoryChange={handleCategoryChange}
+              tag={tag}
+              onTagChange={handleTagChange}
+              categories={categories}
+              tags={tags}
               onReset={handleReset}
             />
 
             <section className="se-articles-results" aria-label="Resultados">
               <div className="se-articles-results__meta">
                 <span className="se-meta se-meta--category">
-                  {filteredPosts.length} artículos
+                  {postsState.status === "success"
+                    ? `${postsState.total || filteredItems.length} artículos`
+                    : "Artículos"}
                 </span>
               </div>
 
-              <div className="se-articles-grid">
-                {filteredPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    slug={post.slug}
-                    category={post.category}
-                    title={post.title}
-                    excerpt={post.excerpt}
-                    date={post.date}
-                    readTime={post.readTime}
-                    imagePlaceholder={post.imagePlaceholder}
-                    imageUrl={post.imageUrl}
-                    author={post.author}
-                  />
-                ))}
-              </div>
+              {postsState.status === "loading" ? (
+                <LoadingState title="Cargando artículos…" />
+              ) : null}
+
+              {postsState.status === "error" ? (
+                <ErrorState title="No pudimos cargar los artículos" error={postsState.error} onRetry={loadPosts} />
+              ) : null}
+
+              {postsState.status === "success" && filteredItems.length === 0 ? (
+                <EmptyState
+                  title="Sin resultados"
+                  description={
+                    query.trim()
+                      ? "No encontramos artículos que coincidan con tu búsqueda en esta página."
+                      : "No hay artículos publicados para los filtros seleccionados."
+                  }
+                />
+              ) : null}
+
+              {postsState.status === "success" && filteredItems.length > 0 ? (
+                <>
+                  <div className="se-articles-grid">
+                    {filteredItems.map((post, idx) => {
+                      const card = normalizeForCard(post, idx);
+                      return (
+                        <PostCard
+                          key={card.id}
+                          slug={card.slug}
+                          category={card.category}
+                          title={card.title}
+                          excerpt={card.excerpt}
+                          date={card.date}
+                          readTime={card.readTime}
+                          imagePlaceholder={card.imagePlaceholder}
+                          imageUrl={card.imageUrl}
+                          author={card.author}
+                        />
+                      );
+                    })}
+                  </div>
+                  <Pagination page={page} totalPages={postsState.totalPages || 1} onPageChange={setPage} />
+                </>
+              ) : null}
             </section>
           </div>
         </div>

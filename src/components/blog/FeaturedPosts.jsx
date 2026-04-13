@@ -1,7 +1,7 @@
 import { PostCard } from "./PostCard";
-import { FEATURED_POSTS } from "../../data/blogMock";
+import PropTypes from "prop-types";
 
-export const FeaturedPosts = () => {
+export const FeaturedPosts = ({ posts = [] }) => {
   return (
     <section className="se-featured se-section" aria-labelledby="featured-title">
       <div className="se-container">
@@ -9,7 +9,7 @@ export const FeaturedPosts = () => {
           Destacados
         </h2>
         <div className="se-featured__grid">
-          {FEATURED_POSTS.map((post) => (
+          {posts.map((post) => (
             <PostCard
               key={post.id}
               slug={post.slug}
@@ -27,4 +27,21 @@ export const FeaturedPosts = () => {
       </div>
     </section>
   );
+};
+
+FeaturedPosts.propTypes = {
+  posts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      category: PropTypes.string,
+      title: PropTypes.string.isRequired,
+      excerpt: PropTypes.string,
+      date: PropTypes.string,
+      readTime: PropTypes.string,
+      imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
+      imageUrl: PropTypes.string,
+      author: PropTypes.string,
+    })
+  ),
 };

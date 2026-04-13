@@ -5,3 +5,4 @@ export { BlogFeed } from "./BlogFeed";
 export { SuggestedReading } from "./SuggestedReading";
 export { NewsletterBlock } from "./NewsletterBlock";
 export { PlaceholderImage } from "./PlaceholderImage";
+export { ArticleBody } from "./ArticleBody";

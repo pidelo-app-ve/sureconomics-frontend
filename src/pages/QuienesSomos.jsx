@@ -1,5 +1,6 @@
 import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
+import PropTypes from "prop-types";
 
 const SectionBlock = ({ title, children }) => {
   return (
@@ -8,6 +9,11 @@ const SectionBlock = ({ title, children }) => {
       {children}
     </section>
   );
+};
+
+SectionBlock.propTypes = {
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export const QuienesSomos = () => {

@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router-dom";  // Import RouterProvider to 
 import { router } from "./routes";  // Import the router configuration test
 import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
 import { LanguageProvider } from "./i18n/LanguageProvider";
+import { AuthProvider } from "./context/AuthContext";
 
 const Main = () => {
     return (
@@ -13,9 +14,10 @@ const Main = () => {
             {/* Provide global state to all components */}
             <LanguageProvider>
               <StoreProvider> 
-                  {/* Set up routing for the application */}
+                  <AuthProvider>
                   <RouterProvider router={router}>
                   </RouterProvider>
+                  </AuthProvider>
               </StoreProvider>
             </LanguageProvider>
         </React.StrictMode>

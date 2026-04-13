@@ -1,12 +1,26 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import { REPORTS, SUBSCRIPTION } from "../data/surEconomicsMock";
-import { formatDate } from "../data/blogMock";
+import { formatDateEs } from "../lib/date";
+import { applyPageMeta } from "../lib/seo";
+import PropTypes from "prop-types";
 
 const ReportTierBadge = ({ tier }) => {
   return <span className="se-meta se-meta--category">{tier}</span>;
 };
 
+ReportTierBadge.propTypes = {
+  tier: PropTypes.string.isRequired,
+};
+
 export const Informes = () => {
+  useEffect(() => {
+    applyPageMeta({
+      title: "Informes — Sur Economics",
+      description: "Biblioteca de informes e investigación de Sur Economics.",
+    });
+  }, []);
+
   return (
     <main className="se-blog" role="main">
       <section className="se-hero se-hero--institutional">
@@ -53,7 +67,7 @@ export const Informes = () => {
                       <h3 className="se-heading-card se-heading-card--small">{r.title}</h3>
                       <p className="se-card__excerpt se-text-body">{r.excerpt}</p>
                       <div className="se-report-meta">
-                        <time dateTime={r.date}>{formatDate(r.date)}</time>
+                        <time dateTime={r.date}>{formatDateEs(r.date)}</time>
                       </div>
                       <Link to="/suscribirse" className="se-link se-card__cta">
                         Solicitar acceso

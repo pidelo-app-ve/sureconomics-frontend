@@ -9,11 +9,70 @@ import { BRAND, INSTITUTIONAL, PARTNERS, REPORTS } from "../data/surEconomicsMoc
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { PlaceholderImage } from "../components/blog";
 import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { contentService } from "../services/contentService";
+import { applyPageMeta } from "../lib/seo";
+import { ErrorState, LoadingState } from "../components/content";
 
 export const Home = () => {
+  const [state, setState] = useState({ status: "idle", posts: [], error: null });
+
+  const handleLoad = async () => {
+    setState({ status: "loading", posts: [], error: null });
+    try {
+      const res = await contentService.getPosts({ page: 1, limit: 12 });
+      setState({ status: "success", posts: res.items ?? [], error: null });
+    } catch (err) {
+      setState({ status: "error", posts: [], error: err });
+    }
+  };
+
+  useEffect(() => {
+    applyPageMeta({
+      title: `${BRAND.name} — Economía, mercados e inversión`,
+      description: BRAND.description,
+    });
+  }, []);
+
+  useEffect(() => {
+    handleLoad();
+  }, []);
+
+  const derived = useMemo(() => {
+    const posts = state.posts ?? [];
+    const hero = posts[0] ?? null;
+    const featured = posts.slice(1, 4);
+    const feed = posts.slice(4, 9);
+    const suggested = posts.slice(9, 12);
+
+    const toCard = (post, fallbackPlaceholder) => {
+      const firstCategory = post.categories?.[0]?.name || post.categories?.[0]?.slug || "Editorial";
+      const imagePlaceholder = fallbackPlaceholder;
+      return {
+        id: post.id || post.slug,
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt,
+        date: post.publishDate,
+        author: post.author,
+        category: firstCategory,
+        imageUrl: post.featuredImage || "",
+        imagePlaceholder,
+        readTime: "",
+      };
+    };
+
+    return {
+      hero: hero ? toCard(hero, "chart") : null,
+      featured: featured.map((p, i) => toCard(p, i % 2 === 0 ? "building" : "growth")),
+      feed: feed.map((p, i) => toCard(p, i % 2 === 0 ? "chart" : "building")),
+      suggested: suggested.map((p, i) => toCard(p, i % 2 === 0 ? "growth" : "chart")),
+    };
+  }, [state.posts]);
+
   return (
     <main className="se-blog" role="main">
-      <Hero />
+      <Hero featuredPost={derived.hero} />
       <section className="se-section">
         <div className="se-container">
           <div className="se-two-col se-two-col--align-start">
@@ -99,9 +158,21 @@ export const Home = () => {
         </div>
       </section>
 
-      <FeaturedPosts />
-      <BlogFeed />
-      <SuggestedReading />
+      {state.status === "loading" ? (
+        <LoadingState title="Cargando publicaciones…" description="Obteniendo artículos publicados desde el backend." />
+      ) : null}
+      {state.status === "error" ? (
+        <ErrorState title="No pudimos cargar el contenido editorial" error={state.error} onRetry={handleLoad} />
+      ) : null}
+
+      {state.status === "success" ? (
+        <>
+          <FeaturedPosts posts={derived.featured} />
+          <BlogFeed posts={derived.feed} />
+          <SuggestedReading posts={derived.suggested} />
+        </>
+      ) : null}
+
       <NewsletterBlock />
       <PartnersLogoCloud partners={PARTNERS} />
     </main>

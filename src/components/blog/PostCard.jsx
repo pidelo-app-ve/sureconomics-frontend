@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { PlaceholderImage } from "./PlaceholderImage";
-import { formatDate } from "../../data/blogMock";
+import { formatDateEs } from "../../lib/date";
 
 export const PostCard = ({
   slug,
@@ -42,7 +42,7 @@ export const PostCard = ({
           <p className="se-card__excerpt se-text-body">{excerpt}</p>
         )}
         <div className="se-card__meta">
-          <time dateTime={date}>{formatDate(date)}</time>
+          <time dateTime={date}>{formatDateEs(date)}</time>
           {readTime && <span className="se-card__read-time">{readTime}</span>}
           {author && <span className="se-card__author">Por {author}</span>}
         </div>

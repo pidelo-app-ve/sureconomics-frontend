@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { SUGGESTED_READING, getPostBySlug } from "../../data/blogMock";
+import PropTypes from "prop-types";
 
-export const SuggestedReading = () => {
+export const SuggestedReading = ({ posts = [] }) => {
   return (
     <section className="se-suggested se-section" aria-labelledby="suggested-title">
       <div className="se-container">
@@ -9,13 +9,12 @@ export const SuggestedReading = () => {
           También te puede interesar
         </h2>
         <ul className="se-suggested__list">
-          {SUGGESTED_READING.map((item) => {
-            const post = getPostBySlug(item.slug);
+          {posts.map((post) => {
             const hasImage = Boolean(post?.imageUrl);
             return (
-              <li key={item.id} className="se-suggested__item">
+              <li key={post.id} className="se-suggested__item">
                 <Link
-                  to={`/articulo/${item.slug}`}
+                  to={`/articulo/${post.slug}`}
                   className={`se-suggested__link-wrap ${!hasImage ? "se-suggested__link-wrap--no-thumb" : ""}`}
                 >
                   {hasImage && (
@@ -30,9 +29,11 @@ export const SuggestedReading = () => {
                     </span>
                   )}
                   <span className="se-suggested__text">
-                    <span className="se-meta se-suggested__category">{item.category}</span>
-                    <span className="se-suggested__link">{item.title}</span>
-                    <span className="se-suggested__read-time">{item.readTime}</span>
+                    <span className="se-meta se-suggested__category">{post.category}</span>
+                    <span className="se-suggested__link">{post.title}</span>
+                    {post.readTime ? (
+                      <span className="se-suggested__read-time">{post.readTime}</span>
+                    ) : null}
                   </span>
                 </Link>
               </li>
@@ -42,4 +43,17 @@ export const SuggestedReading = () => {
       </div>
     </section>
   );
+};
+
+SuggestedReading.propTypes = {
+  posts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      category: PropTypes.string,
+      imageUrl: PropTypes.string,
+      readTime: PropTypes.string,
+    })
+  ),
 };

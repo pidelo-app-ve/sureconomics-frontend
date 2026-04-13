@@ -17,7 +17,6 @@ export const Contacto = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Demo-only: no backend integration yet.
-    // eslint-disable-next-line no-alert
     alert("Mensaje enviado (demo). En la próxima fase se conectará a backend.");
   };
 

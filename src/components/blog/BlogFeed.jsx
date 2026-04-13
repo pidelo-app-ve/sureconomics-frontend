@@ -1,7 +1,7 @@
 import { PostCard } from "./PostCard";
-import { BLOG_FEED } from "../../data/blogMock";
+import PropTypes from "prop-types";
 
-export const BlogFeed = () => {
+export const BlogFeed = ({ posts = [] }) => {
   return (
     <section className="se-feed se-section" aria-labelledby="feed-title">
       <div className="se-container">
@@ -9,7 +9,7 @@ export const BlogFeed = () => {
           Últimas publicaciones
         </h2>
         <ul className="se-feed__list">
-          {BLOG_FEED.map((post) => (
+          {posts.map((post) => (
             <li key={post.id}>
               <PostCard
                 slug={post.slug}
@@ -28,4 +28,21 @@ export const BlogFeed = () => {
       </div>
     </section>
   );
+};
+
+BlogFeed.propTypes = {
+  posts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+      category: PropTypes.string,
+      title: PropTypes.string.isRequired,
+      excerpt: PropTypes.string,
+      date: PropTypes.string,
+      readTime: PropTypes.string,
+      imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
+      imageUrl: PropTypes.string,
+      author: PropTypes.string,
+    })
+  ),
 };

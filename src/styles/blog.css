@@ -1518,3 +1518,45 @@
   font-size: var(--se-text-small);
   color: var(--se-gray-700);
 }
+
+/* Admin (CMS) */
+.se-admin-login__shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: var(--se-space-xl) 0;
+  background: var(--se-offwhite);
+}
+
+.se-admin-login__header {
+  margin-bottom: var(--se-space-lg);
+}
+
+.se-admin-login__subtitle {
+  color: var(--se-gray-700);
+  margin-top: var(--se-space-xs);
+}
+
+.se-admin-login__error {
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: #8b2942;
+  margin-bottom: var(--se-space-md);
+  padding: var(--se-space-sm) var(--se-space-md);
+  background: #fbeff2;
+  border: 1px solid #e9c2cb;
+  border-radius: 8px;
+}
+
+.se-admin-shell {
+  padding: var(--se-space-2xl) 0 var(--se-section-gap);
+}
+
+.se-admin-shell__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--se-space-md);
+  margin-bottom: var(--se-space-lg);
+}

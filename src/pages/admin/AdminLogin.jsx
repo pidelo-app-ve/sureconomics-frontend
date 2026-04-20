@@ -11,7 +11,7 @@ export const AdminLogin = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (isAuthenticated) {
-        return <Navigate to="/admin" replace />;
+        return <Navigate to="/admin/posts" replace />;
     }
 
     const handleSubmit = async (e) => {
@@ -20,7 +20,7 @@ export const AdminLogin = () => {
         setIsSubmitting(true);
         try {
             await login(email, password);
-            navigate("/admin", { replace: true });
+            navigate("/admin/posts", { replace: true });
         } catch (err) {
             const message =
                 err instanceof Error ? err.message : "No se pudo iniciar sesión.";

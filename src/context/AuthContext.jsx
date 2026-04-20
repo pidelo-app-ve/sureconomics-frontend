@@ -2,11 +2,12 @@ import {
     createContext,
     useCallback,
     useContext,
+    useEffect,
     useMemo,
     useState,
 } from "react";
 import PropTypes from "prop-types";
-import { loginAdmin as loginApi } from "../lib/api";
+import { ADMIN_AUTH_SYNC_EVENT, loginAdmin as loginApi } from "../lib/api";
 import {
     clearStoredAuth,
     persistAuth,
@@ -17,6 +18,14 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useState(() => readStoredAuth());
+
+    useEffect(() => {
+        const syncFromStorage = () => {
+            setAuth(readStoredAuth());
+        };
+        window.addEventListener(ADMIN_AUTH_SYNC_EVENT, syncFromStorage);
+        return () => window.removeEventListener(ADMIN_AUTH_SYNC_EVENT, syncFromStorage);
+    }, []);
 
     const login = useCallback(async (email, password) => {
         const data = await loginApi(email, password);
@@ -38,16 +47,21 @@ export const AuthProvider = ({ children }) => {
         });
     }, []);
 
+    const getAccessToken = useCallback(() => readStoredAuth().accessToken, []);
+    const getRefreshToken = useCallback(() => readStoredAuth().refreshToken, []);
+
     const value = useMemo(
         () => ({
             accessToken: auth.accessToken,
             refreshToken: auth.refreshToken,
             accessExpiresAt: auth.accessExpiresAt,
             isAuthenticated: Boolean(auth.accessToken),
+            getAccessToken,
+            getRefreshToken,
             login,
             logout,
         }),
-        [auth, login, logout]
+        [auth, getAccessToken, getRefreshToken, login, logout]
     );
 
     return (

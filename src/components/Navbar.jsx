@@ -1,15 +1,51 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import logoImg from "../assets/img/Positivo sin tagline@300x.png";
 import useI18n from "../i18n/useI18n";
+import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
+
+const isNavItemActive = (pathname, to) => {
+  if (to === "/") return pathname === "/";
+  if (to === "/articulos") {
+    return (
+      pathname.startsWith("/articulos") || pathname.startsWith("/articulo/")
+    );
+  }
+  return pathname === to || pathname.startsWith(`${to}/`);
+};
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { t } = useI18n();
+  const { isAuthenticated, isEmailVerified, logout } = useUserAuth();
+
+  const mainNavItems = useMemo(
+    () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion"),
+    []
+  );
+  const subscriptionNav = useMemo(
+    () => PRIMARY_NAV.find((item) => item.id === "suscripcion"),
+    []
+  );
+
+  const navLinkClass = useCallback(
+    (to) =>
+      `se-header__nav-link${
+        isNavItemActive(location.pathname, to)
+          ? " se-header__nav-link--active"
+          : ""
+      }`,
+    [location.pathname]
+  );
+
+  const handleLogout = async () => {
+    await logout();
+    closeMenu();
+  };
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
@@ -67,11 +103,16 @@ export const Navbar = () => {
           aria-label="Navegación principal"
         >
           <ul className="se-header__nav-list">
-            {PRIMARY_NAV.filter((item) => item.id !== "suscripcion").map((item) => (
+            {mainNavItems.map((item) => (
               <li key={item.id}>
                 <Link
                   to={item.to}
-                  className="se-header__nav-link"
+                  className={navLinkClass(item.to)}
+                  aria-current={
+                    isNavItemActive(location.pathname, item.to)
+                      ? "page"
+                      : undefined
+                  }
                 >
                   {t(item.labelKey)}
                 </Link>
@@ -80,15 +121,61 @@ export const Navbar = () => {
           </ul>
         </nav>
         <div className="se-header__actions se-header__actions--desktop">
-          {PRIMARY_NAV.find((item) => item.id === "suscripcion")?.to && (
-          <Link
-            to={PRIMARY_NAV.find((item) => item.id === "suscripcion").to}
-            className="se-btn se-btn--secondary se-header__cta"
-            aria-label="Suscribirse al newsletter"
-          >
-            {t("common.suscribirse")}
-          </Link>
+          {isAuthenticated ? (
+            <nav className="se-header__user-nav" aria-label="Cuenta de lector">
+              <Link to="/cuenta" className="se-header__nav-link se-header__nav-link--compact">
+                {t("nav.cuenta")}
+              </Link>
+              {isEmailVerified ? (
+                <>
+                  <Link
+                    to="/cuenta/marcadores"
+                    className="se-header__nav-link se-header__nav-link--compact"
+                  >
+                    {t("nav.marcadores")}
+                  </Link>
+                  <Link
+                    to="/cuenta/envios"
+                    className="se-header__nav-link se-header__nav-link--compact"
+                  >
+                    {t("nav.envios")}
+                  </Link>
+                </>
+              ) : null}
+              <button
+                type="button"
+                className="se-header__nav-link se-header__nav-link--compact se-header__nav-link--button"
+                onClick={handleLogout}
+              >
+                {t("nav.salir")}
+              </button>
+            </nav>
+          ) : (
+            <div
+              className="se-header__guest-actions"
+              role="group"
+              aria-label={t("nav.readerAuth")}
+            >
+              <Link
+                to="/cuenta/entrar"
+                className="se-btn se-btn--secondary"
+              >
+                {t("nav.entrar")}
+              </Link>
+              <Link to="/cuenta/registro" className="se-btn">
+                {t("nav.registrar")}
+              </Link>
+            </div>
           )}
+          {subscriptionNav?.to ? (
+            <Link
+              to={subscriptionNav.to}
+              className="se-btn se-btn--secondary se-header__cta"
+              aria-label={t("common.suscribirse")}
+            >
+              {t("common.suscribirse")}
+            </Link>
+          ) : null}
         </div>
 
         <button
@@ -120,7 +207,7 @@ export const Navbar = () => {
           <div className="se-header__menu-panel">
             <nav className="se-header__nav" aria-label="Navegación principal">
               <ul className="se-header__nav-list">
-                {PRIMARY_NAV.filter((item) => item.id !== "suscripcion").map((item, index) => (
+                {mainNavItems.map((item, index) => (
                   <li
                     key={item.id}
                     className="se-header__nav-item"
@@ -128,8 +215,13 @@ export const Navbar = () => {
                   >
                     <Link
                       to={item.to}
-                      className="se-header__nav-link"
+                      className={navLinkClass(item.to)}
                       onClick={closeMenu}
+                      aria-current={
+                        isNavItemActive(location.pathname, item.to)
+                          ? "page"
+                          : undefined
+                      }
                     >
                       {t(item.labelKey)}
                     </Link>
@@ -137,15 +229,73 @@ export const Navbar = () => {
                 ))}
               </ul>
             </nav>
-            <div className="se-header__actions">
-              <Link
-                to={PRIMARY_NAV.find((item) => item.id === "suscripcion").to}
-                className="se-btn se-btn--secondary se-header__cta"
-                onClick={closeMenu}
-                aria-label="Suscribirse al newsletter"
-              >
-                {t("common.suscribirse")}
-              </Link>
+            <div className="se-header__actions se-header__actions--mobile">
+              {isAuthenticated ? (
+                <nav
+                  className="se-header__user-nav se-header__user-nav--stack"
+                  aria-label="Cuenta de lector"
+                >
+                  <Link to="/cuenta" className="se-header__nav-link" onClick={closeMenu}>
+                    {t("nav.cuenta")}
+                  </Link>
+                  {isEmailVerified ? (
+                    <>
+                      <Link
+                        to="/cuenta/marcadores"
+                        className="se-header__nav-link"
+                        onClick={closeMenu}
+                      >
+                        {t("nav.marcadores")}
+                      </Link>
+                      <Link
+                        to="/cuenta/envios"
+                        className="se-header__nav-link"
+                        onClick={closeMenu}
+                      >
+                        {t("nav.envios")}
+                      </Link>
+                    </>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="se-header__nav-link se-header__nav-link--button"
+                    onClick={handleLogout}
+                  >
+                    {t("nav.salir")}
+                  </button>
+                </nav>
+              ) : (
+                <div
+                  className="se-header__guest-actions se-header__guest-actions--stack"
+                  role="group"
+                  aria-label={t("nav.readerAuth")}
+                >
+                  <Link
+                    to="/cuenta/registro"
+                    className="se-btn se-header__cta"
+                    onClick={closeMenu}
+                  >
+                    {t("nav.registrar")}
+                  </Link>
+                  <Link
+                    to="/cuenta/entrar"
+                    className="se-btn se-btn--secondary se-header__cta"
+                    onClick={closeMenu}
+                  >
+                    {t("nav.entrar")}
+                  </Link>
+                </div>
+              )}
+              {subscriptionNav?.to ? (
+                <Link
+                  to={subscriptionNav.to}
+                  className="se-btn se-btn--secondary se-header__cta se-header__cta--muted"
+                  onClick={closeMenu}
+                  aria-label={t("common.suscribirse")}
+                >
+                  {t("common.suscribirse")}
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

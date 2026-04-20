@@ -27,6 +27,7 @@ export const applyPageMeta = ({
   title,
   description,
   canonicalUrl,
+  noindex = false,
 } = {}) => {
   if (title) document.title = title;
   if (description) upsertMeta("description", description);
@@ -36,5 +37,11 @@ export const applyPageMeta = ({
   if (title) upsertMeta("og:title", title, true);
   if (description) upsertMeta("og:description", description, true);
   if (canonicalUrl) upsertMeta("og:url", canonicalUrl, true);
+
+  if (noindex) {
+    upsertMeta("robots", "noindex, nofollow");
+  } else {
+    upsertMeta("robots", "index, follow");
+  }
 };
 

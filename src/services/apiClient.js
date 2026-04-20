@@ -41,6 +41,9 @@ const safeJson = async (res) => {
 const unwrapPayload = (payload) => {
   if (!payload) return null;
   if (payload.success === false) return payload;
+  if (Object.prototype.hasOwnProperty.call(payload, "meta") && payload.meta != null && "data" in payload) {
+    return { data: payload.data, meta: payload.meta };
+  }
   if ("data" in payload) return payload.data;
   return payload;
 };
@@ -98,6 +101,16 @@ export const createApiClient = ({
         status: res.status,
         code: payload?.error?.code,
         details: payload?.error?.details ?? payload,
+        url,
+      });
+    }
+
+    if (payload && payload.success === false) {
+      const err = payload.error ?? { message: "Request failed" };
+      throw new ApiError(typeof err.message === "string" ? err.message : "Request failed", {
+        status: res.status,
+        code: err.code,
+        details: err.details ?? payload,
         url,
       });
     }

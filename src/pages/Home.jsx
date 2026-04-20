@@ -13,9 +13,21 @@ import { useEffect, useMemo, useState } from "react";
 import { contentService } from "../services/contentService";
 import { applyPageMeta } from "../lib/seo";
 import { ErrorState, LoadingState } from "../components/content";
+import { HeadlinesSection } from "../components/home/HeadlinesSection";
 
 export const Home = () => {
   const [state, setState] = useState({ status: "idle", posts: [], error: null });
+  const [headlinesState, setHeadlinesState] = useState({ status: "idle", headlines: [], error: null });
+
+  const handleLoadHeadlines = async () => {
+    setHeadlinesState({ status: "loading", headlines: [], error: null });
+    try {
+      const headlines = await contentService.getHeadlines({ limit: 12 });
+      setHeadlinesState({ status: "success", headlines, error: null });
+    } catch (err) {
+      setHeadlinesState({ status: "error", headlines: [], error: err });
+    }
+  };
 
   const handleLoad = async () => {
     setState({ status: "loading", posts: [], error: null });
@@ -36,6 +48,7 @@ export const Home = () => {
 
   useEffect(() => {
     handleLoad();
+    handleLoadHeadlines();
   }, []);
 
   const derived = useMemo(() => {
@@ -73,6 +86,7 @@ export const Home = () => {
   return (
     <main className="se-blog" role="main">
       <Hero featuredPost={derived.hero} />
+      <HeadlinesSection state={headlinesState} onRetry={handleLoadHeadlines} />
       <section className="se-section">
         <div className="se-container">
           <div className="se-two-col se-two-col--align-start">

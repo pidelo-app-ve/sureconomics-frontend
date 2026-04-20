@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 const getMessage = (error) => {
   if (!error) return "Ocurrió un error al cargar los datos.";
   if (typeof error === "string") return error;
+  if (error.status === 429) {
+    return "Demasiadas solicitudes en poco tiempo. Espere unos minutos e inténtelo de nuevo.";
+  }
   return error.message || "Ocurrió un error al cargar los datos.";
 };
 

@@ -9,6 +9,14 @@ export const translations = {
     "nav.suscripcion": "Suscripción",
     "nav.consultoria": "Consultoría",
     "nav.contacto": "Contacto",
+    "nav.entrar": "Entrar",
+    "nav.registrar": "Registrarse",
+    "nav.readerAuth": "Acceso de lectores",
+    "nav.cuenta": "Cuenta",
+    "nav.perfil": "Perfil",
+    "nav.marcadores": "Marcadores",
+    "nav.envios": "Envíos",
+    "nav.salir": "Salir",
 
     "footer.aboutTitle": "Sur Economics",
     "footer.note":
@@ -26,6 +34,14 @@ export const translations = {
     "nav.suscripcion": "Subscription",
     "nav.consultoria": "Advisory",
     "nav.contacto": "Contact",
+    "nav.entrar": "Sign in",
+    "nav.registrar": "Sign up",
+    "nav.readerAuth": "Reader sign-in",
+    "nav.cuenta": "Account",
+    "nav.perfil": "Profile",
+    "nav.marcadores": "Bookmarks",
+    "nav.envios": "Submissions",
+    "nav.salir": "Sign out",
 
     "footer.aboutTitle": "Sur Economics",
     "footer.note":

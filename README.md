@@ -12,7 +12,7 @@ This is the Sur Economics single-page app. The editorial/blog experience is back
 
 1. Copy env template:
 
-```bash
+```bash new deploy
 cp .env.example .env
 ```
 

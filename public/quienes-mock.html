@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quienes Somos — Mockups</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0b0b0b;
+        --muted: rgba(0, 0, 0, 0.65);
+        --hairline: rgba(0, 0, 0, 0.1);
+        --soft: rgba(0, 0, 0, 0.04);
+        --shadow: 0 18px 46px rgba(0, 0, 0, 0.14);
+        --radius: 18px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 60px; }
+      .top {
+        position: sticky;
+        top: 0;
+        background: rgba(255,255,255,.85);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--hairline);
+        z-index: 10;
+      }
+      .top-inner { max-width: 1100px; margin: 0 auto; padding: 14px 18px; display: flex; gap: 12px; align-items: center; }
+      .pill {
+        display: inline-flex; gap: 8px; padding: 6px 10px; border: 1px solid var(--hairline);
+        border-radius: 999px; background: #fff;
+      }
+      .pill button {
+        appearance: none; border: 0; background: transparent; padding: 6px 10px;
+        border-radius: 999px; cursor: pointer; color: var(--muted); font-weight: 700; letter-spacing: .01em;
+      }
+      .pill button[aria-pressed="true"] { background: #0b0b0b; color: #fff; }
+      .hint { color: var(--muted); font-size: 13px; }
+
+      .panel { display: none; }
+      .panel.active { display: block; }
+      .kicker { text-transform: uppercase; letter-spacing: .14em; font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+      h1 { font-family: ui-serif, Georgia, serif; font-weight: 600; letter-spacing: -0.03em; font-size: clamp(34px, 5vw, 56px); margin: 0; }
+      .lead { color: var(--muted); font-size: 16px; line-height: 1.65; max-width: 70ch; margin-top: 14px; }
+      .grid2 { display: grid; grid-template-columns: 1.15fr .85fr; gap: 22px; margin-top: 28px; }
+      @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+      .card {
+        border: 1px solid var(--hairline);
+        border-radius: var(--radius);
+        background: #fff;
+        box-shadow: 0 10px 30px rgba(0,0,0,.06);
+        padding: 18px;
+      }
+      .strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+      @media (max-width: 860px) { .strip { grid-template-columns: 1fr; } }
+      .stat { padding: 16px; border-radius: 16px; border: 1px solid var(--hairline); background: linear-gradient(180deg,#fff,#fbfbfb); }
+      .stat strong { display: block; font-size: 18px; letter-spacing: -.02em; }
+      .stat span { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+      .obj { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+      .obj li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 12px 12px; border: 1px solid var(--hairline); border-radius: 14px; background: #fff; }
+      .num { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; background: #0b0b0b; color: #fff; font-weight: 800; font-size: 12px; }
+
+      .section { margin-top: 34px; }
+      .section h2 { font-family: ui-serif, Georgia, serif; letter-spacing: -0.02em; margin: 0 0 12px; font-size: 28px; }
+      .team { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      @media (max-width: 860px) { .team { grid-template-columns: 1fr; } }
+      .person { border: 1px solid var(--hairline); border-radius: 18px; padding: 14px; background: #fff; transition: transform .18s ease, box-shadow .18s ease; }
+      .person:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(0,0,0,.12); }
+      .person b { display: block; }
+      .person i { display: block; font-style: normal; color: var(--muted); margin-top: 4px; font-size: 13px; }
+
+      /* Option B */
+      .lux { border-top: 1px solid var(--hairline); margin-top: 22px; padding-top: 22px; }
+      .rule { height: 1px; background: var(--hairline); margin: 16px 0; }
+      .bigline { display:flex; justify-content:space-between; gap: 14px; align-items:flex-end; }
+      .bigline small { color: var(--muted); max-width: 46ch; line-height: 1.55; }
+
+      /* Option C */
+      .swiss { display:grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+      @media (max-width: 860px) { .swiss { grid-template-columns: 1fr; } }
+      .band { border: 1px solid var(--hairline); border-radius: 22px; padding: 18px; background: #fff; }
+      .band.alt { background: linear-gradient(180deg,#fff,#f7f7f7); }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <div class="top-inner">
+        <div class="pill" role="group" aria-label="Mock options">
+          <button id="btnA" aria-pressed="true">Option A</button>
+          <button id="btnB" aria-pressed="false">Option B</button>
+          <button id="btnC" aria-pressed="false">Option C</button>
+        </div>
+        <div class="hint">Black/white only • responsive • team sections will be collapsible on mobile</div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <!-- A -->
+      <section id="panelA" class="panel active">
+        <p class="kicker">Quiénes somos</p>
+        <h1>Sur Economics</h1>
+        <p class="lead">Plataforma editorial e institucional para economía y finanzas en América Latina. Investigación, claridad y criterio para decisiones.</p>
+
+        <div class="strip">
+          <div class="stat"><strong>Investigación</strong><span>Datos + contexto. Señales claras, sin ruido.</span></div>
+          <div class="stat"><strong>Lectura ejecutiva</strong><span>Resúmenes y análisis para actuar rápido.</span></div>
+          <div class="stat"><strong>Red regional</strong><span>Mirada LATAM con estándar global.</span></div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <p class="kicker" style="margin:0 0 8px">Propósito</p>
+            <div style="font-size:15px; line-height:1.65; color:var(--muted)">
+              Construir una plataforma de referencia para entender la región con información confiable y análisis editorial.
+            </div>
+          </div>
+          <div class="card">
+            <p class="kicker" style="margin:0 0 8px">Objetivos</p>
+            <ol class="obj">
+              <li><span class="num">1</span><span style="color:var(--muted)">Convertir datos en narrativa accionable.</span></li>
+              <li><span class="num">2</span><span style="color:var(--muted)">Elevar el estándar editorial regional.</span></li>
+              <li><span class="num">3</span><span style="color:var(--muted)">Conectar economía, política y mercados.</span></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Liderazgo / dirección editorial</h2>
+          <div class="team">
+            <div class="person"><b>Nombre Apellido</b><i>Rol / ciudad</i></div>
+            <div class="person"><b>Nombre Apellido</b><i>Rol / ciudad</i></div>
+            <div class="person"><b>Nombre Apellido</b><i>Rol / ciudad</i></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- B -->
+      <section id="panelB" class="panel">
+        <p class="kicker">Quiénes somos</p>
+        <div class="bigline">
+          <h1 style="margin:0">Sur Economics</h1>
+          <small>Minimal luxury: reglas finas, mucho aire, foco tipográfico.</small>
+        </div>
+        <div class="rule"></div>
+        <p class="lead">Una voz editorial sobria. Investigación, claridad y una estética en blanco y negro.</p>
+        <div class="lux">
+          <div class="grid2">
+            <div>
+              <h2 style="font-family:ui-serif,Georgia,serif;margin:0 0 10px">Propósito</h2>
+              <p style="margin:0;color:var(--muted);line-height:1.7">Estructurar información económica con una mirada regional y un estándar de verificación.</p>
+            </div>
+            <div>
+              <h2 style="font-family:ui-serif,Georgia,serif;margin:0 0 10px">Objetivos</h2>
+              <ul class="obj">
+                <li><span class="num">1</span><span style="color:var(--muted)">Síntesis editorial de alta señal.</span></li>
+                <li><span class="num">2</span><span style="color:var(--muted)">Análisis con contexto institucional.</span></li>
+                <li><span class="num">3</span><span style="color:var(--muted)">Cobertura consistente y legible.</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="section">
+            <h2>Equipo</h2>
+            <div class="team">
+              <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+              <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+              <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- C -->
+      <section id="panelC" class="panel">
+        <p class="kicker">Quiénes somos</p>
+        <h1>Sur Economics</h1>
+        <p class="lead">Swiss grid: estructura, alineación y bandas limpias.</p>
+        <div class="swiss">
+          <div class="band">
+            <h2 style="font-family:ui-serif,Georgia,serif;margin:0 0 10px">Propósito</h2>
+            <p style="margin:0;color:var(--muted);line-height:1.7">Plataforma editorial e institucional para información económica y financiera de América Latina.</p>
+          </div>
+          <div class="band alt">
+            <h2 style="font-family:ui-serif,Georgia,serif;margin:0 0 10px">Objetivos</h2>
+            <ol class="obj">
+              <li><span class="num">1</span><span style="color:var(--muted)">Estrategia y criterio.</span></li>
+              <li><span class="num">2</span><span style="color:var(--muted)">Lectura ejecutiva.</span></li>
+              <li><span class="num">3</span><span style="color:var(--muted)">Cobertura regional.</span></li>
+            </ol>
+          </div>
+        </div>
+        <div class="section">
+          <h2>Equipo</h2>
+          <div class="team">
+            <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+            <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+            <div class="person"><b>Nombre Apellido</b><i>Rol</i></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const buttons = [
+        { id: "btnA", panel: "panelA" },
+        { id: "btnB", panel: "panelB" },
+        { id: "btnC", panel: "panelC" },
+      ];
+      const setActive = (id) => {
+        buttons.forEach((b) => {
+          const btn = document.getElementById(b.id);
+          const panel = document.getElementById(b.panel);
+          const active = b.id === id;
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+          panel.classList.toggle("active", active);
+        });
+      };
+      buttons.forEach((b) => document.getElementById(b.id).addEventListener("click", () => setActive(b.id)));
+    </script>
+  </body>
+</html>
+

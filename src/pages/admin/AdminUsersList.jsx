@@ -69,6 +69,7 @@ export const AdminUsersList = () => {
               <thead>
                 <tr>
                   <th scope="col">ID</th>
+                  <th scope="col">Nombre</th>
                   <th scope="col">Correo</th>
                   <th scope="col">Colaborador</th>
                   <th scope="col">Acciones</th>
@@ -77,10 +78,14 @@ export const AdminUsersList = () => {
               <tbody>
                 {state.items.map((row) => {
                   const uid = adminPick(row, ["id", "_id"], "");
+                  const firstName = adminPick(row, ["first_name", "firstName"], "");
+                  const lastName = adminPick(row, ["last_name", "lastName"], "");
+                  const name = [firstName, lastName].filter(Boolean).join(" ").trim() || "—";
                   const email = adminPick(row, ["email"], "—");
                   return (
                     <tr key={uid || email}>
                       <td>{uid}</td>
+                      <td>{name}</td>
                       <td>{email}</td>
                       <td>{flagLabel(row)}</td>
                       <td>

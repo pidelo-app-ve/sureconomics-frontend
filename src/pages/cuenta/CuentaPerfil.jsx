@@ -36,6 +36,13 @@ export const CuentaPerfil = () => {
 
   const fields = profile
     ? [
+        {
+          key: "name",
+          label: "Nombre",
+          value:
+            [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim() ||
+            "—",
+        },
         { key: "email", label: "Correo", value: profile.email || "—" },
         { key: "age", label: "Edad", value: profile.age || "—" },
         { key: "sex", label: "Sexo", value: profile.sex || "—" },

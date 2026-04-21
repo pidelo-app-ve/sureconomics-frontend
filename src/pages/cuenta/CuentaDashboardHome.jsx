@@ -74,8 +74,10 @@ export const CuentaDashboardHome = () => {
     );
   }
 
-  const firstName =
-    profile?.email?.split("@")[0]?.replace(/\./g, " ")?.trim() || "Lector";
+  const displayName =
+    [profile?.firstName, profile?.lastName].filter(Boolean).join(" ").trim() ||
+    profile?.email?.split("@")[0]?.replace(/\./g, " ")?.trim() ||
+    "Lector";
 
   return (
     <div className="se-reader-dash__page">
@@ -83,7 +85,7 @@ export const CuentaDashboardHome = () => {
         <div className="se-reader-home__hero-copy">
           <p className="se-reader-home__kicker">Bienvenido</p>
           <h1 className="se-reader-home__title">
-            Hola, <span className="se-reader-home__accent">{firstName}</span>
+            Hola, <span className="se-reader-home__accent">{displayName}</span>
           </h1>
           <p className="se-reader-home__lead">
             Un solo lugar para su perfil, artículos guardados y propuestas editoriales.

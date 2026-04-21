@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { deleteAdminComment, listAdminComments, patchAdminComment } from "../../services/adminCommentsService";
+import { getAdminPost } from "../../services/adminPostsService";
+import { getAdminUser } from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
@@ -11,12 +13,52 @@ const STATUS_OPTIONS = [
   { value: "rejected", label: "Rechazado" },
 ];
 
+const pickFromObj = (obj, keys, fallback = "") => {
+  if (!obj || typeof obj !== "object") return fallback;
+  for (const key of keys) {
+    const value = obj[key];
+    if (value === undefined || value === null) continue;
+    const asString = String(value).trim();
+    if (asString) return asString;
+  }
+  return fallback;
+};
+
+const getAuthorDetails = (row) => {
+  const raw = row?.author ?? row?.user ?? row?.commenter ?? null;
+  if (raw && typeof raw === "object") {
+    const name =
+      pickFromObj(raw, ["name", "fullName", "full_name", "displayName", "display_name"]) ||
+      pickFromObj(raw, ["username", "user_name"]);
+    const email = pickFromObj(raw, ["email", "mail"]);
+    return { name: name || "—", email: email || "" };
+  }
+
+  const name = adminPick(row, ["author_name", "user_name", "author"], "—");
+  const email = adminPick(row, ["author_email", "user_email", "email"], "");
+  return { name, email };
+};
+
+const getPostDetails = (row) => {
+  const raw = row?.post ?? row?.article ?? row?.content ?? null;
+  if (raw && typeof raw === "object") {
+    const slug = pickFromObj(raw, ["slug", "post_slug", "article_slug"]);
+    const title = pickFromObj(raw, ["title", "post_title", "article_title", "name"]);
+    return { slug, title };
+  }
+
+  const slug = adminPick(row, ["post_slug", "slug", "article_slug"], "");
+  const title = adminPick(row, ["post_title", "article_title", "title"], "");
+  return { slug, title };
+};
+
 export const AdminCommentsList = () => {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
   const [slug, setSlug] = useState("");
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [actionId, setActionId] = useState(null);
+  const [lookups, setLookups] = useState({ posts: {}, users: {} });
 
   const load = useCallback(
     async (pageOverride) => {
@@ -30,8 +72,45 @@ export const AdminCommentsList = () => {
           slug: slug.trim() || undefined,
         });
         setState({ status: "success", items, meta, error: null });
+
+        // Resolve related entities (author + post) because /admin/comments only returns ids.
+        const postIds = Array.from(
+          new Set((items ?? []).map((r) => adminPick(r, ["post_id", "postId"], "")).filter(Boolean))
+        );
+        const userIds = Array.from(
+          new Set((items ?? []).map((r) => adminPick(r, ["user_id", "userId"], "")).filter(Boolean))
+        );
+
+        const [postsPairs, usersPairs] = await Promise.all([
+          Promise.all(
+            postIds.map(async (id) => {
+              try {
+                const post = await getAdminPost(id);
+                return [String(id), post];
+              } catch {
+                return [String(id), null];
+              }
+            })
+          ),
+          Promise.all(
+            userIds.map(async (id) => {
+              try {
+                const user = await getAdminUser(id);
+                return [String(id), user];
+              } catch {
+                return [String(id), null];
+              }
+            })
+          ),
+        ]);
+
+        setLookups({
+          posts: Object.fromEntries(postsPairs),
+          users: Object.fromEntries(usersPairs),
+        });
       } catch (err) {
         setState({ status: "error", items: [], meta: null, error: err });
+        setLookups({ posts: {}, users: {} });
       }
     },
     [page, status, slug]
@@ -151,9 +230,37 @@ export const AdminCommentsList = () => {
               <tbody>
                 {state.items.map((row) => {
                   const cid = adminPick(row, ["id", "_id"], "");
-                  const author = adminPick(row, ["author", "author_name", "user_name"], "—");
+                  const userId = adminPick(row, ["user_id", "userId"], "");
+                  const postId = adminPick(row, ["post_id", "postId"], "");
+                  const user = userId ? lookups.users[String(userId)] : null;
+                  const postEntity = postId ? lookups.posts[String(postId)] : null;
+
+                  const author = user
+                    ? {
+                        name: (() => {
+                          const fromParts = [
+                            pickFromObj(user, ["first_name", "firstName"]),
+                            pickFromObj(user, ["last_name", "lastName"]),
+                          ]
+                            .filter(Boolean)
+                            .join(" ")
+                            .trim();
+                          if (fromParts) return fromParts;
+                          return (
+                            pickFromObj(user, ["name", "fullName", "full_name", "displayName", "display_name"]) ||
+                            pickFromObj(user, ["username", "user_name"]) ||
+                            adminPick(user, ["email"], "—")
+                          );
+                        })(),
+                        email: pickFromObj(user, ["email", "mail"]),
+                      }
+                    : getAuthorDetails(row);
                   const st = adminPick(row, ["status", "state"], "—");
-                  const postSlug = adminPick(row, ["post_slug", "slug", "article_slug"], "");
+                  const postSlug =
+                    pickFromObj(postEntity, ["slug"]) || adminPick(row, ["post_slug", "slug", "article_slug"], "");
+                  const postTitle =
+                    pickFromObj(postEntity, ["title", "metaTitle", "name"]) ||
+                    adminPick(row, ["post_title", "article_title", "title"], "");
                   const body = adminPick(row, ["content", "body", "text"], "");
                   const excerpt = body.length > 120 ? `${body.slice(0, 120)}…` : body;
                   const busy = actionId === cid;
@@ -161,9 +268,45 @@ export const AdminCommentsList = () => {
                     <tr key={cid}>
                       <td>{cid}</td>
                       <td>
-                        <code style={{ fontSize: "0.8em" }}>{postSlug || "—"}</code>
+                        {postTitle ? (
+                          <div style={{ display: "grid", gap: "0.25rem" }}>
+                            <span style={{ fontWeight: 600 }}>{postTitle}</span>
+                            {postSlug ? (
+                              <a
+                                className="se-link"
+                                href={`/articulo/${postSlug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: "0.8em" }}
+                              >
+                                {postSlug}
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : postSlug ? (
+                          <a
+                            className="se-link"
+                            href={`/articulo/${postSlug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: "0.8em" }}
+                          >
+                            {postSlug}
+                          </a>
+                        ) : (
+                          <span>—</span>
+                        )}
                       </td>
-                      <td>{author}</td>
+                      <td>
+                        <div style={{ display: "grid", gap: "0.15rem" }}>
+                          <span style={{ fontWeight: 600 }}>{author.name}</span>
+                          {author.email ? (
+                            <span className="se-text-body" style={{ fontSize: "0.8em", opacity: 0.8 }}>
+                              {author.email}
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
                       <td>{st}</td>
                       <td>
                         <span className="se-text-body" style={{ whiteSpace: "pre-wrap", fontSize: "0.9em" }}>

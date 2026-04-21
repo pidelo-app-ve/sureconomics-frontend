@@ -18,6 +18,8 @@ const SEX_OPTIONS = [
 export const CuentaRegistro = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isEmailVerified, register, profile } = useUserAuth();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
@@ -60,6 +62,8 @@ export const CuentaRegistro = () => {
     e.preventDefault();
     setErrorMessage("");
 
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
     const trimmedEmail = email.trim();
     const trimmedCountry = country.trim();
     const trimmedCity = city.trim();
@@ -70,6 +74,10 @@ export const CuentaRegistro = () => {
 
     if (password.length < 8 || password.length > 4096) {
       setErrorMessage("La contraseña debe tener entre 8 y 4096 caracteres.");
+      return;
+    }
+    if (!trimmedFirstName || !trimmedLastName) {
+      setErrorMessage("Nombre y apellido son obligatorios.");
       return;
     }
     if (!Number.isFinite(ageNum) || ageNum < 0 || ageNum > 150) {
@@ -96,6 +104,8 @@ export const CuentaRegistro = () => {
     setIsSubmitting(true);
     try {
       const { profile: registrationProfile } = await register({
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
         email: trimmedEmail,
         password,
         age: ageNum,
@@ -153,6 +163,44 @@ export const CuentaRegistro = () => {
                 {errorMessage}
               </p>
             ) : null}
+
+            <div className="se-form-grid">
+              <label className="se-form-field" htmlFor="registro-first-name">
+                <span className="se-form-label">Nombre</span>
+                <input
+                  id="registro-first-name"
+                  type="text"
+                  name="firstName"
+                  autoComplete="given-name"
+                  className="se-form-control"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  maxLength={120}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? errorId : undefined}
+                />
+              </label>
+
+              <label className="se-form-field" htmlFor="registro-last-name">
+                <span className="se-form-label">Apellido</span>
+                <input
+                  id="registro-last-name"
+                  type="text"
+                  name="lastName"
+                  autoComplete="family-name"
+                  className="se-form-control"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  maxLength={120}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? errorId : undefined}
+                />
+              </label>
+            </div>
 
             <label className="se-form-field" htmlFor="registro-email">
               <span className="se-form-label">Correo electrónico</span>

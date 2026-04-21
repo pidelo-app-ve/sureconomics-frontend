@@ -17,6 +17,8 @@ const pickTokens = (data) => {
 const normalizeProfile = (raw) => {
   if (!raw || typeof raw !== "object") {
     return {
+      firstName: "",
+      lastName: "",
       email: "",
       isEmailVerified: false,
       age: "",
@@ -28,6 +30,8 @@ const normalizeProfile = (raw) => {
     };
   }
   return {
+    firstName: String(raw.first_name ?? raw.firstName ?? ""),
+    lastName: String(raw.last_name ?? raw.lastName ?? ""),
     email: String(raw.email ?? ""),
     isEmailVerified: Boolean(raw.is_email_verified ?? raw.email_verified ?? raw.isEmailVerified),
     age: raw.age != null ? String(raw.age) : "",
@@ -50,6 +54,8 @@ const userFromRegisterPayload = (data) => {
  * @param {{
  *   email: string,
  *   password: string,
+ *   firstName: string,
+ *   lastName: string,
  *   age: number,
  *   sex: string,
  *   country: string,
@@ -62,6 +68,8 @@ export const registerUser = async (payload) => {
   const {
     email,
     password,
+    firstName,
+    lastName,
     age,
     sex,
     country,
@@ -73,6 +81,8 @@ export const registerUser = async (payload) => {
   const json = {
     email: String(email ?? "").trim(),
     password,
+    first_name: String(firstName ?? "").trim(),
+    last_name: String(lastName ?? "").trim(),
     age: Number(age),
     sex: String(sex ?? "").trim(),
     country: String(country ?? "").trim(),

@@ -16,7 +16,9 @@ export const translations = {
     "nav.perfil": "Perfil",
     "nav.marcadores": "Marcadores",
     "nav.envios": "Envíos",
+    "nav.dashboard": "Dashboard",
     "nav.salir": "Salir",
+    "nav.cerrarSesion": "Cerrar sesión",
 
     "footer.aboutTitle": "Sur Economics",
     "footer.note":
@@ -41,7 +43,9 @@ export const translations = {
     "nav.perfil": "Profile",
     "nav.marcadores": "Bookmarks",
     "nav.envios": "Submissions",
+    "nav.dashboard": "Dashboard",
     "nav.salir": "Sign out",
+    "nav.cerrarSesion": "Sign out",
 
     "footer.aboutTitle": "Sur Economics",
     "footer.note":

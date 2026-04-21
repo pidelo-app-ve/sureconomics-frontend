@@ -58,19 +58,19 @@ export const router = createBrowserRouter([
             { path: "cuenta/registro", element: <CuentaRegistro /> },
             { path: "cuenta/verificar-email", element: <CuentaVerificarEmail /> },
             { path: "cuenta/solicitar-codigo", element: <CuentaSolicitarCodigo /> },
-            {
-                path: "cuenta",
-                element: <CuentaDashboardLayout />,
-                children: [
-                    { index: true, element: <CuentaDashboardHome /> },
-                    { path: "perfil", element: <CuentaPerfil /> },
-                    { path: "marcadores", element: <CuentaMarcadores /> },
-                    { path: "envios", element: <CuentaEnviosList /> },
-                    { path: "envios/nuevo", element: <CuentaEnviosNuevo /> },
-                    { path: "envios/:id", element: <CuentaEnvioDetail /> },
-                ],
-            },
             { path: "*", element: <NotFound /> },
+        ],
+    },
+    {
+        path: "/cuenta",
+        element: <CuentaDashboardLayout />,
+        children: [
+            { index: true, element: <CuentaDashboardHome /> },
+            { path: "perfil", element: <CuentaPerfil /> },
+            { path: "marcadores", element: <CuentaMarcadores /> },
+            { path: "envios", element: <CuentaEnviosList /> },
+            { path: "envios/nuevo", element: <CuentaEnviosNuevo /> },
+            { path: "envios/:id", element: <CuentaEnvioDetail /> },
         ],
     },
     {

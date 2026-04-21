@@ -17,11 +17,26 @@ const isNavItemActive = (pathname, to) => {
   return pathname === to || pathname.startsWith(`${to}/`);
 };
 
+const READER_DASHBOARD_EXCLUDED = [
+  "/cuenta/entrar",
+  "/cuenta/registro",
+  "/cuenta/verificar-email",
+  "/cuenta/solicitar-codigo",
+];
+
+const isReaderDashboardActive = (pathname) => {
+  if (!pathname.startsWith("/cuenta")) return false;
+  return !READER_DASHBOARD_EXCLUDED.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+};
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { t } = useI18n();
-  const { isAuthenticated, isEmailVerified, logout } = useUserAuth();
+  const { isAuthenticated, logout } = useUserAuth();
 
   const mainNavItems = useMemo(
     () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion"),
@@ -65,6 +80,16 @@ export const Navbar = () => {
   }, [location.pathname, closeMenu]);
 
   useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
     if (!isMenuOpen) return;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
@@ -84,7 +109,9 @@ export const Navbar = () => {
 
   return (
     <header
-      className={`se-header ${isMenuOpen ? "se-header--menu-open" : ""}`}
+      className={`se-header ${isMenuOpen ? "se-header--menu-open" : ""} ${
+        isScrolled ? "se-header--scrolled" : ""
+      }`}
       role="banner"
     >
       <div className="se-container se-header__inner">
@@ -123,31 +150,25 @@ export const Navbar = () => {
         <div className="se-header__actions se-header__actions--desktop">
           {isAuthenticated ? (
             <nav className="se-header__user-nav" aria-label="Cuenta de lector">
-              <Link to="/cuenta" className="se-header__nav-link se-header__nav-link--compact">
-                {t("nav.cuenta")}
+              <Link
+                to="/cuenta"
+                className={`se-btn se-btn--secondary se-header__dash-btn${
+                  isReaderDashboardActive(location.pathname)
+                    ? " se-header__dash-btn--active"
+                    : ""
+                }`}
+                aria-current={
+                  isReaderDashboardActive(location.pathname) ? "page" : undefined
+                }
+              >
+                {t("nav.dashboard")}
               </Link>
-              {isEmailVerified ? (
-                <>
-                  <Link
-                    to="/cuenta/marcadores"
-                    className="se-header__nav-link se-header__nav-link--compact"
-                  >
-                    {t("nav.marcadores")}
-                  </Link>
-                  <Link
-                    to="/cuenta/envios"
-                    className="se-header__nav-link se-header__nav-link--compact"
-                  >
-                    {t("nav.envios")}
-                  </Link>
-                </>
-              ) : null}
               <button
                 type="button"
-                className="se-header__nav-link se-header__nav-link--compact se-header__nav-link--button"
+                className="se-btn se-btn--secondary se-header__dash-btn"
                 onClick={handleLogout}
               >
-                {t("nav.salir")}
+                {t("nav.cerrarSesion")}
               </button>
             </nav>
           ) : (
@@ -167,15 +188,6 @@ export const Navbar = () => {
               </Link>
             </div>
           )}
-          {subscriptionNav?.to ? (
-            <Link
-              to={subscriptionNav.to}
-              className="se-btn se-btn--secondary se-header__cta"
-              aria-label={t("common.suscribirse")}
-            >
-              {t("common.suscribirse")}
-            </Link>
-          ) : null}
         </div>
 
         <button
@@ -235,33 +247,22 @@ export const Navbar = () => {
                   className="se-header__user-nav se-header__user-nav--stack"
                   aria-label="Cuenta de lector"
                 >
-                  <Link to="/cuenta" className="se-header__nav-link" onClick={closeMenu}>
-                    {t("nav.cuenta")}
+                  <Link
+                    to="/cuenta"
+                    className="se-btn se-btn--secondary se-header__dash-btn"
+                    onClick={closeMenu}
+                    aria-current={
+                      isReaderDashboardActive(location.pathname) ? "page" : undefined
+                    }
+                  >
+                    {t("nav.dashboard")}
                   </Link>
-                  {isEmailVerified ? (
-                    <>
-                      <Link
-                        to="/cuenta/marcadores"
-                        className="se-header__nav-link"
-                        onClick={closeMenu}
-                      >
-                        {t("nav.marcadores")}
-                      </Link>
-                      <Link
-                        to="/cuenta/envios"
-                        className="se-header__nav-link"
-                        onClick={closeMenu}
-                      >
-                        {t("nav.envios")}
-                      </Link>
-                    </>
-                  ) : null}
                   <button
                     type="button"
-                    className="se-header__nav-link se-header__nav-link--button"
+                    className="se-btn se-btn--secondary se-header__dash-btn"
                     onClick={handleLogout}
                   >
-                    {t("nav.salir")}
+                    {t("nav.cerrarSesion")}
                   </button>
                 </nav>
               ) : (
@@ -286,16 +287,6 @@ export const Navbar = () => {
                   </Link>
                 </div>
               )}
-              {subscriptionNav?.to ? (
-                <Link
-                  to={subscriptionNav.to}
-                  className="se-btn se-btn--secondary se-header__cta se-header__cta--muted"
-                  onClick={closeMenu}
-                  aria-label={t("common.suscribirse")}
-                >
-                  {t("common.suscribirse")}
-                </Link>
-              ) : null}
             </div>
           </div>
         </div>

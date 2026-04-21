@@ -5,6 +5,7 @@ import { contentService } from "../services/contentService";
 import { formatDateEs } from "../lib/date";
 import { applyPageMeta } from "../lib/seo";
 import { ErrorState, LoadingState, Pagination } from "../components/content";
+import { ShareButtons } from "../components/content/ShareButtons";
 import { useUserAuth } from "../context/UserAuthContext";
 import * as userMeService from "../services/userMeService";
 import { CommentList } from "../components/comments/CommentList";
@@ -178,6 +179,9 @@ export const Article = () => {
             <div className="se-article__meta">
               <time dateTime={post.publishDate}>{formatDateEs(post.publishDate)}</time>
               {post.author && <span className="se-article__author">Por {post.author}</span>}
+            </div>
+            <div className="se-article__share">
+              <ShareButtons url={post.canonicalUrl || `/articulo/${post.slug}`} title={post.title} />
             </div>
             {post.id && isEmailVerified ? (
               <div className="se-article__toolbar">

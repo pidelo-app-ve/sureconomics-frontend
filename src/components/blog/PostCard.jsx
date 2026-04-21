@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { PlaceholderImage } from "./PlaceholderImage";
 import { formatDateEs } from "../../lib/date";
+import { ShareButtons } from "../content/ShareButtons";
 
 export const PostCard = ({
   slug,
@@ -45,6 +46,9 @@ export const PostCard = ({
           <time dateTime={date}>{formatDateEs(date)}</time>
           {readTime && <span className="se-card__read-time">{readTime}</span>}
           {author && <span className="se-card__author">Por {author}</span>}
+        </div>
+        <div className="se-card__share">
+          <ShareButtons url={url} title={title} />
         </div>
         <Link to={url} className="se-link se-card__cta">
           Leer más

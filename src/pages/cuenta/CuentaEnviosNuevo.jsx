@@ -3,14 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import * as userMeService from "../../services/userMeService";
+import { SubmissionForm } from "../../components/submissions/SubmissionForm";
 
 export const CuentaEnviosNuevo = () => {
   const navigate = useNavigate();
   const { isEmailVerified } = useUserAuth();
-  const [title, setTitle] = useState("");
-  const [excerpt, setExcerpt] = useState("");
-  const [content, setContent] = useState("");
-  const [featuredImageUrl, setFeaturedImageUrl] = useState("");
+  const [values, setValues] = useState({ title: "", excerpt: "", content: "", featuredImageUrl: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,10 +26,10 @@ export const CuentaEnviosNuevo = () => {
     setIsSubmitting(true);
     try {
       const created = await userMeService.createSubmission({
-        title,
-        excerpt,
-        content,
-        featured_image_url: featuredImageUrl,
+        title: values.title,
+        excerpt: values.excerpt,
+        content: values.content,
+        featured_image_url: values.featuredImageUrl,
       });
       const id =
         created?.id ??
@@ -70,85 +68,16 @@ export const CuentaEnviosNuevo = () => {
   }
 
   return (
-    <div className="se-reader-dash__page">
-      <header className="se-reader-page-head">
-        <h1 className="se-reader-page-title">Nuevo envío</h1>
-        <p className="se-reader-page-lead">
-          <Link to="/cuenta/envios" className="se-link se-reader-backlink">
-            ← Volver a la lista
-          </Link>
-        </p>
-      </header>
-
-      <div className="se-reader-card se-reader-card--form">
-        <form className="se-contact-form se-contact-form--reader" onSubmit={handleSubmit} noValidate>
-          {errorMessage ? (
-            <p className="se-admin-login__error" role="alert" id="envio-nuevo-error">
-              {errorMessage}
-            </p>
-          ) : null}
-
-          <label className="se-form-field" htmlFor="envio-title">
-            <span className="se-form-label">Título</span>
-            <input
-              id="envio-title"
-              name="title"
-              className="se-form-control"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              disabled={isSubmitting}
-              aria-invalid={Boolean(errorMessage)}
-              aria-describedby={errorMessage ? "envio-nuevo-error" : undefined}
-            />
-          </label>
-
-          <label className="se-form-field" htmlFor="envio-excerpt">
-            <span className="se-form-label">Resumen</span>
-            <textarea
-              id="envio-excerpt"
-              name="excerpt"
-              className="se-form-control"
-              rows={3}
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
-          </label>
-
-          <label className="se-form-field" htmlFor="envio-content">
-            <span className="se-form-label">Contenido</span>
-            <textarea
-              id="envio-content"
-              name="content"
-              className="se-form-control"
-              rows={12}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              disabled={isSubmitting}
-            />
-          </label>
-
-          <label className="se-form-field" htmlFor="envio-image">
-            <span className="se-form-label">URL de imagen destacada (opcional)</span>
-            <input
-              id="envio-image"
-              name="featured_image_url"
-              type="url"
-              className="se-form-control"
-              value={featuredImageUrl}
-              onChange={(e) => setFeaturedImageUrl(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </label>
-
-          <button type="submit" className="se-btn" disabled={isSubmitting}>
-            {isSubmitting ? "Enviando…" : "Enviar a revisión"}
-          </button>
-        </form>
-      </div>
-    </div>
+    <SubmissionForm
+      title="Nuevo envío"
+      backHref="/cuenta/envios"
+      backLabel="Volver a la lista"
+      values={values}
+      onChange={setValues}
+      onSubmit={handleSubmit}
+      submitLabel="Enviar a revisión"
+      isSubmitting={isSubmitting}
+      errorMessage={errorMessage}
+    />
   );
 };

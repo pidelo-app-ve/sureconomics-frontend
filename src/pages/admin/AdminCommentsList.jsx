@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { deleteAdminComment, listAdminComments, patchAdminComment } from "../../services/adminCommentsService";
+import {
+  approveAdminComment,
+  deleteAdminComment,
+  listAdminComments,
+  rejectAdminComment,
+} from "../../services/adminCommentsService";
 import { getAdminPost } from "../../services/adminPostsService";
 import { getAdminUser } from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
@@ -39,23 +44,10 @@ const getAuthorDetails = (row) => {
   return { name, email };
 };
 
-const getPostDetails = (row) => {
-  const raw = row?.post ?? row?.article ?? row?.content ?? null;
-  if (raw && typeof raw === "object") {
-    const slug = pickFromObj(raw, ["slug", "post_slug", "article_slug"]);
-    const title = pickFromObj(raw, ["title", "post_title", "article_title", "name"]);
-    return { slug, title };
-  }
-
-  const slug = adminPick(row, ["post_slug", "slug", "article_slug"], "");
-  const title = adminPick(row, ["post_title", "article_title", "title"], "");
-  return { slug, title };
-};
-
 export const AdminCommentsList = () => {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
-  const [slug, setSlug] = useState("");
+  const [postId, setPostId] = useState("");
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [actionId, setActionId] = useState(null);
   const [lookups, setLookups] = useState({ posts: {}, users: {} });
@@ -65,11 +57,12 @@ export const AdminCommentsList = () => {
       const p = pageOverride ?? page;
       setState((s) => ({ ...s, status: "loading", error: null }));
       try {
+        const postIdTrim = postId.trim();
         const { items, meta } = await listAdminComments({
           page: p,
           limit: 20,
           status: status || undefined,
-          slug: slug.trim() || undefined,
+          post_id: postIdTrim ? (/^\d+$/.test(postIdTrim) ? Number(postIdTrim) : postIdTrim) : undefined,
         });
         setState({ status: "success", items, meta, error: null });
 
@@ -113,7 +106,7 @@ export const AdminCommentsList = () => {
         setLookups({ posts: {}, users: {} });
       }
     },
-    [page, status, slug]
+    [page, status, postId]
   );
 
   useEffect(() => {
@@ -124,13 +117,25 @@ export const AdminCommentsList = () => {
     load();
   }, [load]);
 
-  const handleStatusChange = async (id, nextStatus) => {
-    setActionId(id);
+  const handleApprove = async (commentId) => {
+    setActionId(commentId);
     try {
-      await patchAdminComment(id, { status: nextStatus });
+      await approveAdminComment(commentId);
       await load();
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo actualizar.");
+      window.alert(err instanceof Error ? err.message : "No se pudo aprobar.");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleReject = async (commentId) => {
+    setActionId(commentId);
+    try {
+      await rejectAdminComment(commentId);
+      await load();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "No se pudo rechazar.");
     } finally {
       setActionId(null);
     }
@@ -186,13 +191,14 @@ export const AdminCommentsList = () => {
             ))}
           </select>
         </label>
-        <label className="se-form-field" htmlFor="mod-slug">
-          <span className="se-form-label">Slug del artículo</span>
+        <label className="se-form-field" htmlFor="mod-post-id">
+          <span className="se-form-label">ID del artículo</span>
           <input
-            id="mod-slug"
+            id="mod-post-id"
             className="se-form-control"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            inputMode="numeric"
+            value={postId}
+            onChange={(e) => setPostId(e.target.value)}
             placeholder="opcional"
           />
         </label>
@@ -318,7 +324,7 @@ export const AdminCommentsList = () => {
                           type="button"
                           className="se-link se-header__nav-link--button"
                           disabled={busy}
-                          onClick={() => handleStatusChange(cid, "approved")}
+                          onClick={() => handleApprove(cid)}
                         >
                           Aprobar
                         </button>
@@ -327,7 +333,7 @@ export const AdminCommentsList = () => {
                           type="button"
                           className="se-link se-header__nav-link--button"
                           disabled={busy}
-                          onClick={() => handleStatusChange(cid, "rejected")}
+                          onClick={() => handleReject(cid)}
                         >
                           Rechazar
                         </button>

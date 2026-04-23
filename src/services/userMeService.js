@@ -55,3 +55,20 @@ export const getSubmissionById = async (id) => {
     createdAt: String(data.created_at ?? data.createdAt ?? ""),
   };
 };
+
+export const patchMySubmission = (id, patch) =>
+  userRequest(`/me/submissions/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    json: {
+      title: patch?.title,
+      excerpt: patch?.excerpt,
+      content: patch?.content,
+      featured_image_url: patch?.featured_image_url ?? patch?.featuredImageUrl,
+    },
+  });
+
+export const listMySubmissionNotes = async (submissionId, params = {}) =>
+  userRequest(`/me/submissions/${encodeURIComponent(submissionId)}/notes`, {
+    method: "GET",
+    query: { page: params.page ?? 1, limit: params.limit ?? 20 },
+  });

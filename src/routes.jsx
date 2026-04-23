@@ -38,6 +38,7 @@ import { CuentaMarcadores } from "./pages/cuenta/CuentaMarcadores";
 import { CuentaEnviosList } from "./pages/cuenta/CuentaEnviosList";
 import { CuentaEnviosNuevo } from "./pages/cuenta/CuentaEnviosNuevo";
 import { CuentaEnvioDetail } from "./pages/cuenta/CuentaEnvioDetail";
+import { CuentaEnvioEditar } from "./pages/cuenta/CuentaEnvioEditar";
 
 export const router = createBrowserRouter([
     {
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
             { path: "marcadores", element: <CuentaMarcadores /> },
             { path: "envios", element: <CuentaEnviosList /> },
             { path: "envios/nuevo", element: <CuentaEnviosNuevo /> },
+            { path: "envios/:id/editar", element: <CuentaEnvioEditar /> },
             { path: "envios/:id", element: <CuentaEnvioDetail /> },
         ],
     },

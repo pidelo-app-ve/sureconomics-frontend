@@ -12,6 +12,7 @@ import {
 } from "../../services/adminPostsService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 const emptyForm = () => ({
     title: "",
@@ -125,6 +126,7 @@ export const AdminPostEditor = () => {
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", error: null });
     const [actionError, setActionError] = useState(null);
+    const { confirm, ConfirmDialog } = useAdminConfirm();
 
     const numericPostId = useMemo(() => {
         if (!postId) return null;
@@ -239,15 +241,16 @@ export const AdminPostEditor = () => {
 
     const handleDelete = async () => {
         if (isCreate) return;
-        const ok = window.confirm("¿Eliminar este artículo de forma permanente?");
-        if (!ok) return;
         setActionError(null);
-        try {
-            await deleteAdminPost(numericPostId);
-            navigate("/admin/posts", { replace: true });
-        } catch (err) {
-            setActionError(err);
-        }
+        await confirm({
+            title: "Eliminar artículo",
+            description: `¿Eliminar este artículo (ID ${numericPostId}) de forma permanente?`,
+            confirmLabel: "Eliminar artículo",
+            onConfirm: async () => {
+                await deleteAdminPost(numericPostId);
+                navigate("/admin/posts", { replace: true });
+            },
+        });
     };
 
     const formatActionError = (err) => {
@@ -478,6 +481,8 @@ export const AdminPostEditor = () => {
                     ) : null}
                 </div>
             </div>
+
+            <ConfirmDialog />
         </main>
     );
 };

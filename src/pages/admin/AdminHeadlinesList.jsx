@@ -4,10 +4,12 @@ import { deleteAdminHeadline, listAdminHeadlines } from "../../services/adminHea
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 export const AdminHeadlinesList = () => {
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const load = useCallback(async () => {
     setState((s) => ({ ...s, status: "loading", error: null }));
@@ -28,13 +30,15 @@ export const AdminHeadlinesList = () => {
   }, [load]);
 
   const handleDelete = async (hid, title) => {
-    if (!window.confirm(`¿Eliminar el titular «${title}»?`)) return;
-    try {
-      await deleteAdminHeadline(hid);
-      await load();
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo eliminar.");
-    }
+    await confirm({
+      title: "Eliminar titular",
+      description: `¿Eliminar el titular «${title}» (ID ${hid})?`,
+      confirmLabel: "Eliminar titular",
+      onConfirm: async () => {
+        await deleteAdminHeadline(hid);
+        await load();
+      },
+    });
   };
 
   const meta = state.meta;
@@ -106,6 +110,8 @@ export const AdminHeadlinesList = () => {
           <Pagination page={meta?.page ?? page} totalPages={totalPages} onPageChange={setPage} />
         </>
       ) : null}
+
+      <ConfirmDialog />
     </main>
   );
 };

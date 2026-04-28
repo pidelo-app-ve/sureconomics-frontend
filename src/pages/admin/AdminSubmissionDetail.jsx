@@ -21,6 +21,7 @@ import {
   listAdminSubmissionNotes,
   patchAdminSubmissionNote,
 } from "../../services/adminSubmissionNotesService";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 const normalizeStatusForSelect = (value) => {
   const s = String(value || "").toLowerCase();
@@ -44,6 +45,7 @@ export const AdminSubmissionDetail = () => {
   const [featuredImageFailed, setFeaturedImageFailed] = useState(false);
   const [authorUser, setAuthorUser] = useState(null);
   const [authorUserLoad, setAuthorUserLoad] = useState({ status: "idle", error: null });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const numericId = useMemo(() => {
     if (!id) return null;
@@ -209,17 +211,21 @@ export const AdminSubmissionDetail = () => {
 
   const handleDeleteNote = async (noteId) => {
     if (!numericId || !noteId) return;
-    setDeleteState({ status: "loading", error: null, noteId });
-    try {
-      await deleteAdminSubmissionNote(numericId, noteId);
-      setDeleteState({ status: "success", error: null, noteId: null });
-      if (editing.noteId === noteId) {
-        setEditing({ noteId: null, value: "" });
-      }
-      await loadNotes();
-    } catch (err) {
-      setDeleteState({ status: "error", error: err, noteId });
-    }
+    const ok = await confirm({
+      title: "Eliminar nota",
+      description: `¿Eliminar esta nota (ID ${noteId})?`,
+      confirmLabel: "Eliminar nota",
+      onConfirm: async () => {
+        setDeleteState({ status: "loading", error: null, noteId });
+        await deleteAdminSubmissionNote(numericId, noteId);
+        setDeleteState({ status: "success", error: null, noteId: null });
+        if (editing.noteId === noteId) {
+          setEditing({ noteId: null, value: "" });
+        }
+        await loadNotes();
+      },
+    });
+    if (!ok) return;
   };
 
   if (loadState.status === "loading") {
@@ -234,7 +240,7 @@ export const AdminSubmissionDetail = () => {
     return (
       <main role="main" className="se-admin-submission-detail">
         <ErrorState title="No se pudo cargar el envío" error={loadState.error} onRetry={load} />
-        <p style={{ marginTop: "1rem" }}>
+        <p className="se-admin-submission-detail__stack">
           <Link to="/admin/submissions" className="se-link">
             Volver al listado
           </Link>
@@ -291,7 +297,7 @@ export const AdminSubmissionDetail = () => {
           </p>
         ) : null}
         {authorUserLoad.status === "error" ? (
-          <p className="se-admin-login__error" role="alert" style={{ marginBottom: "0.75rem" }}>
+          <p className="se-admin-login__error se-admin-submission-detail__inline-alert" role="alert">
             {authorUserLoad.error instanceof Error
               ? authorUserLoad.error.message
               : "No se pudo cargar el usuario en administración."}
@@ -361,7 +367,7 @@ export const AdminSubmissionDetail = () => {
               Resumen
             </span>
             {excerptTrim ? (
-              <p className="se-text-body" style={{ margin: 0 }}>
+              <p className="se-text-body se-admin-submission-detail__excerpt">
                 {excerptTrim}
               </p>
             ) : (
@@ -390,7 +396,7 @@ export const AdminSubmissionDetail = () => {
               </p>
             ) : null}
             {saveState.status === "success" ? (
-              <p className="se-text-body" role="status" style={{ marginTop: 0 }}>
+              <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
                 Estado actualizado.
               </p>
             ) : null}
@@ -421,7 +427,7 @@ export const AdminSubmissionDetail = () => {
           </p>
         ) : null}
 
-        <form className="se-contact-form" onSubmit={handleCreateNote} style={{ maxWidth: "40rem" }}>
+        <form className="se-contact-form se-admin-submission-detail__notes-form" onSubmit={handleCreateNote}>
           {createState.status === "error" ? (
             <p className="se-admin-login__error" role="alert">
               {createState.error instanceof Error ? createState.error.message : "Error al crear la nota."}
@@ -445,13 +451,13 @@ export const AdminSubmissionDetail = () => {
         </form>
 
         {notesState.status === "loading" || notesState.status === "idle" ? (
-          <div style={{ marginTop: "1rem" }}>
+          <div className="se-admin-submission-detail__stack">
             <LoadingState title="Cargando notas…" />
           </div>
         ) : null}
 
         {notesState.status === "error" ? (
-          <div style={{ marginTop: "1rem" }}>
+          <div className="se-admin-submission-detail__stack">
             <ErrorState title="No se pudieron cargar las notas" error={notesState.error} onRetry={loadNotes} />
           </div>
         ) : null}
@@ -523,14 +529,12 @@ export const AdminSubmissionDetail = () => {
               })}
             </div>
           ) : (
-            <p className="se-text-body" style={{ margin: "0.75rem 0 0", color: "#64748b" }}>
-              Todavía no hay notas en este envío.
-            </p>
+            <p className="se-admin-submission-detail__muted">Todavía no hay notas en este envío.</p>
           )
         ) : null}
 
         {deleteState.status === "error" ? (
-          <p className="se-admin-login__error" role="alert" style={{ marginTop: "1rem" }}>
+          <p className="se-admin-login__error se-admin-submission-detail__retry" role="alert">
             {deleteState.error instanceof Error ? deleteState.error.message : "Error al eliminar la nota."}
           </p>
         ) : null}
@@ -543,6 +547,8 @@ export const AdminSubmissionDetail = () => {
           />
         ) : null}
       </section>
+
+      <ConfirmDialog />
     </main>
   );
 };

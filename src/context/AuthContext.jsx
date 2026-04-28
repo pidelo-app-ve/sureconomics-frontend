@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 import PropTypes from "prop-types";
-import { ADMIN_AUTH_SYNC_EVENT, loginAdmin as loginApi } from "../lib/api";
+import { ADMIN_AUTH_SYNC_EVENT, loginAdmin as loginApi, registerAdmin as registerApi } from "../lib/api";
 import {
     clearStoredAuth,
     persistAuth,
@@ -38,6 +38,17 @@ export const AuthProvider = ({ children }) => {
         return data;
     }, []);
 
+    const register = useCallback(async (email, password) => {
+        const data = await registerApi(email, password);
+        persistAuth({
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresIn: data.expires_in,
+        });
+        setAuth(readStoredAuth());
+        return data;
+    }, []);
+
     const logout = useCallback(() => {
         clearStoredAuth();
         setAuth({
@@ -59,9 +70,10 @@ export const AuthProvider = ({ children }) => {
             getAccessToken,
             getRefreshToken,
             login,
+            register,
             logout,
         }),
-        [auth, getAccessToken, getRefreshToken, login, logout]
+        [auth, getAccessToken, getRefreshToken, login, register, logout]
     );
 
     return (

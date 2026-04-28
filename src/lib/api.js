@@ -207,3 +207,20 @@ export const adminRequest = async (path, options = {}) => {
  */
 export const loginAdmin = (email, password) =>
     apiRequest("/auth/login", { method: "POST", json: { email, password } });
+
+/**
+ * Admin registration.
+ * Backend is expected to return the same token envelope as login.
+ *
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<{
+ *   access_token: string,
+ *   refresh_token: string,
+ *   token_type?: string,
+ *   expires_in?: number,
+ *   refresh_expires_in?: number
+ * }>}
+ */
+export const registerAdmin = (email, password) =>
+    apiRequest("/auth/register", { method: "POST", json: { email, password } });

@@ -146,12 +146,12 @@ export const CuentaRegistro = () => {
   const errorId = "cuenta-registro-error";
 
   return (
-    <main className="se-blog se-admin-login" role="main">
-      <div className="se-admin-login__shell">
+    <main className="se-blog se-reader-auth" role="main">
+      <div className="se-reader-auth__shell">
         <div className="se-container se-container--narrow">
-          <header className="se-admin-login__header">
+          <header className="se-reader-auth__header">
             <h1 className="se-heading-section">Registro</h1>
-            <p className="se-text-small se-admin-login__subtitle">
+            <p className="se-text-small se-reader-auth__subtitle">
               Cree una cuenta para comentar y guardar artículos. Tras registrarse le enviaremos un
               código por correo para verificar su dirección.
             </p>
@@ -159,7 +159,7 @@ export const CuentaRegistro = () => {
 
           <form className="se-contact-form" onSubmit={handleSubmit} noValidate>
             {errorMessage ? (
-              <p className="se-admin-login__error" role="alert" id={errorId}>
+              <p className="se-reader-auth__error" role="alert" id={errorId}>
                 {errorMessage}
               </p>
             ) : null}
@@ -369,7 +369,7 @@ export const CuentaRegistro = () => {
             </button>
           </form>
 
-          <p className="se-text-body" style={{ marginTop: "1.5rem" }}>
+          <p className="se-text-body se-reader-auth__footer">
             ¿Ya tiene cuenta?{" "}
             <Link to="/cuenta/entrar" className="se-link">
               Entrar

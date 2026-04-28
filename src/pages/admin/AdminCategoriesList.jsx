@@ -7,10 +7,12 @@ import {
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 export const AdminCategoriesList = () => {
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const load = useCallback(async () => {
     setState((s) => ({ ...s, status: "loading", error: null }));
@@ -31,13 +33,15 @@ export const AdminCategoriesList = () => {
   }, [load]);
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`¿Eliminar la categoría «${name}»?`)) return;
-    try {
-      await deleteAdminCategory(id);
-      await load();
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo eliminar.");
-    }
+    await confirm({
+      title: "Eliminar categoría",
+      description: `¿Eliminar la categoría «${name}» (ID ${id})?`,
+      confirmLabel: "Eliminar categoría",
+      onConfirm: async () => {
+        await deleteAdminCategory(id);
+        await load();
+      },
+    });
   };
 
   const meta = state.meta;
@@ -108,6 +112,8 @@ export const AdminCategoriesList = () => {
           <Pagination page={meta?.page ?? page} totalPages={totalPages} onPageChange={setPage} />
         </>
       ) : null}
+
+      <ConfirmDialog />
     </main>
   );
 };

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 import { useAuth } from "../../context/AuthContext";
 
 const RAIL_MENU_ID = "se-admin-rail-menu";
@@ -13,6 +14,11 @@ const NavGroup = ({ label, children }) => (
     <div className="se-admin-nav-group__links">{children}</div>
   </div>
 );
+
+NavGroup.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+};
 
 export const AdminLayout = () => {
   const { logout } = useAuth();
@@ -68,8 +74,10 @@ export const AdminLayout = () => {
         className={`se-admin-backdrop${menuOpen ? " se-admin-backdrop--visible" : ""}`}
         onClick={closeMenu}
         onKeyDown={(e) => e.key === "Enter" && closeMenu()}
-        role="presentation"
-        aria-hidden="true"
+        role="button"
+        tabIndex={menuOpen ? 0 : -1}
+        aria-label="Cerrar menú"
+        aria-hidden={!menuOpen}
       />
 
       <div className="se-admin-app__body">

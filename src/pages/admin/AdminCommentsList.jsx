@@ -10,6 +10,7 @@ import { getAdminUser } from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -51,6 +52,7 @@ export const AdminCommentsList = () => {
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [actionId, setActionId] = useState(null);
   const [lookups, setLookups] = useState({ posts: {}, users: {} });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const load = useCallback(
     async (pageOverride) => {
@@ -142,16 +144,21 @@ export const AdminCommentsList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Eliminar este comentario de forma permanente?")) return;
     setActionId(id);
-    try {
-      await deleteAdminComment(id);
-      await load();
-    } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo eliminar.");
-    } finally {
+    const ok = await confirm({
+      title: "Eliminar comentario",
+      description: `¿Eliminar este comentario (ID ${id}) de forma permanente?`,
+      confirmLabel: "Eliminar comentario",
+      onConfirm: async () => {
+        await deleteAdminComment(id);
+        await load();
+      },
+    });
+    if (!ok) {
       setActionId(null);
+      return;
     }
+    setActionId(null);
   };
 
   const meta = state.meta;
@@ -356,6 +363,8 @@ export const AdminCommentsList = () => {
           <Pagination page={meta?.page ?? page} totalPages={totalPages} onPageChange={setPage} />
         </>
       ) : null}
+
+      <ConfirmDialog />
     </main>
   );
 };

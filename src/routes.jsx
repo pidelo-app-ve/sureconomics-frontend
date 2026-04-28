@@ -29,6 +29,7 @@ import { AdminUserDetail } from "./pages/admin/AdminUserDetail";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import { CuentaEntrar } from "./pages/cuenta/CuentaEntrar";
 import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
+import { Backoffice } from "./pages/backoffice/Backoffice";
 import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
 import { CuentaDashboardLayout } from "./pages/cuenta/CuentaDashboardLayout";
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
             { path: "informes", element: <Informes /> },
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
+            { path: "backoffice", element: <Backoffice /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },
             { path: "cuenta/verificar-email", element: <CuentaVerificarEmail /> },

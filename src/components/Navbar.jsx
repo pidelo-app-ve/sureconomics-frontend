@@ -42,10 +42,6 @@ export const Navbar = () => {
     () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion"),
     []
   );
-  const subscriptionNav = useMemo(
-    () => PRIMARY_NAV.find((item) => item.id === "suscripcion"),
-    []
-  );
 
   const navLinkClass = useCallback(
     (to) =>
@@ -213,10 +209,21 @@ export const Navbar = () => {
             onClick={closeMenu}
             onKeyDown={(e) => e.key === "Enter" && closeMenu()}
             role="button"
-            tabIndex={-1}
+            tabIndex={0}
             aria-label="Cerrar menú"
           />
           <div className="se-header__menu-panel">
+            <div className="se-header__menu-header">
+              <span className="se-header__menu-title">{t("nav.menu")}</span>
+              <button
+                type="button"
+                className="se-header__menu-close"
+                onClick={closeMenu}
+                aria-label="Cerrar menú"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
             <nav className="se-header__nav" aria-label="Navegación principal">
               <ul className="se-header__nav-list">
                 {mainNavItems.map((item, index) => (

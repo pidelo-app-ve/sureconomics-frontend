@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../../context/AuthContext";
+import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 
 const RAIL_MENU_ID = "se-admin-rail-menu";
 
@@ -64,7 +65,17 @@ export const AdminLayout = () => {
         >
           <span className="se-admin-mobile-bar__burger" aria-hidden="true" />
         </button>
-        <span className="se-admin-mobile-bar__title">Sur Economics · Admin</span>
+        <div className="se-admin-mobile-bar__brand" aria-label="Sur Economics Admin">
+          <img
+            className="se-admin-mobile-bar__logo"
+            src={BRAND_PUBLIC_LOGO.dark.isotypeWithBox}
+            alt=""
+            width={32}
+            height={32}
+            decoding="async"
+          />
+          <span className="se-admin-mobile-bar__title">Admin</span>
+        </div>
         <Link to="/" className="se-admin-mobile-bar__site" onClick={closeMenu}>
           Sitio
         </Link>
@@ -87,7 +98,15 @@ export const AdminLayout = () => {
           aria-label="Navegación de administración"
         >
           <div className="se-admin-rail__brand">
-            <span className="se-admin-rail__logo">Sur Economics</span>
+            <img
+              className="se-admin-rail__logo-img"
+              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+              alt=""
+              width={200}
+              height={44}
+              decoding="async"
+            />
+            <span className="se-sr-only">Sur Economics</span>
             <span className="se-admin-rail__badge">Admin</span>
           </div>
 

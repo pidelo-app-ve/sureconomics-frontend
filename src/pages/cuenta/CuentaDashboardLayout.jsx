@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { RequireUserAuth } from "../../components/cuenta/RequireUserAuth";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 
 const IconGrid = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -96,7 +97,25 @@ const DashboardShell = () => {
       >
         <div className="se-reader-dash__rail-brand">
           <Link to="/" className="se-reader-dash__rail-logo" onClick={handleCloseRail}>
-            Sur Economics
+            <span className="se-reader-dash__rail-logo-stack" aria-hidden="true">
+              <img
+                className="se-reader-dash__rail-logo-iso"
+                src={BRAND_PUBLIC_LOGO.dark.isotypeWithBox}
+                alt=""
+                width={40}
+                height={40}
+                decoding="async"
+              />
+              <img
+                className="se-reader-dash__rail-logo-word"
+                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                alt=""
+                width={200}
+                height={48}
+                decoding="async"
+              />
+            </span>
+            <span className="se-sr-only">Sur Economics — inicio</span>
           </Link>
           <span className="se-reader-dash__rail-tag">Lector</span>
         </div>
@@ -142,6 +161,21 @@ const DashboardShell = () => {
             <span />
             <span />
           </button>
+          <Link
+            to="/"
+            className="se-reader-dash__topbar-home"
+            onClick={handleCloseRail}
+            aria-label="Sur Economics — inicio"
+          >
+            <img
+              className="se-reader-dash__topbar-home-img"
+              src={BRAND_PUBLIC_LOGO.light.isotypeWithBox}
+              alt=""
+              width={28}
+              height={28}
+              decoding="async"
+            />
+          </Link>
           <div className="se-reader-dash__topbar-meta">
             <span className="se-reader-dash__topbar-title">Su espacio</span>
             {profile?.email ? (

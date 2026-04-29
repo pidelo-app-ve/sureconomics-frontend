@@ -1,11 +1,17 @@
+import { useRef } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
+
 export const NewsletterBlock = () => {
+  const sectionRef = useRef(null);
+  useRevealOnScroll(sectionRef);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // Demo: no backend. Could show a toast or message.
   };
 
   return (
-    <section className="se-newsletter se-section" aria-labelledby="newsletter-title">
+    <section ref={sectionRef} className="se-newsletter se-section se-reveal" aria-labelledby="newsletter-title">
       <div className="se-container">
         <div className="se-newsletter__card">
           <h2 id="newsletter-title" className="se-newsletter__title">

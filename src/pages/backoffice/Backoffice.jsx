@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
+import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 
 const MODES = {
   login: "login",
@@ -69,7 +70,18 @@ export const Backoffice = () => {
       <div className="se-backoffice-auth__shell">
         <div className="se-container se-container--narrow">
           <header className="se-backoffice-auth__header">
-            <p className="se-backoffice-auth__kicker">Sur Economics</p>
+            <div className="se-backoffice-auth__brand" aria-label="Sur Economics">
+              <div className="se-backoffice-auth__brand-mark">
+                <img
+                  src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
+                  alt=""
+                  className="se-backoffice-auth__brand-img"
+                  width={200}
+                  height={44}
+                  decoding="async"
+                />
+              </div>
+            </div>
             <h1 className="se-heading-section">{title}</h1>
             <p className="se-text-small se-backoffice-auth__subtitle">{subtitle}</p>
           </header>

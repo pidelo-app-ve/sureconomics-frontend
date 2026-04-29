@@ -12,7 +12,7 @@ const getMessage = (error) => {
 export const ErrorState = ({ title = "Error", error, onRetry }) => {
   const message = getMessage(error);
   return (
-    <div className="se-container" role="alert" aria-live="polite">
+    <div className="se-state se-state--error" role="alert" aria-live="polite">
       <div style={{ padding: "2rem 0" }}>
         <h2 className="se-heading-section se-heading-section--small" style={{ marginBottom: "0.75rem" }}>
           {title}

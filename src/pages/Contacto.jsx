@@ -9,20 +9,24 @@ export const Contacto = () => {
     subject: "",
     message: "",
   });
+  const [submitState, setSubmitState] = useState({ status: "idle", message: "" });
 
   const handleChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Demo-only: no backend integration yet.
-    alert("Mensaje enviado (demo). En la próxima fase se conectará a backend.");
+    if (submitState.status === "loading") return;
+    setSubmitState({ status: "loading", message: "" });
+    await new Promise((r) => setTimeout(r, 700));
+    setSubmitState({ status: "success", message: "Mensaje enviado (demo). En la próxima fase se conectará a backend." });
+    setForm({ name: "", email: "", subject: "", message: "" });
   };
 
   return (
-    <main className="se-blog" role="main">
-      <section className="se-hero se-hero--institutional">
+    <main className="se-blog se-contact" role="main">
+      <section className="se-hero se-hero--institutional se-contact__hero">
         <div className="se-container">
           <div className="se-institutional-hero">
             <h1 className="se-heading-hero">Contacto</h1>
@@ -35,10 +39,21 @@ export const Contacto = () => {
 
       <section className="se-section">
         <div className="se-container">
-          <div className="se-two-col se-two-col--align-start">
-            <div>
+          <div className="se-contact__grid">
+            <div className="se-contact__panel">
               <h2 className="se-heading-section">Formulario</h2>
-              <form className="se-contact-form" onSubmit={handleSubmit}>
+              <form className="se-contact-form se-contact__form" onSubmit={handleSubmit} aria-describedby="contact-submit-status">
+                <div id="contact-submit-status" className="se-contact__status" aria-live="polite">
+                  {submitState.status === "success" ? (
+                    <div className="se-contact__banner" role="status">
+                      <strong>Enviado.</strong> {submitState.message}
+                    </div>
+                  ) : submitState.status === "loading" ? (
+                    <div className="se-contact__banner se-contact__banner--loading" role="status">
+                      Enviando…
+                    </div>
+                  ) : null}
+                </div>
                 <div className="se-form-grid">
                   <label className="se-form-field">
                     <span className="se-form-label">Nombre</span>
@@ -47,6 +62,7 @@ export const Contacto = () => {
                       value={form.name}
                       onChange={handleChange("name")}
                       required
+                      disabled={submitState.status === "loading"}
                     />
                   </label>
                   <label className="se-form-field">
@@ -57,6 +73,7 @@ export const Contacto = () => {
                       value={form.email}
                       onChange={handleChange("email")}
                       required
+                      disabled={submitState.status === "loading"}
                     />
                   </label>
                 </div>
@@ -67,6 +84,7 @@ export const Contacto = () => {
                     value={form.subject}
                     onChange={handleChange("subject")}
                     required
+                    disabled={submitState.status === "loading"}
                   />
                 </label>
                 <label className="se-form-field">
@@ -77,50 +95,53 @@ export const Contacto = () => {
                     value={form.message}
                     onChange={handleChange("message")}
                     required
+                    disabled={submitState.status === "loading"}
                   />
                 </label>
-                <button type="submit" className="se-btn" aria-label="Enviar formulario">
-                  Enviar
+                <button type="submit" className="se-btn" aria-label="Enviar formulario" disabled={submitState.status === "loading"}>
+                  {submitState.status === "loading" ? "Enviando…" : "Enviar"}
                 </button>
               </form>
 
-              <div style={{ marginTop: "1rem" }}>
+              <div className="se-contact__footer-links">
                 <Link to="/consultoria" className="se-link">
                   Consultoría
                 </Link>
               </div>
             </div>
 
-            <div>
-              <h2 className="se-heading-section">Emails corporativos</h2>
-              <div className="se-contact-info">
-                <div className="se-contact-info__row">
-                  <span className="se-contact-info__label">Principal:</span>
-                  <a href={`mailto:${CONTACT.primaryEmail}`} className="se-link">
-                    {CONTACT.primaryEmail}
-                  </a>
-                </div>
-                {CONTACT.leadershipEmails.map((e) => (
-                  <div key={e.email} className="se-contact-info__row">
-                    <span className="se-contact-info__label">{e.name}:</span>
-                    <a href={`mailto:${e.email}`} className="se-link">
-                      {e.email}
+            <div className="se-contact__aside">
+              <section className="se-contact__module" aria-label="Emails corporativos">
+                <h2 className="se-heading-section">Emails corporativos</h2>
+                <div className="se-contact-info">
+                  <div className="se-contact-info__row">
+                    <span className="se-contact-info__label">Principal:</span>
+                    <a href={`mailto:${CONTACT.primaryEmail}`} className="se-link">
+                      {CONTACT.primaryEmail}
                     </a>
                   </div>
-                ))}
-              </div>
+                  {CONTACT.leadershipEmails.map((e) => (
+                    <div key={e.email} className="se-contact-info__row">
+                      <span className="se-contact-info__label">{e.name}:</span>
+                      <a href={`mailto:${e.email}`} className="se-link">
+                        {e.email}
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </section>
 
-              <h2 className="se-heading-section" style={{ marginTop: "2.25rem" }}>
-                Oficinas
-              </h2>
-              <div className="se-contact-offices">
-                {CONTACT.offices.map((o) => (
-                  <div key={o.city} className="se-contact-office">
-                    <div className="se-contact-office__city">{o.city}</div>
-                    <div className="se-contact-office__address">{o.address}</div>
-                  </div>
-                ))}
-              </div>
+              <section className="se-contact__module" aria-label="Oficinas">
+                <h2 className="se-heading-section">Oficinas</h2>
+                <div className="se-contact-offices">
+                  {CONTACT.offices.map((o) => (
+                    <div key={o.city} className="se-contact-office">
+                      <div className="se-contact-office__city">{o.city}</div>
+                      <div className="se-contact-office__address">{o.address}</div>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         </div>

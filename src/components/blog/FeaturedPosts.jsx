@@ -1,9 +1,18 @@
 import { PostCard } from "./PostCard";
 import PropTypes from "prop-types";
+import { useRef } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const FeaturedPosts = ({ posts = [] }) => {
+  const sectionRef = useRef(null);
+  useRevealOnScroll(sectionRef);
+
   return (
-    <section className="se-featured se-section" aria-labelledby="featured-title">
+    <section
+      ref={sectionRef}
+      className="se-featured se-section se-reveal se-reveal--stagger"
+      aria-labelledby="featured-title"
+    >
       <div className="se-container">
         <h2 id="featured-title" className="se-heading-section">
           Destacados

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PostCard } from "../components/blog";
 import { BRAND } from "../data/surEconomicsMock";
 import { contentService } from "../services/contentService";
@@ -24,6 +25,7 @@ const normalizeForCard = (post, idx = 0) => {
 };
 
 export const Articulos = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [tag, setTag] = useState("");
@@ -88,6 +90,58 @@ export const Articulos = () => {
     loadTaxonomies();
   }, []);
 
+  const categorySlugSet = useMemo(() => {
+    const set = new Set();
+    for (const c of categories) {
+      if (c?.slug) set.add(String(c.slug));
+    }
+    return set;
+  }, [categories]);
+
+  const tagSlugSet = useMemo(() => {
+    const set = new Set();
+    for (const t of tags) {
+      if (t?.slug) set.add(String(t.slug));
+    }
+    return set;
+  }, [tags]);
+
+  useEffect(() => {
+    const nextCategoryRaw = searchParams.get("category") ?? "";
+    const nextTagRaw = searchParams.get("tag") ?? "";
+
+    const nextCategory =
+      Boolean(nextCategoryRaw) && categorySlugSet.size > 0 && !categorySlugSet.has(nextCategoryRaw)
+        ? ""
+        : nextCategoryRaw;
+    const nextTag =
+      Boolean(nextTagRaw) && tagSlugSet.size > 0 && !tagSlugSet.has(nextTagRaw) ? "" : nextTagRaw;
+
+    const categoryChanged = nextCategory !== category;
+    const tagChanged = nextTag !== tag;
+
+    if (categoryChanged) setCategory(nextCategory);
+    if (tagChanged) setTag(nextTag);
+    if (categoryChanged || tagChanged) setPage(1);
+
+    const shouldStripInvalidCategory =
+      Boolean(nextCategoryRaw) && categorySlugSet.size > 0 && !categorySlugSet.has(nextCategoryRaw);
+    const shouldStripInvalidTag = Boolean(nextTagRaw) && tagSlugSet.size > 0 && !tagSlugSet.has(nextTagRaw);
+
+    if (shouldStripInvalidCategory || shouldStripInvalidTag) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (shouldStripInvalidCategory) next.delete("category");
+          if (shouldStripInvalidTag) next.delete("tag");
+          return next;
+        },
+        { replace: true }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, categorySlugSet, tagSlugSet]);
+
   useEffect(() => {
     loadPosts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,26 +162,36 @@ export const Articulos = () => {
     setCategory("");
     setTag("");
     setPage(1);
+    setSearchParams({}, { replace: true });
   };
 
   const handleCategoryChange = (slug) => {
     setCategory(slug);
     setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (slug) next.set("category", slug);
+    else next.delete("category");
+    setSearchParams(next, { replace: true });
   };
 
   const handleTagChange = (slug) => {
     setTag(slug);
     setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (slug) next.set("tag", slug);
+    else next.delete("tag");
+    setSearchParams(next, { replace: true });
   };
 
   return (
-    <main className="se-blog" role="main">
-      <section className="se-section">
+    <main className="se-blog se-articles" role="main">
+      <section className="se-section se-articles__hero" aria-label="Artículos">
         <div className="se-container">
-          <div className="se-page-head">
-            <h1 className="se-heading-section">Artículos</h1>
-            <p className="se-text-body">
-              Explorador editorial: filtra por categoría y tags para encontrar lecturas publicadas con criterio.
+          <div className="se-articles__head">
+            <p className="se-articles__kicker">Artículos</p>
+            <h1 className="se-articles__title">Explorador editorial</h1>
+            <p className="se-text-body se-articles__lead">
+              Filtra por categoría y tags para encontrar lecturas publicadas con criterio. Búsqueda rápida por título o resumen.
             </p>
           </div>
         </div>

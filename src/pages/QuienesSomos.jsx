@@ -1,14 +1,52 @@
 import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 
-const TeamSection = ({ title, members, defaultOpen }) => {
-  if (!members?.length) return null;
+const useInitialAccordionOpen = () => {
+  const [initiallyOpen, setInitiallyOpen] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia?.("(min-width: 960px)");
+    setInitiallyOpen(Boolean(mq?.matches));
+  }, []);
+  return initiallyOpen;
+};
+
+const BrandWordmark = () => {
   return (
-    <details className="se-about__acc" defaultOpen={defaultOpen}>
-      <summary className="se-about__acc-summary">
+    <span className="se-about__wordmark" aria-label={BRAND.name}>
+      <span className="se-about__wordmark-sur">Sur</span>
+      <span className="se-about__wordmark-e se-logomark-e" aria-hidden="true">
+        E
+      </span>
+      <span className="se-about__wordmark-rest">conomics</span>
+    </span>
+  );
+};
+
+const TeamSection = ({ title, members, initiallyOpen }) => {
+  const hasMembers = Boolean(members?.length);
+  const [open, setOpen] = useState(Boolean(initiallyOpen));
+  useEffect(() => {
+    setOpen(Boolean(initiallyOpen));
+  }, [initiallyOpen]);
+
+  if (!hasMembers) return null;
+
+  return (
+    <details
+      className="se-about__acc"
+      open={open}
+      onToggle={(e) => setOpen(Boolean(e.currentTarget.open))}
+    >
+      <summary className="se-about__acc-summary" aria-label={`Abrir sección ${title}`}>
         <span className="se-about__acc-title">{title}</span>
-        <span className="se-about__acc-meta">{members.length}</span>
+        <span className="se-about__acc-right">
+          <span className="se-about__acc-meta" aria-label={`${members.length} integrantes`}>
+            {members.length}
+          </span>
+          <span className="se-about__acc-chevron" aria-hidden="true" />
+        </span>
       </summary>
       <div className="se-about__acc-body">
         <div className="se-team-grid">
@@ -21,11 +59,31 @@ const TeamSection = ({ title, members, defaultOpen }) => {
   );
 };
 
+TeamSection.propTypes = {
+  title: PropTypes.string.isRequired,
+  members: PropTypes.arrayOf(PropTypes.object),
+  initiallyOpen: PropTypes.bool,
+};
+
 export const QuienesSomos = () => {
-  const defaultAccordionOpen = useMemo(() => {
-    if (typeof window === "undefined") return true;
-    return window.matchMedia("(min-width: 960px)").matches;
-  }, []);
+  const initiallyOpen = useInitialAccordionOpen();
+  const signals = useMemo(
+    () => [
+      {
+        title: "Investigación",
+        description: "Datos + contexto. Señales claras, sin ruido.",
+      },
+      {
+        title: "Lectura ejecutiva",
+        description: "Resúmenes y análisis para decidir con velocidad.",
+      },
+      {
+        title: "Red regional",
+        description: "Mirada LATAM con estándar global de verificación.",
+      },
+    ],
+    []
+  );
 
   return (
     <main className="se-blog se-about" role="main">
@@ -34,9 +92,11 @@ export const QuienesSomos = () => {
           <div className="se-about__hero-grid">
             <div className="se-about__hero-copy">
               <p className="se-about__kicker">Quiénes somos</p>
-              <h1 className="se-about__title">{BRAND.name}</h1>
+              <h1 className="se-about__title">
+                <BrandWordmark />
+              </h1>
               <p className="se-about__tagline">{BRAND.tagline}</p>
-              <p className="se-text-body se-about__desc">{INSTITUTIONAL.purpose}</p>
+              <p className="se-text-body se-about__desc">{BRAND.description}</p>
             </div>
             <div className="se-about__hero-aside" aria-hidden="true">
               <div className="se-about__hero-card">
@@ -50,6 +110,19 @@ export const QuienesSomos = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="se-section se-about__signals" aria-label="Señales editoriales">
+        <div className="se-container">
+          <div className="se-about__signals-grid">
+            {signals.map((s) => (
+              <article key={s.title} className="se-about__signal">
+                <h2 className="se-about__signal-title">{s.title}</h2>
+                <p className="se-about__signal-desc">{s.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -79,9 +152,7 @@ export const QuienesSomos = () => {
       <section className="se-section se-about__team">
         <div className="se-container">
           <header className="se-about__team-head">
-            <h2 className="se-heading-section" style={{ margin: 0 }}>
-              Equipo
-            </h2>
+            <h2 className="se-heading-section se-about__team-title">Equipo</h2>
             <p className="se-text-body se-about__team-lead">
               La estructura editorial y operativa detrás de Sur Economics.
             </p>
@@ -91,27 +162,27 @@ export const QuienesSomos = () => {
             <TeamSection
               title="Liderazgo / dirección editorial"
               members={TEAM.leadership}
-              defaultOpen={defaultAccordionOpen}
+              initiallyOpen={initiallyOpen}
             />
             <TeamSection
               title="Consejo Editorial"
               members={TEAM.editorialBoard}
-              defaultOpen={defaultAccordionOpen}
+              initiallyOpen={initiallyOpen}
             />
             <TeamSection
               title="Equipo operativo"
               members={TEAM.operational}
-              defaultOpen={defaultAccordionOpen}
+              initiallyOpen={initiallyOpen}
             />
             <TeamSection
               title="Colaboradores"
               members={TEAM.collaborators}
-              defaultOpen={defaultAccordionOpen}
+              initiallyOpen={initiallyOpen}
             />
             <TeamSection
               title="Equipo de investigación"
               members={TEAM.researchTeam}
-              defaultOpen={defaultAccordionOpen}
+              initiallyOpen={initiallyOpen}
             />
           </div>
         </div>

@@ -173,7 +173,7 @@ export const Article = () => {
     <main className="se-blog se-article" role="main">
       <article>
         <header className="se-article__header">
-          <div className="se-container se-container--narrow">
+          <div className="se-container">
             <span className="se-meta se-meta--category">{categoryLabel}</span>
             <h1 className="se-article__title">{post.title}</h1>
             <div className="se-article__meta">

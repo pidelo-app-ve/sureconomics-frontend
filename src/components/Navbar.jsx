@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
-import logoImg from "../assets/img/Positivo sin tagline@300x.png";
+import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
 import { useUserAuth } from "../context/UserAuthContext";
 
@@ -117,7 +117,18 @@ export const Navbar = () => {
           aria-label="Sur Economics - Inicio"
           onClick={closeMenu}
         >
-          <img src={logoImg} alt="Sur Economics" className="se-header__logo" />
+          <picture>
+            <source
+              media="(max-width: 520px)"
+              srcSet={BRAND_PUBLIC_LOGO.dark.wordmarkCompressed}
+            />
+            <img
+              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+              alt=""
+              className="se-header__logo"
+              decoding="async"
+            />
+          </picture>
         </Link>
 
         {/* Desktop nav — visible only from 992px up */}

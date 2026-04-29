@@ -1,21 +1,47 @@
 import { Link } from "react-router-dom";
 import { BRAND, PRIMARY_NAV, CONTACT } from "../data/surEconomicsMock";
+import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
+import { useState } from "react";
 
 export const Footer = () => {
   const { t } = useI18n();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterState, setNewsletterState] = useState({ status: "idle", message: "" });
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    if (newsletterState.status === "loading") return;
+    const email = newsletterEmail.trim();
+    if (!email) return;
+    setNewsletterState({ status: "loading", message: "" });
+    await new Promise((r) => setTimeout(r, 700));
+    setNewsletterState({ status: "success", message: "Listo. Te enviaremos el próximo boletín (demo)." });
+    setNewsletterEmail("");
+  };
 
   return (
     <footer className="se-footer" role="contentinfo">
       <div className="se-container">
         <div className="se-footer__grid">
           <div className="se-footer__about">
-            <h2 className="se-footer__brand">{BRAND.name}</h2>
+            <h2 className="se-footer__brand">
+              <img
+                className="se-footer__brand-mark"
+                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                alt=""
+                width={220}
+                height={48}
+                decoding="async"
+              />
+              <span className="se-sr-only">{BRAND.name}</span>
+            </h2>
             <p className="se-footer__tagline">{BRAND.tagline}</p>
             <p className="se-footer__description">{BRAND.description}</p>
           </div>
 
           <nav className="se-footer__nav" aria-label="Enlaces del sitio">
+            <div className="se-footer__contact-title">Navegación</div>
             <ul className="se-footer__nav-list">
               {PRIMARY_NAV.map((item) => (
                 <li key={item.id}>
@@ -32,15 +58,41 @@ export const Footer = () => {
             <a className="se-footer__link" href={`mailto:${CONTACT.primaryEmail}`}>
               {CONTACT.primaryEmail}
             </a>
-            <div className="se-footer__offices">
-              {CONTACT.offices.map((office) => (
-                <div key={office.city} className="se-footer__office">
-                  <span className="se-footer__office-city">{office.city}:</span>{" "}
-                  <span className="se-footer__office-address">
-                    {office.address}
-                  </span>
-                </div>
-              ))}
+          </div>
+
+          <div className="se-footer__newsletter" aria-label="Newsletter">
+            <div className="se-footer__contact-title">Newsletter</div>
+            <p className="se-footer__newsletter-text">
+              Reciba un resumen ejecutivo con señales y contexto. Una vez al mes.
+            </p>
+            <form className="se-footer__newsletter-form" onSubmit={handleNewsletterSubmit}>
+              <label className="se-sr-only" htmlFor="footer-newsletter-email">
+                Email
+              </label>
+              <input
+                id="footer-newsletter-email"
+                type="email"
+                className="se-footer__newsletter-input"
+                placeholder="Email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                disabled={newsletterState.status === "loading"}
+                required
+                aria-label="Email para newsletter"
+              />
+              <button
+                type="submit"
+                className="se-footer__newsletter-btn"
+                disabled={newsletterState.status === "loading"}
+                aria-label="Suscribirme al newsletter"
+              >
+                {newsletterState.status === "loading" ? "Enviando…" : "Suscribirme"}
+              </button>
+            </form>
+            <div className="se-footer__newsletter-status" aria-live="polite">
+              {newsletterState.status === "success" ? (
+                <p className="se-footer__newsletter-ok">{newsletterState.message}</p>
+              ) : null}
             </div>
           </div>
         </div>

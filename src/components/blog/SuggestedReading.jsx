@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useRef } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const SuggestedReading = ({ posts = [] }) => {
+  const sectionRef = useRef(null);
+  useRevealOnScroll(sectionRef);
+
   return (
-    <section className="se-suggested se-section" aria-labelledby="suggested-title">
+    <section
+      ref={sectionRef}
+      className="se-suggested se-section se-reveal se-reveal--stagger"
+      aria-labelledby="suggested-title"
+    >
       <div className="se-container">
         <h2 id="suggested-title" className="se-heading-section">
           También te puede interesar

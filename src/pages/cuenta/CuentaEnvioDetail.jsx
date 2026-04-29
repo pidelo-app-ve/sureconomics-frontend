@@ -274,9 +274,7 @@ export const CuentaEnvioDetail = () => {
               ))}
             </div>
           ) : (
-            <p className="se-text-body" style={{ margin: 0, color: "#64748b" }}>
-              Todavía no hay notas.
-            </p>
+            <p className="se-text-body se-submission-detail__notes-empty">Todavía no hay notas.</p>
           )
         ) : null}
 

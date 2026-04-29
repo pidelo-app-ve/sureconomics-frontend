@@ -22,14 +22,34 @@ export const Informes = () => {
   }, []);
 
   return (
-    <main className="se-blog" role="main">
-      <section className="se-hero se-hero--institutional">
+    <main className="se-blog se-reports" role="main">
+      <section className="se-hero se-hero--institutional se-reports__hero" aria-label="Informes y reportes">
         <div className="se-container">
-          <div className="se-institutional-hero">
-            <h1 className="se-heading-hero">Informes y reportes</h1>
-            <p className="se-text-lead se-hero__claim">
-              Investigación extensa con lectura ejecutiva: escenarios, riesgos y oportunidades para Latinoamérica.
-            </p>
+          <div className="se-reports__hero-grid">
+            <div className="se-reports__hero-copy">
+              <p className="se-reports__kicker">Informes</p>
+              <h1 className="se-reports__title">Investigación extensa con lectura ejecutiva</h1>
+              <p className="se-text-lead se-reports__lead">
+                Escenarios, riesgos y oportunidades para Latinoamérica. Una biblioteca pensada para tomadores de decisión.
+              </p>
+              <div className="se-reports__hero-cta">
+                <Link to="/suscribirse" className="se-btn" aria-label="Suscribirse">
+                  Suscribirse
+                </Link>
+                <Link to="/consultoria" className="se-btn se-btn--secondary" aria-label="Ver consultoría">
+                  Consultoría
+                </Link>
+              </div>
+            </div>
+
+            <aside className="se-reports__hero-panel" aria-label="Beneficios">
+              <p className="se-reports__panel-kicker">Incluye</p>
+              <ul className="se-reports__bullets" aria-label="Beneficios de la suscripción">
+                <li>Boletín mensual con síntesis accionable.</li>
+                <li>Informes por país/sector con estructura ejecutiva.</li>
+                <li>Lectura geopolítica y riesgos de mercado.</li>
+              </ul>
+            </aside>
           </div>
         </div>
       </section>
@@ -43,14 +63,19 @@ export const Informes = () => {
                 Nuestros informes integran análisis económico, financiero y de lectura política con una estructura pensada para tomadores de decisión. Cada reporte acompaña el “por qué”
                 y el “qué sigue”, orientando a inversionistas e institucionalidad.
               </p>
-              <ul className="se-compact-list">
-                <li>Investigaciones extensas en economía, finanzas y política.</li>
-                <li>Boletín mensual con síntesis accionable.</li>
-                <li>Oportunidades de inversión directa en Latinoamérica.</li>
-                <li>Acceso preferente para potenciales inversionistas.</li>
-                <li>Cursos con orientación práctica en economía y finanzas.</li>
-              </ul>
-              <div style={{ marginTop: "1.5rem" }}>
+              <div className="se-reports__signals" aria-label="Señales de valor">
+                {[
+                  { t: "Cobertura", d: "Economía, finanzas y política con contexto regional." },
+                  { t: "Estructura", d: "Marco, escenarios, riesgos y próximos pasos." },
+                  { t: "Acción", d: "Síntesis ejecutiva para decidir con criterio." },
+                ].map((s) => (
+                  <div key={s.t} className="se-reports__signal">
+                    <p className="se-reports__signal-title">{s.t}</p>
+                    <p className="se-reports__signal-desc">{s.d}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="se-reports__value-cta">
                 <Link to="/suscribirse" className="se-btn se-btn--secondary" aria-label="Ir a Suscripción">
                   Suscribirse
                 </Link>
@@ -83,14 +108,19 @@ export const Informes = () => {
 
       <section className="se-section se-section--narrow">
         <div className="se-container se-container--narrow">
-          <div className="se-research-cta">
-            <h2 className="se-heading-section">Una biblioteca para decisiones</h2>
-            <p className="se-text-body">
+          <div className="se-research-cta se-reports__cta">
+            <h2 className="se-heading-section se-reports__cta-title">Una biblioteca para decisiones</h2>
+            <p className="se-text-body se-reports__cta-text">
               {SUBSCRIPTION.benefits[0]} {SUBSCRIPTION.benefits[1]}
             </p>
-            <Link to="/suscribirse" className="se-btn" aria-label="Suscribirse">
-              Suscribirse
-            </Link>
+            <div className="se-reports__cta-actions">
+              <Link to="/suscribirse" className="se-btn" aria-label="Suscribirse">
+                Suscribirse
+              </Link>
+              <Link to="/contacto" className="se-btn se-btn--secondary" aria-label="Contactar">
+                Contacto institucional
+              </Link>
+            </div>
           </div>
         </div>
       </section>

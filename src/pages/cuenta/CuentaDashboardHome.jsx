@@ -4,6 +4,40 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import * as userMeService from "../../services/userMeService";
 
+const IconProfile = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.75" />
+    <path
+      d="M5.5 19.5c.9-3.2 3.4-5 6.5-5s5.6 1.8 6.5 5"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+const IconStar = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M12 4.2 14.1 9.2l5.5.8-4 3.9.9 5.4L12 16.9 7.5 19.3l.9-5.4-4-3.9 5.5-.8L12 4.2Z"
+      stroke="currentColor"
+      strokeWidth="1.65"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const IconSpark = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.9 2.9M15.5 15.5l2.9 2.9M5.6 18.4l2.9-2.9M15.5 8.5l2.9-2.9"
+      stroke="currentColor"
+      strokeWidth="1.65"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 export const CuentaDashboardHome = () => {
   const { profile, isEmailVerified, loadProfile } = useUserAuth();
   const [stats, setStats] = useState({
@@ -101,7 +135,7 @@ export const CuentaDashboardHome = () => {
       <section className="se-reader-home__cards" aria-label="Accesos rápidos">
         <Link to="/cuenta/perfil" className="se-reader-home__card se-reader-home__card--profile">
           <span className="se-reader-home__card-icon" aria-hidden="true">
-            ◎
+            <IconProfile />
           </span>
           <h2 className="se-reader-home__card-title">Mi perfil</h2>
           <p className="se-reader-home__card-desc">Datos de contacto y preferencias.</p>
@@ -110,7 +144,7 @@ export const CuentaDashboardHome = () => {
 
         <Link to="/cuenta/marcadores" className="se-reader-home__card se-reader-home__card--marks">
           <span className="se-reader-home__card-icon" aria-hidden="true">
-            ★
+            <IconStar />
           </span>
           <h2 className="se-reader-home__card-title">Marcadores</h2>
           <p className="se-reader-home__card-desc">
@@ -125,7 +159,7 @@ export const CuentaDashboardHome = () => {
 
         <Link to="/cuenta/envios" className="se-reader-home__card se-reader-home__card--subs">
           <span className="se-reader-home__card-icon" aria-hidden="true">
-            ✦
+            <IconSpark />
           </span>
           <h2 className="se-reader-home__card-title">Envíos</h2>
           <p className="se-reader-home__card-desc">

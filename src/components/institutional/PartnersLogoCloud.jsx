@@ -1,8 +1,13 @@
 import PropTypes from "prop-types";
+import { useRef } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const PartnersLogoCloud = ({ partners }) => {
+  const sectionRef = useRef(null);
+  useRevealOnScroll(sectionRef);
+
   return (
-    <section className="se-partners" aria-label="Partners y aliados">
+    <section ref={sectionRef} className="se-partners se-reveal se-reveal--stagger" aria-label="Partners y aliados">
       <div className="se-container">
         <div className="se-partners__head">
           <h2 className="se-heading-section">Aliados institucionales</h2>

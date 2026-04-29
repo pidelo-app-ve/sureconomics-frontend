@@ -12,12 +12,23 @@ import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { contentService } from "../services/contentService";
 import { applyPageMeta } from "../lib/seo";
-import { ErrorState, LoadingState } from "../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { HeadlinesSection } from "../components/home/HeadlinesSection";
+
+const shuffleInPlace = (arr) => {
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+};
 
 export const Home = () => {
   const [state, setState] = useState({ status: "idle", posts: [], error: null });
   const [headlinesState, setHeadlinesState] = useState({ status: "idle", headlines: [], error: null });
+  const [topicsState, setTopicsState] = useState({ status: "idle", items: [], error: null });
 
   const handleLoadHeadlines = async () => {
     setHeadlinesState({ status: "loading", headlines: [], error: null });
@@ -39,6 +50,19 @@ export const Home = () => {
     }
   };
 
+  const handleLoadTopics = async () => {
+    setTopicsState({ status: "loading", items: [], error: null });
+    try {
+      const all = await contentService.getCategories();
+      const usable = (all ?? []).filter((c) => c?.slug && c?.name);
+      const picked =
+        usable.length <= 10 ? usable : shuffleInPlace([...usable]).slice(0, 10);
+      setTopicsState({ status: "success", items: picked, error: null });
+    } catch (err) {
+      setTopicsState({ status: "error", items: [], error: err });
+    }
+  };
+
   useEffect(() => {
     applyPageMeta({
       title: `${BRAND.name} — Economía, mercados e inversión`,
@@ -49,6 +73,7 @@ export const Home = () => {
   useEffect(() => {
     handleLoad();
     handleLoadHeadlines();
+    handleLoadTopics();
   }, []);
 
   const derived = useMemo(() => {
@@ -87,7 +112,7 @@ export const Home = () => {
     <main className="se-blog" role="main">
       <Hero featuredPost={derived.hero} />
       <HeadlinesSection state={headlinesState} onRetry={handleLoadHeadlines} />
-      <section className="se-section">
+      <section className="se-section se-home__platform">
         <div className="se-container">
           <div className="se-two-col se-two-col--align-start">
             <div>
@@ -95,10 +120,10 @@ export const Home = () => {
               <p className="se-text-body">
                 {BRAND.description}
               </p>
-              <p className="se-text-body" style={{ marginTop: "1rem" }}>
+              <p className="se-text-body se-home__platform-sub">
                 {INSTITUTIONAL.purpose}
               </p>
-              <div style={{ marginTop: "1.5rem" }}>
+              <div className="se-home__platform-cta">
                 <Link to="/quienes-somos" className="se-link">
                   Conocer el proyecto
                 </Link>
@@ -153,22 +178,33 @@ export const Home = () => {
       <section className="se-section">
         <div className="se-container">
           <h2 className="se-heading-section">Temas clave</h2>
-          <ul className="se-topics" aria-label="Temas clave">
-            {[
-              "Inflación",
-              "Política monetaria",
-              "Mercados y flujos",
-              "Riesgo y volatilidad",
-              "Inversión en Latinoamérica",
-              "Geopolítica regional",
-              "Sector energía y transición",
-              "Consumo y crecimiento",
-            ].map((t) => (
-              <li key={t} className="se-topics__item">
-                <span className="se-topics__chip">{t}</span>
-              </li>
-            ))}
-          </ul>
+          {topicsState.status === "loading" ? (
+            <LoadingState title="Cargando categorías…" description="Obteniendo temas desde el servidor." />
+          ) : null}
+
+          {topicsState.status === "error" ? (
+            <ErrorState title="No pudimos cargar los temas" error={topicsState.error} onRetry={handleLoadTopics} />
+          ) : null}
+
+          {topicsState.status === "success" && topicsState.items.length === 0 ? (
+            <EmptyState title="Sin categorías" description="No hay categorías disponibles para mostrar en este momento." />
+          ) : null}
+
+          {topicsState.status === "success" && topicsState.items.length ? (
+            <ul className="se-topics" aria-label="Temas clave">
+              {topicsState.items.map((c) => (
+                <li key={c.slug} className="se-topics__item">
+                  <Link
+                    className="se-topics__chip"
+                    to={`/articulos?category=${encodeURIComponent(c.slug)}`}
+                    aria-label={`Ver artículos en la categoría ${c.name}`}
+                  >
+                    {c.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </section>
 

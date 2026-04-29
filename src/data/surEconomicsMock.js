@@ -42,7 +42,7 @@ export const TEAM = {
       summary:
         "Lidera la dirección editorial y la línea de investigación del medio. Enfoque en rigor, claridad y mirada regional.",
       cvUrl: "#",
-      email: "editor@su-reconomics.example",
+      email: "odoval@rendigroup.com",
       links: [],
     },
     {
@@ -52,7 +52,7 @@ export const TEAM = {
       summary:
         "Supervisa el marco financiero y el acompañamiento institucional. Aporta visión estratégica para proyectos de inteligencia e inversión.",
       cvUrl: "#",
-      email: "finanzas@su-reconomics.example",
+      email: "",
       links: [],
     },
     {
@@ -62,12 +62,12 @@ export const TEAM = {
       summary:
         "Conecta la operación editorial y el componente comercial con una metodología orientada a valor para aliados e inversionistas.",
       cvUrl: "#",
-      email: "operaciones@su-reconomics.example",
+      email: "jpaz@rendigroup.com",
       links: [],
     },
   ],
   editorialBoard: [
-    { id: "consejo-oscar-doval", name: "Oscar Doval", role: "Consejo Editorial", summary: "Rigor y criterio editorial.", cvUrl: "#", email: "consejo@su-reconomics.example", links: [] },
+    { id: "consejo-oscar-doval", name: "Oscar Doval", role: "Consejo Editorial", summary: "Rigor y criterio editorial.", cvUrl: "#", email: "odoval@rendigroup.com", links: [] },
     {
       id: "consejo-pablo-quintero",
       name: "Pablo Quintero",
@@ -75,7 +75,7 @@ export const TEAM = {
       summary:
         "Politólogo (Universidad Central de Venezuela). Consultor político, asesor en comunicación y asuntos corporativos. Socio director de LOG Consultancy.",
       cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
-      email: "pablo.quintero@su-reconomics.example",
+      email: "",
       links: [],
     },
     {
@@ -85,7 +85,7 @@ export const TEAM = {
       summary:
         "Economista (Universidad Católica Andrés Bello). Consultor del Banco de Desarrollo de América Latina (CAF).",
       cvUrl: "#",
-      email: "juan.paz@su-reconomics.example",
+      email: "jpaz@rendigroup.com",
       links: [],
     },
   ],
@@ -96,7 +96,7 @@ export const TEAM = {
       role: "Mercadeo y diseño",
       summary: "Ejecución creativa con foco en claridad y consistencia.",
       cvUrl: "#",
-      email: "ariana@su-reconomics.example",
+      email: "",
       links: [],
     },
     {
@@ -105,7 +105,7 @@ export const TEAM = {
       role: "Mercadeo y diseño",
       summary: "Dirección de contenido y estrategia de experiencia editorial.",
       cvUrl: "#",
-      email: "maria.fernanda@su-reconomics.example",
+      email: "",
       links: [],
     },
     {
@@ -114,7 +114,7 @@ export const TEAM = {
       role: "TI",
       summary: "Soporte tecnológico y evolución del producto.",
       cvUrl: "#",
-      email: "ti@su-reconomics.example",
+      email: "",
       links: [],
     },
   ],
@@ -142,7 +142,7 @@ export const TEAM = {
       summary:
         "Estudios de administración y finanzas de la Universidad Católica. Director de Invicto Capital.",
       cvUrl: "#",
-      email: "",
+      email: "lramirez@rendigroup.com",
       links: [],
     },
     {
@@ -158,7 +158,7 @@ export const TEAM = {
     },
   ],
   researchTeam: [
-    { id: "res-juan-francisco-paz", name: "Juan Francisco Paz", role: "Equipo de Investigación", summary: "Líneas de investigación y coordinación.", cvUrl: "#", email: "", links: [] },
+    { id: "res-juan-francisco-paz", name: "Juan Francisco Paz", role: "Equipo de Investigación", summary: "Líneas de investigación y coordinación.", cvUrl: "#", email: "jpaz@rendigroup.com", links: [] },
     { id: "res-sofia-venavidez", name: "Sofía Venavidez", role: "Equipo de Investigación", summary: "Análisis y recopilación de datos.", cvUrl: "#", email: "", links: [] },
     { id: "res-cesar-guillen", name: "César Guillén", role: "Equipo de Investigación", summary: "Estructuración de informes.", cvUrl: "#", email: "", links: [] },
     { id: "res-alessandro-ferrara", name: "Alessandro Ferrara", role: "Equipo de Investigación", summary: "Investigación comparada.", cvUrl: "#", email: "", links: [] },
@@ -180,10 +180,10 @@ export const INSTITUTIONAL = {
 };
 
 export const CONTACT = {
-  primaryEmail: "contacto@su-reconomics.example",
+  primaryEmail: "odoval@rendigroup.com",
   leadershipEmails: [
-    { name: "Juan Francisco Paz", email: "juan.paz@su-reconomics.example" },
-    { name: "Oscar Doval", email: "editor@su-reconomics.example" },
+    { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
+    { name: "Leonardo Ramírez", email: "lramirez@rendigroup.com" },
   ],
   offices: [
     { city: "Miami", address: "Dirección próximamente" },

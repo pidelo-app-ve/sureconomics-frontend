@@ -66,7 +66,7 @@ export const Contacto = () => {
                     />
                   </label>
                   <label className="se-form-field">
-                    <span className="se-form-label">Email</span>
+                    <span className="se-form-label">Correo electrónico</span>
                     <input
                       type="email"
                       className="se-form-control"

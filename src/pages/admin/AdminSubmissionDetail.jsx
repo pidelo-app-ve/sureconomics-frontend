@@ -34,7 +34,7 @@ export const AdminSubmissionDetail = () => {
   const [row, setRow] = useState(null);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
   const [status, setStatus] = useState("pending");
-  const [saveState, setSaveState] = useState({ status: "idle", error: null });
+  const [saveState, setSaveState] = useState({ status: "idle", error: null, message: "", publishedSlug: null });
   const [notesPage, setNotesPage] = useState(1);
   const [notesState, setNotesState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [newNote, setNewNote] = useState("");
@@ -42,6 +42,7 @@ export const AdminSubmissionDetail = () => {
   const [editing, setEditing] = useState({ noteId: null, value: "" });
   const [updateState, setUpdateState] = useState({ status: "idle", error: null });
   const [deleteState, setDeleteState] = useState({ status: "idle", error: null, noteId: null });
+  const [notesFeedback, setNotesFeedback] = useState({ status: "idle", message: "" });
   const [featuredImageFailed, setFeaturedImageFailed] = useState(false);
   const [authorUser, setAuthorUser] = useState(null);
   const [authorUserLoad, setAuthorUserLoad] = useState({ status: "idle", error: null });
@@ -151,17 +152,26 @@ export const AdminSubmissionDetail = () => {
         error: new Error(
           "Solo se puede guardar como En revisión, Aceptado o Rechazado. Elija uno de esos estados para aplicar la transición en el servidor."
         ),
+        message: "",
+        publishedSlug: null,
       });
       return;
     }
-    setSaveState({ status: "loading", error: null });
+    setSaveState({ status: "loading", error: null, message: "", publishedSlug: null });
     try {
       const updated = await applyAdminSubmissionWorkflow(numericId, normalized);
       setRow(updated);
-      setStatus(normalizeStatusForSelect(adminPick(updated, ["status"], normalized) || normalized));
-      setSaveState({ status: "success", error: null });
+      const newStatus = adminPick(updated, ["status"], normalized) || normalized;
+      setStatus(normalizeStatusForSelect(newStatus));
+      const message =
+        normalized === "accepted"
+          ? "Estado cambiado a Aprobado. El artículo se publicó correctamente."
+          : `Estado cambiado a ${submissionStatusLabel(normalized === "under_review" ? "under_review" : "rejected")}.`;
+      const publishedSlug =
+        normalized === "accepted" ? adminPick(updated, ["published_post_slug"], null) : null;
+      setSaveState({ status: "success", error: null, message, publishedSlug: publishedSlug || null });
     } catch (err) {
-      setSaveState({ status: "error", error: err });
+      setSaveState({ status: "error", error: err, message: "", publishedSlug: null });
     }
   };
 
@@ -172,11 +182,13 @@ export const AdminSubmissionDetail = () => {
     if (!trimmed) return;
 
     setCreateState({ status: "loading", error: null });
+    setNotesFeedback({ status: "idle", message: "" });
     try {
       await createAdminSubmissionNote(numericId, { note: trimmed });
       setNewNote("");
       setCreateState({ status: "success", error: null });
       await loadNotes();
+      setNotesFeedback({ status: "success", message: "Nota agregada correctamente." });
     } catch (err) {
       setCreateState({ status: "error", error: err });
     }
@@ -199,11 +211,13 @@ export const AdminSubmissionDetail = () => {
     if (!trimmed) return;
 
     setUpdateState({ status: "loading", error: null });
+    setNotesFeedback({ status: "idle", message: "" });
     try {
       await patchAdminSubmissionNote(numericId, editing.noteId, { note: trimmed });
       setUpdateState({ status: "success", error: null });
       setEditing({ noteId: null, value: "" });
       await loadNotes();
+      setNotesFeedback({ status: "success", message: "Nota actualizada correctamente." });
     } catch (err) {
       setUpdateState({ status: "error", error: err });
     }
@@ -211,6 +225,7 @@ export const AdminSubmissionDetail = () => {
 
   const handleDeleteNote = async (noteId) => {
     if (!numericId || !noteId) return;
+    setNotesFeedback({ status: "idle", message: "" });
     const ok = await confirm({
       title: "Eliminar nota",
       description: `¿Eliminar esta nota (ID ${noteId})?`,
@@ -219,6 +234,7 @@ export const AdminSubmissionDetail = () => {
         setDeleteState({ status: "loading", error: null, noteId });
         await deleteAdminSubmissionNote(numericId, noteId);
         setDeleteState({ status: "success", error: null, noteId: null });
+        setNotesFeedback({ status: "success", message: "Nota eliminada correctamente." });
         if (editing.noteId === noteId) {
           setEditing({ noteId: null, value: "" });
         }
@@ -397,7 +413,15 @@ export const AdminSubmissionDetail = () => {
             ) : null}
             {saveState.status === "success" ? (
               <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
-                Estado actualizado.
+                {saveState.message || "Estado actualizado."}
+                {saveState.publishedSlug ? (
+                  <>
+                    {" "}
+                    <Link to={`/articulo/${encodeURIComponent(saveState.publishedSlug)}`} className="se-link">
+                      Ver artículo publicado
+                    </Link>
+                  </>
+                ) : null}
               </p>
             ) : null}
 
@@ -420,6 +444,11 @@ export const AdminSubmissionDetail = () => {
 
       <section className="se-admin-submission-detail__notes-panel" aria-label="Notas del envío">
         <h2 className="se-admin-submission-detail__notes-title">Notas del envío</h2>
+        {notesFeedback.status === "success" ? (
+          <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+            {notesFeedback.message}
+          </p>
+        ) : null}
         {!(notesState.status === "success" && notesState.items.length > 0) ? (
           <p className="se-admin-submission-detail__notes-lead">
             Añada o edite notas asociadas a este envío; el autor las consulta desde su cuenta. Use la paginación si la

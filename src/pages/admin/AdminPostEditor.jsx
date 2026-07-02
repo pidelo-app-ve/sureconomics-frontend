@@ -13,6 +13,7 @@ import {
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 
 const emptyForm = () => ({
     title: "",
@@ -124,9 +125,10 @@ export const AdminPostEditor = () => {
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
-    const [saveState, setSaveState] = useState({ status: "idle", error: null });
-    const [actionError, setActionError] = useState(null);
+    const [saveState, setSaveState] = useState({ status: "idle", error: null, message: "" });
+    const [actionState, setActionState] = useState({ status: "idle", error: null, message: "", kind: "" });
     const { confirm, ConfirmDialog } = useAdminConfirm();
+    const flash = useFlashMessage();
 
     const numericPostId = useMemo(() => {
         if (!postId) return null;
@@ -190,8 +192,8 @@ export const AdminPostEditor = () => {
     };
 
     const handleSave = async () => {
-        setSaveState({ status: "loading", error: null });
-        setActionError(null);
+        setSaveState({ status: "loading", error: null, message: "" });
+        setActionState({ status: "idle", error: null, message: "" });
         try {
             const payload = formToPayload(form);
             if (isCreate) {
@@ -203,52 +205,65 @@ export const AdminPostEditor = () => {
                         ? created.data?.id
                         : null);
                 if (newId != null) {
-                    navigate(`/admin/posts/${newId}`, { replace: true });
+                    navigate(`/admin/posts/${newId}`, {
+                        replace: true,
+                        state: { flash: "Artículo creado correctamente." },
+                    });
                 } else {
-                    navigate("/admin/posts", { replace: true });
+                    navigate("/admin/posts", {
+                        replace: true,
+                        state: { flash: "Artículo creado correctamente." },
+                    });
                 }
                 return;
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
-            setSaveState({ status: "success", error: null });
+            setSaveState({ status: "success", error: null, message: "Cambios guardados correctamente." });
         } catch (err) {
-            setSaveState({ status: "error", error: err });
+            setSaveState({ status: "error", error: err, message: "" });
         }
     };
 
     const handlePublish = async () => {
         if (isCreate) return;
-        setActionError(null);
+        setSaveState({ status: "idle", error: null, message: "" });
+        setActionState({ status: "loading", error: null, message: "", kind: "publish" });
         try {
             const updated = await publishAdminPost(numericPostId);
             setForm(postToForm(updated));
+            setActionState({ status: "success", error: null, message: "Artículo publicado correctamente.", kind: "publish" });
         } catch (err) {
-            setActionError(err);
+            setActionState({ status: "error", error: err, message: "", kind: "publish" });
         }
     };
 
     const handleUnpublish = async () => {
         if (isCreate) return;
-        setActionError(null);
+        setSaveState({ status: "idle", error: null, message: "" });
+        setActionState({ status: "loading", error: null, message: "", kind: "unpublish" });
         try {
             const updated = await unpublishAdminPost(numericPostId);
             setForm(postToForm(updated));
+            setActionState({ status: "success", error: null, message: "Artículo despublicado correctamente.", kind: "unpublish" });
         } catch (err) {
-            setActionError(err);
+            setActionState({ status: "error", error: err, message: "", kind: "unpublish" });
         }
     };
 
     const handleDelete = async () => {
         if (isCreate) return;
-        setActionError(null);
+        setActionState({ status: "idle", error: null, message: "", kind: "" });
         await confirm({
             title: "Eliminar artículo",
             description: `¿Eliminar este artículo (ID ${numericPostId}) de forma permanente?`,
             confirmLabel: "Eliminar artículo",
             onConfirm: async () => {
                 await deleteAdminPost(numericPostId);
-                navigate("/admin/posts", { replace: true });
+                navigate("/admin/posts", {
+                    replace: true,
+                    state: { flash: "Artículo eliminado correctamente." },
+                });
             },
         });
     };
@@ -298,14 +313,29 @@ export const AdminPostEditor = () => {
                 </Link>
             </header>
 
+            {flash ? (
+                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+                    {flash}
+                </p>
+            ) : null}
             {saveState.status === "error" ? (
                 <p className="se-admin-login__error" role="alert">
                     {formatActionError(saveState.error)}
                 </p>
             ) : null}
-            {actionError ? (
+            {saveState.status === "success" ? (
+                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+                    {saveState.message}
+                </p>
+            ) : null}
+            {actionState.status === "error" ? (
                 <p className="se-admin-login__error" role="alert">
-                    {formatActionError(actionError)}
+                    {formatActionError(actionState.error)}
+                </p>
+            ) : null}
+            {actionState.status === "success" ? (
+                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+                    {actionState.message}
                 </p>
             ) : null}
 
@@ -340,8 +370,8 @@ export const AdminPostEditor = () => {
                         {form.status && !["draft", "published"].includes(form.status) ? (
                             <option value={form.status}>{form.status}</option>
                         ) : null}
-                        <option value="draft">draft</option>
-                        <option value="published">published</option>
+                        <option value="draft">Borrador</option>
+                        <option value="published">Publicado</option>
                     </select>
                 </label>
                 <label className="se-form-field" htmlFor="post-published-at">
@@ -437,10 +467,10 @@ export const AdminPostEditor = () => {
                 </fieldset>
 
                 <fieldset className="se-form-field">
-                    <legend className="se-form-label">Tags</legend>
+                    <legend className="se-form-label">Etiquetas</legend>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "220px", overflowY: "auto" }}>
                         {tags.length === 0 ? (
-                            <span className="se-text-body">No se pudieron cargar tags.</span>
+                            <span className="se-text-body">No se pudieron cargar etiquetas.</span>
                         ) : (
                             tags.map((t) => {
                                 const id = t.id ?? t._id;
@@ -468,11 +498,21 @@ export const AdminPostEditor = () => {
                     </button>
                     {!isCreate ? (
                         <>
-                            <button type="button" className="se-btn se-btn--secondary" onClick={handlePublish}>
-                                Publicar
+                            <button
+                                type="button"
+                                className="se-btn se-btn--secondary"
+                                onClick={handlePublish}
+                                disabled={actionState.status === "loading"}
+                            >
+                                {actionState.status === "loading" && actionState.kind === "publish" ? "Publicando…" : "Publicar"}
                             </button>
-                            <button type="button" className="se-btn se-btn--secondary" onClick={handleUnpublish}>
-                                Despublicar
+                            <button
+                                type="button"
+                                className="se-btn se-btn--secondary"
+                                onClick={handleUnpublish}
+                                disabled={actionState.status === "loading"}
+                            >
+                                {actionState.status === "loading" && actionState.kind === "unpublish" ? "Despublicando…" : "Despublicar"}
                             </button>
                             <button type="button" className="se-btn se-btn--secondary" onClick={handleDelete}>
                                 Eliminar

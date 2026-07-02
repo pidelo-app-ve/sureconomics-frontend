@@ -81,7 +81,7 @@ export const SubmissionForm = ({
           </label>
 
           <label className="se-form-field" htmlFor="submission-image">
-            <span className="se-form-label">URL de imagen destacada (opcional)</span>
+            <span className="se-form-label">URL de imagen destacada</span>
             <input
               id="submission-image"
               name="featured_image_url"
@@ -89,6 +89,7 @@ export const SubmissionForm = ({
               className="se-form-control"
               value={values.featuredImageUrl}
               onChange={handleFieldChange("featuredImageUrl")}
+              required
               disabled={isSubmitting}
             />
           </label>

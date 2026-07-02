@@ -5788,6 +5788,10 @@ a.se-topics__chip:focus-visible {
   border-bottom: none;
 }
 
+.se-admin-table__actions {
+  white-space: nowrap;
+}
+
 /* —— Admin: listado de envíos colaborativos (toolbar, chips, pills, cards) —— */
 .se-admin-submissions {
   max-width: 100%;
@@ -5841,9 +5845,9 @@ a.se-topics__chip:focus-visible {
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.2;
-  color: var(--se-gray-700);
-  background: #fff;
-  border: 1px solid rgba(15, 18, 24, 0.1);
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   cursor: pointer;
   transition:
@@ -5855,13 +5859,14 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-submissions__chip:hover {
-  border-color: rgba(109, 156, 248, 0.45);
-  color: var(--se-gray-900);
-  box-shadow: 0 2px 10px rgba(15, 18, 24, 0.06);
+  border-color: var(--adm-accent-soft);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .se-admin-submissions__chip:focus-visible {
-  outline: 2px solid rgba(109, 156, 248, 0.7);
+  outline: 2px solid var(--adm-accent-soft);
   outline-offset: 2px;
 }
 
@@ -5871,14 +5876,15 @@ a.se-topics__chip:focus-visible {
 
 .se-admin-submissions__chip--active {
   color: #fff;
-  background: linear-gradient(135deg, #4f6ae8 0%, #3d52c9 100%);
+  background: linear-gradient(135deg, var(--adm-red) 0%, #b52d2d 100%);
   border-color: transparent;
-  box-shadow: 0 4px 14px rgba(79, 106, 232, 0.35);
+  box-shadow: 0 4px 14px rgba(232, 64, 64, 0.35);
 }
 
 .se-admin-submissions__chip--active:hover {
   color: #fff;
   border-color: transparent;
+  background: linear-gradient(135deg, #ef5252 0%, #c23a3a 100%);
 }
 
 .se-admin-submissions__meta-bar {
@@ -5952,6 +5958,41 @@ a.se-topics__chip:focus-visible {
   color: #1e3a8a;
 }
 
+/* —— Generic status pill (posts/headlines/comments list tables) —— */
+.se-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.65rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-transform: none;
+}
+
+.se-status-pill--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.se-status-pill--positive {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.se-status-pill--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.se-status-pill--negative {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
 .se-admin-submissions__id {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.78rem;
@@ -5972,7 +6013,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-submissions__title-link:hover {
-  color: #3d52c9;
+  color: #ffb4b4;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -6068,7 +6109,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-submissions__card-title a:hover {
-  color: #3d52c9;
+  color: #ffb4b4;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -6256,6 +6297,30 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-app .se-admin-submissions__status--rejected {
+  background: rgba(255, 77, 109, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 77, 109, 0.28);
+}
+
+.se-admin-app .se-status-pill--neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.se-admin-app .se-status-pill--positive {
+  background: rgba(34, 197, 94, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.se-admin-app .se-status-pill--warning {
+  background: rgba(250, 204, 21, 0.14);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(250, 204, 21, 0.28);
+}
+
+.se-admin-app .se-status-pill--negative {
   background: rgba(255, 77, 109, 0.12);
   color: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 77, 109, 0.28);

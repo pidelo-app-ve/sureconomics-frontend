@@ -277,15 +277,15 @@ export const ArticlesFiltersLite = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-tag">
-            Tag
+            Etiqueta
           </label>
           <FilterSelect
             id="filter-tag"
-            ariaLabel="Tag"
+            ariaLabel="Etiqueta"
             value={tag}
             onChange={onTagChange}
             options={tagOptions.map((t) => ({ value: t.value, label: t.label }))}
-            placeholderLabel="Seleccionar tag"
+            placeholderLabel="Seleccionar etiqueta"
             emptyLabel="Todos"
           />
         </div>

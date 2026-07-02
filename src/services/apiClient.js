@@ -56,7 +56,7 @@ export const createApiClient = ({
   if (!resolvedBaseUrl) {
     // Fail fast to avoid silent requests to current origin.
     // Consumers can catch this and show a readable error state.
-    throw new ApiError("Missing API base URL. Set VITE_API_URL in your .env.", { status: 0 });
+    throw new ApiError("Falta la URL base de la API. Defina VITE_API_URL en su .env.", { status: 0 });
   }
 
   /**
@@ -96,7 +96,7 @@ export const createApiClient = ({
       const message =
         (payload && (payload.message || payload.error?.message)) ||
         res.statusText ||
-        "Request failed";
+        "Error en la solicitud";
       throw new ApiError(String(message), {
         status: res.status,
         code: payload?.error?.code,
@@ -106,8 +106,8 @@ export const createApiClient = ({
     }
 
     if (payload && payload.success === false) {
-      const err = payload.error ?? { message: "Request failed" };
-      throw new ApiError(typeof err.message === "string" ? err.message : "Request failed", {
+      const err = payload.error ?? { message: "Error en la solicitud" };
+      throw new ApiError(typeof err.message === "string" ? err.message : "Error en la solicitud", {
         status: res.status,
         code: err.code,
         details: err.details ?? payload,

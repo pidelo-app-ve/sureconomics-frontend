@@ -65,7 +65,10 @@ export const CuentaEnvioEditar = () => {
         content: values.content,
         featured_image_url: values.featuredImageUrl ? values.featuredImageUrl : null,
       });
-      navigate(`/cuenta/envios/${encodeURIComponent(safeId)}`, { replace: true });
+      navigate(`/cuenta/envios/${encodeURIComponent(safeId)}`, {
+        replace: true,
+        state: { flash: "Envío actualizado correctamente." },
+      });
     } catch (err) {
       if (err?.status === 409 || err?.code === "invalid_submission_status") {
         setErrorMessage("Este envío ya no se puede editar porque cambió de estado.");

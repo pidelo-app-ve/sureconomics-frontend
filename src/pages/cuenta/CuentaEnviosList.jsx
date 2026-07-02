@@ -5,9 +5,12 @@ import { applyPageMeta } from "../../lib/seo";
 import * as userMeService from "../../services/userMeService";
 import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
+import { submissionStatusLabel } from "../../lib/submissionDisplay";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 
 export const CuentaEnviosList = () => {
   const { isEmailVerified } = useUserAuth();
+  const flash = useFlashMessage();
   const [state, setState] = useState({ status: "idle", data: null, error: null });
 
   const handleLoad = useCallback(async (page = 1) => {
@@ -79,6 +82,12 @@ export const CuentaEnviosList = () => {
         </Link>
       </header>
 
+      {flash ? (
+        <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+          {flash}
+        </p>
+      ) : null}
+
       {items.length === 0 ? (
         <div className="se-reader-empty se-reader-card">
           <p className="se-reader-empty__title">Sin envíos todavía</p>
@@ -96,7 +105,7 @@ export const CuentaEnviosList = () => {
                 <span className="se-reader-subs__main">
                   <span className="se-reader-subs__title">{s.title || `Envío ${s.id}`}</span>
                   <span className="se-reader-subs__meta">
-                    <span className="se-reader-subs__pill">{s.status || "—"}</span>
+                    <span className="se-reader-subs__pill">{s.status ? submissionStatusLabel(s.status) : "—"}</span>
                     {s.createdAt ? <span>{s.createdAt}</span> : null}
                   </span>
                 </span>

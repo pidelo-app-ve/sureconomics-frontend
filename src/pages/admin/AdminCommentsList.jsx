@@ -19,6 +19,13 @@ const STATUS_OPTIONS = [
   { value: "rejected", label: "Rechazado" },
 ];
 
+const STATUS_LABELS = { pending: "Pendiente", approved: "Aprobado", rejected: "Rechazado" };
+const STATUS_PILL_MODIFIERS = {
+  pending: "se-status-pill--warning",
+  approved: "se-status-pill--positive",
+  rejected: "se-status-pill--negative",
+};
+
 const pickFromObj = (obj, keys, fallback = "") => {
   if (!obj || typeof obj !== "object") return fallback;
   for (const key of keys) {
@@ -52,6 +59,7 @@ export const AdminCommentsList = () => {
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [actionId, setActionId] = useState(null);
   const [lookups, setLookups] = useState({ posts: {}, users: {} });
+  const [actionFeedback, setActionFeedback] = useState({ status: "idle", message: "", error: null });
   const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const load = useCallback(
@@ -121,11 +129,13 @@ export const AdminCommentsList = () => {
 
   const handleApprove = async (commentId) => {
     setActionId(commentId);
+    setActionFeedback({ status: "idle", message: "", error: null });
     try {
       await approveAdminComment(commentId);
       await load();
+      setActionFeedback({ status: "success", message: `Comentario #${commentId} aprobado correctamente.`, error: null });
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo aprobar.");
+      setActionFeedback({ status: "error", message: "", error: err });
     } finally {
       setActionId(null);
     }
@@ -133,11 +143,13 @@ export const AdminCommentsList = () => {
 
   const handleReject = async (commentId) => {
     setActionId(commentId);
+    setActionFeedback({ status: "idle", message: "", error: null });
     try {
       await rejectAdminComment(commentId);
       await load();
+      setActionFeedback({ status: "success", message: `Comentario #${commentId} rechazado correctamente.`, error: null });
     } catch (err) {
-      window.alert(err instanceof Error ? err.message : "No se pudo rechazar.");
+      setActionFeedback({ status: "error", message: "", error: err });
     } finally {
       setActionId(null);
     }
@@ -145,6 +157,7 @@ export const AdminCommentsList = () => {
 
   const handleDelete = async (id) => {
     setActionId(id);
+    setActionFeedback({ status: "idle", message: "", error: null });
     const ok = await confirm({
       title: "Eliminar comentario",
       description: `¿Eliminar este comentario (ID ${id}) de forma permanente?`,
@@ -152,6 +165,7 @@ export const AdminCommentsList = () => {
       onConfirm: async () => {
         await deleteAdminComment(id);
         await load();
+        setActionFeedback({ status: "success", message: `Comentario #${id} eliminado correctamente.`, error: null });
       },
     });
     if (!ok) {
@@ -213,6 +227,17 @@ export const AdminCommentsList = () => {
           Filtrar
         </button>
       </form>
+
+      {actionFeedback.status === "success" ? (
+        <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+          {actionFeedback.message}
+        </p>
+      ) : null}
+      {actionFeedback.status === "error" ? (
+        <p className="se-admin-login__error" role="alert">
+          {actionFeedback.error instanceof Error ? actionFeedback.error.message : "No se pudo completar la acción."}
+        </p>
+      ) : null}
 
       {state.status === "loading" ? <LoadingState title="Cargando comentarios…" /> : null}
       {state.status === "error" ? (
@@ -320,13 +345,17 @@ export const AdminCommentsList = () => {
                           ) : null}
                         </div>
                       </td>
-                      <td>{st}</td>
+                      <td>
+                        <span className={`se-status-pill ${STATUS_PILL_MODIFIERS[st] || "se-status-pill--neutral"}`}>
+                          {STATUS_LABELS[st] || st}
+                        </span>
+                      </td>
                       <td>
                         <span className="se-text-body" style={{ whiteSpace: "pre-wrap", fontSize: "0.9em" }}>
                           {excerpt}
                         </span>
                       </td>
-                      <td>
+                      <td className="se-admin-table__actions">
                         <button
                           type="button"
                           className="se-link se-header__nav-link--button"

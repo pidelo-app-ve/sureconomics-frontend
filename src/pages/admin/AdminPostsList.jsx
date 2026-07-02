@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listAdminPosts } from "../../services/adminPostsService";
+import { deleteAdminPost, listAdminPosts, publishAdminPost } from "../../services/adminPostsService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 
 const pick = (row, keys, fallback = "—") => {
     if (!row || typeof row !== "object") return fallback;
@@ -16,6 +18,10 @@ const pick = (row, keys, fallback = "—") => {
 export const AdminPostsList = () => {
     const [page, setPage] = useState(1);
     const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
+    const [actionId, setActionId] = useState(null);
+    const [actionFeedback, setActionFeedback] = useState({ status: "idle", message: "", error: null });
+    const { confirm, ConfirmDialog } = useAdminConfirm();
+    const flash = useFlashMessage();
 
     const load = useCallback(async () => {
         setState((s) => ({ ...s, status: "loading", error: null }));
@@ -38,6 +44,34 @@ export const AdminPostsList = () => {
         load();
     }, [load]);
 
+    const handlePublish = async (id, title) => {
+        setActionId(id);
+        setActionFeedback({ status: "idle", message: "", error: null });
+        try {
+            await publishAdminPost(id);
+            await load();
+            setActionFeedback({ status: "success", message: `«${title}» se publicó correctamente.`, error: null });
+        } catch (err) {
+            setActionFeedback({ status: "error", message: "", error: err });
+        } finally {
+            setActionId(null);
+        }
+    };
+
+    const handleDelete = async (id, title) => {
+        setActionFeedback({ status: "idle", message: "", error: null });
+        await confirm({
+            title: "Eliminar artículo",
+            description: `¿Eliminar el artículo «${title}» (ID ${id}) de forma permanente?`,
+            confirmLabel: "Eliminar artículo",
+            onConfirm: async () => {
+                await deleteAdminPost(id);
+                await load();
+                setActionFeedback({ status: "success", message: `«${title}» se eliminó correctamente.`, error: null });
+            },
+        });
+    };
+
     const meta = state.meta;
     const totalPages = meta?.pages ?? 1;
 
@@ -51,6 +85,22 @@ export const AdminPostsList = () => {
                     Nuevo artículo
                 </Link>
             </header>
+
+            {flash ? (
+                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+                    {flash}
+                </p>
+            ) : null}
+            {actionFeedback.status === "success" ? (
+                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+                    {actionFeedback.message}
+                </p>
+            ) : null}
+            {actionFeedback.status === "error" ? (
+                <p className="se-admin-login__error" role="alert">
+                    {actionFeedback.error instanceof Error ? actionFeedback.error.message : "No se pudo completar la acción."}
+                </p>
+            ) : null}
 
             {state.status === "loading" ? <LoadingState title="Cargando artículos…" /> : null}
             {state.status === "error" ? (
@@ -87,6 +137,7 @@ export const AdminPostsList = () => {
                                     const slug = pick(row, ["slug"], "");
                                     const title = pick(row, ["title"], "(sin título)");
                                     const status = pick(row, ["status", "publication_status", "state"], "—");
+                                    const busy = actionId === id;
                                     return (
                                         <tr key={id || slug || title}>
                                             <td>{id}</td>
@@ -94,11 +145,41 @@ export const AdminPostsList = () => {
                                             <td>
                                                 <code style={{ fontSize: "0.85em" }}>{slug}</code>
                                             </td>
-                                            <td>{status}</td>
                                             <td>
+                                                <span
+                                                    className={`se-status-pill ${
+                                                        status === "published" ? "se-status-pill--positive" : "se-status-pill--neutral"
+                                                    }`}
+                                                >
+                                                    {status === "published" ? "Publicado" : status === "draft" ? "Borrador" : status}
+                                                </span>
+                                            </td>
+                                            <td className="se-admin-table__actions">
                                                 <Link to={`/admin/posts/${id}`} className="se-link">
                                                     Editar
                                                 </Link>
+                                                {status !== "published" ? (
+                                                    <>
+                                                        {" · "}
+                                                        <button
+                                                            type="button"
+                                                            className="se-link se-header__nav-link--button"
+                                                            disabled={busy}
+                                                            onClick={() => handlePublish(id, title)}
+                                                        >
+                                                            {busy ? "Publicando…" : "Publicar"}
+                                                        </button>
+                                                    </>
+                                                ) : null}
+                                                {" · "}
+                                                <button
+                                                    type="button"
+                                                    className="se-link se-header__nav-link--button"
+                                                    disabled={busy}
+                                                    onClick={() => handleDelete(id, title)}
+                                                >
+                                                    Eliminar
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -109,6 +190,8 @@ export const AdminPostsList = () => {
                     <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
                 </>
             ) : null}
+
+            <ConfirmDialog />
         </main>
     );
 };

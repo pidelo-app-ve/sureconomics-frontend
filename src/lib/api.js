@@ -162,7 +162,7 @@ export const adminRequest = async (path, options = {}) => {
         });
 
     if (!readStoredAuth().accessToken) {
-        const err = new Error("Not authenticated");
+        const err = new Error("Debe iniciar sesión");
         err.status = 401;
         throw err;
     }
@@ -176,7 +176,7 @@ export const adminRequest = async (path, options = {}) => {
         } catch {
             clearStoredAuth();
             dispatchAdminAuthSync();
-            const err = new Error("Session expired");
+            const err = new Error("Sesión expirada");
             err.status = 401;
             throw err;
         }

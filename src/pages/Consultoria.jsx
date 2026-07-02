@@ -76,7 +76,11 @@ export const Consultoria = () => {
                     <p className="se-consulting__service-meta">Entregable · Confidencial · Executive-ready</p>
                     <h3 className="se-heading-card se-heading-card--small">{s.title}</h3>
                     <p className="se-card__excerpt se-text-body">{s.description}</p>
-                    <Link to="/contacto" className="se-btn se-consulting__service-cta" aria-label={`Solicitar conversación: ${s.title}`}>
+                    <Link
+                      to={`/contacto?asunto=${encodeURIComponent(s.title)}`}
+                      className="se-btn se-consulting__service-cta"
+                      aria-label={`Solicitar conversación: ${s.title}`}
+                    >
                       Solicitar conversación
                     </Link>
                   </div>

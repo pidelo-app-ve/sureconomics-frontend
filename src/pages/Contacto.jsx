@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { CONTACT } from "../data/surEconomicsMock";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { contactService } from "../services/contactService";
 
 export const Contacto = () => {
+  const [searchParams] = useSearchParams();
+  const prefilledSubject = searchParams.get("asunto") || "";
+
   const [form, setForm] = useState({
     name: "",
     email: "",
-    subject: "",
+    subject: prefilledSubject,
     message: "",
   });
   const [submitState, setSubmitState] = useState({ status: "idle", message: "" });
@@ -19,9 +23,19 @@ export const Contacto = () => {
     e.preventDefault();
     if (submitState.status === "loading") return;
     setSubmitState({ status: "loading", message: "" });
-    await new Promise((r) => setTimeout(r, 700));
-    setSubmitState({ status: "success", message: "Mensaje enviado (demo). En la próxima fase se conectará a backend." });
-    setForm({ name: "", email: "", subject: "", message: "" });
+    try {
+      await contactService.submitContactMessage(form);
+      setSubmitState({ status: "success", message: "Gracias por escribirnos. Le responderemos a la brevedad." });
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      const tooMany = err?.status === 429;
+      setSubmitState({
+        status: "error",
+        message: tooMany
+          ? "Demasiadas solicitudes. Intente de nuevo en unos minutos."
+          : "No se pudo enviar el mensaje. Intente de nuevo o escríbanos directamente por email.",
+      });
+    }
   };
 
   return (
@@ -51,6 +65,10 @@ export const Contacto = () => {
                   ) : submitState.status === "loading" ? (
                     <div className="se-contact__banner se-contact__banner--loading" role="status">
                       Enviando…
+                    </div>
+                  ) : submitState.status === "error" ? (
+                    <div className="se-contact__banner se-contact__banner--error" role="alert">
+                      {submitState.message}
                     </div>
                   ) : null}
                 </div>

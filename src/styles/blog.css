@@ -3435,6 +3435,12 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+.se-contact__banner--error {
+  border-color: rgba(255, 77, 109, 0.32);
+  background: rgba(230, 51, 41, 0.16);
+  color: #ffd6dc;
+}
+
 .se-contact__footer-links {
   margin-top: 1rem;
 }

@@ -35,11 +35,12 @@ export const CuentaEnviosNuevo = () => {
         created?.id ??
         created?.submission_id ??
         (created && typeof created === "object" && created.data && created.data.id);
+      const flashState = { flash: "Envío creado correctamente. Quedó a la espera de revisión." };
       if (id) {
-        navigate(`/cuenta/envios/${encodeURIComponent(id)}`, { replace: true });
+        navigate(`/cuenta/envios/${encodeURIComponent(id)}`, { replace: true, state: flashState });
         return;
       }
-      navigate("/cuenta/envios", { replace: true });
+      navigate("/cuenta/envios", { replace: true, state: flashState });
     } catch (err) {
       if (err?.status === 429) {
         setErrorMessage("Demasiadas solicitudes. Intente más tarde.");

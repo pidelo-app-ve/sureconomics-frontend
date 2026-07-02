@@ -5,6 +5,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";
 import * as userMeService from "../../services/userMeService";
 import { ErrorState, LoadingState, Pagination } from "../../components/content";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 
 const PencilIcon = () => (
   <svg className="se-submission-detail__edit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -28,6 +29,7 @@ const PencilIcon = () => (
 export const CuentaEnvioDetail = () => {
   const { id } = useParams();
   const { isEmailVerified } = useUserAuth();
+  const flash = useFlashMessage();
   const [state, setState] = useState({ status: "idle", submission: null, error: null });
   const [notesPage, setNotesPage] = useState(1);
   const [notesState, setNotesState] = useState({ status: "idle", items: [], meta: null, error: null });
@@ -147,6 +149,11 @@ export const CuentaEnvioDetail = () => {
           ← Mis envíos
         </Link>
       </p>
+      {flash ? (
+        <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+          {flash}
+        </p>
+      ) : null}
       <article className="se-reader-article se-reader-card">
         <header className="se-submission-detail__head">
           <div className="se-submission-detail__title-row">

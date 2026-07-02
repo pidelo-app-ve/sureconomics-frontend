@@ -5,11 +5,14 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 
 export const AdminTagsList = () => {
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
+  const [actionFeedback, setActionFeedback] = useState({ status: "idle", message: "", error: null });
   const { confirm, ConfirmDialog } = useAdminConfirm();
+  const flash = useFlashMessage();
 
   const load = useCallback(async () => {
     setState((s) => ({ ...s, status: "loading", error: null }));
@@ -30,6 +33,7 @@ export const AdminTagsList = () => {
   }, [load]);
 
   const handleDelete = async (id, name) => {
+    setActionFeedback({ status: "idle", message: "", error: null });
     await confirm({
       title: "Eliminar etiqueta",
       description: `¿Eliminar la etiqueta «${name}» (ID ${id})?`,
@@ -37,6 +41,7 @@ export const AdminTagsList = () => {
       onConfirm: async () => {
         await deleteAdminTag(id);
         await load();
+        setActionFeedback({ status: "success", message: `«${name}» se eliminó correctamente.`, error: null });
       },
     });
   };
@@ -54,6 +59,17 @@ export const AdminTagsList = () => {
           Nueva etiqueta
         </Link>
       </header>
+
+      {flash ? (
+        <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+          {flash}
+        </p>
+      ) : null}
+      {actionFeedback.status === "success" ? (
+        <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
+          {actionFeedback.message}
+        </p>
+      ) : null}
 
       {state.status === "loading" ? <LoadingState title="Cargando etiquetas…" /> : null}
       {state.status === "error" ? (
@@ -91,7 +107,7 @@ export const AdminTagsList = () => {
                       <td>
                         <code style={{ fontSize: "0.85em" }}>{slug}</code>
                       </td>
-                      <td>
+                      <td className="se-admin-table__actions">
                         <Link to={`/admin/tags/${tid}`} className="se-link">
                           Editar
                         </Link>

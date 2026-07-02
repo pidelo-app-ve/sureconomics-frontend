@@ -67,18 +67,18 @@ export const Footer = () => {
             </p>
             <form className="se-footer__newsletter-form" onSubmit={handleNewsletterSubmit}>
               <label className="se-sr-only" htmlFor="footer-newsletter-email">
-                Email
+                Correo electrónico
               </label>
               <input
                 id="footer-newsletter-email"
                 type="email"
                 className="se-footer__newsletter-input"
-                placeholder="Email"
+                placeholder="Correo electrónico"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 disabled={newsletterState.status === "loading"}
                 required
-                aria-label="Email para newsletter"
+                aria-label="Correo electrónico para newsletter"
               />
               <button
                 type="submit"

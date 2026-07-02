@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
-import { createAdminHeadline, getAdminHeadline, patchAdminHeadline } from "../../services/adminHeadlinesService";
+import {
+  createAdminHeadline,
+  deleteAdminHeadline,
+  getAdminHeadline,
+  patchAdminHeadline,
+} from "../../services/adminHeadlinesService";
 import { ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 const emptyForm = () => ({
   title: "",
@@ -14,12 +20,21 @@ const emptyForm = () => ({
   is_active: true,
 });
 
+/** `datetime-local` value in local time (API returns ISO8601). */
+const isoToDateTimeLocal = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
 const rowToForm = (row) => ({
   title: adminPick(row, ["title"], ""),
   summary: adminPick(row, ["summary", "excerpt"], ""),
   source_name: adminPick(row, ["source_name", "sourceName"], ""),
   source_url: adminPick(row, ["source_url", "sourceUrl"], ""),
-  published_at: adminPick(row, ["published_at", "publishedAt", "publishDate"], ""),
+  published_at: isoToDateTimeLocal(adminPick(row, ["published_at", "publishedAt", "publishDate"], "")),
   is_active: row?.is_active !== false && row?.isActive !== false,
 });
 
@@ -31,6 +46,7 @@ export const AdminHeadlineEditor = () => {
   const [form, setForm] = useState(emptyForm);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
   const [saveState, setSaveState] = useState({ status: "idle", error: null });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const numericId = useMemo(() => {
     if (!id) return null;
@@ -70,12 +86,17 @@ export const AdminHeadlineEditor = () => {
     e.preventDefault();
     setSaveState({ status: "loading", error: null });
     try {
+      let publishedAtIso;
+      if (form.published_at.trim()) {
+        const d = new Date(form.published_at);
+        publishedAtIso = Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+      }
       const body = {
         title: form.title.trim(),
         summary: form.summary.trim(),
         source_name: form.source_name.trim(),
         source_url: form.source_url.trim() || undefined,
-        published_at: form.published_at.trim() || undefined,
+        published_at: publishedAtIso,
         is_active: form.is_active,
       };
       if (isCreate) {
@@ -90,6 +111,22 @@ export const AdminHeadlineEditor = () => {
     } catch (err) {
       setSaveState({ status: "error", error: err });
     }
+  };
+
+  const handleDelete = async () => {
+    if (isCreate || !numericId) return;
+    await confirm({
+      title: "Eliminar titular",
+      description: `¿Eliminar el titular «${form.title || numericId}» de forma permanente?`,
+      confirmLabel: "Eliminar titular",
+      onConfirm: async () => {
+        await deleteAdminHeadline(numericId);
+        navigate("/admin/headlines", {
+          replace: true,
+          state: { flash: `«${form.title || numericId}» se eliminó correctamente.` },
+        });
+      },
+    });
   };
 
   if (loadState.status === "loading") {
@@ -171,11 +208,11 @@ export const AdminHeadlineEditor = () => {
           />
         </label>
         <label className="se-form-field" htmlFor="hl-date">
-          <span className="se-form-label">Fecha de publicación (ISO8601)</span>
+          <span className="se-form-label">Fecha de publicación</span>
           <input
             id="hl-date"
+            type="datetime-local"
             className="se-form-control"
-            placeholder="2026-04-20T12:00:00"
             value={form.published_at}
             onChange={(e) => setForm((p) => ({ ...p, published_at: e.target.value }))}
           />
@@ -193,8 +230,15 @@ export const AdminHeadlineEditor = () => {
           <button type="submit" className="se-btn" disabled={saveState.status === "loading"}>
             {saveState.status === "loading" ? "Guardando…" : "Guardar"}
           </button>
+          {!isCreate ? (
+            <button type="button" className="se-btn se-btn--secondary" onClick={handleDelete}>
+              Eliminar
+            </button>
+          ) : null}
         </div>
       </form>
+
+      <ConfirmDialog />
     </main>
   );
 };

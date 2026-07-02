@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   createAdminCategory,
+  deleteAdminCategory,
   getAdminCategory,
   patchAdminCategory,
 } from "../../services/adminTaxonomyService";
 import { ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 const emptyForm = () => ({ name: "", slug: "" });
 
@@ -24,6 +26,7 @@ export const AdminCategoryEditor = () => {
   const [form, setForm] = useState(emptyForm);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
   const [saveState, setSaveState] = useState({ status: "idle", error: null });
+  const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const numericId = useMemo(() => {
     if (!id) return null;
@@ -80,6 +83,22 @@ export const AdminCategoryEditor = () => {
     } catch (err) {
       setSaveState({ status: "error", error: err });
     }
+  };
+
+  const handleDelete = async () => {
+    if (isCreate || !numericId) return;
+    await confirm({
+      title: "Eliminar categoría",
+      description: `¿Eliminar la categoría «${form.name || numericId}» de forma permanente?`,
+      confirmLabel: "Eliminar categoría",
+      onConfirm: async () => {
+        await deleteAdminCategory(numericId);
+        navigate("/admin/categories", {
+          replace: true,
+          state: { flash: `«${form.name || numericId}» se eliminó correctamente.` },
+        });
+      },
+    });
   };
 
   if (loadState.status === "loading") {
@@ -139,8 +158,15 @@ export const AdminCategoryEditor = () => {
           <button type="submit" className="se-btn" disabled={saveState.status === "loading"}>
             {saveState.status === "loading" ? "Guardando…" : "Guardar"}
           </button>
+          {!isCreate ? (
+            <button type="button" className="se-btn se-btn--secondary" onClick={handleDelete}>
+              Eliminar
+            </button>
+          ) : null}
         </div>
       </form>
+
+      <ConfirmDialog />
     </main>
   );
 };

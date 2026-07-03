@@ -103,6 +103,23 @@ export const UserAuthProvider = ({ children }) => {
     [loadProfile, persistFromTokenResponse]
   );
 
+  const verifyEmail = useCallback(
+    async ({ email, code }) => {
+      const { tokens } = await userAuthService.verifyUserEmail({ email, code });
+      if (!tokens?.accessToken) {
+        return { authenticated: false };
+      }
+      persistFromTokenResponse(tokens);
+      try {
+        const me = await loadProfile();
+        return { authenticated: true, profile: me };
+      } catch (err) {
+        return { authenticated: true, profile: null, error: err };
+      }
+    },
+    [loadProfile, persistFromTokenResponse]
+  );
+
   const logout = useCallback(async () => {
     await userAuthService.logoutUserRemote();
     clearUserAuth();
@@ -128,6 +145,7 @@ export const UserAuthProvider = ({ children }) => {
       profileStatus,
       login,
       register,
+      verifyEmail,
       logout,
       loadProfile,
       refreshSession,
@@ -139,6 +157,7 @@ export const UserAuthProvider = ({ children }) => {
       profileStatus,
       login,
       register,
+      verifyEmail,
       logout,
       loadProfile,
       refreshSession,

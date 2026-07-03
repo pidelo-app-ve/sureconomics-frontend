@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
-import * as userAuthService from "../../services/userAuthService";
 import { applyPageMeta } from "../../lib/seo";
 
 export const CuentaVerificarEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, loadProfile } = useUserAuth();
+  const { isAuthenticated, verifyEmail } = useUserAuth();
   const [email, setEmail] = useState(location.state?.email ?? "");
   const [code, setCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,18 +27,14 @@ export const CuentaVerificarEmail = () => {
     setInfoMessage("");
     setIsSubmitting(true);
     try {
-      await userAuthService.verifyUserEmail({ email, code });
-      setInfoMessage("Correo verificado. Actualizando sesión…");
-      if (isAuthenticated) {
-        try {
-          await loadProfile();
-        } catch {
-          /* ignore */
-        }
-        navigate("/", { replace: true });
-      } else {
-        navigate("/cuenta/entrar", { replace: true, state: { email, verified: true } });
+      const result = await verifyEmail({ email, code });
+      if (result.authenticated) {
+        setInfoMessage("Correo verificado. Redirigiendo…");
+        navigate("/cuenta", { replace: true });
+        return;
       }
+      setInfoMessage("Correo verificado.");
+      navigate("/cuenta/entrar", { replace: true, state: { email, verified: true } });
     } catch (err) {
       if (err?.status === 429) {
         setErrorMessage("Demasiados intentos. Espere unos minutos e inténtelo de nuevo.");

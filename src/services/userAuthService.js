@@ -115,11 +115,13 @@ export const loginUser = async (email, password) => {
   return { data, tokens: pickTokens(data) };
 };
 
-export const verifyUserEmail = async ({ email, code }) =>
-  userPublicRequest("/user-auth/verify-email", {
+export const verifyUserEmail = async ({ email, code }) => {
+  const data = await userPublicRequest("/user-auth/verify-email", {
     method: "POST",
     json: { email, code },
   });
+  return { data, tokens: pickTokens(data) };
+};
 
 export const resendVerificationCode = async ({ email }) =>
   userPublicRequest("/user-auth/resend-verification-code", {

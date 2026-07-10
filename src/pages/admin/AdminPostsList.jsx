@@ -36,7 +36,7 @@ export const AdminPostsList = () => {
     useEffect(() => {
         applyPageMeta({
             title: "Admin — Artículos",
-            description: "Gestión de artículos (Sur Economics).",
+            description: "Gestión de artículos (SurEconomics).",
         });
     }, []);
 

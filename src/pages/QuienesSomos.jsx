@@ -71,15 +71,15 @@ export const QuienesSomos = () => {
     () => [
       {
         title: "Investigación",
-        description: "Datos + contexto. Señales claras, sin ruido.",
+        description: "datos + contexto + comprensión = conocimiento",
       },
       {
         title: "Lectura ejecutiva",
-        description: "Resúmenes y análisis para decidir con velocidad.",
+        description: "resúmenes + análisis = información + toma de decisiones",
       },
       {
         title: "Red regional",
-        description: "Mirada LATAM con estándar global de verificación.",
+        description: "una mirada de LATAM con estándares de primer mundo",
       },
     ],
     []
@@ -154,7 +154,7 @@ export const QuienesSomos = () => {
           <header className="se-about__team-head">
             <h2 className="se-heading-section se-about__team-title">Equipo</h2>
             <p className="se-text-body se-about__team-lead">
-              La estructura editorial y operativa detrás de Sur Economics.
+              La estructura editorial y operativa detrás de SurEconomics.
             </p>
           </header>
 

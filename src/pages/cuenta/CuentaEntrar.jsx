@@ -14,7 +14,7 @@ export const CuentaEntrar = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Entrar — Sur Economics",
+      title: "Entrar — SurEconomics",
       description: "Acceso para lectores registrados.",
       noindex: true,
     });

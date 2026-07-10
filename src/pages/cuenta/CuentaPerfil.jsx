@@ -8,7 +8,7 @@ export const CuentaPerfil = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Mi perfil — Sur Economics",
+      title: "Mi perfil — SurEconomics",
       description: "Datos de su cuenta de lector.",
       noindex: true,
     });

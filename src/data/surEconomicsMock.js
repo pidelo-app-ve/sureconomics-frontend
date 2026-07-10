@@ -4,10 +4,10 @@
  */
 
 export const BRAND = {
-  name: "Sur Economics",
+  name: "SurEconomics",
   tagline: "Economía, mercados e inversión con inteligencia regional.",
   description:
-    "Sur Economics es una plataforma editorial e institucional dedicada al análisis económico y financiero de América Latina. Combinamos investigación, lectura clara y una mirada estratégica para apoyar decisiones de inversión, empresas e institucionalidad.",
+    "SurEconomics es una plataforma editorial e institucional dedicada al análisis económico y financiero de América Latina. Combinamos investigación profunda, noticias, contenidos sencillos, claros y una mirada estratégica para apoyar las decisiones de inversión y desarrollo en la región.",
 };
 
 export const PRIMARY_NAV = [
@@ -25,7 +25,7 @@ export const PRIMARY_NAV = [
 ];
 
 export const PARTNERS = [
-  { id: "rendi-avisor", name: "RendiGroup Avisor" },
+  { id: "rendi-avisor", name: "RendiGroup Advisor" },
   { id: "rendivalores-cb", name: "Rendivalores Casa de Bolsa C.A." },
   { id: "rendivalores-agricola", name: "Rendivalores Casa de Bolsa Agrícola C.A." },
   { id: "pidelo-alalza", name: "Pídelo by Alalza" },

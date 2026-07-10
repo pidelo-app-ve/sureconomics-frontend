@@ -14,7 +14,7 @@ export const CuentaEnviosNuevo = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Nuevo envío — Sur Economics",
+      title: "Nuevo envío — SurEconomics",
       description: "Enviar propuesta editorial.",
       noindex: true,
     });

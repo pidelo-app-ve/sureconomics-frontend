@@ -20,7 +20,7 @@ export const translations = {
     "nav.salir": "Salir",
     "nav.cerrarSesion": "Cerrar sesión",
 
-    "footer.aboutTitle": "Sur Economics",
+    "footer.aboutTitle": "SurEconomics",
     "footer.note":
       "Plataforma editorial e institucional para información económica y financiera de América Latina.",
 
@@ -47,7 +47,7 @@ export const translations = {
     "nav.salir": "Sign out",
     "nav.cerrarSesion": "Sign out",
 
-    "footer.aboutTitle": "Sur Economics",
+    "footer.aboutTitle": "SurEconomics",
     "footer.note":
       "Editorial and institutional platform for economic and financial information in Latin America.",
 

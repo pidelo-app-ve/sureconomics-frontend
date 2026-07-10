@@ -34,7 +34,7 @@ export const CuentaRegistro = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Registro — Sur Economics",
+      title: "Registro — SurEconomics",
       description: "Cree una cuenta de lector.",
       noindex: true,
     });

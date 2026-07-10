@@ -48,7 +48,7 @@ export const CuentaDashboardHome = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Mi espacio — Sur Economics",
+      title: "Mi espacio — SurEconomics",
       description: "Panel de lector: perfil, marcadores y envíos.",
       noindex: true,
     });

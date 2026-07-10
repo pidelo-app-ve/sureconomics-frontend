@@ -37,7 +37,7 @@ export const CuentaEnvioDetail = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Detalle de envío — Sur Economics",
+      title: "Detalle de envío — SurEconomics",
       description: "Estado de su propuesta.",
       noindex: true,
     });

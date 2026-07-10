@@ -18,7 +18,7 @@ export const NewsletterBlock = () => {
             Recibe nuestro análisis en tu correo
           </h2>
           <p className="se-newsletter__text">
-            Suscríbete para recibir resúmenes y artículos destacados de Sur Economics.
+            Suscríbete para recibir resúmenes y artículos destacados de SurEconomics.
           </p>
           <form
             className="se-newsletter__form"

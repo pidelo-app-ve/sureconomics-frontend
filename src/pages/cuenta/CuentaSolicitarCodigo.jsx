@@ -12,7 +12,7 @@ export const CuentaSolicitarCodigo = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Solicitar código — Sur Economics",
+      title: "Solicitar código — SurEconomics",
       description: "Reenvío del código de verificación.",
       noindex: true,
     });

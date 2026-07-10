@@ -20,7 +20,7 @@ export const CuentaEnvioEditar = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Editar envío — Sur Economics",
+      title: "Editar envío — SurEconomics",
       description: "Editar propuesta editorial.",
       noindex: true,
     });

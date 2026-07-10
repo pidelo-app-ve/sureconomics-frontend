@@ -16,8 +16,8 @@ ReportTierBadge.propTypes = {
 export const Informes = () => {
   useEffect(() => {
     applyPageMeta({
-      title: "Informes — Sur Economics",
-      description: "Biblioteca de informes e investigación de Sur Economics.",
+      title: "Informes — SurEconomics",
+      description: "Biblioteca de informes e investigación de SurEconomics.",
     });
   }, []);
 

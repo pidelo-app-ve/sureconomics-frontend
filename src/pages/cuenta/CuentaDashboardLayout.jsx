@@ -115,7 +115,7 @@ const DashboardShell = () => {
                 decoding="async"
               />
             </span>
-            <span className="se-sr-only">Sur Economics — inicio</span>
+            <span className="se-sr-only">SurEconomics — inicio</span>
           </Link>
           <span className="se-reader-dash__rail-tag">Lector</span>
         </div>
@@ -165,7 +165,7 @@ const DashboardShell = () => {
             to="/"
             className="se-reader-dash__topbar-home"
             onClick={handleCloseRail}
-            aria-label="Sur Economics — inicio"
+            aria-label="SurEconomics — inicio"
           >
             <img
               className="se-reader-dash__topbar-home-img"

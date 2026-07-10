@@ -22,7 +22,7 @@ export const CuentaMarcadores = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Marcadores — Sur Economics",
+      title: "Marcadores — SurEconomics",
       description: "Artículos guardados.",
       noindex: true,
     });

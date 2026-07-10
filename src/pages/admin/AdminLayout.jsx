@@ -65,7 +65,7 @@ export const AdminLayout = () => {
         >
           <span className="se-admin-mobile-bar__burger" aria-hidden="true" />
         </button>
-        <div className="se-admin-mobile-bar__brand" aria-label="Sur Economics Admin">
+        <div className="se-admin-mobile-bar__brand" aria-label="SurEconomics Admin">
           <img
             className="se-admin-mobile-bar__logo"
             src={BRAND_PUBLIC_LOGO.dark.isotypeWithBox}
@@ -106,7 +106,7 @@ export const AdminLayout = () => {
               height={44}
               decoding="async"
             />
-            <span className="se-sr-only">Sur Economics</span>
+            <span className="se-sr-only">SurEconomics</span>
             <span className="se-admin-rail__badge">Admin</span>
           </div>
 

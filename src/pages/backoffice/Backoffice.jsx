@@ -20,7 +20,7 @@ export const Backoffice = () => {
 
   useMemo(() => {
     applyPageMeta({
-      title: "Backoffice — Sur Economics",
+      title: "Backoffice — SurEconomics",
       description: "Acceso a la administración.",
       noindex: true,
     });
@@ -70,7 +70,7 @@ export const Backoffice = () => {
       <div className="se-backoffice-auth__shell">
         <div className="se-container se-container--narrow">
           <header className="se-backoffice-auth__header">
-            <div className="se-backoffice-auth__brand" aria-label="Sur Economics">
+            <div className="se-backoffice-auth__brand" aria-label="SurEconomics">
               <div className="se-backoffice-auth__brand-mark">
                 <img
                   src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}

@@ -174,7 +174,7 @@ export const AdminPostEditor = () => {
     useEffect(() => {
         applyPageMeta({
             title: isCreate ? "Admin — Nuevo artículo" : `Admin — Editar #${postId ?? ""}`,
-            description: "Edición de artículos (Sur Economics).",
+            description: "Edición de artículos (SurEconomics).",
         });
     }, [isCreate, postId]);
 

@@ -82,7 +82,7 @@ export const Articulos = () => {
   useEffect(() => {
     applyPageMeta({
       title: `Artículos — ${BRAND.name}`,
-      description: "Explorador editorial de Sur Economics: artículos publicados y categorías.",
+      description: "Explorador editorial de SurEconomics: artículos publicados y categorías.",
     });
   }, []);
 

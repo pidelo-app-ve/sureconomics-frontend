@@ -15,7 +15,7 @@ export const CuentaVerificarEmail = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Verificar correo — Sur Economics",
+      title: "Verificar correo — SurEconomics",
       description: "Verificación de correo electrónico.",
       noindex: true,
     });

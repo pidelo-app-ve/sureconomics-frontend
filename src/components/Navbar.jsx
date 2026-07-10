@@ -114,7 +114,7 @@ export const Navbar = () => {
         <Link
           to="/"
           className="se-header__brand"
-          aria-label="Sur Economics - Inicio"
+          aria-label="SurEconomics - Inicio"
           onClick={closeMenu}
         >
           <picture>

@@ -85,7 +85,7 @@ export const Hero = ({ featuredPost }) => {
       </div>
       <div className="se-container">
         <div className="se-hero__text">
-          <h1 className="se-heading-hero">{BRAND.name}</h1>
+          <h1 className="se-heading-hero">{BRAND.name.replace(/([a-z])([A-Z])/, "$1​$2")}</h1>
           <p className="se-text-lead se-hero__claim">{heroClaim}</p>
           <p className="se-text-body se-hero__description">{BRAND.description}</p>
           <div className="se-hero__actions">

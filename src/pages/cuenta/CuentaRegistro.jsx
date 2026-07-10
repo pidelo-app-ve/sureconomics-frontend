@@ -132,7 +132,7 @@ export const CuentaRegistro = () => {
           err instanceof Error ? err.message : "Revise los datos del formulario."
         );
       } else if (status === 429) {
-        setErrorMessage("Demasiadas solicitudes. Intente más tarde.");
+        setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
       } else {
         setErrorMessage(
           err instanceof Error ? err.message : "No se pudo completar el registro."

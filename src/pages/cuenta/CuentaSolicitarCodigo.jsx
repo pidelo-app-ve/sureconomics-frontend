@@ -50,7 +50,7 @@ export const CuentaSolicitarCodigo = () => {
 
           <p className="se-text-body">
             <Link to="/cuenta/entrar" className="se-link">
-              Iniciar sesión
+              Entrar
             </Link>
           </p>
 

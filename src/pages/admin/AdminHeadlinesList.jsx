@@ -36,7 +36,7 @@ export const AdminHeadlinesList = () => {
     setActionFeedback({ status: "idle", message: "", error: null });
     await confirm({
       title: "Eliminar titular",
-      description: `¿Eliminar el titular «${title}» (ID ${hid})?`,
+      description: `¿Eliminar el titular «${title}» (ID ${hid}) de forma permanente?`,
       confirmLabel: "Eliminar titular",
       onConfirm: async () => {
         await deleteAdminHeadline(hid);

@@ -77,7 +77,7 @@ export const AdminLayout = () => {
           <span className="se-admin-mobile-bar__title">Admin</span>
         </div>
         <Link to="/" className="se-admin-mobile-bar__site" onClick={closeMenu}>
-          Sitio
+          Volver al sitio
         </Link>
       </header>
 

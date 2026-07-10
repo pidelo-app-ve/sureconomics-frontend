@@ -60,8 +60,8 @@ export const Footer = () => {
             </a>
           </div>
 
-          <div className="se-footer__newsletter" aria-label="Newsletter">
-            <div className="se-footer__contact-title">Newsletter</div>
+          <div className="se-footer__newsletter" aria-label="Boletín">
+            <div className="se-footer__contact-title">Boletín</div>
             <p className="se-footer__newsletter-text">
               Reciba un resumen ejecutivo con señales y contexto. Una vez al mes.
             </p>
@@ -84,7 +84,7 @@ export const Footer = () => {
                 type="submit"
                 className="se-footer__newsletter-btn"
                 disabled={newsletterState.status === "loading"}
-                aria-label="Suscribirme al newsletter"
+                aria-label="Suscribirme al boletín"
               >
                 {newsletterState.status === "loading" ? "Enviando…" : "Suscribirme"}
               </button>

@@ -37,7 +37,7 @@ export const CuentaVerificarEmail = () => {
       navigate("/cuenta/entrar", { replace: true, state: { email, verified: true } });
     } catch (err) {
       if (err?.status === 429) {
-        setErrorMessage("Demasiados intentos. Espere unos minutos e inténtelo de nuevo.");
+        setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
       } else {
         setErrorMessage(err instanceof Error ? err.message : "Código inválido o expirado.");
       }
@@ -61,7 +61,7 @@ export const CuentaVerificarEmail = () => {
             <p className="se-text-body">
               Tras verificar, puede{" "}
               <Link to="/cuenta/entrar" className="se-link">
-                iniciar sesión
+                entrar
               </Link>
               .
             </p>

@@ -43,7 +43,7 @@ export const CuentaEnviosNuevo = () => {
       navigate("/cuenta/envios", { replace: true, state: flashState });
     } catch (err) {
       if (err?.status === 429) {
-        setErrorMessage("Demasiadas solicitudes. Intente más tarde.");
+        setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
       } else {
         setErrorMessage(err instanceof Error ? err.message : "No se pudo crear el envío.");
       }

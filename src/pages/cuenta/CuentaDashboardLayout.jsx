@@ -183,7 +183,7 @@ const DashboardShell = () => {
             ) : null}
           </div>
           <Link to="/" className="se-reader-dash__topbar-site" onClick={handleCloseRail}>
-            Ir al sitio
+            Volver al sitio
           </Link>
         </header>
 

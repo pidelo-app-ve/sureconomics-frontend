@@ -98,7 +98,7 @@ export const AdminPostsList = () => {
             ) : null}
             {actionFeedback.status === "error" ? (
                 <p className="se-admin-login__error" role="alert">
-                    {actionFeedback.error instanceof Error ? actionFeedback.error.message : "No se pudo completar la acción."}
+                    {actionFeedback.error instanceof Error ? actionFeedback.error.message : "No se pudo completar la solicitud."}
                 </p>
             ) : null}
 

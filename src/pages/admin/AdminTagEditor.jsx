@@ -131,7 +131,7 @@ export const AdminTagEditor = () => {
         ) : null}
         {saveState.status === "success" ? (
           <p className="se-text-body" role="status">
-            Guardado.
+            Guardado correctamente.
           </p>
         ) : null}
 

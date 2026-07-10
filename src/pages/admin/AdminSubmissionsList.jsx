@@ -139,7 +139,7 @@ export const AdminSubmissionsList = () => {
           description={
             submissionStatus
               ? `No hay resultados con el filtro «${activeFilterLabel}». Pruebe otro estado o muestre todos.`
-              : "No hay envíos que coincidan con esta vista. Vuelva más tarde o ajuste los filtros del backend."
+              : "No hay envíos que coincidan con esta vista. Vuelva más tarde o pruebe otro filtro."
           }
         />
       ) : null}

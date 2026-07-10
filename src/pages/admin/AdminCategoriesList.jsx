@@ -39,7 +39,7 @@ export const AdminCategoriesList = () => {
     setActionFeedback({ status: "idle", message: "", error: null });
     await confirm({
       title: "Eliminar categoría",
-      description: `¿Eliminar la categoría «${name}» (ID ${id})?`,
+      description: `¿Eliminar la categoría «${name}» (ID ${id}) de forma permanente?`,
       confirmLabel: "Eliminar categoría",
       onConfirm: async () => {
         await deleteAdminCategory(id);

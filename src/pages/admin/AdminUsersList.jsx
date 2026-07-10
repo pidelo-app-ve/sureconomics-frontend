@@ -70,7 +70,7 @@ export const AdminUsersList = () => {
                 <tr>
                   <th scope="col">ID</th>
                   <th scope="col">Nombre</th>
-                  <th scope="col">Correo</th>
+                  <th scope="col">Correo electrónico</th>
                   <th scope="col">Colaborador</th>
                   <th scope="col">Acciones</th>
                 </tr>

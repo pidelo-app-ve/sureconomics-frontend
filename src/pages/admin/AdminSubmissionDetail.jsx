@@ -165,7 +165,7 @@ export const AdminSubmissionDetail = () => {
       setStatus(normalizeStatusForSelect(newStatus));
       const message =
         normalized === "accepted"
-          ? "Estado cambiado a Aprobado. El artículo se publicó correctamente."
+          ? "Estado cambiado a Aceptado. El artículo se publicó correctamente."
           : `Estado cambiado a ${submissionStatusLabel(normalized === "under_review" ? "under_review" : "rejected")}.`;
       const publishedSlug =
         normalized === "accepted" ? adminPick(updated, ["published_post_slug"], null) : null;

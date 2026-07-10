@@ -36,7 +36,7 @@ export const NewsletterBlock = () => {
               aria-label="Correo electrónico"
             />
             <button type="submit" className="se-btn se-newsletter__btn">
-              Suscribirse
+              Suscribirme
             </button>
           </form>
           <p className="se-newsletter__note">

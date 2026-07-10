@@ -53,7 +53,7 @@ export const AdminLogin = () => {
                         ) : null}
 
                         <label className="se-form-field" htmlFor="admin-email">
-                            <span className="se-form-label">Correo</span>
+                            <span className="se-form-label">Correo electrónico</span>
                             <input
                                 id="admin-email"
                                 type="email"

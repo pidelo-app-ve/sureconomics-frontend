@@ -252,12 +252,13 @@
   letter-spacing: -0.04em;
   color: var(--se-black);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .se-heading-section {
   font-family: var(--se-font-heading);
   font-size: var(--se-text-h2);
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -0.025em;
   color: var(--se-black);
@@ -2364,7 +2365,7 @@
   margin: 0;
   font-family: var(--mono);
   font-size: clamp(1.85rem, 4.2vw, 3.35rem);
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.02;
   color: var(--about-text);
@@ -2464,7 +2465,7 @@
 .se-about__hero-card-title {
   font-family: var(--mono);
   font-size: 0.7rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.64);
@@ -2542,7 +2543,7 @@
   margin: 0 0 0.4rem;
   font-family: var(--mono);
   font-size: 0.95rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: rgba(255, 255, 255, 0.92);
 }
@@ -2603,7 +2604,7 @@
   margin: 0 0 0.75rem;
   font-family: var(--mono);
   font-size: 1.05rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: rgba(255, 255, 255, 0.92);
 }
@@ -2649,7 +2650,7 @@
   border: 1px solid rgba(255, 255, 255, 0.16);
   color: rgba(255, 255, 255, 0.92);
   font-family: var(--mono);
-  font-weight: 850;
+  font-weight: 700;
   font-size: 0.75rem;
 }
 
@@ -2731,7 +2732,7 @@
 .se-about__acc-title {
   font-family: var(--mono);
   font-size: 0.98rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: rgba(255, 255, 255, 0.92);
 }
@@ -3027,7 +3028,7 @@
   justify-content: center;
   font-family: var(--mono);
   font-size: 0.9rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
@@ -3036,7 +3037,7 @@
 .se-member-card__name {
   font-family: var(--mono);
   font-size: 1.05rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
   color: rgba(255, 255, 255, 0.92);
@@ -3262,7 +3263,7 @@
   margin: 0 0 0.65rem;
   font-family: var(--mono);
   font-size: 0.7rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--se-suite-dim);
@@ -3272,7 +3273,7 @@
   margin: 0;
   font-family: var(--mono);
   font-size: clamp(1.85rem, 4.2vw, 3.1rem);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.06;
   color: var(--se-suite-text);
@@ -3328,7 +3329,7 @@
   margin: 0 0 0.5rem;
   font-family: var(--mono);
   font-size: 0.68rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.58);
@@ -3481,7 +3482,7 @@
 
 .se-contact .se-contact-office__city {
   font-family: var(--mono);
-  font-weight: 850;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -3525,7 +3526,7 @@
   margin: 0 0 0.65rem;
   font-family: var(--mono);
   font-size: 0.7rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--se-suite-dim);
@@ -3535,7 +3536,7 @@
   margin: 0;
   font-family: var(--mono);
   font-size: clamp(1.85rem, 4.2vw, 3.15rem);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.06;
   color: var(--se-suite-text);
@@ -3573,7 +3574,7 @@
   margin: 0 0 0.5rem;
   font-family: var(--mono);
   font-size: 0.68rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.58);
@@ -3611,7 +3612,7 @@
 .se-reports__signal-title {
   margin: 0 0 0.25rem;
   font-family: var(--mono);
-  font-weight: 850;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -3695,7 +3696,7 @@
   margin: 0 0 0.65rem;
   font-family: var(--mono);
   font-size: 0.7rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.56);
@@ -3705,7 +3706,7 @@
   margin: 0;
   font-family: var(--mono);
   font-size: clamp(1.9rem, 4.2vw, 3.2rem);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.06;
   color: rgba(255, 255, 255, 0.92);
@@ -3995,7 +3996,7 @@
 }
 
 .se-heading-section--small {
-  font-size: var(--se-text-h2);
+  font-size: var(--se-text-h3);
   margin: 0;
 }
 
@@ -4055,7 +4056,7 @@
 }
 
 .se-heading-card--small {
-  font-size: var(--se-text-h3);
+  font-size: var(--se-text-body);
 }
 
 .se-report-grid {
@@ -8687,7 +8688,7 @@ a.se-topics__chip:focus-visible {
   margin: 0;
   max-width: none;
   font-size: clamp(1.65rem, 3.2vw, 2.45rem);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.1;
   text-wrap: balance;
@@ -8857,7 +8858,7 @@ a.se-topics__chip:focus-visible {
   margin: 0 0 0.45rem;
   font-family: var(--se-font-heading);
   font-size: clamp(1.15rem, 2vw, 1.35rem);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-ink);
 }

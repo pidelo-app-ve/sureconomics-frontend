@@ -36,7 +36,7 @@ export const AdminTagsList = () => {
     setActionFeedback({ status: "idle", message: "", error: null });
     await confirm({
       title: "Eliminar etiqueta",
-      description: `¿Eliminar la etiqueta «${name}» (ID ${id})?`,
+      description: `¿Eliminar la etiqueta «${name}» (ID ${id}) de forma permanente?`,
       confirmLabel: "Eliminar etiqueta",
       onConfirm: async () => {
         await deleteAdminTag(id);

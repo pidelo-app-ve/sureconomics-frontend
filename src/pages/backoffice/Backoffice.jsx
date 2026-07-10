@@ -105,7 +105,7 @@ export const Backoffice = () => {
               onClick={() => setMode(MODES.register)}
               disabled={isSubmitting}
             >
-              Registrar
+              Registrarse
             </button>
           </div>
 
@@ -117,7 +117,7 @@ export const Backoffice = () => {
             ) : null}
 
             <label className="se-form-field" htmlFor="backoffice-email">
-              <span className="se-form-label">Correo</span>
+              <span className="se-form-label">Correo electrónico</span>
               <input
                 id="backoffice-email"
                 type="email"

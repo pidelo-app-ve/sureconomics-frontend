@@ -168,7 +168,7 @@ export const AdminUserDetail = () => {
                 <span
                   className={`se-admin-user-detail__chip${readCollabFlag(row) ? " se-admin-user-detail__chip--ok" : ""}`}
                 >
-                  Colaboraciones: {readCollabFlag(row) ? "habilitadas" : "no"}
+                  Colaboraciones: {readCollabFlag(row) ? "Sí" : "No"}
                 </span>
               </div>
               {email && email !== "—" ? (
@@ -209,8 +209,8 @@ export const AdminUserDetail = () => {
                 Respuesta del servidor
               </h2>
               <p className="se-admin-user-detail__panel-lead">
-                Todos los campos devueltos por <code className="se-admin-user-detail__code">GET /admin/users/:id</code>.
-                Objetos y listas se muestran como JSON legible.
+                Todos los datos disponibles de este usuario. Los campos con varias líneas se muestran
+                expandidos para facilitar la lectura.
               </p>
             </div>
             <dl className="se-admin-user-detail__spec">
@@ -241,7 +241,7 @@ export const AdminUserDetail = () => {
           <div className="se-admin-user-detail__surface se-admin-user-detail__surface--sticky">
             <h2 className="se-admin-user-detail__panel-title">Editar</h2>
             <p className="se-admin-user-detail__panel-lead">
-              Los cambios se guardan con <code className="se-admin-user-detail__code">PATCH</code>. El resto de campos son de solo lectura desde esta vista.
+              Los cambios se guardan automáticamente al enviar el formulario. El resto de campos son de solo lectura desde esta vista.
             </p>
 
             <form className="se-contact-form se-admin-user-detail__form" onSubmit={handleSubmit}>

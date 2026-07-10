@@ -41,9 +41,9 @@ export const TeamMemberCard = ({ member }) => {
             <a
               href={`mailto:${member.email}`}
               className="se-link se-member-card__link"
-              aria-label={`Enviar email a ${member.name}`}
+              aria-label={`Enviar correo a ${member.name}`}
             >
-              Email
+              Correo
             </a>
           )}
           {hasExternalCv && (

@@ -17,7 +17,7 @@ export const CommentComposer = ({
     return (
       <p className="se-text-body">
         <Link to="/cuenta/entrar" className="se-link" state={{ from: `/articulo/${slug}` }}>
-          Inicie sesión
+          Entrar
         </Link>{" "}
         para comentar.
       </p>
@@ -51,7 +51,7 @@ export const CommentComposer = ({
       setMessage("Comentario enviado. Aparecerá cuando sea aprobado por moderación.");
     } catch (err) {
       if (err?.status === 429) {
-        setError("Demasiadas solicitudes. Intente más tarde.");
+        setError("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
       } else {
         setError(err instanceof Error ? err.message : "No se pudo enviar el comentario.");
       }

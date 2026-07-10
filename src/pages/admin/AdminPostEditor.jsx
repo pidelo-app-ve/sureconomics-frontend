@@ -219,7 +219,7 @@ export const AdminPostEditor = () => {
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
-            setSaveState({ status: "success", error: null, message: "Cambios guardados correctamente." });
+            setSaveState({ status: "success", error: null, message: "Guardado correctamente." });
         } catch (err) {
             setSaveState({ status: "error", error: err, message: "" });
         }
@@ -271,7 +271,7 @@ export const AdminPostEditor = () => {
     const formatActionError = (err) => {
         if (!err) return "";
         if (err.status === 429) {
-            return "Demasiadas solicitudes. Espere un momento e intente de nuevo.";
+            return "Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.";
         }
         return err.message || "Error";
     };
@@ -309,7 +309,7 @@ export const AdminPostEditor = () => {
                     </p>
                 </div>
                 <Link to="/admin/posts" className="se-link">
-                    ← Listado
+                    ← Volver al listado
                 </Link>
             </header>
 
@@ -351,7 +351,7 @@ export const AdminPostEditor = () => {
                     />
                 </label>
                 <label className="se-form-field" htmlFor="post-slug">
-                    <span className="se-form-label">Slug (opcional; el backend puede autogenerarlo)</span>
+                    <span className="se-form-label">Slug (opcional; se genera automáticamente si lo deja vacío)</span>
                     <input
                         id="post-slug"
                         className="se-form-control"
@@ -375,7 +375,7 @@ export const AdminPostEditor = () => {
                     </select>
                 </label>
                 <label className="se-form-field" htmlFor="post-published-at">
-                    <span className="se-form-label">Fecha de publicación (opcional, ISO vía selector local)</span>
+                    <span className="se-form-label">Fecha de publicación (opcional)</span>
                     <input
                         id="post-published-at"
                         type="datetime-local"
@@ -385,7 +385,7 @@ export const AdminPostEditor = () => {
                     />
                 </label>
                 <label className="se-form-field" htmlFor="post-excerpt">
-                    <span className="se-form-label">Resumen (excerpt)</span>
+                    <span className="se-form-label">Resumen</span>
                     <textarea
                         id="post-excerpt"
                         className="se-form-control se-form-control--textarea"
@@ -433,7 +433,7 @@ export const AdminPostEditor = () => {
                     />
                 </label>
                 <label className="se-form-field" htmlFor="post-image">
-                    <span className="se-form-label">Imagen destacada (featured_image_url)</span>
+                    <span className="se-form-label">Imagen destacada</span>
                     <input
                         id="post-image"
                         className="se-form-control"
@@ -487,9 +487,9 @@ export const AdminPostEditor = () => {
                 </fieldset>
 
                 <p className="se-admin-meta-hint">
-                    Payload alineado con la API: title, slug, excerpt, content, featured_image_url, status,
-                    published_at (ISO8601), meta_title, meta_description, canonical_url, category_ids, tag_ids.
-                    Publicar / despublicar usan los endpoints dedicados (PATCH con cuerpo vacío).
+                    El guardado incluye título, slug, resumen, contenido, imagen destacada, estado y fecha de
+                    publicación, además de las categorías y etiquetas seleccionadas. Publicar y despublicar son
+                    acciones independientes del guardado.
                 </p>
 
                 <div className="se-admin-form-actions">

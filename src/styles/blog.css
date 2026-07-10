@@ -252,7 +252,6 @@
   letter-spacing: -0.04em;
   color: var(--se-black);
   margin: 0;
-  overflow-wrap: anywhere;
 }
 
 .se-heading-section {
@@ -1484,6 +1483,12 @@
   .se-hero .se-container {
     grid-template-columns: 1fr;
     gap: 56px;
+  }
+}
+
+@media (min-width: 961px) and (max-width: 1387px) {
+  .se-hero__text .se-heading-hero {
+    font-size: clamp(48px, 6vw, 83px);
   }
 }
 

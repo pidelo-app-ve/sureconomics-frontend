@@ -1064,7 +1064,8 @@
 }
 
 .se-footer__description {
-  font-size: var(--se-text-body);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
   line-height: var(--se-line-height-relaxed);
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
@@ -6006,7 +6007,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-submissions__id {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 0.78rem;
   color: var(--se-gray-600);
 }
@@ -6467,7 +6468,7 @@ a.se-topics__chip:focus-visible {
 .se-admin-submission-detail__id-chip {
   flex-shrink: 0;
   padding: 0.28rem 0.65rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.86);
@@ -6867,7 +6868,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-user-detail__chip--id {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 0.7rem;
 }
 
@@ -6992,7 +6993,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-user-detail__code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 0.78em;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.86);
@@ -7052,7 +7053,7 @@ a.se-topics__chip:focus-visible {
   padding: 0.65rem 0.75rem;
   max-height: 14rem;
   overflow: auto;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   font-size: 0.75rem;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.9);
@@ -7420,7 +7421,7 @@ a.se-topics__chip:focus-visible {
 .se-comments__body {
   margin: var(--se-space-xs) 0 0;
   white-space: pre-wrap;
-  font-family: var(--se-font-body);
+  font-family: var(--se-font-ui);
   font-size: var(--se-text-small);
   line-height: 1.55;
 }

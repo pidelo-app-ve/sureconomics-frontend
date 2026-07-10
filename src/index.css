@@ -15,6 +15,7 @@ body {
   background: #0b0d10;
   color: #e9eef5;
   overflow-x: hidden;
+  font-family: var(--se-font-ui);
 }
 
 #root {

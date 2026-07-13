@@ -88,6 +88,24 @@ export const TEAM = {
       email: "jpaz@rendigroup.com",
       links: [],
     },
+    {
+      id: "consejo-manuel-puche",
+      name: "Manuel Puche",
+      role: "Consejo Editorial",
+      summary: "Asesoría legal y relaciones institucionales del medio.",
+      cvUrl: "#",
+      email: "",
+      links: [],
+    },
+    {
+      id: "consejo-mafe-yanez",
+      name: "Mafe Yánez",
+      role: "Consejo Editorial",
+      summary: "Aporte editorial y de gestión institucional.",
+      cvUrl: "#",
+      email: "",
+      links: [],
+    },
   ],
   operational: [
     {
@@ -117,6 +135,15 @@ export const TEAM = {
       email: "",
       links: [],
     },
+    {
+      id: "marketing-ambar-prato",
+      name: "Ámbar Prato",
+      role: "Diseñadora",
+      summary: "Diseño y ejecución visual de los contenidos.",
+      cvUrl: "#",
+      email: "",
+      links: [],
+    },
   ],
   collaborators: [
     { id: "col-juan-domingo-cordero", name: "Juan Domingo Cordero Osorio", role: "Colaborador", summary: "Investigación y aportes sectoriales.", cvUrl: "#", email: "", links: [] },
@@ -133,16 +160,6 @@ export const TEAM = {
       cvUrl:
         "https://unionradio.net/experto-ve-positivo-pero-insuficiente-la-medida-para-revisar-las-inhabilitaciones/",
       email: "",
-      links: [],
-    },
-    {
-      id: "col-leonardo-ramirez",
-      name: "Leonardo Ramírez",
-      role: "Colaborador",
-      summary:
-        "Estudios de administración y finanzas de la Universidad Católica. Director de Invicto Capital.",
-      cvUrl: "#",
-      email: "lramirez@rendigroup.com",
       links: [],
     },
     {
@@ -164,6 +181,7 @@ export const TEAM = {
     { id: "res-alessandro-ferrara", name: "Alessandro Ferrara", role: "Equipo de Investigación", summary: "Investigación comparada.", cvUrl: "#", email: "", links: [] },
     { id: "res-saul-benarroch", name: "Saul Benarroch", role: "Equipo de Investigación", summary: "Modelos y lecturas de riesgo.", cvUrl: "#", email: "", links: [] },
     { id: "res-mateo-rodriguez", name: "Mateo Rodríguez", role: "Equipo de Investigación", summary: "Monitoreo regional y síntesis.", cvUrl: "#", email: "", links: [] },
+    { id: "res-david-ruiz", name: "David Ruiz", role: "Equipo de Investigación", summary: "Análisis y apoyo en las líneas de investigación.", cvUrl: "#", email: "", links: [] },
   ],
 };
 
@@ -183,7 +201,6 @@ export const CONTACT = {
   primaryEmail: "odoval@rendigroup.com",
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
-    { name: "Leonardo Ramírez", email: "lramirez@rendigroup.com" },
   ],
   offices: [
     { city: "Miami", address: "Dirección próximamente" },

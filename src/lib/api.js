@@ -222,5 +222,5 @@ export const loginAdmin = (email, password) =>
  *   refresh_expires_in?: number
  * }>}
  */
-export const registerAdmin = (email, password) =>
-    apiRequest("/auth/register", { method: "POST", json: { email, password } });
+export const registerAdmin = (email, password, name) =>
+    apiRequest("/auth/register", { method: "POST", json: { email, password, name } });

@@ -38,8 +38,8 @@ export const AuthProvider = ({ children }) => {
         return data;
     }, []);
 
-    const register = useCallback(async (email, password) => {
-        const data = await registerApi(email, password);
+    const register = useCallback(async (email, password, name) => {
+        const data = await registerApi(email, password, name);
         persistAuth({
             accessToken: data.access_token,
             refreshToken: data.refresh_token,

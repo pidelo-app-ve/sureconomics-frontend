@@ -13,6 +13,7 @@ export const Backoffice = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login, register } = useAuth();
   const [mode, setMode] = useState(MODES.login);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -41,6 +42,11 @@ export const Backoffice = () => {
     setErrorMessage("");
 
     const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+    if (isRegister && !trimmedName) {
+      setErrorMessage("Introduzca su nombre.");
+      return;
+    }
     if (!trimmedEmail) {
       setErrorMessage("Introduzca un correo válido.");
       return;
@@ -53,7 +59,7 @@ export const Backoffice = () => {
     setIsSubmitting(true);
     try {
       if (isRegister) {
-        await register(trimmedEmail, password);
+        await register(trimmedEmail, password, trimmedName);
       } else {
         await login(trimmedEmail, password);
       }
@@ -114,6 +120,25 @@ export const Backoffice = () => {
               <p className="se-backoffice-auth__error" role="alert" id="backoffice-auth-error">
                 {errorMessage}
               </p>
+            ) : null}
+
+            {isRegister ? (
+              <label className="se-form-field" htmlFor="backoffice-name">
+                <span className="se-form-label">Nombre</span>
+                <input
+                  id="backoffice-name"
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  className="se-form-control"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? "backoffice-auth-error" : undefined}
+                />
+              </label>
             ) : null}
 
             <label className="se-form-field" htmlFor="backoffice-email">

@@ -210,6 +210,7 @@ export const CONTACT = {
   primaryEmail: "odoval@rendigroup.com",
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
+    { name: "Mafe Yánez", email: "myanez@rendigroup.com" },
   ],
   offices: [
     { city: "Miami", address: "Dirección próximamente" },

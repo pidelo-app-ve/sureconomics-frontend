@@ -6,8 +6,11 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { useAuth } from "../../context/AuthContext";
 
 export const AdminHeadlinesList = () => {
+  const { role } = useAuth();
+  const canAccess = role === "publicador" || role === "admin";
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [actionFeedback, setActionFeedback] = useState({ status: "idle", message: "", error: null });
@@ -29,8 +32,8 @@ export const AdminHeadlinesList = () => {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (canAccess) load();
+  }, [canAccess, load]);
 
   const handleDelete = async (hid, title) => {
     setActionFeedback({ status: "idle", message: "", error: null });
@@ -48,6 +51,10 @@ export const AdminHeadlinesList = () => {
 
   const meta = state.meta;
   const totalPages = meta?.pages ?? 1;
+
+  if (!canAccess) {
+    return <EmptyState title="Sin acceso" description="Solo publicador y admin pueden gestionar titulares." />;
+  }
 
   return (
     <main role="main">

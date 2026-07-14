@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { useAuth } from "../../context/AuthContext";
 
 const emptyForm = () => ({
     title: "",
@@ -116,6 +117,9 @@ const toggleId = (list, id) => {
 };
 
 export const AdminPostEditor = () => {
+    const { role } = useAuth();
+    const canPublish = role === "publicador" || role === "admin";
+    const canCreate = role === "escritor" || role === "admin";
     const { postId } = useParams();
     const { pathname } = useLocation();
     const isCreate = /\/admin\/posts\/new\/?$/.test(pathname);
@@ -276,6 +280,10 @@ export const AdminPostEditor = () => {
         return err.message || "Error";
     };
 
+    if (isCreate && !canCreate) {
+        return <EmptyState title="Sin acceso" description="Solo escritor y admin pueden crear artículos nuevos." />;
+    }
+
     if (loadState.status === "loading") {
         return <LoadingState title="Cargando artículo…" />;
     }
@@ -371,7 +379,9 @@ export const AdminPostEditor = () => {
                             <option value={form.status}>{form.status}</option>
                         ) : null}
                         <option value="draft">Borrador</option>
-                        <option value="published">Publicado</option>
+                        {canPublish || form.status === "published" ? (
+                            <option value="published">Publicado</option>
+                        ) : null}
                     </select>
                 </label>
                 <label className="se-form-field" htmlFor="post-published-at">
@@ -496,7 +506,7 @@ export const AdminPostEditor = () => {
                     <button type="button" className="se-btn" onClick={handleSave} disabled={saveState.status === "loading"}>
                         {saveState.status === "loading" ? "Guardando…" : isCreate ? "Crear" : "Guardar cambios"}
                     </button>
-                    {!isCreate ? (
+                    {!isCreate && canPublish ? (
                         <>
                             <button
                                 type="button"

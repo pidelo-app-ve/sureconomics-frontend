@@ -5,7 +5,7 @@ export const RequireAdmin = () => {
     const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
-        return <Navigate to="/admin/login" replace />;
+        return <Navigate to="/cuenta/entrar" replace />;
     }
 
     return <Outlet />;

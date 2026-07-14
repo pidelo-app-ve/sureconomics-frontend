@@ -4,6 +4,7 @@ import { listAdminUsers } from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { useAuth } from "../../context/AuthContext";
 
 const flagLabel = (row) => {
   const v =
@@ -18,6 +19,7 @@ const flagLabel = (row) => {
 };
 
 export const AdminUsersList = () => {
+  const { role } = useAuth();
   const [page, setPage] = useState(1);
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
 
@@ -36,8 +38,12 @@ export const AdminUsersList = () => {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (role === "admin") load();
+  }, [role, load]);
+
+  if (role !== "admin") {
+    return <EmptyState title="Sin acceso" description="Solo una cuenta con rol admin puede ver a los usuarios y colaboradores." />;
+  }
 
   const meta = state.meta;
   const totalPages = meta?.pages ?? 1;

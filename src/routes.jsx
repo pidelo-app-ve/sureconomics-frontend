@@ -10,7 +10,6 @@ import { Informes } from "./pages/Informes";
 import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
 import { NotFound } from "./pages/NotFound";
-import { AdminLogin } from "./pages/admin/AdminLogin";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminPostsList } from "./pages/admin/AdminPostsList";
 import { AdminPostEditor } from "./pages/admin/AdminPostEditor";
@@ -26,10 +25,11 @@ import { AdminSubmissionDetail } from "./pages/admin/AdminSubmissionDetail";
 import { AdminCollaborationSettings } from "./pages/admin/AdminCollaborationSettings";
 import { AdminUsersList } from "./pages/admin/AdminUsersList";
 import { AdminUserDetail } from "./pages/admin/AdminUserDetail";
+import { AdminStaffList } from "./pages/admin/AdminStaffList";
+import { AdminMiPerfil } from "./pages/admin/AdminMiPerfil";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import { CuentaEntrar } from "./pages/cuenta/CuentaEntrar";
 import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
-import { Backoffice } from "./pages/backoffice/Backoffice";
 import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
 import { CuentaDashboardLayout } from "./pages/cuenta/CuentaDashboardLayout";
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
             { path: "informes", element: <Informes /> },
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
-            { path: "backoffice", element: <Backoffice /> },
+            { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },
             { path: "cuenta/verificar-email", element: <CuentaVerificarEmail /> },
@@ -79,7 +79,7 @@ export const router = createBrowserRouter([
     },
     {
         path: "/admin/login",
-        element: <AdminLogin />,
+        element: <Navigate to="/cuenta/entrar" replace />,
     },
     {
         path: "/admin",
@@ -107,6 +107,8 @@ export const router = createBrowserRouter([
                     { path: "settings/collaboration", element: <AdminCollaborationSettings /> },
                     { path: "users", element: <AdminUsersList /> },
                     { path: "users/:id", element: <AdminUserDetail /> },
+                    { path: "staff", element: <AdminStaffList /> },
+                    { path: "perfil", element: <AdminMiPerfil /> },
                 ],
             },
         ],

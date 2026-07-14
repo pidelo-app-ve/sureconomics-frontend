@@ -10,7 +10,7 @@ const API_BASE = rawBase.replace(/\/$/, "");
 /** Fired after tokens are refreshed or cleared so AuthContext can sync from sessionStorage. */
 export const ADMIN_AUTH_SYNC_EVENT = "sureconomics-admin-auth-sync";
 
-const dispatchAdminAuthSync = () => {
+export const dispatchAdminAuthSync = () => {
     if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent(ADMIN_AUTH_SYNC_EVENT));
     }
@@ -207,20 +207,3 @@ export const adminRequest = async (path, options = {}) => {
  */
 export const loginAdmin = (email, password) =>
     apiRequest("/auth/login", { method: "POST", json: { email, password } });
-
-/**
- * Admin registration.
- * Backend is expected to return the same token envelope as login.
- *
- * @param {string} email
- * @param {string} password
- * @returns {Promise<{
- *   access_token: string,
- *   refresh_token: string,
- *   token_type?: string,
- *   expires_in?: number,
- *   refresh_expires_in?: number
- * }>}
- */
-export const registerAdmin = (email, password, name) =>
-    apiRequest("/auth/register", { method: "POST", json: { email, password, name } });

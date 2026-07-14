@@ -6,10 +6,11 @@ import {
   getAdminHeadline,
   patchAdminHeadline,
 } from "../../services/adminHeadlinesService";
-import { ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAuth } from "../../context/AuthContext";
 
 const emptyForm = () => ({
   title: "",
@@ -39,6 +40,8 @@ const rowToForm = (row) => ({
 });
 
 export const AdminHeadlineEditor = () => {
+  const { role } = useAuth();
+  const canAccess = role === "publicador" || role === "admin";
   const { id } = useParams();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -71,8 +74,8 @@ export const AdminHeadlineEditor = () => {
   }, [isCreate, numericId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (canAccess) load();
+  }, [canAccess, load]);
 
   useEffect(() => {
     applyPageMeta({
@@ -128,6 +131,10 @@ export const AdminHeadlineEditor = () => {
       },
     });
   };
+
+  if (!canAccess) {
+    return <EmptyState title="Sin acceso" description="Solo publicador y admin pueden gestionar titulares." />;
+  }
 
   if (loadState.status === "loading") {
     return (

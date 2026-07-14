@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAuth } from "../../context/AuthContext";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -53,6 +54,8 @@ const getAuthorDetails = (row) => {
 };
 
 export const AdminCommentsList = () => {
+  const { role } = useAuth();
+  const canAccess = role === "publicador" || role === "admin";
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
   const [postId, setPostId] = useState("");
@@ -124,8 +127,8 @@ export const AdminCommentsList = () => {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (canAccess) load();
+  }, [canAccess, load]);
 
   const handleApprove = async (commentId) => {
     setActionId(commentId);
@@ -174,6 +177,10 @@ export const AdminCommentsList = () => {
     }
     setActionId(null);
   };
+
+  if (!canAccess) {
+    return <EmptyState title="Sin acceso" description="Solo publicador y admin pueden moderar comentarios." />;
+  }
 
   const meta = state.meta;
   const totalPages = meta?.pages ?? 1;

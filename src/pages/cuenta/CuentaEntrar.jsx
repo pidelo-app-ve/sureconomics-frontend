@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
+import { loginUnified } from "../../lib/unifiedAuth";
+import { persistAuth } from "../../lib/authStorage";
+import { dispatchAdminAuthSync } from "../../lib/api";
+import { persistUserAuth } from "../../lib/userAuthStorage";
+import { dispatchUserAuthSync } from "../../lib/userApi";
 
 export const CuentaEntrar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isEmailVerified, login, profile } = useUserAuth();
+  const { isAuthenticated, isEmailVerified, loadProfile, profile } = useUserAuth();
+  const { isAuthenticated: isAdminAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -15,10 +22,14 @@ export const CuentaEntrar = () => {
   useEffect(() => {
     applyPageMeta({
       title: "Entrar — SurEconomics",
-      description: "Acceso para lectores registrados.",
+      description: "Acceso para lectores y equipo editorial.",
       noindex: true,
     });
   }, []);
+
+  if (isAdminAuthenticated) {
+    return <Navigate to="/admin/posts" replace />;
+  }
 
   if (isAuthenticated && !isEmailVerified) {
     return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email }} />;
@@ -34,15 +45,28 @@ export const CuentaEntrar = () => {
     setErrorMessage("");
     setIsSubmitting(true);
     try {
-      const { profile, error } = await login(email, password);
-      if (profile?.isEmailVerified) {
-        const to = location.state?.from && typeof location.state.from === "string" ? location.state.from : "/";
-        navigate(to, { replace: true });
+      const result = await loginUnified(email, password);
+
+      if (result.actor === "admin") {
+        persistAuth({ ...result.tokens, role: result.role });
+        dispatchAdminAuthSync();
+        navigate("/admin/posts", { replace: true });
         return;
       }
-      navigate("/cuenta/verificar-email", { replace: true, state: { email } });
-      if (error && error.status !== 403 && error.status !== 401) {
-        setErrorMessage(error.message || "No se pudo cargar el perfil.");
+
+      persistUserAuth(result.tokens);
+      dispatchUserAuthSync();
+      let freshProfile = null;
+      try {
+        freshProfile = await loadProfile();
+      } catch {
+        /* handled by the isEmailVerified redirect above on next render */
+      }
+      if (freshProfile?.isEmailVerified) {
+        const to = location.state?.from && typeof location.state.from === "string" ? location.state.from : "/";
+        navigate(to, { replace: true });
+      } else {
+        navigate("/cuenta/verificar-email", { replace: true, state: { email } });
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "No se pudo iniciar sesión.";

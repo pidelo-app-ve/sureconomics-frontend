@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getAdminUser, patchAdminUser } from "../../services/adminUsersService";
-import { ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { formatSubmissionDate } from "../../lib/submissionDisplay";
@@ -37,6 +38,7 @@ const pickAvatarUrl = (row) => {
 };
 
 export const AdminUserDetail = () => {
+  const { role } = useAuth();
   const { id } = useParams();
   const [row, setRow] = useState(null);
   const [collab, setCollab] = useState(false);
@@ -69,8 +71,8 @@ export const AdminUserDetail = () => {
   }, [numericId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (role === "admin") load();
+  }, [role, load]);
 
   useEffect(() => {
     applyPageMeta({ title: `Admin — Usuario #${id ?? ""}`, description: "Detalle de usuario.", noindex: true });
@@ -101,6 +103,10 @@ export const AdminUserDetail = () => {
   };
 
   const detailKeys = useMemo(() => sortedAdminUserKeys(row), [row]);
+
+  if (role !== "admin") {
+    return <EmptyState title="Sin acceso" description="Solo una cuenta con rol admin puede ver a los usuarios y colaboradores." />;
+  }
 
   if (loadState.status === "loading") {
     return (

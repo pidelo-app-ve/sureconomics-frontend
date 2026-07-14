@@ -9,6 +9,7 @@ import {
   submissionStatusCssModifier,
   submissionStatusLabel,
 } from "../../lib/submissionDisplay";
+import { useAuth } from "../../context/AuthContext";
 
 const STATUS_FILTERS = [
   { value: "", label: "Todos" },
@@ -45,6 +46,8 @@ const mapRow = (row) => {
 };
 
 export const AdminSubmissionsList = () => {
+  const { role } = useAuth();
+  const canAccess = role === "publicador" || role === "admin";
   const [page, setPage] = useState(1);
   const [submissionStatus, setSubmissionStatus] = useState("");
   const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
@@ -68,8 +71,8 @@ export const AdminSubmissionsList = () => {
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (canAccess) load();
+  }, [canAccess, load]);
 
   const meta = state.meta;
   const totalPages = meta?.pages ?? 1;
@@ -91,6 +94,10 @@ export const AdminSubmissionsList = () => {
   };
 
   const activeFilterLabel = STATUS_FILTERS.find((f) => f.value === submissionStatus)?.label ?? "Todos";
+
+  if (!canAccess) {
+    return <EmptyState title="Sin acceso" description="Solo publicador y admin pueden revisar envíos colaborativos." />;
+  }
 
   return (
     <main role="main" className="se-admin-submissions">

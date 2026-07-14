@@ -5,6 +5,7 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { useAuth } from "../../context/AuthContext";
 
 const pick = (row, keys, fallback = "—") => {
     if (!row || typeof row !== "object") return fallback;
@@ -16,6 +17,8 @@ const pick = (row, keys, fallback = "—") => {
 };
 
 export const AdminPostsList = () => {
+    const { role } = useAuth();
+    const canPublish = role === "publicador" || role === "admin";
     const [page, setPage] = useState(1);
     const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
     const [actionId, setActionId] = useState(null);
@@ -158,7 +161,7 @@ export const AdminPostsList = () => {
                                                 <Link to={`/admin/posts/${id}`} className="se-link">
                                                     Editar
                                                 </Link>
-                                                {status !== "published" ? (
+                                                {status !== "published" && canPublish ? (
                                                     <>
                                                         {" · "}
                                                         <button
@@ -171,15 +174,19 @@ export const AdminPostsList = () => {
                                                         </button>
                                                     </>
                                                 ) : null}
-                                                {" · "}
-                                                <button
-                                                    type="button"
-                                                    className="se-link se-header__nav-link--button"
-                                                    disabled={busy}
-                                                    onClick={() => handleDelete(id, title)}
-                                                >
-                                                    Eliminar
-                                                </button>
+                                                {canPublish ? (
+                                                    <>
+                                                        {" · "}
+                                                        <button
+                                                            type="button"
+                                                            className="se-link se-header__nav-link--button"
+                                                            disabled={busy}
+                                                            onClick={() => handleDelete(id, title)}
+                                                        >
+                                                            Eliminar
+                                                        </button>
+                                                    </>
+                                                ) : null}
                                             </td>
                                         </tr>
                                     );

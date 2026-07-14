@@ -22,7 +22,10 @@ NavGroup.propTypes = {
 };
 
 export const AdminLayout = () => {
-  const { logout } = useAuth();
+  const { logout, role } = useAuth();
+  const canCreateArticle = role === "escritor" || role === "admin";
+  const canSeeEditorial = role === "publicador" || role === "admin";
+  const canManageUsers = role === "admin";
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -115,9 +118,11 @@ export const AdminLayout = () => {
               <NavLink to="/admin/posts" className={linkClass} end onClick={closeMenu}>
                 Artículos
               </NavLink>
-              <NavLink to="/admin/posts/new" className={linkClass} onClick={closeMenu}>
-                Nuevo artículo
-              </NavLink>
+              {canCreateArticle ? (
+                <NavLink to="/admin/posts/new" className={linkClass} onClick={closeMenu}>
+                  Nuevo artículo
+                </NavLink>
+              ) : null}
             </NavGroup>
 
             <NavGroup label="Taxonomía">
@@ -129,24 +134,36 @@ export const AdminLayout = () => {
               </NavLink>
             </NavGroup>
 
-            <NavGroup label="Editorial">
-              <NavLink to="/admin/headlines" className={linkClass} end onClick={closeMenu}>
-                Titulares
-              </NavLink>
-              <NavLink to="/admin/comments" className={linkClass} end onClick={closeMenu}>
-                Comentarios
-              </NavLink>
-              <NavLink to="/admin/submissions" className={linkClass} end onClick={closeMenu}>
-                Envíos
-              </NavLink>
-            </NavGroup>
+            {canSeeEditorial ? (
+              <NavGroup label="Editorial">
+                <NavLink to="/admin/headlines" className={linkClass} end onClick={closeMenu}>
+                  Titulares
+                </NavLink>
+                <NavLink to="/admin/comments" className={linkClass} end onClick={closeMenu}>
+                  Comentarios
+                </NavLink>
+                <NavLink to="/admin/submissions" className={linkClass} end onClick={closeMenu}>
+                  Envíos
+                </NavLink>
+              </NavGroup>
+            ) : null}
 
             <NavGroup label="Sistema">
-              <NavLink to="/admin/users" className={linkClass} end onClick={closeMenu}>
-                Usuarios
-              </NavLink>
+              {canManageUsers ? (
+                <NavLink to="/admin/users" className={linkClass} end onClick={closeMenu}>
+                  Usuarios
+                </NavLink>
+              ) : null}
               <NavLink to="/admin/settings/collaboration" className={linkClass} end onClick={closeMenu}>
                 Colaboración
+              </NavLink>
+              {canManageUsers ? (
+                <NavLink to="/admin/staff" className={linkClass} end onClick={closeMenu}>
+                  Personal
+                </NavLink>
+              ) : null}
+              <NavLink to="/admin/perfil" className={linkClass} end onClick={closeMenu}>
+                Mi perfil
               </NavLink>
             </NavGroup>
           </nav>

@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminSubmissionAuthor";
 import { applyAdminSubmissionWorkflow, getAdminSubmission } from "../../services/adminSubmissionsService";
 import { getAdminUser } from "../../services/adminUsersService";
-import { ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import {
@@ -22,6 +22,7 @@ import {
   patchAdminSubmissionNote,
 } from "../../services/adminSubmissionNotesService";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAuth } from "../../context/AuthContext";
 
 const normalizeStatusForSelect = (value) => {
   const s = String(value || "").toLowerCase();
@@ -30,6 +31,8 @@ const normalizeStatusForSelect = (value) => {
 };
 
 export const AdminSubmissionDetail = () => {
+  const { role } = useAuth();
+  const canAccess = role === "publicador" || role === "admin";
   const { id } = useParams();
   const [row, setRow] = useState(null);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
@@ -69,8 +72,8 @@ export const AdminSubmissionDetail = () => {
   }, [numericId]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (canAccess) load();
+  }, [canAccess, load]);
 
   const loadNotes = useCallback(async () => {
     if (!numericId) return;
@@ -84,8 +87,8 @@ export const AdminSubmissionDetail = () => {
   }, [notesPage, numericId]);
 
   useEffect(() => {
-    loadNotes();
-  }, [loadNotes]);
+    if (canAccess) loadNotes();
+  }, [canAccess, loadNotes]);
 
   useEffect(() => {
     applyPageMeta({ title: `Admin — Envío #${id ?? ""}`, description: "Revisión de envío.", noindex: true });
@@ -243,6 +246,10 @@ export const AdminSubmissionDetail = () => {
     });
     if (!ok) return;
   };
+
+  if (!canAccess) {
+    return <EmptyState title="Sin acceso" description="Solo publicador y admin pueden revisar envíos colaborativos." />;
+  }
 
   if (loadState.status === "loading") {
     return (

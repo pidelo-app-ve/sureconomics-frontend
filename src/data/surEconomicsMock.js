@@ -37,7 +37,7 @@ export const TEAM = {
   leadership: [
     {
       id: "editor-oscar-doval",
-      name: "Oscar Doval",
+      name: "Óscar Doval",
       role: "Editor en Jefe",
       summary:
         "Lidera la dirección editorial y la línea de investigación del medio. Enfoque en rigor, claridad y mirada regional.",
@@ -67,7 +67,7 @@ export const TEAM = {
     },
   ],
   editorialBoard: [
-    { id: "consejo-oscar-doval", name: "Oscar Doval", role: "Consejo Editorial", summary: "Rigor y criterio editorial.", cvUrl: "#", email: "odoval@rendigroup.com", links: [] },
+    { id: "consejo-oscar-doval", name: "Óscar Doval", role: "Consejo Editorial", summary: "Rigor y criterio editorial.", cvUrl: "#", email: "odoval@rendigroup.com", links: [] },
     {
       id: "consejo-pablo-quintero",
       name: "Pablo Quintero",
@@ -99,7 +99,7 @@ export const TEAM = {
     },
     {
       id: "consejo-mafe-yanez",
-      name: "Mafe Yánez",
+      name: "Mafe Yáñez",
       role: "Consejo Editorial",
       summary: "Aporte editorial y de gestión institucional.",
       cvUrl: "#",
@@ -173,7 +173,7 @@ export const TEAM = {
     },
     {
       id: "col-andres-silva",
-      name: "Andres Silva Ayala",
+      name: "Andrés Silva Ayala",
       role: "Colaborador",
       summary:
         "Abogado (Universidad Monteávila). Máster en Comunicación y Marketing Político. Consultor político.",
@@ -196,7 +196,7 @@ export const TEAM = {
 
 export const INSTITUTIONAL = {
   purpose:
-    "Grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires, reunidos con la visión de crear la plataforma y el medio más robusto de información y conocimiento económico y financiero de América Latina.",
+    "Somos un grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires, reunidos con la visión de crear la plataforma y el medio más robusto de información y conocimiento económico y financiero de América Latina.",
   objectives: [
     "Generar información económica y financiera de valor para distintos países y bloques económicos latinoamericanos.",
     "Integrar datos cuantitativos y cualitativos obtenidos de bases de datos confiables e investigaciones de campo exhaustivas.",
@@ -210,7 +210,7 @@ export const CONTACT = {
   primaryEmail: "odoval@rendigroup.com",
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
-    { name: "Mafe Yánez", email: "myanez@rendigroup.com" },
+    { name: "Mafe Yáñez", email: "myanez@rendigroup.com" },
   ],
   offices: [
     { city: "Miami", address: "Dirección próximamente" },

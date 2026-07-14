@@ -13,3 +13,19 @@ export const getAdminUser = async (id) =>
 
 export const patchAdminUser = async (id, body) =>
   unwrapEntity(await adminRequest(`/admin/users/${encodeURIComponent(id)}`, { method: "PATCH", json: body }));
+
+export const setAdminUserCollabEnabled = async (id, enabled) =>
+  unwrapEntity(
+    await adminRequest(`/admin/users/${encodeURIComponent(id)}/collaborative-submissions`, {
+      method: "PATCH",
+      json: { enabled },
+    })
+  );
+
+export const setAdminUserActive = async (id, enabled) =>
+  unwrapEntity(
+    await adminRequest(`/admin/users/${encodeURIComponent(id)}/active`, {
+      method: "PATCH",
+      json: { enabled },
+    })
+  );

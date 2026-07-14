@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getAdminUser, patchAdminUser } from "../../services/adminUsersService";
+import {
+  getAdminUser,
+  patchAdminUser,
+  setAdminUserActive,
+  setAdminUserCollabEnabled,
+} from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
@@ -20,6 +25,14 @@ const readCollabFlag = (row) => {
   if (typeof v === "boolean") return v;
   if (v === 1 || v === "1" || v === "true") return true;
   return false;
+};
+
+const readActiveFlag = (row) => {
+  if (!row || typeof row !== "object") return true;
+  const v = row.is_active;
+  if (typeof v === "boolean") return v;
+  if (v === 0 || v === "0" || v === "false") return false;
+  return true;
 };
 
 const readEmailVerified = (row) => {
@@ -42,6 +55,7 @@ export const AdminUserDetail = () => {
   const { id } = useParams();
   const [row, setRow] = useState(null);
   const [collab, setCollab] = useState(false);
+  const [active, setActive] = useState(true);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [avatarFailed, setAvatarFailed] = useState(false);
@@ -61,6 +75,7 @@ export const AdminUserDetail = () => {
       const data = await getAdminUser(numericId);
       setRow(data);
       setCollab(readCollabFlag(data));
+      setActive(readActiveFlag(data));
       setFirstName(adminPick(data, ["first_name", "firstName"], ""));
       setLastName(adminPick(data, ["last_name", "lastName"], ""));
       setAvatarFailed(false);
@@ -85,15 +100,25 @@ export const AdminUserDetail = () => {
     try {
       const trimmedFirst = firstName.trim();
       const trimmedLast = lastName.trim();
-      const updated = await patchAdminUser(numericId, {
-        can_submit_collaborations: collab,
-        collaborative_submissions_enabled: collab,
-        first_name: trimmedFirst || undefined,
-        last_name: trimmedLast || undefined,
-      });
-      const merged = row && typeof row === "object" ? { ...row, ...updated } : updated;
+      let merged = row;
+
+      if (trimmedFirst || trimmedLast) {
+        const nameUpdate = await patchAdminUser(numericId, {
+          first_name: trimmedFirst || undefined,
+          last_name: trimmedLast || undefined,
+        });
+        merged = merged && typeof merged === "object" ? { ...merged, ...nameUpdate } : nameUpdate;
+      }
+
+      const collabUpdate = await setAdminUserCollabEnabled(numericId, collab);
+      merged = merged && typeof merged === "object" ? { ...merged, ...collabUpdate } : collabUpdate;
+
+      const activeUpdate = await setAdminUserActive(numericId, active);
+      merged = merged && typeof merged === "object" ? { ...merged, ...activeUpdate } : activeUpdate;
+
       setRow(merged);
       setCollab(readCollabFlag(merged));
+      setActive(readActiveFlag(merged));
       setFirstName(adminPick(merged, ["first_name", "firstName"], trimmedFirst));
       setLastName(adminPick(merged, ["last_name", "lastName"], trimmedLast));
       setSaveState({ status: "success", error: null });
@@ -175,6 +200,11 @@ export const AdminUserDetail = () => {
                   className={`se-admin-user-detail__chip${readCollabFlag(row) ? " se-admin-user-detail__chip--ok" : ""}`}
                 >
                   Colaboraciones: {readCollabFlag(row) ? "Sí" : "No"}
+                </span>
+                <span
+                  className={`se-admin-user-detail__chip${readActiveFlag(row) ? " se-admin-user-detail__chip--ok" : " se-admin-user-detail__chip--pending"}`}
+                >
+                  Cuenta: {readActiveFlag(row) ? "Activa" : "Desactivada"}
                 </span>
               </div>
               {email && email !== "—" ? (
@@ -292,6 +322,11 @@ export const AdminUserDetail = () => {
               <label className="se-form-field se-admin-user-detail__toggle" htmlFor="user-collab">
                 <input id="user-collab" type="checkbox" checked={collab} onChange={(e) => setCollab(e.target.checked)} />
                 <span className="se-form-label">Puede enviar colaboraciones</span>
+              </label>
+
+              <label className="se-form-field se-admin-user-detail__toggle" htmlFor="user-active">
+                <input id="user-active" type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
+                <span className="se-form-label">Cuenta activa</span>
               </label>
 
               <div className="se-admin-form-actions">

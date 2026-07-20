@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { RichTextEditor } from "../editor/RichTextEditor";
+import { ImageUrlField } from "../editor/ImageUrlField";
 
 export const SubmissionForm = ({
   values,
@@ -66,33 +68,23 @@ export const SubmissionForm = ({
             />
           </label>
 
-          <label className="se-form-field" htmlFor="submission-content">
+          <div className="se-form-field">
             <span className="se-form-label">Contenido</span>
-            <textarea
-              id="submission-content"
-              name="content"
-              className="se-form-control"
-              rows={12}
+            <RichTextEditor
               value={values.content}
-              onChange={handleFieldChange("content")}
-              required
+              onChange={(html) => onChange({ ...values, content: html })}
               disabled={isSubmitting}
             />
-          </label>
+          </div>
 
-          <label className="se-form-field" htmlFor="submission-image">
-            <span className="se-form-label">URL de imagen destacada</span>
-            <input
-              id="submission-image"
-              name="featured_image_url"
-              type="url"
-              className="se-form-control"
-              value={values.featuredImageUrl}
-              onChange={handleFieldChange("featuredImageUrl")}
-              required
-              disabled={isSubmitting}
-            />
-          </label>
+          <ImageUrlField
+            id="submission-image"
+            label="URL de imagen destacada"
+            value={values.featuredImageUrl}
+            onChange={(v) => onChange({ ...values, featuredImageUrl: v })}
+            required
+            disabled={isSubmitting}
+          />
 
           <button type="submit" className="se-btn" disabled={isSubmitting}>
             {isSubmitting ? "Guardando…" : submitLabel}

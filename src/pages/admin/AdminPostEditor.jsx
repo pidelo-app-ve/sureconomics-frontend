@@ -15,8 +15,8 @@ import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
-import { RichTextEditor } from "../../components/admin/RichTextEditor";
-import { ImageUrlField } from "../../components/admin/ImageUrlField";
+import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { ImageUrlField } from "../../components/editor/ImageUrlField";
 
 const emptyForm = () => ({
     title: "",

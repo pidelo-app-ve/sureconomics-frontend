@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
  * editor can confirm the link actually resolves to an image before saving
  * instead of finding out on the public page.
  */
-export const ImageUrlField = ({ id, label, value, onChange }) => {
+export const ImageUrlField = ({ id, label, value, onChange, required, disabled }) => {
   const [status, setStatus] = useState("idle");
 
   const trimmed = (value || "").trim();
@@ -16,6 +16,7 @@ export const ImageUrlField = ({ id, label, value, onChange }) => {
       <span className="se-form-label">{label}</span>
       <input
         id={id}
+        type="url"
         className="se-form-control"
         value={value}
         onChange={(e) => {
@@ -23,6 +24,8 @@ export const ImageUrlField = ({ id, label, value, onChange }) => {
           setStatus("idle");
         }}
         placeholder="https://…"
+        required={required}
+        disabled={disabled}
       />
       {trimmed ? (
         <div className="se-image-preview">
@@ -51,4 +54,6 @@ ImageUrlField.propTypes = {
   label: PropTypes.string.isRequired,
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  required: PropTypes.bool,
+  disabled: PropTypes.bool,
 };

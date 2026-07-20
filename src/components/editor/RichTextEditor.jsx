@@ -33,9 +33,9 @@ ToolbarButton.propTypes = {
  * into the existing `content` field with no backend changes -- the public
  * article page already renders HTML content as-is.
  *
- * @param {{ value: string, onChange: (html: string) => void, placeholder?: string }} props
+ * @param {{ value: string, onChange: (html: string) => void, placeholder?: string, disabled?: boolean }} props
  */
-export const RichTextEditor = ({ value, onChange, placeholder }) => {
+export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
   // Tiptap only re-renders this component on content changes (`onUpdate`);
   // clicking a toolbar button toggles a mark/selection without necessarily
   // changing content, so without this the button highlight goes stale until
@@ -50,6 +50,7 @@ export const RichTextEditor = ({ value, onChange, placeholder }) => {
       Placeholder.configure({ placeholder: placeholder || "Escriba el contenido…" }),
     ],
     content: value || "",
+    editable: !disabled,
     onUpdate: ({ editor: e }) => {
       onChange(e.getHTML());
     },
@@ -57,6 +58,11 @@ export const RichTextEditor = ({ value, onChange, placeholder }) => {
       forceRerender((t) => t + 1);
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.setEditable(!disabled);
+  }, [editor, disabled]);
 
   // Keep the editor in sync when `value` changes from outside (e.g. loading
   // an existing post) without fighting the user's own typing.
@@ -173,4 +179,5 @@ RichTextEditor.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
 };

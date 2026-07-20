@@ -5157,25 +5157,32 @@ a.se-topics__chip:focus-visible {
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* Rich text editor (post content) */
-.se-admin-app .se-richtext {
+/* Rich text editor (post content) -- theme-agnostic: reads the same
+   --se-form-* tokens the surrounding form already sets, so it looks right
+   in both the dark admin panel and the light reader ("Envíos") dashboard. */
+.se-richtext {
+  --rte-hover-bg: color-mix(in srgb, var(--se-form-text) 8%, transparent);
+  --rte-active-bg: color-mix(in srgb, var(--se-form-focus) 16%, transparent);
+  --rte-divider: color-mix(in srgb, var(--se-form-text) 14%, transparent);
+  --rte-toolbar-bg: color-mix(in srgb, var(--se-form-surface) 92%, var(--se-form-text) 4%);
+
   border: 1.5px solid var(--se-form-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--se-form-surface);
   overflow: hidden;
 }
 
-.se-admin-app .se-richtext__toolbar {
+.se-richtext__toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem;
   border-bottom: 1.5px solid var(--se-form-border);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--rte-toolbar-bg);
 }
 
-.se-admin-app .se-richtext__btn {
+.se-richtext__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5185,36 +5192,36 @@ a.se-topics__chip:focus-visible {
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--se-form-muted, var(--se-form-text));
   font-family: var(--se-font-ui);
   font-size: 0.8rem;
   cursor: pointer;
-  transition: background 0.15s var(--adm-ease), border-color 0.15s var(--adm-ease);
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.se-admin-app .se-richtext__btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
+.se-richtext__btn:hover:not(:disabled) {
+  background: var(--rte-hover-bg);
 }
 
-.se-admin-app .se-richtext__btn--active {
-  background: var(--adm-accent-soft);
-  border-color: var(--adm-accent);
-  color: #fff;
+.se-richtext__btn--active {
+  background: var(--rte-active-bg);
+  border-color: var(--se-form-focus);
+  color: var(--se-form-text);
 }
 
-.se-admin-app .se-richtext__btn:disabled {
+.se-richtext__btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.se-admin-app .se-richtext__divider {
+.se-richtext__divider {
   width: 1px;
   height: 1.4rem;
   margin: 0 0.15rem;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--rte-divider);
 }
 
-.se-admin-app .se-richtext__content {
+.se-richtext__content {
   padding: 0.85rem 1rem;
   min-height: 16rem;
   max-height: 32rem;
@@ -5222,12 +5229,12 @@ a.se-topics__chip:focus-visible {
   color: var(--se-form-text);
 }
 
-.se-admin-app .se-richtext__content .ProseMirror {
+.se-richtext__content .ProseMirror {
   outline: none;
   min-height: 15rem;
 }
 
-.se-admin-app .se-richtext__content .ProseMirror p.is-editor-empty:first-child::before {
+.se-richtext__content .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
   height: 0;
@@ -5235,35 +5242,36 @@ a.se-topics__chip:focus-visible {
   pointer-events: none;
 }
 
-.se-admin-app .se-richtext__content .ProseMirror > * + * {
+.se-richtext__content .ProseMirror > * + * {
   margin-top: 0.75em;
 }
 
-.se-admin-app .se-richtext__content .ProseMirror ul,
-.se-admin-app .se-richtext__content .ProseMirror ol {
+.se-richtext__content .ProseMirror ul,
+.se-richtext__content .ProseMirror ol {
   padding-left: 1.4rem;
 }
 
-.se-admin-app .se-richtext__content .ProseMirror blockquote {
-  border-left: 3px solid var(--adm-accent);
+.se-richtext__content .ProseMirror blockquote {
+  border-left: 3px solid var(--se-form-focus);
   padding-left: 1rem;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--se-form-muted);
 }
 
-.se-admin-app .se-richtext__content .ProseMirror a {
-  color: #ffb4b4;
+.se-richtext__content .ProseMirror a {
+  color: var(--se-form-focus);
+  text-decoration: underline;
 }
 
 /* Featured image URL + preview */
-.se-admin-app .se-image-preview {
+.se-image-preview {
   margin-top: 0.6rem;
   border: 1.5px solid var(--se-form-border);
   border-radius: 12px;
   padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--se-form-surface) 96%, var(--se-form-text) 3%);
 }
 
-.se-admin-app .se-image-preview__img {
+.se-image-preview__img {
   display: block;
   max-width: 100%;
   max-height: 220px;
@@ -5271,14 +5279,14 @@ a.se-topics__chip:focus-visible {
   object-fit: contain;
 }
 
-.se-admin-app .se-image-preview__hint {
+.se-image-preview__hint {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   color: var(--se-form-muted);
 }
 
-.se-admin-app .se-image-preview__hint--error {
-  color: #ff9aa8;
+.se-image-preview__hint--error {
+  color: var(--se-form-invalid, #ff4d6d);
 }
 
 /* Admin confirm dialog (delete) */

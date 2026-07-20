@@ -15,6 +15,8 @@ import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
+import { RichTextEditor } from "../../components/admin/RichTextEditor";
+import { ImageUrlField } from "../../components/admin/ImageUrlField";
 
 const emptyForm = () => ({
     title: "",
@@ -404,16 +406,13 @@ export const AdminPostEditor = () => {
                         onChange={handleChange("excerpt")}
                     />
                 </label>
-                <label className="se-form-field" htmlFor="post-content">
+                <div className="se-form-field">
                     <span className="se-form-label">Contenido</span>
-                    <textarea
-                        id="post-content"
-                        className="se-form-control se-form-control--textarea"
-                        rows={14}
+                    <RichTextEditor
                         value={form.content}
-                        onChange={handleChange("content")}
+                        onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
                     />
-                </label>
+                </div>
                 <label className="se-form-field" htmlFor="post-meta-title">
                     <span className="se-form-label">Meta título (SEO)</span>
                     <input
@@ -442,15 +441,12 @@ export const AdminPostEditor = () => {
                         onChange={handleChange("canonical_url")}
                     />
                 </label>
-                <label className="se-form-field" htmlFor="post-image">
-                    <span className="se-form-label">Imagen destacada</span>
-                    <input
-                        id="post-image"
-                        className="se-form-control"
-                        value={form.featured_image_url}
-                        onChange={handleChange("featured_image_url")}
-                    />
-                </label>
+                <ImageUrlField
+                    id="post-image"
+                    label="Imagen destacada"
+                    value={form.featured_image_url}
+                    onChange={(v) => setForm((prev) => ({ ...prev, featured_image_url: v }))}
+                />
 
                 <fieldset className="se-form-field">
                     <legend className="se-form-label">Categorías</legend>

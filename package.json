@@ -11,6 +11,11 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@tiptap/extension-link": "^3.28.0",
+        "@tiptap/extension-placeholder": "^3.28.0",
+        "@tiptap/pm": "^3.28.0",
+        "@tiptap/react": "^3.28.0",
+        "@tiptap/starter-kit": "^3.28.0",
         "country-telephone-data": "^0.6.3",
         "flag-icons": "^7.5.0",
         "i18n-iso-countries": "^7.14.0",

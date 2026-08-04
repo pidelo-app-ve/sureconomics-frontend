@@ -141,8 +141,12 @@ export const refreshAdminTokens = async () => {
  * Authenticated admin request. Uses access token from sessionStorage; on 401 refreshes once and retries.
  * Returns `data` or `{ data, meta }` when pagination meta is present.
  *
+ * Pass `json` for a JSON body, or `body` directly for anything else — a `FormData`
+ * body is left untouched and no `Content-Type` is set, so the browser can add the
+ * multipart boundary itself (see `adminUploadsService`).
+ *
  * @param {string} path
- * @param {Omit<RequestInit, 'body'> & { json?: unknown, query?: Record<string, unknown> }} [options]
+ * @param {RequestInit & { json?: unknown, query?: Record<string, unknown> }} [options]
  * @returns {Promise<unknown>}
  */
 export const adminRequest = async (path, options = {}) => {

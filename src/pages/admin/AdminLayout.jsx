@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../../context/AuthContext";
+import { AdminToastProvider } from "../../context/AdminToastContext";
+import { AdminToastViewport } from "../../components/admin/AdminToastViewport";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 
 const RAIL_MENU_ID = "se-admin-rail-menu";
@@ -21,7 +23,7 @@ NavGroup.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-export const AdminLayout = () => {
+const AdminShell = () => {
   const { logout, role } = useAuth();
   const canCreateArticle = role === "escritor" || role === "admin";
   const canSeeEditorial = role === "publicador" || role === "admin";
@@ -186,6 +188,18 @@ export const AdminLayout = () => {
           </div>
         </main>
       </div>
+
+      <AdminToastViewport />
     </div>
   );
 };
+
+/**
+ * Toasts are provided at the shell level so every admin page can report the
+ * outcome of an action without each one wiring up its own notification UI.
+ */
+export const AdminLayout = () => (
+  <AdminToastProvider>
+    <AdminShell />
+  </AdminToastProvider>
+);

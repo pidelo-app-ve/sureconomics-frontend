@@ -7,10 +7,14 @@ import {
   patchAdminHeadline,
 } from "../../services/adminHeadlinesService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const emptyForm = () => ({
   title: "",
@@ -48,8 +52,10 @@ export const AdminHeadlineEditor = () => {
   const isCreate = /\/admin\/headlines\/new\/?$/.test(pathname);
   const [form, setForm] = useState(emptyForm);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
-  const [saveState, setSaveState] = useState({ status: "idle", error: null });
+  const [saveState, setSaveState] = useState({ status: "idle", message: "" });
   const { confirm, ConfirmDialog } = useAdminConfirm();
+  const flash = useFlashMessage();
+  const { toastSuccess, toastError } = useAdminToast();
 
   const numericId = useMemo(() => {
     if (!id) return null;
@@ -85,9 +91,13 @@ export const AdminHeadlineEditor = () => {
     });
   }, [isCreate, id]);
 
+  useEffect(() => {
+    if (flash) toastSuccess(flash);
+  }, [flash, toastSuccess]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaveState({ status: "loading", error: null });
+    setSaveState({ status: "loading", message: "" });
     try {
       let publishedAtIso;
       if (form.published_at.trim()) {
@@ -105,14 +115,24 @@ export const AdminHeadlineEditor = () => {
       if (isCreate) {
         const created = await createAdminHeadline(body);
         const newId = created?.id ?? created?._id;
-        if (newId != null) navigate(`/admin/headlines/${newId}`, { replace: true });
-        else navigate("/admin/headlines", { replace: true });
+        const flashMessage = `El titular «${body.title}» se creó correctamente.`;
+        if (newId != null) {
+          navigate(`/admin/headlines/${newId}`, { replace: true, state: { flash: flashMessage } });
+        } else {
+          navigate("/admin/headlines", { replace: true, state: { flash: flashMessage } });
+        }
         return;
       }
       await patchAdminHeadline(numericId, body);
-      setSaveState({ status: "success", error: null });
+      setSaveState({ status: "success", message: "Cambios guardados correctamente." });
+      toastSuccess("Cambios guardados correctamente.", "Titular guardado");
     } catch (err) {
-      setSaveState({ status: "error", error: err });
+      const message = adminErrorMessage(
+        err,
+        isCreate ? "No se pudo crear el titular." : "No se pudieron guardar los cambios."
+      );
+      setSaveState({ status: "error", message });
+      toastError(message, isCreate ? "No se pudo crear el titular" : "No se pudo guardar");
     }
   };
 
@@ -164,17 +184,6 @@ export const AdminHeadlineEditor = () => {
       </header>
 
       <form className="se-contact-form" onSubmit={handleSubmit} style={{ maxWidth: "40rem" }}>
-        {saveState.status === "error" ? (
-          <p className="se-admin-login__error" role="alert">
-            {saveState.error instanceof Error ? saveState.error.message : "Error al guardar."}
-          </p>
-        ) : null}
-        {saveState.status === "success" ? (
-          <p className="se-text-body" role="status">
-            Guardado correctamente.
-          </p>
-        ) : null}
-
         <label className="se-form-field" htmlFor="hl-title">
           <span className="se-form-label">Título</span>
           <input
@@ -233,6 +242,11 @@ export const AdminHeadlineEditor = () => {
           />
           <span className="se-form-label">Activo</span>
         </label>
+        <AdminFormFeedback
+          tone={saveState.status === "error" ? "error" : "success"}
+          message={saveState.status === "loading" ? "" : saveState.message}
+        />
+
         <div className="se-admin-form-actions">
           <button type="submit" className="se-btn" disabled={saveState.status === "loading"}>
             {saveState.status === "loading" ? "Guardando…" : "Guardar"}

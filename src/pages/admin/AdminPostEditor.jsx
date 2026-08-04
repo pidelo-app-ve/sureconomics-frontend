@@ -10,13 +10,17 @@ import {
     publishAdminPost,
     unpublishAdminPost,
 } from "../../services/adminPostsService";
+import { uploadAdminImage } from "../../services/adminUploadsService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { applyPageMeta } from "../../lib/seo";
+import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
+import { useAdminToast } from "../../context/AdminToastContext";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
-import { ImageUrlField } from "../../components/editor/ImageUrlField";
+import { ImageField } from "../../components/editor/ImageField";
 
 const emptyForm = () => ({
     title: "",
@@ -131,10 +135,11 @@ export const AdminPostEditor = () => {
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
-    const [saveState, setSaveState] = useState({ status: "idle", error: null, message: "" });
-    const [actionState, setActionState] = useState({ status: "idle", error: null, message: "", kind: "" });
+    const [saveState, setSaveState] = useState({ status: "idle", message: "" });
+    const [actionState, setActionState] = useState({ status: "idle", message: "", kind: "" });
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
+    const { toastSuccess, toastError } = useAdminToast();
 
     const numericPostId = useMemo(() => {
         if (!postId) return null;
@@ -184,6 +189,12 @@ export const AdminPostEditor = () => {
         });
     }, [isCreate, postId]);
 
+    // A create redirects here with `state.flash`; surface it as a toast so the
+    // confirmation is visible no matter where the page is scrolled.
+    useEffect(() => {
+        if (flash) toastSuccess(flash);
+    }, [flash, toastSuccess]);
+
     const handleChange = (field) => (e) => {
         const v = e.target.value;
         setForm((prev) => ({ ...prev, [field]: v }));
@@ -198,8 +209,8 @@ export const AdminPostEditor = () => {
     };
 
     const handleSave = async () => {
-        setSaveState({ status: "loading", error: null, message: "" });
-        setActionState({ status: "idle", error: null, message: "" });
+        setSaveState({ status: "loading", message: "" });
+        setActionState({ status: "idle", message: "", kind: "" });
         try {
             const payload = formToPayload(form);
             if (isCreate) {
@@ -225,41 +236,55 @@ export const AdminPostEditor = () => {
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
-            setSaveState({ status: "success", error: null, message: "Guardado correctamente." });
+            setSaveState({ status: "success", message: "Cambios guardados correctamente." });
+            toastSuccess("Cambios guardados correctamente.", "Artículo guardado");
         } catch (err) {
-            setSaveState({ status: "error", error: err, message: "" });
+            const message = adminErrorMessage(
+                err,
+                isCreate ? "No se pudo crear el artículo." : "No se pudieron guardar los cambios."
+            );
+            setSaveState({ status: "error", message });
+            toastError(message, isCreate ? "No se pudo crear el artículo" : "No se pudo guardar");
         }
     };
 
     const handlePublish = async () => {
         if (isCreate) return;
-        setSaveState({ status: "idle", error: null, message: "" });
-        setActionState({ status: "loading", error: null, message: "", kind: "publish" });
+        setSaveState({ status: "idle", message: "" });
+        setActionState({ status: "loading", message: "", kind: "publish" });
         try {
             const updated = await publishAdminPost(numericPostId);
             setForm(postToForm(updated));
-            setActionState({ status: "success", error: null, message: "Artículo publicado correctamente.", kind: "publish" });
+            const message = "El artículo quedó publicado y ya es visible en el sitio.";
+            setActionState({ status: "success", message, kind: "publish" });
+            toastSuccess(message, "Artículo publicado");
         } catch (err) {
-            setActionState({ status: "error", error: err, message: "", kind: "publish" });
+            const message = adminErrorMessage(err, "No se pudo publicar el artículo.");
+            setActionState({ status: "error", message, kind: "publish" });
+            toastError(message, "No se pudo publicar");
         }
     };
 
     const handleUnpublish = async () => {
         if (isCreate) return;
-        setSaveState({ status: "idle", error: null, message: "" });
-        setActionState({ status: "loading", error: null, message: "", kind: "unpublish" });
+        setSaveState({ status: "idle", message: "" });
+        setActionState({ status: "loading", message: "", kind: "unpublish" });
         try {
             const updated = await unpublishAdminPost(numericPostId);
             setForm(postToForm(updated));
-            setActionState({ status: "success", error: null, message: "Artículo despublicado correctamente.", kind: "unpublish" });
+            const message = "El artículo se despublicó y ya no es visible en el sitio.";
+            setActionState({ status: "success", message, kind: "unpublish" });
+            toastSuccess(message, "Artículo despublicado");
         } catch (err) {
-            setActionState({ status: "error", error: err, message: "", kind: "unpublish" });
+            const message = adminErrorMessage(err, "No se pudo despublicar el artículo.");
+            setActionState({ status: "error", message, kind: "unpublish" });
+            toastError(message, "No se pudo despublicar");
         }
     };
 
     const handleDelete = async () => {
         if (isCreate) return;
-        setActionState({ status: "idle", error: null, message: "", kind: "" });
+        setActionState({ status: "idle", message: "", kind: "" });
         await confirm({
             title: "Eliminar artículo",
             description: `¿Eliminar este artículo (ID ${numericPostId}) de forma permanente?`,
@@ -274,13 +299,17 @@ export const AdminPostEditor = () => {
         });
     };
 
-    const formatActionError = (err) => {
-        if (!err) return "";
-        if (err.status === 429) {
-            return "Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.";
+    /**
+     * One inline message rendered next to the buttons. Each handler resets the
+     * other state to `idle`, so at most one of the two is ever reportable.
+     */
+    const feedback = (() => {
+        for (const state of [actionState, saveState]) {
+            if (state.status === "error") return { tone: "error", message: state.message };
+            if (state.status === "success") return { tone: "success", message: state.message };
         }
-        return err.message || "Error";
-    };
+        return null;
+    })();
 
     if (isCreate && !canCreate) {
         return <EmptyState title="Sin acceso" description="Solo escritor y admin pueden crear artículos nuevos." />;
@@ -322,32 +351,6 @@ export const AdminPostEditor = () => {
                     ← Volver al listado
                 </Link>
             </header>
-
-            {flash ? (
-                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
-                    {flash}
-                </p>
-            ) : null}
-            {saveState.status === "error" ? (
-                <p className="se-admin-login__error" role="alert">
-                    {formatActionError(saveState.error)}
-                </p>
-            ) : null}
-            {saveState.status === "success" ? (
-                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
-                    {saveState.message}
-                </p>
-            ) : null}
-            {actionState.status === "error" ? (
-                <p className="se-admin-login__error" role="alert">
-                    {formatActionError(actionState.error)}
-                </p>
-            ) : null}
-            {actionState.status === "success" ? (
-                <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
-                    {actionState.message}
-                </p>
-            ) : null}
 
             <div className="se-contact-form">
                 <label className="se-form-field" htmlFor="post-title">
@@ -441,11 +444,12 @@ export const AdminPostEditor = () => {
                         onChange={handleChange("canonical_url")}
                     />
                 </label>
-                <ImageUrlField
+                <ImageField
                     id="post-image"
                     label="Imagen destacada"
                     value={form.featured_image_url}
                     onChange={(v) => setForm((prev) => ({ ...prev, featured_image_url: v }))}
+                    onUpload={uploadAdminImage}
                 />
 
                 <fieldset className="se-form-field">
@@ -497,6 +501,8 @@ export const AdminPostEditor = () => {
                     publicación, además de las categorías y etiquetas seleccionadas. Publicar y despublicar son
                     acciones independientes del guardado.
                 </p>
+
+                <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
 
                 <div className="se-admin-form-actions">
                     <button type="button" className="se-btn" onClick={handleSave} disabled={saveState.status === "loading"}>

@@ -7,9 +7,13 @@ import {
   patchAdminCategory,
 } from "../../services/adminTaxonomyService";
 import { ErrorState, LoadingState } from "../../components/content";
+import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { useAdminToast } from "../../context/AdminToastContext";
 
 const emptyForm = () => ({ name: "", slug: "" });
 
@@ -25,8 +29,10 @@ export const AdminCategoryEditor = () => {
   const isCreate = /\/admin\/categories\/new\/?$/.test(pathname);
   const [form, setForm] = useState(emptyForm);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
-  const [saveState, setSaveState] = useState({ status: "idle", error: null });
+  const [saveState, setSaveState] = useState({ status: "idle", message: "" });
   const { confirm, ConfirmDialog } = useAdminConfirm();
+  const flash = useFlashMessage();
+  const { toastSuccess, toastError } = useAdminToast();
 
   const numericId = useMemo(() => {
     if (!id) return null;
@@ -62,26 +68,40 @@ export const AdminCategoryEditor = () => {
     });
   }, [isCreate, id]);
 
+  useEffect(() => {
+    if (flash) toastSuccess(flash);
+  }, [flash, toastSuccess]);
+
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaveState({ status: "loading", error: null });
+    setSaveState({ status: "loading", message: "" });
     try {
       const body = { name: form.name.trim(), slug: form.slug.trim() };
       if (isCreate) {
         const created = await createAdminCategory(body);
         const newId = created?.id ?? created?._id;
-        if (newId != null) navigate(`/admin/categories/${newId}`, { replace: true });
-        else navigate("/admin/categories", { replace: true });
+        const flashMessage = `La categoría «${body.name}» se creó correctamente.`;
+        if (newId != null) {
+          navigate(`/admin/categories/${newId}`, { replace: true, state: { flash: flashMessage } });
+        } else {
+          navigate("/admin/categories", { replace: true, state: { flash: flashMessage } });
+        }
         return;
       }
       await patchAdminCategory(numericId, body);
-      setSaveState({ status: "success", error: null });
+      setSaveState({ status: "success", message: "Cambios guardados correctamente." });
+      toastSuccess("Cambios guardados correctamente.", "Categoría guardada");
     } catch (err) {
-      setSaveState({ status: "error", error: err });
+      const message = adminErrorMessage(
+        err,
+        isCreate ? "No se pudo crear la categoría." : "No se pudieron guardar los cambios."
+      );
+      setSaveState({ status: "error", message });
+      toastError(message, isCreate ? "No se pudo crear la categoría" : "No se pudo guardar");
     }
   };
 
@@ -129,17 +149,6 @@ export const AdminCategoryEditor = () => {
       </header>
 
       <form className="se-contact-form" onSubmit={handleSubmit} style={{ maxWidth: "32rem" }}>
-        {saveState.status === "error" ? (
-          <p className="se-admin-login__error" role="alert">
-            {saveState.error instanceof Error ? saveState.error.message : "Error al guardar."}
-          </p>
-        ) : null}
-        {saveState.status === "success" ? (
-          <p className="se-text-body" role="status">
-            Guardado correctamente.
-          </p>
-        ) : null}
-
         <label className="se-form-field" htmlFor="cat-name">
           <span className="se-form-label">Nombre</span>
           <input
@@ -154,6 +163,11 @@ export const AdminCategoryEditor = () => {
           <span className="se-form-label">Slug</span>
           <input id="cat-slug" className="se-form-control" value={form.slug} onChange={handleChange("slug")} required />
         </label>
+        <AdminFormFeedback
+          tone={saveState.status === "error" ? "error" : "success"}
+          message={saveState.status === "loading" ? "" : saveState.message}
+        />
+
         <div className="se-admin-form-actions">
           <button type="submit" className="se-btn" disabled={saveState.status === "loading"}>
             {saveState.status === "loading" ? "Guardando…" : "Guardar"}

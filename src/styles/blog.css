@@ -5289,6 +5289,162 @@ a.se-topics__chip:focus-visible {
   color: var(--se-form-invalid, #ff4d6d);
 }
 
+/* —— Featured image: URL vs. upload —— */
+.se-image-field__modes {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 0.55rem;
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--se-form-surface) 92%, var(--se-form-text) 6%);
+}
+
+.se-image-field__mode {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.34rem 0.9rem;
+  border-radius: 999px;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--se-form-muted);
+  transition: background var(--adm-dur, 0.18s) ease, color var(--adm-dur, 0.18s) ease;
+}
+
+.se-image-field__mode:hover:not(:disabled) {
+  color: var(--se-form-text);
+}
+
+.se-image-field__mode--active {
+  background: var(--se-form-focus, #e84040);
+  color: #fff;
+}
+
+.se-image-field__mode:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.se-image-field__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px dashed var(--se-form-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--se-form-surface) 96%, var(--se-form-text) 3%);
+  text-align: center;
+  transition: border-color var(--adm-dur, 0.18s) ease, background var(--adm-dur, 0.18s) ease;
+}
+
+.se-image-field__drop--over {
+  border-color: var(--se-form-focus, #e84040);
+  border-style: solid;
+  background: color-mix(in srgb, var(--se-form-surface) 86%, var(--se-form-focus, #e84040) 12%);
+}
+
+.se-image-field__drop--busy {
+  opacity: 0.9;
+}
+
+.se-image-field__drop-text {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  color: var(--se-form-text);
+}
+
+.se-image-field__drop-hint {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  color: var(--se-form-muted);
+}
+
+.se-image-field__pick {
+  flex: 0 0 auto;
+}
+
+.se-image-field__spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--se-form-border);
+  border-top-color: var(--se-form-focus, #e84040);
+  animation: se-image-field-spin 0.7s linear infinite;
+}
+
+@keyframes se-image-field-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-image-field__spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.se-image-field__alert {
+  margin: 0.55rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.se-image-field__alert--error {
+  color: var(--se-form-invalid, #ff4d6d);
+}
+
+.se-image-field__alert--ok {
+  color: var(--se-form-muted);
+}
+
+.se-image-field__current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+/* The Cloudinary URL is long; let it shrink and ellipsize rather than push the
+   "Quitar imagen" button out of the card. */
+.se-image-field__url {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mono, monospace);
+  font-size: 0.74rem;
+  color: var(--se-form-muted);
+}
+
+.se-image-field__clear {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--se-form-invalid, #ff4d6d);
+  text-decoration: underline;
+}
+
+.se-image-field__clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 /* Admin confirm dialog (delete) */
 .se-admin-app .se-adm-dialog {
   position: fixed;
@@ -6871,6 +7027,154 @@ a.se-topics__chip:focus-visible {
   font-size: var(--se-text-caption);
   color: rgba(255, 255, 255, 0.58);
   margin-top: var(--se-space-xs);
+}
+
+/* —— Admin: resultado de una acción, junto a los botones —— */
+.se-admin-form-feedback {
+  margin: var(--se-space-md) 0 0;
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  line-height: 1.5;
+}
+
+/* Errors reuse `.se-admin-login__error`, which already brings its own box. */
+.se-admin-form-feedback--ok {
+  padding: var(--se-space-sm) var(--se-space-md);
+  border-radius: 8px;
+  color: #b9f0cf;
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.32);
+}
+
+/* —— Admin: avisos flotantes (toasts) ——
+   Fixed to the viewport so the outcome of a click is visible even when the
+   button that triggered it sits at the bottom of a very long form. */
+.se-adm-toasts {
+  position: fixed;
+  z-index: 200;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: min(24rem, calc(100vw - 1.5rem));
+  pointer-events: none;
+}
+
+.se-adm-toast {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 0.7rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: var(--adm-radius-md, 14px);
+  border: 1px solid var(--adm-border, rgba(255, 255, 255, 0.1));
+  background: #171a21;
+  box-shadow: var(--adm-shadow-md, 0 18px 44px rgba(0, 0, 0, 0.55));
+  animation: se-adm-toast-in 0.24s var(--adm-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+}
+
+@keyframes se-adm-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-adm-toast {
+    animation: none;
+  }
+}
+
+.se-adm-toast__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0b0d10;
+}
+
+.se-adm-toast--success {
+  border-left: 3px solid #2ecc71;
+}
+
+.se-adm-toast--success .se-adm-toast__icon {
+  background: #2ecc71;
+}
+
+.se-adm-toast--error {
+  border-left: 3px solid var(--adm-red, #e84040);
+}
+
+.se-adm-toast--error .se-adm-toast__icon {
+  background: var(--adm-red, #e84040);
+  color: #fff;
+}
+
+.se-adm-toast--info {
+  border-left: 3px solid rgba(255, 255, 255, 0.42);
+}
+
+.se-adm-toast--info .se-adm-toast__icon {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.se-adm-toast__body {
+  min-width: 0;
+}
+
+.se-adm-toast__title {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.se-adm-toast__text {
+  margin: 0.2rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+  overflow-wrap: anywhere;
+}
+
+.se-adm-toast__close {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0 0.15rem;
+  line-height: 1;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color var(--adm-dur, 0.18s) ease;
+}
+
+.se-adm-toast__close:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* The mobile admin bar is fixed at the top; keep toasts clear of the bottom
+   edge on small screens where thumbs live. */
+@media (max-width: 640px) {
+  .se-adm-toasts {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+  }
 }
 
 /* —— Admin: detalle de usuario (ficha + API completa) —— */

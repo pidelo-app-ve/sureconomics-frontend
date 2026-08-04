@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { RichTextEditor } from "../editor/RichTextEditor";
-import { ImageUrlField } from "../editor/ImageUrlField";
+import { ImageField } from "../editor/ImageField";
 
 export const SubmissionForm = ({
   values,
@@ -77,7 +77,7 @@ export const SubmissionForm = ({
             />
           </div>
 
-          <ImageUrlField
+          <ImageField
             id="submission-image"
             label="URL de imagen destacada"
             value={values.featuredImageUrl}

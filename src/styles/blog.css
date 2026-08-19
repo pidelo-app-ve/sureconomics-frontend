@@ -9940,6 +9940,13 @@ a.se-topics__chip:focus-visible {
   height: 100%;
 }
 
+/* The container is already 16/9 and clips; this stops a photograph of another
+   ratio from being stretched to fit it. */
+.se-artcard__img {
+  display: block;
+  object-fit: cover;
+}
+
 .se-artcard__summary {
   margin: 0;
   font-size: var(--se-text-small);

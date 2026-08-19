@@ -111,6 +111,33 @@ const varianteDe = (slug) => {
   return VARIANTES[total % VARIANTES.length];
 };
 
+/**
+ * Una derivada del tamaño en que la imagen se va a ver.
+ *
+ * Las imágenes que la redacción sube son PNG de 1536 px y cerca de 2 MB cada una.
+ * En una tarjeta de 400 px eso son veinte veces más píxeles de los que se pintan,
+ * y el listado de artículos llegaba a pesar unos 17 MB — inaceptable en móvil, que
+ * es donde se lee un medio económico de la región.
+ *
+ * Cloudinary sirve derivadas por URL, así que basta insertar la transformación:
+ * `f_auto` entrega WebP o AVIF a quien los acepte, `q_auto` ajusta la compresión, y
+ * `c_fill` recorta al encuadre en vez de deformar.
+ *
+ * Solo toca direcciones de Cloudinary y solo cuando no traen ya una transformación
+ * — `featured_image_url` es un campo libre y puede apuntar a cualquier sitio, que
+ * se devuelve intacto.
+ */
+export const imagenAncho = (url, ancho) => {
+  if (!url || !url.includes("res.cloudinary.com")) return url;
+  const marca = "/image/upload/";
+  const corte = url.indexOf(marca);
+  if (corte === -1) return url;
+  const resto = url.slice(corte + marca.length);
+  // `v<digitos>/` justo después de `upload/` significa que no hay transformación.
+  if (!/^v\d+\//.test(resto)) return url;
+  return `${url.slice(0, corte + marca.length)}f_auto,q_auto,c_fill,w_${ancho}/${resto}`;
+};
+
 /** Where a piece lives. */
 export const rutaDePieza = (pieza) => {
   if (!pieza) return "/";

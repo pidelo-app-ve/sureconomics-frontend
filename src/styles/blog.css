@@ -10270,6 +10270,16 @@ a.se-topics__chip:focus-visible {
   border-radius: 10px;
 }
 
+/* Without this the photograph renders at its intrinsic 1536px inside a narrower
+   reading column, and the container's `overflow: hidden` clips it instead of
+   scaling it -- the reader saw a crop of the left third of the image. Full width
+   of the column, height from the image, so the whole composition survives. */
+.se-piece__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .se-piece__back {
   display: inline-block;
   margin-top: var(--se-space-md);

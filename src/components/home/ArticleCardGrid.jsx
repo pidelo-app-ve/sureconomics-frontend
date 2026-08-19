@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { PlaceholderImage } from "../blog";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { rutaDePieza } from "../../lib/pieza";
+import { imagenAncho, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
@@ -18,7 +18,7 @@ export const ArticleCardGrid = ({ items }) => (
           {a.imagenUrl ? (
             <img
               className="se-artcard__img"
-              src={a.imagenUrl}
+              src={imagenAncho(a.imagenUrl, 800)}
               alt=""
               loading="lazy"
               decoding="async"

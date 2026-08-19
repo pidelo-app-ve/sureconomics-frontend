@@ -5,6 +5,7 @@ import { PlaceholderImage } from "../blog";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
 import { piezaShape } from "../home/piezaShape";
+import { imagenAncho } from "../../lib/pieza";
 
 /**
  * Body copy, as the writer formatted it.
@@ -254,7 +255,12 @@ DownloadGate.propTypes = { pieza: piezaShape().isRequired };
 const Media = ({ pieza }) =>
   pieza.imagenUrl ? (
     <div className="se-piece__media">
-      <img className="se-piece__img" src={pieza.imagenUrl} alt={pieza.titulo} loading="lazy" />
+      <img
+        className="se-piece__img"
+        src={imagenAncho(pieza.imagenUrl, 1400)}
+        alt={pieza.titulo}
+        loading="lazy"
+      />
     </div>
   ) : (
     <div className="se-piece__media">

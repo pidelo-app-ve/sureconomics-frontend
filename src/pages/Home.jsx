@@ -13,7 +13,7 @@ import {
   NewsList,
   ReportGrid,
 } from "../components/home";
-import { FORMATO_META } from "../lib/pieza";
+import { FORMATO_META, imagenAncho } from "../lib/pieza";
 import { temaPrincipal } from "../lib/contentFilter";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
@@ -60,7 +60,7 @@ const aperturaDe = (pieza) =>
         date: pieza.fecha,
         author: pieza.autor ?? "",
         category: temaPrincipal(pieza) ?? "",
-        imageUrl: pieza.imagenUrl ?? "",
+        imageUrl: imagenAncho(pieza.imagenUrl, 1600) ?? "",
         imagePlaceholder: "growth",
         readTime: "",
       }

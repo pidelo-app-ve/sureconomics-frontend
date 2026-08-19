@@ -7,14 +7,27 @@ import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
 
-const isNavItemActive = (pathname, to) => {
+/**
+ * Several format entries share the `/articulos` path and differ only by the
+ * `formato` query param, so matching on pathname alone would light up
+ * "Artículos" while the reader is on Noticias. Compare the param too, and treat
+ * a param-less entry as "no format selected".
+ */
+const isNavItemActive = (pathname, search, to) => {
   if (to === "/") return pathname === "/";
-  if (to === "/articulos") {
-    return (
-      pathname.startsWith("/articulos") || pathname.startsWith("/articulo/")
-    );
+
+  const [toPath, toQuery = ""] = to.split("?");
+  const itemFormat = new URLSearchParams(toQuery).get("formato");
+
+  if (toPath === "/articulos") {
+    const onArticles =
+      pathname.startsWith("/articulos") || pathname.startsWith("/articulo/");
+    if (!onArticles) return false;
+    const currentFormat = new URLSearchParams(search).get("formato");
+    return itemFormat ? currentFormat === itemFormat : !currentFormat;
   }
-  return pathname === to || pathname.startsWith(`${to}/`);
+
+  return pathname === toPath || pathname.startsWith(`${toPath}/`);
 };
 
 const READER_DASHBOARD_EXCLUDED = [
@@ -39,18 +52,18 @@ export const Navbar = () => {
   const { isAuthenticated, logout } = useUserAuth();
 
   const mainNavItems = useMemo(
-    () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion"),
+    () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion" && !item.hidden),
     []
   );
 
   const navLinkClass = useCallback(
     (to) =>
       `se-header__nav-link${
-        isNavItemActive(location.pathname, to)
+        isNavItemActive(location.pathname, location.search, to)
           ? " se-header__nav-link--active"
           : ""
       }`,
-    [location.pathname]
+    [location.pathname, location.search]
   );
 
   const handleLogout = async () => {
@@ -143,7 +156,7 @@ export const Navbar = () => {
                   to={item.to}
                   className={navLinkClass(item.to)}
                   aria-current={
-                    isNavItemActive(location.pathname, item.to)
+                    isNavItemActive(location.pathname, location.search, item.to)
                       ? "page"
                       : undefined
                   }
@@ -248,7 +261,7 @@ export const Navbar = () => {
                       className={navLinkClass(item.to)}
                       onClick={closeMenu}
                       aria-current={
-                        isNavItemActive(location.pathname, item.to)
+                        isNavItemActive(location.pathname, location.search, item.to)
                           ? "page"
                           : undefined
                       }

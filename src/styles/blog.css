@@ -850,7 +850,9 @@
     align-items: center;
     flex-wrap: nowrap;
     gap: clamp(0.35rem, 1vw, 0.9rem);
-    padding: 0.5rem 1rem;
+    /* Horizontal padding stays on the container's gutter: a flat 1rem here used
+       to pull the logo 24px left of every page's content edge. */
+    padding: 0.5rem var(--se-content-gutter);
   }
 
   .se-header__nav--desktop {
@@ -3692,9 +3694,12 @@
   padding-top: clamp(2.25rem, 5vw, 3.25rem);
 }
 
+/* Flush with the container, so the kicker, the title and the filter bar below
+   all start on the same vertical line as the header logo. Centring this block
+   inside the container is what used to indent the heading away from everything
+   else on the page. */
 .se-articles__head {
-  max-width: min(980px, 100%);
-  margin: 0 auto var(--se-space-xl);
+  margin: 0 0 var(--se-space-xl);
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
 }
 
@@ -3720,7 +3725,9 @@
 
 .se-articles__lead {
   margin-top: 0.9rem;
-  max-width: 80ch;
+  /* The 980px half keeps the lead wrapping exactly where it did before the
+     block stopped being centred — only the indent went away, not the measure. */
+  max-width: min(980px, 80ch);
 }
 
 /* Filters: dark glass */
@@ -9370,5 +9377,1690 @@ a.se-topics__chip:focus-visible {
 .se-reader-dash .se-submission-detail__notes nav.se-container .se-btn--secondary:hover:not(:disabled) {
   background: rgba(26, 26, 26, 0.04);
   border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ==========================================================================
+   Portada fase 1 — cintillo, explorador y los cinco bloques de formato.
+   Usa los tokens de marca existentes (--color-accent, --color-paper, --mono);
+   no introduce paleta nueva.
+   ========================================================================== */
+
+/* —— Cintillo de mercado —— */
+.se-ticker {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: #101010;
+  border-bottom: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  overflow: hidden;
+}
+
+.se-ticker__viewport {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.se-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: se-ticker-slide 60s linear infinite;
+}
+
+.se-ticker__run {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.se-ticker:hover .se-ticker__track {
+  animation-play-state: paused;
+}
+
+@keyframes se-ticker-slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-ticker__track { animation: none; }
+  .se-ticker__viewport { overflow-x: auto; }
+}
+
+.se-ticker__item {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 9px 20px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.se-ticker__k {
+  color: rgba(255, 255, 255, 0.52);
+  letter-spacing: 0.04em;
+}
+
+.se-ticker__v {
+  color: var(--color-cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-ticker__v--up { color: var(--color-green); }
+.se-ticker__v--down { color: var(--color-accent); }
+
+/* The stamp sits beside the marquee, so it needs its own ground to stay legible. */
+.se-ticker__stamp {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  background: #101010;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11.5px;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.se-ticker__stamp:hover { color: var(--color-cream); }
+
+@media (max-width: 640px) {
+  .se-ticker { font-size: 11.5px; }
+  .se-ticker__stamp { display: none; }
+}
+
+/* —— Explorador de dos ejes ——
+   Wears the same treatment as the old articles filter panel — accent rule on the
+   left, warm radial glow, deep shadow — but laid out as a wide horizontal bar
+   instead of a tall sidebar, so it reads as one control strip above the results.
+   The hero already ends in 100px of padding and shares the section background, so
+   the explorer section adds no top gap of its own. */
+.se-explorer-section { padding-top: 0; }
+
+.se-explorer {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 4px solid rgba(230, 51, 41, 0.75);
+  border-radius: 14px;
+  padding: var(--se-space-md);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(230, 51, 41, 0.14), transparent 55%),
+    radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
+    rgba(15, 17, 21, 0.84);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+}
+
+.se-explorer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-sm);
+  align-items: center;
+}
+
+.se-explorer__lead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.se-explorer__eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.se-explorer__scope {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--color-slate-2);
+  white-space: nowrap;
+}
+
+/* The search field is the one element that should absorb spare width. */
+.se-explorer__field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.se-explorer__search {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--color-cream);
+  font-family: var(--sans);
+  font-size: 14px;
+  transition: border-color 0.18s ease;
+}
+
+.se-explorer__search::placeholder { color: var(--color-slate-2); }
+.se-explorer__search:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.se-explorer__sel { position: relative; flex: 0 0 auto; }
+
+.se-explorer__btn {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 170px;
+  padding: 11px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--color-cream);
+  font-family: var(--sans);
+  font-size: 14px;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.se-explorer__btn:hover { border-color: var(--color-accent); }
+
+/* Filled = this axis has a selection; on = its panel is open. */
+.se-explorer__btn--filled { border-color: rgba(230, 51, 41, 0.55); }
+
+.se-explorer__btn--on {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.se-explorer__caret { font-size: 11px; opacity: 0.7; }
+
+.se-explorer__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 300px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: #1c1c1c;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+}
+
+.se-explorer__opt {
+  display: flex;
+  width: 100%;
+  gap: 14px;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--color-cream);
+  font-family: var(--sans);
+  font-size: 14px;
+  text-align: left;
+  transition: background 0.14s ease;
+}
+
+.se-explorer__opt:hover { background: rgba(255, 255, 255, 0.07); }
+
+.se-explorer__opt--on {
+  background: var(--color-accent);
+  color: var(--color-cream);
+}
+
+.se-explorer__opt--region { font-weight: 600; }
+
+.se-explorer__opt--child {
+  padding-left: 28px;
+  font-size: 13.5px;
+  color: var(--color-slate);
+}
+
+.se-explorer__opt--child.se-explorer__opt--on { color: var(--color-cream); }
+
+.se-explorer__group { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.se-explorer__group:first-of-type { border-top: 0; }
+
+.se-explorer__n {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-explorer__opt--on .se-explorer__n { color: rgba(255, 255, 255, 0.78); }
+
+.se-explorer__none {
+  margin: 0;
+  padding: 12px 11px;
+  font-size: 13px;
+  color: var(--color-slate-2);
+}
+
+.se-explorer__total {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--color-slate);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.se-explorer__total strong {
+  color: var(--color-cream);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.se-explorer__clear {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-slate);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.se-explorer__clear:hover {
+  color: var(--color-cream);
+  border-color: var(--color-accent);
+}
+
+.se-explorer__active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-xs);
+  align-items: center;
+  margin-top: var(--se-space-sm);
+  padding-top: var(--se-space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.se-explorer__chip {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 13px;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-cream);
+  font-size: 13px;
+}
+
+.se-explorer__chip span { opacity: 0.75; }
+.se-explorer__chip:hover span { opacity: 1; }
+
+/* Results below the explorer on a listing page. */
+.se-listing { margin-top: var(--se-space-2xl); }
+
+/* —— Paginación de listados ——
+   Count on the left, controls on the right, separated from the results by the
+   same hairline the lists use so it reads as the foot of the list rather than a
+   floating widget. */
+.se-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-sm);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--se-space-xl);
+  padding-top: var(--se-space-lg);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-pager__count {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-pager__count strong {
+  color: var(--color-cream);
+  font-weight: 700;
+}
+
+.se-pager__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.se-pager__btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-slate);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.se-pager__btn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-cream);
+}
+
+.se-pager__btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.se-pager__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.se-pager__btn--edge {
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.se-pager__btn--on {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-cream);
+  font-weight: 700;
+}
+
+.se-pager__gap {
+  padding: 0 2px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--color-slate-2);
+}
+
+@media (max-width: 640px) {
+  .se-pager { justify-content: center; }
+  .se-pager__count { flex: 1 1 100%; text-align: center; }
+  .se-pager__controls { margin-left: 0; justify-content: center; }
+}
+
+@media (max-width: 860px) {
+  .se-explorer__total { margin-left: 0; }
+  .se-explorer__sel { flex: 1 1 160px; }
+  .se-explorer__btn { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 640px) {
+  .se-explorer { padding: var(--se-space-sm); }
+  .se-explorer__field { flex-basis: 100%; }
+  .se-explorer__panel { min-width: 0; width: 100%; }
+  .se-explorer__clear { flex: 1 1 auto; }
+}
+
+/* —— Encabezado compartido de los bloques de formato —— */
+.se-format__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-sm);
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: var(--se-space-lg);
+  border-bottom: 2px solid var(--color-cream);
+}
+
+.se-format__title { margin: 0; }
+
+.se-format__more {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.se-format__more::after { content: " \2192"; }
+.se-format__more:hover { color: var(--color-accent); }
+
+/* Shared small pill for topic and place labels inside the format blocks. */
+.se-tagpill {
+  display: inline-block;
+  padding: 3px 11px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--color-slate);
+  white-space: nowrap;
+}
+
+/* —— Noticias: lista sin imagen —— */
+.se-newslist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-newslist__row {
+  display: flex;
+  gap: var(--se-space-sm);
+  align-items: baseline;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-newslist__geo {
+  flex: 0 0 160px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-newslist__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-cream);
+  transition: color 0.18s ease;
+}
+
+.se-newslist__title:hover { color: var(--color-accent); }
+
+.se-newslist__date {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .se-newslist__row { flex-wrap: wrap; }
+  .se-newslist__geo { flex-basis: 100%; }
+  .se-newslist__title { flex-basis: 100%; }
+}
+
+/* —— Artículos: tarjetas con imagen y firma —— */
+.se-artgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--se-space-lg);
+}
+
+.se-artcard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-hairline);
+  background: #131313;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.se-artcard:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px);
+}
+
+/* The placeholder graphic grows to fill whatever box it gets, so pin the ratio —
+   otherwise the media eats two thirds of the card and the copy reads as an
+   afterthought. */
+.se-artcard__media {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-artcard__media > * {
+  width: 100%;
+  height: 100%;
+}
+
+.se-artcard__summary {
+  margin: 0;
+  font-size: var(--se-text-small);
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.se-artcard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--se-space-sm);
+}
+
+.se-artcard__title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.se-artcard__title a { color: var(--color-cream); transition: color 0.18s ease; }
+.se-artcard__title a:hover { color: var(--color-accent); }
+
+.se-artcard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.se-artcard__by {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+}
+
+/* —— Editorial: sin firma, marcado con la regla de acento —— */
+.se-edlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-md);
+}
+
+/* Same ribbon behaviour as the report cards: white at rest, accent on hover, so
+   the colour marks what the reader is pointing at instead of being decoration. */
+.se-edrow {
+  border-left: 4px solid var(--color-cream);
+  padding: 2px 0 2px var(--se-space-sm);
+  transition: border-left-color 0.2s ease;
+}
+
+.se-edrow:hover { border-left-color: var(--color-accent); }
+
+.se-edrow__kicker {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-edrow__title {
+  margin: 7px 0 6px;
+  font-size: 20px;
+  line-height: 1.28;
+  font-weight: 600;
+}
+
+.se-edrow__title a { color: var(--color-cream); transition: color 0.18s ease; }
+.se-edrow__title a:hover { color: var(--color-accent); }
+
+.se-edrow__lead {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--se-text-body);
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.se-edrow__date {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+}
+
+/* —— Entrevistas: miniaturas de video —— */
+.se-vidgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--se-space-lg);
+}
+
+.se-vidcard { display: flex; flex-direction: column; }
+
+.se-vidcard__thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--color-hairline);
+  background: linear-gradient(150deg, #1d1d1d 0%, #141414 100%);
+  transition: border-color 0.2s ease;
+}
+
+.se-vidcard__thumb:hover { border-color: var(--color-accent); }
+
+.se-vidcard__play {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(230, 51, 41, 0.92);
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+/* Play triangle drawn with a border, so no extra asset is needed. */
+.se-vidcard__play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent #fff;
+}
+
+.se-vidcard__thumb:hover .se-vidcard__play { transform: scale(1.08); }
+
+.se-vidcard__dur {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 3px 8px;
+  background: rgba(0, 0, 0, 0.75);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--color-cream);
+}
+
+.se-vidcard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding-top: 12px;
+}
+
+.se-vidcard__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.se-vidcard__title a { color: var(--color-cream); transition: color 0.18s ease; }
+.se-vidcard__title a:hover { color: var(--color-accent); }
+
+.se-vidcard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.se-vidcard__who {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+}
+
+/* —— Informes: presentados como documentos —— */
+.se-docgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--se-space-lg);
+}
+
+.se-doccard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--color-hairline);
+  border-left: 4px solid var(--color-cream);
+  background: #131313;
+  padding: var(--se-space-md);
+  transition: border-left-color 0.2s ease;
+}
+
+.se-doccard:hover { border-left-color: var(--color-accent); }
+
+.se-doccard__kicker {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-doccard__title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.28;
+  font-weight: 600;
+}
+
+.se-doccard__title a { color: var(--color-cream); transition: color 0.18s ease; }
+.se-doccard__title a:hover { color: var(--color-accent); }
+
+.se-doccard__summary {
+  margin: 0;
+  font-size: var(--se-text-small);
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.se-doccard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.se-doccard__unit {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--color-slate-2);
+}
+
+@media (max-width: 900px) {
+  .se-artgrid,
+  .se-vidgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .se-artgrid,
+  .se-vidgrid,
+  .se-docgrid { grid-template-columns: 1fr; }
+}
+
+/* —— Pieza: vista de detalle de cualquier formato ——
+   The reading column is left-aligned at the container edge rather than centred:
+   a centred 720px block would sit indented from the header logo and from the
+   listings, which is exactly the misalignment we removed from the format pages. */
+.se-piece {
+  max-width: 720px;
+  animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+}
+
+.se-piece__crumbs {
+  margin: 0 0 var(--se-space-md);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-2);
+}
+
+.se-piece__crumbs a { color: var(--color-slate); text-decoration: none; }
+.se-piece__crumbs a:hover { color: var(--color-accent); }
+
+.se-piece__kicker {
+  margin: 0 0 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-piece__title {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: clamp(1.6rem, 3.4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+  color: var(--color-cream);
+}
+
+.se-piece__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-top: var(--se-space-sm);
+  padding-bottom: var(--se-space-md);
+  border-bottom: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--color-slate-2);
+}
+
+.se-piece__share { margin-left: auto; }
+
+.se-piece__lead {
+  margin: var(--se-space-md) 0 0;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+.se-piece__p {
+  margin: var(--se-space-md) 0 0;
+  font-size: 1rem;
+  line-height: 1.72;
+  color: var(--color-slate);
+}
+
+.se-piece__media {
+  margin: var(--se-space-lg) 0 0;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.se-piece__back {
+  display: inline-block;
+  margin-top: var(--se-space-md);
+  color: var(--color-accent);
+}
+
+/* The outlet own voice, bordered so the reader sees where the reported fact
+   ends and the position begins. */
+.se-opinion {
+  margin: var(--se-space-xl) 0 0;
+  padding: var(--se-space-md);
+  border: 1px solid var(--color-hairline);
+  border-left: 5px solid var(--color-accent);
+  border-radius: 4px;
+  background: rgba(230, 51, 41, 0.06);
+}
+
+.se-opinion__k {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-opinion__body .se-piece__p { margin-top: 0.6rem; color: var(--color-cream); }
+
+.se-sources {
+  margin: var(--se-space-xl) 0 0;
+  padding-top: var(--se-space-md);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-sources__k,
+.se-toc__k {
+  margin: 0 0 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-sources__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 7px;
+  font-size: 0.94rem;
+}
+
+.se-sources__list a { color: var(--color-slate); }
+.se-sources__list a:hover { color: var(--color-accent); }
+
+/* Stand-in for the player. The real one must not hold up the text. */
+.se-videostage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  margin: var(--se-space-lg) 0 0;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  background: #0f0f0f;
+}
+
+.se-videostage__play {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.se-videostage__play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 11px 0 11px 17px;
+  border-color: transparent transparent transparent var(--color-cream);
+}
+
+.se-videostage__note {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-toc {
+  margin: var(--se-space-lg) 0 0;
+  padding: var(--se-space-md);
+  border: 1px solid var(--color-hairline);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.se-toc__list {
+  margin: 0;
+  padding-left: 1.3em;
+  display: grid;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--color-slate);
+}
+
+/* What asks for registration is the file, never the page around it. */
+.se-gate {
+  margin: var(--se-space-xl) 0 0;
+  padding: var(--se-space-lg);
+  border: 2px solid var(--color-accent);
+  border-radius: 8px;
+  background: rgba(230, 51, 41, 0.06);
+}
+
+.se-gate__title {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-cream);
+}
+
+.se-gate__lead { margin: 0; font-size: 0.95rem; color: var(--color-slate); }
+
+.se-gate__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-sm);
+  align-items: flex-end;
+  margin-top: var(--se-space-md);
+}
+
+.se-gate__field { display: grid; gap: 5px; flex: 1 1 170px; min-width: 0; }
+
+.se-gate__label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-gate__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--color-cream);
+  font-family: var(--sans);
+  font-size: 14px;
+}
+
+.se-gate__input:focus-visible { outline: none; border-color: var(--color-accent); }
+
+.se-gate__submit {
+  flex: 0 0 auto;
+  padding: 11px 20px;
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-cream);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.se-gate__submit:hover { filter: brightness(1.08); }
+
+.se-gate__done {
+  margin: var(--se-space-md) 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-green);
+  border-radius: 8px;
+  font-size: 0.94rem;
+  color: var(--color-green);
+}
+
+.se-gate__origin {
+  margin: var(--se-space-md) 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+
+.se-gate__origin strong { color: var(--color-slate); }
+
+/* The side doors for a reader who landed on a single piece from a search. */
+.se-piece__tags {
+  margin: var(--se-space-xl) 0 0;
+  padding-top: var(--se-space-md);
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-piece__tags-label {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-piece__tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.se-piece__tag {
+  padding: 6px 13px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--color-slate);
+  transition: border-color 0.18s ease, color 0.18s ease;
+}
+
+.se-piece__tag:hover { border-color: var(--color-accent); color: var(--color-cream); }
+.se-piece__tag--geo { font-family: var(--mono); font-size: 12px; }
+
+.se-piece__related { margin-top: var(--se-space-2xl); }
+
+.se-piece__related-title {
+  margin: 0 0 var(--se-space-sm);
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-cream);
+}
+
+@media (max-width: 640px) {
+  .se-piece__share { margin-left: 0; }
+  .se-gate__submit { flex: 1 1 100%; }
+}
+
+/* ==========================================================================
+   Panel: the format-aware editor, the two axis pickers, the media library
+
+   Built on the panel's own dark tokens (--adm-*), not on the public site's
+   cream-and-slate palette. The first version of this reached for --color-cream
+   and #fff and produced pale boxes floating on a dark canvas: a control that
+   looks disabled is worse than an ugly one, because an editor stops trying to
+   click it.
+   ========================================================================== */
+
+.se-btn--small {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.75rem;
+}
+
+.se-heading-sub {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--adm-text);
+}
+
+/* One entry per format: "new article" was never the only thing a newsroom makes. */
+.se-admin-create {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* —— Filter bar —— */
+.se-admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: var(--se-space-lg);
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-surface);
+  box-shadow: var(--adm-shadow-sm);
+}
+
+.se-admin-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 9.5rem;
+}
+
+.se-admin-filters__field--grow {
+  flex: 1 1 15rem;
+}
+
+.se-admin-filters .se-form-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--adm-text-muted);
+}
+
+.se-admin-filters__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  max-width: 19rem;
+  padding-bottom: 0.55rem;
+  color: var(--adm-text);
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.se-admin-filters__check input {
+  margin-top: 0.15rem;
+  accent-color: var(--adm-accent);
+}
+
+.se-admin-filters__check em {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.74rem;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--adm-text-muted);
+}
+
+.se-admin-warning {
+  margin: 0.25rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--adm-accent-soft);
+  border-left: 3px solid var(--adm-accent);
+  border-radius: 10px;
+  background: rgba(232, 64, 64, 0.1);
+  color: var(--adm-text);
+  font-size: 0.85rem;
+}
+
+.se-admin-table__note {
+  font-size: 0.72rem;
+  font-style: normal;
+  color: var(--adm-accent);
+}
+
+.se-admin-inline-form {
+  margin-top: var(--se-space-lg);
+}
+
+/* —— Editor sections ——
+   The form is grouped so it reads the way a piece is written: what it is, what it
+   says, how it is classified, what is attached — and the technical fields folded
+   away at the end instead of sitting between two editorial ones. */
+.se-editor-group {
+  margin: 0 0 var(--se-space-lg);
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-surface);
+}
+
+.se-editor-group__title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--adm-text-muted);
+}
+
+.se-editor-group__title::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--adm-border);
+}
+
+.se-editor-advanced {
+  margin: 0 0 var(--se-space-lg);
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-surface);
+}
+
+.se-editor-advanced > summary {
+  padding: 0.9rem 1.25rem;
+  color: var(--adm-text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.se-editor-advanced > summary:hover {
+  color: var(--adm-text);
+}
+
+.se-editor-advanced[open] > summary {
+  border-bottom: 1px solid var(--adm-border);
+}
+
+.se-editor-advanced__body {
+  padding: 1.15rem 1.25rem;
+}
+
+/* —— Axis picker ——
+   Selection is ordered, not a set: the first tag is the one the public cards
+   print, so the chosen list is numbered and reorderable rather than a column of
+   checkboxes that hides which one wins. */
+.se-axis {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A summary is two or three lines. Giving it the body's 16rem box tells a writer
+   to keep going, and makes the form twice as long as the work in it. */
+.se-form-field--brief .se-richtext__content {
+  min-height: 7rem;
+  max-height: 18rem;
+}
+
+.se-form-field--brief .se-richtext__content .ProseMirror {
+  min-height: 6rem;
+}
+
+/* Two pickers in a row read as one wall of chips without this. */
+.se-axis + .se-axis {
+  margin-top: var(--se-space-lg);
+  padding-top: var(--se-space-lg);
+  border-top: 1px solid var(--adm-border);
+}
+
+.se-axis__limit {
+  margin-left: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--adm-text-muted);
+}
+
+.se-axis__hint,
+.se-asset__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--adm-text-muted);
+}
+
+.se-axis__chosen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: se-axis;
+}
+
+.se-axis__chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  counter-increment: se-axis;
+}
+
+.se-axis__chip::before {
+  content: counter(se-axis);
+  flex: 0 0 auto;
+  width: 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--adm-text-muted);
+}
+
+.se-axis__chip-name {
+  flex: 1 1 auto;
+  color: var(--adm-text);
+  font-size: 0.9rem;
+}
+
+.se-axis__chip-role {
+  margin-left: 0.55rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: var(--adm-accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.se-axis__chip-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.2rem;
+}
+
+.se-axis__chip-actions button {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--adm-text-muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color var(--adm-dur) var(--adm-ease),
+    color var(--adm-dur) var(--adm-ease);
+}
+
+.se-axis__chip-actions button:hover:not(:disabled) {
+  border-color: var(--adm-accent);
+  color: var(--adm-accent);
+}
+
+.se-axis__chip-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.se-axis__empty,
+.se-asset__empty {
+  margin: 0 0 0.85rem;
+  color: var(--adm-text-muted);
+  font-size: 0.84rem;
+}
+
+.se-axis__full {
+  margin: 0 0 0.75rem;
+  color: var(--adm-accent);
+  font-size: 0.78rem;
+}
+
+.se-axis__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.se-axis__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--adm-text);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition:
+    border-color var(--adm-dur) var(--adm-ease),
+    background var(--adm-dur) var(--adm-ease),
+    color var(--adm-dur) var(--adm-ease);
+}
+
+.se-axis__option:hover:not(:disabled) {
+  border-color: var(--adm-accent);
+  background: rgba(232, 64, 64, 0.12);
+}
+
+.se-axis__option.is-selected {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent);
+  color: #fff;
+}
+
+.se-axis__option:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.se-axis__count {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  opacity: 0.6;
+}
+
+.se-axis__option.is-selected .se-axis__count {
+  opacity: 0.85;
+}
+
+.se-axis__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.se-axis__group-name {
+  margin: 0 0 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--adm-text-muted);
+}
+
+/* —— Asset field —— */
+.se-asset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.se-asset__required {
+  margin-left: 0.55rem;
+  padding: 0.12rem 0.45rem;
+  border: 1px solid var(--adm-accent);
+  border-radius: 999px;
+  color: var(--adm-accent);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.se-asset__current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--adm-border);
+  border-left: 3px solid var(--color-green);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.se-asset__current-name {
+  margin: 0;
+  color: var(--adm-text);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.se-asset__current-meta {
+  margin: 0.25rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--adm-text-muted);
+}
+
+.se-asset__ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+}
+
+.se-asset__way {
+  display: flex;
+  flex: 1 1 17rem;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.se-asset__way-title {
+  color: var(--adm-text-muted);
+  font-size: 0.78rem;
+}
+
+.se-asset__way-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.se-asset__way-row .se-form-control {
+  flex: 1 1 auto;
+}
+
+/* The native file input cannot be restyled outright; this at least stops it
+   looking like a piece of another website dropped into the panel. */
+.se-asset__way input[type="file"] {
+  padding: 0.5rem;
+  border: 1px dashed var(--adm-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--adm-text-muted);
+  font-size: 0.8rem;
+}
+
+.se-asset__way input[type="file"]::file-selector-button {
+  margin-right: 0.7rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--adm-text);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.se-asset__way input[type="file"]::file-selector-button:hover {
+  border-color: var(--adm-accent);
+  color: var(--adm-accent);
+}
+
+.se-asset__error {
+  margin: 0.7rem 0 0;
+  color: var(--adm-accent);
+  font-size: 0.82rem;
+}
+
+.se-asset__legacy {
+  margin: 0.6rem 0 0;
+  font-size: 0.76rem;
+  color: var(--adm-text-muted);
+}
+
+/* —— Collaborator format choice ——
+   This one lives on the reader dashboard, which is light, so it uses the public
+   tokens on purpose. */
+.se-submission-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.se-submission-format {
+  display: flex;
+  flex: 1 1 13rem;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.se-submission-format:hover {
+  border-color: var(--color-accent);
+}
+
+.se-submission-format:has(input:checked) {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.se-submission-format input {
+  margin-top: 0.2rem;
+  accent-color: var(--color-accent);
+}
+
+.se-submission-format em {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.76rem;
+  font-style: normal;
+  color: var(--color-slate-2);
+}
+
+/* The report wall: an account, not a lead form. */
+.se-gate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.se-gate__error {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
   color: var(--color-accent);
 }

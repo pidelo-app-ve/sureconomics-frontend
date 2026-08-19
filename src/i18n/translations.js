@@ -3,6 +3,9 @@ export const SUPPORTED_LANGS = ["es", "en"];
 export const translations = {
   es: {
     "nav.inicio": "Inicio",
+    "nav.noticias": "Noticias",
+    "nav.editorial": "Editorial",
+    "nav.entrevistas": "Entrevistas",
     "nav.quienesSomos": "Quiénes somos",
     "nav.articulos": "Artículos",
     "nav.informesReportes": "Informes y reportes",
@@ -30,6 +33,9 @@ export const translations = {
   },
   en: {
     "nav.inicio": "Home",
+    "nav.noticias": "News",
+    "nav.editorial": "Editorial",
+    "nav.entrevistas": "Interviews",
     "nav.quienesSomos": "About us",
     "nav.articulos": "Articles",
     "nav.informesReportes": "Reports & research",

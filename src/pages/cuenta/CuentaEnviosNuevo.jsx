@@ -8,7 +8,7 @@ import { SubmissionForm } from "../../components/submissions/SubmissionForm";
 export const CuentaEnviosNuevo = () => {
   const navigate = useNavigate();
   const { isEmailVerified } = useUserAuth();
-  const [values, setValues] = useState({ title: "", excerpt: "", content: "", featuredImageUrl: "" });
+  const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,6 +26,7 @@ export const CuentaEnviosNuevo = () => {
     setIsSubmitting(true);
     try {
       const created = await userMeService.createSubmission({
+        format: values.format,
         title: values.title,
         excerpt: values.excerpt,
         content: values.content,

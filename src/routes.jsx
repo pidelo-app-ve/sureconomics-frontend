@@ -1,24 +1,23 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
-import { Article } from "./pages/Article";
-import { Category } from "./pages/Category";
 import { Subscribe } from "./pages/Subscribe";
 import { QuienesSomos } from "./pages/QuienesSomos";
 import { Articulos } from "./pages/Articulos";
 import { Informes } from "./pages/Informes";
+import { Pieza } from "./pages/Pieza";
+import { PiezaRedirect } from "./pages/PiezaRedirect";
+import { Explorar } from "./pages/Explorar";
 import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
 import { NotFound } from "./pages/NotFound";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminPostsList } from "./pages/admin/AdminPostsList";
 import { AdminPostEditor } from "./pages/admin/AdminPostEditor";
-import { AdminCategoriesList } from "./pages/admin/AdminCategoriesList";
-import { AdminCategoryEditor } from "./pages/admin/AdminCategoryEditor";
-import { AdminTagsList } from "./pages/admin/AdminTagsList";
-import { AdminTagEditor } from "./pages/admin/AdminTagEditor";
-import { AdminHeadlinesList } from "./pages/admin/AdminHeadlinesList";
-import { AdminHeadlineEditor } from "./pages/admin/AdminHeadlineEditor";
+import { AdminTopicsList } from "./pages/admin/AdminTopicsList";
+import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
+import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
+import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
 import { AdminSubmissionsList } from "./pages/admin/AdminSubmissionsList";
 import { AdminSubmissionDetail } from "./pages/admin/AdminSubmissionDetail";
@@ -48,12 +47,25 @@ export const router = createBrowserRouter([
         errorElement: <NotFound />,
         children: [
             { index: true, element: <Home /> },
-            { path: "articulo/:slug", element: <Article /> },
-            { path: "categoria/:slug", element: <Category /> },
             { path: "suscribirse", element: <Subscribe /> },
             { path: "quienes-somos", element: <QuienesSomos /> },
             { path: "articulos", element: <Articulos /> },
             { path: "informes", element: <Informes /> },
+            { path: "explorar", element: <Explorar /> },
+            // Everything published before the redesign lives at "articulo/<slug>".
+            // Those addresses are indexed and shared, so they redirect to wherever
+            // the piece sits now instead of 404ing. Same for "categoria/<slug>":
+            // categories no longer exist, and the nearest thing a reader wanted is
+            // the cross-format explorer.
+            { path: "articulo/:slug", element: <PiezaRedirect /> },
+            { path: "categoria/:slug", element: <Navigate to="/explorar" replace /> },
+            // One detail page for all five formats; the format sits in the path so
+            // the URL reads as what it is.
+            { path: "noticias/:slug", element: <Pieza /> },
+            { path: "articulos/:slug", element: <Pieza /> },
+            { path: "editorial/:slug", element: <Pieza /> },
+            { path: "entrevistas/:slug", element: <Pieza /> },
+            { path: "informes/:slug", element: <Pieza /> },
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
@@ -92,15 +104,13 @@ export const router = createBrowserRouter([
                     { path: "posts", element: <AdminPostsList /> },
                     { path: "posts/new", element: <AdminPostEditor /> },
                     { path: "posts/:postId", element: <AdminPostEditor /> },
-                    { path: "categories", element: <AdminCategoriesList /> },
-                    { path: "categories/new", element: <AdminCategoryEditor /> },
-                    { path: "categories/:id", element: <AdminCategoryEditor /> },
-                    { path: "tags", element: <AdminTagsList /> },
-                    { path: "tags/new", element: <AdminTagEditor /> },
-                    { path: "tags/:id", element: <AdminTagEditor /> },
-                    { path: "headlines", element: <AdminHeadlinesList /> },
-                    { path: "headlines/new", element: <AdminHeadlineEditor /> },
-                    { path: "headlines/:id", element: <AdminHeadlineEditor /> },
+                    // The two axes. Neither has a create route: topics are a
+                    // closed list of fourteen and places only grow by country,
+                    // which the Lugares screen does inline.
+                    { path: "topics", element: <AdminTopicsList /> },
+                    { path: "places", element: <AdminPlacesList /> },
+                    { path: "media", element: <AdminMediaLibrary /> },
+                    { path: "cinta", element: <AdminMarketTicker /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },
                     { path: "submissions/:id", element: <AdminSubmissionDetail /> },

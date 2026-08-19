@@ -10,18 +10,29 @@ export const BRAND = {
     "SurEconomics es una plataforma editorial e institucional dedicada al análisis económico y financiero de América Latina. Combinamos investigación profunda, noticias, contenidos sencillos, claros y una mirada estratégica para apoyar las decisiones de inversión y desarrollo en la región.",
 };
 
+/**
+ * Header navigation.
+ *
+ * `hidden: true` keeps the entry (and its route, page and any in-page links)
+ * intact while dropping it from the header — the pages are still reachable by
+ * URL and from the footer. Flip the flag to bring one back.
+ *
+ * The format entries mirror the five formats in the functional mockup. Only
+ * Artículos and Informes have their own route today, so the rest point at the
+ * article listing with a `formato` hint; the real per-format pages arrive with
+ * the content-model work.
+ */
 export const PRIMARY_NAV = [
   { id: "inicio", to: "/", labelKey: "nav.inicio" },
-  { id: "quienes-somos", to: "/quienes-somos", labelKey: "nav.quienesSomos" },
+  { id: "noticias", to: "/articulos?formato=noticias", labelKey: "nav.noticias" },
   { id: "articulos", to: "/articulos", labelKey: "nav.articulos" },
+  { id: "editorial", to: "/articulos?formato=editorial", labelKey: "nav.editorial" },
+  { id: "entrevistas", to: "/articulos?formato=entrevistas", labelKey: "nav.entrevistas" },
   {
     id: "informes",
     to: "/informes",
     labelKey: "nav.informesReportes",
   },
-  { id: "suscripcion", to: "/suscribirse", labelKey: "nav.suscripcion" },
-  { id: "consultoria", to: "/consultoria", labelKey: "nav.consultoria" },
-  { id: "contacto", to: "/contacto", labelKey: "nav.contacto" },
 ];
 
 export const PARTNERS = [

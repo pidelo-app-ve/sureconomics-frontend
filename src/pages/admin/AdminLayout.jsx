@@ -118,29 +118,34 @@ const AdminShell = () => {
           <nav className="se-admin-rail__nav">
             <NavGroup label="Contenido">
               <NavLink to="/admin/posts" className={linkClass} end onClick={closeMenu}>
-                Artículos
+                Todo el contenido
               </NavLink>
               {canCreateArticle ? (
                 <NavLink to="/admin/posts/new" className={linkClass} onClick={closeMenu}>
-                  Nuevo artículo
+                  Crear
                 </NavLink>
               ) : null}
+              <NavLink to="/admin/media" className={linkClass} end onClick={closeMenu}>
+                Archivos
+              </NavLink>
+              <NavLink to="/admin/cinta" className={linkClass} end onClick={closeMenu}>
+                Cinta de mercado
+              </NavLink>
             </NavGroup>
 
-            <NavGroup label="Taxonomía">
-              <NavLink to="/admin/categories" className={linkClass} end onClick={closeMenu}>
-                Categorías
+            {/* Two axes, not a flat list of tags: see the Temas screen for why
+                there is no "new topic" here. */}
+            <NavGroup label="Clasificación">
+              <NavLink to="/admin/topics" className={linkClass} end onClick={closeMenu}>
+                Temas
               </NavLink>
-              <NavLink to="/admin/tags" className={linkClass} end onClick={closeMenu}>
-                Etiquetas
+              <NavLink to="/admin/places" className={linkClass} end onClick={closeMenu}>
+                Lugares
               </NavLink>
             </NavGroup>
 
             {canSeeEditorial ? (
               <NavGroup label="Editorial">
-                <NavLink to="/admin/headlines" className={linkClass} end onClick={closeMenu}>
-                  Titulares
-                </NavLink>
                 <NavLink to="/admin/comments" className={linkClass} end onClick={closeMenu}>
                   Comentarios
                 </NavLink>

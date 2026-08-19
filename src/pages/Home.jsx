@@ -1,67 +1,78 @@
-import {
-  Hero,
-  FeaturedPosts,
-  BlogFeed,
-  SuggestedReading,
-  NewsletterBlock,
-} from "../components/blog";
-import { BRAND, INSTITUTIONAL, PARTNERS, REPORTS } from "../data/surEconomicsMock";
+import { useEffect } from "react";
+import { Hero, NewsletterBlock } from "../components/blog";
+import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
-import { PlaceholderImage } from "../components/blog";
-import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
-import { contentService } from "../services/contentService";
 import { applyPageMeta } from "../lib/seo";
-import { EmptyState, ErrorState, LoadingState } from "../components/content";
-import { HeadlinesSection } from "../components/home/HeadlinesSection";
+import { EmptyState, ErrorState } from "../components/content";
+import {
+  ArticleCardGrid,
+  ContentExplorer,
+  EditorialList,
+  FormatSection,
+  InterviewGrid,
+  NewsList,
+  ReportGrid,
+} from "../components/home";
+import { FORMATO_META } from "../lib/pieza";
+import { temaPrincipal } from "../lib/contentFilter";
+import { useContentFilter } from "../hooks/useContentFilter";
+import { usePieces } from "../hooks/usePieces";
+import { useTaxonomy } from "../hooks/useTaxonomy";
 
-const shuffleInPlace = (arr) => {
-  for (let i = arr.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-  }
-  return arr;
+/**
+ * Homepage.
+ *
+ * Order comes from the functional mockup: ticker, opening piece, the explorer as
+ * the second element (it is the main way into the site, not a closing widget), then
+ * the five format blocks with equal weight, then newsletter and the group's units.
+ *
+ * The explorer here spans all five formats, so a selection turns the blocks below
+ * into grouped results — Noticias first, then Artículos, Editorial, Entrevistas and
+ * Informes, with empty groups dropped. Unfiltered, each block shows its most recent
+ * handful.
+ */
+
+/** How many pieces each block shows when nothing is filtered. */
+const PREVIEW = {
+  noticia: 6,
+  articulo: 3,
+  editorial: 2,
+  entrevista: 3,
+  informe: 2,
 };
 
+const LAYOUTS = {
+  noticia: (items) => <NewsList items={items} />,
+  articulo: (items) => <ArticleCardGrid items={items} />,
+  editorial: (items) => <EditorialList items={items} />,
+  entrevista: (items) => <InterviewGrid items={items} />,
+  informe: (items) => <ReportGrid items={items} />,
+};
+
+/** The `Hero` speaks a different shape; this is the whole translation. */
+const aperturaDe = (pieza) =>
+  pieza
+    ? {
+        id: pieza.id,
+        slug: pieza.slug,
+        title: pieza.titulo,
+        excerpt: pieza.resumen || pieza.entrada || "",
+        date: pieza.fecha,
+        author: pieza.autor ?? "",
+        category: temaPrincipal(pieza) ?? "",
+        imageUrl: pieza.imagenUrl ?? "",
+        imagePlaceholder: "growth",
+        readTime: "",
+      }
+    : null;
+
 export const Home = () => {
-  const [state, setState] = useState({ status: "idle", posts: [], error: null });
-  const [headlinesState, setHeadlinesState] = useState({ status: "idle", headlines: [], error: null });
-  const [topicsState, setTopicsState] = useState({ status: "idle", items: [], error: null });
+  const taxonomy = useTaxonomy();
+  const { items: pieces, status, error } = usePieces();
 
-  const handleLoadHeadlines = async () => {
-    setHeadlinesState({ status: "loading", headlines: [], error: null });
-    try {
-      const headlines = await contentService.getHeadlines({ limit: 12 });
-      setHeadlinesState({ status: "success", headlines, error: null });
-    } catch (err) {
-      setHeadlinesState({ status: "error", headlines: [], error: err });
-    }
-  };
-
-  const handleLoad = async () => {
-    setState({ status: "loading", posts: [], error: null });
-    try {
-      const res = await contentService.getPosts({ page: 1, limit: 12 });
-      setState({ status: "success", posts: res.items ?? [], error: null });
-    } catch (err) {
-      setState({ status: "error", posts: [], error: err });
-    }
-  };
-
-  const handleLoadTopics = async () => {
-    setTopicsState({ status: "loading", items: [], error: null });
-    try {
-      const all = await contentService.getCategories();
-      const usable = (all ?? []).filter((c) => c?.slug && c?.name);
-      const picked =
-        usable.length <= 10 ? usable : shuffleInPlace([...usable]).slice(0, 10);
-      setTopicsState({ status: "success", items: picked, error: null });
-    } catch (err) {
-      setTopicsState({ status: "error", items: [], error: err });
-    }
-  };
+  const tree = { geoTop: taxonomy.geoTop, regiones: taxonomy.regiones };
+  const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
+    useContentFilter(pieces, tree);
 
   useEffect(() => {
     applyPageMeta({
@@ -70,158 +81,91 @@ export const Home = () => {
     });
   }, []);
 
-  useEffect(() => {
-    handleLoad();
-    handleLoadHeadlines();
-    handleLoadTopics();
-  }, []);
+  // The API returns newest first, so the opening piece is simply the first one.
+  const apertura = aperturaDe(pieces[0]);
 
-  const derived = useMemo(() => {
-    const posts = state.posts ?? [];
-    const hero = posts[0] ?? null;
-    const featured = posts.slice(1, 4);
-    const feed = posts.slice(4, 9);
-    const suggested = posts.slice(9, 12);
+  const blocks = Object.keys(FORMATO_META)
+    .map((formatoApi) => {
+      const all = results.filter((p) => p.formatoApi === formatoApi);
+      const items = isFiltered ? all : all.slice(0, PREVIEW[formatoApi]);
+      return { formatoApi, items, total: all.length };
+    })
+    .filter((b) => b.items.length > 0);
 
-    const toCard = (post, fallbackPlaceholder) => {
-      const firstCategory = post.categories?.[0]?.name || post.categories?.[0]?.slug || "Editorial";
-      const imagePlaceholder = fallbackPlaceholder;
-      return {
-        id: post.id || post.slug,
-        slug: post.slug,
-        title: post.title,
-        excerpt: post.excerpt,
-        date: post.publishDate,
-        author: post.author,
-        category: firstCategory,
-        imageUrl: post.featuredImage || "",
-        imagePlaceholder,
-        readTime: "",
-      };
-    };
-
-    return {
-      hero: hero ? toCard(hero, "chart") : null,
-      featured: featured.map((p, i) => toCard(p, i % 2 === 0 ? "building" : "growth")),
-      feed: feed.map((p, i) => toCard(p, i % 2 === 0 ? "chart" : "building")),
-      suggested: suggested.map((p, i) => toCard(p, i % 2 === 0 ? "growth" : "chart")),
-    };
-  }, [state.posts]);
+  const nombrePlural = (formatoApi) =>
+    taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural ??
+    FORMATO_META[formatoApi].plural;
 
   return (
     <main className="se-blog" role="main">
-      <Hero featuredPost={derived.hero} />
-      <HeadlinesSection state={headlinesState} onRetry={handleLoadHeadlines} />
-      <section className="se-section se-home__platform">
-        <div className="se-container">
-          <div className="se-two-col se-two-col--align-start">
-            <div>
-              <h2 className="se-heading-section">Una plataforma para entender Latinoamérica</h2>
-              <p className="se-text-body">
-                {BRAND.description}
-              </p>
-              <p className="se-text-body se-home__platform-sub">
-                {INSTITUTIONAL.purpose}
-              </p>
-              <div className="se-home__platform-cta">
-                <Link to="/quienes-somos" className="se-link">
-                  Conocer el proyecto
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="se-visual-card">
-                <PlaceholderImage variant="chart" hero={false} />
-                <div className="se-visual-card__text">
-                  <div className="se-meta se-meta--category">Lectura ejecutiva</div>
-                  <div className="se-visual-card__title">
-                    Investigación + claridad
-                  </div>
-                  <p className="se-text-body">
-                    Estructuramos datos para que puedas decidir con criterio.
-                  </p>
-                </div>
-              </div>
-            </div>
+      {/* The hero carries the masthead, so it renders on arrival and its featured
+          card fills in when the content does. Gating the whole thing on the fetch
+          meant the reader waited for a request to see the name of the outlet. */}
+      <Hero featuredPost={apertura} />
+
+      {status === "error" ? (
+        <section className="se-section">
+          <div className="se-container">
+            <ErrorState title="No se pudo cargar el contenido" error={error} />
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      <section className="se-section">
-        <div className="se-container">
-          <div className="se-two-col se-two-col--align-start">
-            <div>
-              <h2 className="se-heading-section">Investigación destacada</h2>
-              <p className="se-text-body">
-                Nuestro enfoque combina economía, finanzas y lectura política con estructura de reporte.
-              </p>
-            </div>
-            <div>
-              <article className="se-card se-card--compact">
-                <div className="se-card__body">
-                  <span className="se-meta se-meta--category">{REPORTS[0].tier}</span>
-                  <h3 className="se-heading-card se-heading-card--small">{REPORTS[0].title}</h3>
-                  <p className="se-card__excerpt se-text-body">{REPORTS[0].excerpt}</p>
-                  <div className="se-report-meta">
-                    <time dateTime={REPORTS[0].date}>{REPORTS[0].date}</time>
-                  </div>
-                  <Link to="/informes" className="se-link se-card__cta">
-                    Ver biblioteca
-                  </Link>
-                </div>
-              </article>
-            </div>
+      {/* Nothing to explore before anything is published, and an empty filter bar
+          on a launch-day homepage reads as a broken control rather than an
+          honest one. */}
+      {status === "success" && taxonomy.ready && pieces.length ? (
+        <section className="se-section se-explorer-section" aria-label="Explorar contenido">
+          <div className="se-container">
+            <ContentExplorer
+              pieces={pieces}
+              temasDisponibles={taxonomy.topics.map((t) => t.name)}
+              geoTop={taxonomy.geoTop}
+              regiones={taxonomy.regiones}
+              temas={temas}
+              geos={geos}
+              query={query}
+              onChange={setSelection}
+              onQueryChange={setQuery}
+              total={results.length}
+              scopeLabel="en todo el sitio"
+            />
           </div>
-        </div>
-      </section>
-
-      <section className="se-section">
-        <div className="se-container">
-          <h2 className="se-heading-section">Temas clave</h2>
-          {topicsState.status === "loading" ? (
-            <LoadingState title="Cargando categorías…" description="Obteniendo temas desde el servidor." />
-          ) : null}
-
-          {topicsState.status === "error" ? (
-            <ErrorState title="No pudimos cargar los temas" error={topicsState.error} onRetry={handleLoadTopics} />
-          ) : null}
-
-          {topicsState.status === "success" && topicsState.items.length === 0 ? (
-            <EmptyState title="Sin categorías" description="No hay categorías disponibles para mostrar en este momento." />
-          ) : null}
-
-          {topicsState.status === "success" && topicsState.items.length ? (
-            <ul className="se-topics" aria-label="Temas clave">
-              {topicsState.items.map((c) => (
-                <li key={c.slug} className="se-topics__item">
-                  <Link
-                    className="se-topics__chip"
-                    to={`/articulos?category=${encodeURIComponent(c.slug)}`}
-                    aria-label={`Ver artículos en la categoría ${c.name}`}
-                  >
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      </section>
-
-      {state.status === "loading" ? (
-        <LoadingState title="Cargando publicaciones…" description="Obteniendo artículos publicados desde el backend." />
-      ) : null}
-      {state.status === "error" ? (
-        <ErrorState title="No pudimos cargar el contenido editorial" error={state.error} onRetry={handleLoad} />
+        </section>
       ) : null}
 
-      {state.status === "success" ? (
-        <>
-          <FeaturedPosts posts={derived.featured} />
-          <BlogFeed posts={derived.feed} />
-          <SuggestedReading posts={derived.suggested} />
-        </>
+      {status === "success" && !pieces.length ? (
+        <section className="se-section">
+          <div className="se-container">
+            <EmptyState
+              title="Todavía no hay nada publicado"
+              description="Cuando la redacción publique la primera pieza, aparecerá aquí."
+            />
+          </div>
+        </section>
       ) : null}
+
+      {isFiltered && blocks.length === 0 && pieces.length ? (
+        <section className="se-section">
+          <div className="se-container">
+            <EmptyState
+              title="Sin resultados"
+              description="Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda."
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {blocks.map(({ formatoApi, items, total }) => (
+        <FormatSection
+          key={formatoApi}
+          title={nombrePlural(formatoApi)}
+          to={`/articulos?formato=${FORMATO_META[formatoApi].slug}`}
+          linkLabel={isFiltered ? `Ver los ${total}` : "Ver todas"}
+        >
+          {LAYOUTS[formatoApi](items)}
+        </FormatSection>
+      ))}
 
       <NewsletterBlock />
       <PartnersLogoCloud partners={PARTNERS} />

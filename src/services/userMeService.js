@@ -33,6 +33,10 @@ export const createSubmission = (payload) =>
   userRequest("/me/submissions", {
     method: "POST",
     json: {
+      // Only `articulo` or `noticia` — the backend refuses anything else with a
+      // CHECK constraint, so sending a house format would be a 400, not a silent
+      // downgrade.
+      format: payload.format ?? "articulo",
       title: payload.title,
       excerpt: payload.excerpt,
       content: payload.content,
@@ -47,6 +51,7 @@ export const getSubmissionById = async (id) => {
   }
   return {
     id: String(data.id ?? id),
+    format: String(data.format ?? "articulo"),
     title: String(data.title ?? ""),
     excerpt: String(data.excerpt ?? ""),
     content: String(data.content ?? ""),
@@ -60,6 +65,7 @@ export const patchMySubmission = (id, patch) =>
   userRequest(`/me/submissions/${encodeURIComponent(id)}`, {
     method: "PATCH",
     json: {
+      format: patch?.format,
       title: patch?.title,
       excerpt: patch?.excerpt,
       content: patch?.content,

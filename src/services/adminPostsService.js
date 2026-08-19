@@ -1,17 +1,29 @@
 import { adminRequest } from "../lib/api";
 import { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
-import { listAdminCategoriesForEditor, listAdminTagsForEditor } from "./adminTaxonomyService";
 
 export { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
 
 /**
- * @param {{ page?: number, limit?: number }} [params]
+ * @param {{
+ *   page?: number,
+ *   limit?: number,
+ *   format?: string,
+ *   status?: string,
+ *   q?: string,
+ *   unclassified?: boolean,
+ * }} [params]
  */
 export const listAdminPosts = async (params = {}) => {
     const raw = await adminRequest("/admin/posts", {
         query: {
             page: params.page ?? 1,
             limit: params.limit ?? 20,
+            format: params.format || undefined,
+            status: params.status || undefined,
+            q: params.q || undefined,
+            // The re-tagging backlog: pieces carried over from the old
+            // categorisation that nobody has given a topic yet.
+            unclassified: params.unclassified ? 1 : undefined,
         },
     });
     return unwrapListResponse(raw);
@@ -57,8 +69,3 @@ export const unpublishAdminPost = async (postId) =>
 export const deleteAdminPost = async (postId) =>
     adminRequest(`/admin/posts/${postId}`, { method: "DELETE" });
 
-/** @returns {Promise<Array<{ id: unknown, name?: string, slug?: string }>>} */
-export const listAdminCategories = () => listAdminCategoriesForEditor();
-
-/** @returns {Promise<Array<{ id: unknown, name?: string, slug?: string }>>} */
-export const listAdminTags = () => listAdminTagsForEditor();

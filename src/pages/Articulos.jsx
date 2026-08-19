@@ -1,272 +1,199 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import { useSearchParams } from "react-router-dom";
-import { PostCard } from "../components/blog";
 import { BRAND } from "../data/surEconomicsMock";
-import { contentService } from "../services/contentService";
 import { applyPageMeta } from "../lib/seo";
-import { ArticlesFiltersLite } from "../components/articles/ArticlesFiltersLite";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../components/content";
+import {
+  ArticleCardGrid,
+  ContentExplorer,
+  EditorialList,
+  InterviewGrid,
+  ListingPagination,
+  NewsList,
+  ReportGrid,
+} from "../components/home";
+import { FORMATO_META, FORMATO_POR_RUTA } from "../lib/pieza";
+import { useContentFilter } from "../hooks/useContentFilter";
+import { usePagedList } from "../hooks/usePagedList";
+import { usePieces } from "../hooks/usePieces";
+import { useTaxonomy } from "../hooks/useTaxonomy";
+import { useDelayedFlag } from "../hooks/useDelayedFlag";
 
-const normalizeForCard = (post, idx = 0) => {
-  const firstCategory = post.categories?.[0]?.name || post.categories?.[0]?.slug || "Editorial";
-  const placeholders = ["chart", "building", "growth"];
-  return {
-    id: post.id || post.slug,
-    slug: post.slug,
-    category: firstCategory,
-    title: post.title,
-    excerpt: post.excerpt,
-    date: post.publishDate,
-    readTime: "",
-    imagePlaceholder: placeholders[idx % placeholders.length],
-    imageUrl: post.featuredImage || "",
-    author: post.author,
-  };
+/**
+ * Listing page for one content format.
+ *
+ * The header menu points every format here through `?formato=`. A missing param
+ * means Artículos, matching the menu entry that has no param.
+ *
+ * The two explorer axes narrow *within* the format — a format page never leaves its
+ * format. Cross-format results come from `/explorar` instead.
+ */
+
+const LAYOUTS = {
+  noticia: (items) => <NewsList items={items} />,
+  articulo: (items) => <ArticleCardGrid items={items} />,
+  editorial: (items) => <EditorialList items={items} />,
+  entrevista: (items) => <InterviewGrid items={items} />,
+  informe: (items) => <ReportGrid items={items} />,
 };
 
-export const Articulos = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("");
-  const [tag, setTag] = useState("");
-  const [page, setPage] = useState(1);
+/**
+ * One format's view, mounted fresh for each format.
+ *
+ * Split out of the page so the parent can key it on the format. All five formats
+ * share the single `/articulos` route, so switching between them from the menu only
+ * changes the query string: React keeps this subtree mounted and reuses the DOM
+ * nodes. That had two consequences worth naming, both fixed by the key — the entry
+ * animation never replayed, because a CSS animation only starts when its element is
+ * created; and the filter selection carried over, so a topic chosen under Noticias
+ * silently followed the reader into Editorial.
+ */
+export const FormatListing = ({ formatoApi }) => {
+  const meta = FORMATO_META[formatoApi];
+  const taxonomy = useTaxonomy();
+  const { items: pieces, status, error, truncated } = usePieces({ format: formatoApi });
 
-  const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
+  const tree = { geoTop: taxonomy.geoTop, regiones: taxonomy.regiones };
+  const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
+    useContentFilter(pieces, tree);
 
-  const [postsState, setPostsState] = useState({
-    status: "idle",
-    items: [],
-    total: 0,
-    totalPages: 1,
-    error: null,
-  });
+  const listingRef = useRef(null);
+  const { page, totalPages, visible, goTo, resetPage, from, to, total } = usePagedList(
+    results,
+    meta.porPagina,
+    { scrollTo: listingRef }
+  );
 
-  const LIMIT = 12;
-
-  const loadTaxonomies = async () => {
-    try {
-      const [cats, tgs] = await Promise.all([
-        contentService.getCategories(),
-        contentService.getTags(),
-      ]);
-      setCategories(cats);
-      setTags(tgs);
-    } catch {
-      setCategories([]);
-      setTags([]);
-    }
-  };
-
-  const loadPosts = async () => {
-    setPostsState((s) => ({ ...s, status: "loading", error: null }));
-    try {
-      const res = await contentService.getPosts({
-        page,
-        limit: LIMIT,
-        category,
-        tag,
-      });
-      setPostsState({
-        status: "success",
-        items: res.items ?? [],
-        total: res.total ?? 0,
-        totalPages: res.totalPages ?? 1,
-        error: null,
-      });
-    } catch (err) {
-      setPostsState((s) => ({ ...s, status: "error", error: err }));
-    }
-  };
-
+  // Every format shares the `/articulos` path, so the app's ScrollToTop — which
+  // watches the pathname — never fires when the reader moves between them. This
+  // subtree is keyed by format, so its mount *is* "a new view was entered", and a
+  // new view starts at the top.
   useEffect(() => {
-    applyPageMeta({
-      title: `Artículos — ${BRAND.name}`,
-      description: "Explorador editorial de SurEconomics: artículos publicados y categorías.",
-    });
+    window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    loadTaxonomies();
-  }, []);
+  // Page four of the old result set means nothing in the new one, so any change to
+  // the filters sends the reader back to the first page.
+  const handleSelection = useCallback(
+    (next) => {
+      setSelection(next);
+      resetPage();
+    },
+    [setSelection, resetPage]
+  );
 
-  const categorySlugSet = useMemo(() => {
-    const set = new Set();
-    for (const c of categories) {
-      if (c?.slug) set.add(String(c.slug));
-    }
-    return set;
-  }, [categories]);
+  const handleQuery = useCallback(
+    (next) => {
+      setQuery(next);
+      resetPage();
+    },
+    [setQuery, resetPage]
+  );
 
-  const tagSlugSet = useMemo(() => {
-    const set = new Set();
-    for (const t of tags) {
-      if (t?.slug) set.add(String(t.slug));
-    }
-    return set;
-  }, [tags]);
-
-  useEffect(() => {
-    const nextCategoryRaw = searchParams.get("category") ?? "";
-    const nextTagRaw = searchParams.get("tag") ?? "";
-
-    const nextCategory =
-      Boolean(nextCategoryRaw) && categorySlugSet.size > 0 && !categorySlugSet.has(nextCategoryRaw)
-        ? ""
-        : nextCategoryRaw;
-    const nextTag =
-      Boolean(nextTagRaw) && tagSlugSet.size > 0 && !tagSlugSet.has(nextTagRaw) ? "" : nextTagRaw;
-
-    const categoryChanged = nextCategory !== category;
-    const tagChanged = nextTag !== tag;
-
-    if (categoryChanged) setCategory(nextCategory);
-    if (tagChanged) setTag(nextTag);
-    if (categoryChanged || tagChanged) setPage(1);
-
-    const shouldStripInvalidCategory =
-      Boolean(nextCategoryRaw) && categorySlugSet.size > 0 && !categorySlugSet.has(nextCategoryRaw);
-    const shouldStripInvalidTag = Boolean(nextTagRaw) && tagSlugSet.size > 0 && !tagSlugSet.has(nextTagRaw);
-
-    if (shouldStripInvalidCategory || shouldStripInvalidTag) {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (shouldStripInvalidCategory) next.delete("category");
-          if (shouldStripInvalidTag) next.delete("tag");
-          return next;
-        },
-        { replace: true }
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, categorySlugSet, tagSlugSet]);
-
-  useEffect(() => {
-    loadPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, category, tag]);
-
-  const filteredItems = useMemo(() => {
-    const items = postsState.items ?? [];
-    const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((p) => {
-      const haystack = `${p.title ?? ""} ${p.excerpt ?? ""}`.toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [postsState.items, query]);
-
-  const handleReset = () => {
-    setQuery("");
-    setCategory("");
-    setTag("");
-    setPage(1);
-    setSearchParams({}, { replace: true });
-  };
-
-  const handleCategoryChange = (slug) => {
-    setCategory(slug);
-    setPage(1);
-    const next = new URLSearchParams(searchParams);
-    if (slug) next.set("category", slug);
-    else next.delete("category");
-    setSearchParams(next, { replace: true });
-  };
-
-  const handleTagChange = (slug) => {
-    setTag(slug);
-    setPage(1);
-    const next = new URLSearchParams(searchParams);
-    if (slug) next.set("tag", slug);
-    else next.delete("tag");
-    setSearchParams(next, { replace: true });
-  };
+  const formato = taxonomy.formats.find((f) => f.slug === formatoApi);
+  const titulo = formato?.name_plural ?? meta.plural;
+  // Only announced when the wait is long enough to be worth announcing.
+  const cargando = useDelayedFlag(status === "loading");
 
   return (
-    <main className="se-blog se-articles" role="main">
-      <section className="se-section se-articles__hero" aria-label="Artículos">
-        <div className="se-container">
-          <div className="se-articles__head">
-            <p className="se-articles__kicker">Artículos</p>
-            <h1 className="se-articles__title">Explorador editorial</h1>
-            <p className="se-text-body se-articles__lead">
-              Filtra por categoría y tags para encontrar lecturas publicadas con criterio. Búsqueda rápida por título o resumen.
-            </p>
-          </div>
+    <section className="se-section se-articles__hero" aria-label={titulo}>
+      <div className="se-container">
+        <div className="se-articles__head">
+          <p className="se-articles__kicker">{titulo}</p>
+          <h1 className="se-articles__title">{titulo}</h1>
+          {formato?.lede ? (
+            <p className="se-text-body se-articles__lead">{formato.lede}</p>
+          ) : null}
         </div>
+      </div>
 
-        <div className="se-container">
-          <div className="se-articles-layout">
-            <ArticlesFiltersLite
-              query={query}
-              onQueryChange={setQuery}
-              category={category}
-              onCategoryChange={handleCategoryChange}
-              tag={tag}
-              onTagChange={handleTagChange}
-              categories={categories}
-              tags={tags}
-              onReset={handleReset}
-            />
+      <div className="se-container">
+        {status === "error" ? (
+          <ErrorState title="No se pudo cargar esta sección" error={error} />
+        ) : null}
 
-            <section className="se-articles-results" aria-label="Resultados">
-              <div className="se-articles-results__meta">
-                <span className="se-meta se-meta--category">
-                  {postsState.status === "success"
-                    ? `${postsState.total || filteredItems.length} artículos`
-                    : "Artículos"}
-                </span>
-              </div>
+        {cargando ? <LoadingState title={`Cargando ${titulo.toLowerCase()}…`} /> : null}
 
-              {postsState.status === "loading" ? (
-                <LoadingState title="Cargando artículos…" />
-              ) : null}
+        {status === "success" ? (
+          <>
+            {/* The filters only mean something once the geography tree has loaded,
+                and they are only worth showing when there is something to narrow. */}
+            {taxonomy.ready && pieces.length ? (
+              <ContentExplorer
+                pieces={pieces}
+                temasDisponibles={taxonomy.topics.map((t) => t.name)}
+                geoTop={taxonomy.geoTop}
+                regiones={taxonomy.regiones}
+                temas={temas}
+                geos={geos}
+                query={query}
+                onChange={handleSelection}
+                onQueryChange={handleQuery}
+                total={results.length}
+                scopeLabel={`en ${titulo}`}
+              />
+            ) : null}
 
-              {postsState.status === "error" ? (
-                <ErrorState title="No pudimos cargar los artículos" error={postsState.error} onRetry={loadPosts} />
-              ) : null}
-
-              {postsState.status === "success" && filteredItems.length === 0 ? (
+            <div className="se-listing" ref={listingRef}>
+              {visible.length ? (
+                LAYOUTS[formatoApi](visible)
+              ) : (
                 <EmptyState
-                  title="Sin resultados"
+                  title={isFiltered ? "Sin resultados" : `Todavía no hay ${titulo.toLowerCase()}`}
                   description={
-                    query.trim()
-                      ? "No encontramos artículos que coincidan con tu búsqueda en esta página."
-                      : "No hay artículos publicados para los filtros seleccionados."
+                    isFiltered
+                      ? "Ningún contenido de esta sección coincide con los filtros. Quite alguno para ampliar la búsqueda."
+                      : "Cuando la redacción publique en esta sección, aparecerá aquí."
                   }
                 />
-              ) : null}
+              )}
+            </div>
 
-              {postsState.status === "success" && filteredItems.length > 0 ? (
-                <>
-                  <div className="se-articles-grid">
-                    {filteredItems.map((post, idx) => {
-                      const card = normalizeForCard(post, idx);
-                      return (
-                        <PostCard
-                          key={card.id}
-                          slug={card.slug}
-                          category={card.category}
-                          title={card.title}
-                          excerpt={card.excerpt}
-                          date={card.date}
-                          readTime={card.readTime}
-                          imagePlaceholder={card.imagePlaceholder}
-                          imageUrl={card.imageUrl}
-                          author={card.author}
-                        />
-                      );
-                    })}
-                  </div>
-                  <Pagination page={page} totalPages={postsState.totalPages || 1} onPageChange={setPage} />
-                </>
-              ) : null}
-            </section>
-          </div>
-        </div>
-      </section>
-    </main>
+            {truncated ? (
+              <p className="se-text-body se-listing__note">
+                Se están mostrando las piezas más recientes de esta sección.
+              </p>
+            ) : null}
+
+            <ListingPagination
+              page={page}
+              totalPages={totalPages}
+              from={from}
+              to={to}
+              total={total}
+              unit={titulo.toLowerCase()}
+              onPageChange={goTo}
+            />
+          </>
+        ) : null}
+      </div>
+    </section>
   );
 };
 
+FormatListing.propTypes = {
+  formatoApi: PropTypes.oneOf(Object.keys(FORMATO_META)).isRequired,
+};
+
+export const Articulos = () => {
+  const [searchParams] = useSearchParams();
+
+  // An unknown slug falls back to Artículos rather than rendering an error — a
+  // stale link should still land the reader somewhere useful.
+  const formatoApi = FORMATO_POR_RUTA[searchParams.get("formato") ?? ""] ?? "articulo";
+  const meta = FORMATO_META[formatoApi];
+
+  useEffect(() => {
+    applyPageMeta({
+      title: `${meta.plural} — ${BRAND.name}`,
+      description: `${meta.plural} de ${BRAND.name}.`,
+    });
+  }, [meta]);
+
+  return (
+    <main className="se-blog se-articles" role="main">
+      <FormatListing formatoApi={formatoApi} key={formatoApi} />
+    </main>
+  );
+};

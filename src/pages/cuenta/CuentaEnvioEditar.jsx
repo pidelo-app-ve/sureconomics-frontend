@@ -12,7 +12,7 @@ export const CuentaEnvioEditar = () => {
   const { isEmailVerified } = useUserAuth();
 
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
-  const [values, setValues] = useState({ title: "", excerpt: "", content: "", featuredImageUrl: "" });
+  const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,6 +37,7 @@ export const CuentaEnvioEditar = () => {
         return;
       }
       setValues({
+        format: submission.format ?? "articulo",
         title: submission.title ?? "",
         excerpt: submission.excerpt ?? "",
         content: submission.content ?? "",
@@ -60,6 +61,7 @@ export const CuentaEnvioEditar = () => {
     setIsSubmitting(true);
     try {
       await userMeService.patchMySubmission(safeId, {
+        format: values.format,
         title: values.title,
         excerpt: values.excerpt,
         content: values.content,

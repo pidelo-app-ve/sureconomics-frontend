@@ -3,6 +3,27 @@ import { Link } from "react-router-dom";
 import { RichTextEditor } from "../editor/RichTextEditor";
 import { ImageField } from "../editor/ImageField";
 
+/**
+ * What an outside contributor may send.
+ *
+ * Entrevistas, informes and the editorial are the house's own voice — the
+ * editorial in particular runs unsigned, so a guest byline on one would misstate
+ * who is speaking. The backend enforces the same pair with a CHECK constraint, so
+ * this list cannot drift into offering something the API refuses.
+ */
+const CONTRIBUTOR_FORMATS = [
+  {
+    value: "articulo",
+    label: "Artículo",
+    hint: "Análisis firmado, con su contexto regional.",
+  },
+  {
+    value: "noticia",
+    label: "Noticia",
+    hint: "Un hecho reciente, con la fuente citada.",
+  },
+];
+
 export const SubmissionForm = ({
   values,
   onChange,
@@ -39,6 +60,28 @@ export const SubmissionForm = ({
             </p>
           ) : null}
 
+          <fieldset className="se-form-field">
+            <legend className="se-form-label">Qué está enviando</legend>
+            <div className="se-submission-formats">
+              {CONTRIBUTOR_FORMATS.map((format) => (
+                <label key={format.value} className="se-submission-format">
+                  <input
+                    type="radio"
+                    name="format"
+                    value={format.value}
+                    checked={values.format === format.value}
+                    onChange={handleFieldChange("format")}
+                    disabled={isSubmitting}
+                  />
+                  <span>
+                    <strong>{format.label}</strong>
+                    <em>{format.hint}</em>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <label className="se-form-field" htmlFor="submission-title">
             <span className="se-form-label">Título</span>
             <input
@@ -54,19 +97,16 @@ export const SubmissionForm = ({
             />
           </label>
 
-          <label className="se-form-field" htmlFor="submission-excerpt">
+          {/* Same editor as the body, for the same reason: a summary is prose. */}
+          <div className="se-form-field se-form-field--brief">
             <span className="se-form-label">Resumen</span>
-            <textarea
-              id="submission-excerpt"
-              name="excerpt"
-              className="se-form-control"
-              rows={3}
+            <RichTextEditor
               value={values.excerpt}
-              onChange={handleFieldChange("excerpt")}
-              required
+              onChange={(html) => onChange({ ...values, excerpt: html })}
+              placeholder="Dos o tres líneas que resuman lo que envía…"
               disabled={isSubmitting}
             />
-          </label>
+          </div>
 
           <div className="se-form-field">
             <span className="se-form-label">Contenido</span>
@@ -97,6 +137,7 @@ export const SubmissionForm = ({
 
 SubmissionForm.propTypes = {
   values: PropTypes.shape({
+    format: PropTypes.oneOf(["articulo", "noticia"]).isRequired,
     title: PropTypes.string.isRequired,
     excerpt: PropTypes.string.isRequired,
     content: PropTypes.string.isRequired,

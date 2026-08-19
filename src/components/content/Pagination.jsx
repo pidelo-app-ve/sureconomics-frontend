@@ -1,33 +1,14 @@
 import PropTypes from "prop-types";
-
-const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-
-const buildRange = (current, total) => {
-  if (total <= 1) return [1];
-
-  const windowSize = 5;
-  const half = Math.floor(windowSize / 2);
-  let start = clamp(current - half, 1, Math.max(1, total - windowSize + 1));
-  let end = Math.min(total, start + windowSize - 1);
-  start = Math.max(1, end - windowSize + 1);
-
-  const pages = [];
-  if (start > 1) pages.push(1);
-  if (start > 2) pages.push("…");
-  for (let p = start; p <= end; p += 1) pages.push(p);
-  if (end < total - 1) pages.push("…");
-  if (end < total) pages.push(total);
-  return pages;
-};
+import { PAGE_GAP, buildPageRange, clampPage } from "../../lib/pageRange";
 
 export const Pagination = ({ page, totalPages, onPageChange }) => {
   if (!totalPages || totalPages <= 1) return null;
 
-  const safePage = clamp(page || 1, 1, totalPages);
-  const pages = buildRange(safePage, totalPages);
+  const safePage = clampPage(page || 1, totalPages);
+  const pages = buildPageRange(safePage, totalPages);
 
   const handleGo = (next) => {
-    const target = clamp(next, 1, totalPages);
+    const target = clampPage(next, totalPages);
     if (target === safePage) return;
     onPageChange(target);
   };
@@ -47,9 +28,9 @@ export const Pagination = ({ page, totalPages, onPageChange }) => {
 
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
           {pages.map((p, idx) =>
-            p === "…" ? (
+            p === PAGE_GAP ? (
               <span key={`ellipsis-${idx}`} className="se-meta" aria-hidden="true" style={{ padding: "0 0.25rem" }}>
-                …
+                {PAGE_GAP}
               </span>
             ) : (
               <button

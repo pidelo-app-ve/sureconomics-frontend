@@ -1,18 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
     createAdminPost,
     deleteAdminPost,
     getAdminPost,
-    listAdminCategories,
-    listAdminTags,
     patchAdminPost,
     publishAdminPost,
     unpublishAdminPost,
 } from "../../services/adminPostsService";
-import { uploadAdminImage } from "../../services/adminUploadsService";
+import {
+    groupPlacesByRegion,
+    listAdminFormats,
+    listAdminPlaces,
+    listAdminTopics,
+} from "../../services/adminTaxonomyService";
+import {
+    ACCEPTED_DOCUMENT_MIME,
+    ACCEPTED_IMAGE_MIME,
+    uploadAdminMediaDocument,
+    uploadAdminMediaImage,
+} from "../../services/adminMediaService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
+import { AxisPicker } from "../../components/admin/AxisPicker";
+import { AssetField } from "../../components/admin/AssetField";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
@@ -20,9 +31,31 @@ import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
-import { ImageField } from "../../components/editor/ImageField";
+
+/**
+ * Which extra fields each format asks for.
+ *
+ * Kept here rather than read from the API because it is a statement about the
+ * *form*, not about the content: the backend already says which file a format
+ * needs (`required_media`) and whether it carries a byline (`shows_author`), and
+ * those are the two rules the database enforces. This map only decides which
+ * inputs are worth showing.
+ *
+ * ``image`` is on artículo alone, and that is deliberate. Artículos are the only
+ * format whose layout prints one -- `ArticleCardGrid` renders it, and the news
+ * list, the editorial list, the interview grid and the report grid all do not.
+ * Asking a noticia for an image is asking an editor to find a photograph the site
+ * will never display.
+ */
+const FORMAT_FIELDS = {
+    noticia: ["source", "opinion"],
+    articulo: ["image"],
+    entrevista: ["interviewee"],
+    informe: ["unit"],
+};
 
 const emptyForm = () => ({
+    format: "",
     title: "",
     slug: "",
     excerpt: "",
@@ -33,8 +66,17 @@ const emptyForm = () => ({
     featured_image_url: "",
     status: "draft",
     published_at: "",
-    category_ids: [],
-    tag_ids: [],
+    topic_ids: [],
+    place_ids: [],
+    source_name: "",
+    source_url: "",
+    house_opinion: "",
+    interviewee: "",
+    interviewee_role: "",
+    unit: "",
+    image_asset_id: null,
+    video_asset_id: null,
+    document_asset_id: null,
 });
 
 const idsFromRelation = (val) => {
@@ -66,23 +108,31 @@ const postToForm = (post) => {
     if (!post || typeof post !== "object") return emptyForm();
     const publishedAt = post.published_at ?? post.publishedAt;
     return {
+        ...emptyForm(),
+        format: pickStr(post, ["format"]),
         title: pickStr(post, ["title"]),
         slug: pickStr(post, ["slug"]),
         excerpt: pickStr(post, ["excerpt", "summary"]),
         content: pickStr(post, ["content", "body", "html"]),
-        meta_title: pickStr(post, ["meta_title", "metaTitle", "seo_title"]),
-        meta_description: pickStr(post, ["meta_description", "metaDescription", "seo_description"]),
-        canonical_url: pickStr(post, ["canonical_url", "canonicalUrl", "url"]),
-        featured_image_url: pickStr(post, [
-            "featured_image_url",
-            "featuredImageUrl",
-            "featured_image",
-            "featuredImage",
-        ]),
-        status: pickStr(post, ["status", "publication_status", "state"], "draft"),
+        meta_title: pickStr(post, ["meta_title"]),
+        meta_description: pickStr(post, ["meta_description"]),
+        canonical_url: pickStr(post, ["canonical_url"]),
+        featured_image_url: pickStr(post, ["featured_image_url"]),
+        status: pickStr(post, ["status"], "draft"),
         published_at: typeof publishedAt === "string" ? isoToDateTimeLocal(publishedAt) : "",
-        category_ids: idsFromRelation(post.categories ?? post.category_ids),
-        tag_ids: idsFromRelation(post.tags ?? post.tag_ids),
+        // Order is meaning: the first of each is the principal tag, which is the
+        // one the public cards print.
+        topic_ids: idsFromRelation(post.topics ?? post.topic_ids),
+        place_ids: idsFromRelation(post.places ?? post.place_ids),
+        source_name: pickStr(post, ["source_name"]),
+        source_url: pickStr(post, ["source_url"]),
+        house_opinion: pickStr(post, ["house_opinion"]),
+        interviewee: pickStr(post, ["interviewee"]),
+        interviewee_role: pickStr(post, ["interviewee_role"]),
+        unit: pickStr(post, ["unit"]),
+        image_asset_id: post.image_asset_id ?? null,
+        video_asset_id: post.video_asset_id ?? null,
+        document_asset_id: post.document_asset_id ?? null,
     };
 };
 
@@ -94,6 +144,7 @@ const formToPayload = (form) => {
     }
 
     const payload = {
+        format: form.format.trim() || undefined,
         title: form.title.trim() || undefined,
         slug: form.slug.trim() || undefined,
         excerpt: form.excerpt.trim() || undefined,
@@ -104,22 +155,26 @@ const formToPayload = (form) => {
         featured_image_url: form.featured_image_url.trim() || undefined,
         status: form.status.trim() || undefined,
         published_at: publishedAtValue,
-        category_ids: form.category_ids.length ? form.category_ids : undefined,
-        tag_ids: form.tag_ids.length ? form.tag_ids : undefined,
+        source_name: form.source_name.trim() || undefined,
+        source_url: form.source_url.trim() || undefined,
+        house_opinion: form.house_opinion.trim() || undefined,
+        interviewee: form.interviewee.trim() || undefined,
+        interviewee_role: form.interviewee_role.trim() || undefined,
+        unit: form.unit.trim() || undefined,
     };
+    // Sent even when empty: clearing every topic is a real edit, and `undefined`
+    // would read as "leave them alone".
+    payload.topic_ids = form.topic_ids;
+    payload.place_ids = form.place_ids;
+    // Same for the three slots — null is how a file gets detached.
+    payload.image_asset_id = form.image_asset_id ?? null;
+    payload.video_asset_id = form.video_asset_id ?? null;
+    payload.document_asset_id = form.document_asset_id ?? null;
+
     Object.keys(payload).forEach((k) => {
         if (payload[k] === undefined) delete payload[k];
     });
     return payload;
-};
-
-const toggleId = (list, id) => {
-    const n = Number(id);
-    const useNum = !Number.isNaN(n) && String(n) === String(id);
-    const target = useNum ? n : id;
-    const has = list.some((x) => String(x) === String(target));
-    if (has) return list.filter((x) => String(x) !== String(target));
-    return [...list, target];
 };
 
 export const AdminPostEditor = () => {
@@ -130,10 +185,13 @@ export const AdminPostEditor = () => {
     const { pathname } = useLocation();
     const isCreate = /\/admin\/posts\/new\/?$/.test(pathname);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const [form, setForm] = useState(emptyForm);
-    const [categories, setCategories] = useState([]);
-    const [tags, setTags] = useState([]);
+    const [formats, setFormats] = useState([]);
+    const [topics, setTopics] = useState([]);
+    const [placeGroups, setPlaceGroups] = useState([]);
+    const [assets, setAssets] = useState({ image: null, video: null, document: null });
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
     const [actionState, setActionState] = useState({ status: "idle", message: "", kind: "" });
@@ -147,20 +205,25 @@ export const AdminPostEditor = () => {
         return Number.isFinite(n) ? n : postId;
     }, [postId]);
 
-    const loadTaxonomies = useCallback(async () => {
-        try {
-            const [cats, tgs] = await Promise.all([listAdminCategories(), listAdminTags()]);
-            setCategories(cats);
-            setTags(tgs);
-        } catch {
-            setCategories([]);
-            setTags([]);
-        }
+    const loadReference = useCallback(async () => {
+        const [fmts, tps, pls] = await Promise.all([
+            listAdminFormats().catch(() => []),
+            listAdminTopics().catch(() => []),
+            listAdminPlaces().catch(() => []),
+        ]);
+        setFormats(fmts.filter((f) => f.is_active !== false));
+        setTopics(tps.filter((t) => t.is_active !== false));
+        const { regions } = groupPlacesByRegion(pls.filter((p) => p.is_active !== false));
+        setPlaceGroups(regions);
     }, []);
 
     const loadPost = useCallback(async () => {
         if (isCreate || !numericPostId) {
-            setForm(emptyForm());
+            // `?format=noticia` comes from the "create" menu, so the newsroom lands
+            // on the right form instead of picking the format twice.
+            const requested = searchParams.get("format") || "";
+            setForm({ ...emptyForm(), format: requested });
+            setAssets({ image: null, video: null, document: null });
             setLoadState({ status: "success", error: null });
             return;
         }
@@ -168,29 +231,40 @@ export const AdminPostEditor = () => {
         try {
             const post = await getAdminPost(numericPostId);
             setForm(postToForm(post));
+            setAssets({
+                image: post.image_asset ?? null,
+                video: post.video_asset ?? null,
+                document: post.document_asset ?? null,
+            });
             setLoadState({ status: "success", error: null });
         } catch (err) {
             setLoadState({ status: "error", error: err });
         }
-    }, [isCreate, numericPostId]);
+    }, [isCreate, numericPostId, searchParams]);
 
     useEffect(() => {
-        loadTaxonomies();
-    }, [loadTaxonomies]);
+        loadReference();
+    }, [loadReference]);
 
     useEffect(() => {
         loadPost();
     }, [loadPost]);
 
-    useEffect(() => {
-        applyPageMeta({
-            title: isCreate ? "Admin — Nuevo artículo" : `Admin — Editar #${postId ?? ""}`,
-            description: "Edición de artículos (SurEconomics).",
-        });
-    }, [isCreate, postId]);
+    const currentFormat = useMemo(
+        () => formats.find((f) => f.slug === form.format) ?? null,
+        [formats, form.format]
+    );
 
-    // A create redirects here with `state.flash`; surface it as a toast so the
-    // confirmation is visible no matter where the page is scrolled.
+    useEffect(() => {
+        const name = currentFormat?.name ?? "pieza";
+        applyPageMeta({
+            title: isCreate
+                ? `Admin — Crear ${name.toLowerCase()}`
+                : `Admin — Editar #${postId ?? ""}`,
+            description: "Edición de contenido (SurEconomics).",
+        });
+    }, [isCreate, postId, currentFormat]);
+
     useEffect(() => {
         if (flash) toastSuccess(flash);
     }, [flash, toastSuccess]);
@@ -200,13 +274,17 @@ export const AdminPostEditor = () => {
         setForm((prev) => ({ ...prev, [field]: v }));
     };
 
-    const handleToggleCategory = (id) => {
-        setForm((prev) => ({ ...prev, category_ids: toggleId(prev.category_ids, id) }));
+    const setAsset = (slot, kind) => (assetId, asset) => {
+        setForm((prev) => ({ ...prev, [slot]: assetId }));
+        setAssets((prev) => ({ ...prev, [kind]: asset }));
     };
 
-    const handleToggleTag = (id) => {
-        setForm((prev) => ({ ...prev, tag_ids: toggleId(prev.tag_ids, id) }));
-    };
+    const shows = (field) => (FORMAT_FIELDS[form.format] ?? []).includes(field);
+    const requiredMedia = currentFormat?.required_media ?? "none";
+    const showsImage = shows("image");
+    // A URL pasted before the media library existed. Shown so an editor knows why
+    // there is an image on a piece with nothing attached, and can clear it.
+    const legacyImage = Boolean(form.featured_image_url && !form.image_asset_id);
 
     const handleSave = async () => {
         setSaveState({ status: "loading", message: "" });
@@ -215,94 +293,90 @@ export const AdminPostEditor = () => {
             const payload = formToPayload(form);
             if (isCreate) {
                 const created = await createAdminPost(payload);
-                const newId =
-                    created?.id ??
-                    created?._id ??
-                    (typeof created === "object" && created !== null && "data" in created
-                        ? created.data?.id
-                        : null);
+                const newId = created?.id ?? null;
+                // Same reason: no gendered adjective on a name that comes from data.
+                const label = currentFormat?.name ?? "La pieza";
                 if (newId != null) {
                     navigate(`/admin/posts/${newId}`, {
                         replace: true,
-                        state: { flash: "Artículo creado correctamente." },
+                        state: { flash: `${label}: creada correctamente.` },
                     });
                 } else {
                     navigate("/admin/posts", {
                         replace: true,
-                        state: { flash: "Artículo creado correctamente." },
+                        state: { flash: `${label}: creada correctamente.` },
                     });
                 }
                 return;
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
+            setAssets({
+                image: updated.image_asset ?? null,
+                video: updated.video_asset ?? null,
+                document: updated.document_asset ?? null,
+            });
             setSaveState({ status: "success", message: "Cambios guardados correctamente." });
-            toastSuccess("Cambios guardados correctamente.", "Artículo guardado");
+            toastSuccess("Cambios guardados correctamente.", "Contenido guardado");
         } catch (err) {
             const message = adminErrorMessage(
                 err,
-                isCreate ? "No se pudo crear el artículo." : "No se pudieron guardar los cambios."
+                isCreate ? "No se pudo crear la pieza." : "No se pudieron guardar los cambios."
             );
             setSaveState({ status: "error", message });
-            toastError(message, isCreate ? "No se pudo crear el artículo" : "No se pudo guardar");
+            toastError(message, isCreate ? "No se pudo crear" : "No se pudo guardar");
         }
     };
 
-    const handlePublish = async () => {
+    const runAction = (kind, fn, successMessage, failureMessage, toastTitle) => async () => {
         if (isCreate) return;
         setSaveState({ status: "idle", message: "" });
-        setActionState({ status: "loading", message: "", kind: "publish" });
+        setActionState({ status: "loading", message: "", kind });
         try {
-            const updated = await publishAdminPost(numericPostId);
+            const updated = await fn(numericPostId);
             setForm(postToForm(updated));
-            const message = "El artículo quedó publicado y ya es visible en el sitio.";
-            setActionState({ status: "success", message, kind: "publish" });
-            toastSuccess(message, "Artículo publicado");
+            setActionState({ status: "success", message: successMessage, kind });
+            toastSuccess(successMessage, toastTitle);
         } catch (err) {
-            const message = adminErrorMessage(err, "No se pudo publicar el artículo.");
-            setActionState({ status: "error", message, kind: "publish" });
-            toastError(message, "No se pudo publicar");
+            const message = adminErrorMessage(err, failureMessage);
+            setActionState({ status: "error", message, kind });
+            toastError(message, toastTitle);
         }
     };
 
-    const handleUnpublish = async () => {
-        if (isCreate) return;
-        setSaveState({ status: "idle", message: "" });
-        setActionState({ status: "loading", message: "", kind: "unpublish" });
-        try {
-            const updated = await unpublishAdminPost(numericPostId);
-            setForm(postToForm(updated));
-            const message = "El artículo se despublicó y ya no es visible en el sitio.";
-            setActionState({ status: "success", message, kind: "unpublish" });
-            toastSuccess(message, "Artículo despublicado");
-        } catch (err) {
-            const message = adminErrorMessage(err, "No se pudo despublicar el artículo.");
-            setActionState({ status: "error", message, kind: "unpublish" });
-            toastError(message, "No se pudo despublicar");
-        }
-    };
+    const handlePublish = runAction(
+        "publish",
+        publishAdminPost,
+        "Quedó publicada y ya es visible en el sitio.",
+        "No se pudo publicar.",
+        "Publicar"
+    );
+
+    const handleUnpublish = runAction(
+        "unpublish",
+        unpublishAdminPost,
+        "Se despublicó y ya no es visible en el sitio.",
+        "No se pudo despublicar.",
+        "Despublicar"
+    );
 
     const handleDelete = async () => {
         if (isCreate) return;
         setActionState({ status: "idle", message: "", kind: "" });
         await confirm({
-            title: "Eliminar artículo",
-            description: `¿Eliminar este artículo (ID ${numericPostId}) de forma permanente?`,
-            confirmLabel: "Eliminar artículo",
+            title: "Eliminar pieza",
+            description: `¿Eliminar esta pieza (ID ${numericPostId}) de forma permanente?`,
+            confirmLabel: "Eliminar",
             onConfirm: async () => {
                 await deleteAdminPost(numericPostId);
                 navigate("/admin/posts", {
                     replace: true,
-                    state: { flash: "Artículo eliminado correctamente." },
+                    state: { flash: "Pieza eliminada correctamente." },
                 });
             },
         });
     };
 
-    /**
-     * One inline message rendered next to the buttons. Each handler resets the
-     * other state to `idle`, so at most one of the two is ever reportable.
-     */
     const feedback = (() => {
         for (const state of [actionState, saveState]) {
             if (state.status === "error") return { tone: "error", message: state.message };
@@ -312,17 +386,17 @@ export const AdminPostEditor = () => {
     })();
 
     if (isCreate && !canCreate) {
-        return <EmptyState title="Sin acceso" description="Solo escritor y admin pueden crear artículos nuevos." />;
+        return <EmptyState title="Sin acceso" description="Solo escritor y admin pueden crear contenido nuevo." />;
     }
 
     if (loadState.status === "loading") {
-        return <LoadingState title="Cargando artículo…" />;
+        return <LoadingState title="Cargando…" />;
     }
 
     if (loadState.status === "error") {
         return (
             <>
-                <ErrorState title="No se pudo cargar el artículo" error={loadState.error} onRetry={loadPost} />
+                <ErrorState title="No se pudo cargar la pieza" error={loadState.error} onRetry={loadPost} />
                 <p style={{ marginTop: "1rem" }}>
                     <Link to="/admin/posts" className="se-link">
                         Volver al listado
@@ -333,18 +407,27 @@ export const AdminPostEditor = () => {
     }
 
     if (!isCreate && !numericPostId) {
-        return <EmptyState title="Ruta no válida" description="Falta el identificador del artículo." />;
+        return <EmptyState title="Ruta no válida" description="Falta el identificador de la pieza." />;
     }
+
+    /** Whether publishing would be refused for a missing file, said before trying. */
+    const missingMedia =
+        (requiredMedia === "video" && !form.video_asset_id) ||
+        (requiredMedia === "document" && !form.document_asset_id);
 
     return (
         <main role="main">
             <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
                 <div>
                     <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        {isCreate ? "Nuevo artículo" : `Editar artículo #${postId}`}
+                        {/* "Crear"/"Editar" + the name works for every format;
+                            "nueva informe" would not. */}
+                        {isCreate
+                            ? `Crear ${currentFormat?.name?.toLowerCase() ?? "pieza"}`
+                            : `Editar ${currentFormat?.name?.toLowerCase() ?? "pieza"} #${postId}`}
                     </h1>
                     <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
-                        Estado: {form.status || "—"}
+                        Estado: {form.status === "published" ? "publicado" : "borrador"}
                     </p>
                 </div>
                 <Link to="/admin/posts" className="se-link">
@@ -352,187 +435,414 @@ export const AdminPostEditor = () => {
                 </Link>
             </header>
 
-            <div className="se-contact-form">
-                <label className="se-form-field" htmlFor="post-title">
-                    <span className="se-form-label">Título</span>
-                    <input
-                        id="post-title"
-                        className="se-form-control"
-                        value={form.title}
-                        onChange={handleChange("title")}
-                        required
-                    />
-                </label>
-                <label className="se-form-field" htmlFor="post-slug">
-                    <span className="se-form-label">Slug (opcional; se genera automáticamente si lo deja vacío)</span>
-                    <input
-                        id="post-slug"
-                        className="se-form-control"
-                        value={form.slug}
-                        onChange={handleChange("slug")}
-                    />
-                </label>
-                <label className="se-form-field" htmlFor="post-status">
-                    <span className="se-form-label">Estado</span>
+            <div className="se-editor-group">
+                <p className="se-editor-group__title">Formato</p>
+                <label className="se-form-field" htmlFor="post-format">
+                    <span className="se-form-label">Qué es esta pieza</span>
                     <select
-                        id="post-status"
+                        id="post-format"
                         className="se-form-control"
-                        value={form.status}
-                        onChange={handleChange("status")}
+                        value={form.format}
+                        onChange={handleChange("format")}
                     >
-                        {form.status && !["draft", "published"].includes(form.status) ? (
-                            <option value={form.status}>{form.status}</option>
-                        ) : null}
-                        <option value="draft">Borrador</option>
-                        {canPublish || form.status === "published" ? (
-                            <option value="published">Publicado</option>
-                        ) : null}
+                        <option value="">Elija un formato…</option>
+                        {formats.map((f) => (
+                            <option key={f.slug} value={f.slug}>
+                                {f.name}
+                            </option>
+                        ))}
                     </select>
                 </label>
-                <label className="se-form-field" htmlFor="post-published-at">
-                    <span className="se-form-label">Fecha de publicación (opcional)</span>
-                    <input
-                        id="post-published-at"
-                        type="datetime-local"
-                        className="se-form-control"
-                        value={form.published_at}
-                        onChange={handleChange("published_at")}
-                    />
-                </label>
-                <label className="se-form-field" htmlFor="post-excerpt">
-                    <span className="se-form-label">Resumen</span>
-                    <textarea
-                        id="post-excerpt"
-                        className="se-form-control se-form-control--textarea"
-                        rows={3}
-                        value={form.excerpt}
-                        onChange={handleChange("excerpt")}
-                    />
-                </label>
-                <div className="se-form-field">
-                    <span className="se-form-label">Contenido</span>
-                    <RichTextEditor
-                        value={form.content}
-                        onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                    />
-                </div>
-                <label className="se-form-field" htmlFor="post-meta-title">
-                    <span className="se-form-label">Meta título (SEO)</span>
-                    <input
-                        id="post-meta-title"
-                        className="se-form-control"
-                        value={form.meta_title}
-                        onChange={handleChange("meta_title")}
-                    />
-                </label>
-                <label className="se-form-field" htmlFor="post-meta-desc">
-                    <span className="se-form-label">Meta descripción (SEO)</span>
-                    <textarea
-                        id="post-meta-desc"
-                        className="se-form-control se-form-control--textarea"
-                        rows={2}
-                        value={form.meta_description}
-                        onChange={handleChange("meta_description")}
-                    />
-                </label>
-                <label className="se-form-field" htmlFor="post-canonical">
-                    <span className="se-form-label">URL canónica</span>
-                    <input
-                        id="post-canonical"
-                        className="se-form-control"
-                        value={form.canonical_url}
-                        onChange={handleChange("canonical_url")}
-                    />
-                </label>
-                <ImageField
-                    id="post-image"
-                    label="Imagen destacada"
-                    value={form.featured_image_url}
-                    onChange={(v) => setForm((prev) => ({ ...prev, featured_image_url: v }))}
-                    onUpload={uploadAdminImage}
-                />
-
-                <fieldset className="se-form-field">
-                    <legend className="se-form-label">Categorías</legend>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                        {categories.length === 0 ? (
-                            <span className="se-text-body">No se pudieron cargar categorías.</span>
-                        ) : (
-                            categories.map((c) => {
-                                const id = c.id ?? c._id;
-                                const checked = form.category_ids.some((x) => String(x) === String(id));
-                                return (
-                                    <label key={String(id)} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={checked}
-                                            onChange={() => handleToggleCategory(id)}
-                                        />
-                                        <span>{c.name || c.slug || String(id)}</span>
-                                    </label>
-                                );
-                            })
-                        )}
-                    </div>
-                </fieldset>
-
-                <fieldset className="se-form-field">
-                    <legend className="se-form-label">Etiquetas</legend>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxHeight: "220px", overflowY: "auto" }}>
-                        {tags.length === 0 ? (
-                            <span className="se-text-body">No se pudieron cargar etiquetas.</span>
-                        ) : (
-                            tags.map((t) => {
-                                const id = t.id ?? t._id;
-                                const checked = form.tag_ids.some((x) => String(x) === String(id));
-                                return (
-                                    <label key={String(id)} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                                        <input type="checkbox" checked={checked} onChange={() => handleToggleTag(id)} />
-                                        <span>{t.name || t.slug || String(id)}</span>
-                                    </label>
-                                );
-                            })
-                        )}
-                    </div>
-                </fieldset>
-
-                <p className="se-admin-meta-hint">
-                    El guardado incluye título, slug, resumen, contenido, imagen destacada, estado y fecha de
-                    publicación, además de las categorías y etiquetas seleccionadas. Publicar y despublicar son
-                    acciones independientes del guardado.
-                </p>
-
-                <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
-
-                <div className="se-admin-form-actions">
-                    <button type="button" className="se-btn" onClick={handleSave} disabled={saveState.status === "loading"}>
-                        {saveState.status === "loading" ? "Guardando…" : isCreate ? "Crear" : "Guardar cambios"}
-                    </button>
-                    {!isCreate && canPublish ? (
-                        <>
-                            <button
-                                type="button"
-                                className="se-btn se-btn--secondary"
-                                onClick={handlePublish}
-                                disabled={actionState.status === "loading"}
-                            >
-                                {actionState.status === "loading" && actionState.kind === "publish" ? "Publicando…" : "Publicar"}
-                            </button>
-                            <button
-                                type="button"
-                                className="se-btn se-btn--secondary"
-                                onClick={handleUnpublish}
-                                disabled={actionState.status === "loading"}
-                            >
-                                {actionState.status === "loading" && actionState.kind === "unpublish" ? "Despublicando…" : "Despublicar"}
-                            </button>
-                            <button type="button" className="se-btn se-btn--secondary" onClick={handleDelete}>
-                                Eliminar
-                            </button>
-                        </>
-                    ) : null}
-                </div>
+                {form.format && currentFormat?.lede ? (
+                    <p className="se-admin-meta-hint">{currentFormat.lede}</p>
+                ) : null}
+                {!form.format ? (
+                    <p className="se-admin-meta-hint">
+                        El formato decide qué pide el formulario y cómo se ve la pieza en el
+                        sitio. Elíjalo para continuar.
+                    </p>
+                ) : null}
             </div>
+
+            {form.format ? (
+                <>
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">La pieza</p>
+                        <label className="se-form-field" htmlFor="post-title">
+                            <span className="se-form-label">Título</span>
+                            <input
+                                id="post-title"
+                                className="se-form-control"
+                                value={form.title}
+                                onChange={handleChange("title")}
+                                required
+                            />
+                        </label>
+                        {/* The same editor as the body: a summary is prose, and a
+                            writer who needs an emphasis or a link in it should not
+                            have to give it up because the field is smaller. */}
+                        <div className="se-form-field se-form-field--brief" id="post-excerpt">
+                            <span className="se-form-label">
+                                {form.format === "editorial" ? "Entradilla" : "Resumen"}
+                            </span>
+                            <RichTextEditor
+                                value={form.excerpt}
+                                onChange={(html) => setForm((prev) => ({ ...prev, excerpt: html }))}
+                                placeholder={
+                                    form.format === "editorial"
+                                        ? "La frase con la que abre el editorial…"
+                                        : "Dos o tres líneas que resuman la pieza…"
+                                }
+                            />
+                        </div>
+
+                        {shows("source") ? (
+                            <>
+                                <label className="se-form-field" htmlFor="post-source-name">
+                                    <span className="se-form-label">Fuente</span>
+                                    <input
+                                        id="post-source-name"
+                                        className="se-form-control"
+                                        value={form.source_name}
+                                        onChange={handleChange("source_name")}
+                                        placeholder="Reuters, Banco Central, …"
+                                    />
+                                </label>
+                                <label className="se-form-field" htmlFor="post-source-url">
+                                    <span className="se-form-label">Enlace a la fuente</span>
+                                    <input
+                                        id="post-source-url"
+                                        className="se-form-control"
+                                        value={form.source_url}
+                                        onChange={handleChange("source_url")}
+                                        placeholder="https://…"
+                                    />
+                                </label>
+                            </>
+                        ) : null}
+
+                        {shows("interviewee") ? (
+                            <>
+                                <label className="se-form-field" htmlFor="post-interviewee">
+                                    <span className="se-form-label">Entrevistado</span>
+                                    <input
+                                        id="post-interviewee"
+                                        className="se-form-control"
+                                        value={form.interviewee}
+                                        onChange={handleChange("interviewee")}
+                                    />
+                                </label>
+                                <label className="se-form-field" htmlFor="post-interviewee-role">
+                                    <span className="se-form-label">Cargo</span>
+                                    <input
+                                        id="post-interviewee-role"
+                                        className="se-form-control"
+                                        value={form.interviewee_role}
+                                        onChange={handleChange("interviewee_role")}
+                                    />
+                                </label>
+                            </>
+                        ) : null}
+
+                        {shows("unit") ? (
+                            <label className="se-form-field" htmlFor="post-unit">
+                                <span className="se-form-label">Unidad que firma</span>
+                                <input
+                                    id="post-unit"
+                                    className="se-form-control"
+                                    value={form.unit}
+                                    onChange={handleChange("unit")}
+                                    placeholder="RendiGroup Advisors, …"
+                                />
+                            </label>
+                        ) : null}
+
+                        {currentFormat?.shows_author === false ? (
+                            <p className="se-admin-meta-hint">
+                                Este formato se publica sin firma personal: el sitio no muestra
+                                autor.
+                            </p>
+                        ) : null}
+                    </div>
+
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">Cuerpo</p>
+                        <div className="se-form-field">
+                            <span className="se-form-label">
+                                {form.format === "entrevista"
+                                    ? "Resumen escrito de la conversación"
+                                    : "Contenido"}
+                            </span>
+                            <RichTextEditor
+                                value={form.content}
+                                onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+                            />
+                        </div>
+
+                        {/* The house position closes the note, so it sits after the body
+                            rather than up with the identity fields. */}
+                        {shows("opinion") ? (
+                            <div className="se-form-field se-form-field--brief" id="post-house-opinion">
+                                <span className="se-form-label">
+                                    ¿Qué piensa SurEconomics? — cierre de la nota
+                                </span>
+                                <RichTextEditor
+                                    value={form.house_opinion}
+                                    onChange={(html) =>
+                                        setForm((prev) => ({ ...prev, house_opinion: html }))
+                                    }
+                                    placeholder="La lectura del medio sobre el hecho. Si lo deja vacío, la nota se publica sin este bloque."
+                                />
+                            </div>
+                        ) : null}
+                    </div>
+
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">Clasificación</p>
+                        <AxisPicker
+                            id="post-topics"
+                            legend="Temas"
+                            hint="El primero es el principal: es el único que se muestra en las tarjetas."
+                            options={topics}
+                            value={form.topic_ids}
+                            onChange={(next) => setForm((prev) => ({ ...prev, topic_ids: next }))}
+                        />
+                        <AxisPicker
+                            id="post-places"
+                            legend="Lugares"
+                            hint="Elija el lugar más específico que aplique. Al filtrar por una región aparecen sus países."
+                            groups={placeGroups}
+                            value={form.place_ids}
+                            onChange={(next) => setForm((prev) => ({ ...prev, place_ids: next }))}
+                        />
+                    </div>
+
+                    {requiredMedia !== "none" || showsImage ? (
+                        <div className="se-editor-group">
+                            <p className="se-editor-group__title">Archivos</p>
+
+                            {requiredMedia === "video" ? (
+                                <AssetField
+                                    id="post-video"
+                                    label="Video de la entrevista"
+                                    hint="Puede pegar un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
+                                    kind="video"
+                                    value={form.video_asset_id}
+                                    asset={assets.video}
+                                    onChange={setAsset("video_asset_id", "video")}
+                                    required
+                                />
+                            ) : null}
+
+                            {requiredMedia === "document" ? (
+                                <AssetField
+                                    id="post-document"
+                                    label="Documento del informe (PDF)"
+                                    hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
+                                    kind="document"
+                                    value={form.document_asset_id}
+                                    asset={assets.document}
+                                    onChange={setAsset("document_asset_id", "document")}
+                                    onUpload={uploadAdminMediaDocument}
+                                    accept={ACCEPTED_DOCUMENT_MIME}
+                                    required
+                                />
+                            ) : null}
+
+                            {/* Only the formats whose layout actually prints an image ask for
+                                one. Artículos use image cards; noticias, editorial, entrevistas
+                                and informes never show one, and asking anyway is asking for
+                                work that never appears on the site. */}
+                            {showsImage ? (
+                                <>
+                                    <AssetField
+                                        id="post-image-asset"
+                                        label="Imagen del artículo"
+                                        hint="Opcional. Si la deja vacía, el artículo se muestra con un fondo de color."
+                                        kind="image"
+                                        value={form.image_asset_id}
+                                        asset={assets.image}
+                                        onChange={setAsset("image_asset_id", "image")}
+                                        onUpload={uploadAdminMediaImage}
+                                        accept={ACCEPTED_IMAGE_MIME}
+                                    />
+                                    {legacyImage ? (
+                                        <p className="se-asset__legacy">
+                                            Esta pieza trae una imagen por URL de antes de la
+                                            biblioteca de archivos:{" "}
+                                            <a
+                                                className="se-link"
+                                                href={form.featured_image_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                verla
+                                            </a>
+                                            {". "}
+                                            Se sigue usando mientras no adjunte una nueva.{" "}
+                                            <button
+                                                type="button"
+                                                className="se-link se-header__nav-link--button"
+                                                onClick={() =>
+                                                    setForm((prev) => ({
+                                                        ...prev,
+                                                        featured_image_url: "",
+                                                    }))
+                                                }
+                                            >
+                                                Quitarla
+                                            </button>
+                                        </p>
+                                    ) : null}
+                                </>
+                            ) : null}
+                        </div>
+                    ) : null}
+
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">Publicación</p>
+                        <label className="se-form-field" htmlFor="post-status">
+                            <span className="se-form-label">Estado</span>
+                            <select
+                                id="post-status"
+                                className="se-form-control"
+                                value={form.status}
+                                onChange={handleChange("status")}
+                            >
+                                <option value="draft">Borrador</option>
+                                {canPublish || form.status === "published" ? (
+                                    <option value="published">Publicado</option>
+                                ) : null}
+                            </select>
+                        </label>
+                        <label className="se-form-field" htmlFor="post-published-at">
+                            <span className="se-form-label">
+                                Fecha de publicación (opcional)
+                            </span>
+                            <input
+                                id="post-published-at"
+                                type="datetime-local"
+                                className="se-form-control"
+                                value={form.published_at}
+                                onChange={handleChange("published_at")}
+                            />
+                        </label>
+
+                        {missingMedia ? (
+                            <p className="se-admin-warning">
+                                Falta {requiredMedia === "video" ? "el video" : "el documento"}.
+                                Puede guardar como borrador, pero publicar será rechazado hasta
+                                que lo adjunte.
+                            </p>
+                        ) : null}
+                    </div>
+
+                    {/* Slug and SEO are real needs and belong to the machine, not to the
+                        story. Folded away so the form reads as editorial work first. */}
+                    <details className="se-editor-advanced">
+                        <summary>Avanzado — dirección y SEO</summary>
+                        <div className="se-editor-advanced__body">
+                            <label className="se-form-field" htmlFor="post-slug">
+                                <span className="se-form-label">
+                                    Slug (opcional; se genera del título si lo deja vacío)
+                                </span>
+                                <input
+                                    id="post-slug"
+                                    className="se-form-control"
+                                    value={form.slug}
+                                    onChange={handleChange("slug")}
+                                />
+                            </label>
+                            <label className="se-form-field" htmlFor="post-meta-title">
+                                <span className="se-form-label">Meta título</span>
+                                <input
+                                    id="post-meta-title"
+                                    className="se-form-control"
+                                    value={form.meta_title}
+                                    onChange={handleChange("meta_title")}
+                                    maxLength={70}
+                                />
+                            </label>
+                            <label className="se-form-field" htmlFor="post-meta-desc">
+                                <span className="se-form-label">Meta descripción</span>
+                                <textarea
+                                    id="post-meta-desc"
+                                    className="se-form-control se-form-control--textarea"
+                                    rows={2}
+                                    value={form.meta_description}
+                                    onChange={handleChange("meta_description")}
+                                    maxLength={320}
+                                />
+                            </label>
+                            <label className="se-form-field" htmlFor="post-canonical">
+                                <span className="se-form-label">URL canónica</span>
+                                <input
+                                    id="post-canonical"
+                                    className="se-form-control"
+                                    value={form.canonical_url}
+                                    onChange={handleChange("canonical_url")}
+                                    placeholder="Solo si esta pieza se publicó primero en otro sitio"
+                                />
+                            </label>
+                            <p className="se-admin-meta-hint">
+                                Si deja el meta título y la meta descripción vacíos, los
+                                buscadores usan el título y el resumen de la pieza, que suele ser
+                                lo correcto.
+                            </p>
+                        </div>
+                    </details>
+
+                    <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
+
+                    <div className="se-admin-form-actions">
+                        <button
+                            type="button"
+                            className="se-btn"
+                            onClick={handleSave}
+                            disabled={saveState.status === "loading"}
+                        >
+                            {saveState.status === "loading"
+                                ? "Guardando…"
+                                : isCreate
+                                  ? "Crear"
+                                  : "Guardar cambios"}
+                        </button>
+                        {!isCreate && canPublish ? (
+                            <>
+                                <button
+                                    type="button"
+                                    className="se-btn se-btn--secondary"
+                                    onClick={handlePublish}
+                                    disabled={actionState.status === "loading"}
+                                >
+                                    {actionState.status === "loading" &&
+                                    actionState.kind === "publish"
+                                        ? "Publicando…"
+                                        : "Publicar"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="se-btn se-btn--secondary"
+                                    onClick={handleUnpublish}
+                                    disabled={actionState.status === "loading"}
+                                >
+                                    {actionState.status === "loading" &&
+                                    actionState.kind === "unpublish"
+                                        ? "Despublicando…"
+                                        : "Despublicar"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="se-btn se-btn--secondary"
+                                    onClick={handleDelete}
+                                >
+                                    Eliminar
+                                </button>
+                            </>
+                        ) : null}
+                    </div>
+                </>
+            ) : null}
 
             <ConfirmDialog />
         </main>

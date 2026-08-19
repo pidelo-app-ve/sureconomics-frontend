@@ -1,0 +1,121 @@
+/**
+ * Two-axis filtering shared by the explorer and every listing page.
+ *
+ * Kept in one place on purpose: the explorer's option counts and the page's result
+ * list have to agree, or an option will promise a number the page can't deliver.
+ * Both call `matches` here.
+ *
+ * The geography tree used to be imported from a fixed data file. It now comes from
+ * the API, so every function that needs it takes it as an argument — a module that
+ * silently reads mutable global state is exactly how the counts and the results
+ * would drift apart while both looked right.
+ */
+
+/** The tree, in the shape `useTaxonomy` hands back. */
+const EMPTY_TREE = { geoTop: "Las Américas", regiones: {} };
+
+/** country → region, derived per call. Twenty-six entries; not worth memoising. */
+const countryRegion = (regiones) => {
+  const out = {};
+  Object.entries(regiones ?? {}).forEach(([region, countries]) => {
+    (countries ?? []).forEach((country) => {
+      out[country] = region;
+    });
+  });
+  return out;
+};
+
+/**
+ * Every geography node a piece belongs to. Tagging Perú also places the piece in
+ * Andina and in Las Américas, which is what lets a reader browsing a region find
+ * country-level pieces without them being tagged twice.
+ *
+ * Takes the piece's whole list because a piece may carry three geographies — an
+ * analysis of trade between Venezuela and Colombia belongs to both, and to Andina
+ * and Las Américas above them.
+ *
+ * @param {Array<string>} geos
+ * @param {{ geoTop?: string, regiones?: Record<string, string[]> }} tree
+ * @returns {Set<string>}
+ */
+export const expandGeo = (geos, tree = EMPTY_TREE) => {
+  const { geoTop = EMPTY_TREE.geoTop, regiones } = tree;
+  const byCountry = countryRegion(regiones);
+  const out = new Set([geoTop]);
+  (geos ?? []).forEach((geo) => {
+    if (!geo) return;
+    out.add(geo);
+    const region = byCountry[geo];
+    if (region) out.add(region);
+  });
+  return out;
+};
+
+/**
+ * The single tag a listing card shows. Inside the piece every tag is shown, but a
+ * card has room for one, and the first is the principal one.
+ */
+export const temaPrincipal = (piece) => piece?.temas?.[0] ?? null;
+
+/**
+ * A piece with no country is regional or continental, and reads as the root —
+ * plenty of news is exactly that: a Fed decision belongs to no single country.
+ */
+export const geoPrincipal = (piece, geoTop = EMPTY_TREE.geoTop) =>
+  piece?.geos?.[0] ?? geoTop;
+
+/**
+ * @param {object} piece
+ * @param {{ temas?: Set<string>, geos?: Set<string>, query?: string, tree?: object }} selection
+ * @returns {boolean}
+ */
+export const matches = (piece, { temas, geos, query, tree } = {}) => {
+  // Within an axis the values add up (or); across axes they narrow (and). A piece
+  // matches when *any* of its own tags is among the selected ones.
+  if (temas?.size && !(piece.temas ?? []).some((t) => temas.has(t))) return false;
+
+  if (geos?.size) {
+    const belongs = expandGeo(piece.geos, tree);
+    if (![...geos].some((g) => belongs.has(g))) return false;
+  }
+
+  const q = (query ?? "").trim().toLowerCase();
+  if (q) {
+    const haystack = [piece.titulo, piece.resumen, piece.entrada, piece.entrevistado]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    if (!haystack.includes(q)) return false;
+  }
+
+  return true;
+};
+
+/**
+ * How many pieces one option would return.
+ *
+ * The option's own axis is replaced rather than added to, so the number answers
+ * "what if I picked this" instead of "what if I added this to what I already
+ * picked" — which is what makes zero-result options detectable and hideable.
+ *
+ * @param {Array<object>} pieces
+ * @param {"tema" | "geo"} axis
+ * @param {string} value
+ * @param {{ temas?: Set<string>, geos?: Set<string>, query?: string, tree?: object }} selection
+ * @returns {number}
+ */
+export const countForOption = (pieces, axis, value, selection = {}) => {
+  const probe =
+    axis === "tema"
+      ? { ...selection, temas: new Set([value]) }
+      : { ...selection, geos: new Set([value]) };
+  return pieces.filter((p) => matches(p, probe)).length;
+};
+
+/**
+ * @param {Array<object>} pieces
+ * @param {{ temas?: Set<string>, geos?: Set<string>, query?: string, tree?: object }} selection
+ * @returns {Array<object>}
+ */
+export const applyFilter = (pieces, selection) =>
+  pieces.filter((p) => matches(p, selection));

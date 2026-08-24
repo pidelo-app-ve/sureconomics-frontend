@@ -36,7 +36,8 @@ export const ArticleCardGrid = ({ items }) => (
           <div className="se-artcard__foot">
             <span className="se-tagpill">{geoPrincipal(a)}</span>
             <span className="se-artcard__by">
-              {a.fecha} · Por {a.autor}
+              {a.fecha}
+              {a.autor ? ` · Por ${a.autor}` : ""}
             </span>
           </div>
         </div>
@@ -47,7 +48,9 @@ export const ArticleCardGrid = ({ items }) => (
 
 ArticleCardGrid.propTypes = {
   items: listaDePiezas({
-    autor: PropTypes.string.isRequired,
+    // Optional: a piece with no byline set shows none rather than the name of
+            // whoever's account uploaded it.
+    autor: PropTypes.string,
     resumen: PropTypes.string,
     imagen: PropTypes.oneOf(["chart", "building", "growth"]),
     imagenUrl: PropTypes.string,

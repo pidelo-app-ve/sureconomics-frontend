@@ -186,9 +186,14 @@ export const piezaFromApi = (row) => {
     geoSlugs: (row.places ?? []).map((p) => p.slug),
     fecha: fechaCorta(row.published_at),
     fechaIso: row.published_at ?? null,
-    // The API omits the byline for a format that runs unsigned, so this is already
-    // the right answer rather than something to suppress in the view.
-    autor: row.content_format?.shows_author === false ? null : row.author?.name ?? null,
+    // The byline the piece is published under, and nothing else.
+    //
+    // It deliberately does NOT fall back to `author.name`, which is the account
+    // that wrote the piece. That account name was being printed on the site, which
+    // exposed a personal login as a public byline -- and a fallback would keep
+    // doing it every time somebody left the field empty, which is exactly what the
+    // newsroom asked to stop. No byline means no byline shown.
+    autor: row.content_format?.shows_author === false ? null : row.byline || null,
     entrevistado: row.interviewee || null,
     entrevistadoCargo: row.interviewee_role || null,
     unidad: row.unit || null,

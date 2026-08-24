@@ -63,6 +63,7 @@ const emptyForm = () => ({
     meta_title: "",
     meta_description: "",
     canonical_url: "",
+    byline: "",
     featured_image_url: "",
     status: "draft",
     published_at: "",
@@ -117,6 +118,7 @@ const postToForm = (post) => {
         meta_title: pickStr(post, ["meta_title"]),
         meta_description: pickStr(post, ["meta_description"]),
         canonical_url: pickStr(post, ["canonical_url"]),
+        byline: pickStr(post, ["byline"]),
         featured_image_url: pickStr(post, ["featured_image_url"]),
         status: pickStr(post, ["status"], "draft"),
         published_at: typeof publishedAt === "string" ? isoToDateTimeLocal(publishedAt) : "",
@@ -155,6 +157,8 @@ const formToPayload = (form) => {
         featured_image_url: form.featured_image_url.trim() || undefined,
         status: form.status.trim() || undefined,
         published_at: publishedAtValue,
+        // Sent even when blank so clearing a byline actually clears it.
+        byline: form.byline.trim() || null,
         source_name: form.source_name.trim() || undefined,
         source_url: form.source_url.trim() || undefined,
         house_opinion: form.house_opinion.trim() || undefined,
@@ -495,6 +499,29 @@ export const AdminPostEditor = () => {
                                 }
                             />
                         </div>
+
+                        {/* The published byline. Not the account that uploads the
+                            piece -- nobody wants their personal login printed on
+                            the site, and an editor rarely publishes under their
+                            own name. */}
+                        {currentFormat?.shows_author !== false ? (
+                            <label className="se-form-field" htmlFor="post-byline">
+                                <span className="se-form-label">
+                                    Firma — nombre con el que se publica
+                                </span>
+                                <input
+                                    id="post-byline"
+                                    className="se-form-control"
+                                    value={form.byline}
+                                    onChange={handleChange("byline")}
+                                    placeholder="Pablo Quintero, Redacción SurEconomics, …"
+                                />
+                                <span className="se-admin-meta-hint">
+                                    Si lo deja vacío, la pieza se publica sin firma. No se usa el
+                                    nombre de la cuenta.
+                                </span>
+                            </label>
+                        ) : null}
 
                         {shows("source") ? (
                             <>

@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { conAncestros } from "../../lib/contentFilter";
+import { useTaxonomy } from "../../hooks/useTaxonomy";
 
 /**
  * The piece's own topic and place tags, as links into the explorer.
@@ -10,32 +12,45 @@ import { Link } from "react-router-dom";
  * dead end.
  *
  * Every tag is shown here — a listing card only has room for the principal one.
+ *
+ * Places are shown with their ancestors: a piece tagged Venezuela reads
+ * "Venezuela · Andina · Las Américas". Those are derived from the tree, not stored
+ * on the piece — the filter already treats them as included, so writing them in
+ * would be the same fact twice and would spend the piece's limited tag slots.
  */
-export const PieceTags = ({ temas, geos }) => (
-  <div className="se-piece__tags">
-    <span className="se-piece__tags-label">Seguir leyendo sobre</span>
-    <div className="se-piece__tags-list">
-      {temas.map((tema) => (
-        <Link
-          key={`t-${tema}`}
-          to={`/explorar?tema=${encodeURIComponent(tema)}`}
-          className="se-piece__tag"
-        >
-          {tema}
-        </Link>
-      ))}
-      {geos.map((geo) => (
-        <Link
-          key={`g-${geo}`}
-          to={`/explorar?donde=${encodeURIComponent(geo)}`}
-          className="se-piece__tag se-piece__tag--geo"
-        >
-          {geo}
-        </Link>
-      ))}
+export const PieceTags = ({ temas, geos }) => {
+  const { geoTop, regiones } = useTaxonomy();
+  const lugares = conAncestros(geos, { geoTop, regiones });
+
+  return (
+    <div className="se-piece__tags">
+      <span className="se-piece__tags-label">Seguir leyendo sobre</span>
+      <div className="se-piece__tags-list">
+        {temas.map((tema) => (
+          <Link
+            key={`t-${tema}`}
+            to={`/explorar?tema=${encodeURIComponent(tema)}`}
+            className="se-piece__tag"
+          >
+            {tema}
+          </Link>
+        ))}
+        {lugares.map(({ nombre, propio }) => (
+          <Link
+            key={`g-${nombre}`}
+            to={`/explorar?donde=${encodeURIComponent(nombre)}`}
+            className={`se-piece__tag se-piece__tag--geo${
+              propio ? "" : " se-piece__tag--heredado"
+            }`}
+            title={propio ? undefined : `Incluye todo ${nombre}`}
+          >
+            {nombre}
+          </Link>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 PieceTags.propTypes = {
   temas: PropTypes.arrayOf(PropTypes.string).isRequired,

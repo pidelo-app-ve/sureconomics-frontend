@@ -52,6 +52,46 @@ export const expandGeo = (geos, tree = EMPTY_TREE) => {
 };
 
 /**
+ * A place plus everything above it, outermost last: Venezuela, Andina, Las Américas.
+ *
+ * Derived from the tree at render time and stored nowhere. The newsroom asked to
+ * see the region beside the country, and the temptation was to write it onto the
+ * piece as a second tag — which would be the same fact recorded twice, and would
+ * spend one of the three slots a piece has on something the tree already knows.
+ *
+ * The ancestors are links like any other tag: a reader who sees "Andina" can click
+ * it and get the whole region, which is the point of showing it.
+ *
+ * @param {Array<string>} geos the piece's own place tags
+ * @param {{ geoTop?: string, regiones?: Record<string, string[]> }} tree
+ * @returns {Array<{ nombre: string, propio: boolean }>}
+ */
+export const conAncestros = (geos, tree = EMPTY_TREE) => {
+  const { geoTop = EMPTY_TREE.geoTop, regiones } = tree;
+  const propios = (geos ?? []).filter(Boolean);
+  if (!propios.length) return [];
+
+  const byCountry = countryRegion(regiones);
+  const vistos = new Set();
+  const salida = [];
+
+  const push = (nombre, propio) => {
+    if (!nombre || vistos.has(nombre)) return;
+    vistos.add(nombre);
+    salida.push({ nombre, propio });
+  };
+
+  // What the newsroom tagged comes first and reads as the piece's own.
+  propios.forEach((geo) => push(geo, true));
+  // Then the regions those belong to, then the root — deduplicated, because two
+  // countries of the same region must not print it twice.
+  propios.forEach((geo) => push(byCountry[geo], false));
+  push(geoTop, false);
+
+  return salida;
+};
+
+/**
  * The single tag a listing card shows. Inside the piece every tag is shown, but a
  * card has room for one, and the first is the principal one.
  */

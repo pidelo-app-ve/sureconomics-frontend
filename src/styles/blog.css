@@ -11067,6 +11067,18 @@ a.se-topics__chip:focus-visible {
   color: var(--color-slate-2);
 }
 
+/* A place inherited from the tree rather than tagged on the piece. Same control,
+   quieter, because it is context: the newsroom chose "Venezuela", the region and
+   the continent come with it. */
+.se-piece__tag--heredado {
+  opacity: 0.66;
+}
+
+.se-piece__tag--heredado:hover,
+.se-piece__tag--heredado:focus-visible {
+  opacity: 1;
+}
+
 /* The report wall: an account, not a lead form. */
 .se-gate__actions {
   display: flex;

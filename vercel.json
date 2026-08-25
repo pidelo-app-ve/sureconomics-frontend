@@ -1,8 +1,14 @@
 {
-    "builds": [{
-        "src": "package.json",
-        "use": "@vercel/static-build"
-    }],
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/static-build"
+        },
+        {
+            "src": "api/*.js",
+            "use": "@vercel/node"
+        }
+    ],
     "redirects": [
         {
             "source": "/articulo/:slug",
@@ -15,8 +21,14 @@
             "permanent": true
         }
     ],
-    "rewrites": [{
-        "source": "/(.*)",
-        "destination": "/index.html"
-    }]
+    "rewrites": [
+        {
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
 }

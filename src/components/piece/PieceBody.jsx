@@ -269,14 +269,20 @@ DownloadGate.propTypes = { pieza: piezaShape().isRequired };
 const Media = ({ pieza, conMarcador = false }) => {
   if (pieza.imagenUrl) {
     return (
-      <div className="se-piece__media">
+      <figure className="se-piece__media">
         <img
           className="se-piece__img"
           src={imagenAncho(pieza.imagenUrl, 1400)}
           alt={pieza.titulo}
           loading="lazy"
         />
-      </div>
+        {/* Printed only when there is one: the newsroom asked for somewhere to
+            record who holds the rights, and an empty credit line under every
+            photograph would be worse than none. */}
+        {pieza.imagenCredito ? (
+          <figcaption className="se-piece__credit">{pieza.imagenCredito}</figcaption>
+        ) : null}
+      </figure>
     );
   }
   if (!conMarcador) return null;

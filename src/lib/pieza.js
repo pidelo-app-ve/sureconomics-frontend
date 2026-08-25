@@ -212,6 +212,10 @@ export const piezaFromApi = (row) => {
     opinionCasaHtml: row.house_opinion || null,
     imagen: varianteDe(row.slug ?? ""),
     imagenUrl: row.image_asset?.url || row.featured_image_url || null,
+    // On the asset, not on the post: the rights belong to the photograph. A piece
+    // carrying a legacy `featured_image_url` has no asset behind it and so no
+    // credit, which is accurate -- nobody ever recorded one for those.
+    imagenCredito: row.image_asset?.credit || null,
     videoUrl: row.video_asset?.url || null,
     duracion: duracionCorta(row.video_asset?.duration_seconds),
     // Present means "there is a report to offer"; the URL is handed out only to a

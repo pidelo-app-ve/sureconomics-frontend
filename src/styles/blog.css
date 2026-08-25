@@ -10106,6 +10106,17 @@ a.se-topics__chip:focus-visible {
   }
 }
 
+/* —— Pie de foto con el crédito ——
+   Alineado con la imagen y en mono, como el resto de los metadatos de una pieza:
+   es un dato de la fotografía, no parte del texto que se está leyendo. */
+.se-piece__credit {
+  margin: 8px 0 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+
 /* —— Editorial del día: el bloque de portada ——
    A todo color y con imagen, como se pidió. La fotografía llena la tarjeta y el
    texto se lee sobre un velo que se abre hacia la derecha, así que la imagen se
@@ -11110,7 +11121,9 @@ a.se-topics__chip:focus-visible {
 
 .se-asset__current {
   display: flex;
-  align-items: center;
+  /* Was centred, which looked right while the body was two lines. The credit
+     editor makes it tall, and a centred "Quitar" floats beside nothing. */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
@@ -11133,6 +11146,41 @@ a.se-topics__chip:focus-visible {
   font-family: var(--mono);
   font-size: 0.7rem;
   color: var(--adm-text-muted);
+}
+
+/* —— El crédito, junto al archivo adjunto ——
+   Se guarda por separado del resto del formulario a propósito: pertenece a la
+   imagen y no a la pieza, así que se confirma aquí y afecta a cualquier pieza que
+   use la misma fotografía. */
+.se-asset__credit {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--adm-border);
+}
+
+.se-asset__credit-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+.se-asset__credit-row .se-form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.se-asset__credit-ok {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--color-green);
+}
+
+@media (max-width: 640px) {
+  .se-asset__credit-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .se-asset__ways {

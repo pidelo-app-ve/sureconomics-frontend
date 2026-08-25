@@ -1,9 +1,10 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createAdminExternalMedia,
   formatBytes,
   formatDuration,
+  patchAdminMedia,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 
@@ -35,6 +36,34 @@ export const AssetField = ({
   const [extra, setExtra] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  // The credit belongs to the asset, so it saves on its own rather than with the
+  // piece: the same photograph in a second piece arrives already credited, and a
+  // correction fixes every piece using it at once.
+  const [credito, setCredito] = useState("");
+  const [creditoBusy, setCreditoBusy] = useState(false);
+  const [creditoListo, setCreditoListo] = useState(false);
+
+  useEffect(() => {
+    setCredito(asset?.credit ?? "");
+    setCreditoListo(false);
+  }, [asset?.id, asset?.credit]);
+
+  const guardarCredito = async () => {
+    setCreditoBusy(true);
+    setError("");
+    try {
+      const actualizado = await patchAdminMedia(value, { credit: credito.trim() });
+      // Reported upwards so the editor holds the fresh asset: without this the
+      // field would show the saved credit and the page would not.
+      onChange(value, actualizado);
+      setCreditoListo(true);
+    } catch (err) {
+      setError(adminErrorMessage(err, "No se pudo guardar el crédito."));
+    } finally {
+      setCreditoBusy(false);
+    }
+  };
 
   /**
    * What each kind of file is called, and what else is worth knowing about it.
@@ -142,6 +171,42 @@ export const AssetField = ({
                 .filter(Boolean)
                 .join(" · ")}
             </p>
+
+            {kind === "image" ? (
+              <div className="se-asset__credit">
+                <label className="se-form-label" htmlFor={`${id}-credit`}>
+                  Crédito de la imagen
+                </label>
+                <p className="se-asset__hint">
+                  Quién tiene los derechos, tal como debe salir publicado. Se guarda
+                  en la imagen, así que si la reutiliza en otra pieza va sola.
+                </p>
+                <div className="se-asset__credit-row">
+                  <input
+                    id={`${id}-credit`}
+                    className="se-form-control"
+                    value={credito}
+                    placeholder="Foto: Reuters · © BCV · Cortesía de la empresa"
+                    maxLength={255}
+                    onChange={(event) => {
+                      setCredito(event.target.value);
+                      setCreditoListo(false);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="se-btn se-btn--secondary se-btn--small"
+                    disabled={creditoBusy || credito.trim() === (asset?.credit ?? "")}
+                    onClick={guardarCredito}
+                  >
+                    {creditoBusy ? "Guardando…" : "Guardar"}
+                  </button>
+                </div>
+                {creditoListo ? (
+                  <p className="se-asset__credit-ok">Crédito guardado.</p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
           <button
             type="button"

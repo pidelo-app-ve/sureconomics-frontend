@@ -24,6 +24,7 @@ import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { AxisPicker } from "../../components/admin/AxisPicker";
 import { AssetField } from "../../components/admin/AssetField";
+import { SourcesField } from "../../components/admin/SourcesField";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
@@ -47,8 +48,11 @@ import { RichTextEditor } from "../../components/editor/RichTextEditor";
  * Asking a noticia for an image is asking an editor to find a photograph the site
  * will never display.
  */
+// Sources are not in here: every format can cite them. Editorial having no source
+// field was reported as a bug, and there is no format for which "where did this
+// come from" is the wrong question.
 const FORMAT_FIELDS = {
-    noticia: ["source", "opinion"],
+    noticia: ["opinion"],
     articulo: ["image"],
     entrevista: ["interviewee"],
     informe: ["unit"],
@@ -69,8 +73,7 @@ const emptyForm = () => ({
     published_at: "",
     topic_ids: [],
     place_ids: [],
-    source_name: "",
-    source_url: "",
+    sources: [],
     house_opinion: "",
     interviewee: "",
     interviewee_role: "",
@@ -126,8 +129,7 @@ const postToForm = (post) => {
         // one the public cards print.
         topic_ids: idsFromRelation(post.topics ?? post.topic_ids),
         place_ids: idsFromRelation(post.places ?? post.place_ids),
-        source_name: pickStr(post, ["source_name"]),
-        source_url: pickStr(post, ["source_url"]),
+        sources: (post?.sources ?? []).map((f) => ({ name: f.name ?? "", url: f.url ?? "" })),
         house_opinion: pickStr(post, ["house_opinion"]),
         interviewee: pickStr(post, ["interviewee"]),
         interviewee_role: pickStr(post, ["interviewee_role"]),
@@ -159,8 +161,11 @@ const formToPayload = (form) => {
         published_at: publishedAtValue,
         // Sent even when blank so clearing a byline actually clears it.
         byline: form.byline.trim() || null,
-        source_name: form.source_name.trim() || undefined,
-        source_url: form.source_url.trim() || undefined,
+        // Sent even when empty: an absent key means "leave them alone", and a piece
+        // whose last source was just removed has to say so.
+        sources: (form.sources ?? [])
+            .map((f) => ({ name: (f.name ?? "").trim(), url: (f.url ?? "").trim() || undefined }))
+            .filter((f) => f.name),
         house_opinion: form.house_opinion.trim() || undefined,
         interviewee: form.interviewee.trim() || undefined,
         interviewee_role: form.interviewee_role.trim() || undefined,
@@ -523,30 +528,10 @@ export const AdminPostEditor = () => {
                             </label>
                         ) : null}
 
-                        {shows("source") ? (
-                            <>
-                                <label className="se-form-field" htmlFor="post-source-name">
-                                    <span className="se-form-label">Fuente</span>
-                                    <input
-                                        id="post-source-name"
-                                        className="se-form-control"
-                                        value={form.source_name}
-                                        onChange={handleChange("source_name")}
-                                        placeholder="Reuters, Banco Central, …"
-                                    />
-                                </label>
-                                <label className="se-form-field" htmlFor="post-source-url">
-                                    <span className="se-form-label">Enlace a la fuente</span>
-                                    <input
-                                        id="post-source-url"
-                                        className="se-form-control"
-                                        value={form.source_url}
-                                        onChange={handleChange("source_url")}
-                                        placeholder="https://…"
-                                    />
-                                </label>
-                            </>
-                        ) : null}
+                        <SourcesField
+                            value={form.sources}
+                            onChange={(sources) => setForm((prev) => ({ ...prev, sources }))}
+                        />
 
                         {shows("interviewee") ? (
                             <>

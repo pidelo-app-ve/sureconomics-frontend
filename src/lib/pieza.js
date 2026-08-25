@@ -197,7 +197,12 @@ export const piezaFromApi = (row) => {
     entrevistado: row.interviewee || null,
     entrevistadoCargo: row.interviewee_role || null,
     unidad: row.unit || null,
-    fuente: row.source_name ? { nombre: row.source_name, url: row.source_url || null } : null,
+    // As many as the piece cites, in the order the newsroom entered them. The
+    // fallback covers a response from a build that predates the list, so the
+    // deploys do not have to be ordered.
+    fuentes: (row.sources ?? (row.source_name ? [{ name: row.source_name, url: row.source_url }] : []))
+      .map((f) => ({ nombre: (f.name ?? "").trim(), url: f.url || null }))
+      .filter((f) => f.nombre),
     opinionCasa: textoLlano(row.house_opinion) || null,
     opinionCasaHtml: row.house_opinion || null,
     imagen: varianteDe(row.slug ?? ""),

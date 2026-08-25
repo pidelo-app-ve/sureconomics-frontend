@@ -43,34 +43,40 @@ OpinionBlock.propTypes = {
 };
 
 /**
- * Where the noticia came from.
+ * Where the piece came from — all of it.
  *
- * Singular, because the model stores one source per piece. It used to render a
- * list from sample data, which quietly promised a shape the database does not have.
+ * A story built from three agencies used to be able to credit one of them. The
+ * heading agrees with the count rather than always reading "Fuentes", because a
+ * plural over a single line reads like something is missing.
  */
-const Fuente = ({ fuente }) => {
-  if (!fuente?.nombre) return null;
+const Fuentes = ({ fuentes }) => {
+  const filas = (fuentes ?? []).filter((f) => f?.nombre);
+  if (!filas.length) return null;
   return (
     <div className="se-sources">
-      <p className="se-sources__k">Fuente</p>
+      <p className="se-sources__k">{filas.length === 1 ? "Fuente" : "Fuentes"}</p>
       <ul className="se-sources__list">
-        <li>
-          {fuente.url ? (
-            <a href={fuente.url} target="_blank" rel="noreferrer noopener">
-              {fuente.nombre}
-              <span aria-hidden="true"> ↗</span>
-            </a>
-          ) : (
-            fuente.nombre
-          )}
-        </li>
+        {filas.map((fuente, index) => (
+          <li key={`${fuente.nombre}-${index}`}>
+            {fuente.url ? (
+              <a href={fuente.url} target="_blank" rel="noreferrer noopener">
+                {fuente.nombre}
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            ) : (
+              fuente.nombre
+            )}
+          </li>
+        ))}
       </ul>
     </div>
   );
 };
 
-Fuente.propTypes = {
-  fuente: PropTypes.shape({ nombre: PropTypes.string, url: PropTypes.string }),
+Fuentes.propTypes = {
+  fuentes: PropTypes.arrayOf(
+    PropTypes.shape({ nombre: PropTypes.string, url: PropTypes.string })
+  ),
 };
 
 /**
@@ -289,7 +295,7 @@ export const PieceBody = ({ pieza }) => {
         {pieza.opinionCasaHtml ? (
           <OpinionBlock titulo="¿Qué piensa SurEconomics?" html={pieza.opinionCasaHtml} />
         ) : null}
-        <Fuente fuente={pieza.fuente} />
+        <Fuentes fuentes={pieza.fuentes} />
       </>
     );
   }

@@ -257,24 +257,37 @@ const DownloadGate = ({ pieza }) => {
 
 DownloadGate.propTypes = { pieza: piezaShape().isRequired };
 
-/** The image a piece carries, real when there is one and a treatment when not. */
-const Media = ({ pieza }) =>
-  pieza.imagenUrl ? (
-    <div className="se-piece__media">
-      <img
-        className="se-piece__img"
-        src={imagenAncho(pieza.imagenUrl, 1400)}
-        alt={pieza.titulo}
-        loading="lazy"
-      />
-    </div>
-  ) : (
+/**
+ * The image a piece carries.
+ *
+ * ``conMarcador`` decides what happens when there is none. Artículos have always
+ * reserved the space, so they draw the generated treatment and the layout holds.
+ * The other formats print nothing: they were reading without an image block until
+ * now, and giving every already-published piece a grey rectangle it never had
+ * would be a worse change than the one being fixed.
+ */
+const Media = ({ pieza, conMarcador = false }) => {
+  if (pieza.imagenUrl) {
+    return (
+      <div className="se-piece__media">
+        <img
+          className="se-piece__img"
+          src={imagenAncho(pieza.imagenUrl, 1400)}
+          alt={pieza.titulo}
+          loading="lazy"
+        />
+      </div>
+    );
+  }
+  if (!conMarcador) return null;
+  return (
     <div className="se-piece__media">
       <PlaceholderImage variant={pieza.imagen} hero />
     </div>
   );
+};
 
-Media.propTypes = { pieza: piezaShape().isRequired };
+Media.propTypes = { pieza: piezaShape().isRequired, conMarcador: PropTypes.bool };
 
 /**
  * The part of a piece that differs by format.
@@ -291,6 +304,7 @@ export const PieceBody = ({ pieza }) => {
   if (pieza.formato === "Noticias") {
     return (
       <>
+        <Media pieza={pieza} />
         <Cuerpo html={pieza.cuerpo} />
         {pieza.opinionCasaHtml ? (
           <OpinionBlock titulo="¿Qué piensa SurEconomics?" html={pieza.opinionCasaHtml} />
@@ -300,6 +314,9 @@ export const PieceBody = ({ pieza }) => {
     );
   }
 
+  // Entrevistas print no image: the video is the piece, and a photo above it
+  // would compete with it. The image an interview carries does its work on the
+  // listing card, which is why the field is still offered for the format.
   if (pieza.formato === "Entrevistas") {
     return (
       <>
@@ -318,6 +335,7 @@ export const PieceBody = ({ pieza }) => {
   if (pieza.formato === "Informes") {
     return (
       <>
+        <Media pieza={pieza} />
         {pieza.resumenHtml ? (
           <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.resumenHtml }} />
         ) : null}
@@ -330,6 +348,7 @@ export const PieceBody = ({ pieza }) => {
   if (pieza.formato === "Editorial") {
     return (
       <>
+        <Media pieza={pieza} />
         <OpinionBlock titulo="Editorial de SurEconomics" />
         {pieza.entradaHtml ? (
           <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.entradaHtml }} />
@@ -339,10 +358,11 @@ export const PieceBody = ({ pieza }) => {
     );
   }
 
-  // Artículos: signed analysis, and the only format whose layout prints an image.
+  // Artículos: signed analysis, and the one layout that reserves space for an
+  // image whether or not the piece brought one.
   return (
     <>
-      <Media pieza={pieza} />
+      <Media pieza={pieza} conMarcador />
       {pieza.resumenHtml ? (
         <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.resumenHtml }} />
       ) : null}

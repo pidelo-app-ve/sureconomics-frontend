@@ -51,9 +51,22 @@ import { RichTextEditor } from "../../components/editor/RichTextEditor";
 // Sources are not in here: every format can cite them. Editorial having no source
 // field was reported as a bug, and there is no format for which "where did this
 // come from" is the wrong question.
+// Only the fields that genuinely belong to one format. The image is not among
+// them: it used to be listed under `articulo` alone, on the theory that only that
+// layout printed one -- which meant the newsroom had nowhere to attach the photo
+// they had for a noticia, and every noticia published with a generated placeholder.
+// Any piece can carry an image, so it is asked for unconditionally below.
+/** What the image actually does, said per format so the promise is accurate. */
+const IMAGE_HINT = {
+    entrevista:
+        "Opcional. Aparece en la tarjeta de la entrevista en los listados; al abrirla, lo primero es el video.",
+    articulo:
+        "Opcional. Si la deja vacía, el artículo se muestra con un fondo de color.",
+    default: "Opcional. Aparece en la tarjeta de la pieza y al abrirla.",
+};
+
 const FORMAT_FIELDS = {
     noticia: ["opinion"],
-    articulo: ["image"],
     entrevista: ["interviewee"],
     informe: ["unit"],
 };
@@ -290,7 +303,7 @@ export const AdminPostEditor = () => {
 
     const shows = (field) => (FORMAT_FIELDS[form.format] ?? []).includes(field);
     const requiredMedia = currentFormat?.required_media ?? "none";
-    const showsImage = shows("image");
+
     // A URL pasted before the media library existed. Shown so an editor knows why
     // there is an image on a piece with nothing attached, and can clear it.
     const legacyImage = Boolean(form.featured_image_url && !form.image_asset_id);
@@ -629,87 +642,81 @@ export const AdminPostEditor = () => {
                         />
                     </div>
 
-                    {requiredMedia !== "none" || showsImage ? (
-                        <div className="se-editor-group">
-                            <p className="se-editor-group__title">Archivos</p>
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">Archivos</p>
 
-                            {requiredMedia === "video" ? (
+                        {requiredMedia === "video" ? (
+                            <AssetField
+                                id="post-video"
+                                label="Video de la entrevista"
+                                hint="Puede pegar un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
+                                kind="video"
+                                value={form.video_asset_id}
+                                asset={assets.video}
+                                onChange={setAsset("video_asset_id", "video")}
+                                required
+                            />
+                        ) : null}
+
+                        {requiredMedia === "document" ? (
+                            <AssetField
+                                id="post-document"
+                                label="Documento del informe (PDF)"
+                                hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
+                                kind="document"
+                                value={form.document_asset_id}
+                                asset={assets.document}
+                                onChange={setAsset("document_asset_id", "document")}
+                                onUpload={uploadAdminMediaDocument}
+                                accept={ACCEPTED_DOCUMENT_MIME}
+                                required
+                            />
+                        ) : null}
+
+                        {/* Every format, because every format has a card in a listing
+                            and any piece may arrive with a photo. */}
+                        <>
                                 <AssetField
-                                    id="post-video"
-                                    label="Video de la entrevista"
-                                    hint="Puede pegar un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
-                                    kind="video"
-                                    value={form.video_asset_id}
-                                    asset={assets.video}
-                                    onChange={setAsset("video_asset_id", "video")}
-                                    required
+                                    id="post-image-asset"
+                                    label="Imagen"
+                                    hint={IMAGE_HINT[form.format] ?? IMAGE_HINT.default}
+                                    kind="image"
+                                    value={form.image_asset_id}
+                                    asset={assets.image}
+                                    onChange={setAsset("image_asset_id", "image")}
+                                    onUpload={uploadAdminMediaImage}
+                                    accept={ACCEPTED_IMAGE_MIME}
                                 />
-                            ) : null}
-
-                            {requiredMedia === "document" ? (
-                                <AssetField
-                                    id="post-document"
-                                    label="Documento del informe (PDF)"
-                                    hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
-                                    kind="document"
-                                    value={form.document_asset_id}
-                                    asset={assets.document}
-                                    onChange={setAsset("document_asset_id", "document")}
-                                    onUpload={uploadAdminMediaDocument}
-                                    accept={ACCEPTED_DOCUMENT_MIME}
-                                    required
-                                />
-                            ) : null}
-
-                            {/* Only the formats whose layout actually prints an image ask for
-                                one. Artículos use image cards; noticias, editorial, entrevistas
-                                and informes never show one, and asking anyway is asking for
-                                work that never appears on the site. */}
-                            {showsImage ? (
-                                <>
-                                    <AssetField
-                                        id="post-image-asset"
-                                        label="Imagen del artículo"
-                                        hint="Opcional. Si la deja vacía, el artículo se muestra con un fondo de color."
-                                        kind="image"
-                                        value={form.image_asset_id}
-                                        asset={assets.image}
-                                        onChange={setAsset("image_asset_id", "image")}
-                                        onUpload={uploadAdminMediaImage}
-                                        accept={ACCEPTED_IMAGE_MIME}
-                                    />
-                                    {legacyImage ? (
-                                        <p className="se-asset__legacy">
-                                            Esta pieza trae una imagen por URL de antes de la
-                                            biblioteca de archivos:{" "}
-                                            <a
-                                                className="se-link"
-                                                href={form.featured_image_url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                verla
-                                            </a>
-                                            {". "}
-                                            Se sigue usando mientras no adjunte una nueva.{" "}
-                                            <button
-                                                type="button"
-                                                className="se-link se-header__nav-link--button"
-                                                onClick={() =>
-                                                    setForm((prev) => ({
-                                                        ...prev,
-                                                        featured_image_url: "",
-                                                    }))
-                                                }
-                                            >
-                                                Quitarla
-                                            </button>
-                                        </p>
-                                    ) : null}
-                                </>
-                            ) : null}
+                                {legacyImage ? (
+                                    <p className="se-asset__legacy">
+                                        Esta pieza trae una imagen por URL de antes de la
+                                        biblioteca de archivos:{" "}
+                                        <a
+                                            className="se-link"
+                                            href={form.featured_image_url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            verla
+                                        </a>
+                                        {". "}
+                                        Se sigue usando mientras no adjunte una nueva.{" "}
+                                        <button
+                                            type="button"
+                                            className="se-link se-header__nav-link--button"
+                                            onClick={() =>
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    featured_image_url: "",
+                                                }))
+                                            }
+                                        >
+                                            Quitarla
+                                        </button>
+                                    </p>
+                                ) : null}
+                            </>
                         </div>
-                    ) : null}
 
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">Publicación</p>

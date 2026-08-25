@@ -13,11 +13,16 @@ export const FORMATO_META = {
   noticia: {
     slug: "noticias",
     plural: "Noticias",
-    /** How many fit on a listing page. A layout decision, so it lives here. */
-    porPagina: 10,
+    /**
+     * How many fit on a listing page. A layout decision, so it lives here.
+     *
+     * Nine, not ten, since noticias became a grid: the grid is three columns wide,
+     * and ten left a last row with a single card in it and two empty slots beside.
+     */
+    porPagina: 9,
   },
   articulo: { slug: "articulos", plural: "Artículos", porPagina: 9 },
-  editorial: { slug: "editorial", plural: "Editorial", porPagina: 5 },
+  editorial: { slug: "editorial", plural: "Editorial", porPagina: 6 },
   entrevista: { slug: "entrevistas", plural: "Entrevistas", porPagina: 6 },
   informe: { slug: "informes", plural: "Informes", porPagina: 6 },
 };

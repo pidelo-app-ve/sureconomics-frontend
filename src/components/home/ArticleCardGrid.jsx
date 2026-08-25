@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { PlaceholderImage } from "../blog";
+import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { imagenAncho, rutaDePieza } from "../../lib/pieza";
+import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
@@ -11,21 +11,7 @@ export const ArticleCardGrid = ({ items }) => (
     {items.map((a) => (
       <article key={a.id} className="se-artcard">
         <Link to={rutaDePieza(a)} className="se-artcard__media" aria-label={a.titulo}>
-          {/* The real image when the piece has one. The gradient is a treatment for
-              a piece without a photograph, not the default for every piece: this
-              card showed the placeholder unconditionally, so every article in
-              production came up as a grey box with a word in it. */}
-          {a.imagenUrl ? (
-            <img
-              className="se-artcard__img"
-              src={imagenAncho(a.imagenUrl, 800)}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <PlaceholderImage variant={a.imagen} />
-          )}
+          <CardMedia pieza={a} />
         </Link>
         <div className="se-artcard__body">
           <span className="se-meta se-meta--category">{temaPrincipal(a)}</span>
@@ -52,7 +38,6 @@ ArticleCardGrid.propTypes = {
             // whoever's account uploaded it.
     autor: PropTypes.string,
     resumen: PropTypes.string,
-    imagen: PropTypes.oneOf(["chart", "building", "growth"]),
     imagenUrl: PropTypes.string,
   }),
 };

@@ -9975,6 +9975,15 @@ a.se-topics__chip:focus-visible {
 /* The placeholder graphic grows to fill whatever box it gets, so pin the ratio —
    otherwise the media eats two thirds of the card and the copy reads as an
    afterthought. */
+/* The rule has to sit on the link, not on the fill inside it: a decoration set on
+   an ancestor is drawn across its descendants and cannot be cancelled from within,
+   so the topic on the colour field came out underlined like a link. */
+.se-artcard__media,
+.se-doccard__media,
+.se-card__media-link {
+  text-decoration: none;
+}
+
 .se-artcard__media {
   display: block;
   aspect-ratio: 16 / 9;
@@ -10033,56 +10042,157 @@ a.se-topics__chip:focus-visible {
   color: var(--color-slate-2);
 }
 
-/* —— Editorial: sin firma, marcado con la regla de acento —— */
-.se-edlist {
+/* —— Editorial: sin firma, marcado con la regla de acento ——
+   Era una lista propia (`se-edlist`/`se-edrow`) y ahora son tarjetas como el
+   resto del sitio, así que solo queda el modificador: la regla de acento a la
+   izquierda es lo que distingue la posición del medio de un análisis firmado sin
+   que el lector tenga que notar que falta una firma. */
+.se-artcard--editorial {
+  border-left: 4px solid var(--color-cream);
+  transition: border-left-color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.se-artcard--editorial:hover {
+  border-left-color: var(--color-accent);
+}
+
+/* —— El relleno de una tarjeta sin fotografía ——
+   El color lo pone el componente en línea, porque se deriva del tema y no puede
+   vivir en una hoja de estilos. Aquí va solo la disposición.
+
+   Reemplaza al dibujo gris de líneas, que era lo que se veía en el destacado de
+   portada y se reportó como una imagen rota. El texto se apoya abajo, como el pie
+   de una fotografía, para que el color respire arriba. */
+.se-cardfill {
   display: flex;
   flex-direction: column;
-  gap: var(--se-space-md);
+  justify-content: flex-end;
+  gap: 6px;
+  height: 100%;
+  padding: var(--se-space-sm);
 }
 
-/* Same ribbon behaviour as the report cards: white at rest, accent on hover, so
-   the colour marks what the reader is pointing at instead of being decoration. */
-.se-edrow {
-  border-left: 4px solid var(--color-cream);
-  padding: 2px 0 2px var(--se-space-sm);
-  transition: border-left-color 0.2s ease;
-}
-
-.se-edrow:hover { border-left-color: var(--color-accent); }
-
-.se-edrow__kicker {
-  display: block;
+.se-cardfill__geo {
   font-family: var(--mono);
   font-size: 10.5px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-slate-2);
+  color: rgba(255, 255, 255, 0.62);
 }
 
-.se-edrow__title {
-  margin: 7px 0 6px;
+/* The hero's fill is four times the area of a card's, so the type scales with it
+   instead of sitting lost in the middle of a colour field. */
+.se-cardfill--hero {
+  height: 100%;
+  min-height: 260px;
+  padding: var(--se-space-md);
+}
+
+.se-cardfill--hero .se-cardfill__tema {
+  font-size: clamp(22px, 2.6vw, 34px);
+}
+
+.se-cardfill__tema {
   font-size: 20px;
-  line-height: 1.28;
   font-weight: 600;
+  line-height: 1.15;
+  color: var(--color-cream);
 }
 
-.se-edrow__title a { color: var(--color-cream); transition: color 0.18s ease; }
-.se-edrow__title a:hover { color: var(--color-accent); }
+@media (max-width: 640px) {
+  .se-cardfill__tema {
+    font-size: 17px;
+  }
+}
 
-.se-edrow__lead {
+/* —— Editorial del día: el bloque de portada ——
+   A todo color y con imagen, como se pidió. La fotografía llena la tarjeta y el
+   texto se lee sobre un velo que se abre hacia la derecha, así que la imagen se
+   ve y el titular sigue teniendo contraste. Sin fotografía, el color del tema
+   ocupa su lugar y la maqueta no cambia. */
+.se-eddia__card {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  min-height: 280px;
+  border: 1px solid var(--color-hairline);
+  border-left: 4px solid var(--color-accent);
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.se-eddia__card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.se-eddia__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-eddia__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  min-height: 280px;
+  padding: var(--se-space-lg);
+  background: linear-gradient(
+    100deg,
+    rgba(8, 8, 8, 0.94) 0%,
+    rgba(8, 8, 8, 0.82) 52%,
+    rgba(8, 8, 8, 0.3) 100%
+  );
+}
+
+.se-eddia__kicker {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-eddia__title {
   margin: 0;
-  max-width: 68ch;
-  font-size: var(--se-text-body);
-  line-height: 1.55;
+  max-width: 34ch;
+  font-size: clamp(24px, 3.4vw, 40px);
+  line-height: 1.12;
+  font-weight: 700;
+  color: var(--color-cream);
+}
+
+.se-eddia__lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--se-text-small);
+  line-height: 1.6;
   color: var(--color-slate);
 }
 
-.se-edrow__date {
-  display: block;
-  margin-top: 8px;
+.se-eddia__cta {
   font-family: var(--mono);
   font-size: 11.5px;
-  color: var(--color-slate-2);
+  letter-spacing: 0.06em;
+  color: var(--color-cream);
+}
+
+.se-eddia__card:hover .se-eddia__cta {
+  color: var(--color-accent);
+}
+
+@media (max-width: 640px) {
+  .se-eddia__body {
+    /* On a narrow screen the veil has nowhere to open into, so it covers evenly
+       and the photograph reads as a tint rather than as a picture. */
+    background: rgba(8, 8, 8, 0.9);
+  }
 }
 
 /* —— Entrevistas: miniaturas de video —— */
@@ -10180,12 +10290,35 @@ a.se-topics__chip:focus-visible {
 .se-doccard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   border: 1px solid var(--color-hairline);
   border-left: 4px solid var(--color-cream);
   background: #131313;
-  padding: var(--se-space-md);
   transition: border-left-color 0.2s ease;
+}
+
+/* The padding used to sit on the card. It moved down here when the card gained an
+   image: on the card it would have inset the photograph from its own edges. */
+.se-doccard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--se-space-md);
+}
+
+.se-doccard__media {
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-doccard__media > * {
+  width: 100%;
+  height: 100%;
+}
+
+.se-doccard__media img {
+  object-fit: cover;
 }
 
 .se-doccard:hover { border-left-color: var(--color-accent); }
@@ -10216,6 +10349,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-doccard__foot {
+  margin-top: auto;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

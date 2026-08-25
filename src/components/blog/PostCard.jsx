@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { PlaceholderImage } from "./PlaceholderImage";
+import { fondoDeTema } from "../../lib/tarjeta";
 import { formatDateEs } from "../../lib/date";
 import { ShareButtons } from "../content/ShareButtons";
 
@@ -12,7 +12,6 @@ export const PostCard = ({
   date,
   readTime,
   author,
-  imagePlaceholder,
   imageUrl,
   variant = "default",
 }) => {
@@ -31,7 +30,16 @@ export const PostCard = ({
             decoding="async"
           />
         ) : (
-          <PlaceholderImage variant={imagePlaceholder} hero={isHero} />
+          /* The grey line drawing this used to render is what the front page was
+             showing for a piece with no photograph, and it read as a broken image.
+             A colour field from the topic instead -- and nothing written on it,
+             because this card prints the topic directly underneath, and the first
+             version of this said "Agro y Alimentos" twice in a row. */
+          <div
+            className={`se-cardfill${isHero ? " se-cardfill--hero" : ""}`}
+            style={{ background: fondoDeTema(category) }}
+            aria-hidden="true"
+          />
         )}
       </Link>
       <div className="se-card__body">
@@ -66,7 +74,6 @@ PostCard.propTypes = {
   date: PropTypes.string.isRequired,
   readTime: PropTypes.string,
   author: PropTypes.string,
-  imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
   imageUrl: PropTypes.string,
   variant: PropTypes.oneOf(["default", "hero", "compact"]),
 };

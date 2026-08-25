@@ -1,27 +1,55 @@
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { geoPrincipal } from "../../lib/contentFilter";
+import { CardMedia } from "./CardMedia";
+import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 
 /**
- * Noticias: a list of headlines with their place and date, no image.
+ * Noticias: image cards, like every other format now.
  *
- * Deliberately image-free. At the volume the brief states (350 a month),
- * requiring a picture per note isn't viable, and headline + country + date reads
- * perfectly well on its own.
+ * This was a dense text list -- place, headline, date -- and that was deliberate:
+ * at the stated volume of some 350 notes a month a photograph per note is real
+ * work, and a wire list scans faster than a grid. Asking for cards everywhere is
+ * an editorial call and it was made.
+ *
+ * What survives from the old reasoning is the part that still bites: most notes
+ * will arrive without a picture for a while, so the card has to look finished
+ * without one. That is what `CardMedia` is for.
+ *
+ * The grid and card classes are the ones the artículo grid already uses. Sharing
+ * them rather than cloning the rules is the point; the name reads as
+ * article-specific and no longer is.
  */
 export const NewsList = ({ items }) => (
-  <ul className="se-newslist">
+  <div className="se-artgrid">
     {items.map((n) => (
-      <li key={n.id} className="se-newslist__row">
-        <span className="se-newslist__geo">{geoPrincipal(n)}</span>
-        <Link to={rutaDePieza(n)} className="se-newslist__title">
-          {n.titulo}
+      <article key={n.id} className="se-artcard">
+        <Link to={rutaDePieza(n)} className="se-artcard__media" aria-label={n.titulo}>
+          {/* The body leads with the place, so the field carries the topic --
+              the one card whose copy is sparse enough to want it. */}
+          <CardMedia pieza={n} etiqueta={temaPrincipal(n)} />
         </Link>
-        <time className="se-newslist__date">{n.fecha}</time>
-      </li>
+        <div className="se-artcard__body">
+          {/* The place leads a note, the way the old list had it in the left
+              column: for this outlet "where" is the first thing a reader sorts by. */}
+          <span className="se-meta se-meta--category">{geoPrincipal(n)}</span>
+          <h3 className="se-artcard__title">
+            <Link to={rutaDePieza(n)}>{n.titulo}</Link>
+          </h3>
+          {n.resumen ? <p className="se-artcard__summary">{n.resumen}</p> : null}
+          <div className="se-artcard__foot">
+            <span className="se-artcard__by">{n.fecha}</span>
+          </div>
+        </div>
+      </article>
     ))}
-  </ul>
+  </div>
 );
 
-NewsList.propTypes = { items: listaDePiezas() };
+NewsList.propTypes = {
+  items: listaDePiezas({
+    resumen: PropTypes.string,
+    imagenUrl: PropTypes.string,
+  }),
+};

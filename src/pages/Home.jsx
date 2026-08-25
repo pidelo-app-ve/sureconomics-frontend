@@ -7,6 +7,7 @@ import { EmptyState, ErrorState } from "../components/content";
 import {
   ArticleCardGrid,
   ContentExplorer,
+  EditorialDelDia,
   EditorialList,
   FormatSection,
   InterviewGrid,
@@ -61,7 +62,6 @@ const aperturaDe = (pieza) =>
         author: pieza.autor ?? "",
         category: temaPrincipal(pieza) ?? "",
         imageUrl: imagenAncho(pieza.imagenUrl, 1600) ?? "",
-        imagePlaceholder: "growth",
         readTime: "",
       }
     : null;
@@ -77,6 +77,11 @@ export const Home = () => {
   };
   const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
     useContentFilter(pieces, tree);
+
+  // The latest editorial, for the block under the hero. Read off the unfiltered
+  // list on purpose: it is the outlet's standing position, not a search result,
+  // so it should not disappear because the reader narrowed the explorer.
+  const editorialDelDia = pieces.find((p) => p.formatoApi === "editorial") ?? null;
 
   useEffect(() => {
     applyPageMeta({
@@ -106,6 +111,8 @@ export const Home = () => {
           card fills in when the content does. Gating the whole thing on the fetch
           meant the reader waited for a request to see the name of the outlet. */}
       <Hero featuredPost={apertura} />
+
+      <EditorialDelDia pieza={editorialDelDia} />
 
       {status === "error" ? (
         <section className="se-section">

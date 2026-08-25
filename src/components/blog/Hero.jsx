@@ -106,7 +106,6 @@ export const Hero = ({ featuredPost }) => {
               excerpt={featuredPost.excerpt}
               date={featuredPost.date}
               readTime={featuredPost.readTime}
-              imagePlaceholder={featuredPost.imagePlaceholder}
               imageUrl={featuredPost.imageUrl}
               author={featuredPost.author}
               variant="hero"
@@ -128,7 +127,6 @@ Hero.propTypes = {
     category: PropTypes.string,
     author: PropTypes.string,
     imageUrl: PropTypes.string,
-    imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
     readTime: PropTypes.string,
   }),
 };

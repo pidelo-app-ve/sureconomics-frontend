@@ -27,7 +27,6 @@ export const FeaturedPosts = ({ posts = [] }) => {
               excerpt={post.excerpt}
               date={post.date}
               readTime={post.readTime}
-              imagePlaceholder={post.imagePlaceholder}
               imageUrl={post.imageUrl}
               author={post.author}
             />
@@ -48,7 +47,6 @@ FeaturedPosts.propTypes = {
       excerpt: PropTypes.string,
       date: PropTypes.string,
       readTime: PropTypes.string,
-      imagePlaceholder: PropTypes.oneOf(["chart", "building", "growth"]),
       imageUrl: PropTypes.string,
       author: PropTypes.string,
     })

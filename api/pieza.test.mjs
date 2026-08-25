@@ -9,7 +9,7 @@
  * cuando la API no responde, porque estas rutas antes eran archivos estáticos que
  * no podían fallar.
  */
-import handler, { esNuestroShell, inyectar } from "./pieza.js";
+import handler, { descripcionDe, esNuestroShell, inyectar } from "./pieza.js";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -72,8 +72,11 @@ await conFetch(fetchNormal(PIEZA), async () => {
     (h.match(/og:description" content="([^"]{0,60})/) || [])[1]);
   check("la descripción se recorta con puntos suspensivos",
     (h.match(/og:description" content="([^"]*)"/) || [])[1]?.endsWith("…"));
-  check("og:image a 1200x630 por Cloudinary",
-    h.includes("f_auto,q_auto,c_fill,w_1200,h_630/v1787613820/sureconomics/foto.jpg"));
+  check("og:image a 1200x630 y en jpg fijo, no f_auto",
+    h.includes("f_jpg,q_auto,c_fill,w_1200,h_630/v1787613820/sureconomics/foto.jpg")
+    && !h.includes("f_auto"));
+  check("secure_url y type declarados",
+    h.includes('og:image:secure_url') && h.includes('content="image/jpeg"'));
   check("tarjeta grande cuando hay foto", h.includes('name="twitter:card" content="summary_large_image"'));
   check("og:url canónica al dominio real",
     h.includes('property="og:url" content="https://www.sureconomics.com/articulos/concertacion-tripartita"'));
@@ -119,6 +122,31 @@ for (const [nombre, impl, marca] of casos) {
     check(`${nombre}: no se cachea largo`, res.headers["Cache-Control"] === "public, s-maxage=30");
   });
 }
+
+// —— 2b. La descripción sale de donde la haya ——
+//
+// Tres de ochenta y cuatro piezas en producción tenían resumen. Sin respaldo, la
+// previsualización de las otras ochenta y una va sin descripción, que es la
+// versión que un teléfono es más propenso a no dibujar.
+check("usa el resumen cuando lo hay",
+  descripcionDe({ excerpt: "<p>El resumen.</p>", content: "<p>El cuerpo.</p>" }) === "El resumen.");
+check("un resumen vacío no cuenta como resumen",
+  descripcionDe({ excerpt: "<p></p>", content: "<p>El cuerpo.</p>" }) === "El cuerpo.");
+check("cae al cuerpo cuando no hay nada más",
+  descripcionDe({ content: "<p>La coyuntura política actual tiene un diagnóstico revelador.</p>" })
+    === "La coyuntura política actual tiene un diagnóstico revelador.");
+check("prefiere meta_description al cuerpo",
+  descripcionDe({ meta_description: "Para buscadores.", content: "<p>Cuerpo.</p>" }) === "Para buscadores.");
+check("sin nada devuelve nulo", descripcionDe({}) === null);
+check("el cuerpo largo se recorta",
+  descripcionDe({ content: "<p>" + "palabra ".repeat(80) + "</p>" }).endsWith("…"));
+
+await conFetch(fetchNormal({ ...PIEZA, excerpt: "<p></p>", content: "<p>El cuerpo entra como descripción.</p>" }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "noticias", slug: "sin-resumen" } }, res);
+  check("una pieza sin resumen sí emite og:description",
+    res.body.includes('og:description" content="El cuerpo entra como descripción."'));
+});
 
 // —— 3b. El shell: lo que rompió esto en producción ——
 //

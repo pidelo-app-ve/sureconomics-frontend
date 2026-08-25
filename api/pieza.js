@@ -58,8 +58,8 @@ const escapar = (valor) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-/** Excerpts are stored as rich text; a description full of tags is not a
- *  description. */
+/** Rich text in, plain sentence out: a description full of tags is not a
+ *  description, and `<p></p>` is not a summary. */
 const textoLlano = (html, maximo = 200) => {
   const limpio = String(html ?? "")
     .replace(/<[^>]*>/g, " ")
@@ -84,8 +84,25 @@ const imagenParaCompartir = (url) => {
   if (!url.includes("res.cloudinary.com") || corte === -1) return url;
   const resto = url.slice(corte + marca.length);
   if (!/^v\d+\//.test(resto)) return url;
-  return `${url.slice(0, corte + marca.length)}f_auto,q_auto,c_fill,w_1200,h_630/${resto}`;
+  // `f_jpg` and not `f_auto`: the only consumer of this URL is a crawler, and
+  // `f_auto` makes the format depend on who asks. It happens to answer JPEG to
+  // WhatsApp today, which is one more thing that could quietly change.
+  return `${url.slice(0, corte + marca.length)}f_jpg,q_auto,c_fill,w_1200,h_630/${resto}`;
 };
+
+/**
+ * The description, from whatever the piece actually has.
+ *
+ * Three of eighty-four pieces in production had an excerpt -- the field exists and
+ * the newsroom does not fill it, which is fair, it is optional. So the body stands
+ * in: the opening of a piece is a summary of it, and a preview with a headline and
+ * no line under it is the version a phone is most likely to refuse to draw.
+ */
+export const descripcionDe = (pieza) =>
+  textoLlano(pieza?.excerpt) ||
+  textoLlano(pieza?.meta_description) ||
+  textoLlano(pieza?.content) ||
+  null;
 
 const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion }) => {
   const filas = [
@@ -102,8 +119,14 @@ const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion }) => 
   }
   if (imagen) {
     filas.push(`<meta property="og:image" content="${escapar(imagen)}" />`);
+    // Some clients read only `secure_url`, and a couple want the type spelled out
+    // rather than sniffed.
+    filas.push(`<meta property="og:image:secure_url" content="${escapar(imagen)}" />`);
+    filas.push(`<meta property="og:image:type" content="image/jpeg" />`);
     filas.push(`<meta property="og:image:width" content="1200" />`);
     filas.push(`<meta property="og:image:height" content="630" />`);
+    filas.push(`<meta property="og:image:alt" content="${escapar(titulo)}" />`);
+    filas.push(`<meta name="twitter:image" content="${escapar(imagen)}" />`);
     // Large card only when there is a photograph to fill it; asking for one
     // without an image gets a broken-looking empty card.
     filas.push(`<meta name="twitter:card" content="summary_large_image" />`);
@@ -222,7 +245,7 @@ export default async function handler(req, res) {
 
   const html = inyectar(shell, {
     titulo: pieza.title,
-    descripcion: textoLlano(pieza.excerpt || pieza.meta_description || ""),
+    descripcion: descripcionDe(pieza),
     imagen: imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url),
     url: `${SITIO}/${seccion}/${slug}`,
     publicado: pieza.published_at || null,

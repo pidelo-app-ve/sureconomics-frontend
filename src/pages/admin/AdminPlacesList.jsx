@@ -14,7 +14,7 @@ import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 
 /**
- * The geography tree: one root, five regions, and the countries under them.
+ * The geography tree: Mundo, its continents, their regions, and the countries.
  *
  * Countries can be added — a country the region did not have is a real gap — but
  * nothing can be moved between levels, because filtering by a region returns
@@ -60,6 +60,13 @@ export const AdminPlacesList = () => {
     }, [load]);
 
     const { filas } = useMemo(() => groupPlaces(state.rows), [state.rows]);
+
+    // Where a new country may hang: a region, or a continent directly -- China sits
+    // under Asia with no region in between, and the form has to allow the same.
+    const padres = useMemo(
+        () => filas.filter((f) => f.level === "region" || f.level === "continent"),
+        [filas]
+    );
 
     const toggleActive = async (row) => {
         setBusyId(row.id);
@@ -224,16 +231,18 @@ export const AdminPlacesList = () => {
                             />
                         </label>
                         <label className="se-admin-filters__field">
-                            <span className="se-form-label">Región</span>
+                            <span className="se-form-label">Región o continente</span>
                             <select
                                 className="se-form-control"
                                 value={newCountry.parent_id}
                                 onChange={(e) => setNewCountry((p) => ({ ...p, parent_id: e.target.value }))}
                             >
                                 <option value="">Elija…</option>
-                                {regions.map((region) => (
-                                    <option key={region.id} value={region.id}>
-                                        {region.name}
+                                {padres.map((padre) => (
+                                    <option key={padre.id} value={padre.id}>
+                                        {padre.level === "continent"
+                                            ? padre.name
+                                            : `  ${padre.name}`}
                                     </option>
                                 ))}
                             </select>

@@ -15,10 +15,6 @@
     ],
     "rewrites": [
         {
-            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
-            "destination": "/api/pieza?seccion=:seccion&slug=:slug"
-        },
-        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

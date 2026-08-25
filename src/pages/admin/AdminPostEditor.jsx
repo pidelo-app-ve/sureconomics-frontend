@@ -56,13 +56,22 @@ import { RichTextEditor } from "../../components/editor/RichTextEditor";
 // layout printed one -- which meant the newsroom had nowhere to attach the photo
 // they had for a noticia, and every noticia published with a generated placeholder.
 // Any piece can carry an image, so it is asked for unconditionally below.
-/** What the image actually does, said per format so the promise is accurate. */
+/**
+ * What the image actually does, per format, because it is not the same everywhere.
+ *
+ * Only the artículo listing draws a card with an image. Noticias, editorial and
+ * informes list as text, so for those the image appears when the piece is opened
+ * and in the front-page feature -- and the hint has to say so. A field that
+ * promises a thumbnail nobody will see is how the newsroom stops trusting the
+ * form.
+ */
 const IMAGE_HINT = {
-    entrevista:
-        "Opcional. Aparece en la tarjeta de la entrevista en los listados; al abrirla, lo primero es el video.",
     articulo:
-        "Opcional. Si la deja vacía, el artículo se muestra con un fondo de color.",
-    default: "Opcional. Aparece en la tarjeta de la pieza y al abrirla.",
+        "Opcional. Se ve en la tarjeta del listado y al abrir el artículo. Si la deja vacía, se muestra un fondo de color.",
+    entrevista:
+        "Opcional. Al abrir la entrevista lo primero es el video; esta imagen se usa cuando la pieza sale destacada en portada.",
+    default:
+        "Opcional. Se ve al abrir la pieza y cuando sale destacada en portada. En el listado, este formato se muestra como texto, sin miniatura.",
 };
 
 const FORMAT_FIELDS = {

@@ -14,8 +14,10 @@ import { getFormats, getPlaces, getTopics } from "../services/publicContentServi
 const EMPTY = {
   formats: [],
   topics: [],
-  geoTop: "Las Américas",
+  geoTop: "Mundo",
+  continentes: [],
   regiones: {},
+  ancestros: {},
   slugPorNombre: {},
   conteoPorNombre: {},
 };

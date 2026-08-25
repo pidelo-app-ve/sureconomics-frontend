@@ -54,7 +54,11 @@ export const FormatListing = ({ formatoApi }) => {
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error, truncated } = usePieces({ format: formatoApi });
 
-  const tree = { geoTop: taxonomy.geoTop, regiones: taxonomy.regiones };
+  const tree = {
+    geoTop: taxonomy.geoTop,
+    regiones: taxonomy.regiones,
+    ancestros: taxonomy.ancestros,
+  };
   const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
     useContentFilter(pieces, tree);
 
@@ -124,7 +128,9 @@ export const FormatListing = ({ formatoApi }) => {
                 pieces={pieces}
                 temasDisponibles={taxonomy.topics.map((t) => t.name)}
                 geoTop={taxonomy.geoTop}
+                continentes={taxonomy.continentes}
                 regiones={taxonomy.regiones}
+                ancestros={taxonomy.ancestros}
                 temas={temas}
                 geos={geos}
                 query={query}

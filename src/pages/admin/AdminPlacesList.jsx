@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     createAdminPlace,
     deleteAdminPlace,
-    groupPlacesByRegion,
+    groupPlaces,
     listAdminPlaces,
     patchAdminPlace,
 } from "../../services/adminTaxonomyService";
@@ -22,6 +22,15 @@ import { useAuth } from "../../context/AuthContext";
  * those filters answers. A place attached to a piece is retired, not deleted:
  * deleting would take the tagging of every piece under it along with it.
  */
+/** Four levels now, printed in Spanish. Unknown levels fall through to the raw
+    value rather than to an empty cell, so a level added in the API is visible. */
+const NIVEL = {
+    global: "raíz",
+    continent: "continente",
+    region: "región",
+    country: "país",
+};
+
 export const AdminPlacesList = () => {
     const { role } = useAuth();
     const canCurate = role === "publicador" || role === "admin";
@@ -50,7 +59,7 @@ export const AdminPlacesList = () => {
         load();
     }, [load]);
 
-    const { root, regions } = useMemo(() => groupPlacesByRegion(state.rows), [state.rows]);
+    const { filas } = useMemo(() => groupPlaces(state.rows), [state.rows]);
 
     const toggleActive = async (row) => {
         setBusyId(row.id);
@@ -120,7 +129,7 @@ export const AdminPlacesList = () => {
                     {row.name}
                     {row.iso2 ? <span style={{ opacity: 0.6 }}> · {row.iso2}</span> : null}
                 </td>
-                <td>{row.level === "global" ? "raíz" : row.level === "region" ? "región" : "país"}</td>
+                <td>{NIVEL[row.level] ?? row.level}</td>
                 <td>
                     <code style={{ fontSize: "0.85em" }}>{row.slug}</code>
                 </td>
@@ -162,7 +171,8 @@ export const AdminPlacesList = () => {
                         Lugares
                     </h1>
                     <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Una pieza se etiqueta con el lugar más específico que aplique, normalmente un país.
+                        El árbol es Mundo → continentes → regiones → países. Una pieza se etiqueta con
+                        el lugar más específico que aplique, normalmente un país.
                         Al filtrar por una región aparecen sus países, así que el conteo de una región es
                         solo el de las piezas etiquetadas con la región misma.
                     </p>
@@ -181,11 +191,7 @@ export const AdminPlacesList = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {root ? renderRow(root, 0) : null}
-                        {regions.flatMap((region) => [
-                            renderRow(region, 1),
-                            ...region.children.map((country) => renderRow(country, 2)),
-                        ])}
+                        {filas.map((row) => renderRow(row, row.nivel))}
                     </tbody>
                 </table>
             </div>
@@ -196,7 +202,8 @@ export const AdminPlacesList = () => {
                         Añadir un país
                     </h2>
                     <p className="se-admin-meta-hint">
-                        Solo países, y siempre bajo una región. La raíz y las cinco regiones son fijas.
+                        Solo países, bajo una región o directamente bajo un continente. La raíz,
+                        los continentes y las regiones son fijos.
                     </p>
                     <div className="se-admin-filters">
                         <label className="se-admin-filters__field se-admin-filters__field--grow">

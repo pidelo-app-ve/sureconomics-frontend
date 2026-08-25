@@ -37,27 +37,51 @@ export const getTopics = async () => listOf(await client().request("/topics"));
  * The geography tree, flattened into what the filter bar needs:
  * the root's name, and region → countries.
  */
+/**
+ * The geography tree, flattened into the shapes the UI asks of it.
+ *
+ * Walked to whatever depth the API sends. The previous version read
+ * `children.children` directly, which was correct while the tree was exactly
+ * "raíz -> regiones -> países" and would silently drop a whole level the day a
+ * continent appeared between them: the countries under it would stop existing
+ * for the filters, with nothing failing loudly enough to notice.
+ */
 export const getPlaces = async () => {
   const roots = listOf(await client().request("/places"));
   const root = roots[0] ?? null;
+
+  const slugPorNombre = {};
+  const conteoPorNombre = {};
+  /** Name -> its ancestors, nearest first: Venezuela -> Andina, Las Américas, Mundo. */
+  const ancestros = {};
+  const continentes = [];
+  /** A grouping node -> the leaves under it, which is what a picker draws. */
   const regiones = {};
-  (root?.children ?? []).forEach((region) => {
-    regiones[region.name] = (region.children ?? []).map((c) => c.name);
-  });
+
+  const walk = (node, arriba) => {
+    if (!node?.name) return;
+    slugPorNombre[node.name] = node.slug;
+    conteoPorNombre[node.name] = node.post_count ?? 0;
+    ancestros[node.name] = arriba;
+    if (node.level === "continent") continentes.push(node.name);
+
+    const hijos = node.children ?? [];
+    // A group is a node whose children are leaves: the five regions, and any
+    // continent holding a country with no region in between.
+    const hojas = hijos.filter((h) => !(h.children ?? []).length);
+    if (hojas.length) regiones[node.name] = hojas.map((h) => h.name);
+
+    hijos.forEach((h) => walk(h, [node.name, ...arriba]));
+  };
+  if (root) walk(root, []);
+
   return {
-    geoTop: root?.name ?? "Las Américas",
+    geoTop: root?.name ?? "Mundo",
+    continentes,
     regiones,
-    /** Name → slug, because the API filters by slug and the UI shows names. */
-    slugPorNombre: Object.fromEntries(
-      [root, ...(root?.children ?? []), ...(root?.children ?? []).flatMap((r) => r.children ?? [])]
-        .filter(Boolean)
-        .map((node) => [node.name, node.slug])
-    ),
-    conteoPorNombre: Object.fromEntries(
-      [root, ...(root?.children ?? []), ...(root?.children ?? []).flatMap((r) => r.children ?? [])]
-        .filter(Boolean)
-        .map((node) => [node.name, node.post_count ?? 0])
-    ),
+    ancestros,
+    slugPorNombre,
+    conteoPorNombre,
   };
 };
 

@@ -47,8 +47,12 @@ export const Explorar = () => {
   const query = searchParams.get("q") ?? "";
 
   const tree = useMemo(
-    () => ({ geoTop: taxonomy.geoTop, regiones: taxonomy.regiones }),
-    [taxonomy.geoTop, taxonomy.regiones]
+    () => ({
+      geoTop: taxonomy.geoTop,
+      regiones: taxonomy.regiones,
+      ancestros: taxonomy.ancestros,
+    }),
+    [taxonomy.geoTop, taxonomy.regiones, taxonomy.ancestros]
   );
 
   const results = useMemo(
@@ -128,7 +132,9 @@ export const Explorar = () => {
               pieces={pieces}
               temasDisponibles={taxonomy.topics.map((t) => t.name)}
               geoTop={taxonomy.geoTop}
+              continentes={taxonomy.continentes}
               regiones={taxonomy.regiones}
+              ancestros={taxonomy.ancestros}
               temas={temas}
               geos={geos}
               query={query}

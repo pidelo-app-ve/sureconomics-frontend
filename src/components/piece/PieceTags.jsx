@@ -19,8 +19,8 @@ import { useTaxonomy } from "../../hooks/useTaxonomy";
  * would be the same fact twice and would spend the piece's limited tag slots.
  */
 export const PieceTags = ({ temas, geos }) => {
-  const { geoTop, regiones } = useTaxonomy();
-  const lugares = conAncestros(geos, { geoTop, regiones });
+  const { geoTop, ancestros } = useTaxonomy();
+  const lugares = conAncestros(geos, { geoTop, ancestros });
 
   return (
     <div className="se-piece__tags">

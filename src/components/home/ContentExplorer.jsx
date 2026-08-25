@@ -19,7 +19,9 @@ export const ContentExplorer = ({
   // cannot be rendered before that data exists.
   temasDisponibles,
   geoTop,
+  continentes,
   regiones,
+  ancestros,
   temas,
   geos,
   query,
@@ -51,7 +53,7 @@ export const ContentExplorer = ({
   // The tree travels inside the selection so `countForOption` expands a region to
   // its countries the same way the result list does. Without it an option would
   // count zero for a region while the page showed matches under it.
-  const selection = { temas, geos, query, tree: { geoTop, regiones } };
+  const selection = { temas, geos, query, tree: { geoTop, regiones, ancestros } };
   const count = (axis, value) => countForOption(pieces, axis, value, selection);
 
   const toggle = (axis, value) => {
@@ -169,9 +171,33 @@ export const ContentExplorer = ({
                 className={`se-explorer__opt${geos.has(geoTop) ? " se-explorer__opt--on" : ""}`}
                 onClick={() => toggle("geo", geoTop)}
               >
-                <span>Toda la región</span>
+                <span>Todo</span>
                 <span className="se-explorer__n">{count("geo", geoTop)}</span>
               </button>
+
+              {(continentes ?? [])
+                // A continent that holds countries directly is already drawn below
+                // as a group heading; listing it twice would read as two controls.
+                .filter((continente) => !regiones[continente])
+                .map((continente) => {
+                  const nCont = count("geo", continente);
+                  if (!nCont) return null;
+                  return (
+                    <button
+                      type="button"
+                      key={continente}
+                      role="option"
+                      aria-selected={geos.has(continente)}
+                      className={`se-explorer__opt se-explorer__opt--region${
+                        geos.has(continente) ? " se-explorer__opt--on" : ""
+                      }`}
+                      onClick={() => toggle("geo", continente)}
+                    >
+                      <span>{continente}</span>
+                      <span className="se-explorer__n">{nCont}</span>
+                    </button>
+                  );
+                })}
 
               {Object.entries(regiones).map(([region, paises]) => {
                 const nRegion = count("geo", region);
@@ -250,7 +276,9 @@ export const ContentExplorer = ({
 ContentExplorer.propTypes = {
   temasDisponibles: PropTypes.arrayOf(PropTypes.string).isRequired,
   geoTop: PropTypes.string.isRequired,
+  continentes: PropTypes.arrayOf(PropTypes.string),
   regiones: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)).isRequired,
+  ancestros: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string)),
   /** Pool the option counts are computed over — the current format, or everything. */
   pieces: PropTypes.arrayOf(PropTypes.object).isRequired,
   temas: PropTypes.instanceOf(Set).isRequired,

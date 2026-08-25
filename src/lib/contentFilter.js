@@ -12,18 +12,17 @@
  */
 
 /** The tree, in the shape `useTaxonomy` hands back. */
-const EMPTY_TREE = { geoTop: "Las Américas", regiones: {} };
+const EMPTY_TREE = { geoTop: "Mundo", regiones: {}, ancestros: {} };
 
-/** country → region, derived per call. Twenty-six entries; not worth memoising. */
-const countryRegion = (regiones) => {
-  const out = {};
-  Object.entries(regiones ?? {}).forEach(([region, countries]) => {
-    (countries ?? []).forEach((country) => {
-      out[country] = region;
-    });
-  });
-  return out;
-};
+/**
+ * A place's ancestors, nearest first.
+ *
+ * Read from the map the service builds while walking the tree, rather than
+ * derived here from `regiones`. The derived version could only ever see one level
+ * up, which was indistinguishable from correct while there was exactly one level
+ * above a country.
+ */
+const arriba = (tree, nombre) => tree?.ancestros?.[nombre] ?? [];
 
 /**
  * Every geography node a piece belongs to. Tagging Perú also places the piece in
@@ -35,18 +34,17 @@ const countryRegion = (regiones) => {
  * and Las Américas above them.
  *
  * @param {Array<string>} geos
- * @param {{ geoTop?: string, regiones?: Record<string, string[]> }} tree
+ * @param {{ geoTop?: string, ancestros?: Record<string, string[]> }} tree
  * @returns {Set<string>}
  */
 export const expandGeo = (geos, tree = EMPTY_TREE) => {
-  const { geoTop = EMPTY_TREE.geoTop, regiones } = tree;
-  const byCountry = countryRegion(regiones);
+  const { geoTop = EMPTY_TREE.geoTop } = tree;
+  // The root belongs to every piece: filtering by it means "no restriction".
   const out = new Set([geoTop]);
   (geos ?? []).forEach((geo) => {
     if (!geo) return;
     out.add(geo);
-    const region = byCountry[geo];
-    if (region) out.add(region);
+    arriba(tree, geo).forEach((a) => out.add(a));
   });
   return out;
 };
@@ -63,30 +61,30 @@ export const expandGeo = (geos, tree = EMPTY_TREE) => {
  * it and get the whole region, which is the point of showing it.
  *
  * @param {Array<string>} geos the piece's own place tags
- * @param {{ geoTop?: string, regiones?: Record<string, string[]> }} tree
+ * @param {{ geoTop?: string, ancestros?: Record<string, string[]> }} tree
  * @returns {Array<{ nombre: string, propio: boolean }>}
  */
 export const conAncestros = (geos, tree = EMPTY_TREE) => {
-  const { geoTop = EMPTY_TREE.geoTop, regiones } = tree;
+  const { geoTop = EMPTY_TREE.geoTop } = tree;
   const propios = (geos ?? []).filter(Boolean);
   if (!propios.length) return [];
 
-  const byCountry = countryRegion(regiones);
   const vistos = new Set();
   const salida = [];
 
   const push = (nombre, propio) => {
-    if (!nombre || vistos.has(nombre)) return;
+    // The root is left out deliberately. It is "Mundo", and a chip meaning
+    // "everything ever published" is not something a reader would follow.
+    if (!nombre || nombre === geoTop || vistos.has(nombre)) return;
     vistos.add(nombre);
     salida.push({ nombre, propio });
   };
 
   // What the newsroom tagged comes first and reads as the piece's own.
   propios.forEach((geo) => push(geo, true));
-  // Then the regions those belong to, then the root — deduplicated, because two
-  // countries of the same region must not print it twice.
-  propios.forEach((geo) => push(byCountry[geo], false));
-  push(geoTop, false);
+  // Then everything above each of them, deduplicated - two countries of the same
+  // region must not print it twice.
+  propios.forEach((geo) => arriba(tree, geo).forEach((a) => push(a, false)));
 
   return salida;
 };

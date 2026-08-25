@@ -66,25 +66,47 @@ export const deleteAdminPlace = async (id) =>
  * The admin endpoint returns them flat with `parent_id` because the screen is a
  * table, but the editor's picker needs countries grouped under their region.
  */
-export const groupPlacesByRegion = (rows) => {
+/**
+ * The place rows, arranged the two ways the panel needs them.
+ *
+ * `filas` is the whole tree in reading order with each row's depth, which is all
+ * the Lugares table wants. `groups` is every node that holds countries directly --
+ * the five regions, and any continent carrying a country with no region between --
+ * which is what the pickers render.
+ *
+ * Grouping is by parent id rather than by level. Selecting `level === "region"`
+ * was the same thing while every country sat under a region, and became a quiet
+ * omission the moment one did not: China hangs off Asia, and would simply not have
+ * appeared in the editor, with no error to notice.
+ */
+export const groupPlaces = (rows) => {
   const byId = new Map(rows.map((row) => [row.id, row]));
-  const regions = rows
-    .filter((row) => row.level === "region")
-    .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
-    .map((region) => ({ ...region, children: [] }));
-  const byRegionId = new Map(regions.map((region) => [region.id, region]));
 
-  rows
-    .filter((row) => row.level === "country")
-    .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
-    .forEach((country) => {
-      const region = byRegionId.get(country.parent_id);
-      if (region) region.children.push(country);
-    });
+  const hijos = new Map();
+  rows.forEach((row) => {
+    const key = row.parent_id ?? null;
+    if (!hijos.has(key)) hijos.set(key, []);
+    hijos.get(key).push(row);
+  });
+  hijos.forEach((lista) =>
+    lista.sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name))
+  );
 
-  return {
-    root: rows.find((row) => row.level === "global") ?? null,
-    regions,
-    byId,
+  const root = rows.find((row) => row.level === "global") ?? null;
+
+  const filas = [];
+  const walk = (node, nivel) => {
+    filas.push({ ...node, nivel });
+    (hijos.get(node.id) ?? []).forEach((hijo) => walk(hijo, nivel + 1));
   };
+  if (root) walk(root, 0);
+
+  const groups = filas
+    .filter((node) => (hijos.get(node.id) ?? []).some((h) => h.level === "country"))
+    .map((node) => ({
+      ...node,
+      children: (hijos.get(node.id) ?? []).filter((h) => h.level === "country"),
+    }));
+
+  return { root, filas, groups, byId };
 };

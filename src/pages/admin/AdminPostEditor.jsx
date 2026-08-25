@@ -9,7 +9,7 @@ import {
     unpublishAdminPost,
 } from "../../services/adminPostsService";
 import {
-    groupPlacesByRegion,
+    groupPlaces,
     listAdminFormats,
     listAdminPlaces,
     listAdminTopics,
@@ -217,8 +217,8 @@ export const AdminPostEditor = () => {
         ]);
         setFormats(fmts.filter((f) => f.is_active !== false));
         setTopics(tps.filter((t) => t.is_active !== false));
-        const { regions } = groupPlacesByRegion(pls.filter((p) => p.is_active !== false));
-        setPlaceGroups(regions);
+        const { groups } = groupPlaces(pls.filter((p) => p.is_active !== false));
+        setPlaceGroups(groups);
     }, []);
 
     const loadPost = useCallback(async () => {

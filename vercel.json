@@ -15,6 +15,15 @@
     ],
     "rewrites": [
         {
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
+            "has": [{ "type": "query", "key": "_s" }],
+            "destination": "/index.html"
+        },
+        {
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

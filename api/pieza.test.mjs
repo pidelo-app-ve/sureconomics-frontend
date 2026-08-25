@@ -9,7 +9,7 @@
  * cuando la API no responde, porque estas rutas antes eran archivos estáticos que
  * no podían fallar.
  */
-import handler, { inyectar } from "./pieza.js";
+import handler, { esNuestroShell, inyectar } from "./pieza.js";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -31,6 +31,7 @@ const respuestaFalsa = () => {
   r.setHeader = (k, v) => { r.headers[k] = v; };
   r.status = (c) => { r.code = c; return r; };
   r.send = (b) => { r.body = b; return r; };
+  r.redirect = (c, destino) => { r.code = c; r.location = destino; return r; };
   return r;
 };
 
@@ -118,6 +119,35 @@ for (const [nombre, impl, marca] of casos) {
     check(`${nombre}: no se cachea largo`, res.headers["Cache-Control"] === "public, s-maxage=30");
   });
 }
+
+// —— 3b. El shell: lo que rompió esto en producción ——
+//
+// La primera versión pedía el shell a VERCEL_URL, que tiene protección de
+// despliegue, así que recibía la página de autenticación de Vercel —487 KB de
+// HTML ajeno— y la servía con nuestras etiquetas encima. Ahora se comprueba que
+// lo recibido sea esta aplicación, y si no, se devuelve al archivo estático.
+const LOGIN_DE_VERCEL = `<!DOCTYPE html><html lang="en-US"><head><title>Login</title>` +
+  `</head><body>${"x".repeat(500)}<script src="/_next/static/chunks/a.js"></script></body></html>`;
+
+const shells = [
+  ["el shell no responde", async () => { throw new Error("ECONNREFUSED"); }, "shell-sin-respuesta"],
+  ["llega la página de Vercel", async () => ({ ok: true, text: async () => LOGIN_DE_VERCEL }), "shell-no-reconocido"],
+  ["llega algo vacío", async () => ({ ok: true, text: async () => "" }), "shell-no-reconocido"],
+  ["llega un HTML enorme", async () => ({ ok: true, text: async () => "y".repeat(200000) }), "shell-no-reconocido"],
+];
+for (const [nombre, impl, marca] of shells) {
+  await conFetch(impl, async () => {
+    const res = respuestaFalsa();
+    await handler({ query: { seccion: "noticias", slug: "x" } }, res);
+    check(`${nombre}: redirige al estático, no lo sirve`,
+      res.code === 307 && res.location === "/noticias/x?_s=1" && res.headers["X-Pieza-Meta"] === marca,
+      `${res.code} ${res.location ?? ""} ${res.headers["X-Pieza-Meta"] ?? ""}`);
+    check(`${nombre}: nunca devuelve HTML ajeno`, !res.body);
+  });
+}
+
+check("el shell propio se reconoce", esNuestroShell(SHELL));
+check("el de Vercel no", !esNuestroShell(LOGIN_DE_VERCEL));
 
 // —— 4. Una sección que no existe no inventa etiquetas ——
 await conFetch(fetchNormal(PIEZA), async () => {

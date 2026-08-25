@@ -13,6 +13,13 @@
  * did not have. So: a short deadline on the API, and on anything going wrong the
  * plain shell goes out with a 200. The reader gets the page; only the preview is
  * missing, and only until the next request.
+ *
+ * The shell is read from the public domain and then *checked*, which is not
+ * belt-and-braces caution -- it is the lesson from breaking this once. The first
+ * version fetched `VERCEL_URL`, which has deployment protection on it, so what
+ * came back was Vercel's own login page: 487 KB of somebody else's HTML, served to
+ * readers with our meta tags injected into it. Anything that does not look like
+ * this application is not served at all.
  */
 
 const API =
@@ -25,6 +32,15 @@ const API =
 const LIMITE_MS = 3500;
 
 const SITIO = "https://www.sureconomics.com";
+
+/** Where the shell comes from: the public domain, never a deployment URL.
+ *  A deployment URL can be behind Vercel's protection, and what it returns then is
+ *  a login page that looks like a perfectly valid HTTP 200. */
+const SHELL_URL = process.env.SHELL_URL || `${SITIO}/index.html`;
+
+/** Query flag that routes straight to the static file, so this function has
+ *  somewhere to send a request it cannot serve honestly. */
+const SIN_META = "_s";
 
 /** URL section -> the format slug the API knows, and the shape of the piece. */
 const SECCIONES = {
@@ -132,21 +148,38 @@ const conDeadline = async (url, ms) => {
   }
 };
 
-export default async function handler(req, res) {
-  const anfitrion = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : SITIO;
+/** Is this actually our application, or something that merely returned 200? */
+export const esNuestroShell = (html) =>
+  typeof html === "string" &&
+  html.length > 200 &&
+  html.length < 60_000 &&
+  html.includes('id="root"') &&
+  html.includes("/assets/");
 
-  // The shell as this very deployment built it, so the script tags always point at
-  // the current bundle hashes. Reading a copy from the repo would go stale.
+export default async function handler(req, res) {
+  const { seccion, slug } = req.query ?? {};
+
+  /** Hand the request back to the static file. Used whenever we cannot produce
+   *  the application's own HTML: one redirect, and the reader gets the page. */
+  const alEstatico = (motivo) => {
+    res.setHeader("X-Pieza-Meta", motivo);
+    res.setHeader("Cache-Control", "public, s-maxage=30");
+    res.redirect(307, `/${seccion}/${slug}?${SIN_META}=1`);
+  };
+
   let shell = "";
   try {
-    const respuesta = await conDeadline(`${anfitrion}/index.html`, LIMITE_MS);
+    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS);
     shell = await respuesta.text();
   } catch {
-    // Nothing to serve and nothing to fall back to; let Vercel serve the static
-    // file on a retry rather than return a page that is not the app.
-    res.status(502).send("");
+    alEstatico("shell-sin-respuesta");
+    return;
+  }
+
+  if (!esNuestroShell(shell)) {
+    // What came back is not this application. Serving it with our tags on top is
+    // exactly the failure this check exists for.
+    alEstatico("shell-no-reconocido");
     return;
   }
 
@@ -159,7 +192,6 @@ export default async function handler(req, res) {
     res.status(200).send(shell);
   };
 
-  const { seccion, slug } = req.query ?? {};
   const formato = SECCIONES[seccion];
   if (!formato || !slug) {
     seco("ruta-desconocida");

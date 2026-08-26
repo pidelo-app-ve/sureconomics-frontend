@@ -35,14 +35,63 @@ export const PRIMARY_NAV = [
   },
 ];
 
+/**
+ * Las unidades del grupo, con logo en vez de nombre.
+ *
+ * La lista sale del sitio del propio RendiGroup, que es quien la mantiene, y no
+ * coincidía con la que tenía esta página: allí Rendivalores es **una** unidad
+ * —Casa de Bolsa, Casa de Bolsa Agrícola y Fondos Mutuales— y aquí estaba partida
+ * en dos, y «Pídelo by Alalza» allí se llama «Alalza Inversiones».
+ *
+ * `logo` en nulo se dibuja con el nombre, que es lo que hacía toda la sección
+ * antes. Sirve de respaldo honesto mientras falte un archivo.
+ */
+const aliada = (nombre) => `/brand/aliadas/${nombre}`;
+
 export const PARTNERS = [
-  { id: "rendi-avisor", name: "RendiGroup Advisor" },
-  { id: "rendivalores-cb", name: "Rendivalores Casa de Bolsa C.A." },
-  { id: "rendivalores-agricola", name: "Rendivalores Casa de Bolsa Agrícola C.A." },
-  { id: "pidelo-alalza", name: "Pídelo by Alalza" },
-  { id: "moore-capital", name: "Moore Capital SA" },
-  { id: "log-consultancy", name: "LOG Consultancy Group" },
+  {
+    id: "rendigroup-advisors",
+    name: "RendiGroup Advisors",
+    logo: aliada("advisors-logo.png"),
+    url: null,
+  },
+  {
+    id: "rendivalores",
+    name: "Rendivalores",
+    // El nombre largo va en el `title` del enlace: en una rejilla de logos el pie
+    // tiene que caber en una línea.
+    nameLong: "Rendivalores — Casa de Bolsa, Casa de Bolsa Agrícola y Fondos Mutuales",
+    logo: aliada("rendivalores-logo.png"),
+    url: "https://rendivalores.com",
+  },
+  {
+    id: "alalza",
+    name: "Alalza Inversiones",
+    logo: aliada("alalza-logo.png"),
+    url: null,
+  },
+  {
+    id: "moore-capital",
+    name: "Moore Capital",
+    logo: aliada("moore-logo.png"),
+    url: "https://moorecapitals.com",
+  },
+  // Pendientes de confirmar con el grupo, y por eso no se dibujan todavía:
+  //
+  // - Invicto Capital: está en el sitio del grupo y el logo ya está copiado en
+  //   `public/brand/aliadas/invicto-logo.png`. Descomentar y listo.
+  // - LOG Consultancy Group: estaba en esta lista, no aparece en el sitio del
+  //   grupo y no hay logo. Se dibujaría con el nombre si se repone.
+  //
+  // {
+  //   id: "invicto-capital",
+  //   name: "Invicto Capital",
+  //   logo: aliada("invicto-logo.png"),
+  //   url: "https://capitalinvicto.com",
+  // },
+  // { id: "log-consultancy", name: "LOG Consultancy Group", logo: null, url: null },
 ];
+
 
 export const TEAM = {
   leadership: [

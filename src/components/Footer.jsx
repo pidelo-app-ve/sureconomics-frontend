@@ -28,7 +28,7 @@ export const Footer = () => {
             <h2 className="se-footer__brand">
               <img
                 className="se-footer__brand-mark"
-                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
                 alt=""
                 width={220}
                 height={48}

@@ -75,7 +75,11 @@ const IMAGE_HINT = {
 };
 
 const FORMAT_FIELDS = {
-    noticia: ["opinion"],
+    // `opinion` -- el bloque "¿Qué piensa SurEconomics?" -- salió de aquí porque
+    // nadie lo llenaba: estaba en nulo en las veinte noticias publicadas. Un campo
+    // que ocupa espacio en el formulario y nunca se usa entrena a la redacción a
+    // saltárselo. La columna sigue en la base y la vista de lectura sigue sabiendo
+    // dibujarlo, así que reponerlo es volver a listarlo aquí.
     entrevista: ["interviewee"],
     informe: ["unit"],
 };
@@ -96,7 +100,6 @@ const emptyForm = () => ({
     topic_ids: [],
     place_ids: [],
     sources: [],
-    house_opinion: "",
     interviewee: "",
     interviewee_role: "",
     unit: "",
@@ -152,7 +155,6 @@ const postToForm = (post) => {
         topic_ids: idsFromRelation(post.topics ?? post.topic_ids),
         place_ids: idsFromRelation(post.places ?? post.place_ids),
         sources: (post?.sources ?? []).map((f) => ({ name: f.name ?? "", url: f.url ?? "" })),
-        house_opinion: pickStr(post, ["house_opinion"]),
         interviewee: pickStr(post, ["interviewee"]),
         interviewee_role: pickStr(post, ["interviewee_role"]),
         unit: pickStr(post, ["unit"]),
@@ -188,7 +190,6 @@ const formToPayload = (form) => {
         sources: (form.sources ?? [])
             .map((f) => ({ name: (f.name ?? "").trim(), url: (f.url ?? "").trim() || undefined }))
             .filter((f) => f.name),
-        house_opinion: form.house_opinion.trim() || undefined,
         interviewee: form.interviewee.trim() || undefined,
         interviewee_role: form.interviewee_role.trim() || undefined,
         unit: form.unit.trim() || undefined,
@@ -613,22 +614,6 @@ export const AdminPostEditor = () => {
                             />
                         </div>
 
-                        {/* The house position closes the note, so it sits after the body
-                            rather than up with the identity fields. */}
-                        {shows("opinion") ? (
-                            <div className="se-form-field se-form-field--brief" id="post-house-opinion">
-                                <span className="se-form-label">
-                                    ¿Qué piensa SurEconomics? — cierre de la nota
-                                </span>
-                                <RichTextEditor
-                                    value={form.house_opinion}
-                                    onChange={(html) =>
-                                        setForm((prev) => ({ ...prev, house_opinion: html }))
-                                    }
-                                    placeholder="La lectura del medio sobre el hecho. Si lo deja vacío, la nota se publica sin este bloque."
-                                />
-                            </div>
-                        ) : null}
                     </div>
 
                     <div className="se-editor-group">

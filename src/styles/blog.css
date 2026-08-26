@@ -616,11 +616,14 @@
   outline-offset: 2px;
 }
 
+/* Blanco fijo: `--color-cream` es el texto de la página, que en claro es negro, y
+   estas tres rayas van sobre la franja verde. Era el único control de la cabecera
+   en móvil y no se veía. */
 .se-header__burger-line {
   display: block;
   width: 22px;
   height: 2px;
-  background: var(--color-cream);
+  background: #ffffff;
   border-radius: 1px;
   transition: transform var(--se-transition-menu),
     opacity var(--se-transition-menu);
@@ -5736,8 +5739,11 @@ a.se-topics__chip:focus-visible {
   align-items: center;
   gap: var(--se-space-sm);
   padding: 0.65rem var(--se-content-gutter);
-  background: var(--adm-ink-3);
-  border-bottom: 1px solid rgba(var(--se-tinte), 0.08);
+  /* El verde del carril, no un gris pálido: en móvil esta barra *es* la
+     navegación, y era lo único del panel que no decía de qué marca es. */
+  background: var(--adm-rail-bg);
+  color: var(--adm-rail-text);
+  border-bottom: 1px solid var(--adm-rail-border);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -10168,8 +10174,25 @@ a.se-topics__chip:focus-visible {
   font-weight: 600;
 }
 
-.se-artcard__title a { color: var(--color-cream); transition: color 0.18s ease; }
-.se-artcard__title a:hover { color: var(--color-accent); }
+/* Sin subrayar. Estas reglas ponían el color pero nunca quitaban la decoración,
+   así que quedaba el subrayado por defecto del navegador: en una rejilla de nueve
+   tarjetas son nueve rayas negras compitiendo con los titulares. El subrayado
+   vuelve al pasar por encima, que es donde sirve de señal. */
+.se-artcard__title a,
+.se-doccard__title a,
+.se-newslist__title {
+  color: var(--color-cream);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.se-artcard__title a:hover,
+.se-doccard__title a:hover,
+.se-newslist__title:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 .se-artcard__foot {
   display: flex;
@@ -10499,8 +10522,7 @@ a.se-topics__chip:focus-visible {
   font-weight: 600;
 }
 
-.se-doccard__title a { color: var(--color-cream); transition: color 0.18s ease; }
-.se-doccard__title a:hover { color: var(--color-accent); }
+
 
 .se-doccard__summary {
   margin: 0;
@@ -11536,4 +11558,26 @@ a.se-topics__chip:focus-visible {
 .se-explorer__chip:hover,
 .se-explorer__clear:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* —— Lo que va sobre la barra móvil del panel ——
+   Al final de la hoja para que gane por orden. Las reglas de cada pieza están
+   repartidas más arriba y pintan con `--adm-text`, que en el panel claro es
+   negro; sobre el verde de la barra eso deja el título y el enlace ilegibles.
+   Mismo caso que el filtro del sitio público: una superficie oscura dentro de un
+   tema claro no puede usar el token de texto del tema. */
+.se-admin-mobile-bar__title,
+.se-admin-mobile-bar__site,
+.se-admin-mobile-bar__burger {
+  color: #ffffff;
+}
+
+.se-admin-mobile-bar__burger {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.se-admin-mobile-bar__burger span,
+.se-admin-mobile-bar__burger::before,
+.se-admin-mobile-bar__burger::after {
+  background: #ffffff;
 }

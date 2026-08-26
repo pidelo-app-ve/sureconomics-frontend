@@ -9619,6 +9619,13 @@ a.se-topics__chip:focus-visible {
   color: #ffffff;
   box-shadow: 0 18px 44px rgba(0, 51, 24, 0.28);
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+  /* La animación de entrada deja un `transform` puesto —termina con `both`— y un
+     elemento transformado es su propio contexto de apilamiento. Eso encerraba el
+     `z-index: 40` del panel desplegable dentro del filtro, así que las tarjetas
+     que vienen después le pintaban encima. Con esto el filtro entero se apila por
+     delante y el panel vuelve a poder salirse. */
+  position: relative;
+  z-index: 30;
 }
 
 /* Lo de dentro del filtro, sobre superficie oscura. */
@@ -11438,9 +11445,19 @@ a.se-topics__chip:focus-visible {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.se-explorer__n,
 .se-explorer__sel {
   color: #ffffff;
+}
+
+/* El conteo aparece en dos superficies distintas: en la barra verde y dentro del
+   panel desplegable, que se dibuja sobre papel. Ponerlo blanco a secas lo hacía
+   desaparecer en el panel, que es donde más se lee. */
+.se-explorer__bar .se-explorer__n {
+  color: #ffffff;
+}
+
+.se-explorer__panel .se-explorer__n {
+  color: var(--se-gray-500);
 }
 
 /* `__btn` es el disparador de cada eje -- Tema, Dónde -- y era el que quedaba

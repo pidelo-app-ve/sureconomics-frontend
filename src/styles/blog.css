@@ -768,13 +768,12 @@
   width: min(360px, 90vw);
   max-width: 100%;
   height: 100%;
-  background: radial-gradient(
-      120% 120% at 10% 0%,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(var(--se-tinte), 0) 55%
-    ),
-    var(--color-ink);
-  box-shadow: -12px 0 44px rgba(0, 0, 0, 0.55);
+  /* El verde de la cabecera. Usaba `--color-ink`, que en tema claro es negro, así
+     que el cajón salía negro con texto negro dentro: era la navegación entera en
+     móvil y no se leía una sola entrada. Es la misma superficie que la barra de
+     arriba, así que lleva el mismo color y su contenido se fija en blanco. */
+  background: var(--marca-verde);
+  box-shadow: -12px 0 44px rgba(0, 51, 24, 0.35);
   padding: calc(env(safe-area-inset-top, 0px) + 0.75rem) var(--se-space-lg)
     calc(env(safe-area-inset-bottom, 0px) + 1rem);
   display: flex;
@@ -5171,7 +5170,7 @@ a.se-topics__chip:focus-visible {
   --se-form-border: rgba(0, 0, 0, 0.16);
   --se-form-border-strong: rgba(0, 0, 0, 0.26);
   --se-form-text: rgba(0, 0, 0, 0.9);
-  --se-form-muted: rgba(0, 0, 0, 0.62);
+  --se-form-muted: rgba(0, 0, 0, 0.7);
   --se-form-placeholder: rgba(0, 0, 0, 0.42);
   --se-form-focus: var(--adm-accent);
   --se-form-focus-glow: rgba(185, 83, 42, 0.22);
@@ -10428,10 +10427,12 @@ a.se-topics__chip:focus-visible {
   right: 10px;
   bottom: 10px;
   padding: 3px 8px;
+  /* Píldora oscura sobre la miniatura, así que su texto va en blanco fijo:
+     `--color-cream` es el texto de la página y en claro es negro. */
   background: rgba(0, 0, 0, 0.75);
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--color-cream);
+  color: #ffffff;
 }
 
 .se-vidcard__body {
@@ -11576,8 +11577,46 @@ a.se-topics__chip:focus-visible {
   border-color: rgba(255, 255, 255, 0.28);
 }
 
-.se-admin-mobile-bar__burger span,
-.se-admin-mobile-bar__burger::before,
-.se-admin-mobile-bar__burger::after {
+/* Las tres rayas del icono. La de en medio es el elemento y las otras dos son
+   sombras suyas, así que apuntar a `span` o a los pseudo-elementos —como hice
+   primero— no tocaba nada: las de arriba y abajo seguían en negro sobre el verde,
+   y el botón se leía como una caja pálida en vez de como un icono. */
+.se-admin-mobile-bar__burger {
   background: #ffffff;
+  box-shadow:
+    0 -5px 0 #ffffff,
+    0 5px 0 #ffffff;
+}
+
+.se-admin-mobile-bar__menu {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.se-admin-mobile-bar__menu:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* —— Lo que va dentro del cajón del menú móvil ——
+   Al final de la hoja para ganar por orden. Cada pieza se pinta más arriba con
+   `--se-tinte` o `--color-cream`, que en tema claro son negros; sobre el verde del
+   cajón eso deja el menú entero ilegible. Quinta superficie oscura de este tema
+   claro que necesita fijar sus colores en vez de heredarlos. */
+.se-header__menu-title,
+.se-header__menu-close {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.se-header__menu .se-header__nav-link {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.se-header__menu .se-header__nav-link:hover,
+.se-header__menu .se-header__nav-link--active {
+  color: #ffffff;
+}
+
+.se-header__menu-close:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
 }

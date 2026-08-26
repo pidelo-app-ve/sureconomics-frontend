@@ -2,6 +2,7 @@ export const SUPPORTED_LANGS = ["es", "en"];
 
 export const translations = {
   es: {
+    "nav.menu": "Menú",
     "nav.inicio": "Inicio",
     "nav.noticias": "Noticias",
     "nav.editorial": "Editorial",
@@ -32,6 +33,7 @@ export const translations = {
     "common.volverInicio": "Volver al inicio",
   },
   en: {
+    "nav.menu": "Menu",
     "nav.inicio": "Home",
     "nav.noticias": "News",
     "nav.editorial": "Editorial",

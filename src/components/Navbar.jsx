@@ -133,10 +133,10 @@ export const Navbar = () => {
           <picture>
             <source
               media="(max-width: 520px)"
-              srcSet={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
+              srcSet={BRAND_PUBLIC_LOGO.dark.wordmarkCompressed}
             />
             <img
-              src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
+              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
               alt=""
               className="se-header__logo"
               decoding="async"

@@ -514,10 +514,31 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--color-paper);
-  color: var(--color-cream);
-  border-bottom: 1px solid var(--color-hairline-dark);
+  /* Los dos colores del brandbook mezclados: el verde Cardin manda y el cobrizo
+     entra por la derecha. Es una superficie oscura a propósito, así que todo lo
+     que va encima se fija en blanco y no sigue al tema de la página. */
+  background: linear-gradient(
+    100deg,
+    var(--marca-verde) 0%,
+    #0a3d1e 46%,
+    #6d3a22 88%,
+    var(--marca-rojo) 100%
+  );
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* —— Todo lo que va sobre la cabecera ——
+   Fijado en blanco y no con `--se-tinte`: la página es clara y la cabecera no, así
+   que aquí el token diría negro sobre verde. */
+.se-header__nav-link {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.se-header__nav-link:hover,
+.se-header__nav-link--active {
+  color: #ffffff;
 }
 
 .se-header__inner {
@@ -529,7 +550,12 @@
 }
 
 .se-header--scrolled {
-  background: rgba(26, 26, 26, 0.96);
+  background: linear-gradient(
+    100deg,
+    rgba(0, 26, 12, 0.97) 0%,
+    rgba(8, 10, 8, 0.97) 55%,
+    rgba(60, 30, 16, 0.97) 100%
+  );
   backdrop-filter: saturate(160%) blur(12px);
   -webkit-backdrop-filter: saturate(160%) blur(12px);
   box-shadow: 0 1px 0 rgba(var(--se-tinte), 0.05), 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -3012,10 +3038,12 @@
   position: relative;
   border: 1px solid rgba(var(--se-tinte), 0.12);
   border-radius: 18px;
+  /* Era un gris neutro que sobre papel no decía nada. Mismo par que la cabecera:
+     verde de base y el cobrizo entrando por una esquina. */
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.14), transparent 55%),
-    radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    radial-gradient(130% 130% at 100% 0%, rgba(185, 83, 42, 0.22), transparent 60%),
+    linear-gradient(105deg, var(--marca-verde) 0%, #0a3520 70%, #24301f 100%);
+  color: #ffffff;
   padding: clamp(1rem, 2.2vw, 1.25rem);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
@@ -3182,10 +3210,6 @@
    La celda mantiene su relación de aspecto y el logo se ajusta dentro con
    `object-fit: contain`: los cinco archivos vienen a escalas distintas y recortar
    el logo de otra empresa no es una libertad que tengamos. */
-.se-partners__logo {
-  background: #ffffff;
-}
-
 .se-partners__img {
   width: 100%;
   height: 100%;
@@ -3799,11 +3823,15 @@
 .se-articles .se-filters__panel {
   border-color: rgba(var(--se-tinte), 0.12);
   border-left: 4px solid rgba(185, 83, 42, 0.75);
+  /* Era un gris azulado neutro que sobre papel no dice nada. Mismo par que la
+     cabecera: verde Cardin de base y el cobrizo entrando por la esquina. Es una
+     superficie oscura, así que su contenido se fija en blanco -- con el token
+     diría negro sobre verde. */
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.14), transparent 55%),
-    radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+    radial-gradient(130% 130% at 100% 0%, rgba(185, 83, 42, 0.28), transparent 62%),
+    linear-gradient(105deg, var(--marca-verde) 0%, #0a3520 68%, #1f2e20 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 44px rgba(0, 51, 24, 0.28);
   /* NOTE: avoid backdrop-filter here — native <select> dropdown rendering can break
      (giant/blank popover) when the control lives inside a blurred composited layer on some GPUs/browsers. */
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
@@ -9603,6 +9631,19 @@ a.se-topics__chip:focus-visible {
     rgba(15, 17, 21, 0.84);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+}
+
+/* Lo de dentro del filtro, sobre superficie oscura. */
+.se-explorer__k,
+.se-explorer__scope,
+.se-explorer__count,
+.se-explorer__count-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.se-explorer__count strong,
+.se-explorer__n {
+  color: #ffffff;
 }
 
 .se-explorer__bar {

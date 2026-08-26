@@ -979,14 +979,14 @@
   }
 }
 
-/* Header-only button theme (black buttons, white text)
-   Negros a propósito, no un fondo de página que se me colara: el negro es uno de
-   los cuatro colores del brandbook y sobre cabecera blanca es el contraste que
-   pide una llamada a la acción. */
+/* Header-only button theme.
+   En cobrizo: sobre la franja verde el negro se hundía en el fondo, y el cobrizo
+   es el acento de la marca -- que es exactamente el papel de una llamada a la
+   acción. */
 .se-header .se-btn,
 .se-header .se-btn--secondary {
-  background: var(--marca-negro);
-  border-color: var(--marca-negro);
+  background: var(--marca-rojo);
+  border-color: var(--marca-rojo);
   color: #ffffff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
@@ -1870,7 +1870,7 @@
   border-radius: 18px;
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    #ffffff;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
@@ -2328,8 +2328,8 @@
 /* —— About: Quienes Somos (Editorial A, bold — brand manual) —— */
 .se-about {
   --about-canvas: #ffffff;
-  --about-surface: rgba(15, 17, 21, 0.86);
-  --about-surface-2: rgba(21, 24, 32, 0.78);
+  --about-surface: #ffffff;
+  --about-surface-2: var(--adm-ink-3);
   --about-border: rgba(var(--se-tinte), 0.12);
   --about-border-strong: rgba(var(--se-tinte), 0.18);
   --about-text: rgba(var(--se-tinte), 0.92);
@@ -3264,8 +3264,8 @@
 /* —— Consultoria / Contacto / Informes (cohesive suite) —— */
 :root {
   --se-suite-ink: #ffffff;
-  --se-suite-surface: rgba(15, 17, 21, 0.86);
-  --se-suite-surface-2: rgba(21, 24, 32, 0.78);
+  --se-suite-surface: #ffffff;
+  --se-suite-surface-2: var(--adm-ink-3);
   --se-suite-border: rgba(var(--se-tinte), 0.12);
   --se-suite-border-strong: rgba(var(--se-tinte), 0.18);
   --se-suite-text: rgba(var(--se-tinte), 0.92);
@@ -3445,7 +3445,7 @@
   border: 1px solid rgba(var(--se-tinte), 0.12);
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    #ffffff;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   overflow: hidden;
   transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
@@ -3464,7 +3464,7 @@
 /* —— Contacto —— */
 .se-contact {
   /* Retheme shared `.se-contact-form` primitives for dark glass */
-  --se-form-surface: rgba(15, 17, 21, 0.86);
+  --se-form-surface: #ffffff;
   --se-form-border: rgba(var(--se-tinte), 0.12);
   --se-form-border-strong: rgba(var(--se-tinte), 0.18);
   --se-form-text: rgba(var(--se-tinte), 0.92);
@@ -3563,7 +3563,7 @@
   border-radius: 18px;
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    #ffffff;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   padding: clamp(1rem, 2.2vw, 1.25rem);
 }
@@ -3735,7 +3735,7 @@
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.14), transparent 55%),
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    #ffffff;
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.62);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -3916,7 +3916,7 @@
   border: 1px solid rgba(var(--se-tinte), 0.14);
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.12), transparent 55%),
-    rgba(15, 17, 21, 0.96);
+    #ffffff;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   padding: 0.35rem;
 }
@@ -4020,7 +4020,7 @@
   border-radius: 18px;
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
+    #ffffff;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   overflow: hidden;
   transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
@@ -4285,8 +4285,8 @@
   border: 1px solid var(--se-form-border);
   border-radius: var(--se-form-radius);
   box-shadow:
-    0 1px 2px rgba(15, 18, 24, 0.05),
-    0 6px 20px rgba(15, 18, 24, 0.06);
+    0 1px 2px var(--adm-ink-2),
+    0 6px 20px var(--adm-ink-2);
 }
 
 .se-contact-form:first-child {
@@ -4301,7 +4301,7 @@
   gap: 1rem;
   padding: 0.85rem 1rem 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(15, 18, 24, 0.06);
+  box-shadow: 0 1px 3px var(--adm-ink-2);
 }
 
 .se-contact-form.se-contact-form--toolbar .se-form-field {
@@ -4348,7 +4348,7 @@
   line-height: 1.45;
   color: var(--se-form-text);
   outline: none;
-  box-shadow: inset 0 1px 2px rgba(15, 18, 24, 0.04);
+  box-shadow: inset 0 1px 2px var(--adm-ink-2);
   transition:
     border-color 0.18s var(--se-form-ease),
     box-shadow 0.18s var(--se-form-ease),
@@ -4367,7 +4367,7 @@
 .se-form-control:focus {
   border-color: var(--se-form-focus);
   box-shadow:
-    inset 0 1px 2px rgba(15, 18, 24, 0.04),
+    inset 0 1px 2px var(--adm-ink-2),
     0 0 0 3px var(--se-form-focus-glow);
 }
 
@@ -4386,7 +4386,7 @@
 
 .se-form-control[aria-invalid="true"]:focus {
   box-shadow:
-    inset 0 1px 2px rgba(15, 18, 24, 0.04),
+    inset 0 1px 2px var(--adm-ink-2),
     0 0 0 3px rgba(180, 35, 58, 0.18);
 }
 
@@ -4761,13 +4761,13 @@ a.se-topics__chip:focus-visible {
 .se-admin-login .se-contact-form {
   border-color: #9aa3b2;
   box-shadow:
-    0 1px 3px rgba(15, 18, 24, 0.07),
-    0 12px 32px rgba(15, 18, 24, 0.09);
+    0 1px 3px var(--adm-ink-2),
+    0 12px 32px var(--adm-ink-2);
 }
 
 /* Reader auth (Cuenta) — dark editorial shell */
 .se-reader-auth {
-  --se-form-surface: rgba(14, 16, 20, 0.92);
+  --se-form-surface: #ffffff;
   --se-form-border: rgba(var(--se-tinte), 0.12);
   --se-form-border-strong: rgba(var(--se-tinte), 0.18);
   --se-form-text: rgba(var(--se-tinte), 0.92);
@@ -4928,7 +4928,7 @@ a.se-topics__chip:focus-visible {
 
 /* Backoffice auth — refined, darker control room */
 .se-backoffice-auth {
-  --se-form-surface: rgba(10, 11, 14, 0.94);
+  --se-form-surface: #ffffff;
   --se-form-border: rgba(var(--se-tinte), 0.12);
   --se-form-border-strong: rgba(var(--se-tinte), 0.18);
   --se-form-text: rgba(var(--se-tinte), 0.92);
@@ -5159,17 +5159,20 @@ a.se-topics__chip:focus-visible {
   background: var(--adm-canvas);
 }
 
-/* Admin forms inherit shared `.se-contact-form` primitives */
+/* Admin forms inherit shared `.se-contact-form` primitives
+   La superficie se había quedado en negro casi puro mientras el texto ya era
+   oscuro. De aquí salía el editor de texto rico en negro con letra negra, y con él
+   cada campo del panel: todo el formulario cuelga de estos seis tokens. */
 .se-admin-app {
-  --se-form-surface: rgba(15, 17, 21, 0.86);
-  --se-form-border: rgba(var(--se-tinte), 0.12);
-  --se-form-border-strong: rgba(var(--se-tinte), 0.18);
-  --se-form-text: rgba(var(--se-tinte), 0.9);
-  --se-form-muted: rgba(var(--se-tinte), 0.66);
-  --se-form-placeholder: rgba(var(--se-tinte), 0.42);
+  --se-form-surface: #ffffff;
+  --se-form-border: rgba(0, 0, 0, 0.16);
+  --se-form-border-strong: rgba(0, 0, 0, 0.26);
+  --se-form-text: rgba(0, 0, 0, 0.9);
+  --se-form-muted: rgba(0, 0, 0, 0.62);
+  --se-form-placeholder: rgba(0, 0, 0, 0.42);
   --se-form-focus: var(--adm-accent);
-  --se-form-focus-glow: rgba(232, 64, 64, 0.22);
-  --se-form-invalid: #ff4d6d;
+  --se-form-focus-glow: rgba(185, 83, 42, 0.22);
+  --se-form-invalid: #c1272d;
 }
 
 .se-admin-app .se-text-body {
@@ -5733,7 +5736,7 @@ a.se-topics__chip:focus-visible {
   align-items: center;
   gap: var(--se-space-sm);
   padding: 0.65rem var(--se-content-gutter);
-  background: rgba(8, 9, 12, 0.72);
+  background: var(--adm-ink-3);
   border-bottom: 1px solid rgba(var(--se-tinte), 0.08);
   position: sticky;
   top: 0;
@@ -6187,7 +6190,7 @@ a.se-topics__chip:focus-visible {
   font-size: var(--se-text-caption);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: rgba(8, 9, 12, 0.88);
+  background: var(--adm-ink-3);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -6325,7 +6328,7 @@ a.se-topics__chip:focus-visible {
   font-weight: 500;
   color: #475569;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid rgba(15, 18, 24, 0.06);
+  border: 1px solid var(--adm-ink-2);
   border-radius: 999px;
 }
 
@@ -6492,10 +6495,10 @@ a.se-topics__chip:focus-visible {
 
 .se-admin-submissions__card {
   padding: 1rem 1.1rem 1.05rem;
-  border: 1px solid rgba(15, 18, 24, 0.08);
+  border: 1px solid var(--adm-ink-2);
   border-radius: 14px;
   background: var(--adm-surface);
-  box-shadow: 0 1px 3px rgba(15, 18, 24, 0.04);
+  box-shadow: 0 1px 3px var(--adm-ink-2);
   transition:
     box-shadow var(--adm-dur) var(--adm-ease),
     border-color var(--adm-dur) var(--adm-ease);
@@ -6503,7 +6506,7 @@ a.se-topics__chip:focus-visible {
 
 .se-admin-submissions__card:hover {
   border-color: rgba(109, 156, 248, 0.25);
-  box-shadow: 0 6px 20px rgba(15, 18, 24, 0.07);
+  box-shadow: 0 6px 20px var(--adm-ink-2);
 }
 
 .se-admin-submissions__card-top {
@@ -6598,7 +6601,7 @@ a.se-topics__chip:focus-visible {
   background:
     radial-gradient(120% 120% at 12% 0%, rgba(232, 64, 64, 0.16), transparent 58%),
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.86);
+    #ffffff;
   box-shadow: var(--adm-shadow-md);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -6840,7 +6843,7 @@ a.se-topics__chip:focus-visible {
   border-radius: 18px;
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.86);
+    #ffffff;
   box-shadow: var(--adm-shadow-md);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -7002,7 +7005,7 @@ a.se-topics__chip:focus-visible {
   border-radius: 18px;
   background:
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.86);
+    #ffffff;
   box-shadow: var(--adm-shadow-md);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -7038,7 +7041,7 @@ a.se-topics__chip:focus-visible {
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(232, 64, 64, 0.14), transparent 55%),
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.86);
+    #ffffff;
   box-shadow: var(--adm-shadow-md);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -7465,7 +7468,7 @@ a.se-topics__chip:focus-visible {
   letter-spacing: 0.02em;
   color: #475569;
   background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(15, 18, 24, 0.08);
+  border: 1px solid var(--adm-ink-2);
   border-radius: 999px;
 }
 
@@ -7506,7 +7509,7 @@ a.se-topics__chip:focus-visible {
   align-self: flex-start;
   min-width: min(100%, 11rem);
   border-radius: 14px;
-  border: 1px solid rgba(15, 18, 24, 0.07);
+  border: 1px solid var(--adm-ink-2);
   background: rgba(255, 255, 255, 0.72);
 }
 
@@ -7724,8 +7727,8 @@ a.se-topics__chip:focus-visible {
 .se-admin-main .se-contact-form:not(.se-contact-form--toolbar) {
   border-color: #9aa3b2;
   box-shadow:
-    0 1px 3px rgba(15, 18, 24, 0.07),
-    0 12px 32px rgba(15, 18, 24, 0.09);
+    0 1px 3px var(--adm-ink-2),
+    0 12px 32px var(--adm-ink-2);
 }
 
 .se-contact-form.se-contact-form--toolbar .se-btn {
@@ -7866,7 +7869,7 @@ a.se-topics__chip:focus-visible {
   background:
     radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.16), transparent 58%),
     radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.86);
+    #ffffff;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -8085,7 +8088,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-article .se-comments .se-contact-form {
-  --se-form-surface: rgba(12, 13, 16, 0.75);
+  --se-form-surface: #ffffff;
   --se-form-border: rgba(var(--se-tinte), 0.12);
   --se-form-border-strong: rgba(var(--se-tinte), 0.2);
   --se-form-text: rgba(var(--se-tinte), 0.92);
@@ -8098,7 +8101,7 @@ a.se-topics__chip:focus-visible {
   padding: 1.2rem 1.25rem 1.45rem;
   background:
     radial-gradient(120% 90% at 0% 0%, rgba(185, 83, 42, 0.09), transparent 52%),
-    linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, rgba(10, 11, 14, 0.92) 100%);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, #ffffff 100%);
   border: 1px solid rgba(var(--se-tinte), 0.12);
   border-radius: var(--se-form-radius);
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.4);

@@ -534,16 +534,10 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  /* Los dos colores del brandbook mezclados: el verde Cardin manda y el cobrizo
-     entra por la derecha. Es una superficie oscura a propósito, así que todo lo
-     que va encima se fija en blanco y no sigue al tema de la página. */
-  background: linear-gradient(
-    100deg,
-    var(--marca-verde) 0%,
-    #0a3d1e 46%,
-    #6d3a22 88%,
-    var(--marca-rojo) 100%
-  );
+  /* Verde Cardin plano. Llevaba un degradado al cobrizo y se descartó: la marca
+     tiene un verde y el cobrizo es el acento, no medio fondo. Superficie oscura,
+     así que lo que va encima se fija en blanco y no sigue al tema de la página. */
+  background: var(--marca-verde);
   color: #ffffff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   transition: background 0.3s ease, box-shadow 0.3s ease;
@@ -5117,29 +5111,40 @@ a.se-topics__chip:focus-visible {
   --adm-ink-2: #f7f7f5;
   --adm-ink-3: #f2f2f0;
 
-  --adm-rail-bg: color-mix(in srgb, var(--adm-black) 70%, #000 30%);
-  --adm-rail-border: rgba(var(--se-tinte), 0.08);
-  --adm-rail-text: rgba(var(--se-tinte), 0.86);
-  --adm-rail-muted: rgba(var(--se-tinte), 0.52);
-  --adm-rail-hover: rgba(var(--se-tinte), 0.08);
-  --adm-rail-active: rgba(var(--se-tinte), 0.12);
+  /* —— El panel, en claro ——
+     Se había quedado a medias: el lienzo pasó a blanco con el resto del sitio pero
+     las superficies —tablas, tarjetas, el carril— seguían en negro casi puro, y el
+     texto ya era oscuro. De ahí que se viera tétrico: texto oscuro sobre paneles
+     oscuros.
+
+     El carril va en verde Cardin, que es la única superficie oscura que se queda:
+     separa la navegación del contenido sin competir con él, y es el mismo verde de
+     la cabecera pública. */
+  --adm-rail-bg: var(--marca-verde);
+  --adm-rail-border: rgba(255, 255, 255, 0.1);
+  --adm-rail-text: rgba(255, 255, 255, 0.86);
+  --adm-rail-muted: rgba(255, 255, 255, 0.55);
+  --adm-rail-hover: rgba(255, 255, 255, 0.1);
+  --adm-rail-active: rgba(255, 255, 255, 0.16);
 
   --adm-accent: var(--adm-red);
-  --adm-accent-soft: rgba(232, 64, 64, 0.28);
+  --adm-accent-soft: rgba(185, 83, 42, 0.22);
 
-  --adm-canvas: var(--adm-ink);
-  --adm-surface: rgba(15, 17, 21, 0.9);
-  --adm-surface-2: rgba(21, 24, 32, 0.82);
-  --adm-border: rgba(var(--se-tinte), 0.1);
-  --adm-text: rgba(var(--se-tinte), 0.9);
-  --adm-text-muted: rgba(var(--se-tinte), 0.64);
+  --adm-canvas: var(--adm-ink-2);
+  --adm-surface: #ffffff;
+  --adm-surface-2: var(--adm-ink-3);
+  --adm-border: rgba(0, 0, 0, 0.12);
+  --adm-text: rgba(0, 0, 0, 0.88);
+  --adm-text-muted: rgba(0, 0, 0, 0.56);
 
   --adm-radius-lg: 18px;
   --adm-radius-md: 14px;
 
-  --adm-shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.68);
-  --adm-shadow-md: 0 18px 44px rgba(0, 0, 0, 0.55);
-  --adm-shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.38);
+  /* Sombras de papel, no de sala oscura: las anteriores eran negros al 68 % de
+     opacidad, pensados para brillar sobre un fondo negro. */
+  --adm-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.1);
+  --adm-shadow-md: 0 10px 26px rgba(0, 0, 0, 0.08);
+  --adm-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.06);
 
   --adm-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --adm-dur: 0.18s;
@@ -5148,10 +5153,10 @@ a.se-topics__chip:focus-visible {
   flex-direction: column;
   font-family: var(--se-font-ui);
   color: var(--adm-text);
-  background:
-    radial-gradient(1100px 680px at 18% 0%, rgba(232, 64, 64, 0.18), transparent 60%),
-    radial-gradient(900px 620px at 88% 18%, rgba(255, 255, 255, 0.06), transparent 58%),
-    linear-gradient(180deg, #ffffff 0%, var(--adm-canvas) 52%, #ffffff 100%);
+  /* Papel liso. Llevaba dos radiales, uno de ellos del rojo anterior, que sobre
+     fondo claro lavaban la esquina de rosa. Un panel de trabajo no necesita
+     atmósfera. */
+  background: var(--adm-canvas);
 }
 
 /* Admin forms inherit shared `.se-contact-form` primitives */
@@ -7683,12 +7688,15 @@ a.se-topics__chip:focus-visible {
   padding-top: 0.1rem;
 }
 
-/* Admin primary: align with rail accent, slightly brighter than public */
+/* Admin primary: el acento de la marca.
+   Eran azules —#2563eb— heredados de una plantilla; el azul no está en el
+   brandbook y en una fila de cinco botones era lo primero que se veía de la
+   pantalla. */
 .se-admin-main .se-btn:not(.se-btn--secondary) {
-  background: #2563eb;
-  border-color: #1d4ed8;
+  background: var(--adm-accent);
+  border-color: var(--adm-accent);
   color: #ffffff;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 2px rgba(185, 83, 42, 0.2);
   transition:
     transform var(--adm-dur) var(--adm-ease),
     box-shadow var(--adm-dur) var(--adm-ease),
@@ -7697,9 +7705,9 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-main .se-btn:not(.se-btn--secondary):hover {
-  background: #1d4ed8;
-  border-color: #1e40af;
-  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.35);
+  background: #9d4423;
+  border-color: #9d4423;
+  box-shadow: 0 6px 22px rgba(185, 83, 42, 0.3);
 }
 
 .se-admin-main .se-btn:not(.se-btn--secondary):active {
@@ -9645,11 +9653,9 @@ a.se-topics__chip:focus-visible {
   border-left: 4px solid rgba(185, 83, 42, 0.75);
   border-radius: 14px;
   padding: var(--se-space-md);
-  /* Era un gris azulado neutro que sobre papel no dice nada. Mismo par que la
-     cabecera: verde Cardin de base y el cobrizo entrando por la esquina. */
-  background:
-    radial-gradient(130% 130% at 100% 0%, rgba(185, 83, 42, 0.3), transparent 62%),
-    linear-gradient(105deg, #003318 0%, #0a3520 68%, #1f2e20 100%);
+  /* Verde Cardin plano, igual que la cabecera. El radial cobrizo se descartó por
+     lo mismo: el cobrizo es acento, y aquí ya lo lleva el filo izquierdo. */
+  background: var(--marca-verde);
   color: #ffffff;
   box-shadow: 0 18px 44px rgba(0, 51, 24, 0.28);
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
@@ -10260,12 +10266,16 @@ a.se-topics__chip:focus-visible {
    texto se lee sobre un velo que se abre hacia la derecha, así que la imagen se
    ve y el titular sigue teniendo contraste. Sin fotografía, el color del tema
    ocupa su lugar y la maqueta no cambia. */
+/* Blanco, con el filo cobrizo alrededor. Antes era la fotografía a sangre con un
+   velo encima; el bloque pedía leerse como una pieza de opinión y no como una
+   portada, así que el papel manda y el cobrizo lo enmarca. */
 .se-eddia__card {
   position: relative;
   display: block;
   overflow: hidden;
   min-height: 280px;
-  border: 1px solid var(--color-hairline);
+  background: var(--color-paper);
+  border: 1px solid rgba(185, 83, 42, 0.45);
   border-left: 4px solid var(--color-accent);
   text-decoration: none;
   transition: transform 0.2s ease, border-color 0.2s ease;
@@ -10294,11 +10304,13 @@ a.se-topics__chip:focus-visible {
   padding: var(--se-space-lg);
   /* Escrito a mano para el tema oscuro. Sobre papel el velo tiene que aclarar,
      no oscurecer, o el titular negro se pierde contra la fotografía. */
+  /* Blanco completo: la fotografía, si la hay, queda a la derecha del texto en vez
+     de por debajo de él. */
   background: linear-gradient(
     100deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.86) 52%,
-    rgba(255, 255, 255, 0.35) 100%
+    var(--color-paper) 0%,
+    var(--color-paper) 62%,
+    rgba(255, 255, 255, 0.72) 100%
   );
 }
 

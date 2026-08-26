@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { PostCard } from "./PostCard";
 import { BRAND } from "../../data/surEconomicsMock";
+// Con alias: `BRAND` ya está tomado arriba por los datos del sitio.
+import { BRAND as MARCA } from "../../brand/publicBrandLogos";
 import PropTypes from "prop-types";
 
 export const Hero = ({ featuredPost }) => {
@@ -85,7 +87,14 @@ export const Hero = ({ featuredPost }) => {
       </div>
       <div className="se-container">
         <div className="se-hero__text">
-          <h1 className="se-heading-hero">{BRAND.name.replace(/([a-z])([A-Z])/, "$1​$2")}</h1>
+          {/* El logotipo, no el nombre escrito a mano. Era texto en Host Grotesk
+              imitando la marca, con un espacio de ancho cero metido para forzar
+              el corte de línea; el logotipo real trae el isotipo y el
+              espaciado que fija el brandbook. El `h1` se queda: la portada
+              necesita su encabezado, y el nombre viaja en el `alt`. */}
+          <h1 className="se-heading-hero se-hero__logo">
+            <img src={MARCA.lockup} alt={BRAND.name} width="900" height="117" />
+          </h1>
           <p className="se-text-lead se-hero__claim">{heroClaim}</p>
           <p className="se-text-body se-hero__description">{BRAND.description}</p>
           <div className="se-hero__actions">

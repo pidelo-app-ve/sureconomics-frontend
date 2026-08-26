@@ -279,6 +279,26 @@
 }
 
 /* Headings */
+/* —— El logotipo en la portada ——
+   Crece con el ancho de la columna pero con techo: pasado cierto tamaño el
+   isotipo se separa del logotipo y el bloque deja de leerse como una marca. */
+.se-hero__logo {
+  display: block;
+  margin: 0 0 var(--se-space-md);
+}
+
+.se-hero__logo img {
+  display: block;
+  width: min(100%, 520px);
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  .se-hero__logo img {
+    width: min(100%, 320px);
+  }
+}
+
 .se-heading-hero {
   font-family: var(--se-font-heading);
   font-size: var(--se-text-hero);

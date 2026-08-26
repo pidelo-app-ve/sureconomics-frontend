@@ -10275,8 +10275,8 @@ a.se-topics__chip:focus-visible {
   overflow: hidden;
   min-height: 280px;
   background: var(--color-paper);
-  border: 1px solid rgba(185, 83, 42, 0.45);
-  border-left: 4px solid var(--color-accent);
+  border: 1px solid rgba(0, 51, 24, 0.35);
+  border-left: 4px solid var(--marca-verde);
   text-decoration: none;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
@@ -10304,14 +10304,9 @@ a.se-topics__chip:focus-visible {
   padding: var(--se-space-lg);
   /* Escrito a mano para el tema oscuro. Sobre papel el velo tiene que aclarar,
      no oscurecer, o el titular negro se pierde contra la fotografía. */
-  /* Blanco completo: la fotografía, si la hay, queda a la derecha del texto en vez
-     de por debajo de él. */
-  background: linear-gradient(
-    100deg,
-    var(--color-paper) 0%,
-    var(--color-paper) 62%,
-    rgba(255, 255, 255, 0.72) 100%
-  );
+  /* Blanco entero, sin degradado. El que había teñía la derecha del bloque y
+     dejaba la sensación de una imagen a medio cargar. */
+  background: var(--color-paper);
 }
 
 .se-eddia__kicker {
@@ -11491,7 +11486,8 @@ a.se-topics__chip:focus-visible {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.se-explorer__sel {
+.se-explorer__sel,
+.se-explorer__total strong {
   color: #ffffff;
 }
 

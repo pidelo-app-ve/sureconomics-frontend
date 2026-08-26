@@ -53,7 +53,7 @@ export const PARTNERS = [
     id: "rendigroup-advisors",
     name: "RendiGroup Advisors",
     logo: aliada("advisors-logo.png"),
-    url: null,
+    url: "https://rendigroup.com",
   },
   {
     id: "rendivalores",

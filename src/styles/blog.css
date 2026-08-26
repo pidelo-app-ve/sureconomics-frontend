@@ -529,18 +529,6 @@
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* —— Todo lo que va sobre la cabecera ——
-   Fijado en blanco y no con `--se-tinte`: la página es clara y la cabecera no, así
-   que aquí el token diría negro sobre verde. */
-.se-header__nav-link {
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.se-header__nav-link:hover,
-.se-header__nav-link--active {
-  color: #ffffff;
-}
-
 .se-header__inner {
   display: flex;
   align-items: center;
@@ -550,15 +538,10 @@
 }
 
 .se-header--scrolled {
-  background: linear-gradient(
-    100deg,
-    rgba(0, 26, 12, 0.97) 0%,
-    rgba(8, 10, 8, 0.97) 55%,
-    rgba(60, 30, 16, 0.97) 100%
-  );
-  backdrop-filter: saturate(160%) blur(12px);
-  -webkit-backdrop-filter: saturate(160%) blur(12px);
-  box-shadow: 0 1px 0 rgba(var(--se-tinte), 0.05), 0 8px 24px rgba(0, 0, 0, 0.4);
+  /* Sin cambio de color al bajar. La franja verde/cobre es la identidad de la
+     cabecera y cambiarla al primer píxel de scroll la hacía parpadear. Queda solo
+     la sombra, que separa la cabecera del contenido sin repintarla. */
+  box-shadow: 0 8px 24px rgba(0, 51, 24, 0.22);
 }
 
 .se-page {
@@ -657,7 +640,10 @@
   font-family: var(--se-font-ui);
   font-size: 14px;
   font-weight: 500;
-  color: rgba(var(--se-tinte), 0.7);
+  /* Blanco fijo y no `--se-tinte`: la página es clara pero la cabecera es la
+     franja verde/cobre, así que el token daría gris oscuro sobre verde -- que es
+     exactamente lo que dejaba los enlaces sin verse. */
+  color: rgba(255, 255, 255, 0.82);
   text-decoration: none;
   padding: 6px 0;
   position: relative;
@@ -665,11 +651,11 @@
 }
 
 .se-header__nav-link:hover {
-  color: var(--color-accent);
+  color: #ffffff;
 }
 
 .se-header__nav-link--active {
-  color: var(--color-cream);
+  color: #ffffff;
 }
 
 .se-header__nav-link--active::after {
@@ -9625,11 +9611,13 @@ a.se-topics__chip:focus-visible {
   border-left: 4px solid rgba(185, 83, 42, 0.75);
   border-radius: 14px;
   padding: var(--se-space-md);
+  /* Era un gris azulado neutro que sobre papel no dice nada. Mismo par que la
+     cabecera: verde Cardin de base y el cobrizo entrando por la esquina. */
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(185, 83, 42, 0.14), transparent 55%),
-    radial-gradient(140% 120% at 10% 0%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(15, 17, 21, 0.84);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+    radial-gradient(130% 130% at 100% 0%, rgba(185, 83, 42, 0.3), transparent 62%),
+    linear-gradient(105deg, #003318 0%, #0a3520 68%, #1f2e20 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 44px rgba(0, 51, 24, 0.28);
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
 }
 
@@ -11432,4 +11420,58 @@ a.se-topics__chip:focus-visible {
   margin: 0.9rem 0 0;
   font-size: 0.85rem;
   color: var(--color-accent);
+}
+
+/* —— Lo que va dentro del filtro ——
+   Va al final de la hoja a propósito. Las reglas de cada pieza del explorador
+   están repartidas más arriba y pintan con `--se-tinte`, que en página clara es
+   negro; sobre la franja verde eso deja el control entero ilegible. Un bloque
+   acotado al contenedor y colocado después gana por orden, sin tocar catorce
+   reglas una por una ni inflarles la especificidad.
+
+   El panel desplegable queda fuera: se dibuja sobre papel, no sobre el verde. */
+.se-explorer__eyebrow,
+.se-explorer__scope,
+.se-explorer__total,
+.se-explorer__none,
+.se-explorer__caret {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.se-explorer__n,
+.se-explorer__sel {
+  color: #ffffff;
+}
+
+/* `__btn` es el disparador de cada eje -- Tema, Dónde -- y era el que quedaba
+   negro sobre el verde. `__field` no existe en el marcado; lo había puesto de
+   memoria en vez de leer el componente. */
+.se-explorer__search,
+.se-explorer__btn {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+.se-explorer__search::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.se-explorer__search:focus,
+.se-explorer__btn:hover,
+.se-explorer__btn:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.se-explorer__chip,
+.se-explorer__clear {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+.se-explorer__chip:hover,
+.se-explorer__clear:hover {
+  background: rgba(255, 255, 255, 0.12);
 }

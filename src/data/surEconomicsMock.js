@@ -76,19 +76,14 @@ export const PARTNERS = [
     logo: aliada("moore-logo.png"),
     url: "https://moorecapitals.com",
   },
-  // Pendientes de confirmar con el grupo, y por eso no se dibujan todavía:
-  //
-  // - Invicto Capital: está en el sitio del grupo y el logo ya está copiado en
-  //   `public/brand/aliadas/invicto-logo.png`. Descomentar y listo.
-  // - LOG Consultancy Group: estaba en esta lista, no aparece en el sitio del
-  //   grupo y no hay logo. Se dibujaría con el nombre si se repone.
-  //
-  // {
-  //   id: "invicto-capital",
-  //   name: "Invicto Capital",
-  //   logo: aliada("invicto-logo.png"),
-  //   url: "https://capitalinvicto.com",
-  // },
+  {
+    id: "invicto-capital",
+    name: "Invicto Capital",
+    logo: aliada("invicto-logo.png"),
+    url: "https://capitalinvicto.com",
+  },
+  // Queda LOG Consultancy Group, que estaba en esta lista pero no aparece en el
+  // sitio del grupo y no tiene logo. Se dibujaría con el nombre si se repone:
   // { id: "log-consultancy", name: "LOG Consultancy Group", logo: null, url: null },
 ];
 

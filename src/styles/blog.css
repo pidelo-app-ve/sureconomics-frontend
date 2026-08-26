@@ -3185,28 +3185,34 @@
   margin-bottom: var(--se-space-xl);
 }
 
+/* —— La rejilla de aliadas ——
+   `auto-fit` en vez de un número fijo de columnas: con tres fijas y cinco marcas,
+   la fila se cortaba antes del borde y el hilo superior seguía solo hasta el final
+   del contenedor. Ahora las celdas reparten el ancho completo, así que la línea
+   siempre termina donde termina la última celda -- sea con cuatro marcas o con
+   seis. */
 .se-partners__grid {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
   gap: 0;
-  grid-template-columns: repeat(2, 1fr);
-  border-top: 1px solid var(--color-hairline);
-  border-left: 1px solid var(--color-hairline);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
 
+/* Cada celda dibuja su propia caja completa.
+   Los bordes de arriba y de la izquierda estaban en el contenedor, que ocupa el
+   ancho entero: la línea seguía más allá de la última marca hasta el final de la
+   rejilla. Puestos en la celda, la línea termina donde termina el contenido, con
+   cuatro marcas o con seis. */
 .se-partners__item {
-  border-right: 1px solid var(--color-hairline);
-  border-bottom: 1px solid var(--color-hairline);
+  border: 1px solid var(--color-hairline);
+  /* Sin doblar el grosor entre celdas vecinas. */
+  margin: 0 -1px -1px 0;
   aspect-ratio: 3 / 2;
 }
 
-@media (min-width: 768px) {
-  .se-partners__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+
 
 @media (min-width: 1024px) {
   .se-partners__grid {

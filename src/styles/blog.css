@@ -11852,3 +11852,50 @@ a.se-topics__chip:focus-visible {
 [class*="se-reveal"] {
   animation: none !important;
 }
+
+/* —— La barra lateral no pasa del cuerpo ——
+   En una pieza corta la lista sobraba por debajo del artículo y las dos columnas
+   terminaban a alturas distintas.
+
+   La lista envuelve en columnas dentro de la altura de la fila: lo que no cabe no
+   se corta por la mitad, pasa a una segunda columna que queda fuera del recorte y
+   desaparece entera. Es la única forma de acortar la lista en CSS sin dejar medio
+   titular colgando, y significa que la barra se adapta al largo del texto en vez
+   de al revés. */
+@media (min-width: 1000px) {
+  .se-piece__cols {
+    align-items: stretch;
+  }
+
+  .se-piece__aside {
+    overflow: hidden;
+    /* `height: 0` con `min-height: 100%` es el truco que hace que la barra *no*
+       cuente para la altura de la fila y aun así la llene. Con solo `stretch` las
+       dos columnas quedaban iguales pero era la fila la que crecía hasta la barra,
+       así que el hueco seguía estando -- solo cambiaba de lado. Mandando el
+       cuerpo, la barra muestra las piezas que caben y ni una más. */
+    height: 0;
+    min-height: 100%;
+  }
+
+  .se-piece__aside .se-piece__related {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .se-piece__aside .se-newslist {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: flex-start;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .se-piece__aside .se-newslist__row {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+}

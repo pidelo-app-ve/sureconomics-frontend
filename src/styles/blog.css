@@ -11992,6 +11992,13 @@ a.se-topics__chip:focus-visible {
     font-size: 0.78rem;
   }
 
+  /* "EDITORIAL DEL DÍA" salía a 10,5 px. Va en versalitas y con mucho espaciado,
+     que a ese tamaño y en la mano es donde peor se lee. */
+  .se-eddia__kicker,
+  .se-doccard__kicker {
+    font-size: 0.72rem;
+  }
+
   .se-format__more {
     display: inline-flex;
     align-items: center;

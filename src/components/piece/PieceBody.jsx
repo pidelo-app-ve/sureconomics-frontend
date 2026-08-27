@@ -266,7 +266,7 @@ DownloadGate.propTypes = { pieza: piezaShape().isRequired };
  * now, and giving every already-published piece a grey rectangle it never had
  * would be a worse change than the one being fixed.
  */
-const Media = ({ pieza, conMarcador = false }) => {
+export const Media = ({ pieza, conMarcador = false }) => {
   if (pieza.imagenUrl) {
     return (
       <figure className="se-piece__media">
@@ -306,11 +306,20 @@ Media.propTypes = { pieza: piezaShape().isRequired, conMarcador: PropTypes.bool 
  * structure. The page count it carried now sits on the download block, which is
  * where it was doing real work.
  */
-export const PieceBody = ({ pieza }) => {
+export const PieceBody = ({ pieza, enCabecera }) => {
+  // La fotografía y la entradilla suben a la cabecera, junto al titular, que es
+  // donde el brandbook las pone. `enCabecera` existe para que el cuerpo deje de
+  // dibujarlas sin que cada rama tenga que enterarse dos veces.
+  const Portada = enCabecera ? () => null : Media;
+  const Entradilla = ({ html }) =>
+    !enCabecera && html ? (
+      <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: html }} />
+    ) : null;
+
   if (pieza.formato === "Noticias") {
     return (
       <>
-        <Media pieza={pieza} />
+        <Portada pieza={pieza} />
         <Cuerpo html={pieza.cuerpo} />
         {pieza.opinionCasaHtml ? (
           <OpinionBlock titulo="¿Qué piensa SurEconomics?" html={pieza.opinionCasaHtml} />
@@ -341,10 +350,8 @@ export const PieceBody = ({ pieza }) => {
   if (pieza.formato === "Informes") {
     return (
       <>
-        <Media pieza={pieza} />
-        {pieza.resumenHtml ? (
-          <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.resumenHtml }} />
-        ) : null}
+        <Portada pieza={pieza} />
+        <Entradilla html={pieza.resumenHtml} />
         <Cuerpo html={pieza.cuerpo} />
         {pieza.tieneDocumento ? <DownloadGate pieza={pieza} /> : null}
       </>
@@ -354,11 +361,9 @@ export const PieceBody = ({ pieza }) => {
   if (pieza.formato === "Editorial") {
     return (
       <>
-        <Media pieza={pieza} />
+        <Portada pieza={pieza} />
         <OpinionBlock titulo="Editorial de SurEconomics" />
-        {pieza.entradaHtml ? (
-          <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.entradaHtml }} />
-        ) : null}
+        <Entradilla html={pieza.entradaHtml} />
         <Cuerpo html={pieza.cuerpo} />
       </>
     );
@@ -368,13 +373,19 @@ export const PieceBody = ({ pieza }) => {
   // image whether or not the piece brought one.
   return (
     <>
-      <Media pieza={pieza} conMarcador />
-      {pieza.resumenHtml ? (
-        <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: pieza.resumenHtml }} />
-      ) : null}
+      {/* El artículo es el único que reserva el hueco aunque no traiga fotografía,
+          pero solo cuando la portada se dibuja aquí. */}
+      {enCabecera ? null : <Media pieza={pieza} conMarcador />}
+      <Entradilla html={pieza.resumenHtml} />
       <Cuerpo html={pieza.cuerpo} />
     </>
   );
 };
 
-PieceBody.propTypes = { pieza: piezaShape().isRequired };
+PieceBody.propTypes = {
+  pieza: piezaShape().isRequired,
+  /** La portada y la entradilla ya se dibujaron arriba, junto al titular. */
+  enCabecera: PropTypes.bool,
+};
+
+PieceBody.defaultProps = { enCabecera: false };

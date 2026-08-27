@@ -4,7 +4,7 @@ import { BRAND } from "../data/surEconomicsMock";
 import { applyPageMeta } from "../lib/seo";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
-import { PieceBody, PieceByline, PieceTags, RelatedPieces } from "../components/piece";
+import { Media, PieceBody, PieceByline, PieceTags, RelatedPieces } from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
 import { FORMATO_META, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
@@ -106,6 +106,11 @@ export const Pieza = () => {
   const lugar = pieza.geos?.[0] ?? geoTop;
   const tema = temaPrincipal(pieza);
 
+  // La entradilla sale del campo que cada formato usa para ella.
+  const entradilla = pieza.resumenHtml || pieza.entradaHtml || "";
+  // La entrevista no lleva portada en la cabecera: su portada es el video.
+  const conPortada = pieza.formato !== "Entrevistas";
+
   return (
     <main className="se-blog se-articles" role="main">
       <section className="se-section">
@@ -123,12 +128,33 @@ export const Pieza = () => {
               ) : null}
             </nav>
 
-            <p className="se-piece__kicker">
-              {pieza.formato}
-              {tema ? ` · ${tema}` : ""}
-            </p>
+            {/* La cabecera, a dos columnas: el titular y la entradilla a la
+                izquierda, la fotografía a la derecha. Antes la imagen iba debajo del
+                titular y empujaba el texto fuera de la primera pantalla.
 
-            <h1 className="se-piece__title">{pieza.titulo}</h1>
+                La entrevista queda fuera: su portada es el video, que se reproduce
+                y por tanto vive en el cuerpo, no en un hueco de cabecera. */}
+            <header className={`se-piece__head${conPortada ? " se-piece__head--media" : ""}`}>
+              <div className="se-piece__head-text">
+                <p className="se-piece__kicker">
+                  {pieza.formato}
+                  {tema ? ` · ${tema}` : ""}
+                </p>
+                <h1 className="se-piece__title">{pieza.titulo}</h1>
+                {entradilla ? (
+                  <div
+                    className="se-piece__lead se-piece__lead--head"
+                    dangerouslySetInnerHTML={{ __html: entradilla }}
+                  />
+                ) : null}
+              </div>
+
+              {conPortada ? (
+                <div className="se-piece__head-media">
+                  <Media pieza={pieza} />
+                </div>
+              ) : null}
+            </header>
 
             <div className="se-piece__meta">
               <PieceByline
@@ -140,11 +166,21 @@ export const Pieza = () => {
               <ShareButtons url={canonica} title={pieza.titulo} className="se-piece__share" />
             </div>
 
-            <PieceBody pieza={pieza} />
+            {/* El cuerpo y, al lado, lo que se puede leer después. La columna de
+                lectura se estrecha a propósito: un párrafo que cruza la pantalla
+                entera cansa, y el brandbook lo maqueta así. */}
+            <div className="se-piece__cols">
+              <div className="se-piece__main">
+                <PieceBody pieza={pieza} enCabecera={conPortada} />
+                <PieceTags temas={pieza.temas} geos={pieza.geos} />
+              </div>
 
-            <PieceTags temas={pieza.temas} geos={pieza.geos} />
-
-            {relacionadas.length ? <RelatedPieces items={relacionadas} /> : null}
+              {relacionadas.length ? (
+                <aside className="se-piece__aside" aria-label="Más contenido">
+                  <RelatedPieces items={relacionadas} />
+                </aside>
+              ) : null}
+            </div>
           </article>
         </div>
       </section>

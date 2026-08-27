@@ -12006,3 +12006,11 @@ a.se-topics__chip:focus-visible {
     padding: 0.4rem 0;
   }
 }
+
+/* El sitio que guarda la cinta mientras llegan las cifras, para que la cabecera no
+   dé un salto de 33 px cuando aparecen. Mismo alto y mismo color: lo único que le
+   falta es el contenido. */
+.se-ticker--hueco {
+  height: 33px;
+  display: block;
+}

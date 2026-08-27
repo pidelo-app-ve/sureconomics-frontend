@@ -113,7 +113,7 @@ export const Footer = () => {
 
           <div className="se-footer__social">
             <span className="se-footer__social-title" id="se-footer-redes">
-              Redes sociales
+              Síguenos en
             </span>
             <ul className="se-footer__social-list" aria-labelledby="se-footer-redes">
               {SOCIAL.map(({ id, label, handle, url }) => {

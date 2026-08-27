@@ -3046,12 +3046,10 @@
   from {
     opacity: 0;
     transform: translateY(14px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: none;
   }
 }
 
@@ -3372,16 +3370,26 @@
   --se-suite-dur: 0.18s;
 }
 
+/* Ninguna animacion de entrada lleva `filter`, y aplica a las cinco:
+   se-page-rise, se-about-reveal, se-adm-dialog-in, se-admin-outlet-in y
+   se-adm-submission-rise. Ver la nota de abajo.
+
+   Sin `filter` en la animacion, y es a proposito.
+   Reportaron el pie "borroso" en un iPhone y esto lo explica: animar un `blur` deja
+   el elemento en una capa compuesta, y Safari de iOS la rasteriza por debajo de la
+   resolucion del aparato -- el texto se queda blando aunque la animacion haya
+   terminado y el `to` diga `filter: none`. La usan el pie, Consultoria, Contacto e
+   Informes, y todos tenian el mismo defecto.
+   La entrada sigue leyendose igual con subir y aparecer; los dos pixeles de desenfoque
+   durante medio segundo no aportaban nada que compense dejar el texto blando. */
 @keyframes se-page-rise {
   from {
     opacity: 0;
     transform: translateY(14px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: none;
   }
 }
 
@@ -5773,12 +5781,10 @@ a.se-topics__chip:focus-visible {
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(10px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
-    filter: none;
   }
 }
 
@@ -6144,12 +6150,10 @@ a.se-topics__chip:focus-visible {
   from {
     opacity: 0;
     transform: translateY(10px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: none;
   }
 }
 
@@ -6827,12 +6831,10 @@ a.se-topics__chip:focus-visible {
   from {
     opacity: 0;
     transform: translateY(14px);
-    filter: blur(2px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: none;
   }
 }
 

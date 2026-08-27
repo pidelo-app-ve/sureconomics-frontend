@@ -576,7 +576,7 @@
   color: rgba(255, 255, 255, 0.62);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
   /* La auditoria movil lo midio a 9 px y once es el suelo de lo legible en la mano.
      Aqui sube, que en el telefono la barra tiene sitio de sobra; en el escritorio el
      ancho esta contado y se queda en diez. */
@@ -1499,7 +1499,7 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
   /* 44 como el resto de los blancos táctiles del pie. */
   .se-footer__social-link {
     width: 44px;
@@ -12180,7 +12180,7 @@ a.se-topics__chip:focus-visible {
 
    Se gana altura con relleno vertical y no con tipografía más grande: el pie tiene
    una jerarquía que funciona y agrandar la letra la rompería. */
-@media (max-width: 900px) {
+@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
   .se-footer__link,
   .se-footer__contact-link,
   .se-member-card__link,
@@ -12214,7 +12214,14 @@ a.se-topics__chip:focus-visible {
 
    Solo en pantalla estrecha: en escritorio esas medidas funcionan y agrandarlas
    ahí rompería la jerarquía que ya está bien. */
-@media (max-width: 900px) {
+@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
+  /* 0,68rem son 10,9 px: por debajo del suelo, y en las ocho pantallas tactiles,
+     de 320 a 1024. Se le habia escapado a la auditoria movil porque /consultoria
+     no estaba en su lista de rutas. */
+  .se-consulting__service-meta {
+    font-size: 0.72rem;
+  }
+
   .se-explorer__scope {
     font-size: 0.78rem;
   }

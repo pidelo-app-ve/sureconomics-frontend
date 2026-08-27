@@ -21,6 +21,14 @@ import { getMarketTicker } from "../../services/marketTickerService";
  * ahora; a partir de ahí el hueco está desde el primer instante y nada se mueve.
  */
 const RECUERDO = "sureconomics_cinta_con_datos";
+/** El ultimo juego de cifras que llego bien, para no perder la banda por un fallo
+ *  de red. En `localStorage` y no en la sesion: si el servidor tiene un tropiezo,
+ *  una pestaña nueva tambien tiene que seguir mostrando la cinta. */
+const ULTIMA = "sureconomics_cinta_ultima";
+/** Medio dia. Son cifras de cierre: sostenerlas un rato mientras el servidor vuelve
+ *  es razonable, arrastrar el cierre de anteayer no lo es. */
+const CADUCA_MS = 12 * 60 * 60 * 1000;
+const INTENTOS = [0, 600, 1800];
 
 const huboCinta = () => {
   try {
@@ -39,30 +47,79 @@ const recordar = (hay) => {
   }
 };
 
+const guardarUltima = (datos) => {
+  try {
+    localStorage.setItem(ULTIMA, JSON.stringify({ t: Date.now(), datos }));
+  } catch {
+    /* nada que hacer */
+  }
+};
+
+const ultimaBuena = () => {
+  try {
+    const crudo = localStorage.getItem(ULTIMA);
+    if (!crudo) return null;
+    const { t, datos } = JSON.parse(crudo);
+    if (!datos?.indicators?.length) return null;
+    if (!t || Date.now() - t > CADUCA_MS) return null;
+    return datos;
+  } catch {
+    return null;
+  }
+};
+
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+
 export const MarketTicker = () => {
   const [ticker, setTicker] = useState(null);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    let alive = true;
-    getMarketTicker()
-      .then((data) => {
-        if (!alive) return;
-        setTicker(data);
-        setCargando(false);
-        recordar(Boolean(data?.indicators?.length));
-      })
-      .catch(() => {
-        // A strip that cannot load is a strip that shows nothing. It is ambient
-        // context, not content, so it must never become an error message across
-        // the top of every page.
-        if (!alive) return;
-        setTicker(null);
-        setCargando(false);
-        recordar(false);
-      });
+    let vivo = true;
+
+    (async () => {
+      let ultimoError = null;
+      for (const espera of INTENTOS) {
+        if (espera) await dormir(espera);
+        if (!vivo) return;
+        try {
+          const datos = await getMarketTicker();
+          if (!vivo) return;
+          setTicker(datos);
+          setCargando(false);
+          const hay = Boolean(datos?.indicators?.length);
+          recordar(hay);
+          // Se guarda lo que llego bien, y se limpia cuando la redaccion vacia la
+          // cinta a proposito: una respuesta buena y vacia es una decision, y
+          // sostener las cifras de ayer contra ella seria publicar por nuestra
+          // cuenta. El respaldo es solo para cuando la peticion falla.
+          if (hay) guardarUltima(datos);
+          else {
+            try { localStorage.removeItem(ULTIMA); } catch { /* nada */ }
+          }
+          return;
+        } catch (error) {
+          ultimoError = error;
+        }
+      }
+
+      if (!vivo) return;
+      // Se agotaron los intentos. Antes esto dejaba la cabecera sin banda: la cinta
+      // desaparecia por un tropiezo de red aunque estuviera llena. Se sostiene el
+      // ultimo juego bueno mientras no caduque.
+      const respaldo = ultimaBuena();
+      setTicker(respaldo);
+      setCargando(false);
+      recordar(Boolean(respaldo));
+      if (!respaldo && ultimoError) {
+        // Sin respaldo no se dibuja nada. Es contexto de ambiente, no contenido: no
+        // puede convertirse en un mensaje de error cruzando lo alto de cada pagina.
+        console.warn("[cinta] no se pudo cargar y no hay respaldo vigente", ultimoError);
+      }
+    })();
+
     return () => {
-      alive = false;
+      vivo = false;
     };
   }, []);
 

@@ -122,7 +122,10 @@
 
   /* Transitions */
   --se-transition: 0.2s ease;
-  --se-transition-menu: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Corta y con salida rápida. A 0,3 s con una curva simétrica el cajón se
+     arrastraba: se notaba el recorrido en vez de la llegada. Una curva que frena
+     al final llega antes a donde el ojo mira. */
+  --se-transition-menu: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .se-logomark-e {
@@ -11921,9 +11924,12 @@ a.se-topics__chip:focus-visible {
 
    Y de paso se va el segundo aspa: eran la del cajón y la hamburguesa convertida
    en X, las dos a la vez. */
+/* `--desktop` explícito: los botones del cajón llevan la misma clase base
+   `se-header__actions`, así que la regla sin acotar los apagaba a ellos también y
+   ENTRAR y REGISTRARSE desaparecían del menú en el teléfono. */
 .se-header--menu-open .se-header__logo,
 .se-header--menu-open .se-header__burger,
-.se-header--menu-open .se-header__actions {
+.se-header--menu-open .se-header__actions--desktop {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -11971,5 +11977,25 @@ a.se-topics__chip:focus-visible {
      gana blanco con `padding` vertical, que sí crece la caja de un `inline`. */
   main .se-link {
     padding: 0.55rem 0;
+  }
+}
+
+/* —— Dos medidas que solo se vieron en el teléfono ——
+   La auditoría móvil contra producción las midió: el alcance del filtro salía a
+   10,9 px y el "ver todas" de cada sección a 101x19. Once píxeles es el suelo de
+   lo legible en la mano, y un blanco de 19 px de alto se falla con el pulgar.
+
+   Solo en pantalla estrecha: en escritorio esas medidas funcionan y agrandarlas
+   ahí rompería la jerarquía que ya está bien. */
+@media (max-width: 900px) {
+  .se-explorer__scope {
+    font-size: 0.78rem;
+  }
+
+  .se-format__more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 0;
   }
 }

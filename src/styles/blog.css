@@ -752,7 +752,9 @@
 .se-header__menu-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  /* Negro neutro y no azul pizarra: el azul teñía el verde del cajón y lo
+     dejaba turbio. */
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   transition: opacity var(--se-transition-menu);
 }
@@ -808,11 +810,13 @@
 }
 
 .se-header__menu-close {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid rgba(var(--se-tinte), 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+  font-size: 1.35rem;
+  line-height: 1;
   color: rgba(var(--se-tinte), 0.92);
   display: inline-flex;
   align-items: center;
@@ -823,8 +827,8 @@
 }
 
 .se-header__menu-close:hover {
-  background: rgba(var(--se-tinte), 0.1);
-  border-color: rgba(var(--se-tinte), 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
 .se-header__menu-close:focus-visible {
@@ -11902,5 +11906,70 @@ a.se-topics__chip:focus-visible {
   .se-partners__img {
     max-height: 86px;
     max-width: 158px;
+  }
+}
+
+/* —— La barra se aparta cuando el cajón está abierto ——
+   El logo y la hamburguesa se pintaban *encima* del cajón: la cabecera es `sticky`
+   con `z-index`, así que es su propio contexto de apilamiento y el 1001 del menú
+   queda encerrado dentro.
+
+   Se apagan el logo y las acciones, *no* el contenedor: el cajón vive dentro de
+   `se-header__inner`, y un `opacity: 0` ahí apaga todo el subárbol -- también un
+   `position: fixed`. Con la regla puesta en el contenedor el cajón desaparecía
+   entero, que es peor que el solape que venía a arreglar.
+
+   Y de paso se va el segundo aspa: eran la del cajón y la hamburguesa convertida
+   en X, las dos a la vez. */
+.se-header--menu-open .se-header__logo,
+.se-header--menu-open .se-header__burger,
+.se-header--menu-open .se-header__actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* La marca al frente del cajón, con aire debajo. */
+.se-header__menu-brand {
+  display: block;
+  width: 150px;
+  height: auto;
+}
+
+.se-header__menu-header {
+  padding-bottom: var(--se-space-sm);
+}
+
+/* —— Blancos táctiles en teléfono ——
+   La auditoría los midió: los enlaces del pie salían a 48x18 px y varios `se-link`
+   por debajo de 25 px de alto. La guía pide 44; un enlace de 18 px de alto se
+   falla con el pulgar y se acierta el de al lado.
+
+   Se gana altura con relleno vertical y no con tipografía más grande: el pie tiene
+   una jerarquía que funciona y agrandar la letra la rompería. */
+@media (max-width: 900px) {
+  .se-footer__link,
+  .se-footer__contact-link,
+  .se-member-card__link,
+  .se-footer a.se-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.35rem 0;
+  }
+
+  /* Y separación entre ellos, porque dos blancos de 44 px pegados siguen siendo
+     una sola zona de error. */
+  .se-footer__nav-list > li + li,
+  .se-footer__contact-list > li + li {
+    margin-top: 0.15rem;
+  }
+
+  /* Los enlaces sueltos dentro del cuerpo de una página -- el de Consultoría y los
+     de correo en Contacto -- salían a 25 px de alto. Aquí no se puede meter
+     `inline-flex` con altura: van dentro de un párrafo y romperían el renglón. Se
+     gana blanco con `padding` vertical, que sí crece la caja de un `inline`. */
+  main .se-link {
+    padding: 0.55rem 0;
   }
 }

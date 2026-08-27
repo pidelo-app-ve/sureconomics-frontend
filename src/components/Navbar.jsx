@@ -238,7 +238,17 @@ export const Navbar = () => {
           />
           <div className="se-header__menu-panel">
             <div className="se-header__menu-header">
-              <span className="se-header__menu-title">{t("nav.menu")}</span>
+              {/* La marca arriba, como en el carril del panel de administración:
+                  es lo que hace que ese se lea bien y el cajón no. Antes decía
+                  "Menú", una etiqueta que no dice nada que el cajón abierto no
+                  diga ya, y que además chocaba con el logo de la barra. */}
+              <img
+                className="se-header__menu-brand"
+                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                alt="SurEconomics"
+                width="150"
+                height="20"
+              />
               <button
                 type="button"
                 className="se-header__menu-close"

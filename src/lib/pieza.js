@@ -208,8 +208,6 @@ export const piezaFromApi = (row) => {
     fuentes: (row.sources ?? (row.source_name ? [{ name: row.source_name, url: row.source_url }] : []))
       .map((f) => ({ nombre: (f.name ?? "").trim(), url: f.url || null }))
       .filter((f) => f.nombre),
-    opinionCasa: textoLlano(row.house_opinion) || null,
-    opinionCasaHtml: row.house_opinion || null,
     imagen: varianteDe(row.slug ?? ""),
     imagenUrl: row.image_asset?.url || row.featured_image_url || null,
     // On the asset, not on the post: the rights belong to the photograph. A piece

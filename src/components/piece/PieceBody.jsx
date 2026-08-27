@@ -22,28 +22,20 @@ const Cuerpo = ({ html }) => {
 Cuerpo.propTypes = { html: PropTypes.string };
 
 /**
- * A bordered block that carries the outlet's own voice.
+ * La banda que marca la voz del medio. Hoy solo la usa el editorial.
  *
- * Used twice with different titles: closing a noticia, where the reader must see
- * where the reported fact ends and the position begins; and opening an editorial,
- * where the whole piece is that voice.
+ * Llevaba también el cuerpo del "¿Qué piensa SurEconomics?" al cierre de cada
+ * noticia. Ese campo se retiró entero -- del formulario, de la base y de aquí --
+ * porque la redacción no lo llenó nunca, así que el parámetro `html` se quedó sin
+ * quien lo pasara y con él la mitad del componente.
  */
-const OpinionBlock = ({ titulo, html }) => (
-  // Sin cuerpo es solo una etiqueta -- el editorial lo usa así para marcar de qué
-  // formato es la pieza. Con el mismo relleno que cuando lleva texto quedaba una
-  // caja grande y vacía sobre el primer párrafo.
-  <aside className={`se-opinion${html ? "" : " se-opinion--marca"}`}>
+const OpinionBlock = ({ titulo }) => (
+  <aside className="se-opinion se-opinion--marca">
     <p className="se-opinion__k">{titulo}</p>
-    {html ? (
-      <div className="se-opinion__body" dangerouslySetInnerHTML={{ __html: html }} />
-    ) : null}
   </aside>
 );
 
-OpinionBlock.propTypes = {
-  titulo: PropTypes.string.isRequired,
-  html: PropTypes.string,
-};
+OpinionBlock.propTypes = { titulo: PropTypes.string.isRequired };
 
 /**
  * Where the piece came from — all of it.
@@ -324,9 +316,6 @@ export const PieceBody = ({ pieza, enCabecera }) => {
       <>
         <Portada pieza={pieza} />
         <Cuerpo html={pieza.cuerpo} />
-        {pieza.opinionCasaHtml ? (
-          <OpinionBlock titulo="¿Qué piensa SurEconomics?" html={pieza.opinionCasaHtml} />
-        ) : null}
         <Fuentes fuentes={pieza.fuentes} />
       </>
     );

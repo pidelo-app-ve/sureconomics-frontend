@@ -3,34 +3,34 @@ import { useRef } from "react";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 /**
- * Las unidades del grupo, con su logo.
+ * Las unidades del grupo, desfilando.
  *
- * Antes eran los nombres puestos en una caja, que es lo que se pidió cambiar: una
- * marca se reconoce por su logo antes de leerse.
+ * Antes era una rejilla de celdas con borde: cada marca dentro de su cuadrito, que
+ * es justo lo que un logo ajeno no quiere. Ahora pasan en horizontal, sin caja, con
+ * la misma técnica que el cintillo de mercado -- dos pasadas idénticas y el carril
+ * se desplaza exactamente la mitad, así el salto del final al principio cae en un
+ * punto donde las dos son iguales y no se ve.
  *
- * `logo` en nulo cae al nombre. No es un adorno defensivo: la lista tiene unidades
- * cuyo archivo todavía no existe, y un hueco vacío en la rejilla se leería como que
- * la marca no está.
+ * Se detiene al pasar el ratón, para poder leer una marca o pinchar su enlace, y
+ * no se mueve para quien pidió menos movimiento en su sistema: una fila de logos
+ * en bucle es decoración, y la decoración es lo primero que sobra ahí.
  *
- * Los logos llegan con fondo blanco opaco —tres de los cinco no traen
- * transparencia— así que van sobre papel y no sobre un parche de color. Con el
- * enfoque visual claro eso deja de ser un problema y pasa a ser lo correcto.
+ * `logo` en nulo cae al nombre. No es cautela: la lista tiene unidades cuyo
+ * archivo todavía no existe, y un hueco en el desfile se leería como que la marca
+ * no está.
  */
-const Marca = ({ aliada }) => (
-  <>
-    {aliada.logo ? (
-      <img
-        className="se-partners__img"
-        src={aliada.logo}
-        alt={aliada.nameLong ?? aliada.name}
-        loading="lazy"
-        decoding="async"
-      />
-    ) : (
-      <span className="se-partners__name">{aliada.name}</span>
-    )}
-  </>
-);
+const Marca = ({ aliada }) =>
+  aliada.logo ? (
+    <img
+      className="se-partners__img"
+      src={aliada.logo}
+      alt={aliada.nameLong ?? aliada.name}
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <span className="se-partners__name">{aliada.name}</span>
+  );
 
 const formaAliada = PropTypes.shape({
   id: PropTypes.string.isRequired,
@@ -42,6 +42,42 @@ const formaAliada = PropTypes.shape({
 
 Marca.propTypes = { aliada: formaAliada.isRequired };
 
+/** Una pasada completa de la lista. Se pinta dos veces para cerrar el bucle. */
+const Pasada = ({ partners, oculta }) => (
+  <div className="se-partners__run" aria-hidden={oculta ? "true" : undefined}>
+    {partners.map((aliada) =>
+      aliada.url ? (
+        <a
+          key={aliada.id}
+          className="se-partners__logo se-partners__logo--link"
+          href={aliada.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          title={aliada.nameLong ?? aliada.name}
+          tabIndex={oculta ? -1 : undefined}
+        >
+          <Marca aliada={aliada} />
+        </a>
+      ) : (
+        <div
+          key={aliada.id}
+          className="se-partners__logo"
+          title={aliada.nameLong ?? aliada.name}
+        >
+          <Marca aliada={aliada} />
+        </div>
+      )
+    )}
+  </div>
+);
+
+Pasada.propTypes = {
+  partners: PropTypes.arrayOf(formaAliada).isRequired,
+  oculta: PropTypes.bool,
+};
+
+Pasada.defaultProps = { oculta: false };
+
 export const PartnersLogoCloud = ({ partners }) => {
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
@@ -49,7 +85,7 @@ export const PartnersLogoCloud = ({ partners }) => {
   return (
     <section
       ref={sectionRef}
-      className="se-partners se-reveal se-reveal--stagger"
+      className="se-partners se-reveal"
       aria-label="Partners y aliados"
     >
       <div className="se-container">
@@ -59,30 +95,17 @@ export const PartnersLogoCloud = ({ partners }) => {
             Una red de marcas asociadas al ecosistema de investigación, inversión y asesoría.
           </p>
         </div>
+      </div>
 
-        <ul className="se-partners__grid" aria-label="Logos de aliados">
-          {partners.map((aliada) => (
-            <li key={aliada.id} className="se-partners__item">
-              {/* Enlace solo cuando la unidad tiene sitio propio. Un enlace que no
-                  lleva a ninguna parte es peor que un logo quieto. */}
-              {aliada.url ? (
-                <a
-                  className="se-partners__logo se-partners__logo--link"
-                  href={aliada.url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  title={aliada.nameLong ?? aliada.name}
-                >
-                  <Marca aliada={aliada} />
-                </a>
-              ) : (
-                <div className="se-partners__logo" title={aliada.nameLong ?? aliada.name}>
-                  <Marca aliada={aliada} />
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+      {/* Fuera del contenedor: el desfile ocupa el ancho de la pantalla y las
+          marcas entran y salen por los bordes en vez de aparecer de la nada. */}
+      <div className="se-partners__viewport">
+        <div className="se-partners__track">
+          <Pasada partners={partners} />
+          {/* La segunda pasada es la misma lista otra vez, así que para un lector
+              de pantalla es ruido: se oculta y queda fuera del tabulador. */}
+          <Pasada partners={partners} oculta />
+        </div>
       </div>
     </section>
   );

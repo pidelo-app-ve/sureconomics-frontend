@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
+import { HoraCaracas } from "./HoraCaracas";
 import useI18n from "../i18n/useI18n";
 import { useUserAuth } from "../context/UserAuthContext";
 
@@ -210,6 +211,8 @@ export const Navbar = () => {
           )}
         </div>
 
+        <HoraCaracas className="se-hora--header" />
+
         <button
           type="button"
           className="se-header__burger"
@@ -282,6 +285,8 @@ export const Navbar = () => {
                 ))}
               </ul>
             </nav>
+            <HoraCaracas className="se-hora--cajon" />
+
             <div className="se-header__actions se-header__actions--mobile">
               {isAuthenticated ? (
                 <nav

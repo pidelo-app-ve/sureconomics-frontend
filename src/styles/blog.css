@@ -554,6 +554,71 @@
   gap: 24px;
 }
 
+/* —— La hora de Caracas ——
+   Dos renglones cortos, como "FILTROS / en todo el sitio" del filtro: el lugar
+   arriba en versalitas y la hora debajo, que es lo que se mira. Apilado y no en una
+   linea porque en la barra el ancho esta contado y una linea pide el doble.
+
+   La cabecera y el cajon son la misma superficie verde, asi que un solo juego de
+   colores sirve en los dos sitios. */
+.se-hora {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  line-height: 1.15;
+}
+
+.se-hora__lugar {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+@media (max-width: 900px) {
+  /* La auditoria movil lo midio a 9 px y once es el suelo de lo legible en la mano.
+     Aqui sube, que en el telefono la barra tiene sitio de sobra; en el escritorio el
+     ancho esta contado y se queda en diez. */
+  .se-hora__lugar {
+    font-size: 11px;
+  }
+}
+
+.se-hora__valor {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  /* Cifras de ancho fijo. Sin esto el bloque se ensancha y se estrecha con cada
+     segundo y va arrastrando la navegacion de al lado: un reloj que empuja la
+     pagina una vez por segundo es peor que no tener reloj. */
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Se apaga con el logotipo y la hamburguesa cuando el cajon abre, o quedaria
+   flotando por encima del panel. La hora no se pierde: el cajon lleva la suya. */
+.se-header--menu-open .se-hora--header {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--se-transition-menu, 0.2s ease);
+}
+
+.se-hora--cajon {
+  padding-top: var(--se-space-md);
+  margin-top: var(--se-space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 380px) {
+  /* En la pantalla mas estrecha que queda en la calle el logotipo comprimido y la
+     hamburguesa se comen la barra. Ahi la hora vive solo en el cajon. */
+  .se-hora--header {
+    display: none;
+  }
+}
+
 .se-header--scrolled {
   /* Sin cambio de color al bajar. La franja verde/cobre es la identidad de la
      cabecera y cambiarla al primer píxel de scroll la hacía parpadear. Queda solo
@@ -918,7 +983,11 @@
 
   .se-header__inner {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    /* Cuatro columnas: marca, navegacion, hora, botones. Eran tres, y al entrar el
+       reloj como cuarto hijo el grid le abria una segunda fila implicita: ENTRAR y
+       REGISTRARSE caian por debajo de la barra verde. Un hijo mas en un grid no se
+       coloca solo. */
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     flex-wrap: nowrap;
     gap: clamp(0.35rem, 1vw, 0.9rem);
@@ -12171,4 +12240,57 @@ a.se-topics__chip:focus-visible {
 .se-ticker--hueco {
   height: 33px;
   display: block;
+}
+
+/* —— La franja estrecha del escritorio: el reloj y la navegacion ——
+   Medido, no supuesto: de 1200 arriba caben marca, navegacion, hora y botones sin
+   tocar nada. A 1100 faltan 47 px y "Informes y reportes" se corta, y eso lo trajo
+   el reloj. A 992 ya se cortaba antes de que el reloj existiera.
+
+   Se recupera el ancho de donde no se ve: el rotulo "Caracas" se queda solo para
+   lectores de pantalla -- la hora sola se entiende y el `title` lo explica al pasar
+   por encima -- y los enlaces y los botones se juntan unos pixeles.
+
+   Va al final del archivo a proposito. Junto al resto de la hora no hacia nada:
+   `.se-header__nav-list` y `.se-header__actions .se-btn` se definen mas abajo con la
+   misma especificidad, asi que la cascada devolvia los valores viejos y las medidas
+   salian identicas. */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .se-hora--header .se-hora__lugar {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .se-header__nav--desktop .se-header__nav-list {
+    column-gap: clamp(0.3rem, 0.7vw, 0.62rem);
+  }
+
+  .se-header__actions--desktop .se-btn {
+    padding: 0.4rem 0.7rem;
+  }
+}
+
+/* Y por debajo de 1100 tambien se van los segundos. Medido: a 992 el reloj completo
+   dejaba la navegacion 36 px peor que antes de existir; sin segundos vuelve a donde
+   estaba. Menos precision en una ventana de 1024 es una perdida mucho menor que
+   quedarse sin reloj o que perder una entrada del menu. */
+@media (min-width: 992px) and (max-width: 1099px) {
+  .se-hora--header .se-hora__seg {
+    display: none;
+  }
+
+  /* Y el logotipo baja de 34 a 26 px de alto, que son unos 60 de ancho. Con eso la
+     navegacion deja de cortarse en esta franja. Se toca aqui y no en la regla
+     general: de 1100 arriba sobra sitio y el logotipo se queda como estaba.
+
+     Medido antes de tocarlo: a 1060 faltaban 19 px, a 1024 faltaban 53. El unico
+     ancho que aun se queda corto es 992, y ahi "Informes y reportes" ya se cortaba
+     antes de que existiera el reloj. */
+  .se-header__logo {
+    height: 26px;
+  }
 }

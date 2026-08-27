@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
+import { useState } from "react";
 import { temaPrincipal } from "../../lib/contentFilter";
-import { imagenAncho } from "../../lib/pieza";
+import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { piezaShape } from "./piezaShape";
 
@@ -26,16 +27,32 @@ import { piezaShape } from "./piezaShape";
  *
  * In practice only the news card asks: its body carries the place, so the topic on
  * the field adds something. Every other card already says both.
+ *
+ * *El mismo relleno cubre la imagen que se cae.* Auditando produccion salio que dos
+ * piezas apuntan a imagenes alojadas en Wikimedia y Wikimedia nos contesto 429: esas
+ * fotos van a fallar de vez en cuando para el lector, y sin esto la tarjeta se queda
+ * con el recuadro roto del navegador. El color del tema ya existia para las piezas
+ * sin foto; sirve igual para la foto que no llega, y la maqueta no se mueve.
  */
+/** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x. */
+const ANCHOS = [400, 640, 800, 1100, 1400];
+/** Una columna en telefono, dos en tablet, tres en escritorio. */
+const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
+
 export const CardMedia = ({ pieza, ancho, etiqueta }) => {
-  if (pieza.imagenUrl) {
+  const [fallo, setFallo] = useState(false);
+
+  if (pieza.imagenUrl && !fallo) {
     return (
       <img
         className="se-artcard__img"
         src={imagenAncho(pieza.imagenUrl, ancho)}
+        srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS) ?? undefined}
+        sizes={SIZES}
         alt=""
         loading="lazy"
         decoding="async"
+        onError={() => setFallo(true)}
       />
     );
   }

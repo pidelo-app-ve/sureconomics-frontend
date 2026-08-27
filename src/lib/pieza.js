@@ -143,6 +143,28 @@ export const imagenAncho = (url, ancho) => {
   return `${url.slice(0, corte + marca.length)}f_auto,q_auto,c_fill,w_${ancho}/${resto}`;
 };
 
+/**
+ * El mismo recorte a varios anchos, para que el navegador elija.
+ *
+ * Sin esto la tarjeta pedia `w_800` y punto. Medido contra produccion: en un iPhone
+ * de 390 px la caja mide 340 y a 3x necesita 1020, asi que llegaba una imagen de 800
+ * estirada. Un `srcset` con `sizes` lo resuelve sin que nadie tenga que adivinar la
+ * densidad: la eleccion es del navegador, que es el unico que sabe en que pantalla
+ * esta.
+ *
+ * Devuelve nulo cuando no hay nada que elegir -- una URL ajena o ya transformada no
+ * se puede reescalar -- y un `srcset` nulo simplemente no se pinta.
+ */
+export const imagenSrcSet = (url, anchos) => {
+  if (!url || !anchos?.length) return null;
+  const candidatos = anchos
+    .map((a) => [a, imagenAncho(url, a)])
+    // Si `imagenAncho` devolvio la URL tal cual, no hubo transformacion posible.
+    .filter(([, u]) => u !== url);
+  if (!candidatos.length) return null;
+  return candidatos.map(([a, u]) => `${u} ${a}w`).join(", ");
+};
+
 /** Where a piece lives. */
 export const rutaDePieza = (pieza) => {
   if (!pieza) return "/";

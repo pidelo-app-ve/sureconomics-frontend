@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { temaPrincipal } from "../../lib/contentFilter";
 import { formatDateEs } from "../../lib/date";
-import { imagenAncho, rutaDePieza } from "../../lib/pieza";
+import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { piezaShape } from "./piezaShape";
 
@@ -23,26 +24,39 @@ import { piezaShape } from "./piezaShape";
  * casa con un marco vacío dentro es peor que no tener bloque: anuncia que el medio
  * no tiene nada que decir.
  */
+/** La columna de la imagen: todo el ancho en telefono, el 44% al lado del texto. */
+const ANCHOS = [600, 900, 1200, 1600];
+const SIZES = "(max-width: 859px) 100vw, 44vw";
+
 export const EditorialDelDia = ({ pieza }) => {
+  const [fallo, setFallo] = useState(false);
   if (!pieza) return null;
 
   const entradilla = pieza.entrada || pieza.resumen || "";
   // La fotografía cuando la hay; si no, el color del tema, el mismo tratamiento
   // que usan las tarjetas, para que la página se sostenga en los dos casos.
-  const fondo = pieza.imagenUrl ? null : fondoDeTema(temaPrincipal(pieza));
+  // El color del tema cubre las dos cosas: la pieza sin foto y la foto que no llega.
+  // Auditando produccion salio que hay imagenes alojadas fuera que contestan 429, y
+  // el recuadro roto del navegador en el bloque de la editorial es lo peor que puede
+  // salir en esa posicion.
+  const hayFoto = Boolean(pieza.imagenUrl) && !fallo;
+  const fondo = hayFoto ? null : fondoDeTema(temaPrincipal(pieza));
 
   return (
     <section className="se-section se-eddia" aria-label="Editorial del día">
       <div className="se-container">
         <Link to={rutaDePieza(pieza)} className="se-eddia__card">
           <div className="se-eddia__media">
-            {pieza.imagenUrl ? (
+            {hayFoto ? (
               <img
                 className="se-eddia__img"
                 src={imagenAncho(pieza.imagenUrl, 1200)}
+                srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS) ?? undefined}
+                sizes={SIZES}
                 alt=""
                 loading="lazy"
                 decoding="async"
+                onError={() => setFallo(true)}
               />
             ) : (
               <div

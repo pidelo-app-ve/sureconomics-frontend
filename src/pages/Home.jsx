@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Hero, NewsletterBlock } from "../components/blog";
+import { Fragment, useEffect } from "react";
+import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { applyPageMeta } from "../lib/seo";
@@ -14,8 +14,7 @@ import {
   NewsList,
   ReportGrid,
 } from "../components/home";
-import { FORMATO_META, imagenAncho } from "../lib/pieza";
-import { temaPrincipal } from "../lib/contentFilter";
+import { FORMATO_META } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -23,14 +22,21 @@ import { useTaxonomy } from "../hooks/useTaxonomy";
 /**
  * Homepage.
  *
- * Order comes from the functional mockup: ticker, opening piece, the explorer as
- * the second element (it is the main way into the site, not a closing widget), then
- * the five format blocks with equal weight, then newsletter and the group's units.
+ * El orden lo cambio el socio: primero el filtro, pegado al navbar, porque es la
+ * entrada al sitio; despues noticias, que ocupa el lugar donde estaba el hero; y
+ * detras la editorial del dia.
  *
- * The explorer here spans all five formats, so a selection turns the blocks below
- * into grouped results — Noticias first, then Artículos, Editorial, Entrevistas and
- * Informes, with empty groups dropped. Unfiltered, each block shows its most recent
- * handful.
+ * El hero -- logotipo grande, claim, descripcion y los dos botones -- se queda en
+ * `components/blog/Hero.jsx` sin renderizarse, a peticion expresa: "dejalo por ahi,
+ * sin verse por ahora". Quien lo devuelva necesita traducirle la forma: espera un
+ * `featuredPost` con las claves del mock (title, excerpt, imageUrl, category) y no
+ * las de la API (titulo, resumen, imagenUrl); esa traduccion vivia aqui y esta en
+ * el historial.
+ *
+ * El filtro abarca los cinco formatos, asi que una seleccion convierte los bloques
+ * de abajo en resultados agrupados -- Noticias primero, luego Articulos, Editorial,
+ * Entrevistas e Informes, y los grupos vacios se caen. Sin filtrar, cada bloque
+ * muestra su punado mas reciente.
  */
 
 /** How many pieces each block shows when nothing is filtered. */
@@ -50,22 +56,6 @@ const LAYOUTS = {
   informe: (items) => <ReportGrid items={items} />,
 };
 
-/** The `Hero` speaks a different shape; this is the whole translation. */
-const aperturaDe = (pieza) =>
-  pieza
-    ? {
-        id: pieza.id,
-        slug: pieza.slug,
-        title: pieza.titulo,
-        excerpt: pieza.resumen || pieza.entrada || "",
-        date: pieza.fecha,
-        author: pieza.autor ?? "",
-        category: temaPrincipal(pieza) ?? "",
-        imageUrl: imagenAncho(pieza.imagenUrl, 1600) ?? "",
-        readTime: "",
-      }
-    : null;
-
 export const Home = () => {
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error } = usePieces();
@@ -78,9 +68,9 @@ export const Home = () => {
   const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
     useContentFilter(pieces, tree);
 
-  // The latest editorial, for the block under the hero. Read off the unfiltered
-  // list on purpose: it is the outlet's standing position, not a search result,
-  // so it should not disappear because the reader narrowed the explorer.
+  // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
+  // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
+  // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
   const editorialDelDia = pieces.find((p) => p.formatoApi === "editorial") ?? null;
 
   useEffect(() => {
@@ -89,9 +79,6 @@ export const Home = () => {
       description: BRAND.description,
     });
   }, []);
-
-  // The API returns newest first, so the opening piece is simply the first one.
-  const apertura = aperturaDe(pieces[0]);
 
   const blocks = Object.keys(FORMATO_META)
     .map((formatoApi) => {
@@ -105,14 +92,19 @@ export const Home = () => {
     taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural ??
     FORMATO_META[formatoApi].plural;
 
+  // La editorial va detras de noticias. Si el filtro dejo la portada sin bloque de
+  // noticias, va delante de todo: no puede caerse de la pagina por un filtro.
+  const hayNoticias = blocks.some((b) => b.formatoApi === "noticia");
+
   return (
     <main className="se-blog" role="main">
-      {/* The hero carries the masthead, so it renders on arrival and its featured
-          card fills in when the content does. Gating the whole thing on the fetch
-          meant the reader waited for a request to see the name of the outlet. */}
-      <Hero featuredPost={apertura} />
-
-      <EditorialDelDia pieza={editorialDelDia} />
+      {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
+          hero y con el el unico `h1`; una portada sin encabezado deja a los
+          buscadores y a los lectores de pantalla sin saber que pagina es esta. */}
+      <h1 className="se-sr-only">
+        {BRAND.name} — análisis y perspectiva sobre economía, mercados e inversión en
+        América Latina
+      </h1>
 
       {status === "error" ? (
         <section className="se-section">
@@ -122,11 +114,14 @@ export const Home = () => {
         </section>
       ) : null}
 
-      {/* Nothing to explore before anything is published, and an empty filter bar
-          on a launch-day homepage reads as a broken control rather than an
-          honest one. */}
+      {/* El filtro, lo primero bajo el navbar. Nada que explorar antes de que haya
+          algo publicado, y una barra de filtros vacia el dia del lanzamiento se lee
+          como un control roto y no como uno honesto. */}
       {status === "success" && taxonomy.ready && pieces.length ? (
-        <section className="se-section se-explorer-section" aria-label="Explorar contenido">
+        <section
+          className="se-section se-explorer-section se-explorer-section--primera"
+          aria-label="Explorar contenido"
+        >
           <div className="se-container">
             <ContentExplorer
               pieces={pieces}
@@ -169,15 +164,19 @@ export const Home = () => {
         </section>
       ) : null}
 
+      {hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
+
       {blocks.map(({ formatoApi, items, total }) => (
-        <FormatSection
-          key={formatoApi}
-          title={nombrePlural(formatoApi)}
-          to={`/articulos?formato=${FORMATO_META[formatoApi].slug}`}
-          linkLabel={isFiltered ? `Ver los ${total}` : "Ver todas"}
-        >
-          {LAYOUTS[formatoApi](items)}
-        </FormatSection>
+        <Fragment key={formatoApi}>
+          <FormatSection
+            title={nombrePlural(formatoApi)}
+            to={`/articulos?formato=${FORMATO_META[formatoApi].slug}`}
+            linkLabel={isFiltered ? `Ver los ${total}` : "Ver todas"}
+          >
+            {LAYOUTS[formatoApi](items)}
+          </FormatSection>
+          {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
+        </Fragment>
       ))}
 
       <NewsletterBlock />

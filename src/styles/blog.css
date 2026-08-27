@@ -11827,3 +11827,28 @@ a.se-topics__chip:focus-visible {
   font-size: 11.5px;
   color: var(--se-gray-500);
 }
+
+/* —— Sin animaciones de entrada ——
+   El contenido estaba con `opacity: 0` y desplazado 16 px hasta que el observador
+   de scroll lo marcaba visible, y varias secciones además entraban con
+   `se-page-rise`. Se quita: al bajar, el texto aparecía en vez de estar, y en una
+   página de lectura eso distrae más de lo que aporta. Además deja el contenido a
+   la vista aunque el observador no llegue a dispararse.
+
+   Va al final de la hoja para ganar por orden, sin desactivar el observador: si
+   algún día se quiere volver, es borrar este bloque. */
+[class*="se-reveal"] > .se-container > *,
+[class*="se-reveal"] > .se-container > * > li,
+[class*="se-reveal"] > .se-container > * > * {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+.se-explorer,
+.se-piece,
+.se-articles__grid,
+[class*="se-reveal"] {
+  animation: none !important;
+}

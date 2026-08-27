@@ -1,8 +1,16 @@
 import { Link } from "react-router-dom";
-import { BRAND, PRIMARY_NAV, CONTACT } from "../data/surEconomicsMock";
+import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
+import { IconInstagram, IconX } from "./icons/social";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
 import { useState } from "react";
+
+/** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
+ *  salga un hueco con el nombre suelto rompiendo la fila. */
+const ICONO_RED = {
+  instagram: IconInstagram,
+  x: IconX,
+};
 
 export const Footer = () => {
   const { t } = useI18n();
@@ -98,9 +106,38 @@ export const Footer = () => {
         </div>
 
         <hr className="se-divider se-footer__divider" />
-        <p className="se-footer__copy">
-          © {new Date().getFullYear()} {BRAND.name}. Todos los derechos reservados.
-        </p>
+        <div className="se-footer__bottom">
+          <p className="se-footer__copy">
+            © {new Date().getFullYear()} {BRAND.name}. Todos los derechos reservados.
+          </p>
+
+          <div className="se-footer__social">
+            <span className="se-footer__social-title" id="se-footer-redes">
+              Redes sociales
+            </span>
+            <ul className="se-footer__social-list" aria-labelledby="se-footer-redes">
+              {SOCIAL.map(({ id, label, handle, url }) => {
+                const Icono = ICONO_RED[id];
+                if (!Icono) return null;
+                return (
+                  <li key={id}>
+                    <a
+                      className={`se-footer__social-link se-footer__social-link--${id}`}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${label}: ${handle}`}
+                      title={`${label} ${handle}`}
+                    >
+                      <Icono className="se-footer__social-svg" />
+                      <span className="se-sr-only">{`${label} ${handle}`}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
       </div>
     </footer>
   );

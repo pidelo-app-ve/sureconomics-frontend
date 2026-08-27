@@ -1338,6 +1338,116 @@
   margin: 0;
 }
 
+/* —— Redes sociales, al pie ——
+   El copyright y las redes comparten la franja de abajo: el copyright a la
+   izquierda, las cuentas a la derecha. En teléfono se apilan, con las redes
+   primero, porque es lo que se toca y el aviso legal no.
+
+   Verde en reposo y cobrizo al pasar por encima, no el color de cada red. En una
+   página que es verde y cobre de arriba abajo, un magenta de Instagram al pie
+   entra como una mancha; y estos dos son enlaces de identidad, no botones de
+   compartir. */
+.se-footer__bottom {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: var(--se-space-md);
+}
+
+@media (min-width: 720px) {
+  .se-footer__bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--se-space-lg);
+  }
+}
+
+.se-footer__social {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.se-footer__social-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-footer__social-list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.se-footer__social-link {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--se-tinte), 0.14);
+  background: #ffffff;
+  color: var(--marca-verde);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    color var(--se-transition),
+    border-color var(--se-transition),
+    background var(--se-transition),
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* El pie le cuelga una flecha a `.se-footer__link` con `::after`. Estos no llevan
+   esa clase, pero se deja dicho: un icono con una flecha detrás no es un icono. */
+.se-footer__social-link::after {
+  content: none;
+}
+
+.se-footer__social-svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+.se-footer__social-link:hover {
+  color: var(--marca-rojo);
+  border-color: rgba(185, 83, 42, 0.55);
+  background: rgba(185, 83, 42, 0.06);
+  transform: translateY(-2px);
+}
+
+.se-footer__social-link:focus-visible {
+  outline: 2px solid rgba(185, 83, 42, 0.65);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  /* 44 como el resto de los blancos táctiles del pie. */
+  .se-footer__social-link {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-footer__social-link {
+    transition: none;
+  }
+
+  .se-footer__social-link:hover {
+    transform: none;
+  }
+}
+
 @media (min-width: 1024px) {
   .se-footer__grid {
     grid-template-columns: 1.1fr 0.8fr 0.9fr 1fr;

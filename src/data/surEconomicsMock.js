@@ -276,6 +276,30 @@ export const CONTACT = {
   ],
 };
 
+/**
+ * Las cuentas del medio. Aquí y no dentro del pie: el enlace a una red se repite
+ * en cuanto haya una segunda barra que lo pida, y dos copias de una URL se
+ * desincronizan el día que cambie el nombre de usuario.
+ *
+ * Sin el `igsi` que trae el enlace copiado desde el aplicativo: es el
+ * identificador de esa sesión de compartir, no dice nada a quien llega desde el
+ * pie de la página.
+ */
+export const SOCIAL = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    handle: "@sur_economics",
+    url: "https://www.instagram.com/sur_economics",
+  },
+  {
+    id: "x",
+    label: "X",
+    handle: "@Sur_economics",
+    url: "https://x.com/Sur_economics",
+  },
+];
+
 export const SERVICES = [
   {
     id: "invest-market-research",

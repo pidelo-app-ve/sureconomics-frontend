@@ -29,7 +29,10 @@ Cuerpo.propTypes = { html: PropTypes.string };
  * where the whole piece is that voice.
  */
 const OpinionBlock = ({ titulo, html }) => (
-  <aside className="se-opinion">
+  // Sin cuerpo es solo una etiqueta -- el editorial lo usa así para marcar de qué
+  // formato es la pieza. Con el mismo relleno que cuando lleva texto quedaba una
+  // caja grande y vacía sobre el primer párrafo.
+  <aside className={`se-opinion${html ? "" : " se-opinion--marca"}`}>
     <p className="se-opinion__k">{titulo}</p>
     {html ? (
       <div className="se-opinion__body" dangerouslySetInnerHTML={{ __html: html }} />

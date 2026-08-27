@@ -11792,6 +11792,14 @@ a.se-topics__chip:focus-visible {
   color: var(--color-accent);
 }
 
+/* El bloque llevaba 4rem de margen superior, que era la separación que necesitaba
+   cuando iba *debajo* del artículo en una sola columna. Al lado solo lo empuja
+   hacia abajo y lo descuadra del primer párrafo. Arriba del todo, a la altura del
+   texto: son dos columnas que empiezan juntas. */
+.se-piece__aside .se-piece__related {
+  margin-top: 0;
+}
+
 /* —— La lista lateral de "también te puede interesar" ——
    `se-newslist` es una rejilla de tres columnas —lugar · titular · fecha— pensada
    para el ancho completo del pie de una pieza. Metida en una barra de 320 px, el

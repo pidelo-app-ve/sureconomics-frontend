@@ -3570,7 +3570,10 @@
   --se-form-placeholder: rgba(var(--se-tinte), 0.42);
   --se-form-focus: var(--color-accent);
   --se-form-focus-glow: rgba(185, 83, 42, 0.22);
-  --se-form-invalid: #ff4d6d;
+  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
+     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
+     paleta y encima se leia mal. */
+  --se-form-invalid: #8f3a17;
 }
 
 .se-contact .se-form-control {
@@ -3639,7 +3642,7 @@
 }
 
 .se-contact__banner--error {
-  border-color: rgba(255, 77, 109, 0.32);
+  border-color: rgba(185, 83, 42, 0.32);
   background: rgba(185, 83, 42, 0.16);
   color: #ffd6dc;
 }
@@ -4837,11 +4840,13 @@ a.se-topics__chip:focus-visible {
 .se-admin-login__error {
   font-family: var(--se-font-ui);
   font-size: var(--se-text-small);
-  color: #8b2942;
+  /* Cobrizo de la marca, no el granate rosado que traia de antes del brandbook. */
+  color: var(--adm-err, #8f3a17);
   margin-bottom: var(--se-space-md);
   padding: var(--se-space-sm) var(--se-space-md);
-  background: #fbeff2;
-  border: 1px solid #e9c2cb;
+  background: var(--adm-err-bg, rgba(185, 83, 42, 0.09));
+  border: 1px solid var(--adm-err-border, rgba(185, 83, 42, 0.34));
+  border-left: 3px solid var(--marca-rojo);
   border-radius: 8px;
 }
 
@@ -4862,7 +4867,10 @@ a.se-topics__chip:focus-visible {
   --se-form-placeholder: rgba(var(--se-tinte), 0.45);
   --se-form-focus: var(--color-accent);
   --se-form-focus-glow: rgba(185, 83, 42, 0.22);
-  --se-form-invalid: #ff4d6d;
+  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
+     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
+     paleta y encima se leia mal. */
+  --se-form-invalid: #8f3a17;
 }
 
 .se-reader-auth__shell {
@@ -4927,8 +4935,8 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-reader-auth .se-form-control[aria-invalid="true"] {
-  background-color: rgba(255, 77, 109, 0.08);
-  border-color: rgba(255, 77, 109, 0.42);
+  background-color: rgba(185, 83, 42, 0.08);
+  border-color: rgba(185, 83, 42, 0.42);
 }
 
 .se-reader-auth .se-form-label {
@@ -4984,8 +4992,8 @@ a.se-topics__chip:focus-visible {
   color: rgba(var(--se-tinte), 0.92);
   margin-bottom: var(--se-space-md);
   padding: 0.85rem 0.95rem;
-  background: rgba(255, 77, 109, 0.14);
-  border: 1px solid rgba(255, 77, 109, 0.28);
+  background: rgba(185, 83, 42, 0.14);
+  border: 1px solid rgba(185, 83, 42, 0.28);
   border-radius: 12px;
 }
 
@@ -5020,7 +5028,10 @@ a.se-topics__chip:focus-visible {
   --se-form-placeholder: rgba(var(--se-tinte), 0.45);
   --se-form-focus: var(--color-accent);
   --se-form-focus-glow: rgba(185, 83, 42, 0.22);
-  --se-form-invalid: #ff4d6d;
+  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
+     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
+     paleta y encima se leia mal. */
+  --se-form-invalid: #8f3a17;
 }
 
 .se-backoffice-auth__shell {
@@ -5157,8 +5168,8 @@ a.se-topics__chip:focus-visible {
   color: rgba(var(--se-tinte), 0.92);
   margin-bottom: var(--se-space-md);
   padding: 0.85rem 0.95rem;
-  background: rgba(255, 77, 109, 0.14);
-  border: 1px solid rgba(255, 77, 109, 0.28);
+  background: rgba(185, 83, 42, 0.14);
+  border: 1px solid rgba(185, 83, 42, 0.28);
   border-radius: 12px;
 }
 
@@ -5210,6 +5221,22 @@ a.se-topics__chip:focus-visible {
 
   --adm-accent: var(--adm-red);
   --adm-accent-soft: rgba(185, 83, 42, 0.22);
+
+  /* —— Avisos ——
+     No habia tokens para esto y cada aviso traia su color a mano, heredado del panel
+     oscuro: el de exito era menta palido (#b9f0cf) sobre un verde al 12 %, que sobre
+     blanco es 1,4:1 -- se guardaba y no se apreciaba nada. El de error venia del tema
+     oscuro en rosa palido.
+
+     Verde para lo que salio bien y cobrizo para lo que no, que son los dos colores de
+     la marca. El cobrizo tambien es el acento de los botones, asi que el error se
+     distingue por el filo y el icono, no solo por el color. */
+  --adm-ok: #00522a;
+  --adm-ok-bg: rgba(0, 82, 42, 0.08);
+  --adm-ok-border: rgba(0, 82, 42, 0.3);
+  --adm-err: #8f3a17;
+  --adm-err-bg: rgba(185, 83, 42, 0.09);
+  --adm-err-border: rgba(185, 83, 42, 0.34);
 
   --adm-canvas: var(--adm-ink-2);
   --adm-surface: #ffffff;
@@ -5283,10 +5310,17 @@ a.se-topics__chip:focus-visible {
   border-color: rgba(255, 180, 180, 0.65);
 }
 
+/* Esta era la que ganaba dentro del panel: rosa palido al 95 % sobre un fondo al
+   12 %, escrita para un lienzo negro. Sobre el panel blanco de ahora el texto
+   desaparecia -- el aviso salia y no se leia. */
 .se-admin-app .se-admin-login__error {
-  color: rgba(255, 230, 232, 0.95);
-  background: rgba(255, 77, 109, 0.12);
-  border-color: rgba(255, 77, 109, 0.32);
+  color: var(--adm-err);
+  background: var(--adm-err-bg);
+  border-color: var(--adm-err-border);
+  /* El filo izquierdo, otra vez solido: `border-color` de esta misma regla pisaba el
+     `border-left` de la base y lo dejaba translucido como los otros tres lados, asi
+     que el error no se distinguia del exito mas que por el tono del texto. */
+  border-left-color: var(--marca-rojo);
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
 }
 
@@ -5489,7 +5523,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-image-preview__hint--error {
-  color: var(--se-form-invalid, #ff4d6d);
+  color: var(--se-form-invalid, #8f3a17);
 }
 
 /* —— Featured image: URL vs. upload —— */
@@ -5601,7 +5635,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-image-field__alert--error {
-  color: var(--se-form-invalid, #ff4d6d);
+  color: var(--se-form-invalid, #8f3a17);
 }
 
 .se-image-field__alert--ok {
@@ -5639,7 +5673,7 @@ a.se-topics__chip:focus-visible {
   font-family: var(--se-font-ui);
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--se-form-invalid, #ff4d6d);
+  color: var(--se-form-invalid, #8f3a17);
   text-decoration: underline;
 }
 
@@ -5743,8 +5777,8 @@ a.se-topics__chip:focus-visible {
   margin: 0.85rem 0 0;
   padding: 0.75rem 0.85rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 77, 109, 0.28);
-  background: rgba(255, 77, 109, 0.12);
+  border: 1px solid rgba(185, 83, 42, 0.28);
+  background: rgba(185, 83, 42, 0.12);
   color: rgba(var(--se-tinte), 0.92);
 }
 
@@ -6798,9 +6832,9 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-app .se-admin-submissions__status--rejected {
-  background: rgba(255, 77, 109, 0.12);
+  background: rgba(185, 83, 42, 0.12);
   color: rgba(var(--se-tinte), 0.92);
-  border: 1px solid rgba(255, 77, 109, 0.28);
+  border: 1px solid rgba(185, 83, 42, 0.28);
 }
 
 .se-admin-app .se-status-pill--neutral {
@@ -6822,9 +6856,9 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-app .se-status-pill--negative {
-  background: rgba(255, 77, 109, 0.12);
+  background: rgba(185, 83, 42, 0.12);
   color: rgba(var(--se-tinte), 0.92);
-  border: 1px solid rgba(255, 77, 109, 0.28);
+  border: 1px solid rgba(185, 83, 42, 0.28);
 }
 
 @keyframes se-adm-submission-rise {
@@ -7279,13 +7313,14 @@ a.se-topics__chip:focus-visible {
   line-height: 1.5;
 }
 
-/* Errors reuse `.se-admin-login__error`, which already brings its own box. */
+/* Los errores reutilizan `.se-admin-login__error`, que ya trae su propia caja. */
 .se-admin-form-feedback--ok {
   padding: var(--se-space-sm) var(--se-space-md);
   border-radius: 8px;
-  color: #b9f0cf;
-  background: rgba(46, 204, 113, 0.12);
-  border: 1px solid rgba(46, 204, 113, 0.32);
+  color: var(--adm-ok, #00522a);
+  background: var(--adm-ok-bg, rgba(0, 82, 42, 0.08));
+  border: 1px solid var(--adm-ok-border, rgba(0, 82, 42, 0.3));
+  border-left: 3px solid var(--adm-ok, #00522a);
 }
 
 /* —— Admin: avisos flotantes (toasts) ——
@@ -7313,7 +7348,9 @@ a.se-topics__chip:focus-visible {
   border-radius: var(--adm-radius-md, 14px);
   border: 1px solid var(--adm-border, rgba(var(--se-tinte), 0.1));
   background: #f2f2f0;
-  box-shadow: var(--adm-shadow-md, 0 18px 44px rgba(0, 0, 0, 0.55));
+  /* Sombra de papel. La de antes era negro al 55 %, pensada para brillar sobre un
+     lienzo negro; sobre el panel blanco parecia una mancha. */
+  box-shadow: var(--adm-shadow-md, 0 14px 34px rgba(0, 51, 24, 0.16));
   animation: se-adm-toast-in 0.24s var(--adm-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
 }
 
@@ -7347,12 +7384,15 @@ a.se-topics__chip:focus-visible {
   color: #ffffff;
 }
 
+/* Verde de la marca, no el esmeralda plano de antes: era el unico color del panel
+   que no salia del brandbook. */
 .se-adm-toast--success {
-  border-left: 3px solid #2ecc71;
+  border-left: 3px solid var(--adm-ok, #00522a);
 }
 
 .se-adm-toast--success .se-adm-toast__icon {
-  background: #2ecc71;
+  background: var(--adm-ok, #00522a);
+  color: #ffffff;
 }
 
 .se-adm-toast--error {
@@ -7361,15 +7401,18 @@ a.se-topics__chip:focus-visible {
 
 .se-adm-toast--error .se-adm-toast__icon {
   background: var(--adm-red, #b9532a);
-  color: #fff;
+  color: #ffffff;
 }
 
 .se-adm-toast--info {
-  border-left: 3px solid rgba(var(--se-tinte), 0.42);
+  border-left: 3px solid var(--marca-verde);
 }
 
+/* El icono iba en blanco al 72 % sobre un aviso que ya es casi blanco: no se veia el
+   icono ni el simbolo de dentro. */
 .se-adm-toast--info .se-adm-toast__icon {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--marca-verde);
+  color: #ffffff;
 }
 
 .se-adm-toast__body {

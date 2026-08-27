@@ -11620,3 +11620,76 @@ a.se-topics__chip:focus-visible {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.4);
 }
+
+/* —— La firma de una pieza ——
+   "POR" en cobre, el nombre en grueso, una regla vertical y la fecha con su icono,
+   como el brandbook la dibuja.
+
+   Sin retrato de la persona, y es una decisión editorial: conseguir y mantener una
+   fotografía por cada firmante cuesta más de lo que aporta. Cuando firma la casa sí
+   va el isotipo, que es un archivo y no cien. */
+.se-firma {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.se-firma__marca {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+}
+
+.se-firma__quien {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.se-firma__por {
+  font-family: var(--se-font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-firma__nombre {
+  font-family: var(--se-font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--se-black);
+}
+
+.se-firma__rol {
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+/* La regla vertical del brandbook. Va en el borde y no como elemento propio, así
+   desaparece sola cuando la firma envuelve a dos líneas en pantalla estrecha. */
+.se-firma__cuando {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--color-hairline);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+.se-firma__cal {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 560px) {
+  .se-firma__cuando {
+    padding-left: 0;
+    border-left: none;
+  }
+}

@@ -4,7 +4,7 @@ import { BRAND } from "../data/surEconomicsMock";
 import { applyPageMeta } from "../lib/seo";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
-import { PieceBody, PieceTags, RelatedPieces } from "../components/piece";
+import { PieceBody, PieceByline, PieceTags, RelatedPieces } from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
 import { FORMATO_META, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
@@ -131,9 +131,12 @@ export const Pieza = () => {
             <h1 className="se-piece__title">{pieza.titulo}</h1>
 
             <div className="se-piece__meta">
-              {pieza.fecha ? <time className="se-piece__date">{pieza.fecha}</time> : null}
-              {pieza.autor ? <span>Por {pieza.autor}</span> : null}
-              {pieza.unidad ? <span>Investigación de {pieza.unidad}</span> : null}
+              <PieceByline
+                autor={pieza.autor}
+                fecha={pieza.fecha}
+                unidad={pieza.unidad}
+                esEditorial={pieza.formato === "Editorial"}
+              />
               <ShareButtons url={canonica} title={pieza.titulo} className="se-piece__share" />
             </div>
 

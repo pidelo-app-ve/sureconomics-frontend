@@ -37,8 +37,10 @@ export const getAdminPost = async (postId) => unwrapEntity(await adminRequest(`/
 /**
  * @param {Record<string, unknown>} body
  */
-export const createAdminPost = async (body) =>
-    unwrapEntity(await adminRequest("/admin/posts", { method: "POST", json: body }));
+export const createAdminPost = async (body, idempotencyKey) =>
+    unwrapEntity(
+        await adminRequest("/admin/posts", { method: "POST", json: body, idempotencyKey }),
+    );
 
 /**
  * @param {string|number} postId

@@ -66,6 +66,7 @@ export const createApiClient = ({
    *   query?: Record<string, unknown>,
    *   json?: unknown,
    *   headers?: Record<string, string>,
+   *   idempotencyKey?: string,
    *   signal?: AbortSignal,
    * }} [options]
    */
@@ -77,6 +78,12 @@ export const createApiClient = ({
       ...defaultHeaders,
       ...(options.headers ?? {}),
     };
+
+    // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
+    // crear otra cosa. Ver `lib/idempotencia.js`.
+    if (options.idempotencyKey) {
+      headers["Idempotency-Key"] = options.idempotencyKey;
+    }
 
     let body;
     if (options.json !== undefined) {

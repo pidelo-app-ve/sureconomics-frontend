@@ -46,7 +46,7 @@ const throwFromPayload = (res, payload) => {
  * @param {RequestInit & { token?: string, json?: unknown, query?: Record<string, unknown> }} [options]
  */
 const rawFetch = async (path, options = {}) => {
-    const { token, json, headers: initHeaders, body, query, ...rest } = options;
+    const { token, json, headers: initHeaders, body, query, idempotencyKey, ...rest } = options;
     const url = buildUrl(path, query);
 
     const headers = { ...initHeaders };
@@ -55,6 +55,11 @@ const rawFetch = async (path, options = {}) => {
     }
     if (token) {
         headers.Authorization = `Bearer ${token}`;
+    }
+    // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
+    // crear otra cosa. Ver `lib/idempotencia.js`.
+    if (idempotencyKey) {
+        headers["Idempotency-Key"] = idempotencyKey;
     }
 
     const res = await fetch(url, {

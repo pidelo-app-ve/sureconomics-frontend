@@ -15,10 +15,11 @@ export const addBookmark = (postId) =>
 export const removeBookmark = (postId) =>
   userRequest(`/posts/${encodeURIComponent(postId)}/bookmark`, { method: "DELETE" });
 
-export const postComment = (slug, content) =>
+export const postComment = (slug, content, idempotencyKey) =>
   userRequest(`/posts/${encodeURIComponent(slug)}/comments`, {
     method: "POST",
     json: { content },
+    idempotencyKey,
   });
 
 export const listMySubmissions = async (params = {}) => {
@@ -29,7 +30,7 @@ export const listMySubmissions = async (params = {}) => {
   return normalizePaginatedSubmissions(data);
 };
 
-export const createSubmission = (payload) =>
+export const createSubmission = (payload, idempotencyKey) =>
   userRequest("/me/submissions", {
     method: "POST",
     json: {
@@ -42,6 +43,7 @@ export const createSubmission = (payload) =>
       content: payload.content,
       featured_image_url: payload.featured_image_url ?? payload.featuredImageUrl ?? "",
     },
+    idempotencyKey,
   });
 
 export const getSubmissionById = async (id) => {

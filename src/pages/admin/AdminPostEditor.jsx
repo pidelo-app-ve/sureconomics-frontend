@@ -32,6 +32,7 @@ import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 
 /**
  * Which extra fields each format asks for.
@@ -226,6 +227,12 @@ export const AdminPostEditor = () => {
     const [assets, setAssets] = useState({ image: null, video: null, document: null });
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
+    // La misma clave mientras la creación no cuaje. El caso que evita: se pulsa Crear,
+    // la pieza se guarda, la respuesta se pierde por el camino, y quien escribe -- que
+    // solo ve un error -- vuelve a pulsar. Sin esto acaba con dos piezas iguales en el
+    // listado y sin saber cuál borrar. Al cuajar se navega al editor de la pieza nueva,
+    // así que no hace falta renovarla.
+    const { clave: claveDeCreacion } = useClaveIdempotente();
     const [actionState, setActionState] = useState({ status: "idle", message: "", kind: "" });
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
@@ -324,7 +331,7 @@ export const AdminPostEditor = () => {
         try {
             const payload = formToPayload(form);
             if (isCreate) {
-                const created = await createAdminPost(payload);
+                const created = await createAdminPost(payload, claveDeCreacion());
                 const newId = created?.id ?? null;
                 // Same reason: no gendered adjective on a name that comes from data.
                 const label = currentFormat?.name ?? "La pieza";

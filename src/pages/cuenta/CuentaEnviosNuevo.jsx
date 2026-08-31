@@ -4,6 +4,7 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import * as userMeService from "../../services/userMeService";
 import { SubmissionForm } from "../../components/submissions/SubmissionForm";
+import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 
 export const CuentaEnviosNuevo = () => {
   const navigate = useNavigate();
@@ -11,6 +12,9 @@ export const CuentaEnviosNuevo = () => {
   const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // La misma clave mientras el envío no cuaje: si la respuesta se pierde por el camino
+  // y la persona vuelve a pulsar, no acaba con dos propuestas iguales a revisión.
+  const { clave } = useClaveIdempotente();
 
   useEffect(() => {
     applyPageMeta({
@@ -25,13 +29,16 @@ export const CuentaEnviosNuevo = () => {
     setErrorMessage("");
     setIsSubmitting(true);
     try {
-      const created = await userMeService.createSubmission({
-        format: values.format,
-        title: values.title,
-        excerpt: values.excerpt,
-        content: values.content,
-        featured_image_url: values.featuredImageUrl,
-      });
+      const created = await userMeService.createSubmission(
+        {
+          format: values.format,
+          title: values.title,
+          excerpt: values.excerpt,
+          content: values.content,
+          featured_image_url: values.featuredImageUrl,
+        },
+        clave(),
+      );
       const id =
         created?.id ??
         created?.submission_id ??

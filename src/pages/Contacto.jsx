@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CONTACT } from "../data/surEconomicsMock";
 import { Link, useSearchParams } from "react-router-dom";
 import { contactService } from "../services/contactService";
+import { useClaveIdempotente } from "../hooks/useClaveIdempotente";
 
 export const Contacto = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +15,10 @@ export const Contacto = () => {
     message: "",
   });
   const [submitState, setSubmitState] = useState({ status: "idle", message: "" });
+  // La misma clave mientras el envío no cuaje: si la respuesta se pierde y la persona
+  // vuelve a pulsar, el servidor devuelve la de la primera vez en lugar de guardar el
+  // mensaje dos veces. Ver `lib/idempotencia.js`.
+  const { clave, renovar } = useClaveIdempotente();
 
   const handleChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -24,9 +29,11 @@ export const Contacto = () => {
     if (submitState.status === "loading") return;
     setSubmitState({ status: "loading", message: "" });
     try {
-      await contactService.submitContactMessage(form);
+      await contactService.submitContactMessage(form, { idempotencyKey: clave() });
       setSubmitState({ status: "success", message: "Gracias por escribirnos. Le responderemos a la brevedad." });
       setForm({ name: "", email: "", subject: "", message: "" });
+      // Cuajó: lo que venga después es un mensaje nuevo, no un reintento.
+      renovar();
     } catch (err) {
       const tooMany = err?.status === 429;
       setSubmitState({

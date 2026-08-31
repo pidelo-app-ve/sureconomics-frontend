@@ -17,7 +17,7 @@ const ensureClient = (client) => {
 export const contactService = {
   /**
    * @param {{ name: string, email: string, subject: string, message: string }} form
-   * @param {{ client?: { request: Function } }} [opts]
+   * @param {{ client?: { request: Function }, idempotencyKey?: string }} [opts]
    */
   async submitContactMessage(form, opts = {}) {
     const client = ensureClient(opts.client);
@@ -29,6 +29,7 @@ export const contactService = {
         subject: form.subject,
         message: form.message,
       },
+      idempotencyKey: opts.idempotencyKey,
     });
   },
 };

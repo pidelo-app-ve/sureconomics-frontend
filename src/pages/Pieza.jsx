@@ -159,6 +159,7 @@ export const Pieza = () => {
             <div className="se-piece__meta">
               <PieceByline
                 autor={pieza.autor}
+                autorFoto={pieza.autorFoto}
                 fecha={pieza.fecha}
                 unidad={pieza.unidad}
                 esEditorial={pieza.formato === "Editorial"}

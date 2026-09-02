@@ -11816,6 +11816,37 @@ a.se-topics__chip:focus-visible {
   flex: 0 0 auto;
 }
 
+/* El retrato de quien firma. Del mismo tamano que el isotipo a proposito: asi la
+   firma mide lo mismo la lleve una persona o la casa, y el titular de arriba no se
+   mueve entre una pieza y la siguiente. */
+.se-firma__retrato {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  /* Un aro finisimo. Sin el, una foto de fondo claro se derrama en la pagina y deja
+     de leerse como retrato. */
+  box-shadow: 0 0 0 1px var(--color-hairline);
+  background: rgba(var(--se-tinte), 0.05);
+}
+
+/* La silueta, cuando firma una persona de la que no hay foto. Ocupa exactamente el
+   mismo hueco: si midiera menos, la firma daria un salto entre una pieza con retrato
+   y otra sin el, que es justo lo que se nota y molesta al bajar por un listado. */
+.se-firma__silueta {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--se-gray-500);
+  background: rgba(var(--se-tinte), 0.05);
+  box-shadow: 0 0 0 1px var(--color-hairline);
+}
+
 .se-firma__quien {
   display: flex;
   flex-direction: column;
@@ -12345,4 +12376,186 @@ a.se-topics__chip:focus-visible {
   .se-header__logo {
     height: 26px;
   }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   El retrato de la firma en el panel: el buscador, y la etiqueta en la biblioteca.
+
+   El buscador se ve como una tarjeta y no como un campo mas porque no lo es: se
+   entra a el a elegir de entre lo que ya existe, que es la operacion que hace que
+   una foto se suba una vez y sirva para cien piezas.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.se-retrato__hint {
+  margin: 0 0 0.75rem;
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+.se-retrato__actual {
+  display: flex;
+  /* Arriba y no centrado: el campo de la etiqueta hace alto la fila, y un "Quitar"
+     centrado quedaria flotando al lado de nada. Es el mismo motivo por el que se
+     corrigio en `.se-asset__current`. */
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin-bottom: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--adm-border);
+  border-left: 3px solid var(--color-green);
+  border-radius: 10px;
+  background: rgba(var(--se-tinte), 0.04);
+}
+
+.se-retrato__foto {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--color-hairline);
+  background: rgba(var(--se-tinte), 0.06);
+}
+
+.se-retrato__datos {
+  flex: 1 1 auto;
+  /* Sin esto, un nombre de archivo largo estira la tarjeta y empuja el boton fuera. */
+  min-width: 0;
+}
+
+.se-retrato__nombre {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--adm-text);
+  overflow-wrap: anywhere;
+}
+
+.se-retrato__fila {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.se-retrato__fila .se-form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.se-retrato__ok {
+  margin: 0.4rem 0 0;
+  font-size: var(--se-text-small);
+  color: var(--adm-ok, #00522a);
+}
+
+.se-retrato__vacio,
+.se-retrato__nota {
+  margin: 0 0 0.75rem;
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+.se-retrato__error {
+  margin: 0.6rem 0 0;
+  font-size: var(--se-text-small);
+  color: var(--adm-err, #8f3a17);
+}
+
+.se-retrato__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.se-retrato__buscador {
+  margin-top: 0.85rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  background: rgba(var(--se-tinte), 0.03);
+}
+
+.se-retrato__lista {
+  display: grid;
+  /* Se ajustan solas al ancho del panel: en una columna estrecha caben dos, y en el
+     escritorio cuatro o cinco. Un numero fijo obligaria a un punto de ruptura por
+     cada sitio donde el campo puede vivir. */
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-retrato__opcion {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  background: var(--se-white, #fff);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.se-retrato__opcion img {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(var(--se-tinte), 0.06);
+}
+
+.se-retrato__opcion:hover,
+.se-retrato__opcion:focus-visible {
+  border-color: var(--color-green);
+  background: rgba(var(--se-tinte), 0.05);
+}
+
+/* La que ya esta puesta se marca, para no volver a elegirla creyendo que se cambia. */
+.se-retrato__opcion--puesta {
+  border-color: var(--color-green);
+  border-left-width: 3px;
+}
+
+.se-retrato__opcion-nombre {
+  min-width: 0;
+  font-size: var(--se-text-small);
+  overflow-wrap: anywhere;
+}
+
+/* ── la biblioteca ── */
+
+/* La miniatura en la lista de archivos. Una foto sin etiqueta no se puede etiquetar
+   si no se ve quien sale en ella, y etiquetar lo ya subido es el primer trabajo que
+   hay que hacer para que el buscador sirva de algo. */
+.se-media-mini {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  background: rgba(var(--se-tinte), 0.06);
+}
+
+.se-media-etiqueta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 160px;
+}
+
+.se-media-etiqueta .se-form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.se-media-etiqueta__error {
+  font-size: var(--se-text-small);
+  color: var(--adm-err, #8f3a17);
 }

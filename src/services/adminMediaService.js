@@ -11,12 +11,21 @@ import { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
  * video we host ourselves.
  */
 
+/**
+ * The library, optionally narrowed by a needle.
+ *
+ * `q` matches the label, the original filename and the credit. The last two are what
+ * make the byline-photo picker usable on day one: nothing uploaded before the label
+ * column existed carries a label, and without them the whole existing library would
+ * be unsearchable.
+ */
 export const listAdminMedia = async (params = {}) => {
   const raw = await adminRequest("/admin/media", {
     query: {
       page: params.page ?? 1,
       limit: params.limit ?? 24,
       kind: params.kind || undefined,
+      q: params.q?.trim() || undefined,
     },
   });
   return unwrapListResponse(raw);

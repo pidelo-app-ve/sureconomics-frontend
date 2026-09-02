@@ -24,6 +24,7 @@ import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { AxisPicker } from "../../components/admin/AxisPicker";
 import { AssetField } from "../../components/admin/AssetField";
+import { BylinePhotoField } from "../../components/admin/BylinePhotoField";
 import { SourcesField } from "../../components/admin/SourcesField";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
@@ -107,6 +108,7 @@ const emptyForm = () => ({
     image_asset_id: null,
     video_asset_id: null,
     document_asset_id: null,
+    byline_photo_asset_id: null,
 });
 
 const idsFromRelation = (val) => {
@@ -162,6 +164,7 @@ const postToForm = (post) => {
         image_asset_id: post.image_asset_id ?? null,
         video_asset_id: post.video_asset_id ?? null,
         document_asset_id: post.document_asset_id ?? null,
+        byline_photo_asset_id: post.byline_photo_asset_id ?? null,
     };
 };
 
@@ -203,6 +206,7 @@ const formToPayload = (form) => {
     payload.image_asset_id = form.image_asset_id ?? null;
     payload.video_asset_id = form.video_asset_id ?? null;
     payload.document_asset_id = form.document_asset_id ?? null;
+    payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
 
     Object.keys(payload).forEach((k) => {
         if (payload[k] === undefined) delete payload[k];
@@ -224,7 +228,7 @@ export const AdminPostEditor = () => {
     const [formats, setFormats] = useState([]);
     const [topics, setTopics] = useState([]);
     const [placeGroups, setPlaceGroups] = useState([]);
-    const [assets, setAssets] = useState({ image: null, video: null, document: null });
+    const [assets, setAssets] = useState({ image: null, video: null, document: null, bylinePhoto: null });
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
     // La misma clave mientras la creación no cuaje. El caso que evita: se pulsa Crear,
@@ -262,7 +266,7 @@ export const AdminPostEditor = () => {
             // on the right form instead of picking the format twice.
             const requested = searchParams.get("format") || "";
             setForm({ ...emptyForm(), format: requested });
-            setAssets({ image: null, video: null, document: null });
+            setAssets({ image: null, video: null, document: null, bylinePhoto: null });
             setLoadState({ status: "success", error: null });
             return;
         }
@@ -274,6 +278,7 @@ export const AdminPostEditor = () => {
                 image: post.image_asset ?? null,
                 video: post.video_asset ?? null,
                 document: post.document_asset ?? null,
+                bylinePhoto: post.byline_photo ?? null,
             });
             setLoadState({ status: "success", error: null });
         } catch (err) {
@@ -540,22 +545,36 @@ export const AdminPostEditor = () => {
                             the site, and an editor rarely publishes under their
                             own name. */}
                         {currentFormat?.shows_author !== false ? (
-                            <label className="se-form-field" htmlFor="post-byline">
-                                <span className="se-form-label">
-                                    Firma — nombre con el que se publica
-                                </span>
-                                <input
-                                    id="post-byline"
-                                    className="se-form-control"
-                                    value={form.byline}
-                                    onChange={handleChange("byline")}
-                                    placeholder="Pablo Quintero, Redacción SurEconomics, …"
+                            <>
+                                <label className="se-form-field" htmlFor="post-byline">
+                                    <span className="se-form-label">
+                                        Firma — nombre con el que se publica
+                                    </span>
+                                    <input
+                                        id="post-byline"
+                                        className="se-form-control"
+                                        value={form.byline}
+                                        onChange={handleChange("byline")}
+                                        placeholder="Pablo Quintero, Redacción SurEconomics, …"
+                                    />
+                                    <span className="se-admin-meta-hint">
+                                        Si lo deja vacío, la pieza se publica sin firma. No se usa el
+                                        nombre de la cuenta.
+                                    </span>
+                                </label>
+
+                                {/* Dentro de la misma condición que la firma, y no al
+                                    lado de las otras tres adjunciones: un formato que no
+                                    muestra autor no tiene a quién retratar, y el campo
+                                    necesita leer el nombre de arriba para precargar la
+                                    búsqueda. */}
+                                <BylinePhotoField
+                                    value={form.byline_photo_asset_id}
+                                    asset={assets.bylinePhoto}
+                                    byline={form.byline}
+                                    onChange={setAsset("byline_photo_asset_id", "bylinePhoto")}
                                 />
-                                <span className="se-admin-meta-hint">
-                                    Si lo deja vacío, la pieza se publica sin firma. No se usa el
-                                    nombre de la cuenta.
-                                </span>
-                            </label>
+                            </>
                         ) : null}
 
                         <SourcesField

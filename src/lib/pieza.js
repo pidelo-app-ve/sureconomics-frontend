@@ -256,6 +256,15 @@ export const piezaFromApi = (row) => {
     // doing it every time somebody left the field empty, which is exactly what the
     // newsroom asked to stop. No byline means no byline shown.
     autor: row.content_format?.shows_author === false ? null : row.byline || null,
+    // El retrato de quien firma, cuando la redacción eligió uno de la biblioteca. Va
+    // atado a la pieza y no a una cuenta, así que la misma foto llega igual a todas las
+    // piezas que esa persona firme. Nulo es el caso normal y no un dato que falte: la
+    // firma se dibuja entonces con un icono de persona.
+    //
+    // Se calla en los formatos que no muestran autor, por la misma razón que el nombre:
+    // un retrato sin firma al lado no es nada.
+    autorFoto:
+      row.content_format?.shows_author === false ? null : row.byline_photo?.url || null,
     entrevistado: row.interviewee || null,
     entrevistadoCargo: row.interviewee_role || null,
     unidad: row.unit || null,

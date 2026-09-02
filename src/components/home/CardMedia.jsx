@@ -47,7 +47,9 @@ export const CardMedia = ({ pieza, ancho, etiqueta }) => {
       <img
         className="se-artcard__img"
         src={imagenAncho(pieza.imagenUrl, ancho)}
-        srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS) ?? undefined}
+        // El ancho original decide qué tallas existen en nuestro bucket. Para
+        // Cloudinary se ignora: allí los anchos los calcula el servidor.
+        srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
         sizes={SIZES}
         alt=""
         loading="lazy"

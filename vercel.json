@@ -15,8 +15,17 @@
     ],
     "rewrites": [
         {
+            "source": "/media/:ruta*",
+            "destination": "https://sureconomics-backend.onrender.com/media/:ruta*"
+        },
+        {
             "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
-            "has": [{ "type": "query", "key": "_s" }],
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
             "destination": "/index.html"
         },
         {

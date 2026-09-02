@@ -191,3 +191,77 @@ export const userRequest = async (path, options = {}) => {
 
   return unwrapUserResponseData(payload);
 };
+
+/**
+ * Descarga un archivo protegido con la sesión del lector.
+ *
+ * Hace falta porque `window.open` no manda cabeceras: el token se queda fuera y el
+ * servidor contesta 401. Así que se pide con `fetch`, que sí lo lleva, y los bytes se
+ * entregan al navegador como una descarga normal.
+ *
+ * Es el mismo patrón de blob que usan los otros sistemas del equipo con R2, y por la
+ * misma razón: los permisos los decide la aplicación en cada petición, no una firma en
+ * la dirección que cualquiera podría reenviar.
+ *
+ * Refresca el token una vez si venció, igual que `userRequest`.
+ */
+export const descargarArchivoDeUsuario = async (path, { nombreSugerido } = {}) => {
+  if (!API_BASE) {
+    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
+  }
+
+  const { refreshToken, accessExpiresAt } = readUserAuth();
+  if (refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
+    try {
+      await refreshUserTokens();
+    } catch {
+      /* continue */
+    }
+  }
+
+  const pedir = () =>
+    fetch(`${API_BASE}${path.startsWith("/") ? path : `/${path}`}`, {
+      headers: { Authorization: `Bearer ${readUserAuth().accessToken}` },
+    });
+
+  if (!readUserAuth().accessToken) {
+    throw new ApiError("Debe iniciar sesión", { status: 401 });
+  }
+
+  let res = await pedir();
+  if (res.status === 401 && readUserAuth().refreshToken) {
+    try {
+      await refreshUserTokens();
+      res = await pedir();
+    } catch {
+      /* se maneja abajo */
+    }
+  }
+
+  if (!res.ok) {
+    // El cuerpo de un error sí es JSON; el de un acierto son bytes.
+    const payload = await res.json().catch(() => ({}));
+    throwFromPayload(res, payload ?? {});
+  }
+
+  const blob = await res.blob();
+  // El nombre lo pone el servidor en `Content-Disposition`; si no llega, el sugerido.
+  const cabecera = res.headers.get("Content-Disposition") || "";
+  const enCabecera = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cabecera);
+  const nombre = (enCabecera && decodeURIComponent(enCabecera[1])) || nombreSugerido || "descarga";
+
+  const objeto = URL.createObjectURL(blob);
+  try {
+    const enlace = document.createElement("a");
+    enlace.href = objeto;
+    enlace.download = nombre;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+  } finally {
+    // Sin esto el blob se queda en memoria hasta que se recargue la página, y un
+    // informe de veinte megas se nota.
+    setTimeout(() => URL.revokeObjectURL(objeto), 1000);
+  }
+  return { nombre, bytes: blob.size };
+};

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { PlaceholderImage } from "../blog";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
+import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
 import { imagenAncho } from "../../lib/pieza";
 
@@ -177,7 +178,15 @@ const DownloadGate = ({ pieza }) => {
         setState({ status: "error", error: "Este informe todavía no tiene archivo cargado." });
         return;
       }
-      window.open(doc.url, "_blank", "noopener,noreferrer");
+      // Dos caminos según dónde viva el archivo, y quien llama no tiene que saberlo:
+      // una dirección relativa es un endpoint nuestro y necesita el token, así que se
+      // baja con `fetch`; una absoluta es Cloudinary y se abre tal cual, como siempre.
+      // `window.open` no manda cabeceras, así que con la relativa daría 401.
+      if (doc.url.startsWith("/")) {
+        await descargarArchivoDeUsuario(doc.url, { nombreSugerido: doc.filename });
+      } else {
+        window.open(doc.url, "_blank", "noopener,noreferrer");
+      }
       setState({ status: "idle", error: "" });
     } catch (err) {
       setState({

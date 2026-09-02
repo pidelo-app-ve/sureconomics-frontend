@@ -51,7 +51,7 @@ export const EditorialDelDia = ({ pieza }) => {
               <img
                 className="se-eddia__img"
                 src={imagenAncho(pieza.imagenUrl, 1200)}
-                srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS) ?? undefined}
+                srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
                 sizes={SIZES}
                 alt=""
                 loading="lazy"

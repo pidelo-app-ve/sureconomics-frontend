@@ -155,8 +155,43 @@ export const imagenAncho = (url, ancho) => {
  * Devuelve nulo cuando no hay nada que elegir -- una URL ajena o ya transformada no
  * se puede reescalar -- y un `srcset` nulo simplemente no se pinta.
  */
-export const imagenSrcSet = (url, anchos) => {
-  if (!url || !anchos?.length) return null;
+/** Los anchos que el backend genera al subir a R2. Tiene que coincidir con
+ *  `ANCHOS_DERIVADOS` de `imagenes_service.py`: si aquí se pide un ancho que allí no se
+ *  genera, el navegador se lleva un 404 y la tarjeta se queda sin foto. */
+const ANCHOS_EN_R2 = [640, 1100, 1400];
+
+/** Una imagen guardada en nuestro bucket llega como ruta relativa, no como URL. */
+const esDeNuestroBucket = (url) => typeof url === "string" && url.startsWith("/media/");
+
+/** La clave hermana de un ancho: `foo-abc.jpg` -> `foo-abc-640.jpg`. Igual que
+ *  `clave_de_talla` en el backend. */
+const tallaEnR2 = (ruta, ancho) => {
+  const barra = ruta.lastIndexOf("/");
+  const nombre = ruta.slice(barra + 1);
+  if (!nombre.includes(".")) return `${ruta}-${ancho}`;
+  const punto = nombre.lastIndexOf(".");
+  return `${ruta.slice(0, barra + 1)}${nombre.slice(0, punto)}-${ancho}${nombre.slice(punto)}`;
+};
+
+export const imagenSrcSet = (url, anchos, anchoOriginal = null) => {
+  if (!url) return null;
+
+  // —— Nuestro bucket ——
+  // R2 no redimensiona al vuelo como hacía Cloudinary, así que las tallas se generan al
+  // subir y viven en claves hermanas. Sólo se ofrecen las que existen de verdad: el
+  // backend no genera tallas mayores que la original, porque agrandar una foto no la
+  // mejora, y pedir una que no está devuelve un 404 y deja la tarjeta en blanco.
+  if (esDeNuestroBucket(url)) {
+    const utiles = anchoOriginal
+      ? ANCHOS_EN_R2.filter((a) => a < anchoOriginal)
+      : ANCHOS_EN_R2;
+    if (!utiles.length) return null;
+    return utiles.map((a) => `${tallaEnR2(url, a)} ${a}w`).join(", ");
+  }
+
+  // —— Cloudinary ——
+  // Lo que ya estaba allí sigue sirviéndose, y allí los anchos los calcula el servidor.
+  if (!anchos?.length) return null;
   const candidatos = anchos
     .map((a) => [a, imagenAncho(url, a)])
     // Si `imagenAncho` devolvio la URL tal cual, no hubo transformacion posible.
@@ -232,6 +267,11 @@ export const piezaFromApi = (row) => {
       .filter((f) => f.nombre),
     imagen: varianteDe(row.slug ?? ""),
     imagenUrl: row.image_asset?.url || row.featured_image_url || null,
+    // El ancho de la original decide qué tallas existen en nuestro bucket: el backend no
+    // genera ninguna mayor que el archivo, así que pedirla devolvería un 404 y dejaría
+    // la tarjeta sin foto. Nulo para lo que viene de Cloudinary, donde los anchos los
+    // calcula el servidor al vuelo.
+    imagenAnchoOriginal: row.image_asset?.width ?? null,
     // On the asset, not on the post: the rights belong to the photograph. A piece
     // carrying a legacy `featured_image_url` has no asset behind it and so no
     // credit, which is accurate -- nobody ever recorded one for those.

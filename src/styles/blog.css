@@ -12947,14 +12947,33 @@ a.se-topics__chip:focus-visible {
   }
 
   .se-ticker__casa {
+    /* Ancho completo. El 44% es un reparto **horizontal**, y apilados no hay nada que
+       repartir: cada fila tiene la franja entera para si.
+       Dejarlo puesto fue el fallo, y de los caros: en un telefono de 393 px nuestra
+       fila medía 173 mientras una cifra ocupa 124, asi que no cabia ni una entera.
+       Medido: cero cifras completas a la vista y dos cortadas. Se veian fragmentos de
+       numeros -- "…,81 Bs" sin etiqueta -- que no dicen nada. */
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
+  .se-ticker__mundo {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  /* El credito, mas discreto en el telefono.
+     Medido a 393: ocupaba unos 180 px de los 393 de su fila, casi un tercio, para una
+     atribucion. Sus condiciones exigen que este, no que grite: a 9 px y con menos
+     relleno cumple igual y le devuelve el sitio a las cifras, que es lo que el lector
+     vino a ver. */
   .se-ticker__mundo-credito {
-    /* En vertical el credito debajo del widget descuadra la fila; se recuesta a la
-       derecha del propio widget, que es donde cabe. */
-    padding: 0 10px;
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
     border-left: none;
   }
 }

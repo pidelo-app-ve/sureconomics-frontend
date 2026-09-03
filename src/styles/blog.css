@@ -552,6 +552,17 @@
   justify-content: space-between;
   height: 76px;
   gap: 24px;
+  /* Mas ancho que la columna de lectura, y a proposito.
+     `.se-container` topa en `--se-container-max` (1200px), que menos los dos
+     margenes deja 1120 utiles. Ese ancho esta pensado para un parrafo -- una linea
+     que cruza la pantalla entera cansa -- pero aqui no hay parrafo: hay marca (262),
+     nav, botones (214) y reloj (72) peleando por el mismo sitio. Con siete enlaces
+     el nav pide 607 y solo recibia 522, asi que el septimo se metia por debajo de
+     ENTRAR y salia cortado como "Quie...".
+     Un mastil puede ser mas ancho que el texto que enmarca; es lo que hace casi
+     cualquier periodico. Con 1440 hay holgura de sobra a partir de 1280, y por
+     debajo entra la consulta de abajo. */
+  max-width: 1440px;
 }
 
 /* —— La hora de Caracas ——
@@ -607,8 +618,17 @@
 
 .se-hora--cajon {
   padding-top: var(--se-space-md);
-  margin-top: var(--se-space-sm);
+  /* `auto`: se lleva todo el hueco libre del cajon y baja hasta juntarse con los
+     botones. Ver la nota en `.se-header__menu .se-header__actions`. */
+  margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Y la etiqueta sube de 0,62 a 0,74 de blanco solo aqui. En la barra el verde es mas
+   oscuro y 0,62 se lee; sobre el verde del cajon el mismo valor queda mortecino, y
+   una hora que apenas se distingue del fondo no vale para lo que esta. */
+.se-hora--cajon .se-hora__lugar {
+  color: rgba(255, 255, 255, 0.74);
 }
 
 @media (max-width: 380px) {
@@ -720,6 +740,11 @@
   flex-wrap: wrap;
   gap: var(--se-space-sm) var(--se-space-lg);
 }
+
+/* El cuerpo y el hueco de los enlaces de escritorio NO se tocan aqui: los fija la
+   consulta `min-width: 992px` de mas abajo, que es donde el encabezado pasa a grid.
+   Una regla suelta a este nivel tiene la misma especificidad y pierde por orden --
+   escribi una y era codigo muerto. Si hay que apretar el nav, se aprieta alli. */
 
 .se-header__nav-link {
   font-family: var(--se-font-ui);
@@ -948,13 +973,26 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* El `margin-top: auto` se lo queda el reloj, no los botones.
+   Estaba aqui, y el reloj -- que va justo antes en el marcado -- se quedaba pegado a
+   los enlaces con 147 px de vacio debajo: medido a 430, 393, 375 y 360, siempre 147.
+   Un dato solo en medio de la nada se lee como algo que se quedo a medias.
+   Puesto en el reloj, el hueco pasa a estar ENCIMA y el reloj baja pegado a los
+   botones: abajo queda un bloque -- hora, regla, ENTRAR/REGISTRARSE -- en vez de dos
+   piezas sueltas. Si se pusiera en los dos, el flex partiria el hueco por la mitad y
+   volveria a haber dos huecos. */
 .se-header__menu .se-header__actions {
-  margin-top: auto;
+  margin-top: 0;
   padding-top: var(--se-space-lg);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  border-top: 1px solid rgba(var(--se-tinte), 0.08);
+  /* Aqui habia `border-top: 1px solid rgba(var(--se-tinte), 0.08)`, y era negro al 8%
+     sobre el verde del cajon: invisible. El mismo token en la superficie equivocada que
+     dejaba el texto de las fichas del equipo sin leerse.
+     Se quita en vez de aclararse: ahora que el reloj baja pegado a los botones, los dos
+     son un bloque, y la regla del reloj ya lo separa de los enlaces. Una segunda linea
+     aqui partiria por dentro el grupo que se acaba de juntar. */
 }
 
 .se-header__menu .se-header__cta {
@@ -963,8 +1001,36 @@
   justify-content: center;
 }
 
-/* Responsive: show burger and hide desktop nav below 992px */
-@media (max-width: 991px) {
+/* En modo menu y de tableta arriba, el reloj se pega al boton de menu.
+   `.se-header__inner` es un flex con `space-between`, asi que con tres hijos --
+   marca, reloj, boton -- el aire se reparte a partes iguales y crece con el ancho.
+   Medido: 70 px por lado en un movil de 393, pero 313 a 1099. A ese ancho el reloj
+   queda flotando en el centro con dos huecos enormes y se lee como algo que se quedo
+   suelto, no como una decision.
+   Es un efecto de haber subido el corte del menu a 1100: antes esa franja era modo
+   nav y el reloj vivia en su columna del grid.
+   Se agrupa de 768 arriba y no en el telefono: ahi el hueco ya es pequeno y los tres
+   bloques repartidos se leen equilibrados. 768 es el corte de tableta de siempre, no
+   un numero elegido para tapar esto. */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .se-header__inner .se-hora--header {
+    margin-left: auto;
+  }
+
+  .se-header__inner .se-header__burger {
+    margin-left: 1rem;
+  }
+}
+
+/* El menu de hamburguesa toma el mando por debajo de 1100, no de 992.
+   Subio al entrar el septimo enlace ("Quienes somos"). Medido en la franja que se
+   perdio: al nav le quedaban 448 px a 1024 y necesitaba 535, y a 992 tenia 433 para
+   534. Ahi no caben marca + siete enlaces + dos botones + reloj de ninguna manera --
+   el ultimo enlace se metia por debajo de ENTRAR y salia cortado como "Quie...".
+   Apretar mas la tipografia no era una opcion: ya esta a 13 px.
+   El precio es que el iPad en horizontal pasa a menu. Lo hacen bastantes diarios, y
+   un menu con los siete enlaces en columna se usa mejor que una tira recortada. */
+@media (max-width: 1099px) {
   .se-header__burger {
     display: flex;
   }
@@ -976,7 +1042,7 @@
 }
 
 /* Desktop: show nav + Subscribe, hide burger and overlay menu */
-@media (min-width: 992px) {
+@media (min-width: 1100px) {
   .se-header__burger {
     display: none;
   }
@@ -1014,9 +1080,14 @@
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none; /* Firefox */
-    padding: 0 0.9rem 0 0.6rem;
-    scroll-padding-left: 0.6rem;
-    scroll-padding-right: 0.6rem;
+    /* Era `0 0.9rem 0 0.6rem`: 24 px de relleno a los lados de la tira. Con seis
+       enlaces sobraba sitio y no se notaba; con siete esos 24 px son justo los que
+       faltaban a 1280. El desplazamiento sigue funcionando sin ellos -- lo que hacian
+       era separar el primer y el ultimo enlace del borde, y de eso ya se encarga el
+       `margin-inline` del contenedor. */
+    padding: 0;
+    scroll-padding-left: 0;
+    scroll-padding-right: 0;
     /* Removed fade mask to prevent “hidden” menu items */
   }
 
@@ -2628,6 +2699,19 @@
   animation-delay: 70ms;
 }
 
+/* El logotipo de la portada. Fluido y con techo, para que no domine el hero en una
+   pantalla ancha ni se vuelva ilegible en una estrecha. `height: auto` conserva la
+   proporcion del archivo (445x57), asi que el isotipo no se deforma. */
+.se-about__logo {
+  display: block;
+  width: 100%;
+  max-width: clamp(240px, 34vw, 420px);
+  height: auto;
+}
+
+/* Las reglas del wordmark dibujado a mano se quedan: `.se-logomark-e` la usan otras
+   piezas, y borrar el resto sin repasarlas seria arriesgar por ahorrar cuatro
+   selectores. Ya no las alcanza nada de esta pagina. */
 .se-about__wordmark {
   display: inline-flex;
   flex-wrap: nowrap;
@@ -3224,6 +3308,13 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   overflow: hidden;
+  /* Columna, y el bloque de enlaces empujado al fondo con `margin-top: auto`. Sin
+     esto "Correo" quedaba a una altura distinta en cada ficha de la fila, porque un
+     cargo de dos lineas ("Director de operaciones y comercializacion") baja todo lo
+     que viene detras. Las fichas ya median igual -- las estira la rejilla -- pero su
+     contenido no estaba alineado, que es lo que se ve. */
+  display: flex;
+  flex-direction: column;
   transition:
     transform 220ms ease,
     border-color 220ms ease,
@@ -3278,7 +3369,12 @@
   font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: rgba(var(--se-tinte), 0.9);
+  /* Blanco, no `--se-tinte`. El token es "0, 0, 0", asi que sobre este verde daba
+     negro sobre negro: las iniciales estaban ahi y no se leian. Es el mismo fallo
+     que ya esta avisado en `.se-header__nav-link`, que se arreglo alli y quedo sin
+     arreglar aqui -- y la auditoria de contraste no lo caza porque recorre paginas
+     en reposo y estas fichas viven dentro de un acordeon. */
+  color: rgba(255, 255, 255, 0.92);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
 }
 
@@ -3288,7 +3384,9 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
-  color: rgba(var(--se-tinte), 0.92);
+  color: #ffffff;
+  /* Un nombre largo parte por donde toca en vez de desbordar la ficha. */
+  overflow-wrap: break-word;
 }
 
 .se-member-card__role {
@@ -3296,19 +3394,31 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.58);
+  /* 0,58 de negro sobre verde oscuro era invisible; 0,78 de blanco pasa de sobra el
+     4,5:1 y sigue leyendose como secundario frente al nombre en blanco puro. */
+  color: rgba(255, 255, 255, 0.78);
   margin-top: var(--se-space-xs);
+  overflow-wrap: break-word;
 }
 
+/* `.se-about .se-text-body` (0,2,0) pinta `--about-muted`, que es negro al 68%, y
+   el resumen lleva las dos clases. Con un solo nombre esta regla es 0,1,0 y perdia
+   siempre -- daba igual que fuera despues. De ahi que el nombre y el cargo salieran
+   blancos y la descripcion siguiera negra sobre verde: los otros dos no llevan
+   `se-text-body`. Se sube a 0,2,0 con el ancestro y gana por orden. */
+.se-about .se-member-card__summary,
 .se-member-card__summary {
   margin: var(--se-space-md) 0 0;
-  color: rgba(var(--se-tinte), 0.72);
+  color: rgba(255, 255, 255, 0.86);
   font-size: 0.95rem;
   line-height: 1.6;
 }
 
 .se-member-card__links {
-  margin-top: var(--se-space-md);
+  /* `auto` y no una medida: pega el bloque al fondo de la ficha, que es lo que
+     alinea los "Correo" de una fila entre si. */
+  margin-top: auto;
+  padding-top: var(--se-space-md);
   display: flex;
   gap: var(--se-space-sm);
   flex-wrap: wrap;
@@ -3316,13 +3426,16 @@
 
 .se-member-card__link {
   font-size: 0.78rem;
-  color: rgba(var(--se-tinte), 0.88);
-  border-bottom-color: rgba(var(--se-tinte), 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.4);
 }
 
+/* Al pasar por encima iba a un rosa (#ffb4b4) que no esta en la paleta: es de la
+   familia del #ff4d6d que ya se saco de los avisos del panel. Va al cobre, que es
+   el acento de la casa y el mismo que subraya el enlace activo del nav. */
 .se-member-card__link:hover {
-  color: #ffb4b4;
-  border-color: rgba(255, 180, 180, 0.65);
+  color: #f0a17c;
+  border-color: rgba(240, 161, 124, 0.7);
 }
 
 .se-member-card__link:focus-visible {
@@ -10893,6 +11006,48 @@ a.se-topics__chip:focus-visible {
   background: #f7f7f5;
 }
 
+/* Con video de verdad dentro, el escenario deja de ser un hueco de espera.
+   `.se-videostage` es la caja vacia: fondo gris, borde y el triangulo de "aqui va un
+   video", centrado con flex. Cuando hay video ese centrado es justo lo que lo estropea
+   -- el iframe no tiene medida propia, asi que se queda en los 300x150 que pone el
+   navegador por omision y aparece como un cuadro negro pequeno flotando en el gris.
+
+   Faltaba desde antes de que existiera Stream: un enlace de YouTube pegado a mano se
+   veia igual de pequeno. No se noto porque para verlo hace falta una entrevista con
+   video, y hasta ahora no habia ninguna. Se descubrio al mirar la captura, no en el
+   codigo: la sonda decia "hayIframe: true" y estaba en lo cierto.
+
+   La proporcion 16/9 se queda en el contenedor y el marco la rellena; asi la caja mide
+   igual con video y sin el, y el cuerpo del articulo no salta al cargar. */
+.se-videostage--live {
+  gap: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.se-videostage__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /* El marco cubre toda la caja; la nota de duracion se coloca encima. */
+  border-radius: 10px;
+  background: #000;
+}
+
+/* Sobre el video, no debajo: debajo empujaria el cuerpo del articulo y el marco ya
+   ocupa toda la caja. Con su propio fondo para que se lea sobre cualquier fotograma. */
+.se-videostage--live .se-videostage__note {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  margin: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #ffffff;
+}
+
 .se-videostage__play {
   position: relative;
   width: 58px;
@@ -12239,10 +12394,18 @@ a.se-topics__chip:focus-visible {
 }
 
 /* La marca al frente del cajón, con aire debajo. */
+/* Los 4 px son para caer en el eje de los enlaces, no un ajuste al gusto: el enlace
+   lleva `padding-left: 4px` -- el aire que necesita el recuadro del activo -- asi que
+   su texto empieza en 76,3 mientras el logotipo empezaba en 72,3. Cuatro pixeles de
+   desfase entre el logotipo y la lista que cuelga debajo, suficientes para que se vea
+   descuadrado sin que se sepa por que.
+   Se mueve el logotipo y no se quita el relleno del enlace: ese relleno lo necesita
+   el recuadro del elemento activo para no comerse la primera letra. */
 .se-header__menu-brand {
   display: block;
   width: 150px;
   height: auto;
+  margin-left: 4px;
 }
 
 .se-header__menu-header {
@@ -12338,7 +12501,7 @@ a.se-topics__chip:focus-visible {
    `.se-header__nav-list` y `.se-header__actions .se-btn` se definen mas abajo con la
    misma especificidad, asi que la cascada devolvia los valores viejos y las medidas
    salian identicas. */
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1100px) and (max-width: 1279px) {
   .se-hora--header .se-hora__lugar {
     position: absolute;
     width: 1px;
@@ -12357,22 +12520,18 @@ a.se-topics__chip:focus-visible {
   }
 }
 
-/* Y por debajo de 1100 tambien se van los segundos. Medido: a 992 el reloj completo
-   dejaba la navegacion 36 px peor que antes de existir; sin segundos vuelve a donde
-   estaba. Menos precision en una ventana de 1024 es una perdida mucho menor que
-   quedarse sin reloj o que perder una entrada del menu. */
-@media (min-width: 992px) and (max-width: 1099px) {
-  .se-hora--header .se-hora__seg {
-    display: none;
-  }
+/* El logotipo pequeno, ahora entre 1100 y 1280.
+   Baja de 34 a 26 px de alto, que son unos 60 px menos de ancho. Antes vivia en
+   992-1099 -- una franja que hoy es menu y donde ya no pinta nada -- y aqui es justo
+   lo que faltaba: medido, a 1200 y a 1152 el nav se quedaba 41 px corto, y estos 60
+   lo resuelven con holgura.
 
-  /* Y el logotipo baja de 34 a 26 px de alto, que son unos 60 de ancho. Con eso la
-     navegacion deja de cortarse en esta franja. Se toca aqui y no en la regla
-     general: de 1100 arriba sobra sitio y el logotipo se queda como estaba.
+   Se toca solo en esta franja: de 1280 arriba sobra sitio y el logotipo se queda a su
+   tamano, que es donde la marca se lee como debe.
 
-     Medido antes de tocarlo: a 1060 faltaban 19 px, a 1024 faltaban 53. El unico
-     ancho que aun se queda corto es 992, y ahi "Informes y reportes" ya se cortaba
-     antes de que existiera el reloj. */
+   Los segundos del reloj ya no se esconden en ningun sitio: la regla que lo hacia
+   cubria 992-1099, que hoy es menu. De 1100 arriba el reloj entero cabe. */
+@media (min-width: 1100px) and (max-width: 1279px) {
   .se-header__logo {
     height: 26px;
   }
@@ -12558,4 +12717,95 @@ a.se-topics__chip:focus-visible {
 .se-media-etiqueta__error {
   font-size: var(--se-text-small);
   color: var(--adm-err, #8f3a17);
+}
+
+
+/* La barra de la subida de video.
+   Existe por una razon concreta: un archivo de medio giga tarda minutos, y sin cifra
+   ni barra la redaccion no distingue "subiendo" de "colgado" y cancela subidas que
+   iban bien. `<progress>` nativo y no un div pintado: trae el papel de barra de
+   progreso para un lector de pantalla sin que haya que declararlo. */
+.se-asset__progreso {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(var(--se-tinte), 0.1);
+  appearance: none;
+}
+
+.se-asset__progreso::-webkit-progress-bar {
+  background: rgba(var(--se-tinte), 0.1);
+  border-radius: 999px;
+}
+
+.se-asset__progreso::-webkit-progress-value {
+  background: var(--color-green);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.se-asset__progreso::-moz-progress-bar {
+  background: var(--color-green);
+  border-radius: 999px;
+}
+
+.se-asset__progreso-cifra {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--mono);
+  font-size: var(--se-text-small);
+  /* Cifras de ancho fijo: sin esto el numero baila al pasar de 9 a 10 y de 99 a 100. */
+  font-variant-numeric: tabular-nums;
+  color: var(--adm-text);
+}
+
+/* Lo que esta pasando ahora mismo, en palabras. La barra dice cuanto queda; esto dice
+   de que paso -- pedir permiso, subir, anotar -- porque son tres y el segundo es el
+   unico largo. */
+.se-asset__aviso {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+
+/* El video adjunto en el formulario: caratula y si ya se puede ver.
+   La caratula la saca Cloudflare del propio archivo, asi que verla es la prueba de que
+   el video llego -- vale mas que cualquier texto de confirmacion. Y el estado hace
+   falta al VOLVER a abrir la pieza, no solo justo despues de subir: quien sube y cierra
+   no tendria despues ninguna forma de saber si Cloudflare acabo, y publicaria una
+   entrevista con el reproductor en negro. */
+.se-asset__video {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.6rem;
+  flex-wrap: wrap;
+}
+
+.se-asset__video-mini {
+  width: 96px;
+  height: 54px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  object-fit: cover;
+  background: rgba(var(--se-tinte), 0.08);
+}
+
+.se-asset__video-estado {
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+  min-width: 0;
+}
+
+/* Verde y no un simple gris mas claro: "listo para publicar" es la unica informacion
+   de este bloque que cambia lo que el editor hace a continuacion. */
+.se-asset__video-estado--listo {
+  color: var(--adm-ok, #00522a);
+  font-weight: 600;
 }

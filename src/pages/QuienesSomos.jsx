@@ -1,4 +1,5 @@
 import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
+import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
@@ -12,17 +13,27 @@ const useInitialAccordionOpen = () => {
   return initiallyOpen;
 };
 
-const BrandWordmark = () => {
-  return (
-    <span className="se-about__wordmark" aria-label={BRAND.name}>
-      <span className="se-about__wordmark-sur">Sur</span>
-      <span className="se-about__wordmark-e se-logomark-e" aria-hidden="true">
-        E
-      </span>
-      <span className="se-about__wordmark-rest">conomics</span>
-    </span>
-  );
-};
+/**
+ * El logotipo, del archivo del brandbook y no dibujado a mano.
+ *
+ * Aqui habia tres <span> de texto -- "Sur", una "E" en cobre y "conomics" -- montando
+ * una imitacion del logotipo con la tipografia de la pagina. Se parecia, y era otra
+ * cosa: sin el isotipo, con otro trazo y con un kerning que no es el que fija el
+ * brandbook. En la cabecera y en el pie ya se servia el archivo de verdad, asi que
+ * la portada de "Quienes somos" era el unico sitio del sitio con un logotipo falso.
+ *
+ * Va la version principal -- isotipo verde y el nombre en negro -- porque el fondo de
+ * esta cabecera es claro. La negativa es para la franja verde.
+ */
+const BrandWordmark = () => (
+  <img
+    className="se-about__logo"
+    src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
+    alt={BRAND.name}
+    width="445"
+    height="57"
+  />
+);
 
 const TeamSection = ({ title, members, initiallyOpen }) => {
   const hasMembers = Boolean(members?.length);

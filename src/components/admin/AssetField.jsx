@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import {
   createAdminExternalMedia,
+  estadoDelVideo,
   formatBytes,
   formatDuration,
   patchAdminMedia,
@@ -36,6 +37,34 @@ export const AssetField = ({
   const [extra, setExtra] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Nulo mientras no haya nada que informar. Un video de medio giga tarda minutos, y
+  // una barra que no se mueve es indistinguible de algo colgado: la redaccion cancela
+  // subidas que iban bien.
+  const [progreso, setProgreso] = useState(null);
+  const [aviso, setAviso] = useState("");
+
+  // Si Cloudflare ya acabo de transcodificar el video adjunto.
+  //
+  // Hace falta al **volver** a abrir la pieza, no solo justo despues de subir: quien
+  // sube y cierra no tiene despues ninguna forma de saber si el video ya se ve, y
+  // publicaria una entrevista con el reproductor en negro. Nulo = no se ha preguntado.
+  const esDeStream = asset?.storage === "stream" && Boolean(asset?.object_key);
+  const [videoListo, setVideoListo] = useState(null);
+
+  useEffect(() => {
+    if (!esDeStream) {
+      setVideoListo(null);
+      return undefined;
+    }
+    let vivo = true;
+    setVideoListo(null);
+    estadoDelVideo(asset.object_key)
+      .then((e) => { if (vivo) setVideoListo(Boolean(e?.listo)); })
+      // Que la consulta falle no dice que el video este mal: se deja en nulo y no se
+      // afirma nada, que es mejor que decir "no esta listo" sin saberlo.
+      .catch(() => { if (vivo) setVideoListo(null); });
+    return () => { vivo = false; };
+  }, [esDeStream, asset?.object_key]);
 
   // The credit belongs to the asset, so it saves on its own rather than with the
   // piece: the same photograph in a second piece arrives already credited, and a
@@ -108,12 +137,23 @@ export const AssetField = ({
     if (!file || !onUpload) return;
     setBusy(true);
     setError("");
+    setAviso("");
+    setProgreso(null);
     try {
-      attach(await onUpload(file));
+      // El segundo argumento es opcional: quien sube una imagen no lo usa y sigue
+      // funcionando igual. Solo el video lo necesita.
+      attach(
+        await onUpload(file, {
+          onProgress: setProgreso,
+          onAviso: setAviso,
+        })
+      );
     } catch (err) {
       setError(adminErrorMessage(err, "No se pudo subir el archivo."));
     } finally {
       setBusy(false);
+      setProgreso(null);
+      setAviso("");
     }
   };
 
@@ -159,9 +199,42 @@ export const AssetField = ({
             <p className="se-asset__current-name">
               {asset?.original_filename || asset?.url || `Archivo #${value}`}
             </p>
+            {esDeStream ? (
+              <div className="se-asset__video">
+                {/* La caratula la saca Cloudflare del propio video: si se ve, el video
+                    esta ahi de verdad. Vale mas que cualquier texto de confirmacion. */}
+                {asset?.poster_url ? (
+                  <img
+                    className="se-asset__video-mini"
+                    src={asset.poster_url}
+                    alt=""
+                    width="96"
+                    height="54"
+                  />
+                ) : null}
+                <span
+                  className={
+                    videoListo === true
+                      ? "se-asset__video-estado se-asset__video-estado--listo"
+                      : "se-asset__video-estado"
+                  }
+                >
+                  {videoListo === true
+                    ? "Listo para verse"
+                    : videoListo === false
+                      ? "Cloudflare lo esta procesando; en unos minutos se vera en la pieza."
+                      : "Comprobando el estado del video…"}
+                </span>
+              </div>
+            ) : null}
+
             <p className="se-asset__current-meta">
               {[
-                asset?.storage === "external" ? "enlace externo" : "almacenado",
+                asset?.storage === "stream"
+                  ? "nuestro servicio de video"
+                  : asset?.storage === "external"
+                    ? "enlace externo"
+                    : "almacenado",
                 formatDuration(asset?.duration_seconds),
                 asset?.pages ? `${asset.pages} páginas` : null,
                 asset?.width && asset?.height ? `${asset.width}×${asset.height}` : null,
@@ -225,6 +298,18 @@ export const AssetField = ({
           <label className="se-asset__way">
             <span className="se-asset__way-title">Subir un archivo</span>
             <input type="file" accept={accept} onChange={handleUpload} disabled={busy} />
+            {progreso !== null ? (
+              <>
+                <progress
+                  className="se-asset__progreso"
+                  value={progreso}
+                  max="100"
+                  aria-label="Progreso de la subida"
+                />
+                <span className="se-asset__progreso-cifra">{progreso}%</span>
+              </>
+            ) : null}
+            {aviso ? <span className="se-asset__aviso">{aviso}</span> : null}
           </label>
         ) : null}
 
@@ -274,8 +359,14 @@ AssetField.propTypes = {
   kind: PropTypes.oneOf(["image", "video", "document"]).isRequired,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   asset: PropTypes.shape({
+    // `id` y `credit` faltaban desde antes, y el linter llevaba tiempo avisando de las
+    // cuatro lecturas. Se cierran aqui porque este bloque ya se estaba tocando.
+    id: PropTypes.number,
+    credit: PropTypes.string,
     url: PropTypes.string,
     storage: PropTypes.string,
+    object_key: PropTypes.string,
+    poster_url: PropTypes.string,
     original_filename: PropTypes.string,
     duration_seconds: PropTypes.number,
     pages: PropTypes.number,

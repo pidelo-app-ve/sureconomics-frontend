@@ -17,6 +17,12 @@ import {
 import {
     ACCEPTED_DOCUMENT_MIME,
     ACCEPTED_IMAGE_MIME,
+    ACCEPTED_VIDEO_MIME,
+    MAX_VIDEO_BYTES,
+    estadoDelVideo,
+    pedirSubidaDeVideo,
+    registrarVideoDeStream,
+    subirVideoAStream,
     uploadAdminMediaDocument,
     uploadAdminMediaImage,
 } from "../../services/adminMediaService";
@@ -321,6 +327,53 @@ export const AdminPostEditor = () => {
     const setAsset = (slot, kind) => (assetId, asset) => {
         setForm((prev) => ({ ...prev, [slot]: assetId }));
         setAssets((prev) => ({ ...prev, [kind]: asset }));
+    };
+
+    /**
+     * Sube un video a Stream y devuelve el asset, para que `AssetField` lo adjunte.
+     *
+     * Tres pasos, y el orden importa: si se anotara la fila antes de subir, un fallo a
+     * mitad de camino dejaria en la biblioteca un video que no existe, y la entrevista
+     * se podria publicar con un reproductor vacio.
+     *
+     * Al terminar se pregunta una vez por el estado. No se espera a que Stream acabe de
+     * transcodificar -- puede tardar minutos en una entrevista larga y dejaria a un
+     * editor mirando el formulario -- pero si no esta listo se le dice, que es distinto
+     * de callarlo.
+     */
+    const subirVideo = async (file, { onProgress, onAviso } = {}) => {
+        if (file.size > MAX_VIDEO_BYTES) {
+            const mb = Math.round(MAX_VIDEO_BYTES / 1048576);
+            throw new Error(
+                `El video pesa ${Math.round(file.size / 1048576)} MB y el tope es ${mb}. ` +
+                "Comprimalo o recorte la entrevista."
+            );
+        }
+
+        onAviso?.("Pidiendo permiso a Cloudflare…");
+        const permiso = await pedirSubidaDeVideo();
+
+        onAviso?.("Subiendo. No cierre esta pagina.");
+        await subirVideoAStream(file, permiso.upload_url, { onProgress });
+
+        onAviso?.("Subido. Anotandolo en la biblioteca…");
+        const fila = await registrarVideoDeStream(permiso.uid, { nombre: file.name });
+
+        try {
+            const est = await estadoDelVideo(permiso.uid);
+            if (!est?.listo) {
+                toastSuccess(
+                    "Video subido. Cloudflare esta procesandolo; en unos minutos se vera " +
+                    "en la pieza.",
+                    "Video"
+                );
+            }
+        } catch {
+            // Que la consulta de estado falle no invalida la subida: el video esta
+            // arriba y la fila anotada. Callar aqui es lo correcto; lanzar haria
+            // pensar que se perdio.
+        }
+        return fila;
     };
 
     const shows = (field) => (FORMAT_FIELDS[form.format] ?? []).includes(field);
@@ -669,11 +722,13 @@ export const AdminPostEditor = () => {
                             <AssetField
                                 id="post-video"
                                 label="Video de la entrevista"
-                                hint="Puede pegar un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
+                                hint="Suba el archivo y se aloja en nuestro servicio de video, o pegue un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
                                 kind="video"
                                 value={form.video_asset_id}
                                 asset={assets.video}
                                 onChange={setAsset("video_asset_id", "video")}
+                                onUpload={subirVideo}
+                                accept={ACCEPTED_VIDEO_MIME}
                                 required
                             />
                         ) : null}

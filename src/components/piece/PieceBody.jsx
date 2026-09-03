@@ -84,6 +84,15 @@ Fuentes.propTypes = {
  */
 const embedDe = (url) => {
   if (!url) return null;
+
+  // Nuestro propio servicio de video, primero: la direccion que manda el backend ya es
+  // la del reproductor, asi que se usa tal cual. Sin esta rama caia hasta el final y
+  // se pintaba como un enlace suelto -- un video alojado por nosotros mostrandose peor
+  // que uno de YouTube.
+  if (/(?:cloudflarestream\.com|videodelivery\.net)\//.test(url)) {
+    return { tipo: "iframe", src: url };
+  }
+
   const youtube = /(?:youtube\.com\/.*[?&]v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/.exec(url);
   if (youtube) return { tipo: "iframe", src: `https://www.youtube.com/embed/${youtube[1]}` };
   const vimeo = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url);

@@ -9783,7 +9783,17 @@ a.se-topics__chip:focus-visible {
 .se-ticker {
   position: relative;
   display: flex;
+  /* `stretch`, pero el centrado se resuelve **dentro** de cada fila.
+     Primero se puso `center` aqui para arreglar que nuestras cifras quedaran pegadas
+     arriba -- su centro caia en y=17 con la franja centrada en y=24 -- y funciono, pero
+     trajo otro problema: centrada, nuestra mitad medía sólo lo que su contenido (46 px)
+     dentro de una franja de 73, y las reglas entre cifras quedaban flotando a media
+     altura mientras las del widget iban de arriba abajo.
+     Con `stretch` las dos mitades llenan la franja, y cada fila centra lo suyo con su
+     propio `justify-content: center`. Se arregla donde estaba el problema en vez de
+     compensarlo un nivel mas arriba. */
   align-items: stretch;
+  min-height: 46px;
   background: var(--marca-verde);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--mono);
@@ -9795,12 +9805,22 @@ a.se-topics__chip:focus-visible {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
+  /* Estirado, para que la pista y sus filas lleguen a todo el alto de la franja: las
+     reglas entre cifras tienen que ir de arriba abajo como las del widget, no quedarse
+     a media altura. */
+  display: flex;
+  align-items: stretch;
 }
 
 .se-ticker__track {
   display: flex;
   width: max-content;
-  animation: se-ticker-slide 60s linear infinite;
+  /* 42 s en vez de 60. Un aviso para quien lo cambie: la duracion es fija, asi que la
+     velocidad real depende de cuanto contenido haya -- tres cifras automaticas recorren
+     menos distancia en los mismos segundos que siete escritas a mano, y se ven mas
+     lentas. Si algun dia molesta, la solucion no es otro numero aqui sino calcular la
+     duracion a partir del ancho de la pista. */
+  animation: se-ticker-slide 42s linear infinite;
 }
 
 .se-ticker__run {
@@ -9822,21 +9842,43 @@ a.se-topics__chip:focus-visible {
   .se-ticker__viewport { overflow-x: auto; }
 }
 
+/* `center` en vez de `baseline`, y mas aire a los lados.
+   El `baseline` alineaba bien la etiqueta con la cifra entre si, pero dejaba el bloque
+   colgando del borde de arriba de la franja. Con `center` el item se centra y las
+   lineas de base siguen cuadrando porque todo va en la misma linea.
+   El relleno lateral sube de 20 a 26: la mitad del mundo lleva logotipos y respira, y
+   nuestras cifras iban apretadas al lado. Ahora los dos lados pesan parecido, que era
+   lo que se pedia. */
+/* En columna, igual que las filas de TradingView: etiqueta arriba, cifra en medio,
+   variacion abajo.
+   Iba todo en una linea, y al dejar que el widget usara su alto natural nuestras cifras
+   se quedaron flotando en 73 px de franja mientras las suyas la llenaban con tres
+   lineas. El desequilibrio era el mismo de antes, sólo al reves. Apiladas, los dos
+   lados leen como hermanos y el alto se aprovecha en vez de sobrar. */
 .se-ticker__item {
   display: inline-flex;
-  gap: 8px;
-  align-items: baseline;
-  padding: 9px 20px;
-  border-right: 1px solid rgba(var(--se-tinte), 0.1);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  padding: 0 22px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   white-space: nowrap;
 }
 
+/* La etiqueta hace de nombre del simbolo: pequena y apagada, como en el widget. */
 .se-ticker__k {
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.04em;
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: 0.06em;
 }
 
+/* La cifra es el dato: la mas grande y la unica en blanco puro. */
 .se-ticker__v {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
   color: #ffffff;
   font-variant-numeric: tabular-nums;
 }
@@ -9847,15 +9889,22 @@ a.se-topics__chip:focus-visible {
 .se-ticker__v--down { color: #ff9d8a; }
 
 /* The stamp sits beside the marquee, so it needs its own ground to stay legible. */
+/* El sello de la fuente: nota al margen, no panel.
+   Con la franja estirada a 72 px su fondo `rgba(0,0,0,.22)` dejo de ser una pastilla y
+   se convirtio en un bloque oscuro de 225x72 que se comia el 36% de nuestra mitad y
+   parecia flotar sobre las cifras. Sin fondo, mas pequeno y mas apagado, se lee como
+   lo que es: de donde salen estos numeros. Mismo tratamiento que el credito de
+   TradingView al otro extremo, que hace el mismo papel. */
 .se-ticker__stamp {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  padding: 9px 16px;
-  background: rgba(0, 0, 0, 0.22);
+  padding: 0 14px;
   border-left: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
   white-space: nowrap;
   transition: color 0.18s ease;
 }
@@ -12808,4 +12857,104 @@ a.se-topics__chip:focus-visible {
 .se-asset__video-estado--listo {
   color: var(--adm-ok, #00522a);
   font-weight: 600;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   El cintillo de dos segmentos: Venezuela a la izquierda, el mundo a la derecha.
+
+   Venezuela es nuestro -- se lee del BCV y de la Bolsa -- y va con la tipografia de
+   la casa. El mundo lo dibuja el script de TradingView, que trae la suya y no se
+   puede cambiar; por eso los dos van separados por una regla en vez de fingir que
+   son una sola linea. Fingirlo se notaria, y peor.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* La mitad nuestra: ancho por contenido, no la mitad de la franja. Con dos divisas y
+   el IBC ocupa lo que ocupa, y lo que sobra es para el mundo. */
+/* El reparto: 44% para nosotros, el resto para el mundo.
+   Antes era `flex: 0 1 auto`, o sea "lo que ocupe el contenido", y con la cinta manual
+   de siete indicadores eso se comia el 83% de la franja: a TradingView le quedaban 238
+   px y su widget se veia como una astilla. Un desfile no tiene ancho natural -- su
+   contenido es `max-content` y siempre pide mas -- asi que el reparto tiene que
+   decidirse aqui y no dejarselo al contenido.
+   44 y no 50 porque el mundo lleva mas simbolos y logotipos, y porque nuestras tres
+   cifras entran de sobra en ese ancho. */
+.se-ticker__casa {
+  display: flex;
+  align-items: stretch;
+  flex: 0 1 44%;
+  max-width: 44%;
+  min-width: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.se-ticker__mundo {
+  display: flex;
+  align-items: center;
+  flex: 1 1 56%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Ya no se recorta a 46 px: en `compact` el widget cabe solo. El recorte estaba
+   amputandole la segunda linea, que es lo que lo hacia parecer roto. */
+.se-ticker__mundo-caja {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* TradingView oculta su enlace de atribucion cuando el widget es transparente, y sus
+   condiciones lo exigen, asi que se pone uno propio. Discreto pero presente: no es
+   decoracion, es la licencia. */
+.se-ticker__mundo-credito {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  white-space: nowrap;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.se-ticker__mundo-credito:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* La variacion, al lado de la cifra. Mas pequena que el valor a proposito: el numero
+   es el dato y el porcentaje es el contexto. */
+/* Debajo de la cifra, no al lado: es la tercera linea que empareja con la del widget. */
+.se-ticker__d {
+  font-size: 11px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-ticker__d--up { color: #6ee7a0; }
+.se-ticker__d--down { color: #ff9d8a; }
+.se-ticker__d--flat { color: rgba(255, 255, 255, 0.45); }
+
+/* Por debajo de 860 los dos segmentos se apilan, que es el mismo corte que decide
+   cual de las dos listas de simbolos se pide. Nuestra mitad va arriba: es la que el
+   lector venezolano viene a mirar, y en un telefono lo primero es lo primero. */
+@media (max-width: 860px) {
+  .se-ticker {
+    flex-direction: column;
+  }
+
+  .se-ticker__casa {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .se-ticker__mundo-credito {
+    /* En vertical el credito debajo del widget descuadra la fila; se recuesta a la
+       derecha del propio widget, que es donde cabe. */
+    padding: 0 10px;
+    border-left: none;
+  }
 }

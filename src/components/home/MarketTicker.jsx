@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMarketTicker } from "../../services/marketTickerService";
 
 /**
@@ -70,6 +70,136 @@ const ultimaBuena = () => {
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/**
+ * Los indices mundiales, por TradingView.
+ *
+ * Dos listas y no una, y la razon es de lectura, no de tecnica: la lista de simbolos se
+ * fija al crear el widget y no se puede cambiar despues. Diecinueve simbolos
+ * desfilando en 375 px significa que quien quiere ver el Merval **espera a que el
+ * desfile lo traiga de vuelta**. En el telefono van cinco: los que un lector mira de
+ * verdad en la mano.
+ *
+ * TradingView no es una API que llamemos: es su script, que se dibuja solo. Nosotros
+ * nunca vemos esos numeros, y eso tiene dos consecuencias que conviene saber -- la
+ * regla de "se calla con datos viejos" no se le puede aplicar a esta mitad, y esas
+ * cifras no se pueden reutilizar en ningun otro sitio del sitio.
+ *
+ * Su atribucion es obligatoria por sus condiciones de uso. No se quita.
+ */
+const SIMBOLOS_ESCRITORIO = [
+  { proName: "BMFBOVESPA:IBOV", title: "Bovespa" },
+  { proName: "INDEX:MXX", title: "IPC México" },
+  { proName: "BCBA:IMV", title: "Merval" },
+  { proName: "BVC:COLCAP", title: "Colcap" },
+  { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
+  { proName: "FOREXCOM:NSXUSD", title: "Nasdaq 100" },
+  { proName: "CAPITALCOM:EU50", title: "Euro Stoxx 50" },
+  { proName: "BME:IBC", title: "IBEX 35" },
+  { proName: "FOREXCOM:JPXJPY", title: "Nikkei 225" },
+  { proName: "FX:EURUSD", title: "EUR/USD" },
+  { proName: "OANDA:XAUUSD", title: "Oro" },
+  { proName: "TVC:UKOIL", title: "Brent" },
+  { proName: "BITSTAMP:BTCUSD", title: "BTC/USD" },
+];
+
+/** En el telefono: petroleo, oro, la bolsa de referencia, el bitcoin y el euro. */
+const SIMBOLOS_MOVIL = [
+  { proName: "TVC:UKOIL", title: "Brent" },
+  { proName: "OANDA:XAUUSD", title: "Oro" },
+  { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
+  { proName: "BITSTAMP:BTCUSD", title: "BTC/USD" },
+  { proName: "FX:EURUSD", title: "EUR/USD" },
+];
+
+/** El mismo corte que usa el componente original: por debajo, los dos se apilan. */
+const CORTE_MOVIL = "(max-width: 860px)";
+
+const CintaMundial = () => {
+  const caja = useRef(null);
+  const [estrecho, setEstrecho] = useState(() => {
+    try {
+      return window.matchMedia?.(CORTE_MOVIL)?.matches ?? false;
+    } catch {
+      return false;
+    }
+  });
+
+  // Se vuelve a montar solo al cruzar el corte, que pasa casi nunca -- girar el
+  // telefono. Escuchar el `resize` y remontar en cada pixel seria tirar el widget y
+  // volverlo a pedir decenas de veces por arrastrar una ventana.
+  useEffect(() => {
+    let mq;
+    try {
+      mq = window.matchMedia?.(CORTE_MOVIL);
+    } catch {
+      return undefined;
+    }
+    if (!mq) return undefined;
+    const alCambiar = (e) => setEstrecho(e.matches);
+    mq.addEventListener?.("change", alCambiar);
+    return () => mq.removeEventListener?.("change", alCambiar);
+  }, []);
+
+  useEffect(() => {
+    const destino = caja.current;
+    if (!destino) return undefined;
+
+    // Se vacia antes de inyectar. Sin esto, el doble efecto de StrictMode en desarrollo
+    // deja dos cintas apiladas, y al cruzar el corte se acumularian.
+    destino.innerHTML = "";
+
+    const contenedor = document.createElement("div");
+    contenedor.className = "tradingview-widget-container";
+    const hueco = document.createElement("div");
+    hueco.className = "tradingview-widget-container__widget";
+    contenedor.appendChild(hueco);
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.async = true;
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
+    // La configuracion va como TEXTO dentro del script, que es como lo pide TradingView.
+    script.text = JSON.stringify({
+      symbols: estrecho ? SIMBOLOS_MOVIL : SIMBOLOS_ESCRITORIO,
+      showSymbolLogo: true,
+      isTransparent: true,
+      // `compact` y no `adaptive`: en adaptive TradingView pinta dos lineas por simbolo
+      // -- nombre arriba, precio abajo -- y pide 72 px de alto. La franja mide 46, asi
+      // que le cortabamos la mitad y se veia amputado. En compact va todo en una linea,
+      // que es como van nuestras cifras: los dos lados pesan lo mismo sin estirar la
+      // cabecera. Medido antes de cambiarlo: iframe 72 px en una caja de 46.
+      displayMode: "compact",
+      colorTheme: "dark",
+      locale: "es",
+    });
+    contenedor.appendChild(script);
+    destino.appendChild(contenedor);
+
+    return () => {
+      destino.innerHTML = "";
+    };
+  }, [estrecho]);
+
+  return (
+    <div className="se-ticker__mundo">
+      {/* `data-lista` deja a la vista cual de las dos listas esta puesta. Se anadio
+          porque comprobarlo desde fuera era imposible: TradingView se lleva el script
+          inyectado en cuanto lo consume, asi que una sonda que lo busque casi nunca
+          llega a tiempo. Un atributo cuesta nada y hace la decision observable. */}
+      <div className="se-ticker__mundo-caja" ref={caja} data-lista={estrecho ? "movil" : "escritorio"} />
+      <a
+        className="se-ticker__mundo-credito"
+        href="https://www.tradingview.com/"
+        target="_blank"
+        rel="noreferrer noopener"
+      >
+        TradingView
+      </a>
+    </div>
+  );
+};
+
 export const MarketTicker = () => {
   const [ticker, setTicker] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -123,47 +253,76 @@ export const MarketTicker = () => {
     };
   }, []);
 
-  if (!ticker?.indicators?.length) {
-    // Mientras carga se guarda el sitio solo si la última vez hubo cifras. Sin
-    // datos y ya cargada, no se dibuja nada: una banda vacía es una franja que no
-    // dice nada, y una fila de ceros de relleno sería una afirmación que nadie hizo.
-    return cargando && huboCinta() ? (
-      <div className="se-ticker se-ticker--hueco" aria-hidden="true" />
-    ) : null;
+  const hayCifras = Boolean(ticker?.indicators?.length);
+
+  // Sin cifras nuestras la franja **sigue saliendo**, con el mundo dentro. Antes aquí
+  // se devolvía nada, y era lo correcto cuando no había nada más que poner: una banda
+  // vacía es una franja que no dice nada. Ahora la mitad mundial es contenido real y
+  // vive por su cuenta, así que si el BCV se calla -- porque el dato es viejo, que es
+  // la regla -- el lector sigue viendo el Brent y el oro en vez de un hueco.
+  //
+  // Mientras carga se guarda el sitio sólo si la última vez hubo cifras: reservarlo
+  // siempre haría aparecer y colapsar una banda en la primera visita.
+  if (!hayCifras && cargando && huboCinta()) {
+    return <div className="se-ticker se-ticker--hueco" aria-hidden="true" />;
   }
 
-  const run = ticker.indicators.map((item, i) => (
+  const run = (ticker?.indicators ?? []).map((item, i) => (
     <span className="se-ticker__item" key={`${item.label}-${i}`}>
       <span className="se-ticker__k">{item.label}</span>
       <span className={`se-ticker__v se-ticker__v--${item.direction}`}>{item.value}</span>
+      {/* La variación sólo existe por la vía automática. Cuando falta no se dibuja
+          nada: un "0,00%" de relleno afirmaría que no se movió, y lo cierto es que no
+          lo sabemos. */}
+      {typeof item.change === "number" ? (
+        <span className={`se-ticker__d se-ticker__d--${item.direction}`}>
+          {item.change > 0 ? "+" : ""}
+          {item.change.toFixed(2)}%
+        </span>
+      ) : null}
     </span>
   ));
 
   return (
-    <div className="se-ticker" aria-label="Cifras de cierre de mercado">
-      <div className="se-ticker__viewport">
-        <div className="se-ticker__track">
-          <div className="se-ticker__run">{run}</div>
-          <div className="se-ticker__run" aria-hidden="true">
-            {run}
+    <div className="se-ticker" aria-label="Cifras de mercado">
+      {hayCifras ? (
+        <div className="se-ticker__casa">
+          <div className="se-ticker__viewport">
+            <div className="se-ticker__track">
+              <div className="se-ticker__run">{run}</div>
+              <div className="se-ticker__run" aria-hidden="true">
+                {run}
+              </div>
+            </div>
           </div>
+          {ticker.caption ? (
+            ticker.sourceUrl ? (
+              <a
+                className="se-ticker__stamp"
+                href={ticker.sourceUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {ticker.caption}
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            ) : (
+              <span
+                className="se-ticker__stamp"
+                title={
+                  ticker.effectiveDate
+                    ? `Cierre del ${ticker.effectiveDate}`
+                    : undefined
+                }
+              >
+                {ticker.caption}
+              </span>
+            )
+          ) : null}
         </div>
-      </div>
-      {ticker.caption ? (
-        ticker.sourceUrl ? (
-          <a
-            className="se-ticker__stamp"
-            href={ticker.sourceUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {ticker.caption}
-            <span aria-hidden="true"> ↗</span>
-          </a>
-        ) : (
-          <span className="se-ticker__stamp">{ticker.caption}</span>
-        )
       ) : null}
+
+      <CintaMundial />
     </div>
   );
 };

@@ -242,6 +242,12 @@ export const AdminPlacesList = () => {
                                     <option key={padre.id} value={padre.id}>
                                         {padre.level === "continent"
                                             ? padre.name
+                                            /* Dos espacios duros escritos como escape:
+                                               sangran el lugar hijo en el desplegable. Con
+                                               espacios normales el HTML los colapsa y la
+                                               jerarquia desaparece. El escape es el MISMO
+                                               caracter; se escribe asi para que el linter no
+                                               lo lea como un espacio raro colado por error. */
                                             : `  ${padre.name}`}
                                     </option>
                                 ))}

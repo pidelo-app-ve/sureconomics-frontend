@@ -328,6 +328,7 @@ export const PieceBody = ({ pieza, enCabecera }) => {
     !enCabecera && html ? (
       <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: html }} />
     ) : null;
+  Entradilla.propTypes = { html: PropTypes.string };
 
   if (pieza.formato === "Noticias") {
     return (

@@ -1,0 +1,53 @@
+# Integración continua del sitio.
+#
+# Por qué existe: hasta ahora las pruebas, el linter y la construcción dependían de que
+# quien tocara el código se acordara de correrlos. Y ya se vio que eso falla — el linter
+# llevaba tiempo rojo en `master` con seis errores y nadie se había enterado, porque no
+# había nada que mirase.
+#
+# Corre en cada empujón y en cada propuesta de cambio. No despliega nada: de eso se
+# encarga Vercel por su cuenta. Esto sólo dice si lo que se subió está sano.
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+# Si se empuja dos veces seguidas, la primera ejecución se cancela: interesa el estado
+# de lo último, no acumular ejecuciones de commits ya superados.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  revisar:
+    name: Linter y construcción
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `npm ci` y no `npm install`: instala exactamente lo que dice el lockfile y falla
+      # si no cuadra, que es lo que hace reproducible una construcción.
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Linter
+        run: npm run lint
+
+      # Que compile es la comprobación más barata que existe contra un import roto o un
+      # JSX mal cerrado, y es exactamente el tipo de fallo que se cuela al editar CSS y
+      # componentes a la vez.
+      - name: Construir
+        run: npm run build
+
+      # Las etiquetas meta de una pieza las genera una función de Vercel, y tiene su
+      # propia prueba. Si se rompe, WhatsApp y X dejan de mostrar la vista previa al
+      # compartir un artículo, que es de las cosas que nadie nota hasta que importa.
+      - name: Prueba de las vistas previas
+        run: npm run test:og

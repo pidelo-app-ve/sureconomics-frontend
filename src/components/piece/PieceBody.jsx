@@ -168,16 +168,28 @@ VideoStage.propTypes = {
 };
 
 /**
- * The wall in front of a report.
+ * The wall in front of a report — cuando hay wall.
  *
  * Not a lead-capture form. Registering and signing in is what earns the file, so
  * the page asks for an account rather than for a name and an e-mail it would take
  * and then let anyone through anyway. Three states, because a reader can be signed
  * out, signed in but unconfirmed, or entitled — and each needs a different sentence.
+ *
+ * Y un cuarto camino que no es un estado del lector sino de la pieza: la redacción puede
+ * abrir un informe a todo el que entre. Entonces no hay muro, hay un botón. Se decidió
+ * así en vez de pedir el correo sin validarlo: un formulario que deja pasar a cualquiera
+ * cobra un peaje de fricción a cambio de datos que no valen nada, y la redacción abre un
+ * informe precisamente cuando quiere que llegue lejos.
+ *
+ * El botón se pinta sin preguntar nada al servidor. La bandera viaja en el detalle de la
+ * pieza justo para eso -- averiguarlo provocando un 401 habría dejado el botón parpadeando
+ * y una petición fallida en la consola de cada lector.
  */
 const DownloadGate = ({ pieza }) => {
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const [state, setState] = useState({ status: "idle", error: "" });
+
+  const abierto = Boolean(pieza.documentoAbierto);
 
   const handleDownload = async () => {
     setState({ status: "loading", error: "" });
@@ -192,7 +204,10 @@ const DownloadGate = ({ pieza }) => {
       // baja con `fetch`; una absoluta es Cloudinary y se abre tal cual, como siempre.
       // `window.open` no manda cabeceras, así que con la relativa daría 401.
       if (doc.url.startsWith("/")) {
-        await descargarArchivoDeUsuario(doc.url, { nombreSugerido: doc.filename });
+        await descargarArchivoDeUsuario(doc.url, {
+          nombreSugerido: doc.filename,
+          exigirSesion: !abierto,
+        });
       } else {
         window.open(doc.url, "_blank", "noopener,noreferrer");
       }
@@ -208,13 +223,35 @@ const DownloadGate = ({ pieza }) => {
     }
   };
 
+  const boton = (
+    <div className="se-gate__actions">
+      <button
+        type="button"
+        className="se-gate__submit"
+        onClick={handleDownload}
+        disabled={state.status === "loading"}
+      >
+        {state.status === "loading" ? "Preparando…" : "Descargar el informe"}
+      </button>
+    </div>
+  );
+
+  const paginas = pieza.paginas ? `${pieza.paginas} páginas. ` : "";
+
   return (
     <section className="se-gate" aria-labelledby="gate-title">
       <h2 id="gate-title" className="se-gate__title">
         Descargue el informe completo
       </h2>
 
-      {!isAuthenticated ? (
+      {abierto ? (
+        <>
+          <p className="se-gate__lead">
+            {paginas}Descarga libre: no hace falta cuenta ni registro.
+          </p>
+          {boton}
+        </>
+      ) : !isAuthenticated ? (
         <>
           <p className="se-gate__lead">
             Los informes son para lectores registrados. Cree una cuenta o inicie sesión
@@ -243,19 +280,9 @@ const DownloadGate = ({ pieza }) => {
       ) : (
         <>
           <p className="se-gate__lead">
-            {pieza.paginas ? `${pieza.paginas} páginas. ` : ""}Descarga gratuita para lectores
-            registrados.
+            {paginas}Descarga gratuita para lectores registrados.
           </p>
-          <div className="se-gate__actions">
-            <button
-              type="button"
-              className="se-gate__submit"
-              onClick={handleDownload}
-              disabled={state.status === "loading"}
-            >
-              {state.status === "loading" ? "Preparando…" : "Descargar el informe"}
-            </button>
-          </div>
+          {boton}
         </>
       )}
 

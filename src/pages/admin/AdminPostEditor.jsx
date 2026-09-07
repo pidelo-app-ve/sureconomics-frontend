@@ -115,6 +115,9 @@ const emptyForm = () => ({
     video_asset_id: null,
     document_asset_id: null,
     byline_photo_asset_id: null,
+    // Cerrado por omision: crear un informe sin decir nada lo deja pidiendo cuenta.
+    // En una decision de acceso, el valor por omision tiene que ser el restrictivo.
+    document_open_access: false,
 });
 
 const idsFromRelation = (val) => {
@@ -171,6 +174,7 @@ const postToForm = (post) => {
         video_asset_id: post.video_asset_id ?? null,
         document_asset_id: post.document_asset_id ?? null,
         byline_photo_asset_id: post.byline_photo_asset_id ?? null,
+        document_open_access: Boolean(post.document_open_access),
     };
 };
 
@@ -212,6 +216,11 @@ const formToPayload = (form) => {
     payload.image_asset_id = form.image_asset_id ?? null;
     payload.video_asset_id = form.video_asset_id ?? null;
     payload.document_asset_id = form.document_asset_id ?? null;
+    // Se manda siempre, aunque el formato no pida documento. La alternativa -- mandarlo
+    // solo en informes -- es una condicion mas que alguien puede olvidar, y la columna
+    // existe en toda pieza sin significar nada donde no hay documento. Mandarlo de mas
+    // es inocuo; olvidarlo cerraria un informe abierto al guardar.
+    payload.document_open_access = Boolean(form.document_open_access);
     payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
 
     Object.keys(payload).forEach((k) => {
@@ -746,6 +755,7 @@ export const AdminPostEditor = () => {
                         ) : null}
 
                         {requiredMedia === "document" ? (
+                            <>
                             <AssetField
                                 id="post-document"
                                 label="Documento del informe (PDF)"
@@ -758,6 +768,39 @@ export const AdminPostEditor = () => {
                                 accept={ACCEPTED_DOCUMENT_MIME}
                                 required
                             />
+
+                            {/* Quien puede descargarlo. Va aqui, pegado al campo del
+                                archivo, porque es una decision sobre ese archivo y no
+                                sobre la pieza en general. */}
+                            <label className="se-form-field se-acceso" htmlFor="post-open-access">
+                                <span className="se-acceso__fila">
+                                    <input
+                                        id="post-open-access"
+                                        type="checkbox"
+                                        checked={Boolean(form.document_open_access)}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({
+                                                ...prev,
+                                                document_open_access: e.target.checked,
+                                            }))
+                                        }
+                                    />
+                                    <span className="se-form-label se-acceso__titulo">
+                                        Descarga abierta a todos
+                                    </span>
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Sin marcar, sólo los lectores registrados con el correo
+                                    confirmado pueden descargarlo. Marcado, cualquiera que
+                                    entre al sitio lo descarga en un clic, sin cuenta.
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Se puede cambiar después: cerrar un informe abierto
+                                    corta el acceso de inmediato, también para quien ya
+                                    tenía la dirección.
+                                </span>
+                            </label>
+                            </>
                         ) : null}
 
                         {/* Every format, because every format has a card in a listing

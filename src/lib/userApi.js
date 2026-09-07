@@ -111,6 +111,47 @@ export const userPublicRequest = async (path, options = {}) => {
 };
 
 /**
+ * Igual que `userRequest`, pero **sin exigir sesión**: manda el token si hay uno y se
+ * conforma si no.
+ *
+ * Existe por los informes de descarga abierta. `userRequest` corta con un 401 propio
+ * antes de tocar la red cuando no hay token guardado -- lo cual es correcto para todo lo
+ * demás, porque ahorra un viaje que iba a fallar. Pero en un informe abierto el servidor
+ * habría contestado 200, y ese 401 del navegador dejaba al lector anónimo sin poder
+ * descargar algo que la redacción abrió a todos. El fallo no era del backend, así que las
+ * pruebas del backend no podían verlo.
+ *
+ * Se manda el token cuando lo hay porque el servidor identifica al lector si puede, y
+ * distinguir aquí quién es sería duplicar una decisión que ya se toma allá.
+ *
+ * @returns {Promise<Record<string, unknown>>}
+ */
+export const userOptionalAuthRequest = async (path, options = {}) => {
+  if (!API_BASE) {
+    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
+  }
+
+  const { refreshToken, accessExpiresAt, accessToken } = readUserAuth();
+  // Sólo se refresca si de verdad hay sesión que refrescar.
+  if (accessToken && refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
+    try {
+      await refreshUserTokens();
+    } catch {
+      /* continue */
+    }
+  }
+
+  const { res, payload } = await rawUserFetch(path, {
+    ...options,
+    token: readUserAuth().accessToken || undefined,
+  });
+  if (!res.ok || payload?.success === false) {
+    throwFromPayload(res, payload ?? {});
+  }
+  return unwrapUserResponseData(payload);
+};
+
+/**
  * @returns {Promise<Record<string, unknown>>}
  */
 export const refreshUserTokens = async () => {
@@ -205,7 +246,10 @@ export const userRequest = async (path, options = {}) => {
  *
  * Refresca el token una vez si venció, igual que `userRequest`.
  */
-export const descargarArchivoDeUsuario = async (path, { nombreSugerido } = {}) => {
+export const descargarArchivoDeUsuario = async (
+  path,
+  { nombreSugerido, exigirSesion = true } = {},
+) => {
   if (!API_BASE) {
     throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
   }
@@ -219,12 +263,19 @@ export const descargarArchivoDeUsuario = async (path, { nombreSugerido } = {}) =
     }
   }
 
-  const pedir = () =>
-    fetch(`${API_BASE}${path.startsWith("/") ? path : `/${path}`}`, {
-      headers: { Authorization: `Bearer ${readUserAuth().accessToken}` },
+  const pedir = () => {
+    // La cabecera se arma sólo si hay token. Mandar `Bearer undefined` no es lo mismo
+    // que no mandar nada: el servidor intentaria leerlo.
+    const token = readUserAuth().accessToken;
+    return fetch(`${API_BASE}${path.startsWith("/") ? path : `/${path}`}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+  };
 
-  if (!readUserAuth().accessToken) {
+  // `exigirSesion: false` es para los informes de descarga abierta, donde el servidor
+  // contesta 200 sin sesión. Por omisión se exige, que es lo que quiere todo lo demás:
+  // cortar aquí ahorra un viaje que iba a volver 401.
+  if (exigirSesion && !readUserAuth().accessToken) {
     throw new ApiError("Debe iniciar sesión", { status: 401 });
   }
 

@@ -287,10 +287,14 @@ export const piezaFromApi = (row) => {
     imagenCredito: row.image_asset?.credit || null,
     videoUrl: row.video_asset?.url || null,
     duracion: duracionCorta(row.video_asset?.duration_seconds),
-    // Present means "there is a report to offer"; the URL is handed out only to a
-    // signed-in reader by `documentService`.
+    // Present means "there is a report to offer"; the URL is handed out by
+    // `documentService`, and quién puede pedirla lo decide el servidor.
     tieneDocumento: Boolean(row.document_asset),
     paginas: row.document_asset?.pages ?? null,
+    // Si la redacción abrió este informe a todo el que entre. Se normaliza a booleano
+    // porque una pieza que venga del listado no trae el campo, y `undefined` haría que
+    // la página ofreciera el registro a alguien que no lo necesita.
+    documentoAbierto: Boolean(row.document_open_access),
   };
 };
 

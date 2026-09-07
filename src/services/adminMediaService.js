@@ -78,8 +78,19 @@ export const uploadAdminMediaDocument = (file) => upload("/admin/media/document"
  * El paso 3 es imprescindible: sin el, el video queda en Cloudflare y ninguna pieza
  * puede apuntarle.
  */
-export const pedirSubidaDeVideo = async () =>
-  unwrapEntity(await adminRequest("/admin/media/video/subida", { method: "POST" }));
+export const pedirSubidaDeVideo = async (clave) =>
+  unwrapEntity(
+    await adminRequest("/admin/media/video/subida", {
+      method: "POST",
+      // La clave de idempotencia no es opcional aqui en la practica, y por eso se pide
+      // como argumento: cada llamada a Cloudflare crea un hueco de video NUEVO y Stream
+      // factura por minuto almacenado. Un doble clic sin clave creaba dos huecos, el
+      // navegador subia a uno, y el otro quedaba huerfano facturandose para siempre --
+      // y sin forma de encontrarlo, porque su identificador no se guardo en ninguna
+      // parte. Con la clave, el segundo clic recibe la direccion del primero.
+      idempotencyKey: clave,
+    })
+  );
 
 /**
  * Sube el archivo a la direccion que dio Cloudflare.
@@ -117,11 +128,12 @@ export const subirVideoAStream = (file, uploadUrl, { onProgress } = {}) =>
     xhr.send(cuerpo);
   });
 
-export const registrarVideoDeStream = async (uid, { nombre } = {}) =>
+export const registrarVideoDeStream = async (uid, { nombre, clave } = {}) =>
   unwrapEntity(
     await adminRequest("/admin/media/video", {
       method: "POST",
       json: { uid, original_filename: nombre || undefined },
+      idempotencyKey: clave,
     })
   );
 

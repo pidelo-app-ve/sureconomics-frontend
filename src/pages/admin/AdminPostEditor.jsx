@@ -243,6 +243,11 @@ export const AdminPostEditor = () => {
     // listado y sin saber cuál borrar. Al cuajar se navega al editor de la pieza nueva,
     // así que no hace falta renovarla.
     const { clave: claveDeCreacion } = useClaveIdempotente();
+    // Clave aparte para la subida de video, y no la de crear la pieza: son dos
+    // operaciones distintas y compartir la clave haria que la segunda recibiera la
+    // respuesta guardada de la primera. Se renueva cuando una subida cuaja, porque a
+    // partir de ahi lo que venga es otro video y no un reintento del mismo.
+    const { clave: claveDeVideo, renovar: renovarClaveDeVideo } = useClaveIdempotente();
     const [actionState, setActionState] = useState({ status: "idle", message: "", kind: "" });
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
@@ -351,13 +356,20 @@ export const AdminPostEditor = () => {
         }
 
         onAviso?.("Pidiendo permiso a Cloudflare…");
-        const permiso = await pedirSubidaDeVideo();
+        // Con la clave: si el editor pulsa dos veces, la segunda recibe la direccion de
+        // la primera en vez de crear un segundo hueco de video que se factura solo.
+        const permiso = await pedirSubidaDeVideo(claveDeVideo());
 
         onAviso?.("Subiendo. No cierre esta pagina.");
         await subirVideoAStream(file, permiso.upload_url, { onProgress });
 
         onAviso?.("Subido. Anotandolo en la biblioteca…");
-        const fila = await registrarVideoDeStream(permiso.uid, { nombre: file.name });
+        const fila = await registrarVideoDeStream(permiso.uid, {
+            nombre: file.name,
+            clave: claveDeVideo(),
+        });
+        // Cuajo: la proxima subida es otro video, no un reintento de este.
+        renovarClaveDeVideo();
 
         try {
             const est = await estadoDelVideo(permiso.uid);

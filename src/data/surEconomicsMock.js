@@ -72,7 +72,7 @@ export const PARTNERS = [
     id: "alalza",
     name: "Alalza Inversiones",
     logo: aliada("alalza-logo.png"),
-    url: null,
+    url: "https://www.pidelove.com",
   },
   {
     id: "moore-capital",

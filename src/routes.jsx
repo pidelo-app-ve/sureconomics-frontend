@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Subscribe } from "./pages/Subscribe";
+import { BoletinBaja } from "./pages/BoletinBaja";
 import { QuienesSomos } from "./pages/QuienesSomos";
 import { Articulos } from "./pages/Articulos";
 import { Informes } from "./pages/Informes";
@@ -18,6 +19,7 @@ import { AdminTopicsList } from "./pages/admin/AdminTopicsList";
 import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
 import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
+import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
 import { AdminSubmissionsList } from "./pages/admin/AdminSubmissionsList";
 import { AdminSubmissionDetail } from "./pages/admin/AdminSubmissionDetail";
@@ -48,6 +50,9 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <Home /> },
             { path: "suscribirse", element: <Subscribe /> },
+            // A donde apunta el enlace de baja de cada boletin. Sin sesion: el
+            // token de la direccion es la unica credencial. Ver `BoletinBaja`.
+            { path: "boletin/baja", element: <BoletinBaja /> },
             { path: "quienes-somos", element: <QuienesSomos /> },
             { path: "articulos", element: <Articulos /> },
             { path: "informes", element: <Informes /> },
@@ -112,6 +117,7 @@ export const router = createBrowserRouter([
                     { path: "media", element: <AdminMediaLibrary /> },
                     { path: "cinta", element: <AdminMarketTicker /> },
                     { path: "comments", element: <AdminCommentsList /> },
+                    { path: "boletin", element: <AdminNewsletterList /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },
                     { path: "submissions/:id", element: <AdminSubmissionDetail /> },
                     { path: "settings/collaboration", element: <AdminCollaborationSettings /> },

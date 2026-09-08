@@ -4,6 +4,7 @@ import { IconInstagram, IconX } from "./icons/social";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
 import { useState } from "react";
+import { subscribeToNewsletter } from "../services/newsletterService";
 
 /** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
  *  salga un hueco con el nombre suelto rompiendo la fila. */
@@ -15,17 +16,49 @@ const ICONO_RED = {
 export const Footer = () => {
   const { t } = useI18n();
   const [newsletterEmail, setNewsletterEmail] = useState("");
+  // El campo trampa: invisible para una persona, irresistible para un rastreador.
+  const [newsletterTrampa, setNewsletterTrampa] = useState("");
   const [newsletterState, setNewsletterState] = useState({ status: "idle", message: "" });
 
+  /**
+   * Suscribir de verdad.
+   *
+   * Lo que había aquí antes: un `setTimeout` de 700 milisegundos y el mensaje "Listo. Te
+   * enviaremos el próximo boletín (demo)". No existía ni la tabla ni la ruta, así que
+   * cada correo escrito en este formulario se perdió — y la persona se fue creyendo lo
+   * contrario. La palabra "(demo)" estaba ahí, pero se lee de pasada.
+   *
+   * El acierto no distingue si el correo ya estaba: el servidor contesta lo mismo en los
+   * dos casos para que nadie pueda averiguar quién está suscrito escribiendo
+   * direcciones, y decirlo aquí anularía esa protección.
+   */
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     if (newsletterState.status === "loading") return;
     const email = newsletterEmail.trim();
     if (!email) return;
     setNewsletterState({ status: "loading", message: "" });
-    await new Promise((r) => setTimeout(r, 700));
-    setNewsletterState({ status: "success", message: "Listo. Te enviaremos el próximo boletín (demo)." });
-    setNewsletterEmail("");
+    try {
+      await subscribeToNewsletter(email, {
+        source: "footer",
+        honeypot: newsletterTrampa,
+      });
+      setNewsletterEmail("");
+      setNewsletterState({
+        status: "success",
+        message: "Listo. Le llegará el próximo boletín a ese correo.",
+      });
+    } catch (err) {
+      setNewsletterState({
+        status: "error",
+        message:
+          err?.status === 422
+            ? "Revise el correo: parece que tiene algo raro."
+            : err?.status === 429
+              ? "Demasiados intentos. Espere un momento y vuelva a probar."
+              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+      });
+    }
   };
 
   return (
@@ -88,6 +121,18 @@ export const Footer = () => {
                 required
                 aria-label="Correo electrónico para newsletter"
               />
+              {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
+                  rellenara sin querer, su suscripción se descartaría. */}
+              <input
+                type="text"
+                name="website"
+                className="se-sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                autoComplete="off"
+                value={newsletterTrampa}
+                onChange={(e) => setNewsletterTrampa(e.target.value)}
+              />
               <button
                 type="submit"
                 className="se-footer__newsletter-btn"
@@ -100,6 +145,11 @@ export const Footer = () => {
             <div className="se-footer__newsletter-status" aria-live="polite">
               {newsletterState.status === "success" ? (
                 <p className="se-footer__newsletter-ok">{newsletterState.message}</p>
+              ) : null}
+              {newsletterState.status === "error" ? (
+                <p className="se-footer__newsletter-error" role="alert">
+                  {newsletterState.message}
+                </p>
               ) : null}
             </div>
           </div>

@@ -39,11 +39,17 @@ import { useTaxonomy } from "../hooks/useTaxonomy";
  * muestra su punado mas reciente.
  */
 
-/** How many pieces each block shows when nothing is filtered. */
+/**
+ * How many pieces each block shows when nothing is filtered.
+ *
+ * `editorial` en 3 y no en 2: la rejilla tiene tres columnas, asi que con dos tarjetas
+ * quedaba un hueco a la derecha -- y con una de las dos repitiendo la editorial del dia,
+ * el lector veia **una sola** editorial nueva de las diez publicadas.
+ */
 const PREVIEW = {
   noticia: 6,
   articulo: 3,
-  editorial: 2,
+  editorial: 3,
   entrevista: 3,
   informe: 2,
 };
@@ -83,7 +89,22 @@ export const Home = () => {
   const blocks = Object.keys(FORMATO_META)
     .map((formatoApi) => {
       const all = results.filter((p) => p.formatoApi === formatoApi);
-      const items = isFiltered ? all : all.slice(0, PREVIEW[formatoApi]);
+
+      // La editorial del dia ya esta puesta arriba, a lo ancho y con su propio
+      // encabezado. Sin quitarla de aqui salia otra vez en la primera tarjeta del
+      // bloque -- las dos son "la mas reciente", asi que la repeticion era segura, no
+      // casual. Se quita tambien cuando hay filtro, porque el bloque de arriba se pinta
+      // igual: esta en pantalla de las dos maneras.
+      const visibles =
+        formatoApi === "editorial" && editorialDelDia
+          ? all.filter((p) => p.id !== editorialDelDia.id)
+          : all;
+
+      const items = isFiltered ? visibles : visibles.slice(0, PREVIEW[formatoApi]);
+
+      // `total` cuenta `all` y no `visibles`: es la cifra del enlace "Ver los N", y la
+      // editorial de arriba tambien esta en esa lista. Restarla ahi seria mentir sobre
+      // cuantas hay.
       return { formatoApi, items, total: all.length };
     })
     .filter((b) => b.items.length > 0);

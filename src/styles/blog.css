@@ -1407,6 +1407,19 @@
   line-height: 1.5;
 }
 
+.se-footer__newsletter-error {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  /* #b9532a, el acento de la marca, en filete y relleno. El texto se queda oscuro: el
+     pie tiene fondo blanco y un rojo saturado en las letras se lee peor. */
+  border: 1px solid rgba(185, 83, 42, 0.32);
+  background: rgba(185, 83, 42, 0.1);
+  color: rgba(var(--se-tinte), 0.92);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .se-footer__nav-list {
   list-style: none;
   margin: 0;
@@ -2404,10 +2417,23 @@
 }
 
 /* Newsletter */
+/* —— El boletin de la portada: «Entorno en Vinetas» ——
+
+   Se conserva la identidad que ya habia -- fondo #f7f7f5, filete de hairline y la
+   rejilla de puntos en acento al 8 % con mascara radial -- y cambia el reparto.
+
+   La tarjeta tenia 64 px de relleno y el texto acababa a media anchura, asi que la mitad
+   derecha quedaba vacia. Ahora son dos columnas: la copia con su formulario a la
+   izquierda y una tira de vinetas dibujada en CSS a la derecha. Dibujada y no una
+   ilustracion: no hay ninguna en el proyecto, y una inventada prometeria un contenido
+   que todavia no existe.
+
+   Contrastes medidos sobre #f7f7f5: negro 19.58:1, acento 4.52:1, gris de marca 4.97:1,
+   y blanco sobre el acento del boton 4.85:1. Los cuatro pasan AA. */
 .se-newsletter__card {
   background: #f7f7f5;
   color: var(--color-cream);
-  padding: 64px clamp(28px, 5vw, 72px);
+  padding: clamp(36px, 4vw, 60px) clamp(28px, 5vw, 64px);
   position: relative;
   overflow: hidden;
   isolation: isolate;
@@ -2426,43 +2452,90 @@
   z-index: -1;
 }
 
+/* `minmax(0, ...)` en la primera columna: sin el, una palabra larga del titular ensancha
+   la pista y empuja la tira fuera de la tarjeta. */
+.se-newsletter__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+}
+
+.se-newsletter__copy {
+  min-width: 0;
+}
+
+/* El mismo tratamiento que el cintillo de la editorial del dia: mono, versalitas y
+   acento. Es lo que hace que este bloque se lea como parte del sistema y no como una
+   pieza traida de fuera. */
+.se-newsletter__kicker {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 12px;
+}
+
 .se-newsletter__title {
-  font-family: var(--se-font-ui);
+  font-family: var(--se-font-heading);
   font-weight: 700;
   letter-spacing: -0.025em;
   font-size: clamp(30px, 3.6vw, 44px);
-  line-height: 1.1;
+  line-height: 1.05;
   color: var(--color-cream);
-  margin-bottom: 14px;
-  max-width: 26ch;
+  margin: 0 0 12px;
+  max-width: 20ch;
+  text-wrap: balance;
 }
 
 .se-newsletter__text {
   font-size: 16px;
   line-height: 1.6;
   color: rgba(var(--se-tinte), 0.72);
-  margin: 0 0 28px;
-  max-width: 48ch;
+  margin: 0 0 24px;
+  max-width: 52ch;
+}
+
+/* La etiqueta se ve. Estaba solo en el `placeholder`, que desaparece en cuanto se
+   escribe: quien vuelve al formulario a medias no sabe que hay en la caja, y un lector
+   de pantalla no tiene nada estable que anunciar. */
+.se-newsletter__label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(var(--se-tinte), 0.62);
+  margin-bottom: 8px;
 }
 
 .se-newsletter__form {
-  display: flex;
-  gap: 0;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(var(--se-tinte), 0.18);
-  max-width: 540px;
-  transition: border-color 0.2s ease;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
-.se-newsletter__form:focus-within {
+.se-newsletter__field {
+  display: flex;
+  gap: 0;
+  background: var(--color-paper);
+  border: 1px solid rgba(var(--se-tinte), 0.18);
+  max-width: 540px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* El campo lleva `outline: none`, asi que el anillo de foco lo pinta el contenedor: un
+   filete de acento mas un halo de 3 px. Sin el halo el unico aviso seria un cambio de
+   color de un pixel, que es casi no tener aviso. */
+.se-newsletter__field:focus-within {
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.18);
 }
 
 .se-newsletter__input {
   flex: 1;
   min-width: 0;
-  padding: 18px 22px;
+  padding: 16px 20px;
   font-family: var(--se-font-ui);
   font-size: 15px;
   border: none;
@@ -2477,24 +2550,132 @@
 
 .se-newsletter__btn {
   flex-shrink: 0;
-  border-radius: 0;
+  /* 48 px de alto: por encima del minimo de 44 que necesita un dedo. */
+  min-height: 48px;
   border: none;
-  padding: 0 28px;
+  border-radius: 0;
+  padding: 0 26px;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.se-newsletter__btn:hover {
+  background: var(--se-accent-hover);
+}
+
+.se-newsletter__btn:active {
+  /* Un empujon de un pixel: confirma la pulsacion en un boton sin sombra. */
+  transform: translateY(1px);
+}
+
+.se-newsletter__btn:disabled {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+/* Anillo por dentro: el boton llega al borde de la caja, y por fuera se saldria. */
+.se-newsletter__btn:focus-visible {
+  outline: 2px solid var(--color-cream);
+  outline-offset: -5px;
+}
+
+/* La tira de vinetas: seis recuadros, dos filas de tres. Lo que "vineta" quiere decir,
+   dibujado con los mismos filetes de acento de la rejilla del fondo. */
+.se-newsletter__tira {
+  display: grid;
+  grid-template-columns: repeat(3, 74px);
+  grid-template-rows: repeat(2, 74px);
+  gap: 10px;
+  /* Girada grado y medio: la tira parece una pagina puesta encima de la tarjeta y no un
+     componente mas de la interfaz. */
+  transform: rotate(-1.5deg);
+}
+
+.se-newsletter__vineta {
+  border: 1px solid rgba(185, 83, 42, 0.32);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.se-newsletter__vineta--tinta {
+  background: rgba(185, 83, 42, 0.12);
+  border-color: rgba(185, 83, 42, 0.5);
+}
+
+.se-newsletter__status:empty {
+  /* Sin esto, el hueco del mensaje empuja la nota de abajo aunque no haya nada que
+     decir, y el bloque se mueve al suscribirse. */
+  display: none;
+}
+
+.se-newsletter__status {
+  margin: 12px 0 0;
+}
+
+/* El acierto y el error. El verde y el rojo van en el filete y en el relleno, nunca en
+   las letras: el texto se queda en el tinte al 92 %, que sobre este fondo es casi negro
+   y se lee igual de bien en los dos casos. */
+.se-newsletter__ok,
+.se-newsletter__error {
+  margin: 10px 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  color: rgba(var(--se-tinte), 0.92);
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 540px;
+}
+
+.se-newsletter__ok {
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.se-newsletter__error {
+  border: 1px solid rgba(185, 83, 42, 0.32);
+  background: rgba(185, 83, 42, 0.1);
 }
 
 .se-newsletter__note {
   font-size: 13px;
   color: var(--color-slate-2);
-  margin: 0;
+  margin: 12px 0 0;
+  max-width: 52ch;
 }
 
+/* Debajo de 1024 la tira se retira: en dos columnas estrechas le robaria al texto el
+   ancho que necesita, y es decoracion. */
+@media (max-width: 1023px) {
+  .se-newsletter__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-newsletter__tira {
+    display: none;
+  }
+}
+
+/* 640 px es el corte que ya usa el resto de la hoja, no uno nuevo. El boton pasa debajo
+   del campo: uno junto al otro deja la caja del correo en poco mas de 100 px en un
+   telefono estrecho y no se ve lo que se escribe. */
 @media (max-width: 640px) {
-  .se-newsletter__form {
+  .se-newsletter__field {
     flex-direction: column;
+    max-width: none;
   }
 
   .se-newsletter__btn {
-    padding: 14px 28px;
+    width: 100%;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(var(--se-tinte), 0.18);
   }
 }
 
@@ -6352,6 +6533,15 @@ a.se-topics__chip:focus-visible {
   justify-content: space-between;
   gap: var(--se-space-md);
   margin-bottom: var(--se-space-lg);
+}
+
+/* El filtro y el boton de descarga de la lista del boletin. La cabecera ya reparte con
+   `space-between`, asi que esto solo alinea los dos controles entre si. */
+.se-boletin__acciones {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--se-space-sm);
+  flex-wrap: wrap;
 }
 
 .se-admin-shell__header .se-heading-section {
@@ -10417,9 +10607,26 @@ a.se-topics__chip:focus-visible {
 }
 
 /* —— Artículos: tarjetas con imagen y firma —— */
+/* Tres columnas cuando caben, y las que quepan cuando no.
+
+   Antes eran tres fijas, y eso dejaba un hueco a la derecha cada vez que el numero de
+   tarjetas no era multiplo de tres: se veia en el bloque de editorial, que mostraba
+   dos, y aparecia igual en articulos y noticias en cuanto un filtro dejaba cuatro
+   resultados. Con `auto-fit` dos tarjetas se reparten el ancho y tres quedan como
+   estaban.
+
+   280 px y no 320, y el numero salio de medir: con 320 la rejilla se quedaba en dos
+   columnas a 1024 px de pantalla -- tres pistas de 320 con 64 de hueco son 1024 y ahi
+   solo hay 976 de contenido -- asi que el arreglo metia un hueco justo donde antes no
+   habia ninguno. Con 280 caben tres (904) y siguen sin caber cuatro (1216 contra 1152),
+   de modo que los cortes quedan donde estaban.
+
+   El `min(280px, 100%)` no es adorno: con `minmax(280px, ...)` a secas, una pantalla
+   mas estrecha que 280 px forzaria una pista de 280 y la pagina se desplazaria a lo
+   ancho. Asi la pista nunca puede ser mas ancha que su contenedor. */
 .se-artgrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: var(--se-space-lg);
 }
 

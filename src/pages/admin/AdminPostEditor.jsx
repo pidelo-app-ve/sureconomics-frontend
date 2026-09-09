@@ -15,6 +15,7 @@ import {
     listAdminTopics,
 } from "../../services/adminTaxonomyService";
 import {
+    ACCEPTED_AUDIO_MIME,
     ACCEPTED_DOCUMENT_MIME,
     ACCEPTED_IMAGE_MIME,
     ACCEPTED_VIDEO_MIME,
@@ -23,6 +24,7 @@ import {
     pedirSubidaDeVideo,
     registrarVideoDeStream,
     subirVideoAStream,
+    uploadAdminMediaAudio,
     uploadAdminMediaDocument,
     uploadAdminMediaImage,
 } from "../../services/adminMediaService";
@@ -114,6 +116,7 @@ const emptyForm = () => ({
     image_asset_id: null,
     video_asset_id: null,
     document_asset_id: null,
+    audio_asset_id: null,
     byline_photo_asset_id: null,
     // Cerrado por omision: crear un informe sin decir nada lo deja pidiendo cuenta.
     // En una decision de acceso, el valor por omision tiene que ser el restrictivo.
@@ -173,6 +176,7 @@ const postToForm = (post) => {
         image_asset_id: post.image_asset_id ?? null,
         video_asset_id: post.video_asset_id ?? null,
         document_asset_id: post.document_asset_id ?? null,
+        audio_asset_id: post.audio_asset_id ?? null,
         byline_photo_asset_id: post.byline_photo_asset_id ?? null,
         document_open_access: Boolean(post.document_open_access),
     };
@@ -216,6 +220,7 @@ const formToPayload = (form) => {
     payload.image_asset_id = form.image_asset_id ?? null;
     payload.video_asset_id = form.video_asset_id ?? null;
     payload.document_asset_id = form.document_asset_id ?? null;
+    payload.audio_asset_id = form.audio_asset_id ?? null;
     // Se manda siempre, aunque el formato no pida documento. La alternativa -- mandarlo
     // solo en informes -- es una condicion mas que alguien puede olvidar, y la columna
     // existe en toda pieza sin significar nada donde no hay documento. Mandarlo de mas
@@ -243,7 +248,7 @@ export const AdminPostEditor = () => {
     const [formats, setFormats] = useState([]);
     const [topics, setTopics] = useState([]);
     const [placeGroups, setPlaceGroups] = useState([]);
-    const [assets, setAssets] = useState({ image: null, video: null, document: null, bylinePhoto: null });
+    const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
     // La misma clave mientras la creación no cuaje. El caso que evita: se pulsa Crear,
@@ -286,7 +291,7 @@ export const AdminPostEditor = () => {
             // on the right form instead of picking the format twice.
             const requested = searchParams.get("format") || "";
             setForm({ ...emptyForm(), format: requested });
-            setAssets({ image: null, video: null, document: null, bylinePhoto: null });
+            setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
             setLoadState({ status: "success", error: null });
             return;
         }
@@ -298,6 +303,7 @@ export const AdminPostEditor = () => {
                 image: post.image_asset ?? null,
                 video: post.video_asset ?? null,
                 document: post.document_asset ?? null,
+                audio: post.audio_asset ?? null,
                 bylinePhoto: post.byline_photo ?? null,
             });
             setLoadState({ status: "success", error: null });
@@ -429,11 +435,13 @@ export const AdminPostEditor = () => {
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
-            setAssets({
+            setAssets((prev) => ({
+                ...prev,
                 image: updated.image_asset ?? null,
                 video: updated.video_asset ?? null,
                 document: updated.document_asset ?? null,
-            });
+                audio: updated.audio_asset ?? null,
+            }));
             setSaveState({ status: "success", message: "Cambios guardados correctamente." });
             toastSuccess("Cambios guardados correctamente.", "Contenido guardado");
         } catch (err) {
@@ -531,7 +539,8 @@ export const AdminPostEditor = () => {
     /** Whether publishing would be refused for a missing file, said before trying. */
     const missingMedia =
         (requiredMedia === "video" && !form.video_asset_id) ||
-        (requiredMedia === "document" && !form.document_asset_id);
+        (requiredMedia === "document" && !form.document_asset_id) ||
+        (requiredMedia === "audio" && !form.audio_asset_id);
 
     return (
         <main role="main">
@@ -803,6 +812,21 @@ export const AdminPostEditor = () => {
                             </>
                         ) : null}
 
+                        {requiredMedia === "audio" ? (
+                            <AssetField
+                                id="post-audio"
+                                label="Audio del podcast (MP3 o M4A)"
+                                hint="Se escucha sin cuenta, como cualquier pieza. Sin audio, el podcast no se puede publicar."
+                                kind="audio"
+                                value={form.audio_asset_id}
+                                asset={assets.audio}
+                                onChange={setAsset("audio_asset_id", "audio")}
+                                onUpload={uploadAdminMediaAudio}
+                                accept={ACCEPTED_AUDIO_MIME}
+                                required
+                            />
+                        ) : null}
+
                         {/* Every format, because every format has a card in a listing
                             and any piece may arrive with a photo. */}
                         <>
@@ -879,7 +903,7 @@ export const AdminPostEditor = () => {
 
                         {missingMedia ? (
                             <p className="se-admin-warning">
-                                Falta {requiredMedia === "video" ? "el video" : "el documento"}.
+                                Falta {requiredMedia === "video" ? "el video" : requiredMedia === "audio" ? "el audio" : "el documento"}.
                                 Puede guardar como borrador, pero publicar será rechazado hasta
                                 que lo adjunte.
                             </p>

@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useState } from "react";
 import {
+    ACCEPTED_AUDIO_MIME,
     ACCEPTED_DOCUMENT_MIME,
     ACCEPTED_IMAGE_MIME,
     deleteAdminMedia,
@@ -8,6 +9,7 @@ import {
     formatDuration,
     listAdminMedia,
     patchAdminMedia,
+    uploadAdminMediaAudio,
     uploadAdminMediaDocument,
     uploadAdminMediaImage,
 } from "../../services/adminMediaService";
@@ -23,6 +25,7 @@ const KINDS = [
     { value: "image", label: "Imágenes" },
     { value: "video", label: "Videos" },
     { value: "document", label: "Documentos" },
+    { value: "audio", label: "Podcast" },
 ];
 
 const WHERE = {
@@ -188,8 +191,8 @@ export const AdminMediaLibrary = () => {
                         Archivos
                     </h1>
                     <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Imágenes, videos y documentos. Un archivo adjunto a una pieza no se puede eliminar:
-                        habría que quitarlo de la pieza primero.
+                        Imágenes, videos, documentos y podcast. Un archivo adjunto a una pieza no se puede
+                        eliminar: habría que quitarlo de la pieza primero.
                     </p>
                 </div>
                 {canUpload ? (
@@ -210,6 +213,16 @@ export const AdminMediaLibrary = () => {
                                 type="file"
                                 accept={ACCEPTED_DOCUMENT_MIME}
                                 onChange={handleUpload(uploadAdminMediaDocument, "Documento")}
+                                disabled={busy}
+                                style={{ display: "none" }}
+                            />
+                        </label>
+                        <label className="se-btn se-btn--small">
+                            Subir audio
+                            <input
+                                type="file"
+                                accept={ACCEPTED_AUDIO_MIME}
+                                onChange={handleUpload(uploadAdminMediaAudio, "Audio")}
                                 disabled={busy}
                                 style={{ display: "none" }}
                             />

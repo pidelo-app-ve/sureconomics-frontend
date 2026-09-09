@@ -168,6 +168,45 @@ VideoStage.propTypes = {
 };
 
 /**
+ * El audio del podcast.
+ *
+ * Un `<audio>` nativo y nada más -- a diferencia del video de una entrevista, que
+ * durante la migración puede venir de YouTube o Vimeo y por eso necesita `embedDe`
+ * y sus tres formas, un podcast siempre es un archivo nuestro en R2. No hay nada
+ * que decidir aquí.
+ */
+const AudioStage = ({ url, duracion, titulo }) => {
+  if (!url) {
+    return (
+      <div className="se-audiostage">
+        <p className="se-audiostage__note">
+          El audio de este podcast todavía no está cargado.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="se-audiostage">
+      <audio
+        className="se-audiostage__player"
+        src={url}
+        controls
+        preload="metadata"
+        aria-label={titulo ? `Audio: ${titulo}` : "Audio del podcast"}
+      />
+      {duracion ? <p className="se-audiostage__note">{duracion}</p> : null}
+    </div>
+  );
+};
+
+AudioStage.propTypes = {
+  url: PropTypes.string,
+  duracion: PropTypes.string,
+  titulo: PropTypes.string,
+};
+
+/**
  * The wall in front of a report — cuando hay wall.
  *
  * Not a lead-capture form. Registering and signing in is what earns the file, so
@@ -380,6 +419,17 @@ export const PieceBody = ({ pieza, enCabecera }) => {
             {pieza.entrevistadoCargo ? `, ${pieza.entrevistadoCargo}` : ""}.
           </p>
         ) : null}
+        <Cuerpo html={pieza.cuerpo} />
+      </>
+    );
+  }
+
+  // Podcast: el audio es la pieza, igual que el video lo es en una entrevista. Sin
+  // imagen encima por la misma razón -- competiría con lo que de verdad importa.
+  if (pieza.formato === "Podcast") {
+    return (
+      <>
+        <AudioStage url={pieza.audioUrl} duracion={pieza.duracion} titulo={pieza.titulo} />
         <Cuerpo html={pieza.cuerpo} />
       </>
     );

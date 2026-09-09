@@ -33,9 +33,10 @@ export const PRIMARY_NAV = [
     to: "/informes",
     labelKey: "nav.informesReportes",
   },
-  // Al final y no entre los formatos: los seis de arriba son sitios donde se lee, y
-  // este es la casa que los publica. La pagina y su ruta ya existian desde el
-  // rediseno; lo unico que faltaba era la puerta para entrar desde el encabezado.
+  { id: "podcast", to: "/articulos?formato=podcast", labelKey: "nav.podcast" },
+  // Al final y no entre los formatos: los de arriba son sitios donde se lee, y este
+  // es la casa que los publica. La pagina y su ruta ya existian desde el rediseno;
+  // lo unico que faltaba era la puerta para entrar desde el encabezado.
   { id: "quienesSomos", to: "/quienes-somos", labelKey: "nav.quienesSomos" },
 ];
 

@@ -25,6 +25,7 @@ export const FORMATO_META = {
   editorial: { slug: "editorial", plural: "Editorial", porPagina: 6 },
   entrevista: { slug: "entrevistas", plural: "Entrevistas", porPagina: 6 },
   informe: { slug: "informes", plural: "Informes", porPagina: 6 },
+  podcast: { slug: "podcast", plural: "Podcast", porPagina: 6 },
 };
 
 /** Route prefix → format slug, for reading a URL back. */
@@ -286,7 +287,13 @@ export const piezaFromApi = (row) => {
     // credit, which is accurate -- nobody ever recorded one for those.
     imagenCredito: row.image_asset?.credit || null,
     videoUrl: row.video_asset?.url || null,
-    duracion: duracionCorta(row.video_asset?.duration_seconds),
+    audioUrl: row.audio_asset?.url || null,
+    // Campo compartido entre entrevista y podcast -- nunca es las dos a la vez, así
+    // que no hay ambigüedad, y así InterviewGrid y PodcastGrid leen `p.duracion`
+    // igual sin que a cada una le haga falta saber de qué formato viene la pieza.
+    duracion: duracionCorta(
+      row.video_asset?.duration_seconds ?? row.audio_asset?.duration_seconds
+    ),
     // Present means "there is a report to offer"; the URL is handed out by
     // `documentService`, and quién puede pedirla lo decide el servidor.
     tieneDocumento: Boolean(row.document_asset),

@@ -64,13 +64,14 @@ export const router = createBrowserRouter([
             // the cross-format explorer.
             { path: "articulo/:slug", element: <PiezaRedirect /> },
             { path: "categoria/:slug", element: <Navigate to="/explorar" replace /> },
-            // One detail page for all five formats; the format sits in the path so
+            // One detail page for all six formats; the format sits in the path so
             // the URL reads as what it is.
             { path: "noticias/:slug", element: <Pieza /> },
             { path: "articulos/:slug", element: <Pieza /> },
             { path: "editorial/:slug", element: <Pieza /> },
             { path: "entrevistas/:slug", element: <Pieza /> },
             { path: "informes/:slug", element: <Pieza /> },
+            { path: "podcast/:slug", element: <Pieza /> },
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },

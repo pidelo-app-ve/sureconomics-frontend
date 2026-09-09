@@ -47,6 +47,7 @@ export const ACCEPTED_DOCUMENT_MIME = "application/pdf";
 /** Both match the backend defaults; used only for a hint before uploading. */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 export const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+export const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
 
 /**
  * `adminRequest` leaves `Content-Type` unset for a `FormData` body, so the browser
@@ -61,6 +62,13 @@ const upload = async (path, file) => {
 export const uploadAdminMediaImage = (file) => upload("/admin/media/image", file);
 
 export const uploadAdminMediaDocument = (file) => upload("/admin/media/document", file);
+
+/**
+ * El audio de un podcast: síncrono, como el documento, y no en dos pasos como el
+ * video. Un mp3 de unos minutos pesa unos pocos MB -- nada que ver con media hora de
+ * entrevista -- así que pasar por nuestro servidor no cuesta lo que costaría con video.
+ */
+export const uploadAdminMediaAudio = (file) => upload("/admin/media/audio", file);
 
 /**
  * El video de una entrevista, en tres pasos.
@@ -148,6 +156,9 @@ export const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
 
 /** Lo que Stream acepta. Se ofrece como filtro del selector, no como validacion. */
 export const ACCEPTED_VIDEO_MIME = "video/mp4,video/quicktime,video/webm,video/x-matroska";
+
+/** Charlas cortas: mp3 o m4a. La firma de bytes la comprueba el backend igual. */
+export const ACCEPTED_AUDIO_MIME = "audio/mpeg,audio/mp4,.mp3,.m4a";
 
 export const patchAdminMedia = async (id, body) =>
   unwrapEntity(

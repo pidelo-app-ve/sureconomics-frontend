@@ -12,6 +12,7 @@ import {
   FormatSection,
   InterviewGrid,
   NewsList,
+  PodcastGrid,
   ReportGrid,
 } from "../components/home";
 import { FORMATO_META } from "../lib/pieza";
@@ -52,6 +53,7 @@ const PREVIEW = {
   editorial: 3,
   entrevista: 3,
   informe: 2,
+  podcast: 3,
 };
 
 const LAYOUTS = {
@@ -60,6 +62,7 @@ const LAYOUTS = {
   editorial: (items) => <EditorialList items={items} />,
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
+  podcast: (items) => <PodcastGrid items={items} />,
 };
 
 export const Home = () => {

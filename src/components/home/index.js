@@ -9,4 +9,5 @@ export { EditorialDelDia } from "./EditorialDelDia";
 export { EditorialList } from "./EditorialList";
 export { InterviewGrid } from "./InterviewGrid";
 export { ReportGrid } from "./ReportGrid";
+export { PodcastGrid } from "./PodcastGrid";
 export { ListingPagination } from "./ListingPagination";

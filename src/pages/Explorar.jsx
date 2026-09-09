@@ -10,6 +10,7 @@ import {
   FormatSection,
   InterviewGrid,
   NewsList,
+  PodcastGrid,
   ReportGrid,
 } from "../components/home";
 import { FORMATO_META } from "../lib/pieza";
@@ -35,6 +36,7 @@ const LAYOUTS = {
   editorial: (items) => <EditorialList items={items} />,
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
+  podcast: (items) => <PodcastGrid items={items} />,
 };
 
 export const Explorar = () => {
@@ -119,8 +121,8 @@ export const Explorar = () => {
             <h1 className="se-articles__title">{titulo}</h1>
             {status === "success" ? (
               <p className="se-text-body se-articles__lead">
-                {results.length} {results.length === 1 ? "pieza" : "piezas"} en los cinco
-                formatos, agrupadas.
+                {results.length} {results.length === 1 ? "pieza" : "piezas"}, agrupadas por
+                formato.
               </p>
             ) : null}
           </div>

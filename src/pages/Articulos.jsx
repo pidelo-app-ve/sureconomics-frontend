@@ -11,6 +11,7 @@ import {
   InterviewGrid,
   ListingPagination,
   NewsList,
+  PodcastGrid,
   ReportGrid,
 } from "../components/home";
 import { FORMATO_META, FORMATO_POR_RUTA } from "../lib/pieza";
@@ -36,12 +37,13 @@ const LAYOUTS = {
   editorial: (items) => <EditorialList items={items} />,
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
+  podcast: (items) => <PodcastGrid items={items} />,
 };
 
 /**
  * One format's view, mounted fresh for each format.
  *
- * Split out of the page so the parent can key it on the format. All five formats
+ * Split out of the page so the parent can key it on the format. All six formats
  * share the single `/articulos` route, so switching between them from the menu only
  * changes the query string: React keeps this subtree mounted and reuses the DOM
  * nodes. That had two consequences worth naming, both fixed by the key — the entry

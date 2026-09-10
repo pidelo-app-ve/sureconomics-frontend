@@ -96,11 +96,15 @@ export const getPieces = async ({
   topic,
   place,
   q,
+  // Sólo las marcadas como contenido educativo. Se filtra en el servidor y no aquí
+  // porque la sección educativa cruza los seis formatos: filtrarlo en el navegador
+  // obligaría a traerse el sitio entero para quedarse con una parte.
+  educational,
   page = 1,
   limit = 20,
 } = {}) => {
   const payload = await client().request("/posts", {
-    query: { format, topic, place, q, page, limit },
+    query: { format, topic, place, q, educational, page, limit },
   });
   const rows = payload && "data" in payload ? payload.data : payload;
   const meta = payload?.meta ?? null;

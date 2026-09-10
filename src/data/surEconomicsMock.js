@@ -34,6 +34,10 @@ export const PRIMARY_NAV = [
     labelKey: "nav.informesReportes",
   },
   { id: "podcast", to: "/articulos?formato=podcast", labelKey: "nav.podcast" },
+  // Despues de los formatos y no entre ellos: los de arriba son formatos, y este es
+  // un corte transversal -- las mismas piezas, reunidas por ser educativas. Su ruta
+  // es propia porque el criterio es un valor de la pieza y no un filtro.
+  { id: "educacion", to: "/educacion", labelKey: "nav.educacion" },
   // Al final y no entre los formatos: los de arriba son sitios donde se lee, y este
   // es la casa que los publica. La pagina y su ruta ya existian desde el rediseno;
   // lo unico que faltaba era la puerta para entrar desde el encabezado.

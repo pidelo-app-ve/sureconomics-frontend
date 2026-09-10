@@ -3,6 +3,7 @@ import { useState } from "react";
 import { temaPrincipal } from "../../lib/contentFilter";
 import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
+import { SelloEducativo } from "./SelloEducativo";
 import { piezaShape } from "./piezaShape";
 
 /**
@@ -42,36 +43,50 @@ const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
 export const CardMedia = ({ pieza, ancho, etiqueta }) => {
   const [fallo, setFallo] = useState(false);
 
+  // El sello va aquí y no en cada rejilla porque cinco de las seis pintan su imagen
+  // a través de este componente. La que falta es la de entrevistas, que tiene su
+  // propia miniatura con el botón de reproducir, y lo pinta por su cuenta.
+  //
+  // Sale como hermano de la imagen, no envuelto con ella: el contenedor de la
+  // tarjeta ya es la caja 16/9 que recorta, y meter un envoltorio de por medio
+  // habría movido la maqueta de las cinco rejillas.
   if (pieza.imagenUrl && !fallo) {
     return (
-      <img
-        className="se-artcard__img"
-        src={imagenAncho(pieza.imagenUrl, ancho)}
-        // El ancho original decide qué tallas existen en nuestro bucket. Para
-        // Cloudinary se ignora: allí los anchos los calcula el servidor.
-        srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
-        sizes={SIZES}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        onError={() => setFallo(true)}
-      />
+      <>
+        <img
+          className="se-artcard__img"
+          src={imagenAncho(pieza.imagenUrl, ancho)}
+          // El ancho original decide qué tallas existen en nuestro bucket. Para
+          // Cloudinary se ignora: allí los anchos los calcula el servidor.
+          srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
+          sizes={SIZES}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setFallo(true)}
+        />
+        <SelloEducativo pieza={pieza} />
+      </>
     );
   }
 
   return (
-    <div
-      className="se-cardfill"
-      style={{ background: fondoDeTema(temaPrincipal(pieza)) }}
-      aria-hidden={etiqueta ? undefined : "true"}
-    >
-      {etiqueta ? <span className="se-cardfill__tema">{etiqueta}</span> : null}
-    </div>
+    <>
+      <div
+        className="se-cardfill"
+        style={{ background: fondoDeTema(temaPrincipal(pieza)) }}
+        aria-hidden={etiqueta ? undefined : "true"}
+      >
+        {etiqueta ? <span className="se-cardfill__tema">{etiqueta}</span> : null}
+      </div>
+      {/* Fuera del relleno, que puede llevar `aria-hidden`: el sello sí se anuncia. */}
+      <SelloEducativo pieza={pieza} />
+    </>
   );
 };
 
 CardMedia.propTypes = {
-  pieza: piezaShape({ imagenUrl: PropTypes.string }).isRequired,
+  pieza: piezaShape({ imagenUrl: PropTypes.string, educativo: PropTypes.bool }).isRequired,
   ancho: PropTypes.number,
   etiqueta: PropTypes.string,
 };

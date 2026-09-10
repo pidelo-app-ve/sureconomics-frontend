@@ -3,6 +3,8 @@ export { MarketTicker } from "./MarketTicker";
 export { ContentExplorer } from "./ContentExplorer";
 export { FormatSection } from "./FormatSection";
 export { CardMedia } from "./CardMedia";
+export { SelloEducativo } from "./SelloEducativo";
+export { EducativoGrid } from "./EducativoGrid";
 export { NewsList } from "./NewsList";
 export { ArticleCardGrid } from "./ArticleCardGrid";
 export { EditorialDelDia } from "./EditorialDelDia";

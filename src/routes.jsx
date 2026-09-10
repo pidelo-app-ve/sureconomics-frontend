@@ -9,6 +9,7 @@ import { Informes } from "./pages/Informes";
 import { Pieza } from "./pages/Pieza";
 import { PiezaRedirect } from "./pages/PiezaRedirect";
 import { Explorar } from "./pages/Explorar";
+import { Educacion } from "./pages/Educacion";
 import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
 import { NotFound } from "./pages/NotFound";
@@ -57,6 +58,9 @@ export const router = createBrowserRouter([
             { path: "articulos", element: <Articulos /> },
             { path: "informes", element: <Informes /> },
             { path: "explorar", element: <Explorar /> },
+            // Cruza los seis formatos, como /explorar, pero por un valor de la pieza
+            // en vez de por los filtros. De ahi su propia ruta y no un parametro mas.
+            { path: "educacion", element: <Educacion /> },
             // Everything published before the redesign lives at "articulo/<slug>".
             // Those addresses are indexed and shared, so they redirect to wherever
             // the piece sits now instead of 404ing. Same for "categoria/<slug>":

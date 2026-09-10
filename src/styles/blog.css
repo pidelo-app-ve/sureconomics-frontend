@@ -1012,7 +1012,7 @@
    Se agrupa de 768 arriba y no en el telefono: ahi el hueco ya es pequeno y los tres
    bloques repartidos se leen equilibrados. 768 es el corte de tableta de siempre, no
    un numero elegido para tapar esto. */
-@media (min-width: 768px) and (max-width: 1099px) {
+@media (min-width: 768px) and (max-width: 1199px) {
   .se-header__inner .se-hora--header {
     margin-left: auto;
   }
@@ -1022,15 +1022,18 @@
   }
 }
 
-/* El menu de hamburguesa toma el mando por debajo de 1100, no de 992.
-   Subio al entrar el septimo enlace ("Quienes somos"). Medido en la franja que se
-   perdio: al nav le quedaban 448 px a 1024 y necesitaba 535, y a 992 tenia 433 para
-   534. Ahi no caben marca + siete enlaces + dos botones + reloj de ninguna manera --
-   el ultimo enlace se metia por debajo de ENTRAR y salia cortado como "Quie...".
+/* El menu de hamburguesa toma el mando por debajo de 1200, no de 1100 ni de 992.
+   Subio dos veces por el mismo motivo, y las dos medido. La primera al entrar el
+   septimo enlace ("Quienes somos"): al nav le quedaban 448 px a 1024 y necesitaba
+   535, y a 992 tenia 433 para 534.
+   La segunda al entrar el noveno ("Educacion"). Con nueve enlaces la tira pide 733 px.
+   Recibia 607 a 1280 y 690 a 1366, asi que se cortaban dos enlaces y uno. Con el hueco
+   apretado y el reloj cedido (las dos reglas de mas abajo) entran enteros de 1200
+   arriba; entre 1100 y 1199 seguia faltando -- 94 px a 1100 -- y de ahi este corte.
    Apretar mas la tipografia no era una opcion: ya esta a 13 px.
    El precio es que el iPad en horizontal pasa a menu. Lo hacen bastantes diarios, y
-   un menu con los siete enlaces en columna se usa mejor que una tira recortada. */
-@media (max-width: 1099px) {
+   un menu con los nueve enlaces en columna se usa mejor que una tira recortada. */
+@media (max-width: 1199px) {
   .se-header__burger {
     display: flex;
   }
@@ -1042,7 +1045,7 @@
 }
 
 /* Desktop: show nav + Subscribe, hide burger and overlay menu */
-@media (min-width: 1100px) {
+@media (min-width: 1200px) {
   .se-header__burger {
     display: none;
   }
@@ -1125,6 +1128,27 @@
 
   .se-header__menu {
     display: none;
+  }
+}
+
+/* —— La franja donde nueve enlaces caben justo ——
+   De 1200 a 1439. A 1440 y arriba la tira entera cabe con el reloj puesto y el hueco
+   de siempre, asi que estas dos concesiones no llegan alli.
+
+   Se ceden dos cosas y ninguna es un enlace, que es el orden correcto de prioridades:
+   primero el hueco entre enlaces, y despues el reloj de Caracas. El reloj ya cedia
+   entre 768 y 1199 por lo mismo; esto solo extiende su franja. Un enlace del menu que
+   no se ve es navegacion perdida; un reloj que no se ve es un adorno menos.
+
+   Medido con nueve enlaces: la tira pedia 733 px y recibia 607 a 1280. Con las dos
+   reglas entra sin cortar ninguno desde 1200. */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .se-header__inner .se-hora--header {
+    display: none;
+  }
+
+  .se-header__nav--desktop .se-header__nav-list {
+    column-gap: 0.5rem;
   }
 }
 
@@ -7608,11 +7632,12 @@ a.se-topics__chip:focus-visible {
   margin-top: var(--se-space-xs);
 }
 
-/* —— Admin: el interruptor de acceso de un informe ——
-   Se destaca sobre el resto del formulario a proposito: es la unica casilla del editor
-   que cambia quien puede ver algo, y el resto son datos de la pieza. El recuadro y el
-   filo a la izquierda existen para que no se marque sin querer al recorrer el formulario
-   con el tabulador. */
+/* —— Admin: los interruptores destacados del editor ——
+   Dos, hoy: quien puede descargar un informe, y si la pieza es contenido educativo. Se
+   destacan sobre el resto del formulario a proposito -- las demas casillas son datos de
+   la pieza y estas dos cambian donde aparece o quien la ve. El recuadro y el filo a la
+   izquierda existen para que no se marquen sin querer al recorrer el formulario con el
+   tabulador. */
 .se-acceso {
   margin-top: var(--se-space-md);
   padding: var(--se-space-sm) var(--se-space-md);
@@ -7653,6 +7678,29 @@ a.se-topics__chip:focus-visible {
   /* #b9532a, el mismo acento, al 18%. Escrito en crudo porque el token es un hex y
      `rgba()` no puede partirlo. */
   box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.18);
+}
+
+/* El filo en el verde del sello, no en el acento: los dos interruptores comparten el
+   recuadro, y con el mismo filo se leerian como la misma decision. Es el color con el
+   que el lector va a ver la pieza marcada.
+
+   Va DESPUES de la regla de foco a proposito: `border-color` ahi es la forma corta y
+   pone los cuatro lados, asi que enfocando el interruptor el filo verde se volvia
+   terracota. Estas dos reglas lo devuelven, cada una mas especifica que la de arriba. */
+.se-acceso--educativo {
+  border-left-color: var(--marca-verde);
+}
+
+.se-acceso--educativo:focus-within {
+  /* La forma corta pone los cuatro lados, con lo que el filo de la izquierda tambien
+     queda verde -- que es justo lo que hace falta. */
+  border-color: var(--marca-verde);
+  /* #003318, el mismo verde, al 18%. En crudo por lo mismo que el de arriba. */
+  box-shadow: 0 0 0 3px rgba(0, 51, 24, 0.18);
+}
+
+.se-acceso--educativo .se-acceso__fila input[type="checkbox"] {
+  accent-color: var(--marca-verde);
 }
 
 /* —— Admin: resultado de una acción, junto a los botones —— */
@@ -10555,6 +10603,44 @@ a.se-topics__chip:focus-visible {
   white-space: nowrap;
 }
 
+/* —— El sello de contenido educativo ——
+   Relleno, a diferencia de `.se-tagpill`, que es sólo contorno. El pedido era que se
+   notara distinto de lo que ya había, y una séptima píldora igual a las demás se
+   habría leído como otro tema más -- que es justo lo que esto no es: una pieza
+   educativa conserva su tema y su país.
+
+   En el verde del brandbook y no en el acento terracota: el acento ya es el botón de
+   reproducir de las entrevistas, y sobre esa misma miniatura el sello habría
+   desaparecido dentro de su propio color. */
+.se-sello-edu {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: var(--marca-verde);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  /* Blanco fijo, no `--color-cream`: ése es el texto de la página y en tema claro es
+     negro, que sobre el verde oscuro no se leería. Mismo motivo que en
+     `.se-vidcard__dur`. */
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Las tarjetas de artículo e informe estiran a 100% cualquier hijo directo de su
+   caja de imagen, para que la foto la llene. El sello es hermano de esa foto y
+   caería en la misma regla: sin esto se estira hasta cubrir la tarjeta entera. */
+.se-artcard__media > .se-sello-edu,
+.se-doccard__media > .se-sello-edu {
+  width: auto;
+  height: auto;
+}
+
 /* —— Noticias: lista sin imagen —— */
 .se-newslist {
   list-style: none;
@@ -10624,9 +10710,16 @@ a.se-topics__chip:focus-visible {
    El `min(280px, 100%)` no es adorno: con `minmax(280px, ...)` a secas, una pantalla
    mas estrecha que 280 px forzaria una pista de 280 y la pagina se desplazaria a lo
    ancho. Asi la pista nunca puede ser mas ancha que su contenedor. */
+/* `auto-fill` y no `auto-fit`, que es lo que estaba y se notaba con el sitio casi
+   vacio: `auto-fit` colapsa las columnas que quedan sin nada, asi que una seccion con
+   **una sola pieza** estiraba esa tarjeta a todo el ancho -- una imagen 16/9 de 1100px
+   de lado a lado para una nota. `auto-fill` conserva las columnas: la tarjeta queda de
+   su tamano y al lado queda hueco, que es lo correcto mientras cada formato arranca con
+   una o dos piezas. Afecta a noticias, articulos, editorial y podcast, que comparten
+   esta rejilla; entrevistas e informes ya tenian el numero de columnas fijo. */
 .se-artgrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: var(--se-space-lg);
 }
 
@@ -10659,6 +10752,9 @@ a.se-topics__chip:focus-visible {
   display: block;
   aspect-ratio: 16 / 9;
   overflow: hidden;
+  /* Para que el sello educativo se ancle a la esquina de la imagen. Sin esto se
+     anclaría al primer ancestro posicionado, que es la página. */
+  position: relative;
   border-bottom: 1px solid var(--color-hairline);
 }
 
@@ -11064,6 +11160,8 @@ a.se-topics__chip:focus-visible {
   display: block;
   aspect-ratio: 16 / 9;
   overflow: hidden;
+  /* Igual que en la tarjeta de artículo: ancla el sello educativo. */
+  position: relative;
   border-bottom: 1px solid var(--color-hairline);
 }
 

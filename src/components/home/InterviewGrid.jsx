@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
+import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas } from "./piezaShape";
 
 /** Entrevistas: video thumbnails with a play affordance and a duration. */
@@ -20,6 +21,9 @@ export const InterviewGrid = ({ items }) => (
         >
           <span className="se-vidcard__play" aria-hidden="true" />
           <span className="se-vidcard__dur">{v.duracion}</span>
+          {/* Aquí y no en `CardMedia`: esta rejilla es la única que no dibuja su
+              imagen a través de ese componente. */}
+          <SelloEducativo pieza={v} />
         </Link>
         <div className="se-vidcard__body">
           <span className="se-meta se-meta--category">{temaPrincipal(v)}</span>
@@ -40,5 +44,6 @@ InterviewGrid.propTypes = {
   items: listaDePiezas({
     duracion: PropTypes.string.isRequired,
     entrevistado: PropTypes.string,
+    educativo: PropTypes.bool,
   }),
 };

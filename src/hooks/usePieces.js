@@ -19,7 +19,7 @@ import { getPieces } from "../services/publicContentService";
 const PER_PAGE = 100;
 const MAX_PAGES = 5;
 
-export const usePieces = ({ format } = {}) => {
+export const usePieces = ({ format, educational } = {}) => {
   const [state, setState] = useState({
     status: "loading",
     items: [],
@@ -41,7 +41,14 @@ export const usePieces = ({ format } = {}) => {
       while (page <= Math.min(pages, MAX_PAGES)) {
         // Sequential on purpose: the first response is what says how many pages
         // there are, so firing them in parallel would mean guessing.
-        const chunk = await getPieces({ format, page, limit: PER_PAGE });
+        // `undefined` y no `false` cuando no se pide: el cliente omite los nulos, y
+        // un `?educational=false` en la direccion se leeria como un filtro puesto.
+        const chunk = await getPieces({
+          format,
+          educational: educational ? true : undefined,
+          page,
+          limit: PER_PAGE,
+        });
         collected.push(...chunk.items);
         pages = chunk.pages || 1;
         total = chunk.total ?? collected.length;
@@ -66,7 +73,7 @@ export const usePieces = ({ format } = {}) => {
     return () => {
       alive = false;
     };
-  }, [format]);
+  }, [format, educational]);
 
   return state;
 };

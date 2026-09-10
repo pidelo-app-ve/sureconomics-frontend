@@ -302,6 +302,12 @@ export const piezaFromApi = (row) => {
     // porque una pieza que venga del listado no trae el campo, y `undefined` haría que
     // la página ofreciera el registro a alguien que no lo necesita.
     documentoAbierto: Boolean(row.document_open_access),
+    // Si la redacción marcó esta pieza como contenido educativo. Transversal al
+    // formato y al tema: la tarjeta pinta el sello encima de lo que ya dice, no en
+    // lugar de nada. Booleano forzado porque una respuesta de una versión anterior
+    // del backend no trae el campo, y `undefined` en un `&&` de JSX no pinta nada
+    // pero tampoco se distingue de un `false` al depurar.
+    educativo: Boolean(row.is_educational),
   };
 };
 

@@ -121,6 +121,9 @@ const emptyForm = () => ({
     // Cerrado por omision: crear un informe sin decir nada lo deja pidiendo cuenta.
     // En una decision de acceso, el valor por omision tiene que ser el restrictivo.
     document_open_access: false,
+    // Sin marcar por omision: una pieza nueva no entra en la seccion educativa sin
+    // que alguien lo decida.
+    is_educational: false,
 });
 
 const idsFromRelation = (val) => {
@@ -179,6 +182,7 @@ const postToForm = (post) => {
         audio_asset_id: post.audio_asset_id ?? null,
         byline_photo_asset_id: post.byline_photo_asset_id ?? null,
         document_open_access: Boolean(post.document_open_access),
+        is_educational: Boolean(post.is_educational),
     };
 };
 
@@ -226,6 +230,11 @@ const formToPayload = (form) => {
     // existe en toda pieza sin significar nada donde no hay documento. Mandarlo de mas
     // es inocuo; olvidarlo cerraria un informe abierto al guardar.
     payload.document_open_access = Boolean(form.document_open_access);
+    // Se manda siempre, por el mismo motivo que el de arriba: el interruptor solo se
+    // ofrece en articulo y entrevista, y condicionar el envio al formato es una
+    // condicion mas que puede desincronizarse del interruptor. Se manda lo que tiene
+    // el formulario, que es lo que la pieza traia si no se toco.
+    payload.is_educational = Boolean(form.is_educational);
     payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
 
     Object.keys(payload).forEach((k) => {
@@ -405,6 +414,13 @@ export const AdminPostEditor = () => {
 
     const shows = (field) => (FORMAT_FIELDS[form.format] ?? []).includes(field);
     const requiredMedia = currentFormat?.required_media ?? "none";
+
+    // Donde se ofrece marcar la pieza como educativa: articulo y entrevista, que es lo
+    // que se pidio. La segunda mitad de la condicion es lo que evita un callejon sin
+    // salida -- si una pieza ya marcada cambia a un formato que no ofrece el
+    // interruptor, sin esto quedaria con el sello puesto y sin forma de quitarlo.
+    const muestraEducativo =
+        form.format === "articulo" || form.format === "entrevista" || form.is_educational;
 
     // A URL pasted before the media library existed. Shown so an editor knows why
     // there is an image on a piece with nothing attached, and can clear it.
@@ -743,6 +759,40 @@ export const AdminPostEditor = () => {
                             value={form.place_ids}
                             onChange={(next) => setForm((prev) => ({ ...prev, place_ids: next }))}
                         />
+
+                        {/* Deliberadamente un interruptor aparte y no una entrada mas en
+                            la lista de temas. Los temas topan en tres y el primero es el
+                            que imprime la tarjeta: como tema, marcar algo de educativo
+                            habria gastado uno de esos huecos y competido por ser el
+                            principal, para decir algo que no descarta ningun tema. */}
+                        {muestraEducativo ? (
+                            <label
+                                className="se-form-field se-acceso se-acceso--educativo"
+                                htmlFor="post-educational"
+                            >
+                                <span className="se-acceso__fila">
+                                    <input
+                                        id="post-educational"
+                                        type="checkbox"
+                                        checked={Boolean(form.is_educational)}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({
+                                                ...prev,
+                                                is_educational: e.target.checked,
+                                            }))
+                                        }
+                                    />
+                                    <span className="se-form-label se-acceso__titulo">
+                                        Es contenido educativo
+                                    </span>
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Marcado, la pieza lleva un sello propio en las tarjetas y
+                                    entra en la sección Educación, además de seguir donde ya
+                                    estaba. No cambia sus temas ni su formato.
+                                </span>
+                            </label>
+                        ) : null}
                     </div>
 
                     <div className="se-editor-group">

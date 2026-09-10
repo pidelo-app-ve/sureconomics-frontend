@@ -94,11 +94,14 @@ export const PARTNERS = [
 
 
 export const TEAM = {
-  leadership: [
+  // Antes "Liderazgo / dirección editorial". Reestructurado a pedido del cliente
+  // (10/2026): estos cuatro pasan a ser el organo formal, y se cae de aqui Juan
+  // Francisco Paz, que no vuelve a aparecer en ningun grupo.
+  board: [
     {
-      id: "editor-oscar-doval",
+      id: "junta-oscar-doval",
       name: "Óscar Doval",
-      role: "Editor en Jefe",
+      role: "Junta Directiva",
       summary:
         "Lidera la dirección editorial y la línea de investigación del medio. Enfoque en rigor, claridad y mirada regional.",
       cvUrl: "#",
@@ -106,23 +109,33 @@ export const TEAM = {
       links: [],
     },
     {
-      id: "director-finanzas-daniel-berconsky",
+      id: "junta-daniel-berconsky",
       name: "Daniel Berconsky Da Ruos",
-      role: "Director de Finanzas",
+      role: "Junta Directiva",
       summary:
         "Supervisa el marco financiero y el acompañamiento institucional. Aporta visión estratégica para proyectos de inteligencia e inversión.",
       cvUrl: "#",
       email: "",
       links: [],
     },
+    // Estaba como Colaborador; el cliente lo sube a Junta Directiva.
     {
-      id: "director-operaciones-juan-francisco-paz",
-      name: "Juan Francisco Paz",
-      role: "Director de Operaciones y comercialización",
-      summary:
-        "Conecta la operación editorial y el componente comercial con una metodología orientada a valor para aliados e inversionistas.",
+      id: "junta-aknaton-matute",
+      name: "Aknatón Matute",
+      role: "Junta Directiva",
+      summary: "Investigación y contenido.",
       cvUrl: "#",
-      email: "jpaz@rendigroup.com",
+      email: "",
+      links: [],
+    },
+    // Mismo caso: estaba como Colaborador.
+    {
+      id: "junta-guillermo-leandro",
+      name: "Guillermo Leandro",
+      role: "Junta Directiva",
+      summary: "Visión sectorial.",
+      cvUrl: "#",
+      email: "",
       links: [],
     },
   ],
@@ -138,28 +151,11 @@ export const TEAM = {
       email: "",
       links: [],
     },
+    // Nombre nuevo a pedido del cliente (10/2026), sin bio propia todavía -- la
+    // misma línea genérica que llevaba Mafe Yáñez, que sale de este grupo.
     {
-      id: "consejo-juan-francisco-paz",
-      name: "Juan Francisco Paz",
-      role: "Consejo Editorial",
-      summary:
-        "Economista (Universidad Católica Andrés Bello). Consultor del Banco de Desarrollo de América Latina (CAF).",
-      cvUrl: "#",
-      email: "jpaz@rendigroup.com",
-      links: [],
-    },
-    {
-      id: "consejo-manuel-puche",
-      name: "Manuel Puche",
-      role: "Consejo Editorial",
-      summary: "Asesoría legal y relaciones institucionales del medio.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    {
-      id: "consejo-mafe-yanez",
-      name: "Mafe Yáñez",
+      id: "consejo-alex-lund",
+      name: "Alex Lund",
       role: "Consejo Editorial",
       summary: "Aporte editorial y de gestión institucional.",
       cvUrl: "#",
@@ -213,44 +209,30 @@ export const TEAM = {
       email: "",
       links: [],
     },
-  ],
-  collaborators: [
-    { id: "col-juan-domingo-cordero", name: "Juan Domingo Cordero Osorio", role: "Colaborador", summary: "Investigación y aportes sectoriales.", cvUrl: "#", email: "", links: [] },
-    { id: "col-simon-cordero-osorio", name: "Simón Cordero Osorio", role: "Colaborador", summary: "Aportes en análisis regional.", cvUrl: "#", email: "", links: [] },
-    { id: "col-daniel-berconsky", name: "Daniel Berconsky Da Ruos", role: "Colaborador", summary: "Acompañamiento financiero.", cvUrl: "#", email: "", links: [] },
-    { id: "col-aknatón-matute", name: "Aknatón Matute", role: "Colaborador", summary: "Investigación y contenido.", cvUrl: "#", email: "", links: [] },
-    { id: "col-guillermo-leandro", name: "Guillermo Leandro", role: "Colaborador", summary: "Visión sectorial.", cvUrl: "#", email: "", links: [] },
+    // Estaba en Equipo de investigación, que desaparece como grupo propio; su
+    // función ya descrita ahí se conserva como etiqueta corta, igual que TI o
+    // Diseñadora en el resto de este grupo.
     {
-      id: "col-giulio-cellini",
-      name: "Giulio Cellini",
-      role: "Colaborador",
-      summary:
-        "Abogado (Universidad Católica Andrés Bello). Representante ante el Consejo Universitario de UCAB y Concejal del Municipio El Hatillo.",
-      cvUrl:
-        "https://unionradio.net/experto-ve-positivo-pero-insuficiente-la-medida-para-revisar-las-inhabilitaciones/",
+      id: "operativo-saul-benarroch",
+      name: "Saul Benarroch",
+      role: "Riesgo",
+      summary: "Modelos y lecturas de riesgo.",
+      cvUrl: "#",
       email: "",
       links: [],
     },
+    // Nombre nuevo a pedido del cliente (10/2026). Sin cargo específico todavía
+    // -- se pidió dejarlo así en vez de inventar uno -- por eso no lleva resumen:
+    // el componente no imprime la línea cuando falta.
     {
-      id: "col-andres-silva",
-      name: "Andrés Silva Ayala",
-      role: "Colaborador",
-      summary:
-        "Abogado (Universidad Monteávila). Máster en Comunicación y Marketing Político. Consultor político.",
-      cvUrl:
-        "https://www.linkedin.com/in/andr%C3%A9s-silva-ayala-543aa1142/?originalSubdomain=ve",
+      id: "operativo-manuel-oropeza",
+      name: "Manuel Oropeza",
+      role: "Equipo operativo",
+      summary: "",
+      cvUrl: "#",
       email: "",
       links: [],
     },
-  ],
-  researchTeam: [
-    { id: "res-juan-francisco-paz", name: "Juan Francisco Paz", role: "Equipo de Investigación", summary: "Líneas de investigación y coordinación.", cvUrl: "#", email: "jpaz@rendigroup.com", links: [] },
-    { id: "res-sofia-venavidez", name: "Sofía Venavidez", role: "Equipo de Investigación", summary: "Análisis y recopilación de datos.", cvUrl: "#", email: "", links: [] },
-    { id: "res-cesar-guillen", name: "César Guillén", role: "Equipo de Investigación", summary: "Estructuración de informes.", cvUrl: "#", email: "", links: [] },
-    { id: "res-alessandro-ferrara", name: "Alessandro Ferrara", role: "Equipo de Investigación", summary: "Investigación comparada.", cvUrl: "#", email: "", links: [] },
-    { id: "res-saul-benarroch", name: "Saul Benarroch", role: "Equipo de Investigación", summary: "Modelos y lecturas de riesgo.", cvUrl: "#", email: "", links: [] },
-    { id: "res-mateo-rodriguez", name: "Mateo Rodríguez", role: "Equipo de Investigación", summary: "Monitoreo regional y síntesis.", cvUrl: "#", email: "", links: [] },
-    { id: "res-david-ruiz", name: "David Ruiz", role: "Equipo de Investigación", summary: "Análisis y apoyo en las líneas de investigación.", cvUrl: "#", email: "", links: [] },
   ],
 };
 

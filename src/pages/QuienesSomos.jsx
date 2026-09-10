@@ -170,9 +170,13 @@ export const QuienesSomos = () => {
           </header>
 
           <div className="se-about__acc-list">
+            {/* Reestructurado a pedido del cliente (10/2026): solo estos tres
+                grupos quedan en la pagina. "Colaboradores" y "Equipo de
+                investigacion" se retiraron -- no solo se vaciaron -- porque
+                un titulo de seccion sin nadie debajo se leeria como un hueco. */}
             <TeamSection
-              title="Liderazgo / dirección editorial"
-              members={TEAM.leadership}
+              title="Junta Directiva"
+              members={TEAM.board}
               initiallyOpen={initiallyOpen}
             />
             <TeamSection
@@ -183,16 +187,6 @@ export const QuienesSomos = () => {
             <TeamSection
               title="Equipo operativo"
               members={TEAM.operational}
-              initiallyOpen={initiallyOpen}
-            />
-            <TeamSection
-              title="Colaboradores"
-              members={TEAM.collaborators}
-              initiallyOpen={initiallyOpen}
-            />
-            <TeamSection
-              title="Equipo de investigación"
-              members={TEAM.researchTeam}
               initiallyOpen={initiallyOpen}
             />
           </div>

@@ -29,12 +29,6 @@ export const TeamMemberCard = ({ member }) => {
         </div>
       </div>
 
-      {member.summary && (
-        <p className="se-member-card__summary se-text-body">
-          {member.summary}
-        </p>
-      )}
-
       {(hasEmail || hasExternalCv) && (
         <div className="se-member-card__links">
           {hasEmail && (
@@ -66,9 +60,7 @@ TeamMemberCard.propTypes = {
   member: PropTypes.shape({
     name: PropTypes.string.isRequired,
     role: PropTypes.string.isRequired,
-    summary: PropTypes.string,
     cvUrl: PropTypes.string,
     email: PropTypes.string,
   }).isRequired,
 };
-

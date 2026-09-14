@@ -1,7 +1,7 @@
 import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 const useInitialAccordionOpen = () => {
@@ -78,23 +78,6 @@ TeamSection.propTypes = {
 
 export const QuienesSomos = () => {
   const initiallyOpen = useInitialAccordionOpen();
-  const signals = useMemo(
-    () => [
-      {
-        title: "Investigación",
-        description: "datos + contexto + comprensión = conocimiento",
-      },
-      {
-        title: "Lectura ejecutiva",
-        description: "resúmenes + análisis = información + toma de decisiones",
-      },
-      {
-        title: "Red regional",
-        description: "una mirada de LATAM con estándares de primer mundo",
-      },
-    ],
-    []
-  );
 
   return (
     <main className="se-blog se-about" role="main">
@@ -106,57 +89,67 @@ export const QuienesSomos = () => {
               <h1 className="se-about__title">
                 <BrandWordmark />
               </h1>
-              <p className="se-about__tagline">{BRAND.tagline}</p>
-              <p className="se-text-body se-about__desc">{BRAND.description}</p>
-            </div>
-            <div className="se-about__hero-aside" aria-hidden="true">
-              <div className="se-about__hero-card">
-                <div className="se-about__hero-card-title">Enfoque</div>
-                <div className="se-about__hero-card-body">
-                  <div className="se-about__hero-bullets">
-                    <div className="se-about__hero-bullet">Economía + mercados</div>
-                    <div className="se-about__hero-bullet">Contexto regional</div>
-                    <div className="se-about__hero-bullet">Lectura ejecutiva</div>
-                  </div>
-                </div>
+              {/* Las tres líneas del documento del cliente. La primera hace de
+                  entradilla y las otras dos, más cortas, van debajo: qué es,
+                  quiénes lo hacen y desde dónde. Antes aquí se repetía el texto
+                  del pie de página, que es el mismo párrafo largo que el lector
+                  ya se encuentra al final de cada página. */}
+              <p className="se-about__tagline">{INSTITUTIONAL.intro[0]}</p>
+              <div className="se-about__intro">
+                {INSTITUTIONAL.intro.slice(1).map((linea) => (
+                  <p key={linea} className="se-about__intro-line">
+                    {linea}
+                  </p>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="se-section se-about__signals" aria-label="Señales editoriales">
+      {/* Los objetivos, que son este recorrido y ya no una lista aparte.
+          Antes la página los decía dos veces: aquí el diagrama del documento del
+          cliente y debajo cinco objetivos en prosa que repetían lo mismo. Los
+          cinco están disueltos dentro de los cuatro pasos; ver `INSTITUTIONAL.flow`. */}
+      <section className="se-section se-about__flow" aria-labelledby="se-flow-title">
         <div className="se-container">
-          <div className="se-about__signals-grid">
-            {signals.map((s) => (
-              <article key={s.title} className="se-about__signal">
-                <h2 className="se-about__signal-title">{s.title}</h2>
-                <p className="se-about__signal-desc">{s.description}</p>
-              </article>
+          <header className="se-about__flow-head">
+            <h2 className="se-heading-section se-about__flow-title" id="se-flow-title">
+              Objetivos
+            </h2>
+            <p className="se-about__flow-lead">De la investigación a la decisión.</p>
+          </header>
+
+          {/* La franja que en el documento es una flecha sobre los cuatro pasos:
+              todo el recorrido ocurre en la región, no es un paso más. */}
+          <p className="se-about__flow-region">
+            <span className="se-about__flow-region-text">Latinoamérica</span>
+          </p>
+
+          <ol className="se-about__flow-steps">
+            {INSTITUTIONAL.flow.map((paso, idx) => (
+              <li key={paso.title} className="se-about__flow-step">
+                {/* El número es decorativo: el orden ya lo lleva la lista ordenada,
+                    así que repetírselo a un lector de pantalla sería ruido. */}
+                <span className="se-about__flow-step-num" aria-hidden="true">
+                  {idx + 1}
+                </span>
+                <h3 className="se-about__flow-step-title">{paso.title}</h3>
+                <p className="se-about__flow-step-text">{paso.text}</p>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
       <section className="se-section se-about__bands">
         <div className="se-container">
-          <div className="se-about__band-grid">
-            <article className="se-about__band">
-              <h2 className="se-about__band-title">Propósito</h2>
-              <p className="se-text-body se-about__band-text">{INSTITUTIONAL.purpose}</p>
-            </article>
-            <article className="se-about__band se-about__band--alt">
-              <h2 className="se-about__band-title">Objetivos</h2>
-              <ol className="se-about__objectives" aria-label="Objetivos">
-                {INSTITUTIONAL.objectives.map((obj, idx) => (
-                  <li key={idx} className="se-about__objective">
-                    <span className="se-about__objective-num">{idx + 1}</span>
-                    <span className="se-about__objective-text">{obj}</span>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          </div>
+          <article className="se-about__band se-about__band--alt">
+            <h2 className="se-about__band-title">Propósito</h2>
+            <p className="se-text-body se-about__band-text se-about__band-text--lead">
+              {INSTITUTIONAL.purpose}
+            </p>
+          </article>
         </div>
       </section>
 
@@ -195,4 +188,3 @@ export const QuienesSomos = () => {
     </main>
   );
 };
-

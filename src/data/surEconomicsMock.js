@@ -6,8 +6,14 @@
 export const BRAND = {
   name: "SurEconomics",
   tagline: "Economía, mercados e inversión con inteligencia regional.",
+  // A pedido del cliente (09/2026): el mismo texto que ya dice el encabezado de
+  // "Quiénes somos" (ver `INSTITUTIONAL.intro`, más abajo en este archivo), en vez
+  // del párrafo largo de antes. No se deriva de `INSTITUTIONAL.intro` en código
+  // porque ahí son tres líneas sueltas y aquí es un párrafo corrido -- formatos
+  // distintos para el mismo contenido -- pero si una cambia, la otra tiene que
+  // cambiar con ella.
   description:
-    "SurEconomics es una plataforma editorial e institucional dedicada al análisis económico y financiero de América Latina. Combinamos investigación profunda, noticias, contenidos sencillos, claros y una mirada estratégica para apoyar las decisiones de inversión y desarrollo en la región.",
+    "Plataforma editorial de economía, mercados e inversión en América Latina. Grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires.",
 };
 
 /**
@@ -98,16 +104,16 @@ export const PARTNERS = [
 
 
 export const TEAM = {
-  // Antes "Liderazgo / dirección editorial". Reestructurado a pedido del cliente
-  // (10/2026): estos cuatro pasan a ser el organo formal, y se cae de aqui Juan
-  // Francisco Paz, que no vuelve a aparecer en ningun grupo.
+  // Reestructurado a pedido del cliente (10/2026) y afinado en 09/2026: ya nadie lleva
+  // resumen. El cliente pidio quitar todas las descripciones, asi que el campo se va de
+  // los datos en vez de quedarse vacio en veinte sitios -- y la tarjeta deja de pintar
+  // ese parrafo. La foto NO vive aqui: se sube desde el panel y se guarda por separado,
+  // atada al `id` de cada quien, que por eso no se puede cambiar a la ligera.
   board: [
     {
       id: "junta-oscar-doval",
       name: "Óscar Doval",
       role: "Junta Directiva",
-      summary:
-        "Lidera la dirección editorial y la línea de investigación del medio. Enfoque en rigor, claridad y mirada regional.",
       cvUrl: "#",
       email: "odoval@rendigroup.com",
       links: [],
@@ -116,139 +122,112 @@ export const TEAM = {
       id: "junta-daniel-berconsky",
       name: "Daniel Berconsky Da Ruos",
       role: "Junta Directiva",
-      summary:
-        "Supervisa el marco financiero y el acompañamiento institucional. Aporta visión estratégica para proyectos de inteligencia e inversión.",
       cvUrl: "#",
       email: "",
       links: [],
     },
-    // Estaba como Colaborador; el cliente lo sube a Junta Directiva.
-    {
-      id: "junta-aknaton-matute",
-      name: "Aknatón Matute",
-      role: "Junta Directiva",
-      summary: "Investigación y contenido.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    // Mismo caso: estaba como Colaborador.
-    {
-      id: "junta-guillermo-leandro",
-      name: "Guillermo Leandro",
-      role: "Junta Directiva",
-      summary: "Visión sectorial.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
+    { id: "junta-aknaton-matute", name: "Aknatón Matute", role: "Junta Directiva", cvUrl: "#", email: "", links: [] },
+    { id: "junta-guillermo-leandro", name: "Guillermo Leandro", role: "Junta Directiva", cvUrl: "#", email: "", links: [] },
   ],
+  // Los dos primeros llevan su cargo real y no el nombre del grupo, a pedido del
+  // cliente: aqui "Consejo Editorial" ya lo dice el titulo de la seccion, asi que
+  // repetirlo en la tarjeta no anadia nada y ocultaba quien es quien.
   editorialBoard: [
-    { id: "consejo-oscar-doval", name: "Óscar Doval", role: "Consejo Editorial", summary: "Rigor y criterio editorial.", cvUrl: "#", email: "odoval@rendigroup.com", links: [] },
+    {
+      id: "consejo-oscar-doval",
+      name: "Óscar Doval",
+      role: "Director General",
+      cvUrl: "#",
+      email: "odoval@rendigroup.com",
+      links: [],
+    },
     {
       id: "consejo-pablo-quintero",
       name: "Pablo Quintero",
-      role: "Consejo Editorial",
-      summary:
-        "Politólogo (Universidad Central de Venezuela). Consultor político, asesor en comunicación y asuntos corporativos. Socio director de LOG Consultancy.",
+      role: "Editor en Jefe",
       cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
       email: "",
       links: [],
     },
-    // Nombre nuevo a pedido del cliente (10/2026), sin bio propia todavía -- la
-    // misma línea genérica que llevaba Mafe Yáñez, que sale de este grupo.
-    {
-      id: "consejo-alex-lund",
-      name: "Alex Lund",
-      role: "Consejo Editorial",
-      summary: "Aporte editorial y de gestión institucional.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
+    { id: "consejo-alex-lund", name: "Alex Lund", role: "Consejo Editorial", cvUrl: "#", email: "", links: [] },
   ],
   operational: [
-    {
-      id: "marketing-ariana-zambrano",
-      name: "Ariana Zambrano",
-      role: "Mercadeo y diseño",
-      summary: "Ejecución creativa con foco en claridad y consistencia.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    {
-      id: "marketing-maria-fernanda",
-      name: "María Fernanda Hernández",
-      role: "Mercadeo y diseño",
-      summary: "Dirección de contenido y estrategia de experiencia editorial.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    {
-      id: "ti-ramon-marquina",
-      name: "Ramon Marquina",
-      role: "TI",
-      summary: "Soporte tecnológico y evolución del producto.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    {
-      id: "ti-luis-ojeda",
-      name: "Luis Ojeda",
-      role: "TI",
-      summary: "Soporte tecnológico y evolución del producto.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    {
-      id: "marketing-ambar-prato",
-      name: "Ámbar Prato",
-      role: "Diseñadora",
-      summary: "Diseño y ejecución visual de los contenidos.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    // Estaba en Equipo de investigación, que desaparece como grupo propio; su
-    // función ya descrita ahí se conserva como etiqueta corta, igual que TI o
-    // Diseñadora en el resto de este grupo.
-    {
-      id: "operativo-saul-benarroch",
-      name: "Saul Benarroch",
-      role: "Riesgo",
-      summary: "Modelos y lecturas de riesgo.",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
-    // Nombre nuevo a pedido del cliente (10/2026). Sin cargo específico todavía
-    // -- se pidió dejarlo así en vez de inventar uno -- por eso no lleva resumen:
-    // el componente no imprime la línea cuando falta.
-    {
-      id: "operativo-manuel-oropeza",
-      name: "Manuel Oropeza",
-      role: "Equipo operativo",
-      summary: "",
-      cvUrl: "#",
-      email: "",
-      links: [],
-    },
+    { id: "marketing-ariana-zambrano", name: "Ariana Zambrano", role: "Mercadeo y diseño", cvUrl: "#", email: "", links: [] },
+    { id: "marketing-maria-fernanda", name: "María Fernanda Hernández", role: "Mercadeo y diseño", cvUrl: "#", email: "", links: [] },
+    { id: "ti-ramon-marquina", name: "Ramon Marquina", role: "TI", cvUrl: "#", email: "", links: [] },
+    { id: "ti-luis-ojeda", name: "Luis Ojeda", role: "TI", cvUrl: "#", email: "", links: [] },
+    { id: "marketing-ambar-prato", name: "Ámbar Prato", role: "Diseñadora", cvUrl: "#", email: "", links: [] },
+    // Nombre nuevo (09/2026). Va junto a Ambar y no al final porque este grupo se lee
+    // por oficios -- mercadeo, TI, diseno -- y separar a las dos disenadoras habria
+    // roto lo unico que ordena la lista.
+    { id: "diseno-veronica-acosta", name: "Verónica Acosta", role: "Diseñadora", cvUrl: "#", email: "", links: [] },
+    // Estaba como "Riesgo"; el cliente corrige a Automatizaciones.
+    { id: "operativo-saul-benarroch", name: "Saul Benarroch", role: "Automatizaciones", cvUrl: "#", email: "", links: [] },
+    { id: "operativo-manuel-oropeza", name: "Manuel Oropeza", role: "Equipo operativo", cvUrl: "#", email: "", links: [] },
   ],
 };
 
 export const INSTITUTIONAL = {
+  /**
+   * Las tres líneas de la cabecera, tal como las mandó el cliente en su documento.
+   *
+   * Viven aquí como tres líneas sueltas -- qué es, quiénes lo hacen y desde dónde --
+   * porque así vienen del documento del cliente y así se leen en esta cabecera:
+   * unirlas en prosa alargaría la primera pantalla sin decir nada más.
+   *
+   * `BRAND.description` dice lo mismo, en prosa corrida, para el pie de página, la
+   * portada y los metadatos del sitio -- el cliente pidió (09/2026) que esos tres
+   * sitios dijeran lo mismo que esta cabecera. Si una cambia, la otra tiene que
+   * cambiar con ella.
+   */
+  intro: [
+    "Plataforma editorial de economía, mercados e inversión en América Latina",
+    "Grupo intergeneracional de profesionales",
+    "Miami, Caracas, Bogotá, Asunción, Buenos Aires",
+  ],
+  // Reemplaza a "Somos un grupo intergeneracional de profesionales con presencia
+  // en Miami, Caracas...", que decía quiénes somos y no para qué estamos. Eso no
+  // se pierde: las ciudades y el grupo intergeneracional suben a `intro`, que es
+  // su sitio, y aquí queda el propósito de verdad.
   purpose:
-    "Somos un grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires, reunidos con la visión de crear la plataforma y el medio más robusto de información y conocimiento económico y financiero de América Latina.",
-  objectives: [
-    "Generar información económica y financiera de valor para distintos países y bloques económicos latinoamericanos.",
-    "Integrar datos cuantitativos y cualitativos obtenidos de bases de datos confiables e investigaciones de campo exhaustivas.",
-    "Brindar una comprensión profunda de la dinámica geoeconómica y geopolítica de la región.",
-    "Servir a inversionistas que desean maximizar su utilidad a través de inversiones directas o instrumentos financieros.",
-    "Promover oportunidades de inversión en Latinoamérica.",
+    "Construir una plataforma sólida para informar, analizar y comprender la realidad económica y financiera de América Latina.",
+  /**
+   * Los objetivos, dibujados como el recorrido que son.
+   *
+   * Antes esto vivia en dos sitios que se pisaban: el diagrama de cuatro pasos del
+   * documento del cliente, y debajo una lista de cinco objetivos en prosa. Decian lo
+   * mismo -- generar informacion, integrar datos, dar comprension de la region, servir
+   * al inversionista, promover oportunidades -- repartido de otra forma, y la pagina
+   * se explicaba dos veces.
+   *
+   * La lista se disuelve aqui dentro y no se tira: cada uno de los cinco objetivos
+   * esta en el paso que le toca. El primero y el segundo en Investigacion, el tercero
+   * en Comprension, y el cuarto y el quinto en Decisiones.
+   *
+   * Es una secuencia de verdad -- cada paso necesita el anterior -- y por eso se numera
+   * y se dibuja con flechas. El orden es el contenido, no un adorno.
+   */
+  flow: [
+    {
+      title: "Investigación",
+      text:
+        "Datos cuantitativos y cualitativos de fuentes confiables e investigación de campo: entorno, tendencias y estadísticas de cada país y bloque económico de la región.",
+    },
+    {
+      title: "Comprensión",
+      text:
+        "La dinámica geoeconómica, geopolítica, social y cultural que explica las cifras y que no se ve en una serie de datos.",
+    },
+    {
+      title: "Lectura ejecutiva",
+      text:
+        "Resúmenes y análisis con claridad y sencillez: lo que hace falta para decidir, sin rodeos ni jerga.",
+    },
+    {
+      title: "Decisiones",
+      text:
+        "Inversión directa o en instrumentos financieros, con las oportunidades que abre Latinoamérica a la vista.",
+    },
   ],
 };
 

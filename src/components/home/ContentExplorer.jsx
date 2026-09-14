@@ -87,26 +87,36 @@ export const ContentExplorer = ({
 
   const hasSelection = active.length > 0 || Boolean((query ?? "").trim());
 
+  // El alcance va dentro del campo y no en un rotulo aparte: "Filtros / en todo el
+  // sitio" nombraba lo que los propios controles ya dicen, y dejaba la busqueda --
+  // lo que la gente viene a usar -- de segunda. Si no hay alcance, "Buscar" a secas.
+  const rotulo = (scopeLabel ?? "").trim() ? `Buscar ${scopeLabel.trim()}` : "Buscar";
+
   return (
     <div className="se-explorer" ref={rootRef}>
       <div className="se-explorer__bar">
-        <div className="se-explorer__lead">
-          <span className="se-explorer__eyebrow">Filtros</span>
-          {scopeLabel ? <span className="se-explorer__scope">{scopeLabel}</span> : null}
-        </div>
-
         {onQueryChange ? (
           <div className="se-explorer__field">
             <label className="se-sr-only" htmlFor="explorer-search">
-              Buscar por título o resumen
+              {rotulo}
             </label>
+            {/* Decorativa: la etiqueta y el marcador de posicion ya dicen que es. */}
+            <svg
+              className="se-explorer__lupa"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M10.8 10.8 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
             <input
               id="explorer-search"
               type="search"
               className="se-explorer__search"
               value={query ?? ""}
               onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="Buscar por título o resumen…"
+              placeholder={rotulo}
             />
           </div>
         ) : null}
@@ -288,5 +298,6 @@ ContentExplorer.propTypes = {
   /** Omit to hide the search field. */
   onQueryChange: PropTypes.func,
   total: PropTypes.number.isRequired,
+  /** Donde busca: "en todo el sitio", "en Artículos". Va dentro del campo. */
   scopeLabel: PropTypes.string,
 };

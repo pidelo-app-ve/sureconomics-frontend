@@ -10232,7 +10232,6 @@ a.se-topics__chip:focus-visible {
 
 /* Lo de dentro del filtro, sobre superficie oscura. */
 .se-explorer__k,
-.se-explorer__scope,
 .se-explorer__count,
 .se-explorer__count-label {
   color: rgba(255, 255, 255, 0.72);
@@ -10250,39 +10249,32 @@ a.se-topics__chip:focus-visible {
   align-items: center;
 }
 
-.se-explorer__lead {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.se-explorer__eyebrow {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.9);
-}
-
-.se-explorer__scope {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  color: var(--color-slate-2);
-  white-space: nowrap;
-}
-
 /* The search field is the one element that should absorb spare width. */
 .se-explorer__field {
-  flex: 1 1 220px;
+  position: relative;
+  flex: 1 1 240px;
   min-width: 0;
 }
+
+/* La lupa vive dentro del campo, a la izquierda del texto. `pointer-events: none`
+   para que el clic caiga en el campo y no en el dibujo. */
+.se-explorer__lupa {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  transition: color 0.18s ease;
+}
+
+.se-explorer__field:focus-within .se-explorer__lupa { color: #ffffff; }
 
 .se-explorer__search {
   width: 100%;
-  padding: 11px 14px;
+  padding: 11px 14px 11px 38px;
   border: 1px solid rgba(var(--se-tinte), 0.18);
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.28);
@@ -12267,8 +12259,6 @@ a.se-topics__chip:focus-visible {
    reglas una por una ni inflarles la especificidad.
 
    El panel desplegable queda fuera: se dibuja sobre papel, no sobre el verde. */
-.se-explorer__eyebrow,
-.se-explorer__scope,
 .se-explorer__total,
 .se-explorer__none,
 .se-explorer__caret {
@@ -12892,10 +12882,6 @@ a.se-topics__chip:focus-visible {
      no estaba en su lista de rutas. */
   .se-consulting__service-meta {
     font-size: 0.72rem;
-  }
-
-  .se-explorer__scope {
-    font-size: 0.78rem;
   }
 
   /* "EDITORIAL DEL DÍA" salía a 10,5 px. Va en versalitas y con mucho espaciado,

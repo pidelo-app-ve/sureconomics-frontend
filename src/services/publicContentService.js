@@ -30,6 +30,24 @@ const listOf = (payload) => {
 /** The five formats, with the section copy the API owns. */
 export const getFormats = async () => listOf(await client().request("/formats"));
 
+/**
+ * Las caras del equipo: `{ id de persona: direccion de la foto }`.
+ *
+ * Solo trae a quien tiene foto. Quien no aparezca se dibuja con sus iniciales, que es
+ * el estado normal de la pagina y no un error -- de ahi que un fallo de red devuelva
+ * un mapa vacio en vez de propagarse: la lista del equipo la tiene el frontend, asi
+ * que sin esto la pagina sigue completa, solo que con iniciales.
+ */
+export const getFotosDelEquipo = async () => {
+  try {
+    const payload = await client().request("/equipo/fotos");
+    const fotos = payload?.data?.fotos ?? payload?.fotos;
+    return fotos && typeof fotos === "object" ? fotos : {};
+  } catch {
+    return {};
+  }
+};
+
 /** The fourteen topics with their published counts. */
 export const getTopics = async () => listOf(await client().request("/topics"));
 

@@ -19,6 +19,7 @@ import { AdminPostEditor } from "./pages/admin/AdminPostEditor";
 import { AdminTopicsList } from "./pages/admin/AdminTopicsList";
 import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
 import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
+import { AdminEquipo } from "./pages/admin/AdminEquipo";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
@@ -121,6 +122,9 @@ export const router = createBrowserRouter([
                     { path: "places", element: <AdminPlacesList /> },
                     { path: "media", element: <AdminMediaLibrary /> },
                     { path: "cinta", element: <AdminMarketTicker /> },
+                    // Solo las fotos del equipo: los nombres y los cargos viven en
+                    // el codigo, y esta pantalla no los toca.
+                    { path: "equipo", element: <AdminEquipo /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "boletin", element: <AdminNewsletterList /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },

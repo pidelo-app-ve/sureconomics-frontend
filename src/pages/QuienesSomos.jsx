@@ -1,4 +1,5 @@
 import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
+import { getFotosDelEquipo } from "../services/publicContentService";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
 import { useEffect, useState } from "react";
@@ -35,7 +36,29 @@ const BrandWordmark = () => (
   />
 );
 
-const TeamSection = ({ title, members, initiallyOpen }) => {
+/**
+ * Las fotos del equipo, del panel.
+ *
+ * Se piden una vez para toda la página y se reparten por `id`. La lista de personas no
+ * viene de aquí -- esa la tiene `TEAM` -- así que si la petición falla, o si nadie ha
+ * subido ninguna foto todavía, la página se dibuja igual de completa con las
+ * iniciales. Por eso no hay estado de carga ni de error: no hay nada que esperar.
+ */
+const useFotosDelEquipo = () => {
+  const [fotos, setFotos] = useState({});
+  useEffect(() => {
+    let vivo = true;
+    getFotosDelEquipo().then((mapa) => {
+      if (vivo) setFotos(mapa);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
+  return fotos;
+};
+
+const TeamSection = ({ title, members, initiallyOpen, fotos }) => {
   const hasMembers = Boolean(members?.length);
   const [open, setOpen] = useState(Boolean(initiallyOpen));
   useEffect(() => {
@@ -62,7 +85,7 @@ const TeamSection = ({ title, members, initiallyOpen }) => {
       <div className="se-about__acc-body">
         <div className="se-team-grid">
           {members.map((m) => (
-            <TeamMemberCard key={m.id} member={m} />
+            <TeamMemberCard key={m.id} member={m} foto={fotos?.[m.id] || ""} />
           ))}
         </div>
       </div>
@@ -74,10 +97,13 @@ TeamSection.propTypes = {
   title: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(PropTypes.object),
   initiallyOpen: PropTypes.bool,
+  /** `{ id de persona: direccion }`. Quien no este, sale con sus iniciales. */
+  fotos: PropTypes.objectOf(PropTypes.string),
 };
 
 export const QuienesSomos = () => {
   const initiallyOpen = useInitialAccordionOpen();
+  const fotos = useFotosDelEquipo();
 
   return (
     <main className="se-blog se-about" role="main">
@@ -171,16 +197,19 @@ export const QuienesSomos = () => {
               title="Junta Directiva"
               members={TEAM.board}
               initiallyOpen={initiallyOpen}
+              fotos={fotos}
             />
             <TeamSection
               title="Consejo Editorial"
               members={TEAM.editorialBoard}
               initiallyOpen={initiallyOpen}
+              fotos={fotos}
             />
             <TeamSection
               title="Equipo operativo"
               members={TEAM.operational}
               initiallyOpen={initiallyOpen}
+              fotos={fotos}
             />
           </div>
         </div>
@@ -188,3 +217,4 @@ export const QuienesSomos = () => {
     </main>
   );
 };
+

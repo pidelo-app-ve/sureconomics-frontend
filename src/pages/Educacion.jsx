@@ -81,11 +81,6 @@ export const Educacion = () => {
           <div className="se-articles__head">
             <p className="se-articles__kicker">{TITULO}</p>
             <h1 className="se-articles__title">Contenido educativo</h1>
-            <p className="se-text-body se-articles__lead">
-              Material para entender cómo funcionan la economía y las finanzas, reunido
-              aquí sin importar el formato en que se publicó. Cada pieza lleva su sello y
-              sigue apareciendo también en su sección.
-            </p>
           </div>
         </div>
 

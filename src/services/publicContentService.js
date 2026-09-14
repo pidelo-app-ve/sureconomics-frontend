@@ -48,6 +48,25 @@ export const getFotosDelEquipo = async () => {
   }
 };
 
+/**
+ * Las publicaciones de redes curadas por la redaccion: `{ instagram: [...], x: [...] }`.
+ *
+ * Como las fotos del equipo, un fallo devuelve las dos listas vacias en vez de
+ * propagarse: el bloque entonces no pinta nada, y la pagina sigue completa.
+ */
+export const getRedes = async () => {
+  try {
+    const payload = await client().request("/social");
+    const d = payload?.data ?? payload ?? {};
+    return {
+      instagram: Array.isArray(d.instagram) ? d.instagram : [],
+      x: Array.isArray(d.x) ? d.x : [],
+    };
+  } catch {
+    return { instagram: [], x: [] };
+  }
+};
+
 /** The fourteen topics with their published counts. */
 export const getTopics = async () => listOf(await client().request("/topics"));
 

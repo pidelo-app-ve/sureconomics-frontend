@@ -13601,3 +13601,360 @@ a.se-topics__chip:focus-visible {
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+/* ═══ EN REDES — el bloque social al pie de todas las vistas ═══════════
+   Una linea por red, tarjetas que se desplazan a lo ancho. Todo el movimiento
+   es de entrada (una vez, al asomarse) o de respuesta al lector; nada gira
+   solo. Con movimiento reducido, todo queda quieto. El porque de cada
+   decision esta en `components/EnRedes.jsx`. */
+
+.se-redes {
+  --redes-alto: 152px;
+  --redes-llegada: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --redes-frenado: cubic-bezier(0.22, 1, 0.36, 1);
+  --redes-paso: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding: 1.75rem 0 2.1rem;
+  background: var(--color-paper);
+}
+
+/* La raya de arriba se dibuja al entrar, de izquierda a derecha. */
+.se-redes::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-hairline);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.9s var(--redes-frenado);
+}
+.se-redes--dentro::before { transform: scaleX(1); }
+
+.se-redes__rotulo {
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.6s var(--redes-frenado) 0.15s, transform 0.6s var(--redes-frenado) 0.15s;
+}
+.se-redes--dentro .se-redes__rotulo { opacity: 1; transform: none; }
+
+.se-redes__fila + .se-redes__fila { margin-top: 1.15rem; }
+
+.se-redes__cabeza {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.55s var(--redes-frenado), transform 0.55s var(--redes-frenado);
+}
+.se-redes__fila--dentro .se-redes__cabeza { opacity: 1; transform: none; }
+
+/* La misma rayita de acento que llevan los titulos de seccion del sitio. Aqui
+   en vez del logotipo de la red: el nombre ya esta escrito al lado, y en la
+   fila de X el logotipo ES la letra X. */
+.se-redes__marca {
+  width: 3px;
+  height: 14px;
+  flex: 0 0 auto;
+  border-radius: 2px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.45s var(--redes-llegada) 0.2s;
+}
+.se-redes__fila--dentro .se-redes__marca { transform: scaleY(1); }
+
+.se-redes__nombre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.se-redes__cuenta {
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  color: var(--color-slate-2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color var(--redes-paso), border-color var(--redes-paso);
+}
+.se-redes__cuenta:hover,
+.se-redes__cuenta:focus-visible { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+/* La fila. `cursor: grab` porque se arrastra con el raton; en un escritorio sin
+   trackpad una fila horizontal sin eso es una fila que no se mueve. */
+.se-redes__pista {
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: var(--se-content-gutter);
+  padding: 4px var(--se-content-gutter) 0.9rem;
+  margin: 0 calc(-1 * var(--se-content-gutter));
+  scrollbar-width: none;
+  cursor: grab;
+  outline: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--se-content-gutter), #000 calc(100% - 3rem), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--se-content-gutter), #000 calc(100% - 3rem), transparent 100%);
+}
+.se-redes__pista::-webkit-scrollbar { display: none; }
+.se-redes__pista--arrastrando { cursor: grabbing; scroll-snap-type: none; }
+.se-redes__pista--arrastrando .se-redes__pieza { pointer-events: none; }
+
+/* El foco del teclado no se dibuja sobre la fila -- con la mascara salia como dos
+   rayas sueltas -- sino en la linea de progreso de debajo, que es lo que las
+   flechas controlan. */
+.se-redes__progreso {
+  height: 1px;
+  margin: -0.3rem 0 0;
+  background: rgba(var(--se-tinte), 0.07);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s, height 0.2s;
+}
+.se-redes__progreso--activo { opacity: 1; }
+.se-redes__pista:focus-visible + .se-redes__progreso {
+  opacity: 1;
+  height: 3px;
+  background: rgba(185, 83, 42, 0.22);
+}
+.se-redes__progreso i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.12s linear;
+}
+
+/* La tarjeta. Entra subiendo, desdifuminandose y creciendo del 96% al 100%,
+   escalonada por `--d`; el retardo se anula al pasar por encima. */
+.se-redes__pieza {
+  position: relative;
+  flex: 0 0 auto;
+  height: var(--redes-alto);
+  border-radius: 14px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: inherit;
+  background: var(--color-paper);
+  border: 1px solid rgba(var(--se-tinte), 0.07);
+  opacity: 0;
+  transform: translateY(18px) scale(0.96);
+  filter: blur(3px);
+  transition:
+    opacity 0.55s var(--redes-frenado) var(--d, 0s),
+    transform 0.7s var(--redes-llegada) var(--d, 0s),
+    filter 0.55s var(--redes-frenado) var(--d, 0s),
+    border-color var(--redes-paso),
+    box-shadow var(--redes-paso);
+}
+.se-redes__fila--dentro .se-redes__pieza { opacity: 1; transform: none; filter: none; }
+.se-redes__fila--dentro .se-redes__pieza:hover,
+.se-redes__fila--dentro .se-redes__pieza:focus-visible {
+  transform: translateY(-4px);
+  transition-delay: 0s;
+  border-color: var(--color-hairline);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.11);
+}
+.se-redes__pieza:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+
+/* Instagram: cuadrada, la imagen manda; al pasar por encima se acerca despacio. */
+.se-redes__pieza--foto { width: var(--redes-alto); }
+.se-redes__pieza--foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 1.2s var(--redes-frenado);
+}
+.se-redes__pieza--foto:hover img,
+.se-redes__pieza--foto:focus-visible img { transform: scale(1.06); }
+
+.se-redes__pie {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 2rem 0.75rem 0.65rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
+  transform: translateY(101%);
+  transition: transform 0.35s var(--redes-frenado);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.se-redes__pieza:hover .se-redes__pie,
+.se-redes__pieza:focus-visible .se-redes__pie { transform: translateY(0); }
+
+/* X: sin imagen, en la serif de lectura del sitio -- suena a SurEconomics
+   hablando, no a un recorte pegado. Al pasar por encima saca una raya roja. */
+.se-redes__pieza--texto {
+  width: 252px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--se-offwhite);
+}
+.se-redes__pieza--texto::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.35s var(--redes-frenado);
+}
+.se-redes__pieza--texto:hover::before,
+.se-redes__pieza--texto:focus-visible::before { transform: scaleY(1); }
+.se-redes__pieza--texto p {
+  margin: 0;
+  font-family: var(--se-font-reading);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--color-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: transform 0.35s var(--redes-frenado);
+}
+.se-redes__pieza--texto:hover p,
+.se-redes__pieza--texto:focus-visible p { transform: translateX(6px); }
+
+.se-redes__fecha {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+  transition: color var(--redes-paso), transform 0.35s var(--redes-frenado);
+}
+.se-redes__pieza--texto:hover .se-redes__fecha,
+.se-redes__pieza--texto:focus-visible .se-redes__fecha { color: var(--color-accent); transform: translateX(6px); }
+
+@media (max-width: 640px) {
+  .se-redes { --redes-alto: 140px; padding: 1.6rem 0 1.9rem; }
+  .se-redes__pieza--texto { width: 226px; }
+  .se-redes__fila + .se-redes__fila { margin-top: 1.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-redes::before, .se-redes__rotulo, .se-redes__cabeza, .se-redes__marca, .se-redes__pieza {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: border-color var(--redes-paso), box-shadow var(--redes-paso), color var(--redes-paso);
+  }
+  .se-redes__fila--dentro .se-redes__pieza:hover,
+  .se-redes__fila--dentro .se-redes__pieza:focus-visible { transform: none; }
+  .se-redes__pieza--foto img, .se-redes__pieza--texto p, .se-redes__fecha, .se-redes__pieza--texto::before { transition: none; }
+  .se-redes__pieza--foto:hover img, .se-redes__pieza--texto:hover p, .se-redes__pieza--texto:hover .se-redes__fecha { transform: none; }
+  .se-redes__pie { transform: translateY(0); transition: none; }
+  .se-redes__progreso i { transition: none; }
+}
+
+/* ═══ Panel: curar las publicaciones ═════════════════════════════════ */
+.se-admin-redes__red { margin-top: 1.75rem; }
+.se-admin-redes__red-cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.se-admin-redes__red-titulo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.se-admin-redes__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  list-style: none;
+}
+.se-admin-redes__pub {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+}
+/* La fila de X no tiene miniatura: una columna menos. */
+.se-admin-redes__pub:not(:has(.se-admin-redes__miniatura)) {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.se-admin-redes__orden {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.se-admin-redes__num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-slate-2);
+}
+.se-admin-redes__flecha {
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+.se-admin-redes__flecha:disabled { opacity: 0.35; cursor: default; }
+.se-admin-redes__miniatura {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: var(--se-offwhite);
+}
+.se-admin-redes__miniatura img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.se-admin-redes__sin-imagen { font-family: var(--mono); font-size: 0.65rem; color: var(--color-slate-2); }
+.se-admin-redes__campos { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.se-admin-redes__fila-campos { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 0.5rem; }
+@media (max-width: 720px) {
+  .se-admin-redes__pub,
+  .se-admin-redes__pub:not(:has(.se-admin-redes__miniatura)) { grid-template-columns: auto minmax(0, 1fr); }
+  .se-admin-redes__pub > .se-btn { grid-column: 1 / -1; justify-self: start; }
+  .se-admin-redes__fila-campos { grid-template-columns: 1fr; }
+}

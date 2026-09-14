@@ -20,6 +20,7 @@ import { AdminTopicsList } from "./pages/admin/AdminTopicsList";
 import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
 import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
 import { AdminEquipo } from "./pages/admin/AdminEquipo";
+import { AdminRedes } from "./pages/admin/AdminRedes";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
@@ -125,6 +126,9 @@ export const router = createBrowserRouter([
                     // Solo las fotos del equipo: los nombres y los cargos viven en
                     // el codigo, y esta pantalla no los toca.
                     { path: "equipo", element: <AdminEquipo /> },
+                    // Las publicaciones de redes que se destacan al pie de todas
+                    // las vistas. Curadas a mano: ver `redes_service.py`.
+                    { path: "redes", element: <AdminRedes /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "boletin", element: <AdminNewsletterList /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },

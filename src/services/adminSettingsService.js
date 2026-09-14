@@ -34,3 +34,14 @@ export const putTeamPhotos = async (fotos) => {
   );
   return data?.fotos ?? {};
 };
+
+/** Las publicaciones curadas, con el id de imagen y su direccion. */
+export const getSocial = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/social")) ?? { instagram: [], x: [] };
+
+/**
+ * Reemplaza las dos listas de una vez. Devuelve como quedan, con las imagenes
+ * resueltas, para repintar sin volver a pedir.
+ */
+export const putSocial = async (cuerpo) =>
+  unwrapEntity(await adminRequest("/admin/settings/social", { method: "PUT", json: cuerpo }));

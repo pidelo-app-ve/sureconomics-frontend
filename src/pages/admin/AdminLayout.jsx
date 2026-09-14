@@ -134,6 +134,9 @@ const AdminShell = () => {
               <NavLink to="/admin/equipo" className={linkClass} end onClick={closeMenu}>
                 Fotos del equipo
               </NavLink>
+              <NavLink to="/admin/redes" className={linkClass} end onClick={closeMenu}>
+                En redes
+              </NavLink>
             </NavGroup>
 
             {/* Two axes, not a flat list of tags: see the Temas screen for why

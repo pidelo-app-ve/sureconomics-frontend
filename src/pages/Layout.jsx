@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom/dist"
 import ScrollToTop from "../components/ScrollToTop"
 import { Navbar } from "../components/Navbar"
 import { Footer } from "../components/Footer"
+import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 
 // Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
@@ -16,6 +17,10 @@ export const Layout = () => {
             <main className="se-page" role="main">
                 <Outlet />
             </main>
+            {/* Lo ultimo en redes, curado desde el panel, encima del pie y por
+                tanto en todas las vistas. Como la cinta, no pinta nada si la
+                redaccion no ha destacado ninguna publicacion. */}
+            <EnRedes />
             <Footer />
         </ScrollToTop>
     )

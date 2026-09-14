@@ -108,9 +108,6 @@ export const FormatListing = ({ formatoApi }) => {
         <div className="se-articles__head">
           <p className="se-articles__kicker">{titulo}</p>
           <h1 className="se-articles__title">{titulo}</h1>
-          {formato?.lede ? (
-            <p className="se-text-body se-articles__lead">{formato.lede}</p>
-          ) : null}
         </div>
       </div>
 

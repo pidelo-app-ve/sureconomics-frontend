@@ -34,6 +34,41 @@ const problemaLocal = (archivo) => {
 };
 
 /**
+ * Lo que mide la foto de verdad, leyendo el archivo antes de subirlo.
+ *
+ * Devuelve `null` si el navegador no puede decodificarla -- un archivo roto, o un
+ * formato que dice ser imagen y no lo es. En ese caso no se bloquea nada: el
+ * servidor vuelve a comprobarlo y es quien manda.
+ */
+const medirImagen = (archivo) =>
+  new Promise((resolver) => {
+    const url = URL.createObjectURL(archivo);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolver({ ancho: img.naturalWidth, alto: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolver(null);
+    };
+    img.src = url;
+  });
+
+/**
+ * El lado corto minimo para que la cara se vea nitida en el circulo.
+ *
+ * El circulo mide 64 px en el panel y 54 en la pagina, pero en una pantalla de
+ * alta densidad eso son 128 px reales -- y el recorte cuadrado usa solo el lado
+ * corto de la foto. Por debajo de 256 px el navegador tiene que estirar, y ahi es
+ * donde "se rompen los pixeles": no hay detalle que mostrar y se inventa.
+ *
+ * Es un aviso y no un bloqueo a proposito: a veces la unica foto que existe de
+ * alguien es esa, y publicarla algo borrosa es decision de la redaccion, no mia.
+ */
+const LADO_MINIMO = 256;
+
+/**
  * Las fotos de «Quiénes somos».
  *
  * **Sólo las fotos.** Quién está en el equipo, con qué cargo y en qué orden vive en el
@@ -177,6 +212,12 @@ export const AdminEquipo = () => {
     }
     setSubiendo(persona.id);
     setGuardado({ status: "idle", mensaje: "" });
+
+    // Se mide antes de subir para poder decir el tamaño exacto en el aviso. Si el
+    // navegador no puede leerla, se sigue igual: el servidor la valida de nuevo.
+    const medida = await medirImagen(archivo);
+    const corto = medida ? Math.min(medida.ancho, medida.alto) : null;
+
     try {
       let fila = await uploadAdminMediaImage(archivo);
       // Se etiqueta con el nombre para que la foto se encuentre después en la
@@ -189,6 +230,19 @@ export const AdminEquipo = () => {
       }
       setImagenes((previo) => ({ ...previo, [persona.id]: fila.id }));
       setVistas((previo) => ({ ...previo, [persona.id]: fila.url || "" }));
+
+      // La foto ya está puesta: esto no la rechaza, sólo dice por qué se va a ver
+      // borrosa, que es la diferencia entre un problema visible y uno invisible.
+      if (corto !== null && corto < LADO_MINIMO) {
+        setGuardado({
+          status: "aviso",
+          mensaje:
+            `${persona.name}: la foto mide ${medida.ancho}x${medida.alto} px y el `
+            + `recorte redondo usa su lado corto (${corto} px). Por debajo de `
+            + `${LADO_MINIMO} px se va a ver pixelada en pantallas buenas. Queda `
+            + `puesta; si consigue una más grande, súbala encima.`,
+        });
+      }
     } catch (err) {
       setGuardado({
         status: "error",
@@ -310,7 +364,12 @@ export const AdminEquipo = () => {
           {guardado.mensaje ? (
             <p
               className={
-                guardado.status === "error" ? "se-admin-form-feedback" : "se-admin-meta-hint"
+                // El aviso de resolucion comparte el recuadro del error -- no es un
+                // fallo, pero un texto que explica por que una foto se vera mal no
+                // puede pasar por la nota gris de abajo, que nadie lee.
+                guardado.status === "error" || guardado.status === "aviso"
+                  ? "se-admin-form-feedback"
+                  : "se-admin-meta-hint"
               }
               role={guardado.status === "error" ? "alert" : "status"}
             >

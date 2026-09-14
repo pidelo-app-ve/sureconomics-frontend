@@ -2,8 +2,36 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { TEAM } from "../../data/surEconomicsMock";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage, patchAdminMedia } from "../../services/adminMediaService";
+import {
+  ACCEPTED_IMAGE_MIME,
+  MAX_IMAGE_BYTES,
+  uploadAdminMediaImage,
+  patchAdminMedia,
+} from "../../services/adminMediaService";
 import { getTeamPhotos, putTeamPhotos } from "../../services/adminSettingsService";
+
+const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
+const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
+/**
+ * Rechazar aquí lo obvio, antes de que el archivo viaje al servidor para volver
+ * rebotado. El mismo criterio que ya usa `ImageField.jsx` para la imagen
+ * destacada de una pieza -- esta pantalla se quedó sin él porque se escribió
+ * aparte, y sin el aviso una foto de mas de 10 MB se iba en silencio: la
+ * pantalla no decia nada especifico, y quien subia terminaba sin saber si
+ * habia funcionado o no.
+ */
+const problemaLocal = (archivo) => {
+  if (!archivo) return "No se seleccionó ningún archivo.";
+  if (archivo.size === 0) return "El archivo está vacío.";
+  if (archivo.size > MAX_IMAGE_BYTES) {
+    return `La imagen pesa ${formatMb(archivo.size)} y el máximo es ${formatMb(MAX_IMAGE_BYTES)}.`;
+  }
+  if (archivo.type && !ACCEPTED_MIME_SET.has(archivo.type)) {
+    return "Formato no admitido. Use JPG, PNG, WebP, GIF o AVIF.";
+  }
+  return "";
+};
 
 /**
  * Las fotos de «Quiénes somos».
@@ -142,6 +170,11 @@ export const AdminEquipo = () => {
   }, []);
 
   const subir = useCallback(async (persona, archivo) => {
+    const problema = problemaLocal(archivo);
+    if (problema) {
+      setGuardado({ status: "error", mensaje: `${persona.name}: ${problema}` });
+      return;
+    }
     setSubiendo(persona.id);
     setGuardado({ status: "idle", mensaje: "" });
     try {
@@ -226,7 +259,7 @@ export const AdminEquipo = () => {
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
             Pulse el círculo de una persona para subir su foto. Quien no tenga sale con
             sus iniciales, que es normal y no un error. Los nombres y los cargos no se
-            editan aquí.
+            editan aquí. JPG, PNG, WebP, GIF o AVIF, hasta {formatMb(MAX_IMAGE_BYTES)}.
           </p>
         </div>
       </header>

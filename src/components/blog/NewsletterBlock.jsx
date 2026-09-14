@@ -9,13 +9,8 @@ import { subscribeToNewsletter } from "../../services/newsletterService";
  * llamaba a `preventDefault` y ahí acababa. Ahora anuncia el producto que la redacción
  * va a publicar los lunes por la mañana, y guarda la suscripción de verdad.
  *
- * Tres decisiones de diseño, todas dentro de lo que ya existe en el sistema:
+ * Dos decisiones de diseño, las dos dentro de lo que ya existe en el sistema:
  *
- *   - **la tira de viñetas de la derecha.** La tarjeta medía 64 px de relleno y el texto
- *     acababa a media anchura: la mitad derecha estaba vacía. Se llena con una tira de
- *     recuadros dibujada en CSS, que es lo que "viñeta" significa. Dibujada y no una
- *     ilustración de archivo a propósito: no hay ninguna, y poner una inventada
- *     prometería un contenido que todavía no existe;
  *   - **la etiqueta del campo se ve.** Estaba sólo en el `placeholder`, que desaparece al
  *     escribir y deja al lector sin saber qué escribió -- y a un lector de pantalla sin
  *     nada estable que anunciar;
@@ -31,9 +26,6 @@ import { subscribeToNewsletter } from "../../services/newsletterService";
  * mismo en los dos casos para que nadie pueda averiguar quién está suscrito escribiendo
  * direcciones, y decirlo aquí anularía esa protección desde el navegador.
  */
-
-/** Seis recuadros: dos filas de tres, con uno entintado para que la tira no sea plana. */
-const VINETAS = [false, true, false, false, false, true];
 
 export const NewsletterBlock = () => {
   const sectionRef = useRef(null);
@@ -122,11 +114,9 @@ export const NewsletterBlock = () => {
                     disabled={enviando}
                     required
                     aria-invalid={hayError || undefined}
-                    /* La nota siempre; el error sólo cuando existe en el DOM, porque una
-                       referencia a un id que no está no se anuncia. */
-                    aria-describedby={
-                      hayError ? "newsletter-error newsletter-nota" : "newsletter-nota"
-                    }
+                    /* Sólo cuando el error existe en el DOM: una referencia a un id que
+                       no está no se anuncia. */
+                    aria-describedby={hayError ? "newsletter-error" : undefined}
                   />
 
                   {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
@@ -163,25 +153,6 @@ export const NewsletterBlock = () => {
                   <p className="se-newsletter__ok">{estado.mensaje}</p>
                 ) : null}
               </div>
-
-              <p id="newsletter-nota" className="se-newsletter__note">
-                Una al lunes y nada más. Puede darse de baja desde cualquier envío.
-              </p>
-            </div>
-
-            {/* Decoración: la tira de viñetas. Fuera del árbol de accesibilidad porque no
-                dice nada que el texto no diga ya. */}
-            <div className="se-newsletter__tira" aria-hidden="true">
-              {VINETAS.map((entintada, i) => (
-                <span
-                  key={i}
-                  className={
-                    entintada
-                      ? "se-newsletter__vineta se-newsletter__vineta--tinta"
-                      : "se-newsletter__vineta"
-                  }
-                />
-              ))}
             </div>
           </div>
         </div>

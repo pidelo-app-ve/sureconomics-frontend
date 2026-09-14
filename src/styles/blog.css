@@ -2453,12 +2453,6 @@
    Se conserva la identidad que ya habia -- fondo #f7f7f5, filete de hairline y la
    rejilla de puntos en acento al 8 % con mascara radial -- y cambia el reparto.
 
-   La tarjeta tenia 64 px de relleno y el texto acababa a media anchura, asi que la mitad
-   derecha quedaba vacia. Ahora son dos columnas: la copia con su formulario a la
-   izquierda y una tira de vinetas dibujada en CSS a la derecha. Dibujada y no una
-   ilustracion: no hay ninguna en el proyecto, y una inventada prometeria un contenido
-   que todavia no existe.
-
    Contrastes medidos sobre #f7f7f5: negro 19.58:1, acento 4.52:1, gris de marca 4.97:1,
    y blanco sobre el acento del boton 4.85:1. Los cuatro pasan AA. */
 .se-newsletter__card {
@@ -2483,13 +2477,11 @@
   z-index: -1;
 }
 
-/* `minmax(0, ...)` en la primera columna: sin el, una palabra larga del titular ensancha
-   la pista y empuja la tira fuera de la tarjeta. */
+/* `minmax(0, 1fr)`: sin el, una palabra larga del titular ensancha la pista mas alla
+   de la tarjeta. */
 .se-newsletter__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: clamp(24px, 4vw, 56px);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .se-newsletter__copy {
@@ -2618,31 +2610,9 @@
   outline-offset: -5px;
 }
 
-/* La tira de vinetas: seis recuadros, dos filas de tres. Lo que "vineta" quiere decir,
-   dibujado con los mismos filetes de acento de la rejilla del fondo. */
-.se-newsletter__tira {
-  display: grid;
-  grid-template-columns: repeat(3, 74px);
-  grid-template-rows: repeat(2, 74px);
-  gap: 10px;
-  /* Girada grado y medio: la tira parece una pagina puesta encima de la tarjeta y no un
-     componente mas de la interfaz. */
-  transform: rotate(-1.5deg);
-}
-
-.se-newsletter__vineta {
-  border: 1px solid rgba(185, 83, 42, 0.32);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.se-newsletter__vineta--tinta {
-  background: rgba(185, 83, 42, 0.12);
-  border-color: rgba(185, 83, 42, 0.5);
-}
-
 .se-newsletter__status:empty {
-  /* Sin esto, el hueco del mensaje empuja la nota de abajo aunque no haya nada que
-     decir, y el bloque se mueve al suscribirse. */
+  /* Sin esto, el hueco del mensaje agranda la tarjeta aunque no haya nada que decir,
+     y el bloque se mueve al suscribirse. */
   display: none;
 }
 
@@ -2673,25 +2643,6 @@
 .se-newsletter__error {
   border: 1px solid rgba(185, 83, 42, 0.32);
   background: rgba(185, 83, 42, 0.1);
-}
-
-.se-newsletter__note {
-  font-size: 13px;
-  color: var(--color-slate-2);
-  margin: 12px 0 0;
-  max-width: 52ch;
-}
-
-/* Debajo de 1024 la tira se retira: en dos columnas estrechas le robaria al texto el
-   ancho que necesita, y es decoracion. */
-@media (max-width: 1023px) {
-  .se-newsletter__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .se-newsletter__tira {
-    display: none;
-  }
 }
 
 /* 640 px es el corte que ya usa el resto de la hoja, no uno nuevo. El boton pasa debajo

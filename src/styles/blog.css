@@ -3224,16 +3224,16 @@
   line-height: 1.7;
 }
 
-/* El proposito es una sola frase y es la tesis de la casa: se lee mas grande que
-   un parrafo cualquiera. Compartir tamano con el cuerpo lo hacia parecer una nota
-   al pie de su propia tarjeta. */
+/* Al tamano normal del cuerpo, como el resto de la pagina -- no mas grande.
+   Llevaba `font-size` propio (21.6px, contra los 14.4px del texto de los pasos
+   justo al lado) con la idea de que el proposito, una sola frase, se leyera
+   como la tesis de la casa. En la practica chocaba: al lado de tarjetas mas
+   chicas se leia como un cuerpo extrano y no como enfasis. Se retira el tamano
+   y el color propios -- `.se-about__band-text` ya pone los suyos -- y se
+   conserva solo lo que sigue siendo necesario ahora que la tarjeta ocupa el
+   ancho entero: acotar la medida de lectura, para que una frase de lado a lado
+   en pantalla grande no pierda el renglon al volver. */
 .se-about__band-text--lead {
-  font-size: clamp(1.1rem, 1.7vw, 1.35rem);
-  line-height: 1.6;
-  color: rgba(var(--se-tinte), 0.82);
-  /* La tarjeta ocupa el ancho entero desde que se fue la de objetivos, y una
-     frase tirada de lado a lado en pantalla grande se lee mal: el ojo pierde el
-     renglon al volver. Se acota a la medida de lectura habitual. */
   max-width: 62ch;
   text-wrap: balance;
 }

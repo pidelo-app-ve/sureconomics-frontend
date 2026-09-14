@@ -4,7 +4,14 @@ import { BRAND } from "../data/surEconomicsMock";
 import { applyPageMeta } from "../lib/seo";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
-import { Media, PieceBody, PieceByline, PieceTags, RelatedPieces } from "../components/piece";
+import {
+  Media,
+  PieceBody,
+  PieceByline,
+  PieceComments,
+  PieceTags,
+  RelatedPieces,
+} from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
 import { FORMATO_META, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
@@ -174,6 +181,18 @@ export const Pieza = () => {
               <div className="se-piece__main">
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
+
+                {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
+                    conversación es sobre lo que se acaba de leer.
+
+                    Sólo donde la sección los admite -- hoy artículo, editorial,
+                    entrevista y podcast. La decisión viaja en la pieza porque es una
+                    política del formato, editable desde el panel, y no una lista de
+                    formatos escrita aquí: la página de detalle es una sola para los
+                    seis, así que sin esta condición aparecerían en todos. */}
+                {pieza.admiteComentarios ? (
+                  <PieceComments pieza={{ slug: pieza.slug, rutaCanonica: canonica }} />
+                ) : null}
               </div>
 
               {relacionadas.length ? (

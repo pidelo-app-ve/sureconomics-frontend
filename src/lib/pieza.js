@@ -308,6 +308,15 @@ export const piezaFromApi = (row) => {
     // del backend no trae el campo, y `undefined` en un `&&` de JSX no pinta nada
     // pero tampoco se distingue de un `false` al depurar.
     educativo: Boolean(row.is_educational),
+    // Si la sección de esta pieza admite comentarios. Es una política del formato y
+    // viaja anidada en la pieza justo para que la página no tenga que cruzar el
+    // listado de formatos ni provocar un error para saber si dibuja la caja.
+    //
+    // `!== false` y no `Boolean(...)`: en el servidor el valor por omisión es abierto,
+    // así que una respuesta que no traiga el campo -- una versión anterior del backend
+    // -- tiene que leerse como abierta y no como cerrada, o al desplegar el frontend
+    // primero desaparecerían los comentarios de todo el sitio.
+    admiteComentarios: row.content_format?.allows_comments !== false,
   };
 };
 

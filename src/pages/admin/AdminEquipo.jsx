@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { TEAM } from "../../data/surEconomicsMock";
+import { TEAM, claveDeFoto } from "../../data/surEconomicsMock";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
   ACCEPTED_IMAGE_MIME,
@@ -133,7 +133,7 @@ const FichaDeFoto = ({ persona, foto, ocupado, onSubir, onQuitar }) => {
           <button
             type="button"
             className="se-btn se-btn--secondary se-btn--small"
-            onClick={() => onQuitar(persona.id)}
+            onClick={() => onQuitar(claveDeFoto(persona))}
             disabled={ocupado}
           >
             Quitar la foto
@@ -242,7 +242,7 @@ export const AdminEquipo = () => {
   }, []);
 
   const subir = useCallback(async (persona, archivo) => {
-    setSubiendo(persona.id);
+    setSubiendo(claveDeFoto(persona));
     try {
       let fila = await uploadAdminMediaImage(archivo);
       // Se etiqueta con el nombre para que la foto se encuentre después en la
@@ -253,8 +253,11 @@ export const AdminEquipo = () => {
       } catch {
         /* la etiqueta es un extra, no el trabajo */
       }
-      setImagenes((previo) => ({ ...previo, [persona.id]: fila.id }));
-      setVistas((previo) => ({ ...previo, [persona.id]: fila.url || "" }));
+      // Se guarda bajo la clave de FOTO, no bajo el id de la ficha: quien aparece
+      // en dos grupos comparte retrato y las dos tarjetas se actualizan a la vez.
+      const clave = claveDeFoto(persona);
+      setImagenes((previo) => ({ ...previo, [clave]: fila.id }));
+      setVistas((previo) => ({ ...previo, [clave]: fila.url || "" }));
     } catch (err) {
       setGuardado({
         status: "error",
@@ -362,8 +365,8 @@ export const AdminEquipo = () => {
                   <FichaDeFoto
                     key={persona.id}
                     persona={persona}
-                    foto={vistas[persona.id] || ""}
-                    ocupado={subiendo === persona.id}
+                    foto={vistas[claveDeFoto(persona)] || ""}
+                    ocupado={subiendo === claveDeFoto(persona)}
                     onSubir={elegirArchivo}
                     onQuitar={quitar}
                   />

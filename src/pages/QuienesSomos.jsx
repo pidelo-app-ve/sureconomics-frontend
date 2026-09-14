@@ -1,4 +1,4 @@
-import { BRAND, INSTITUTIONAL, TEAM } from "../data/surEconomicsMock";
+import { BRAND, INSTITUTIONAL, TEAM, claveDeFoto } from "../data/surEconomicsMock";
 import { getFotosDelEquipo } from "../services/publicContentService";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
@@ -85,7 +85,7 @@ const TeamSection = ({ title, members, initiallyOpen, fotos }) => {
       <div className="se-about__acc-body">
         <div className="se-team-grid">
           {members.map((m) => (
-            <TeamMemberCard key={m.id} member={m} foto={fotos?.[m.id] || ""} />
+            <TeamMemberCard key={m.id} member={m} foto={fotos?.[claveDeFoto(m)] || ""} />
           ))}
         </div>
       </div>

@@ -112,6 +112,8 @@ export const TEAM = {
   board: [
     {
       id: "junta-oscar-doval",
+      // Misma persona que "consejo-oscar-doval": comparten foto. Ver `claveDeFoto`.
+      fotoId: "junta-oscar-doval",
       name: "Óscar Doval",
       role: "Junta Directiva",
       cvUrl: "#",
@@ -135,6 +137,9 @@ export const TEAM = {
   editorialBoard: [
     {
       id: "consejo-oscar-doval",
+      // La misma foto que su ficha de Junta Directiva: es la misma persona, y
+      // subirla dos veces seria pedirle a la redaccion que recuerde hacerlo.
+      fotoId: "junta-oscar-doval",
       name: "Óscar Doval",
       role: "Director General",
       cvUrl: "#",
@@ -166,6 +171,22 @@ export const TEAM = {
     { id: "operativo-manuel-oropeza", name: "Manuel Oropeza", role: "Equipo operativo", cvUrl: "#", email: "", links: [] },
   ],
 };
+
+/**
+ * Con qué clave se guarda la foto de una ficha del equipo.
+ *
+ * Normalmente es su propio `id`. La excepción es quien aparece en dos grupos --
+ * hoy sólo Óscar Doval, en Junta Directiva y en Consejo Editorial --: las dos
+ * fichas son la misma persona y tienen que compartir retrato. Sin esto, subirle la
+ * foto en un grupo dejaba el otro con las iniciales, y habría que acordarse de
+ * subirla dos veces.
+ *
+ * El `fotoId` compartido es el id de su ficha de Junta Directiva, y no un nombre
+ * más bonito, por un motivo concreto: esa es la clave con la que su foto ya está
+ * guardada. Cambiarla por algo más limpio habría dejado la foto huérfana y
+ * obligado a volver a subirla.
+ */
+export const claveDeFoto = (miembro) => miembro?.fotoId ?? miembro?.id ?? "";
 
 export const INSTITUTIONAL = {
   /**

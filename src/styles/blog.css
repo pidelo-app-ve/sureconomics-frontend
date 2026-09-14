@@ -13565,8 +13565,11 @@ a.se-topics__chip:focus-visible {
   --redes-frenado: cubic-bezier(0.22, 1, 0.36, 1);
   --redes-paso: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-  padding: 1.75rem 0 2.1rem;
+  /* Sin margen arriba: `main` es transparente y el `body` es casi negro, asi que
+     cualquier hueco entre la ultima seccion y este bloque sale como una banda
+     oscura a lo ancho. El respiro lo da el relleno, y la raya fina separa. */
+  margin-top: 0;
+  padding: 2.25rem 0 2.1rem;
   background: var(--color-paper);
 }
 
@@ -13671,7 +13674,8 @@ a.se-topics__chip:focus-visible {
    rayas sueltas -- sino en la linea de progreso de debajo, que es lo que las
    flechas controlan. */
 .se-redes__progreso {
-  height: 1px;
+  /* 2 px y no 1: a un pixel el terracota se funde con el blanco y se lee gris. */
+  height: 2px;
   margin: -0.3rem 0 0;
   background: rgba(var(--se-tinte), 0.07);
   overflow: hidden;

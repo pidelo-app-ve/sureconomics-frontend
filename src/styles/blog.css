@@ -3631,6 +3631,13 @@
   display: block;
   padding: 0;
   object-fit: cover;
+  /* Centrado arriba y no en el medio. `cover` recorta al centro del cuadrado por
+     omision, y una foto de medio cuerpo suele tener mas aire sobre la cabeza que
+     debajo de la barbilla -- el centro cae en el pecho y la cabeza queda mocha.
+     Sesgar el recorte hacia arriba deja la cara dentro casi siempre, a costa de
+     perder un poco mas de hombros en las fotos ya encuadradas de cerca -- que
+     sigue siendo mejor perdida que una cabeza cortada. */
+  object-position: center 20%;
   background: rgba(var(--se-tinte), 0.04);
 }
 
@@ -13466,6 +13473,12 @@ a.se-topics__chip:focus-visible {
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
+  /* Mismo sesgo que la tarjeta publica y por el mismo motivo: sin esto una foto de
+     medio cuerpo se recorta por el centro y la cabeza sale mocha. Esta regla la
+     comparten el `<img>` de la foto y el `<span>` de las iniciales -- en el
+     segundo no hace nada, porque `object-position` solo afecta a un elemento
+     reemplazado, asi que no hace falta separarlas. */
+  object-position: center 20%;
   background: var(--color-navy);
   color: #ffffff;
   font-family: var(--mono);

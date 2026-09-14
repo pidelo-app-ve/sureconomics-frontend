@@ -9,6 +9,7 @@ import {
   patchAdminMedia,
 } from "../../services/adminMediaService";
 import { getTeamPhotos, putTeamPhotos } from "../../services/adminSettingsService";
+import { RecorteDeAvatar } from "../../components/admin/RecorteDeAvatar";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
 const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -181,6 +182,8 @@ export const AdminEquipo = () => {
   const [carga, setCarga] = useState({ status: "loading", error: "" });
   const [guardado, setGuardado] = useState({ status: "idle", mensaje: "" });
   const [subiendo, setSubiendo] = useState("");
+  // La foto elegida esperando encuadre: `{ persona, archivo }` o nada.
+  const [recortando, setRecortando] = useState(null);
 
   useEffect(() => {
     let vivo = true;
@@ -204,20 +207,42 @@ export const AdminEquipo = () => {
     };
   }, []);
 
-  const subir = useCallback(async (persona, archivo) => {
+  /**
+   * Elegir un archivo ya no sube nada: abre el recorte.
+   *
+   * El encuadre es el paso que faltaba. Las fotos que manda la gente son de cuerpo
+   * entero, y un recorte cuadrado automatico se queda con el torso -- la cara acaba
+   * diminuta dentro del circulo. Aqui se mira si el archivo sirve, se avisa si es
+   * demasiado pequeño, y quien sube elige que parte se ve.
+   */
+  const elegirArchivo = useCallback(async (persona, archivo) => {
     const problema = problemaLocal(archivo);
     if (problema) {
       setGuardado({ status: "error", mensaje: `${persona.name}: ${problema}` });
       return;
     }
-    setSubiendo(persona.id);
-    setGuardado({ status: "idle", mensaje: "" });
 
-    // Se mide antes de subir para poder decir el tamaño exacto en el aviso. Si el
-    // navegador no puede leerla, se sigue igual: el servidor la valida de nuevo.
+    // Se mide el ORIGINAL, no el recorte: el recorte siempre sale del mismo tamaño,
+    // asi que medirlo no diria nada. Lo que importa es cuanto detalle traia la foto.
     const medida = await medirImagen(archivo);
     const corto = medida ? Math.min(medida.ancho, medida.alto) : null;
+    if (corto !== null && corto < LADO_MINIMO) {
+      setGuardado({
+        status: "aviso",
+        mensaje:
+          `${persona.name}: la foto mide ${medida.ancho}x${medida.alto} px. Por `
+          + `debajo de ${LADO_MINIMO} px de lado corto se va a ver pixelada. Puede `
+          + `encuadrarla igual, pero si consigue una mas grande, mejor.`,
+      });
+    } else {
+      setGuardado({ status: "idle", mensaje: "" });
+    }
 
+    setRecortando({ persona, archivo });
+  }, []);
+
+  const subir = useCallback(async (persona, archivo) => {
+    setSubiendo(persona.id);
     try {
       let fila = await uploadAdminMediaImage(archivo);
       // Se etiqueta con el nombre para que la foto se encuentre después en la
@@ -230,19 +255,6 @@ export const AdminEquipo = () => {
       }
       setImagenes((previo) => ({ ...previo, [persona.id]: fila.id }));
       setVistas((previo) => ({ ...previo, [persona.id]: fila.url || "" }));
-
-      // La foto ya está puesta: esto no la rechaza, sólo dice por qué se va a ver
-      // borrosa, que es la diferencia entre un problema visible y uno invisible.
-      if (corto !== null && corto < LADO_MINIMO) {
-        setGuardado({
-          status: "aviso",
-          mensaje:
-            `${persona.name}: la foto mide ${medida.ancho}x${medida.alto} px y el `
-            + `recorte redondo usa su lado corto (${corto} px). Por debajo de `
-            + `${LADO_MINIMO} px se va a ver pixelada en pantallas buenas. Queda `
-            + `puesta; si consigue una más grande, súbala encima.`,
-        });
-      }
     } catch (err) {
       setGuardado({
         status: "error",
@@ -325,6 +337,21 @@ export const AdminEquipo = () => {
         </p>
       ) : null}
 
+      {/* El encuadre, sobre la lista y no en una pantalla aparte: quien sube ve las
+          fichas detrás y no pierde el sitio donde estaba. */}
+      {recortando ? (
+        <RecorteDeAvatar
+          archivo={recortando.archivo}
+          nombre={recortando.persona.name}
+          onCancelar={() => setRecortando(null)}
+          onListo={(recortada) => {
+            const { persona } = recortando;
+            setRecortando(null);
+            subir(persona, recortada);
+          }}
+        />
+      ) : null}
+
       {carga.status === "ready" ? (
         <>
           {GRUPOS.map((grupo) => (
@@ -337,7 +364,7 @@ export const AdminEquipo = () => {
                     persona={persona}
                     foto={vistas[persona.id] || ""}
                     ocupado={subiendo === persona.id}
-                    onSubir={subir}
+                    onSubir={elegirArchivo}
                     onQuitar={quitar}
                   />
                 ))}

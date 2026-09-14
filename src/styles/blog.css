@@ -13544,3 +13544,60 @@ a.se-topics__chip:focus-visible {
     transition: none;
   }
 }
+
+/* —— Panel: encuadrar la foto antes de subirla ——
+   El circulo de la vista previa es el mismo recorte que va a salir publicado: lo que
+   se ve aqui es lo que se sube, sin sorpresas al guardar. */
+
+.se-recorte {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 14px;
+  background: var(--color-paper, #fff);
+}
+
+.se-recorte__titulo {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.se-recorte__ayuda {
+  margin: 0 0 0.75rem;
+  max-width: 52ch;
+}
+
+/* `touch-action: none` para que arrastrar en un movil mueva la foto y no la pagina. */
+.se-recorte__lienzo {
+  display: block;
+  border-radius: 50%;
+  background: rgba(var(--se-tinte), 0.06);
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 0 0 1px rgba(var(--se-tinte), 0.15);
+}
+
+.se-recorte__lienzo:active {
+  cursor: grabbing;
+}
+
+.se-recorte__lienzo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.se-recorte__zoom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 260px;
+  margin-top: 0.85rem;
+}
+
+.se-recorte__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

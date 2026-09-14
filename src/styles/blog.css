@@ -1131,24 +1131,31 @@
   }
 }
 
-/* —— La franja donde nueve enlaces caben justo ——
-   De 1200 a 1439. A 1440 y arriba la tira entera cabe con el reloj puesto y el hueco
-   de siempre, asi que estas dos concesiones no llegan alli.
-
+/* —— El sitio que necesitan nueve enlaces ——
    Se ceden dos cosas y ninguna es un enlace, que es el orden correcto de prioridades:
-   primero el hueco entre enlaces, y despues el reloj de Caracas. El reloj ya cedia
-   entre 768 y 1199 por lo mismo; esto solo extiende su franja. Un enlace del menu que
-   no se ve es navegacion perdida; un reloj que no se ve es un adorno menos.
+   primero el hueco entre enlaces, y despues el reloj de Caracas. Un enlace del menu
+   que no se ve es navegacion perdida; un reloj que no se ve es un adorno menos.
 
-   Medido con nueve enlaces: la tira pedia 733 px y recibia 607 a 1280. Con las dos
-   reglas entra sin cortar ninguno desde 1200. */
+   El hueco apretado va en TODO el escritorio y no solo en la franja estrecha, y esa
+   distincion se pago por medir con sesion abierta despues de haber medido sin ella:
+   con sesion los botones pasan de ENTRAR/REGISTRARSE a DASHBOARD/CERRAR SESION, que
+   son mas anchos, y `.se-header__inner` topa en 1440 px -- asi que por encima de ese
+   ancho la barra no gana sitio y el problema no se arregla solo. Medido: la tira pedia
+   733 px y recibia 712 a 1440, 1600 y 1920, de modo que "Quienes somos" salia cortado
+   en **todos** los anchos de escritorio con la sesion abierta. Con el hueco apretado
+   pide 675 y le sobran 37.
+
+   El reloj, en cambio, solo cede por debajo de 1440: ahi arriba ya no hace falta
+   quitarlo. Ya cedia entre 768 y 1199 por lo mismo; esto extiende su franja. */
+@media (min-width: 1200px) {
+  .se-header__nav--desktop .se-header__nav-list {
+    column-gap: 0.5rem;
+  }
+}
+
 @media (min-width: 1200px) and (max-width: 1439px) {
   .se-header__inner .se-hora--header {
     display: none;
-  }
-
-  .se-header__nav--desktop .se-header__nav-list {
-    column-gap: 0.5rem;
   }
 }
 

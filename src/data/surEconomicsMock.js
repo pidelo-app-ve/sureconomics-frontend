@@ -215,15 +215,13 @@ export const INSTITUTIONAL = {
   /**
    * Los objetivos, dibujados como el recorrido que son.
    *
-   * Antes esto vivia en dos sitios que se pisaban: el diagrama de cuatro pasos del
-   * documento del cliente, y debajo una lista de cinco objetivos en prosa. Decian lo
-   * mismo -- generar informacion, integrar datos, dar comprension de la region, servir
-   * al inversionista, promover oportunidades -- repartido de otra forma, y la pagina
-   * se explicaba dos veces.
-   *
-   * La lista se disuelve aqui dentro y no se tira: cada uno de los cinco objetivos
-   * esta en el paso que le toca. El primero y el segundo en Investigacion, el tercero
-   * en Comprension, y el cuarto y el quinto en Decisiones.
+   * Tal cual el diagrama del documento del cliente (PDF "Quiénes Somos - SurE",
+   * 15/09/2026): cada caja es una palabra que titula y las que siguen, sueltas.
+   * Investigación -> datos, análisis, entorno, tendencias, estadísticas.
+   * Comprensión -> geopolítica, economía, social, cultural. Lectura ejecutiva ->
+   * claridad, sencillez. Decisiones -> inversión. Antes esto llevaba una frase
+   * redactada por caja; el cliente pidió el texto literal del documento, no una
+   * paráfrasis.
    *
    * Es una secuencia de verdad -- cada paso necesita el anterior -- y por eso se numera
    * y se dibuja con flechas. El orden es el contenido, no un adorno.
@@ -231,23 +229,19 @@ export const INSTITUTIONAL = {
   flow: [
     {
       title: "Investigación",
-      text:
-        "Datos cuantitativos y cualitativos de fuentes confiables e investigación de campo: entorno, tendencias y estadísticas de cada país y bloque económico de la región.",
+      text: "Datos, análisis, entorno, tendencias, estadísticas.",
     },
     {
       title: "Comprensión",
-      text:
-        "La dinámica geoeconómica, geopolítica, social y cultural que explica las cifras y que no se ve en una serie de datos.",
+      text: "Geopolítica, economía, social, cultural.",
     },
     {
       title: "Lectura ejecutiva",
-      text:
-        "Resúmenes y análisis con claridad y sencillez: lo que hace falta para decidir, sin rodeos ni jerga.",
+      text: "Claridad, sencillez.",
     },
     {
       title: "Decisiones",
-      text:
-        "Inversión directa o en instrumentos financieros, con las oportunidades que abre Latinoamérica a la vista.",
+      text: "Inversión.",
     },
   ],
 };

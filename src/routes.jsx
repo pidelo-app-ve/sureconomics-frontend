@@ -22,6 +22,7 @@ import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
 import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
 import { AdminEquipo } from "./pages/admin/AdminEquipo";
 import { AdminRedes } from "./pages/admin/AdminRedes";
+import { AdminAnalitica } from "./pages/admin/AdminAnalitica";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
@@ -131,6 +132,7 @@ export const router = createBrowserRouter([
                     // Las publicaciones de redes que se destacan al pie de todas
                     // las vistas. Curadas a mano: ver `redes_service.py`.
                     { path: "redes", element: <AdminRedes /> },
+                    { path: "analitica", element: <AdminAnalitica /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "boletin", element: <AdminNewsletterList /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },

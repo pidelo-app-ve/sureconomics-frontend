@@ -139,6 +139,12 @@ const AdminShell = () => {
               </NavLink>
             </NavGroup>
 
+            <NavGroup label="Audiencia">
+              <NavLink to="/admin/analitica" className={linkClass} end onClick={closeMenu}>
+                Lectores
+              </NavLink>
+            </NavGroup>
+
             {/* Two axes, not a flat list of tags: see the Temas screen for why
                 there is no "new topic" here. */}
             <NavGroup label="Clasificación">

@@ -14264,3 +14264,186 @@ a.se-topics__chip:focus-visible {
   text-underline-offset: 2px;
 }
 .se-footer__legal:hover { color: var(--color-accent); }
+
+/* ═══ PANEL · AUDIENCIA ═══════════════════════════════════════════════
+   Dos bloques: el directo y el periodo. Las barras van dibujadas con un div y
+   no con una libreria de graficos -- son dos listas cortas, y la dependencia
+   pesaria mas que la pantalla entera. */
+
+.se-audiencia__bloque {
+  margin-bottom: 1.75rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.se-audiencia__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.se-audiencia__h2 {
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.se-audiencia__cabeza .se-audiencia__h2 { margin: 0; }
+
+.se-audiencia__h3 {
+  margin: 1.6rem 0 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+/* --- Las cifras --- */
+.se-audiencia__cifras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.se-audiencia__cifra { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+
+.se-audiencia__numero {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  /* Los digitos alineados: sin esto el numero baila al refrescarse cada veinte
+     segundos, y un numero que se mueve parece un fallo. */
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.se-audiencia__cifra--grande .se-audiencia__numero {
+  font-size: 2.9rem;
+  color: var(--marca-verde);
+}
+
+.se-audiencia__etiqueta {
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  color: var(--color-ink);
+}
+
+.se-audiencia__nota {
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--color-slate-2);
+  max-width: 30ch;
+}
+
+/* --- Periodos --- */
+.se-audiencia__periodos { display: flex; gap: 0.35rem; }
+
+.se-audiencia__periodo {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.se-audiencia__periodo:hover { border-color: var(--color-ink); }
+.se-audiencia__periodo--on {
+  background: var(--marca-verde);
+  border-color: var(--marca-verde);
+  color: #ffffff;
+}
+.se-audiencia__periodo:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* --- Las listas --- */
+.se-audiencia__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* La ruta se queda en una columna acotada y la barra se lleva el espacio que sobra.
+   Al reves -- que era como estaba -- las barras salian cortas y arrinconadas a la
+   derecha, y una barra corta no deja comparar nada, que es para lo unico que esta. */
+.se-audiencia__fila {
+  display: grid;
+  grid-template-columns: minmax(0, 24rem) minmax(4rem, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.se-audiencia__ruta {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--color-ink);
+  /* Una ruta larga no puede ensanchar la rejilla y empujar las barras fuera. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.se-audiencia__ruta--enlace { color: var(--color-accent); text-decoration: none; }
+.se-audiencia__ruta--enlace:hover { text-decoration: underline; }
+
+.se-audiencia__barra {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+.se-audiencia__barra-relleno {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.se-audiencia__valor {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--color-ink);
+}
+.se-audiencia__valor small { color: var(--color-slate-2); font-size: 0.92em; }
+
+.se-audiencia__pie {
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--color-slate-2);
+  max-width: 78ch;
+}
+
+@media (max-width: 720px) {
+  .se-audiencia__fila {
+    /* La barra desaparece antes que el numero: es adorno, el dato es la cifra. */
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .se-audiencia__barra { display: none; }
+  .se-audiencia__cifras { gap: 1.1rem 1.75rem; }
+  .se-audiencia__cifra--grande .se-audiencia__numero { font-size: 2.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-audiencia__barra-relleno { transition: none; }
+}

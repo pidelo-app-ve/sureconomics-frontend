@@ -133,41 +133,9 @@ export const QuienesSomos = () => {
         </div>
       </section>
 
-      {/* Los objetivos, que son este recorrido y ya no una lista aparte.
-          Antes la página los decía dos veces: aquí el diagrama del documento del
-          cliente y debajo cinco objetivos en prosa que repetían lo mismo. Los
-          cinco están disueltos dentro de los cuatro pasos; ver `INSTITUTIONAL.flow`. */}
-      <section className="se-section se-about__flow" aria-labelledby="se-flow-title">
-        <div className="se-container">
-          <header className="se-about__flow-head">
-            <h2 className="se-heading-section se-about__flow-title" id="se-flow-title">
-              Objetivos
-            </h2>
-            <p className="se-about__flow-lead">De la investigación a la decisión.</p>
-          </header>
-
-          {/* La franja que en el documento es una flecha sobre los cuatro pasos:
-              todo el recorrido ocurre en la región, no es un paso más. */}
-          <p className="se-about__flow-region">
-            <span className="se-about__flow-region-text">Latinoamérica</span>
-          </p>
-
-          <ol className="se-about__flow-steps">
-            {INSTITUTIONAL.flow.map((paso, idx) => (
-              <li key={paso.title} className="se-about__flow-step">
-                {/* El número es decorativo: el orden ya lo lleva la lista ordenada,
-                    así que repetírselo a un lector de pantalla sería ruido. */}
-                <span className="se-about__flow-step-num" aria-hidden="true">
-                  {idx + 1}
-                </span>
-                <h3 className="se-about__flow-step-title">{paso.title}</h3>
-                <p className="se-about__flow-step-text">{paso.text}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
+      {/* El diagrama de "Objetivos" se quito a pedido del cliente (09/2026): solo
+          queda el Proposito. `INSTITUTIONAL.flow` tambien se retiro de los datos --
+          nada mas lo usaba. */}
       <section className="se-section se-about__bands">
         <div className="se-container">
           <article className="se-about__band se-about__band--alt">

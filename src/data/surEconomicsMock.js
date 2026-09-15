@@ -212,38 +212,8 @@ export const INSTITUTIONAL = {
   // su sitio, y aquí queda el propósito de verdad.
   purpose:
     "Construir una plataforma sólida para informar, analizar y comprender la realidad económica y financiera de América Latina.",
-  /**
-   * Los objetivos, dibujados como el recorrido que son.
-   *
-   * Tal cual el diagrama del documento del cliente (PDF "Quiénes Somos - SurE",
-   * 15/09/2026): cada caja es una palabra que titula y las que siguen, sueltas.
-   * Investigación -> datos, análisis, entorno, tendencias, estadísticas.
-   * Comprensión -> geopolítica, economía, social, cultural. Lectura ejecutiva ->
-   * claridad, sencillez. Decisiones -> inversión. Antes esto llevaba una frase
-   * redactada por caja; el cliente pidió el texto literal del documento, no una
-   * paráfrasis.
-   *
-   * Es una secuencia de verdad -- cada paso necesita el anterior -- y por eso se numera
-   * y se dibuja con flechas. El orden es el contenido, no un adorno.
-   */
-  flow: [
-    {
-      title: "Investigación",
-      text: "Datos, análisis, entorno, tendencias, estadísticas.",
-    },
-    {
-      title: "Comprensión",
-      text: "Geopolítica, economía, social, cultural.",
-    },
-    {
-      title: "Lectura ejecutiva",
-      text: "Claridad, sencillez.",
-    },
-    {
-      title: "Decisiones",
-      text: "Inversión.",
-    },
-  ],
+  // El diagrama de cuatro pasos ("Objetivos") se quito de la pagina a pedido del
+  // cliente (15/09/2026); vivia en `flow` y ya no se usa en ningun sitio.
 };
 
 export const CONTACT = {

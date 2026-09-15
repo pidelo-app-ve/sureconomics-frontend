@@ -72,6 +72,15 @@ const duracion = (segundos) => {
 
 const numero = (n) => new Intl.NumberFormat("es").format(Math.round(n || 0));
 
+/** «hace 40 s», «hace 3 min». Dice cuándo se miró, que en un panel en vivo es la mitad. */
+const desdeHace = (marca, ahora) => {
+  const s = Math.max(0, Math.round((ahora - marca) / 1000));
+  if (s < 10) return "recién actualizado";
+  if (s < 60) return `actualizado hace ${s} s`;
+  const m = Math.round(s / 60);
+  return `actualizado hace ${m} min`;
+};
+
 const diaCorto = (iso) => {
   const d = new Date(`${iso}T00:00:00`);
   return Number.isNaN(d.getTime())
@@ -125,9 +134,16 @@ const Variacion = ({ actual, anterior }) => {
 
 Variacion.propTypes = { actual: PropTypes.number.isRequired, anterior: PropTypes.number };
 
+/**
+ * `valor` puede llegar vacío cuando el servidor es más viejo que esta pantalla -- se
+ * despliegan por separado. Entonces se dibuja una raya: «no lo sé» es una respuesta;
+ * «undefined %» es un fallo escrito en la cara del lector.
+ */
 const Ficha = ({ valor, etiqueta, nota, children }) => (
   <div className="se-aud__ficha">
-    <span className="se-aud__ficha-valor">{valor}</span>
+    <span className="se-aud__ficha-valor">
+      {valor === null || valor === undefined || valor === "" ? "—" : valor}
+    </span>
     <span className="se-aud__ficha-etiqueta">{etiqueta}</span>
     {children}
     {nota ? <span className="se-aud__ficha-nota">{nota}</span> : null}
@@ -135,7 +151,9 @@ const Ficha = ({ valor, etiqueta, nota, children }) => (
 );
 
 Ficha.propTypes = {
-  valor: PropTypes.node.isRequired,
+  // Sin `isRequired`: `null` es un valor legitimo aqui -- significa "el servidor no
+  // manda ese dato" -- y se dibuja como una raya.
+  valor: PropTypes.node,
   etiqueta: PropTypes.string.isRequired,
   nota: PropTypes.string,
   children: PropTypes.node,
@@ -445,7 +463,20 @@ export const AdminAnalitica = () => {
   const [dias, setDias] = useState(7);
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(true);
+  // Cuando se cargo el RESUMEN. No el directo: ese se refresca solo cada veinte
+  // segundos, asi que un sello atado a el diria "recien actualizado" eternamente. Lo que
+  // envejece -- y para lo que esta el boton -- es el periodo.
+  const [actualizado, setActualizado] = useState(() => Date.now());
+  const [aMano, setAMano] = useState(false);
+  // Un tic cada quince segundos solo para que «hace 40 s» siga siendo verdad. No pide
+  // nada al servidor: repintar un texto es gratis, preguntar no.
+  const [reloj, setReloj] = useState(() => Date.now());
   const montado = useRef(true);
+
+  useEffect(() => {
+    const t = window.setInterval(() => setReloj(Date.now()), 15000);
+    return () => window.clearInterval(t);
+  }, []);
 
   useEffect(() => {
     montado.current = true;
@@ -482,6 +513,23 @@ export const AdminAnalitica = () => {
     };
   }, [pedirVivo]);
 
+  const [recarga, setRecarga] = useState(0);
+
+  /**
+   * Volver a pedirlo todo, ahora.
+   *
+   * El directo ya se refresca solo cada veinte segundos, pero el resumen no -- no cambia
+   * de un minuto a otro -- y hasta ahora la única forma de verlo al día era recargar la
+   * página entera, que además devolvía el periodo a siete días. Esto pide las dos cosas
+   * y conserva lo que estabas mirando.
+   */
+  const actualizar = useCallback(async () => {
+    setAMano(true);
+    setRecarga((n) => n + 1);
+    await pedirVivo();
+    if (montado.current) setAMano(false);
+  }, [pedirVivo]);
+
   useEffect(() => {
     let vigente = true;
     setCargando(true);
@@ -490,6 +538,7 @@ export const AdminAnalitica = () => {
         if (vigente && montado.current) {
           setResumen(datos);
           setError("");
+          setActualizado(Date.now());
         }
       })
       .catch((e) => {
@@ -503,7 +552,7 @@ export const AdminAnalitica = () => {
       // nueva: sin esto, pulsar 90 y luego 7 deja en pantalla los datos de 90.
       vigente = false;
     };
-  }, [dias]);
+  }, [dias, recarga]);
 
   const r = resumen;
   const nada = !cargando && r && r.sesiones === 0 && !vivo?.lectores;
@@ -521,18 +570,39 @@ export const AdminAnalitica = () => {
           </p>
         </div>
         {/* Un solo filtro, arriba, y manda sobre todos los bloques. */}
-        <div className="se-aud__periodos" role="group" aria-label="Periodo">
-          {PERIODOS.map((p) => (
+        <div className="se-aud__mandos">
+          <div className="se-aud__periodos" role="group" aria-label="Periodo">
+            {PERIODOS.map((p) => (
+              <button
+                key={p.dias}
+                type="button"
+                className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
+                aria-pressed={dias === p.dias}
+                onClick={() => setDias(p.dias)}
+              >
+                {p.etiqueta}
+              </button>
+            ))}
+          </div>
+
+          <div className="se-aud__refresco">
             <button
-              key={p.dias}
               type="button"
-              className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
-              aria-pressed={dias === p.dias}
-              onClick={() => setDias(p.dias)}
+              className="se-aud__actualizar"
+              onClick={actualizar}
+              disabled={aMano || cargando}
             >
-              {p.etiqueta}
+              <span className="se-aud__actualizar-icono" aria-hidden="true">
+                ↻
+              </span>
+              {aMano ? "Actualizando…" : "Actualizar"}
             </button>
-          ))}
+            {/* `aria-live` para que quien no ve la pantalla se entere de que hay datos
+                nuevos; `polite` porque no es una urgencia que deba cortar la lectura. */}
+            <span className="se-aud__sello" aria-live="polite">
+              {desdeHace(actualizado, reloj)}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -602,12 +672,12 @@ export const AdminAnalitica = () => {
               nota="cuánto se navega dentro del sitio"
             />
             <Ficha
-              valor={duracion(r.segundos_por_visita)}
+              valor={r.segundos_por_visita === null ? null : duracion(r.segundos_por_visita)}
               etiqueta="de lectura por visita"
               nota="solo tiempo con la pieza visible"
             />
             <Ficha
-              valor={`${r.una_pagina} %`}
+              valor={r.una_pagina === null ? null : `${r.una_pagina} %`}
               etiqueta="se van en la primera"
               nota="leyeron una página y salieron"
             />

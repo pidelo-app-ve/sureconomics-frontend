@@ -14302,8 +14302,58 @@ a.se-topics__chip:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* --- El filtro, uno solo y arriba --- */
+/* --- El filtro y el boton de actualizar, los dos arriba --- */
+.se-aud__mandos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
 .se-aud__periodos { display: flex; gap: 0.35rem; flex: 0 0 auto; }
+
+.se-aud__refresco {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.se-aud__actualizar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--marca-verde);
+  border-radius: 8px;
+  background: var(--marca-verde);
+  color: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.se-aud__actualizar:hover:not(:disabled) { background: #00250f; }
+.se-aud__actualizar:disabled { opacity: 0.55; cursor: default; }
+.se-aud__actualizar:focus-visible { outline: 2px solid var(--aud-marca); outline-offset: 2px; }
+
+/* La flecha gira solo mientras se espera: una animacion continua en un boton
+   quieto no dice nada y ademas distrae. */
+.se-aud__actualizar-icono { display: inline-block; font-size: 0.9em; line-height: 1; }
+.se-aud__actualizar:disabled .se-aud__actualizar-icono {
+  animation: se-aud-girar 0.9s linear infinite;
+}
+@keyframes se-aud-girar {
+  to { transform: rotate(360deg); }
+}
+
+.se-aud__sello {
+  font-family: var(--se-font-ui);
+  font-size: 0.7rem;
+  color: var(--color-slate-2);
+  white-space: nowrap;
+}
 
 .se-aud__periodo {
   padding: 0.45rem 0.85rem;
@@ -14699,6 +14749,8 @@ a.se-topics__chip:focus-visible {
 
 @media (max-width: 720px) {
   .se-aud__cabecera { flex-direction: column; }
+  .se-aud__mandos { align-items: flex-start; width: 100%; }
+  .se-aud__periodos { flex: 1 1 auto; }
   .se-aud__fila {
     /* La barra se va antes que la cifra: es apoyo, el dato es el numero. */
     grid-template-columns: minmax(0, 1fr) auto;
@@ -14710,5 +14762,6 @@ a.se-topics__chip:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .se-aud__marca,
   .se-aud__columna-marca { transition: none; }
-  .se-aud__pulso { animation: none; }
+  .se-aud__pulso,
+  .se-aud__actualizar:disabled .se-aud__actualizar-icono { animation: none; }
 }

@@ -254,6 +254,9 @@ export const INSTITUTIONAL = {
 
 export const CONTACT = {
   primaryEmail: "odoval@rendigroup.com",
+  // El buzon de proteccion de datos, aparte del institucional: lo que entra por
+  // el aviso de cookies son solicitudes de derechos, no consultas editoriales.
+  privacyEmail: "servicios@rendigroup.com",
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
     { name: "Mafe Yáñez", email: "myanez@rendigroup.com" },

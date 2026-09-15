@@ -400,8 +400,8 @@ export const Cookies = () => {
           </p>
           <p>
             Para cualquier consulta sobre este aviso puede escribir a{" "}
-            <a className="se-legal__enlace" href={`mailto:${CONTACT.primaryEmail}`}>
-              {CONTACT.primaryEmail}
+            <a className="se-legal__enlace" href={`mailto:${CONTACT.privacyEmail}`}>
+              {CONTACT.privacyEmail}
             </a>
             . Si considera que no hemos atendido su solicitud, puede reclamar ante la
             autoridad de control de su país — en España, la Agencia Española de Protección
@@ -412,8 +412,8 @@ export const Cookies = () => {
         <footer className="se-legal__pie">
           <p>
             ¿Prefiere leer cómo tratamos el resto de sus datos? Escríbanos a{" "}
-            <a className="se-legal__enlace" href={`mailto:${CONTACT.primaryEmail}`}>
-              {CONTACT.primaryEmail}
+            <a className="se-legal__enlace" href={`mailto:${CONTACT.privacyEmail}`}>
+              {CONTACT.privacyEmail}
             </a>{" "}
             o vuelva a la <Link to="/">portada</Link>.
           </p>

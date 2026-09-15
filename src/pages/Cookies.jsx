@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { BRAND, CONTACT } from "../data/surEconomicsMock";
-import { consentimiento, decidir, estado, revocar } from "../lib/analitica";
+import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from "../lib/analitica";
 
 /**
  * El aviso de cookies: el documento, y el interruptor de verdad.
@@ -91,7 +91,15 @@ const legible = (clave, valor) => {
 };
 
 /** Lo que hay puesto ahora mismo, leído del navegador de quien está mirando. */
-const EstadoActual = ({ decision, cookies, onAceptar, onRevocar, borrando, borrado }) => {
+const EstadoActual = ({
+  decision,
+  cookies,
+  onAceptar,
+  onRevocar,
+  borrando,
+  borrado,
+  deshabilitado,
+}) => {
   if (decision === "si") {
     return (
       <div className="se-legal__estado se-legal__estado--si">
@@ -111,7 +119,8 @@ const EstadoActual = ({ decision, cookies, onAceptar, onRevocar, borrando, borra
           type="button"
           className="se-legal__btn"
           onClick={onRevocar}
-          disabled={borrando}
+          disabled={borrando || deshabilitado}
+          title={deshabilitado ? "En revisión: no se puede retirar por ahora." : undefined}
         >
           {borrando ? "Borrando…" : "Retirar el consentimiento y borrar mis datos"}
         </button>
@@ -138,7 +147,13 @@ const EstadoActual = ({ decision, cookies, onAceptar, onRevocar, borrando, borra
         No hay ninguna cookie de analítica en su navegador. La única que tiene de este
         sitio es <code>cookie_consent</code>, que guarda esta misma decisión.
       </p>
-      <button type="button" className="se-legal__btn se-legal__btn--suave" onClick={onAceptar}>
+      <button
+        type="button"
+        className="se-legal__btn se-legal__btn--suave"
+        onClick={onAceptar}
+        disabled={deshabilitado}
+        title={deshabilitado ? "En revisión: no se puede aceptar por ahora." : undefined}
+      >
         Aceptar la medición de audiencia
       </button>
     </div>
@@ -152,6 +167,7 @@ EstadoActual.propTypes = {
   onRevocar: PropTypes.func.isRequired,
   borrando: PropTypes.bool,
   borrado: PropTypes.bool,
+  deshabilitado: PropTypes.bool,
 };
 
 export const Cookies = () => {
@@ -201,6 +217,14 @@ export const Cookies = () => {
             cada cookie, durante cuánto tiempo y cómo retirar su permiso en un clic.
           </p>
           <p className="se-legal__fecha">Última actualización: {ACTUALIZADO}</p>
+          {!MEDICION_HABILITADA ? (
+            <p className="se-legal__revision" role="note">
+              Esta página está en revisión antes de activarse: el aviso todavía no
+              aparece en el sitio y los botones de abajo no hacen nada por ahora. Se
+              publica aquí para que el equipo legal pueda leer el texto completo antes
+              de que empiece a pedirse permiso.
+            </p>
+          ) : null}
         </header>
 
         <section className="se-legal__bloque" aria-labelledby="cookies-estado">
@@ -214,6 +238,7 @@ export const Cookies = () => {
             onRevocar={retirar}
             borrando={borrando}
             borrado={borrado}
+            deshabilitado={!MEDICION_HABILITADA}
           />
         </section>
 

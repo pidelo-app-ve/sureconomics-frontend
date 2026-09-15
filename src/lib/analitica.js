@@ -30,6 +30,21 @@
  * emite un `session_id` nuevo.
  */
 
+/**
+ * El interruptor general. En `false` mientras el aviso de cookies esta en revision
+ * legal: nadie ve la barra, nadie puede aceptar ni rechazar -- ni siquiera desde la
+ * pagina `/cookies`, que se deja visitable para poder compartir su URL con el cliente --
+ * y la medicion no arranca aunque alguien hubiera aceptado antes de esta pausa.
+ *
+ * Un solo punto de apagado y no una bandera por componente: `arrancar` y `decidir` lo
+ * comprueban ademas de `AvisoDeCookies`, asi que un enlace directo a `/cookies` no puede
+ * activar nada por otra puerta mientras esto siga en `false`.
+ *
+ * Cuando el texto quede aprobado, este valor pasa a `true` y no hace falta tocar nada
+ * mas.
+ */
+export const MEDICION_HABILITADA = false;
+
 const COOKIE_CONSENTIMIENTO = "cookie_consent";
 const COOKIE_USUARIO = "user_id";
 const COOKIE_SESION = "session_id";
@@ -124,6 +139,10 @@ export const aceptado = () => consentimiento() === "si";
  * el codigo.
  */
 export const decidir = (respuesta) => {
+  // Defensa por si algo llega a llamar a esto con el interruptor apagado -- un boton
+  // que se olvido de deshabilitar, una consola abierta. No se escribe nada: se devuelve
+  // la decision que ya hubiera, si la hay, sin tocarla.
+  if (!MEDICION_HABILITADA) return consentimiento();
   const valor = respuesta === "si" ? "si" : "no";
   escribir(COOKIE_CONSENTIMIENTO, valor, SEIS_MESES);
   if (valor === "si") arrancar();
@@ -136,6 +155,7 @@ export const decidir = (respuesta) => {
  * pueda decir "hecho" cuando este hecho de verdad y no cuando se pidio.
  */
 export const revocar = () => {
+  if (!MEDICION_HABILITADA) return Promise.resolve();
   const id = leer(COOKIE_USUARIO);
   const peticion = id ? olvidarEnServidor(id) : Promise.resolve();
   decidir("no");
@@ -304,6 +324,7 @@ const alSalir = () => {
  * que es justo lo que pasaria en desarrollo, donde React monta cada efecto dos veces.
  */
 export const arrancar = () => {
+  if (!MEDICION_HABILITADA) return;
   if (encendido || typeof document === "undefined") return;
   if (!aceptado()) return;
   encendido = true;

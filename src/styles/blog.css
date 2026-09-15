@@ -14068,6 +14068,21 @@ a.se-topics__chip:focus-visible {
   color: var(--color-slate-2);
 }
 
+/* El aviso de "en revision": mismo filete de acento que el resto de avisos del sitio,
+   para que se lea como un estado real de la pagina y no como una nota suelta. */
+.se-legal__revision {
+  margin: 1.25rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 10px;
+  background: var(--se-offwhite);
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
 .se-legal__bloque { margin-bottom: 2.75rem; }
 
 .se-legal__h2 {

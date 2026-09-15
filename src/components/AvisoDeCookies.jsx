@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { aceptado, arrancar, consentimiento, decidir, registrarVista } from "../lib/analitica";
+import {
+  MEDICION_HABILITADA,
+  aceptado,
+  arrancar,
+  consentimiento,
+  decidir,
+  registrarVista,
+} from "../lib/analitica";
 
 /**
  * El aviso de cookies y el interruptor de la medicion.
@@ -32,6 +39,14 @@ import { aceptado, arrancar, consentimiento, decidir, registrarVista } from "../
  * de un cambio de articulo salvo que alguien lo cuente. Este componente ya esta montado
  * en todas las vistas y ya sabe si hay permiso: es el sitio natural. Si no hay permiso,
  * `registrarVista` no hace nada.
+ *
+ * ## En pausa mientras el aviso esta en revision
+ *
+ * Con `MEDICION_HABILITADA` en `false` este componente no dibuja nada: ni la barra, ni
+ * los efectos que arrancan la medicion o cuentan cambios de ruta. Es a proposito el
+ * mismo interruptor que usan `arrancar` y `decidir`, y no uno propio de aqui -- asi un
+ * enlace directo a `/cookies` no puede activar la medicion por otra puerta mientras el
+ * texto siga sin aprobar.
  */
 export const AvisoDeCookies = () => {
   const [decision, setDecision] = useState(() => consentimiento());
@@ -40,10 +55,11 @@ export const AvisoDeCookies = () => {
 
   // Un si dicho en una visita anterior enciende la medicion sin volver a preguntar.
   useEffect(() => {
-    if (aceptado()) arrancar();
+    if (MEDICION_HABILITADA && aceptado()) arrancar();
   }, []);
 
   useEffect(() => {
+    if (!MEDICION_HABILITADA) return;
     // La primera ruta ya la cuenta `arrancar`; contarla otra vez la duplicaria.
     if (primera.current) {
       primera.current = false;
@@ -56,7 +72,7 @@ export const AvisoDeCookies = () => {
     setDecision(decidir(respuesta));
   }, []);
 
-  if (decision) return null;
+  if (!MEDICION_HABILITADA || decision) return null;
 
   return (
     <aside

@@ -139,11 +139,17 @@ const AdminShell = () => {
               </NavLink>
             </NavGroup>
 
+            {/* "Audiencia" oculto del menu a peticion del cliente: el aviso de cookies
+                esta en revision legal y todavia no se pide permiso a nadie, asi que no
+                hay nada que este numero pueda mostrar. La pagina sigue existiendo en
+                /admin/analitica -- no hace falta tocar routes.jsx --, solo se quita el
+                enlace. Se restaura descomentando esto el dia que el aviso se active.
             <NavGroup label="Audiencia">
               <NavLink to="/admin/analitica" className={linkClass} end onClick={closeMenu}>
                 Lectores
               </NavLink>
             </NavGroup>
+            */}
 
             {/* Two axes, not a flat list of tags: see the Temas screen for why
                 there is no "new topic" here. */}

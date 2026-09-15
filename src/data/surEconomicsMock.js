@@ -217,10 +217,16 @@ export const INSTITUTIONAL = {
 };
 
 export const CONTACT = {
-  primaryEmail: "odoval@rendigroup.com",
-  // El buzon de proteccion de datos, aparte del institucional: lo que entra por
-  // el aviso de cookies son solicitudes de derechos, no consultas editoriales.
-  privacyEmail: "servicios@rendigroup.com",
+  // El correo propio del sitio (a pedido del cliente, 15/09/2026): lo que antes
+  // eran dos buzones de RendiGroup -- el principal y el de proteccion de datos --
+  // ahora es uno solo, con dominio de SurEconomics. Los dos campos se quedan
+  // separados porque significan cosas distintas en el codigo -- consulta general
+  // contra solicitud de derechos -- aunque hoy compartan el mismo valor; si algun
+  // dia vuelven a separarse, cada uno ya tiene su sitio.
+  primaryEmail: "info@sureconomics.com",
+  privacyEmail: "info@sureconomics.com",
+  // Estos si son personas, no el buzon del sitio: el correo directo de cada quien
+  // no cambia con lo de arriba.
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
     { name: "Mafe Yáñez", email: "myanez@rendigroup.com" },

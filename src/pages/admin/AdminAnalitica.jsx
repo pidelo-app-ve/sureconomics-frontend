@@ -1,29 +1,47 @@
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { getEnVivo, getResumen } from "../../services/adminAnaliticaService";
 
 /**
- * Audiencia: quién está leyendo ahora y qué pasó estos días.
+ * Audiencia: quién lee ahora y qué pasó en el periodo.
  *
- * Los números vienen de la medición propia del sitio -- ver `lib/analitica.js` y
- * `analitica_service.py` --, así que solo cuentan a quien aceptó las cookies. Eso lo dice
- * la pantalla en voz alta, porque un panel de audiencia que no lo diga se lee como si
- * fueran todos los lectores, y no lo son.
+ * Los números salen de la medición propia del sitio -- ver `lib/analitica.js` y
+ * `analitica_service.py` --, así que cuentan solo a quien aceptó las cookies. Eso lo dice
+ * la pantalla en voz alta: un panel de audiencia que no lo advierta se lee como si fueran
+ * todos los lectores, y no lo son.
  *
- * ## Tres decisiones
+ * ## Cómo está armada
  *
- * **«Lectores» son sesiones, no personas.** Dos pestañas abiertas en la misma casa son
- * dos. Es lo que cuenta cualquier medidor en vivo, y por eso al lado va el número de
- * identificadores distintos: juntos dicen la verdad, cada uno por su lado engaña.
+ * **Una cifra grande, y solo una.** Los lectores de ahora. Lo demás son fichas pequeñas
+ * y gráficos: si todo grita, no se oye nada.
  *
- * **El directo se refresca solo; lo demás no.** Los lectores en vivo se piden cada veinte
- * segundos -- la misma cadencia del latido del navegador, pedirlo más a menudo no daría
- * un número más nuevo. El resumen de la semana no cambia de un minuto a otro, así que se
- * pide una vez y solo se vuelve a pedir si se cambia el periodo.
+ * **Cada número lleva su periodo anterior.** «1.240 visitas» no es información; «1.240,
+ * un 18 % más que la semana pasada» sí. El color de la variación indica dirección, y va
+ * siempre con su signo escrito, que es lo que la hace legible sin distinguir colores.
  *
- * **Se para cuando la pestaña no se ve.** Un panel olvidado en una pestaña de fondo
- * estaría pidiendo al servidor toda la noche para nadie.
+ * **Los tiempos de lectura van en tramos, no en media.** Una media junta al que rebotó a
+ * los diez segundos con el que leyó diez minutos y devuelve un número que no describe a
+ * ninguno de los dos. «Cuántos se quedaron» sí se contesta.
+ *
+ * **Un filtro, arriba, para todo.** No hay filtros dentro de las tarjetas: el periodo
+ * manda sobre todos los bloques a la vez.
+ *
+ * ## Sobre los gráficos
+ *
+ * Dibujados a mano en SVG y CSS, sin librería: son cuatro formas simples y una
+ * dependencia de gráficos pesaría más que la pantalla entera.
+ *
+ * Todos son de **una sola serie** -- magnitud, no identidad --, así que llevan un solo
+ * color y no hacen falta leyendas. La excepción es la rampa de los tramos de lectura,
+ * que sí tiene orden natural (de menos a más tiempo) y por eso usa una escala de un
+ * mismo tono, de claro a oscuro. Los tonos están comprobados contra fondo blanco: la
+ * rampa es monótona en luminosidad, mantiene un tono único y su paso más claro supera el
+ * contraste mínimo -- si alguien la retoca a ojo, es fácil romper eso sin notarlo.
+ *
+ * Y ninguno deja un dato solo en el globo del ratón: cada bloque tiene su tabla
+ * equivalente detrás del botón «tabla», que es la versión que funciona con lector de
+ * pantalla, con el teclado y al imprimir.
  */
 
 const PERIODOS = [
@@ -43,7 +61,7 @@ const NOMBRE_FORMATO = {
   podcast: "Podcast",
 };
 
-/** 95 -> «1 min 35 s». Un promedio de lectura en segundos sueltos no se lee de un vistazo. */
+/** 95 -> «1 min 35 s». Un promedio en segundos sueltos no se lee de un vistazo. */
 const duracion = (segundos) => {
   const n = Math.max(0, Math.round(segundos || 0));
   if (n < 60) return `${n} s`;
@@ -52,37 +70,374 @@ const duracion = (segundos) => {
   return s ? `${m} min ${s} s` : `${m} min`;
 };
 
-const Cifra = ({ valor, etiqueta, nota, grande }) => (
-  <div className={`se-audiencia__cifra${grande ? " se-audiencia__cifra--grande" : ""}`}>
-    <span className="se-audiencia__numero">{valor}</span>
-    <span className="se-audiencia__etiqueta">{etiqueta}</span>
-    {nota ? <span className="se-audiencia__nota">{nota}</span> : null}
+const numero = (n) => new Intl.NumberFormat("es").format(Math.round(n || 0));
+
+const diaCorto = (iso) => {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString("es", { day: "numeric", month: "short" });
+};
+
+const diaLargo = (iso) => {
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
+};
+
+/** El ancho real del contenedor. Los gráficos se dibujan en píxeles, no en porcentajes. */
+const useAncho = () => {
+  const ref = useRef(null);
+  const [ancho, setAncho] = useState(0);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const medir = () => setAncho(el.clientWidth);
+    medir();
+    // `ResizeObserver` y no el evento `resize` de la ventana: la barra lateral del panel
+    // se pliega sin que la ventana cambie de tamaño, y entonces el gráfico se quedaría
+    // dibujado al ancho de antes.
+    const obs = new ResizeObserver(medir);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, ancho];
+};
+
+/* ─── Piezas ───────────────────────────────────────────────────────────────── */
+
+/** La variación contra el periodo anterior. Signo escrito: el color solo acompaña. */
+const Variacion = ({ actual, anterior }) => {
+  if (!anterior) {
+    return <span className="se-aud__delta se-aud__delta--nuevo">sin periodo anterior</span>;
+  }
+  const pct = Math.round(((actual - anterior) / anterior) * 100);
+  const signo = pct > 0 ? "+" : "";
+  const clase = pct > 0 ? "sube" : pct < 0 ? "baja" : "igual";
+  return (
+    <span className={`se-aud__delta se-aud__delta--${clase}`}>
+      {signo}
+      {pct} % vs. periodo anterior
+    </span>
+  );
+};
+
+Variacion.propTypes = { actual: PropTypes.number.isRequired, anterior: PropTypes.number };
+
+const Ficha = ({ valor, etiqueta, nota, children }) => (
+  <div className="se-aud__ficha">
+    <span className="se-aud__ficha-valor">{valor}</span>
+    <span className="se-aud__ficha-etiqueta">{etiqueta}</span>
+    {children}
+    {nota ? <span className="se-aud__ficha-nota">{nota}</span> : null}
   </div>
 );
 
-Cifra.propTypes = {
+Ficha.propTypes = {
   valor: PropTypes.node.isRequired,
   etiqueta: PropTypes.string.isRequired,
   nota: PropTypes.string,
-  grande: PropTypes.bool,
+  children: PropTypes.node,
 };
 
 /**
- * Una barra proporcional al mayor de la lista.
+ * Una tarjeta con su gráfico y su tabla.
  *
- * Dibujada y no una librería de gráficos: son dos listas cortas, y meter una dependencia
- * de gráficos para esto pesaría más que la pantalla entera.
+ * La tabla no es un extra de accesibilidad colgado al final: es la misma información sin
+ * depender de la vista ni del ratón, y por eso el botón está donde se ve.
  */
-const Barra = ({ parte, total }) => (
-  <span className="se-audiencia__barra" aria-hidden="true">
-    <span
-      className="se-audiencia__barra-relleno"
-      style={{ width: `${total > 0 ? Math.max(3, Math.round((parte / total) * 100)) : 0}%` }}
-    />
-  </span>
+const Bloque = ({ titulo, apunte, tabla, children, vacio }) => {
+  const [verTabla, setVerTabla] = useState(false);
+  const id = `aud-${titulo.replace(/\W+/g, "-").toLowerCase()}`;
+  return (
+    <section className="se-aud__bloque" aria-labelledby={id}>
+      <div className="se-aud__bloque-cabeza">
+        <div>
+          <h3 id={id} className="se-aud__h3">
+            {titulo}
+          </h3>
+          {apunte ? <p className="se-aud__apunte">{apunte}</p> : null}
+        </div>
+        {tabla ? (
+          <button
+            type="button"
+            className="se-aud__ver-tabla"
+            aria-pressed={verTabla}
+            onClick={() => setVerTabla((v) => !v)}
+          >
+            {verTabla ? "Gráfico" : "Tabla"}
+          </button>
+        ) : null}
+      </div>
+      {vacio ? (
+        <p className="se-admin-meta-hint">Sin datos en el periodo.</p>
+      ) : verTabla ? (
+        <div className="se-aud__tabla-caja">{tabla}</div>
+      ) : (
+        children
+      )}
+    </section>
+  );
+};
+
+Bloque.propTypes = {
+  titulo: PropTypes.string.isRequired,
+  apunte: PropTypes.string,
+  tabla: PropTypes.node,
+  children: PropTypes.node,
+  vacio: PropTypes.bool,
+};
+
+/* ─── Gráfico de área: visitas por día ─────────────────────────────────────── */
+
+const ALTO_SERIE = 190;
+const MARGEN = { arriba: 14, derecha: 8, abajo: 26, izquierda: 42 };
+
+/**
+ * Topes limpios para el eje: 0 / 10 / 20, nunca 0 / 7,33 / 14,66.
+ *
+ * Y siempre par, porque el eje dibuja tambien el punto medio: con un tope de 25 la
+ * marca de en medio salia "13", que no es la mitad de nada.
+ */
+const techo = (max) => {
+  if (max <= 4) return 4;
+  const mag = 10 ** Math.floor(Math.log10(max));
+  const t = Math.ceil(max / (mag / 2)) * (mag / 2);
+  return t % 2 === 0 ? t : t + 1;
+};
+
+const SerieDiaria = ({ serie }) => {
+  const [ref, ancho] = useAncho();
+  const [activo, setActivo] = useState(null);
+
+  const max = Math.max(1, ...serie.map((d) => d.sesiones));
+  const tope = techo(max);
+  const anchoPlot = Math.max(10, ancho - MARGEN.izquierda - MARGEN.derecha);
+  const altoPlot = ALTO_SERIE - MARGEN.arriba - MARGEN.abajo;
+  const x = (i) =>
+    MARGEN.izquierda + (serie.length > 1 ? (i / (serie.length - 1)) * anchoPlot : anchoPlot / 2);
+  const y = (v) => MARGEN.arriba + altoPlot - (v / tope) * altoPlot;
+
+  const linea = serie.map((d, i) => `${i ? "L" : "M"}${x(i)},${y(d.sesiones)}`).join(" ");
+  const area = `${linea} L${x(serie.length - 1)},${MARGEN.arriba + altoPlot} L${x(0)},${
+    MARGEN.arriba + altoPlot
+  } Z`;
+
+  const cima = serie.reduce((a, b) => (b.sesiones > a.sesiones ? b : a), serie[0]);
+  const iCima = serie.indexOf(cima);
+
+  const alMover = (e) => {
+    const caja = e.currentTarget.getBoundingClientRect();
+    const px = e.clientX - caja.left;
+    const i = Math.round(
+      ((px - MARGEN.izquierda) / anchoPlot) * (serie.length - 1)
+    );
+    setActivo(Math.min(serie.length - 1, Math.max(0, i)));
+  };
+
+  return (
+    <div className="se-aud__grafico" ref={ref}>
+      {ancho > 0 ? (
+        <>
+          <svg
+            width={ancho}
+            height={ALTO_SERIE}
+            role="img"
+            aria-label={`Visitas por día. Máximo ${cima.sesiones} el ${diaLargo(cima.fecha)}.`}
+            onMouseMove={alMover}
+            onMouseLeave={() => setActivo(null)}
+          >
+            {[0, 0.5, 1].map((f) => (
+              <g key={f}>
+                <line
+                  className="se-aud__rejilla"
+                  x1={MARGEN.izquierda}
+                  x2={ancho - MARGEN.derecha}
+                  y1={y(tope * f)}
+                  y2={y(tope * f)}
+                />
+                <text
+                  className="se-aud__tick"
+                  textAnchor="end"
+                  x={MARGEN.izquierda - 8}
+                  y={y(tope * f) + 4}
+                >
+                  {numero(tope * f)}
+                </text>
+              </g>
+            ))}
+
+            <path className="se-aud__area" d={area} />
+            <path className="se-aud__linea" d={linea} />
+
+            {/* La cima, etiquetada. Un número en cada punto sería ilegible; el máximo es
+                el dato que se busca al mirar una serie. */}
+            <circle className="se-aud__punto" cx={x(iCima)} cy={y(cima.sesiones)} r="4" />
+
+            {activo != null ? (
+              <g>
+                <line
+                  className="se-aud__cruz"
+                  x1={x(activo)}
+                  x2={x(activo)}
+                  y1={MARGEN.arriba}
+                  y2={MARGEN.arriba + altoPlot}
+                />
+                <circle
+                  className="se-aud__punto se-aud__punto--activo"
+                  cx={x(activo)}
+                  cy={y(serie[activo].sesiones)}
+                  r="4"
+                />
+              </g>
+            ) : null}
+
+            {serie.map((d, i) =>
+              i === 0 || i === serie.length - 1 || i === Math.floor(serie.length / 2) ? (
+                <text
+                  key={d.fecha}
+                  className="se-aud__tick"
+                  x={x(i)}
+                  y={ALTO_SERIE - 8}
+                  textAnchor={i === 0 ? "start" : i === serie.length - 1 ? "end" : "middle"}
+                >
+                  {diaCorto(d.fecha)}
+                </text>
+              ) : null
+            )}
+          </svg>
+
+          {activo != null ? (
+            <div
+              className="se-aud__globo"
+              style={{
+                left: `${Math.min(Math.max(x(activo), 70), ancho - 70)}px`,
+              }}
+            >
+              <strong>{diaLargo(serie[activo].fecha)}</strong>
+              <span>
+                {numero(serie[activo].sesiones)} visitas · {numero(serie[activo].personas)}{" "}
+                navegadores
+              </span>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </div>
+  );
+};
+
+SerieDiaria.propTypes = { serie: PropTypes.arrayOf(PropTypes.object).isRequired };
+
+/* ─── Columnas ─────────────────────────────────────────────────────────────── */
+
+/**
+ * Columnas verticales. `rampa` solo cuando las categorías tienen orden natural: pintar
+ * más oscuro lo más grande en categorías sin orden repite con el color lo que ya dice la
+ * altura, y gasta el único canal libre que quedaba.
+ */
+const Columnas = ({ datos, rampa, formatoEtiqueta }) => {
+  const max = Math.max(1, ...datos.map((d) => d.valor));
+  return (
+    <ul className={`se-aud__columnas${rampa ? " se-aud__columnas--rampa" : ""}`}>
+      {datos.map((d, i) => (
+        <li key={d.etiqueta} className="se-aud__columna" title={`${d.etiqueta}: ${numero(d.valor)}`}>
+          <span className="se-aud__columna-caja">
+            <span
+              className="se-aud__columna-marca"
+              data-paso={rampa ? i : undefined}
+              style={{ height: `${Math.max(d.valor > 0 ? 2 : 0, (d.valor / max) * 100)}%` }}
+            />
+          </span>
+          <span className="se-aud__columna-pie">
+            {formatoEtiqueta ? formatoEtiqueta(d.etiqueta, i) : d.etiqueta}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+Columnas.propTypes = {
+  datos: PropTypes.arrayOf(PropTypes.object).isRequired,
+  rampa: PropTypes.bool,
+  formatoEtiqueta: PropTypes.func,
+};
+
+/* ─── Barras horizontales ──────────────────────────────────────────────────── */
+
+const Barras = ({ datos, enlazar }) => {
+  const max = Math.max(1, ...datos.map((d) => d.valor));
+  return (
+    <ul className="se-aud__barras">
+      {datos.map((d) => (
+        <li key={d.clave} className="se-aud__fila">
+          {enlazar ? (
+            <a
+              className="se-aud__etiqueta se-aud__etiqueta--enlace"
+              href={d.clave}
+              target="_blank"
+              rel="noreferrer"
+              title={d.clave}
+            >
+              {d.etiqueta}
+            </a>
+          ) : (
+            <span className="se-aud__etiqueta" title={d.etiqueta}>
+              {d.etiqueta}
+            </span>
+          )}
+          <span className="se-aud__pista">
+            <span
+              className="se-aud__marca"
+              style={{ width: `${Math.max(2, (d.valor / max) * 100)}%` }}
+            />
+          </span>
+          <span className="se-aud__valor">
+            {numero(d.valor)}
+            {d.apunte ? <small> · {d.apunte}</small> : null}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+Barras.propTypes = {
+  datos: PropTypes.arrayOf(PropTypes.object).isRequired,
+  enlazar: PropTypes.bool,
+};
+
+const Tabla = ({ columnas, filas }) => (
+  <table className="se-aud__tabla">
+    <thead>
+      <tr>
+        {columnas.map((c) => (
+          <th key={c} scope="col">
+            {c}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {filas.map((f, i) => (
+        <tr key={i}>
+          {f.map((celda, j) => (
+            <td key={j}>{celda}</td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
 );
 
-Barra.propTypes = { parte: PropTypes.number.isRequired, total: PropTypes.number.isRequired };
+Tabla.propTypes = {
+  columnas: PropTypes.arrayOf(PropTypes.string).isRequired,
+  filas: PropTypes.array.isRequired,
+};
+
+/* ─── La pantalla ──────────────────────────────────────────────────────────── */
 
 export const AdminAnalitica = () => {
   const [vivo, setVivo] = useState(null);
@@ -150,22 +505,34 @@ export const AdminAnalitica = () => {
     };
   }, [dias]);
 
-  const maxPieza = resumen?.piezas?.[0]?.lecturas ?? 0;
-  const maxFormato = resumen?.formatos?.[0]?.lecturas ?? 0;
-  const sinDatos = !cargando && resumen && resumen.sesiones === 0 && !vivo?.lectores;
+  const r = resumen;
+  const nada = !cargando && r && r.sesiones === 0 && !vivo?.lectores;
 
   return (
-    <div className="se-admin-shell se-audiencia">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
+    <div className="se-admin-shell se-aud">
+      <header className="se-admin-shell__header se-aud__cabecera">
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>
             Audiencia
           </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem", maxWidth: "70ch" }}>
             Medición propia, sin herramientas de terceros. Cuenta solo a quien aceptó las
-            cookies en el aviso, así que los números son un suelo: la audiencia real es
-            algo mayor.
+            cookies, así que todo lo de aquí es un suelo: la audiencia real es algo mayor.
           </p>
+        </div>
+        {/* Un solo filtro, arriba, y manda sobre todos los bloques. */}
+        <div className="se-aud__periodos" role="group" aria-label="Periodo">
+          {PERIODOS.map((p) => (
+            <button
+              key={p.dias}
+              type="button"
+              className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
+              aria-pressed={dias === p.dias}
+              onClick={() => setDias(p.dias)}
+            >
+              {p.etiqueta}
+            </button>
+          ))}
         </div>
       </header>
 
@@ -175,140 +542,206 @@ export const AdminAnalitica = () => {
         </p>
       ) : null}
 
-      {sinDatos ? (
+      {nada ? (
         <p className="se-admin-meta-hint">
           Todavía no hay nada que enseñar. Aparecerá en cuanto alguien acepte las cookies y
           empiece a leer.
         </p>
       ) : null}
 
-      <section className="se-audiencia__bloque" aria-labelledby="audiencia-vivo">
-        <h2 id="audiencia-vivo" className="se-audiencia__h2">
-          Ahora mismo
-        </h2>
-
-        <div className="se-audiencia__cifras">
-          <Cifra
-            grande
-            valor={vivo?.lectores ?? "—"}
-            etiqueta={vivo?.lectores === 1 ? "lector" : "lectores"}
-            nota={`vistos en los últimos ${vivo?.ventana_minutos ?? 5} minutos`}
-          />
-          <Cifra
-            valor={vivo?.personas ?? "—"}
-            etiqueta="navegadores distintos"
-            nota="dos pestañas de la misma persona cuentan dos veces arriba, una aquí"
-          />
-        </div>
-
-        {vivo?.paginas?.length ? (
-          <ol className="se-audiencia__lista">
-            {vivo.paginas.map((p) => (
-              <li key={p.ruta} className="se-audiencia__fila">
-                <span className="se-audiencia__ruta" title={p.ruta}>
-                  {p.ruta}
-                </span>
-                <Barra parte={p.lectores} total={vivo.paginas[0].lectores} />
-                <span className="se-audiencia__valor">{p.lectores}</span>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="se-admin-meta-hint">Nadie leyendo en este momento.</p>
-        )}
-      </section>
-
-      <section className="se-audiencia__bloque" aria-labelledby="audiencia-periodo">
-        <div className="se-audiencia__cabeza">
-          <h2 id="audiencia-periodo" className="se-audiencia__h2">
-            Últimos {resumen?.dias ?? dias} días
+      {/* La única cifra grande de la pantalla. */}
+      <section className="se-aud__directo" aria-labelledby="aud-directo">
+        <div className="se-aud__directo-cifra">
+          <h2 id="aud-directo" className="se-aud__directo-rotulo">
+            <span className="se-aud__pulso" aria-hidden="true" />
+            Leyendo ahora
           </h2>
-          <div className="se-audiencia__periodos" role="group" aria-label="Periodo">
-            {PERIODOS.map((p) => (
-              <button
-                key={p.dias}
-                type="button"
-                className={`se-audiencia__periodo${
-                  dias === p.dias ? " se-audiencia__periodo--on" : ""
-                }`}
-                aria-pressed={dias === p.dias}
-                onClick={() => setDias(p.dias)}
-              >
-                {p.etiqueta}
-              </button>
-            ))}
-          </div>
+          <span className="se-aud__heroe">{vivo ? numero(vivo.lectores) : "—"}</span>
+          <p className="se-aud__directo-nota">
+            visitas activas en los últimos {vivo?.ventana_minutos ?? 5} minutos ·{" "}
+            {numero(vivo?.personas ?? 0)} navegadores distintos. Dos pestañas de la misma
+            persona suman dos arriba y uno aquí.
+          </p>
         </div>
 
-        {cargando && !resumen ? (
-          <p className="se-admin-meta-hint">Cargando…</p>
-        ) : (
-          <>
-            <div className="se-audiencia__cifras">
-              <Cifra valor={resumen?.sesiones ?? 0} etiqueta="visitas" />
-              <Cifra
-                valor={resumen?.personas ?? 0}
-                etiqueta="navegadores distintos"
-                nota="a cuánta gente distinta se llegó"
-              />
-              <Cifra
-                valor={resumen?.recurrentes ?? 0}
-                etiqueta="volvieron"
-                nota="entraron más de una vez en el periodo"
-              />
-            </div>
-
-            <h3 className="se-audiencia__h3">Por sección</h3>
-            {resumen?.formatos?.length ? (
-              <ol className="se-audiencia__lista">
-                {resumen.formatos.map((f) => (
-                  <li key={f.formato} className="se-audiencia__fila">
-                    <span className="se-audiencia__ruta">
-                      {NOMBRE_FORMATO[f.formato] ?? f.formato}
-                    </span>
-                    <Barra parte={f.lecturas} total={maxFormato} />
-                    <span className="se-audiencia__valor">
-                      {f.lecturas} <small>· {duracion(f.segundos_medios)} de media</small>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="se-admin-meta-hint">Sin lecturas registradas en el periodo.</p>
-            )}
-
-            <h3 className="se-audiencia__h3">Lo más leído</h3>
-            {resumen?.piezas?.length ? (
-              <ol className="se-audiencia__lista se-audiencia__lista--piezas">
-                {resumen.piezas.map((p) => (
-                  <li key={p.ruta} className="se-audiencia__fila">
-                    <a
-                      className="se-audiencia__ruta se-audiencia__ruta--enlace"
-                      href={p.ruta}
-                      target="_blank"
-                      rel="noreferrer"
-                      title={p.ruta}
-                    >
-                      {p.ruta}
-                    </a>
-                    <Barra parte={p.lecturas} total={maxPieza} />
-                    <span className="se-audiencia__valor">
-                      {p.lecturas} <small>· {duracion(p.segundos_medios)} de media</small>
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="se-admin-meta-hint">Sin lecturas registradas en el periodo.</p>
-            )}
-          </>
-        )}
+        <div className="se-aud__directo-lista">
+          {vivo?.paginas?.length ? (
+            <Barras
+              enlazar
+              datos={vivo.paginas.map((p) => ({
+                clave: p.ruta,
+                etiqueta: p.ruta,
+                valor: p.lectores,
+              }))}
+            />
+          ) : (
+            <p className="se-admin-meta-hint">Nadie leyendo en este momento.</p>
+          )}
+        </div>
       </section>
 
-      <p className="se-audiencia__pie">
-        El tiempo medio cuenta solo los segundos que la pieza estuvo <strong>visible</strong> en
-        pantalla: una pestaña abierta de fondo no suma. Los registros se borran a los catorce
-        meses, como dice el aviso de cookies.
+      {cargando && !r ? (
+        <p className="se-admin-meta-hint">Cargando…</p>
+      ) : r ? (
+        <div className={`se-aud__cuerpo${cargando ? " se-aud__cuerpo--esperando" : ""}`}>
+          <div className="se-aud__fichas">
+            <Ficha valor={numero(r.sesiones)} etiqueta="visitas">
+              <Variacion actual={r.sesiones} anterior={r.anterior?.sesiones} />
+            </Ficha>
+            <Ficha valor={numero(r.personas)} etiqueta="navegadores distintos">
+              <Variacion actual={r.personas} anterior={r.anterior?.personas} />
+            </Ficha>
+            <Ficha
+              valor={numero(r.recurrentes)}
+              etiqueta="volvieron"
+              nota="entraron más de una vez en el periodo"
+            />
+            <Ficha
+              valor={r.paginas_por_visita}
+              etiqueta="páginas por visita"
+              nota="cuánto se navega dentro del sitio"
+            />
+            <Ficha
+              valor={duracion(r.segundos_por_visita)}
+              etiqueta="de lectura por visita"
+              nota="solo tiempo con la pieza visible"
+            />
+            <Ficha
+              valor={`${r.una_pagina} %`}
+              etiqueta="se van en la primera"
+              nota="leyeron una página y salieron"
+            />
+          </div>
+
+          <Bloque
+            titulo="Visitas por día"
+            apunte="Pase el ratón para ver un día concreto."
+            vacio={!r.serie?.length}
+            tabla={
+              <Tabla
+                columnas={["Día", "Visitas", "Navegadores"]}
+                filas={(r.serie ?? []).map((d) => [diaLargo(d.fecha), numero(d.sesiones), numero(d.personas)])}
+              />
+            }
+          >
+            {r.serie?.length ? <SerieDiaria serie={r.serie} /> : null}
+          </Bloque>
+
+          <div className="se-aud__par">
+            <Bloque
+              titulo="Cuánto duran las lecturas"
+              apunte="Cuántos se quedaron, que es lo que una media no dice."
+              vacio={!r.profundidad?.some((t) => t.lecturas > 0)}
+              tabla={
+                <Tabla
+                  columnas={["Tramo", "Lecturas"]}
+                  filas={(r.profundidad ?? []).map((t) => [t.etiqueta, numero(t.lecturas)])}
+                />
+              }
+            >
+              <Columnas
+                rampa
+                datos={(r.profundidad ?? []).map((t) => ({
+                  etiqueta: t.etiqueta,
+                  valor: t.lecturas,
+                }))}
+              />
+            </Bloque>
+
+            <Bloque
+              titulo="A qué hora leen"
+              apunte="Visitas por hora del día, para saber cuándo conviene publicar."
+              vacio={!r.horas?.some((h) => h.sesiones > 0)}
+              tabla={
+                <Tabla
+                  columnas={["Hora", "Visitas"]}
+                  filas={(r.horas ?? []).map((h) => [`${h.hora}:00`, numero(h.sesiones)])}
+                />
+              }
+            >
+              <Columnas
+                datos={(r.horas ?? []).map((h) => ({ etiqueta: String(h.hora), valor: h.sesiones }))}
+                formatoEtiqueta={(e, i) => (i % 6 === 0 ? `${e}h` : "")}
+              />
+            </Bloque>
+          </div>
+
+          <Bloque
+            titulo="Por sección"
+            vacio={!r.formatos?.length}
+            tabla={
+              <Tabla
+                columnas={["Sección", "Lecturas", "Tiempo medio"]}
+                filas={(r.formatos ?? []).map((f) => [
+                  NOMBRE_FORMATO[f.formato] ?? f.formato,
+                  numero(f.lecturas),
+                  duracion(f.segundos_medios),
+                ])}
+              />
+            }
+          >
+            <Barras
+              datos={(r.formatos ?? []).map((f) => ({
+                clave: f.formato,
+                etiqueta: NOMBRE_FORMATO[f.formato] ?? f.formato,
+                valor: f.lecturas,
+                apunte: `${duracion(f.segundos_medios)} de media`,
+              }))}
+            />
+          </Bloque>
+
+          <Bloque
+            titulo="Lo más leído"
+            vacio={!r.piezas?.length}
+            tabla={
+              <Tabla
+                columnas={["Pieza", "Lecturas", "Tiempo medio"]}
+                filas={(r.piezas ?? []).map((p) => [
+                  p.ruta,
+                  numero(p.lecturas),
+                  duracion(p.segundos_medios),
+                ])}
+              />
+            }
+          >
+            <Barras
+              enlazar
+              datos={(r.piezas ?? []).map((p) => ({
+                clave: p.ruta,
+                etiqueta: p.ruta,
+                valor: p.lecturas,
+                apunte: `${duracion(p.segundos_medios)} de media`,
+              }))}
+            />
+          </Bloque>
+
+          <Bloque
+            titulo="Por dónde se van"
+            apunte="La última página de cada visita. Si una se repite mucho, algo termina ahí."
+            vacio={!r.salidas?.length}
+            tabla={
+              <Tabla
+                columnas={["Página", "Salidas"]}
+                filas={(r.salidas ?? []).map((s) => [s.ruta, numero(s.salidas)])}
+              />
+            }
+          >
+            <Barras
+              enlazar
+              datos={(r.salidas ?? []).map((s) => ({
+                clave: s.ruta,
+                etiqueta: s.ruta,
+                valor: s.salidas,
+              }))}
+            />
+          </Bloque>
+        </div>
+      ) : null}
+
+      <p className="se-aud__pie">
+        El tiempo de lectura cuenta solo los segundos que la pieza estuvo{" "}
+        <strong>visible</strong> en pantalla: una pestaña abierta de fondo no suma. Los
+        registros se borran a los catorce meses, como dice el aviso de cookies.
       </p>
     </div>
   );

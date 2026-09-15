@@ -159,6 +159,13 @@ export const Footer = () => {
         <div className="se-footer__bottom">
           <p className="se-footer__copy">
             © {new Date().getFullYear()} {BRAND.name}. Todos los derechos reservados.
+            {" · "}
+            {/* El aviso de cookies tiene que estar alcanzable desde cualquier pagina:
+                es donde vive el boton de retirar el consentimiento, y la ley pide que
+                retirarlo sea tan facil como haberlo dado. */}
+            <Link to="/cookies" className="se-footer__legal">
+              Política de cookies
+            </Link>
           </p>
 
           <div className="se-footer__social">

@@ -12,6 +12,7 @@ import { Explorar } from "./pages/Explorar";
 import { Educacion } from "./pages/Educacion";
 import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
+import { Cookies } from "./pages/Cookies";
 import { NotFound } from "./pages/NotFound";
 import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminPostsList } from "./pages/admin/AdminPostsList";
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
             { path: "podcast/:slug", element: <Pieza /> },
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
+            { path: "cookies", element: <Cookies /> },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },

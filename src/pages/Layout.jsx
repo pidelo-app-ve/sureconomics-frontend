@@ -4,6 +4,7 @@ import { Navbar } from "../components/Navbar"
 import { Footer } from "../components/Footer"
 import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
+import { AvisoDeCookies } from "../components/AvisoDeCookies"
 
 // Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
 export const Layout = () => {
@@ -22,6 +23,11 @@ export const Layout = () => {
                 redaccion no ha destacado ninguna publicacion. */}
             <EnRedes />
             <Footer />
+            {/* Al pie del arbol y no arriba: la barra se posiciona sola y asi es lo
+                ultimo que lee un lector de pantalla, no lo primero. Ademas es quien
+                avisa de los cambios de ruta -- el sitio no recarga al cambiar de
+                pieza, asi que alguien tiene que contarlo. */}
+            <AvisoDeCookies />
         </ScrollToTop>
     )
 }

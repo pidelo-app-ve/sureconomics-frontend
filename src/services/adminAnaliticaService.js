@@ -44,12 +44,36 @@ export const getEnVivo = async () => {
   };
 };
 
+/**
+ * La zona horaria de quien está mirando, en nombre IANA: «America/Caracas».
+ *
+ * Va al servidor porque las marcas se guardan en UTC -- que es como hay que guardarlas --
+ * y agrupar por la hora UTC ponía las visitas de las ocho de la mañana a las doce del
+ * mediodía. Se manda el nombre y no el desfase en minutos: un desfase fijo aplicado a
+ * noventa días se equivoca en una hora en los tramos que cruzan un cambio de horario.
+ */
+const zonaDeAqui = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    // Si el navegador no la sabe, el servidor agrupa en UTC y lo dice en la respuesta.
+    return undefined;
+  }
+};
+
 /** Lo de los últimos días: visitas, quién vuelve y cuánto se lee cada cosa. */
 export const getResumen = async (dias = 7) => {
   const d =
-    unwrapEntity(await adminRequest("/admin/analitica/resumen", { query: { dias } })) ?? {};
+    unwrapEntity(
+      await adminRequest("/admin/analitica/resumen", {
+        query: { dias, zona: zonaDeAqui() },
+      })
+    ) ?? {};
   return {
     dias: numeroDe(d.dias, dias),
+    // La zona en la que el servidor ha agrupado. Puede no ser la pedida: si el nombre no
+    // se reconoce, contesta en UTC y lo dice aqui, que es lo que la pantalla avisa.
+    zona: typeof d.zona === "string" ? d.zona : null,
     sesiones: numeroDe(d.sesiones),
     personas: numeroDe(d.personas),
     recurrentes: numeroDe(d.recurrentes),

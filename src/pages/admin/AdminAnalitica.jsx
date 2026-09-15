@@ -720,7 +720,11 @@ export const AdminAnalitica = () => {
 
             <Bloque
               titulo="A qué hora leen"
-              apunte="Visitas por hora del día, para saber cuándo conviene publicar."
+              apunte={
+                r.zona && r.zona !== "UTC"
+                  ? "Visitas por hora del día, en su hora local, para saber cuándo conviene publicar."
+                  : "Visitas por hora del día. Su navegador no informa de su zona horaria, así que están en hora UTC."
+              }
               vacio={!r.horas?.some((h) => h.sesiones > 0)}
               tabla={
                 <Tabla

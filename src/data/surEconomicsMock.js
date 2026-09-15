@@ -129,7 +129,7 @@ export const TEAM = {
     },
     {
       id: "junta-daniel-berconsky",
-      name: "Daniel Berconsky Da Ruos",
+      name: "Daniel Berconsky",
       cvUrl: "#",
       email: "",
       links: [],

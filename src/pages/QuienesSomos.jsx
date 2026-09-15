@@ -157,10 +157,13 @@ export const QuienesSomos = () => {
           </header>
 
           <div className="se-about__acc-list">
-            {/* Reestructurado a pedido del cliente (10/2026): solo estos tres
-                grupos quedan en la pagina. "Colaboradores" y "Equipo de
-                investigacion" se retiraron -- no solo se vaciaron -- porque
-                un titulo de seccion sin nadie debajo se leeria como un hueco. */}
+            {/* Seis grupos, calcados del documento del cliente ("Quiénes Somos - SurE",
+                15/09/2026) y en su mismo orden. Antes eran tres: Director General y
+                Editor en Jefe vivian fusionados con Comite Editorial, y no habia ni
+                Equipo ni Colaboradores. La misma persona puede estar en mas de un
+                grupo -- ver el comentario de `TEAM` en los datos --, que es como el
+                documento lo tiene: cada bloque es un cargo o un comite, no una
+                casilla exclusiva. */}
             <TeamSection
               title="Junta Directiva"
               members={TEAM.board}
@@ -168,14 +171,32 @@ export const QuienesSomos = () => {
               fotos={fotos}
             />
             <TeamSection
-              title="Consejo Editorial"
-              members={TEAM.editorialBoard}
+              title="Director General"
+              members={TEAM.directorGeneral}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Equipo operativo"
-              members={TEAM.operational}
+              title="Editor en Jefe"
+              members={TEAM.editorEnJefe}
+              initiallyOpen={initiallyOpen}
+              fotos={fotos}
+            />
+            <TeamSection
+              title="Comité Editorial"
+              members={TEAM.editorialCommittee}
+              initiallyOpen={initiallyOpen}
+              fotos={fotos}
+            />
+            <TeamSection
+              title="Equipo"
+              members={TEAM.team}
+              initiallyOpen={initiallyOpen}
+              fotos={fotos}
+            />
+            <TeamSection
+              title="Colaboradores"
+              members={TEAM.collaborators}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />

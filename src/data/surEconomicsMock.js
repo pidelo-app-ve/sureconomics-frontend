@@ -104,18 +104,25 @@ export const PARTNERS = [
 
 
 export const TEAM = {
-  // Reestructurado a pedido del cliente (10/2026) y afinado en 09/2026: ya nadie lleva
-  // resumen. El cliente pidio quitar todas las descripciones, asi que el campo se va de
-  // los datos en vez de quedarse vacio en veinte sitios -- y la tarjeta deja de pintar
-  // ese parrafo. La foto NO vive aqui: se sube desde el panel y se guarda por separado,
-  // atada al `id` de cada quien, que por eso no se puede cambiar a la ligera.
+  // Reestructurado el 15/09/2026 para calcar los seis bloques del documento del
+  // cliente ("Quiénes Somos - SurE"): antes Director General, Editor en Jefe y Comité
+  // Editorial vivían fusionados en un solo grupo, y no había ni Equipo ni
+  // Colaboradores. El documento los separa en seis divs, y la misma persona aparece en
+  // más de uno -- Óscar Doval en tres, Pablo Quintero en otros tres -- que es
+  // exactamente cómo el documento lo tiene: cada bloque es un cargo o un comité, no
+  // una casilla exclusiva de una sola persona.
+  //
+  // Sigue sin haber resumenes (el cliente los quito en 10/2026): el campo no existe
+  // en los datos en vez de quedarse vacio en veinte sitios. La foto tampoco vive
+  // aqui -- se sube desde el panel y se guarda por separado -- y por eso casi toda
+  // ficha nueva trae `fotoId`: es la clave real bajo la que ya esta (o va a estar)
+  // guardada su foto, y no siempre coincide con el `id` de esta ficha en concreto.
+  // Ver `claveDeFoto`.
   board: [
     {
       id: "junta-oscar-doval",
-      // Misma persona que "consejo-oscar-doval": comparten foto. Ver `claveDeFoto`.
       fotoId: "junta-oscar-doval",
       name: "Óscar Doval",
-      role: "Junta Directiva",
       cvUrl: "#",
       email: "odoval@rendigroup.com",
       links: [],
@@ -123,68 +130,139 @@ export const TEAM = {
     {
       id: "junta-daniel-berconsky",
       name: "Daniel Berconsky Da Ruos",
-      role: "Junta Directiva",
       cvUrl: "#",
       email: "",
       links: [],
     },
-    { id: "junta-aknaton-matute", name: "Aknatón Matute", role: "Junta Directiva", cvUrl: "#", email: "", links: [] },
-    { id: "junta-guillermo-leandro", name: "Guillermo Leandro", role: "Junta Directiva", cvUrl: "#", email: "", links: [] },
+    { id: "junta-guillermo-leandro", name: "Guillermo Leandro", cvUrl: "#", email: "", links: [] },
+    { id: "junta-aknaton-matute", name: "Aknatón Matute", cvUrl: "#", email: "", links: [] },
   ],
-  // Los dos primeros llevan su cargo real y no el nombre del grupo, a pedido del
-  // cliente: aqui "Consejo Editorial" ya lo dice el titulo de la seccion, asi que
-  // repetirlo en la tarjeta no anadia nada y ocultaba quien es quien.
-  editorialBoard: [
+  // Antes compartia grupo con Editor en Jefe y Comite Editorial. El documento le da
+  // su propio bloque, de una sola persona.
+  directorGeneral: [
     {
       id: "consejo-oscar-doval",
-      // La misma foto que su ficha de Junta Directiva: es la misma persona, y
-      // subirla dos veces seria pedirle a la redaccion que recuerde hacerlo.
       fotoId: "junta-oscar-doval",
       name: "Óscar Doval",
-      role: "Director General",
+      cvUrl: "#",
+      email: "odoval@rendigroup.com",
+      links: [],
+    },
+  ],
+  // Mismo caso que Director General: bloque propio.
+  editorEnJefe: [
+    {
+      id: "consejo-pablo-quintero",
+      name: "Pablo Quintero",
+      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      email: "",
+      links: [],
+    },
+  ],
+  // Los tres, calcados del documento.
+  editorialCommittee: [
+    {
+      id: "comite-pablo-quintero",
+      fotoId: "consejo-pablo-quintero",
+      name: "Pablo Quintero",
+      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      email: "",
+      links: [],
+    },
+    {
+      id: "comite-oscar-doval",
+      fotoId: "junta-oscar-doval",
+      name: "Óscar Doval",
+      cvUrl: "#",
+      email: "odoval@rendigroup.com",
+      links: [],
+    },
+    // Id sin cambiar: es su ficha original (antes vivia sola en "editorialBoard"), y
+    // ese id es la clave con la que ya podria estar guardada su foto.
+    { id: "consejo-alex-lund", name: "Alex Lund", cvUrl: "#", email: "", links: [] },
+  ],
+  // El documento suma aqui a Pablo Quintero y Alex Lund, ademas de a quienes ya
+  // estaban.
+  team: [
+    {
+      id: "equipo-pablo-quintero",
+      fotoId: "consejo-pablo-quintero",
+      name: "Pablo Quintero",
+      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      email: "",
+      links: [],
+    },
+    { id: "equipo-alex-lund", fotoId: "consejo-alex-lund", name: "Alex Lund", cvUrl: "#", email: "", links: [] },
+    { id: "marketing-ariana-zambrano", name: "Ariana Zambrano", cvUrl: "#", email: "", links: [] },
+    { id: "marketing-maria-fernanda", name: "María Fernanda Hernández", cvUrl: "#", email: "", links: [] },
+    { id: "ti-ramon-marquina", name: "Ramón Marquina", cvUrl: "#", email: "", links: [] },
+    { id: "marketing-ambar-prato", name: "Ámbar Prato", cvUrl: "#", email: "", links: [] },
+    // No esta en el documento -- se sumo despues, a pedido explicito del cliente
+    // (09/2026). Va junto a Ambar y no al final: este grupo tenia orden por oficio, y
+    // separar a las dos disenadoras rompia lo unico que lo ordenaba.
+    { id: "diseno-veronica-acosta", name: "Verónica Acosta", cvUrl: "#", email: "", links: [] },
+    { id: "operativo-saul-benarroch", name: "Saúl Benarroch", cvUrl: "#", email: "", links: [] },
+    { id: "ti-luis-ojeda", name: "Luis Ojeda", cvUrl: "#", email: "", links: [] },
+    { id: "operativo-manuel-oropeza", name: "Manuel Oropeza", cvUrl: "#", email: "", links: [] },
+  ],
+  // Vuelve (15/09/2026): se habia retirado en 10/2026 porque un titulo de seccion sin
+  // nadie debajo se leeria como un hueco, y el documento la trae con gente adentro.
+  // Aqui la ficha lleva `bio` -- de donde viene la persona -- en vez de `role`: no
+  // tienen un cargo en la redaccion, son colaboradores externos.
+  collaborators: [
+    {
+      id: "colaborador-mateo-rodriguez",
+      name: "Mateo Rodríguez",
+      bio: "Estudiante de Economía, Universidad Católica Andrés Bello, Caracas, Venezuela.",
+      cvUrl: "#",
+      email: "",
+      links: [],
+    },
+    {
+      id: "colaborador-saul-benarroch",
+      fotoId: "operativo-saul-benarroch",
+      name: "Saúl Benarroch",
+      bio: "Estudiante de Economía, Universidad Metropolitana, Caracas, Venezuela.",
+      cvUrl: "#",
+      email: "",
+      links: [],
+    },
+    {
+      id: "colaborador-oscar-doval",
+      fotoId: "junta-oscar-doval",
+      name: "Óscar Doval",
+      bio: "Médico, MS en Economía Internacional, Caracas, Venezuela.",
       cvUrl: "#",
       email: "odoval@rendigroup.com",
       links: [],
     },
     {
-      id: "consejo-pablo-quintero",
+      id: "colaborador-pablo-quintero",
+      fotoId: "consejo-pablo-quintero",
       name: "Pablo Quintero",
-      role: "Editor en Jefe",
+      bio: "Politólogo, Caracas, Venezuela.",
       cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
       email: "",
       links: [],
     },
-    { id: "consejo-alex-lund", name: "Alex Lund", role: "Consejo Editorial", cvUrl: "#", email: "", links: [] },
-  ],
-  operational: [
-    { id: "marketing-ariana-zambrano", name: "Ariana Zambrano", role: "Mercadeo y diseño", cvUrl: "#", email: "", links: [] },
-    { id: "marketing-maria-fernanda", name: "María Fernanda Hernández", role: "Mercadeo y diseño", cvUrl: "#", email: "", links: [] },
-    { id: "ti-ramon-marquina", name: "Ramon Marquina", role: "TI", cvUrl: "#", email: "", links: [] },
-    { id: "ti-luis-ojeda", name: "Luis Ojeda", role: "TI", cvUrl: "#", email: "", links: [] },
-    { id: "marketing-ambar-prato", name: "Ámbar Prato", role: "Diseñadora", cvUrl: "#", email: "", links: [] },
-    // Nombre nuevo (09/2026). Va junto a Ambar y no al final porque este grupo se lee
-    // por oficios -- mercadeo, TI, diseno -- y separar a las dos disenadoras habria
-    // roto lo unico que ordena la lista.
-    { id: "diseno-veronica-acosta", name: "Verónica Acosta", role: "Diseñadora", cvUrl: "#", email: "", links: [] },
-    // Estaba como "Riesgo"; el cliente corrige a Automatizaciones.
-    { id: "operativo-saul-benarroch", name: "Saul Benarroch", role: "Automatizaciones", cvUrl: "#", email: "", links: [] },
-    { id: "operativo-manuel-oropeza", name: "Manuel Oropeza", role: "Equipo operativo", cvUrl: "#", email: "", links: [] },
   ],
 };
 
 /**
  * Con qué clave se guarda la foto de una ficha del equipo.
  *
- * Normalmente es su propio `id`. La excepción es quien aparece en dos grupos --
- * hoy sólo Óscar Doval, en Junta Directiva y en Consejo Editorial --: las dos
- * fichas son la misma persona y tienen que compartir retrato. Sin esto, subirle la
- * foto en un grupo dejaba el otro con las iniciales, y habría que acordarse de
- * subirla dos veces.
+ * Normalmente es su propio `id`. La excepción es quien aparece en más de un grupo --
+ * hoy Óscar Doval (Junta Directiva, Director General, Comité Editorial y
+ * Colaboradores), Pablo Quintero (Editor en Jefe, Comité Editorial, Equipo y
+ * Colaboradores), Alex Lund (Comité Editorial y Equipo) y Saúl Benarroch (Equipo y
+ * Colaboradores) --: todas sus fichas son la misma persona y tienen que compartir
+ * retrato. Sin esto, subirle la foto en un grupo dejaba a las demás con las
+ * iniciales, y habría que acordarse de subirla una vez por ficha.
  *
- * El `fotoId` compartido es el id de su ficha de Junta Directiva, y no un nombre
- * más bonito, por un motivo concreto: esa es la clave con la que su foto ya está
- * guardada. Cambiarla por algo más limpio habría dejado la foto huérfana y
- * obligado a volver a subirla.
+ * El `fotoId` compartido es el id de la ficha más antigua de esa persona -- la que
+ * ya existía antes de este reparto en seis grupos --, y no un nombre más bonito, por
+ * un motivo concreto: esa es la clave con la que su foto ya está guardada. Cambiarla
+ * habría dejado la foto huérfana y obligado a volver a subirla.
  */
 export const claveDeFoto = (miembro) => miembro?.fotoId ?? miembro?.id ?? "";
 

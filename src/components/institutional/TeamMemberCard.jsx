@@ -45,7 +45,10 @@ export const TeamMemberCard = ({ member, foto }) => {
         )}
         <div className="se-member-card__identity">
           <h3 className="se-member-card__name">{member.name}</h3>
-          <div className="se-member-card__role">{member.role}</div>
+          {/* El cargo se quito de todas las fichas a pedido del cliente (15/09/2026):
+              solo Colaboradores lleva algo debajo del nombre, y es su credencial
+              (`bio`), no un cargo -- de donde viene la persona, no que hace aqui. */}
+          {member.bio ? <p className="se-member-card__bio">{member.bio}</p> : null}
         </div>
       </div>
 
@@ -79,7 +82,8 @@ export const TeamMemberCard = ({ member, foto }) => {
 TeamMemberCard.propTypes = {
   member: PropTypes.shape({
     name: PropTypes.string.isRequired,
-    role: PropTypes.string.isRequired,
+    // Solo en Colaboradores: de donde viene la persona, no que hace aqui.
+    bio: PropTypes.string,
     cvUrl: PropTypes.string,
     email: PropTypes.string,
   }).isRequired,

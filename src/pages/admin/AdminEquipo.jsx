@@ -93,12 +93,37 @@ const iniciales = (nombre) => {
   return `${primera}${ultima}`.toUpperCase() || "SE";
 };
 
-/** Los tres grupos, tal como se pintan en la página pública. */
+/**
+ * Los seis grupos, tal como se pintan en la página pública -- y en el mismo orden.
+ *
+ * Desde que esa página calca los divs del documento del cliente, la misma persona
+ * puede aparecer en varias fichas (Óscar Doval en cuatro, Pablo Quintero en otras
+ * cuatro). Todas comparten foto -- ver `claveDeFoto` --, así que mostrar un botón de
+ * subida por ficha sería mostrarle a la redacción cuatro botones para la misma foto
+ * de la misma persona. Aquí se filtra: cada clave de foto se lista una sola vez, la
+ * primera vez que aparece recorriendo los grupos en este orden. Un grupo que se
+ * queda sin nadie nuevo que fotografiar -- hoy le pasa a Director General, que solo
+ * repite a quien ya salió en Junta Directiva -- no se dibuja.
+ */
+const clavesYaListadas = new Set();
 const GRUPOS = [
   { titulo: "Junta Directiva", gente: TEAM.board },
-  { titulo: "Consejo Editorial", gente: TEAM.editorialBoard },
-  { titulo: "Equipo operativo", gente: TEAM.operational },
-];
+  { titulo: "Director General", gente: TEAM.directorGeneral },
+  { titulo: "Editor en Jefe", gente: TEAM.editorEnJefe },
+  { titulo: "Comité Editorial", gente: TEAM.editorialCommittee },
+  { titulo: "Equipo", gente: TEAM.team },
+  { titulo: "Colaboradores", gente: TEAM.collaborators },
+]
+  .map((grupo) => ({
+    ...grupo,
+    gente: grupo.gente.filter((persona) => {
+      const clave = claveDeFoto(persona);
+      if (clavesYaListadas.has(clave)) return false;
+      clavesYaListadas.add(clave);
+      return true;
+    }),
+  }))
+  .filter((grupo) => grupo.gente.length > 0);
 
 const FichaDeFoto = ({ persona, foto, ocupado, onSubir, onQuitar }) => {
   const entrada = useRef(null);

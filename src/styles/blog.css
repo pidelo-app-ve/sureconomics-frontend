@@ -3418,15 +3418,15 @@
   overflow-wrap: break-word;
 }
 
-.se-member-card__role {
+/* El cargo se quito de las fichas (15/09/2026); solo Colaboradores lleva algo debajo
+   del nombre, y es la credencial de abajo -- una linea corrida, no una etiqueta en
+   versalitas. */
+.se-member-card__bio {
   font-family: var(--se-font-ui);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  /* 0,58 de negro sobre verde oscuro era invisible; 0,78 de blanco pasa de sobra el
-     4,5:1 y sigue leyendose como secundario frente al nombre en blanco puro. */
+  font-size: 0.8rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.78);
-  margin-top: var(--se-space-xs);
+  margin: var(--se-space-xs) 0 0;
   overflow-wrap: break-word;
 }
 

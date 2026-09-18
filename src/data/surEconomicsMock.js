@@ -48,6 +48,12 @@ export const PRIMARY_NAV = [
   // es la casa que los publica. La pagina y su ruta ya existian desde el rediseno;
   // lo unico que faltaba era la puerta para entrar desde el encabezado.
   { id: "quienesSomos", to: "/quienes-somos", labelKey: "nav.quienesSomos" },
+  // La puerta comercial, al lado de la institucional y la ultima de la fila: quien
+  // entra a leer pasa por delante de las nueve secciones antes de llegar a ella, y
+  // quien viene a comprar espacio la encuentra sin que nadie le pase un enlace.
+  // «Anúnciate» ya no va en la navegación principal: es una página comercial, no una
+  // sección para el lector, y en la barra competía por sitio con las que sí lo son.
+  // Vive en el pie, junto a la política de cookies.
 ];
 
 /**
@@ -339,6 +345,15 @@ export const SOCIAL = [
     label: "X",
     handle: "@Sur_economics",
     url: "https://x.com/Sur_economics",
+  },
+  {
+    id: "tiktok",
+    label: "TikTok",
+    // Con cero, no con «o»: es el nombre de la cuenta tal cual.
+    handle: "@surecon0mics",
+    // Sin los parametros `_r` y `_t` que TikTok cuelga al compartir: son de esa
+    // sesion concreta y no pintan nada en un enlace permanente del pie.
+    url: "https://www.tiktok.com/@surecon0mics",
   },
 ];
 

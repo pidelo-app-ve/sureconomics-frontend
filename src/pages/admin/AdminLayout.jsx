@@ -137,6 +137,12 @@ const AdminShell = () => {
               <NavLink to="/admin/redes" className={linkClass} end onClick={closeMenu}>
                 En redes
               </NavLink>
+              <NavLink to="/admin/educacion" className={linkClass} end onClick={closeMenu}>
+                Educación
+              </NavLink>
+              <NavLink to="/admin/publicidad" className={linkClass} end onClick={closeMenu}>
+                Publicidad
+              </NavLink>
             </NavGroup>
 
             {/* "Audiencia" oculto del menu a peticion del cliente: el aviso de cookies

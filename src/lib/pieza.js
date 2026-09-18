@@ -308,6 +308,14 @@ export const piezaFromApi = (row) => {
     // del backend no trae el campo, y `undefined` en un `&&` de JSX no pinta nada
     // pero tampoco se distingue de un `false` al depurar.
     educativo: Boolean(row.is_educational),
+    // Si la redacción marcó esta pieza como «sin publicidad»: un obituario, una
+    // investigación que toca a un anunciante, la cobertura de una tragedia. La página
+    // de detalle no pide espacios cuando es cierto.
+    //
+    // Booleano forzado por lo mismo que `educativo`: un backend anterior al módulo
+    // publicitario no trae el campo, y el valor honesto para una pieza que no sabe
+    // nada de esto es «sí lleva», que es lo que hace `Boolean(undefined)`.
+    sinPublicidad: Boolean(row.sin_publicidad),
     // Si la sección de esta pieza admite comentarios. Es una política del formato y
     // viaja anidada en la pieza justo para que la página no tenga que cruzar el
     // listado de formatos ni provocar un error para saber si dibuja la caja.

@@ -4,6 +4,7 @@ import { BRAND } from "../data/surEconomicsMock";
 import { applyPageMeta } from "../lib/seo";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
+import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
 import {
   Media,
   PieceBody,
@@ -17,6 +18,12 @@ import { FORMATO_META, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import { ESPACIOS } from "../services/publicidadService";
+import {
+  ESPACIOS_DE_SITIO,
+  EspacioPublicitario,
+  useEspacios,
+} from "../components/publicidad";
 
 /**
  * Detail page for a piece of any format.
@@ -89,6 +96,25 @@ export const Pieza = () => {
       description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
     });
   }, [pieza]);
+
+  // Los huecos de esta pieza, declarados **antes** de los returns tempranos de abajo:
+  // un hook no puede quedarse sin ejecutar en un render y sí en el siguiente.
+  //
+  // `listo` espera a tener la pieza porque el contexto -- formato, temas, países -- es
+  // lo que decide qué campaña encaja, y pedir sin él serviría un anuncio al azar y,
+  // peor, contaría esa impresión. Y se apaga entero si la redacción marcó la pieza
+  // como «sin publicidad»: no se piden espacios, así que no hay nada que ocultar
+  // después.
+  useEspacios({
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.ARTICULO_NATIVO, ESPACIOS.ARTICULO_RAIL],
+    contexto: {
+      seccion: pieza?.formatoApi ?? null,
+      formato: pieza?.formatoApi ?? null,
+      tema: pieza?.temaSlugs ?? [],
+      pais: pieza?.geoSlugs ?? [],
+    },
+    listo: Boolean(pieza) && !pieza.sinPublicidad,
+  });
 
   if (state.status === "loading") {
     // Nothing at all for the first fraction of a second: a piece that loads fast
@@ -171,7 +197,14 @@ export const Pieza = () => {
                 unidad={pieza.unidad}
                 esEditorial={pieza.formato === "Editorial"}
               />
-              <ShareButtons url={canonica} title={pieza.titulo} className="se-piece__share" />
+              <div className="se-piece__acciones">
+                {/* Guardar, al lado de compartir: las dos son «qué hago con esto
+                    después de leerlo». El botón faltaba por completo -- la sección de
+                    marcadores de la cuenta existía con su pantalla y su endpoint, pero
+                    nada la alimentaba, así que no podía tener nada dentro. */}
+                <BotonDeMarcador postId={pieza.id} />
+                <ShareButtons url={canonica} title={pieza.titulo} className="se-piece__share" />
+              </div>
             </div>
 
             {/* El cuerpo y, al lado, lo que se puede leer después. La columna de
@@ -181,6 +214,16 @@ export const Pieza = () => {
               <div className="se-piece__main">
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
+
+                {/* La tarjeta nativa del cuerpo, detrás del texto y de las etiquetas.
+                    Se probó a mitad del cuerpo, partiendo los párrafos, y el cliente
+                    lo descartó: en una pieza corta el corte llega enseguida y la
+                    lectura se parte antes de haber dicho nada.
+
+                    Lleva la misma etiqueta de publicidad que en la portada: lo que la
+                    separa de una pieza de la redacción no puede depender de dónde
+                    esté. */}
+                <EspacioPublicitario espacio={ESPACIOS.ARTICULO_NATIVO} variante="cuerpo" />
 
                 {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
                     conversación es sobre lo que se acaba de leer.
@@ -195,11 +238,14 @@ export const Pieza = () => {
                 ) : null}
               </div>
 
-              {relacionadas.length ? (
-                <aside className="se-piece__aside" aria-label="Más contenido">
-                  <RelatedPieces items={relacionadas} />
-                </aside>
-              ) : null}
+              <aside className="se-piece__aside" aria-label="Más contenido">
+                {/* El rail va **encima** de «También te puede interesar», como en la
+                    maqueta: es la primera cosa que ve quien levanta la vista del texto,
+                    y es el sitio que se vende. Si no hay campaña que encaje no pinta
+                    nada y la columna arranca directamente en las relacionadas. */}
+                <EspacioPublicitario espacio={ESPACIOS.ARTICULO_RAIL} />
+                {relacionadas.length ? <RelatedPieces items={relacionadas} /> : null}
+              </aside>
             </div>
           </article>
         </div>

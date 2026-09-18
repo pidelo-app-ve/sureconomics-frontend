@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { subscribeToNewsletter } from "../../services/newsletterService";
+import { ESPACIOS } from "../../services/publicidadService";
+import { EspacioPublicitario } from "../publicidad";
 
 /**
  * El bloque del boletín en la portada: «Entorno en Viñetas».
@@ -153,6 +155,12 @@ export const NewsletterBlock = () => {
                   <p className="se-newsletter__ok">{estado.mensaje}</p>
                 ) : null}
               </div>
+
+              {/* Formato D: el patrocinio del boletin. Va debajo del formulario y
+                  no encima del titulo: quien llega aqui viene a suscribirse, y lo
+                  primero que lea tiene que ser eso. Una linea, un logotipo, y la
+                  etiqueta de siempre. */}
+              <EspacioPublicitario espacio={ESPACIOS.BOLETIN} />
             </div>
           </div>
         </div>

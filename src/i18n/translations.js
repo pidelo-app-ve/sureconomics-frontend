@@ -10,6 +10,7 @@ export const translations = {
     "nav.podcast": "Podcast",
     "nav.educacion": "Educación",
     "nav.quienesSomos": "Quiénes somos",
+    "nav.anunciate": "Anúnciate",
     "nav.articulos": "Artículos",
     "nav.informesReportes": "Informes y reportes",
     "nav.suscripcion": "Suscripción",
@@ -22,7 +23,10 @@ export const translations = {
     "nav.perfil": "Perfil",
     "nav.marcadores": "Marcadores",
     "nav.envios": "Envíos",
-    "nav.dashboard": "Dashboard",
+    // «Mi cuenta» y no «Dashboard»: es una palabra inglesa en un sitio en
+    // español, y sobre todo es mas corta -- el nav no tenia sitio para las dos
+    // etiquetas largas y partia «Anúnciate».
+    "nav.dashboard": "Mi cuenta",
     "nav.salir": "Salir",
     "nav.cerrarSesion": "Cerrar sesión",
 
@@ -43,6 +47,7 @@ export const translations = {
     "nav.podcast": "Podcast",
     "nav.educacion": "Education",
     "nav.quienesSomos": "About us",
+    "nav.anunciate": "Advertise",
     "nav.articulos": "Articles",
     "nav.informesReportes": "Reports & research",
     "nav.suscripcion": "Subscription",
@@ -55,7 +60,7 @@ export const translations = {
     "nav.perfil": "Profile",
     "nav.marcadores": "Bookmarks",
     "nav.envios": "Submissions",
-    "nav.dashboard": "Dashboard",
+    "nav.dashboard": "My account",
     "nav.salir": "Sign out",
     "nav.cerrarSesion": "Sign out",
 

@@ -32,3 +32,12 @@ export const IconX = (props) => (
     />
   </svg>
 );
+
+export const IconTikTok = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      fill="currentColor"
+      d="M16.6 2h-3.1v13.6a2.6 2.6 0 1 1-2.6-2.6c.23 0 .45.03.66.09v-3.16a5.9 5.9 0 0 0-.66-.04 5.71 5.71 0 1 0 5.71 5.71V9.1a6.9 6.9 0 0 0 4.06 1.3V7.3a3.88 3.88 0 0 1-2.75-1.14A3.9 3.9 0 0 1 16.6 3.4V2Z"
+    />
+  </svg>
+);

@@ -4844,13 +4844,20 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   box-shadow: inset 0 1px 0 rgba(var(--se-tinte), 0.65);
 }
 
+/* El fondo de la leyenda es lo que corta el borde del `fieldset`. Sin el, la
+   linea pasa por detras del texto y se lee como un tachado -- se veia en
+   «Que esta enviando» del formulario de envio, y pasaba igual en el de
+   contacto. El color es el del arranque del degradado del propio fieldset:
+   la leyenda se apoya en su borde superior, que es donde empieza. */
 .se-contact-form fieldset.se-form-field legend {
-  font-family: var(--se-font-ui);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--se-form-muted);
-  padding: 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+  padding: 0 0.45rem;
+  background: #fafbfc;
 }
 
 .se-contact-info {
@@ -8568,14 +8575,23 @@ a.se-topics__chip:focus-visible {
 
 /* --- Reader account dashboard (cuenta) --- */
 .se-reader-dash {
-  /* Editorial rail: ink + Sur accent (aligned with :root brand) */
-  --rd-rail: #ffffff;
-  --rd-rail-soft: color-mix(in srgb, var(--color-ink) 88%, #000 12%);
+  /* La barra lateral, con los colores de la marca.
+
+     Estaba rota: `--rd-rail` era blanco y `--rd-rail-soft` casi negro, asi que el
+     degradado iba de blanco a negro con el texto en tinta oscura. Arriba desaparecia
+     el logotipo -- blanco sobre blanco -- y abajo se perdia el menu. Ahora es el
+     verde de marca, plano, con la tinta clara encima: el mismo lenguaje que la
+     cabecera del sitio y que el panel de administracion. */
+  --rd-rail: var(--marca-verde);
+  --rd-rail-soft: var(--marca-verde);
   --rd-ui-accent: var(--color-accent);
   --rd-ui-accent-soft: color-mix(in srgb, var(--color-accent) 35%, transparent);
-  --rd-text: rgba(var(--se-tinte), 0.96);
-  --rd-muted: rgba(var(--se-tinte), 0.7);
-  --rd-hairline: rgba(var(--se-tinte), 0.1);
+  /* Tinta clara: va sobre el verde, no sobre el fondo de la pagina. */
+  --rd-text: #f3f1ec;
+  --rd-muted: rgba(243, 241, 236, 0.66);
+  --rd-hairline: rgba(255, 255, 255, 0.14);
+  /* El filete del area de contenido si es oscuro: ahi el fondo es claro. */
+  --rd-borde: rgba(var(--se-tinte), 0.12);
   --rd-stage: #fafaf9;
   --rd-card: #ffffff;
   --rd-shadow: 0 18px 46px rgba(0, 0, 0, 0.1);
@@ -8622,7 +8638,7 @@ a.se-topics__chip:focus-visible {
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.35rem 1.1rem 1.25rem;
-  background: linear-gradient(180deg, var(--rd-rail) 0%, var(--rd-rail-soft) 100%);
+  background: var(--rd-rail);
   color: var(--rd-text);
   border-bottom: 1px solid var(--rd-hairline);
 }
@@ -12395,6 +12411,20 @@ a.se-topics__chip:focus-visible {
   margin-top: 0;
 }
 
+/* El anuncio abre la columna, asi que arranca pegado arriba: el margen que trae por
+   defecto lo dejaba caido respecto al primer parrafo del articulo. */
+.se-piece__aside .se-ad--rail {
+  margin-top: 0;
+}
+
+/* Y el aire va aqui, en el titulo que viene detras, no debajo del anuncio. Es la
+   diferencia entre «el anuncio empuja» y «el titulo se separa»: si manana el hueco no
+   trae campana, este margen desaparece con el y la columna no queda con un vacio
+   arriba que nadie entiende. */
+.se-piece__aside [data-espacio] + .se-piece__related {
+  margin-top: 2.1rem;
+}
+
 /* —— La lista lateral de "también te puede interesar" ——
    `se-newslist` es una rejilla de tres columnas —lugar · titular · fecha— pensada
    para el ancho completo del pie de una pieza. Metida en una barra de 320 px, el
@@ -12735,7 +12765,7 @@ a.se-topics__chip:focus-visible {
    `.se-header__nav-list` y `.se-header__actions .se-btn` se definen mas abajo con la
    misma especificidad, asi que la cascada devolvia los valores viejos y las medidas
    salian identicas. */
-@media (min-width: 1100px) and (max-width: 1279px) {
+@media (min-width: 1100px) and (max-width: 1365px) {
   .se-hora--header .se-hora__lugar {
     position: absolute;
     width: 1px;
@@ -12746,7 +12776,10 @@ a.se-topics__chip:focus-visible {
   }
 
   .se-header__nav--desktop .se-header__nav-list {
-    column-gap: clamp(0.3rem, 0.7vw, 0.62rem);
+    /* A 1280 el termino que manda es el `vw`, asi que bajar el tope no servia:
+       hay que bajar el `vw`. De 0,7 a 0,55 son ~2 px por hueco y hay diez,
+       que son los 16 px que faltaban sin sesion. */
+    column-gap: clamp(0.28rem, 0.55vw, 0.62rem);
   }
 
   .se-header__actions--desktop .se-btn {
@@ -12765,7 +12798,7 @@ a.se-topics__chip:focus-visible {
 
    Los segundos del reloj ya no se esconden en ningun sitio: la regla que lo hacia
    cubria 992-1099, que hoy es menu. De 1100 arriba el reloj entero cabe. */
-@media (min-width: 1100px) and (max-width: 1279px) {
+@media (min-width: 1100px) and (max-width: 1365px) {
   .se-header__logo {
     height: 26px;
   }
@@ -13309,15 +13342,38 @@ a.se-topics__chip:focus-visible {
   background: var(--color-paper, #fff);
 }
 
+/* El color, declarado y no heredado. Sin el, el titulo tomaba el del contexto:
+   en el panel salia oscuro y en el area de cuenta -- donde el recorte se reusa
+   desde que el lector sube su retrato -- salia en crema sobre blanco, es decir,
+   invisible. Un titulo sin color propio es un titulo que funciona por suerte. */
 .se-recorte__titulo {
   margin: 0 0 0.35rem;
   font-family: var(--mono);
+  font-size: 0.95rem;
   font-weight: 700;
+  color: var(--color-ink);
 }
 
+/* El deslizador, en el cobre de la marca y no en el azul del navegador. */
+.se-recorte__zoom input[type="range"] {
+  accent-color: var(--color-accent);
+}
+.se-recorte__zoom {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-2);
+}
+
+/* Lleva `se-admin-meta-hint`, que es una clase del panel. Fuera de el no pinta
+   nada, asi que el color va aqui para que el texto se lea en los dos sitios. */
 .se-recorte__ayuda {
   margin: 0 0 0.75rem;
   max-width: 52ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-slate);
 }
 
 /* `touch-action: none` para que arrastrar en un movil mueva la foto y no la pagina. */
@@ -14594,4 +14650,3518 @@ a.se-topics__chip:focus-visible {
   .se-aud__columna-marca { transition: none; }
   .se-aud__pulso,
   .se-aud__actualizar:disabled .se-aud__actualizar-icono { animation: none; }
+}
+
+/* ═══ EDUCACION — catalogo, temario y lector ══════════════════════════
+   Educacion es la unica seccion del sitio que vende algo, y eso cambia como se
+   maqueta. En el resto la pregunta es "que dice esto"; aqui es "que me llevo,
+   cuanto dura y cuanto cuesta", y esas tres respuestas tienen que estar
+   siempre en el mismo sitio para que dos modulos se puedan comparar de un
+   vistazo.
+
+   Sigue usando los tokens de marca -- verde, acento terracota, mono en los
+   titulares -- porque lo que vende estos modulos es que los firma esta casa.
+   Una seccion de cursos con lenguaje visual propio se leeria como un anuncio.
+
+   Tres decisiones que no se ven en el codigo y conviene no deshacer:
+
+   1. **La portada no es el hero institucional.** Llevaba `se-hero--institutional`,
+      pensado para una declaracion de principios, y dejaba ~250 px de aire antes
+      de la primera tarjeta. Aqui la cabecera es compacta y ademas trabaja:
+      contiene las tres promesas, asi que el espacio dice algo.
+   2. **La imagen del modulo es opcional de verdad.** Antes cada tarjeta abria
+      con un 16/9 que, sin portada cargada, pintaba un degradado verde -- el
+      elemento mas grande de la tarjeta, sin informacion. Ahora sin imagen no hay
+      hueco: la tarjeta empieza por el titulo.
+   3. **El panel de compra es `sticky`.** La compra se decide leyendo el temario,
+      que es lo largo de la pagina; con el precio arriba y fijo al flujo, quien se
+      convence abajo tiene que volver a subir a buscarlo. */
+
+.se-edu__aviso {
+  font-family: var(--se-font-ui);
+  font-size: 0.95rem;
+  color: var(--color-slate-2);
+}
+
+.se-edu__h2 {
+  margin: 0 0 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-edu__h2--separado { margin-top: 3rem; }
+
+/* --- Portada del catalogo --- */
+
+.se-edu__portada {
+  padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.25rem, 5vw, 3.25rem);
+  background: var(--marca-verde);
+  color: #f6f3ed;
+}
+.se-edu__portada-kicker {
+  margin: 0 0 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e8c77a;
+}
+.se-edu__portada-titulo {
+  max-width: 22ch;
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.9rem, 4.6vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: #ffffff;
+}
+.se-edu__portada-claim {
+  max-width: 58ch;
+  margin: 0;
+  font-size: 1.03rem;
+  line-height: 1.6;
+  color: #c9ddd8;
+}
+
+/* Las tres promesas, dentro de la banda verde. Van aqui y no en una seccion
+   propia por lo mismo que la cabecera es compacta: son las razones para seguir
+   leyendo, y una razon que aparece despues del precio llega tarde. */
+.se-edu__promesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.1rem 2rem;
+  margin: 2rem 0 0;
+  padding: 1.6rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  list-style: none;
+}
+.se-edu__promesa {
+  display: flex;
+  gap: 0.7rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: #b9d2cc;
+}
+.se-edu__promesa strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+}
+.se-edu__promesa-icono {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  margin-top: 0.1rem;
+  color: #e8c77a;
+}
+
+/* --- Rejilla del catalogo --- */
+
+.se-edu__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: clamp(1rem, 2.2vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-edu__grid > li { display: flex; }
+
+/* --- La tarjeta de un modulo --- */
+
+.se-modulo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 1.35rem 1.4rem 1.25rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.se-modulo:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--se-tinte), 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+}
+.se-modulo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* El modulo de cortesia es la puerta de entrada al resto del catalogo: quien lo
+   hace ya tiene cuenta verificada, que es el paso que frena las compras. Por eso
+   se distingue -- con un filete de acento, no con un color de fondo que lo
+   sacaria del lenguaje de tarjeta del sitio. */
+.se-modulo--cortesia {
+  border-color: rgba(185, 83, 42, 0.45);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+.se-modulo--cortesia:hover { border-color: var(--color-accent); }
+
+.se-modulo__foto {
+  display: block;
+  margin: -1.35rem -1.4rem 0.4rem;
+  aspect-ratio: 21 / 9;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  background: var(--se-offwhite);
+}
+.se-modulo__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.se-modulo__cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.se-modulo__etiqueta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-modulo--cortesia .se-modulo__etiqueta { color: var(--color-accent); }
+
+/* El precio, en texto y arriba a la derecha. Antes flotaba en una pildora negra
+   sobre la portada y se leia como una marca de agua; sobre todo, cada tarjeta lo
+   ponia a una altura distinta segun lo alta que fuera su imagen, y un precio que
+   no esta a la misma altura en todas las tarjetas no se puede comparar. */
+.se-modulo__precio {
+  font-family: var(--mono);
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.se-modulo__titulo {
+  font-family: var(--mono);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+.se-modulo:hover .se-modulo__titulo { color: var(--color-accent); }
+
+.se-modulo__resumen {
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.se-modulo__datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+.se-modulo__dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.se-modulo__icono {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+/* El gancho. Vivia en gris de 0,72 rem al pie de la tarjeta: el argumento que
+   mas convierte, escrito con el tamano de una nota al pie. */
+.se-modulo__gancho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-accent);
+}
+
+/* --- Como funciona y las dudas --- */
+
+/* La regla global `.se-section + .se-section { padding-top: 0 }` deja esta banda
+   sin aire arriba, y aqui el fondo cambia de color: el titular queda pegado al
+   borde gris y la seccion parece la continuacion de las tarjetas en vez de un
+   bloque aparte. Se le devuelve el espacio, con algo mas de margen por debajo de
+   las tarjetas para marcar el corte.
+
+   Va con las dos clases a proposito: `.se-section + .se-section` tiene dos
+   clases de especificidad, y un `.se-edu__banda` a secas pierde contra ella y
+   deja el padding en cero sin que nada avise. */
+.se-section.se-edu__banda {
+  margin-top: var(--se-space-xl);
+  padding-top: var(--se-section-gap);
+  background: var(--se-offwhite);
+}
+
+.se-edu__pasos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.5rem 2.25rem;
+  margin: 0 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.se-edu__paso { display: flex; gap: 0.9rem; }
+.se-edu__paso-num {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--marca-verde);
+  color: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.se-edu__paso-copy {
+  font-family: var(--se-font-ui);
+  font-size: 0.89rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-edu__paso-copy strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  color: var(--color-ink);
+}
+
+.se-edu__dudas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1.25rem 2.5rem;
+  margin: 0;
+}
+.se-edu__duda {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-hairline);
+}
+.se-edu__duda dt {
+  margin-bottom: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__duda dd {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+/* --- Detalle del modulo --- */
+
+.se-edu__migas {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: var(--color-slate-2);
+  margin-bottom: 1.25rem;
+}
+
+.se-modulo-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  grid-template-areas:
+    "cabecera panel"
+    "temario  panel";
+  grid-template-rows: auto 1fr;
+  column-gap: clamp(1.75rem, 4vw, 3.25rem);
+  row-gap: 0;
+  align-items: start;
+}
+.se-modulo-detalle__cabecera { grid-area: cabecera; }
+.se-modulo-detalle__temario { grid-area: temario; }
+.se-modulo-detalle__lado { grid-area: panel; }
+
+.se-modulo-detalle__kicker {
+  margin: 0 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-modulo-detalle__titulo {
+  max-width: 24ch;
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.se-modulo-detalle__resumen {
+  max-width: 62ch;
+  margin: 0 0 1.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--color-slate);
+}
+.se-modulo-detalle__prueba {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.se-modulo-detalle__prueba-icono { width: 17px; height: 17px; }
+.se-modulo-detalle__h2 { margin-top: 2.75rem; }
+@media (max-width: 960px) { .se-modulo-detalle__h2 { margin-top: 0; } }
+
+/* --- Temario --- */
+
+.se-temario {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.se-temario__fila + .se-temario__fila { border-top: 1px solid var(--color-hairline); }
+
+/* La fila entera es el objetivo, no solo el titulo. Un enlace de dos centimetros
+   dentro de una fila de sesenta es un objetivo dificil en cualquier pantalla y
+   directamente hostil en una tactil. */
+.se-temario__enlace {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.15s ease;
+}
+a.se-temario__enlace:hover { background: var(--se-offwhite); }
+a.se-temario__enlace:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.se-temario__fila--cerrada { background: rgba(var(--se-tinte), 0.02); }
+
+.se-temario__num {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: var(--se-offwhite);
+  border: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-slate-2);
+}
+.se-temario__fila--cerrada .se-temario__num { opacity: 0.6; }
+
+.se-temario__copy { display: block; min-width: 0; }
+.se-temario__titulo {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+.se-temario__fila--cerrada .se-temario__titulo { color: var(--color-slate-2); }
+a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
+
+.se-temario__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.22rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+.se-temario__icono { width: 13px; height: 13px; flex: 0 0 auto; }
+.se-temario__punto { margin: 0 0.15rem; }
+
+.se-temario__sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--color-slate);
+}
+/* La clase abierta se anuncia como una accion, no como una etiqueta: es la
+   prueba del producto y lo que hay que ofrecer es el boton que la abre. */
+.se-temario__sello--libre {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #ffffff;
+}
+.se-temario__sello--cerrado {
+  border-color: transparent;
+  background: none;
+  color: var(--color-slate-2);
+  font-weight: 400;
+}
+
+/* --- El panel de compra --- */
+
+/* `align-items: start` en la rejilla encoge esta columna a la altura de su
+   contenido, y entonces el `sticky` de dentro no tiene por donde viajar: se
+   comporta como un `static` y se va con el scroll. Estirarla es lo que le da
+   recorrido -- es el fallo clasico de un panel pegajoso dentro de grid. */
+.se-modulo-detalle__lado {
+  position: relative;
+  align-self: stretch;
+  height: 100%;
+}
+
+.se-compra {
+  position: sticky;
+  /* Por debajo de la cabecera fija, con un dedo de aire. */
+  top: 5.5rem;
+  padding: 1.4rem 1.45rem 1.5rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+}
+
+.se-compra__precio {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+}
+.se-compra__suyo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.15rem;
+  color: var(--marca-verde);
+}
+.se-compra__nota {
+  margin: 0.35rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+
+.se-compra__incluye {
+  margin: 1.15rem 0;
+  padding: 1.15rem 0 0;
+  border-top: 1px solid var(--color-hairline);
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  color: var(--color-slate);
+}
+.se-compra__incluye li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.se-compra__icono {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--color-slate-2);
+}
+.se-compra__libre { color: var(--color-accent); font-weight: 600; }
+.se-compra__libre .se-compra__icono { color: var(--color-accent); }
+
+.se-compra__texto {
+  margin: 0 0 0.9rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-compra__acciones .se-btn { width: 100%; justify-content: center; }
+.se-compra__pie {
+  margin: 0.8rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+
+/* Los botones de pasarela, a lo ancho del panel y uno debajo de otro: son la
+   accion de la pagina, y un boton a media caja se lee como algo secundario. */
+.se-edu__pago-texto {
+  margin: 0 0 0.85rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-edu__pago-titulo {
+  margin: 0 0 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__pago-acciones {
+  display: grid;
+  gap: 0.55rem;
+}
+.se-edu__pago-acciones .se-btn { width: 100%; justify-content: center; }
+.se-edu__pago-error {
+  margin: 0.7rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  color: var(--color-accent);
+}
+
+/* --- Lector --- */
+.se-edu__lectura { max-width: 74ch; }
+
+.se-edu__titulo {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+
+.se-edu__leccion-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 0.4rem;
+}
+
+/* La barra de avance. Saber cuanto queda es lo que sostiene la lectura hasta el
+   final de un modulo, y es tambien lo que convierte "compre esto" en "termine
+   esto" -- que es lo que hace que la siguiente compra ocurra. */
+.se-edu__leccion-kicker-dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-slate-2);
+  letter-spacing: 0.04em;
+}
+.se-edu__leccion-kicker-icono { width: 13px; height: 13px; }
+
+.se-edu__avance {
+  height: 3px;
+  margin: 0 0 1.5rem;
+  border-radius: 999px;
+  background: var(--color-hairline);
+  overflow: hidden;
+}
+.se-edu__avance-barra {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.se-edu__video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 1.25rem 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000000;
+}
+.se-edu__video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.se-edu__audio { width: 100%; margin: 1.25rem 0; }
+
+.se-edu__descarga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+.se-edu__descarga-meta {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--color-slate-2);
+}
+
+.se-edu__cuerpo { margin-top: 1.25rem; }
+
+/* El cierre de una clase abierta dentro de un modulo de pago. Va antes de la
+   navegacion entre lecciones y no despues: quien acaba de leer una clase
+   completa esta en el unico momento en que la compra se explica sola. */
+.se-edu__continuar {
+  margin-top: 2.5rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid var(--color-hairline);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 12px;
+  background: var(--se-offwhite);
+}
+.se-edu__continuar-titulo {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__continuar-texto {
+  margin: 0 0 1.1rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+/* Aqui los botones si van en fila: hay ancho de sobra en la columna de
+   lectura, y apilarlos a lo ancho de 74 caracteres se veria desproporcionado. */
+.se-edu__continuar .se-edu__pago-acciones {
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 0.6rem;
+}
+.se-edu__continuar .se-edu__pago-acciones .se-btn { width: auto; }
+
+.se-edu__vecinas {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+}
+
+.se-edu__muro {
+  max-width: 34rem;
+  padding: 1.75rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+}
+.se-edu__muro .se-edu__titulo { font-size: clamp(1.3rem, 2.6vw, 1.6rem); }
+.se-edu__muro .se-edu__pago { margin-top: 1.25rem; }
+.se-edu__muro .se-edu__pago-acciones { grid-auto-flow: row; }
+
+.se-edu__vuelta { max-width: 56ch; text-align: left; }
+.se-edu__vuelta .se-btn { margin-top: 1rem; }
+
+@media (max-width: 960px) {
+  /* El panel deja de estar anclado antes de que la columna se estreche del todo:
+     pegado en una pantalla angosta se come la mitad del alto util, que es
+     justamente donde esta el temario que se vino a leer. */
+  .se-modulo-detalle {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    /* Titulo, luego precio, luego temario. El panel se cuela en medio en vez de
+       saltar al principio: abrir la pagina con una cifra y sin nombre obliga a
+       recordar en que modulo se entro. */
+    grid-template-areas: "cabecera" "panel" "temario";
+    row-gap: 1.75rem;
+  }
+  .se-compra { position: static; }
+}
+
+@media (max-width: 600px) {
+  .se-temario__enlace {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.55rem;
+  }
+  /* El sello salta de fila y se alinea con el texto, no con el numeral. */
+  .se-temario__estado { grid-column: 2; }
+  .se-modulo__cabeza { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-modulo,
+  .se-temario__enlace { transition: none; }
+  .se-modulo:hover { transform: none; }
+}
+
+/* ═══ PANEL · LISTA DE COMPROBACION Y CIFRAS DE EDUCACION ════════════
+   Las dos piezas que convierten los dos paneles de "formulario que guarda campos"
+   en algo que acompaña: que falta antes de publicar, y si lo publicado funciona. */
+
+/* --- Vista previa de una pieza publicitaria ---
+
+   El lienzo lleva el ancho real del hueco, no el del panel. Es la mitad del valor de
+   una previsualizacion: una tarjeta nativa estirada a mil pixeles no se parece en nada
+   a la que sale en una columna de 352, y mirarla asi da una idea equivocada de lo que
+   se va a publicar -- que es peor que no mirarla.
+
+   El fondo imita el del sitio y no el del panel: una tarjeta blanca sobre panel blanco
+   parece no tener borde, y ese borde es justo lo que separa un anuncio de una pieza de
+   la redaccion. */
+.se-vista {
+  margin: 1.1rem 0;
+  padding: 0.9rem 1rem 1.1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+  background: #fbfbfa;
+}
+.se-vista__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+.se-vista__etiqueta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-vista__variantes { display: inline-flex; gap: 0.25rem; }
+.se-vista__variante {
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--color-slate-2);
+  cursor: pointer;
+}
+.se-vista__variante--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.se-vista__lienzo {
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--color-paper);
+  /* La rejilla de la portada: tres columnas de 352 px. */
+  max-width: 22rem;
+}
+/* La franja ancha y la del cuerpo de un articulo ocupan la columna de lectura, no
+   una tarjeta: cada variante se mira a su propio ancho o no se esta mirando nada. */
+.se-vista__lienzo:has(.se-ad--nativo-lista) { max-width: 100%; }
+.se-vista__lienzo:has(.se-ad--nativo-cuerpo) { max-width: 40rem; }
+.se-vista__lienzo:has(.se-ad--banner) { max-width: 100%; }
+.se-vista__lienzo:has(.se-ad--rail) { max-width: 19rem; }
+.se-vista__lienzo:has(.se-ad--patrocinio),
+.se-vista__lienzo:has(.se-ad--boletin),
+.se-vista__lienzo:has(.se-ad--cintillo) { max-width: 100%; }
+
+.se-vista__aviso {
+  margin: 0.8rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  color: #8a3a1c;
+}
+.se-vista--sin p {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.83rem;
+  color: var(--color-slate-2);
+}
+
+/* El acuse de guardado. Se apaga solo: uno que se queda puesto deja de
+   significar nada a los diez segundos -- no se sabe si es de este cambio o del
+   anterior --, asi que desaparecer es parte del mensaje. */
+.se-guardado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.6rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #e4f2ee;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #0e6b5e;
+  vertical-align: middle;
+  animation: se-guardado-entra 0.18s ease-out;
+}
+@keyframes se-guardado-entra {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-guardado { animation: none; }
+}
+
+.se-chequeo {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 10px;
+  background: var(--se-offwhite);
+}
+.se-chequeo__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-chequeo__cuenta {
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-accent);
+}
+.se-chequeo__lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.45rem; }
+.se-chequeo__punto {
+  display: flex;
+  gap: 0.55rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+.se-chequeo__punto small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-slate-2);
+}
+.se-chequeo__icono { width: 15px; height: 15px; flex: 0 0 auto; margin-top: 0.18rem; }
+/* Lo resuelto se atenua, no se esconde: la lista tiene que leerse como el estado de
+   la pieza y no como una regañina, y para eso los ✓ tienen que estar. */
+.se-chequeo__punto--bien { color: var(--color-slate-2); }
+.se-chequeo__punto--bien .se-chequeo__icono { color: #0e6b5e; }
+.se-chequeo__punto--falta .se-chequeo__icono { color: #b4381c; }
+.se-chequeo__punto--falta { font-weight: 600; }
+.se-chequeo__punto--conviene .se-chequeo__icono { color: #9a7412; }
+
+/* --- Cifras de Educacion --- */
+
+.se-edunum { margin-bottom: 1.5rem; }
+.se-edunum__cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.se-edunum__cifra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+.se-edunum__n {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.se-edunum__t {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-2);
+}
+
+.se-edunum__h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.8rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-edunum__nota {
+  font-size: 0.7rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  font-weight: 400;
+  color: var(--color-slate-2);
+}
+
+.se-edunum__embudo { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.85rem; }
+.se-edunum__fila {
+  display: grid;
+  grid-template-columns: minmax(8rem, 15rem) minmax(4rem, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+.se-edunum__modulo {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edunum__borrador {
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.07);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-edunum__barra {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.se-edunum__barra-llena {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.se-edunum__detalle {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate-2);
+  white-space: nowrap;
+}
+.se-edunum__detalle strong { color: var(--color-accent); }
+.se-edunum__ingreso {
+  margin-left: 0.6rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  color: var(--color-ink);
+}
+
+.se-edunum__vacio {
+  max-width: 70ch;
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.16);
+  border-radius: 10px;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+
+@media (max-width: 760px) {
+  /* En vertical la barra pierde el sentido -- se queda de un dedo de ancha -- y las
+     cifras de al lado son lo que se viene a leer. */
+  .se-edunum__fila { grid-template-columns: minmax(0, 1fr); }
+  .se-edunum__detalle { white-space: normal; }
+}
+
+/* ═══ PANEL · EDUCACION ═══════════════════════════════════════════════
+   Dos niveles plegables -- modulo y leccion -- porque un curso es una lista
+   dentro de otra, y abrir las dos a la vez deja una pantalla de tres metros.
+   Cada cambio se guarda al momento: el servidor renumera, asi que un estado
+   local "pendiente" acabaria mostrando un orden que ya no existe. */
+
+.se-admin-edu__modulo {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.se-admin-edu__modulo-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+}
+
+.se-admin-edu__modulo-titulo {
+  flex: 1 1 18rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-admin-edu__modulo-titulo:hover { color: var(--color-accent); }
+.se-admin-edu__modulo-titulo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-admin-edu__modulo-meta,
+.se-admin-edu__leccion-meta {
+  font-family: var(--se-font-ui);
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--color-slate-2);
+}
+
+/* Publicado en verde de marca, borrador apagado: es el estado que hay que poder
+   leer de un vistazo en una lista de diez modulos. */
+.se-admin-edu__estado {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-slate-2);
+}
+.se-admin-edu__estado--on {
+  background: var(--marca-verde);
+  border-color: var(--marca-verde);
+  color: #ffffff;
+}
+
+.se-admin-edu__modulo-cuerpo {
+  padding: 0 1.1rem 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+/* `align-items: end` alineaba los tres campos por su base, y como la duracion
+   lleva tres lineas de explicacion debajo, el desplegable del tipo quedaba
+   hundido respecto a su vecino: dos campos al mismo nivel logico pintados a
+   alturas distintas. Alineados arriba, las etiquetas cuadran; la casilla se
+   baja sola lo justo para no quedar pegada al borde superior. */
+.se-admin-edu__fila-doble {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.se-admin-edu__fila-doble > .se-admin-edu__casilla { margin-top: 1.9rem; }
+
+.se-admin-edu__casilla {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  padding-bottom: 0.4rem;
+}
+.se-admin-edu__casilla small { color: var(--color-slate-2); }
+
+.se-admin-edu__textarea {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.se-admin-edu__sub {
+  margin: 1.5rem 0 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+/* --- Lecciones --- */
+.se-admin-edu__lecciones {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.se-admin-edu__leccion + .se-admin-edu__leccion {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.se-admin-edu__leccion-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--se-offwhite);
+}
+
+.se-admin-edu__orden {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+}
+
+.se-admin-edu__num {
+  width: 1.5rem;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate-2);
+}
+
+.se-admin-edu__flecha {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+.se-admin-edu__flecha:disabled { opacity: 0.35; cursor: default; }
+
+.se-admin-edu__leccion-titulo {
+  flex: 1 1 14rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-admin-edu__leccion-titulo:hover { color: var(--color-accent); }
+.se-admin-edu__leccion-titulo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* La primera leccion lleva sello propio: es la que engancha, y conviene que en el
+   panel se vea cual es sin tener que contar. */
+.se-admin-edu__sello {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-accent);
+  background: rgba(185, 83, 42, 0.1);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.se-admin-edu__leccion-cuerpo {
+  padding: 0.85rem;
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+/* --- Alta de modulo y de leccion --- */
+.se-admin-edu__nueva {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.se-admin-edu__nueva .se-form-control { flex: 1 1 16rem; min-width: 0; }
+.se-admin-edu__nueva--modulo { margin-bottom: 1.25rem; }
+
+@media (max-width: 640px) {
+  .se-admin-edu__modulo-cabeza,
+  .se-admin-edu__leccion-cabeza { gap: 0.5rem; }
+  /* El boton de quitar salta de linea antes que apretujarse contra el titulo. */
+  .se-admin-edu__leccion-cabeza .se-btn { flex: 1 1 100%; }
+}
+
+/* ═══ PUBLICIDAD ══════════════════════════════════════════════════════════
+   Ocho formatos, una sola regla de diseño: **un anuncio tiene que parecer un
+   anuncio**. Comparte la retícula, el tipo y el color del sitio para no romper
+   la página, y no comparte ni una sola señal de autoría editorial: ni el
+   antetítulo en cobre, ni la tipografía serif de los titulares, ni la firma.
+   Lo que hace de frontera es la etiqueta, y por eso nunca es opcional.
+
+   El gris del borde y el fondo apagado son deliberados: un anuncio con más
+   contraste que la pieza que tiene al lado gana la mirada sin haberla pagado, y
+   a los dos días el lector deja de mirar la página entera. */
+
+/* Fondo blanco y no `--se-offwhite`. Parece un detalle y era el fallo: las tarjetas
+   de contenido (`.se-card--default`) son #f7f7f5, exactamente el mismo gris, así que
+   en un listado el anuncio se leía como una tarjeta de la redacción a la que le
+   faltaba la foto. Blanco sobre el gris de la página lo separa sin subirle el
+   contraste, que es lo que no puede hacer: un anuncio que grita más que la pieza que
+   tiene al lado gana la mirada sin haberla pagado. */
+.se-ad {
+  position: relative;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  transition: border-color 0.18s ease;
+}
+a.se-ad:hover { border-color: rgba(0, 0, 0, 0.24); }
+a.se-ad:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-ad { transition: none; }
+}
+
+/* La etiqueta. Cobre sobre claro, mayúsculas y monoespaciada: las tres cosas la
+   separan del antetítulo de una pieza, que es serif y va en el color del tema. */
+.se-ad__etiqueta {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-ad__etiqueta--casa { color: var(--color-slate-2); }
+.se-ad__marca { font-weight: 700; }
+
+.se-ad__titular {
+  margin: 0.4rem 0 0;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+.se-ad__pie {
+  margin: 0.35rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.74rem;
+  color: var(--color-slate-2);
+}
+.se-ad__logo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+.se-ad__cta {
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* --- A · tarjeta nativa ------------------------------------------------- */
+.se-ad--nativo {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+}
+/* La caja del logotipo, ahora en gris: el fondo de la tarjeta pasó a blanco, así que
+   un recuadro blanco dentro de otro blanco no se veía. Y más ancha que alta porque
+   los logotipos que manda un anunciante casi siempre son marcas horizontales -- en
+   una caja cuadrada se quedan en un tercio del alto disponible. */
+.se-ad--nativo .se-ad__media {
+  flex: 0 0 auto;
+  width: 170px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  background: var(--se-offwhite);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+}
+.se-ad--nativo .se-ad__cuerpo { min-width: 0; }
+/* En el cuerpo de un artículo lleva aire arriba y abajo para no pegarse al
+   párrafo anterior, que es lo que la haría parecer parte del texto. */
+.se-ad--nativo-cuerpo { margin: 1.75rem 0; }
+
+/* --- A, variante ficha: la tarjeta nativa dentro de una rejilla de contenido ---
+
+   Calca la retícula de `.se-artcard` a propósito -- misma columna, misma imagen en
+   16/9, mismo cuerpo debajo -- porque es lo que pedía el formato A de la maqueta y
+   porque es lo único que deja la fila entera cuadrada. Lo que NO calca es el color:
+   la tarjeta de contenido va sobre `#f7f7f5` y esta va sobre blanco con el filete de
+   acento a la izquierda.
+
+   Esa diferencia es deliberada y es la línea que no se cruza: compartir retícula con
+   una pieza de la redacción está bien, parecer una pieza de la redacción no. El
+   filete, el fondo y la etiqueta sobre la imagen son las tres cosas que lo impiden, y
+   ninguna de las tres es decorativa. */
+.se-ad--ficha {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Crema tibia y no blanco puro: en una rejilla donde todas las tarjetas son blancas
+     sobre hueso, un blanco mas lo unico que hace es desaparecer. Este medio tono la
+     separa del fondo sin gritar, y de paso le da un cuerpo que antes no tenia. */
+  background: #fffdfb;
+  border: 1px solid rgba(185, 83, 42, 0.18);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 0 10px 10px 0;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+a.se-ad--ficha:hover {
+  transform: translateY(-2px);
+  border-color: rgba(185, 83, 42, 0.42);
+  border-left-color: var(--color-accent);
+  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.35);
+}
+a.se-ad--ficha:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* La misma proporcion que la imagen de una tarjeta: sin esto la fila se descuadra
+   y el anuncio delata que no pertenece a la rejilla. */
+.se-ad__ficha-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  padding: 1.6rem 1.25rem 1.25rem;
+  border-bottom: 1px solid rgba(185, 83, 42, 0.16);
+  /* Una retícula muy tenue sobre un lavado calido, en vez del hueso plano de antes.
+     El problema no era el color: era que al lado de tarjetas con foto a sangre, un
+     recuadro vacio con un logotipo pequeno en medio se lee como que algo no cargo.
+     Con textura el hueco se lee como decidido. Misma retícula que usa el bloque del
+     boletin, para que no parezca un adorno traído de fuera. */
+  background-color: #fbf6f2;
+  background-image:
+    radial-gradient(ellipse 62% 58% at 50% 52%, #fffaf6 0%, rgba(255, 250, 246, 0) 100%),
+    linear-gradient(to bottom, rgba(185, 83, 42, 0.06), rgba(185, 83, 42, 0));
+}
+.se-ad__ficha-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Diagonales y no cuadricula: la retícula de 64 px se leia como una tabla, y el
+     logotipo quedaba cruzado por una linea. La diagonal es ademas el mismo trazo que
+     llevan las cintas, asi que los formatos se reconocen entre si. */
+  background-image:
+    repeating-linear-gradient(
+      58deg,
+      rgba(185, 83, 42, 0.07) 0 1px,
+      transparent 1px 22px
+    );
+  pointer-events: none;
+}
+
+/* La etiqueta, sobre la imagen y en la esquina: en esta variante es lo primero que
+   se ve, antes que el logotipo. En las otras variantes puede ir sobre el titular
+   porque no hay nada que confundir; aqui si lo hay. */
+.se-ad__ficha-media .se-ad__etiqueta {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 0.3rem 0.62rem 0.32rem;
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 0 0 8px 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.4);
+}
+.se-ad__ficha-media .se-ad__etiqueta--casa {
+  background: var(--marca-verde);
+  color: #fff;
+}
+.se-ad__ficha-media .se-ad__marca { color: inherit; opacity: 0.85; }
+
+/* El logotipo, mas grande que antes. Con 56 px de alto en una caja de 16/9 quedaba
+   nadando en el centro, y el aire de sobra era justo lo que hacia que la tarjeta
+   pareciera a medio hacer. */
+.se-ad__logo--ficha {
+  position: relative;
+  z-index: 1;
+  max-width: 80%;
+  max-height: 72px;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-ad--ficha,
+  .se-ad--ficha .se-ad__cta { transition: none; }
+  a.se-ad--ficha:hover { transform: none; }
+}
+
+.se-ad__ficha-cuerpo {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: var(--se-space-sm);
+}
+.se-ad--ficha .se-ad__titular {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.se-ad--ficha .se-ad__pie {
+  margin: 0;
+  font-size: var(--se-text-small);
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+/* La llamada, separada por un filete y anclada abajo. Antes flotaba pegada al pie y
+   en una fila de tres tarjetas cada una la tenia a una altura distinta, segun lo
+   largo del titular. Con `margin-top: auto` y el filete, las tres coinciden. */
+.se-ad--ficha .se-ad__cta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: auto;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(185, 83, 42, 0.16);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+}
+/* La flecha avanza al pasar por encima. Es el unico movimiento de la tarjeta y va
+   sobre un pseudoelemento: la flecha viene dentro del texto del componente, y
+   animarla aparte obligaria a partir esa cadena en dos nodos. */
+a.se-ad--ficha:hover .se-ad__cta {
+  transform: translateX(2px);
+}
+.se-ad--ficha .se-ad__cta {
+  transition: transform 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-ad--ficha { transition: none; }
+  a.se-ad--ficha:hover { transform: none; }
+}
+
+/* --- B · banner / billboard --------------------------------------------- */
+/* --- La rotación dentro de un hueco -------------------------------------- */
+/*
+   Varias piezas comparten sitio y se turnan. Durante el cambio hay dos montadas: la
+   que entra, ya colocada, y la que sale por encima. Por eso el envoltorio es el que
+   manda en la posición — sin `relative` aquí, la saliente se despegaría respecto a
+   la página y cruzaría medio artículo de camino. */
+
+.se-ad-hueco { position: relative; }
+.se-ad-hueco__saliente {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  /* Ya se está yendo: que no intercepte un clic destinado a la que queda debajo. */
+  pointer-events: none;
+}
+
+/* --- La cinta: se despega como una pegatina --- */
+/*
+   Gira desde el borde de arriba, se levanta y se va. El eje en la parte superior es
+   lo que lo hace leerse como despegar y no como desvanecerse: el borde de abajo se
+   separa primero, igual que al tirar de una pegatina por una esquina.
+
+   Y la sombra aparece con el giro. Sin ella la pieza gira sobre la de abajo sin
+   despegarse de ella; la sombra es lo que dice que hay dos capas. */
+@keyframes se-ad-despegar {
+  0% {
+    transform: perspective(900px) rotateX(0deg) translateY(0);
+    opacity: 1;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  55% {
+    transform: perspective(900px) rotateX(46deg) translateY(-7%);
+    /* Opaca todavia. Bajarla aqui convertia el despegue en una fundido cruzado: la de
+       abajo se transparentaba a traves de la de arriba y las dos se leian a la vez,
+       en vez de una tapando a la otra. Una pegatina no es translucida. */
+    opacity: 1;
+    box-shadow: 0 18px 28px -16px rgba(0, 0, 0, 0.55);
+  }
+  82% {
+    transform: perspective(900px) rotateX(74deg) translateY(-17%);
+    opacity: 0.95;
+    box-shadow: 0 26px 32px -18px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    transform: perspective(900px) rotateX(96deg) translateY(-28%);
+    opacity: 0;
+    box-shadow: 0 30px 34px -20px rgba(0, 0, 0, 0);
+  }
+}
+
+.se-ad-hueco__saliente .se-ad--montaje {
+  transform-origin: top center;
+  /* Fondo propio y opaco: el montaje es transparente por defecto y sin esto la de
+     abajo se ve a traves de la que se esta despegando. */
+  background: var(--se-offwhite);
+  backface-visibility: hidden;
+  animation: se-ad-despegar 0.62s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+  will-change: transform, opacity;
+}
+/* La de debajo no se anima: ya estaba ahí. Ese es el efecto — no aparece, se
+   descubre. */
+
+/* --- La tarjeta: entra de golpe y se acomoda --- */
+/*
+   Al revés que la cinta: aquí no hay nada que despegar, la saliente se va rápido y
+   la que llega es la que se mueve. Escala corta con frenada elástica, de arriba,
+   como algo que cae en su sitio. */
+@keyframes se-ad-acomodar {
+  0% { transform: translateY(-9px) scale(1.045); opacity: 0; }
+  55% { transform: translateY(2px) scale(0.995); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes se-ad-retirar {
+  to { opacity: 0; transform: scale(0.97); }
+}
+
+.se-ad-hueco--cambia .se-ad--ficha,
+.se-ad-hueco--cambia .se-ad--nativo,
+.se-ad-hueco--cambia .se-ad--rail {
+  animation: se-ad-acomodar 0.42s cubic-bezier(0.18, 0.89, 0.32, 1.18) both;
+}
+.se-ad-hueco__saliente .se-ad--ficha,
+.se-ad-hueco__saliente .se-ad--nativo,
+.se-ad-hueco__saliente .se-ad--rail {
+  animation: se-ad-retirar 0.2s ease-in forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* El gancho no rota —eso lo decide `useRotacion`—, pero si algo llegara a cambiar,
+     que cambie sin moverse. */
+  .se-ad-hueco__saliente { display: none; }
+  .se-ad-hueco--cambia .se-ad--ficha,
+  .se-ad-hueco--cambia .se-ad--nativo,
+  .se-ad-hueco--cambia .se-ad--rail,
+  .se-ad-hueco__saliente .se-ad--montaje { animation: none; }
+}
+
+/* --- El montaje: el trato de imagen montada (hoy solo el banner) -------- */
+/*
+   Lo usa solo el banner (B). Se deja como bloque propio y no dentro de
+   `.se-ad--banner` porque es el trato, no el hueco: el dia que otro formato pase
+   a imagen montada le basta con anadir su clase y su proporcion.
+   */
+
+.se-ad--montaje {
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+}
+a.se-ad--montaje:hover { border-color: var(--color-accent); }
+
+.se-ad__cinta {
+  position: relative;
+  width: 100%;
+  /* Por defecto la del banner; cada hueco la pisa abajo. Fijarla aqui y no dejarla
+     a la imagen es lo que reserva el sitio antes de que cargue, y evita el salto
+     que corre todo lo que hay debajo. */
+  aspect-ratio: 1456 / 180;
+  background: var(--se-offwhite);
+}
+.se-ad__cinta-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* La etiqueta, sobrepuesta y con placa propia: va encima del arte del anunciante,
+   que puede ser de cualquier color, y sin placa desaparece sobre la mitad. */
+.se-ad__cinta-sello {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.26rem 0.58rem 0.28rem;
+  background: rgba(255, 255, 255, 0.94);
+  border-right: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+  border-bottom-right-radius: 6px;
+}
+.se-ad__cinta-sello .se-ad__etiqueta { color: var(--color-slate-2); }
+
+/* Una sola proporcion para todas las cintas: 1456x180.
+   Un solo arte sirve para los cuatro huecos, y al equipo comercial se le pide un
+   archivo, no cuatro. Cada hueco es mas o menos ancho, pero al ir en `contain` la
+   misma cinta entra entera en todos. */
+.se-ad--banner .se-ad__cinta,
+.se-ad--franja .se-ad__cinta { aspect-ratio: 1456 / 180; }
+
+/* El patrocinio y el boletin van a **todo el ancho** de su columna, como el buscador y
+   las tarjetas que tienen al lado: una cinta mas estrecha que el contenido se lee como
+   que quedo suelta. Lo que baja es el grosor -- 1456/120 en vez de 1456/180 -- porque a
+   ancho completo la proporcion del banner deja una franja demasiado gruesa.
+
+   Y ahi, y solo ahi, la imagen va en `cover`: la cinta se entrega en 1456x180 y en un
+   recuadro mas fino `contain` la encogeria dejando franjas blancas a los lados. `cover`
+   la mantiene a todo el ancho y recorta arriba y abajo, que es de donde sobra. Por eso
+   el arte tiene que llevar su contenido en la banda central. */
+.se-ad--patrocinio .se-ad__cinta,
+.se-ad--boletin .se-ad__cinta {
+  aspect-ratio: 1456 / 120;
+}
+.se-ad--patrocinio .se-ad__cinta-img,
+.se-ad--boletin .se-ad__cinta-img {
+  object-fit: cover;
+}
+
+/* Los margenes que traian los formatos viejos, ahora sobre la cinta: sin ellos la
+   franja se pega al parrafo anterior y se lee como parte del texto. */
+.se-ad--franja-cuerpo { margin: 1.75rem 0; }
+.se-ad--franja-lista { margin: 1.25rem 0; }
+.se-ad--patrocinio { margin: 1.5rem 0; }
+/* Dentro de la tarjeta oscura del boletin: borde claro, que el gris no se ve ahi. */
+.se-ad--boletin {
+  margin-top: 1.1rem;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 640px) {
+  /* En vertical una cinta de 8:1 queda en una franja donde no se lee nada. Se abre, y
+     la imagen sigue entrando entera por ir en `contain`. */
+  .se-ad--banner .se-ad__cinta,
+  .se-ad--franja .se-ad__cinta { aspect-ratio: 3 / 1; }
+  .se-ad--patrocinio .se-ad__cinta,
+  .se-ad--boletin .se-ad__cinta { aspect-ratio: 4 / 1; }
+}
+
+/* --- Lo que pinta cada formato ------------------------------------------
+   Repuesto tal cual estaba: el banner es el unico que cambia de trato. Las
+   tarjetas, el patrocinio, el boletin y el rail siguen como estaban pautados
+   -- logotipo sobre placa y el titular al lado. */
+
+.se-ad__etiqueta {
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:.64rem;
+  font-weight:700;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--color-accent);
+}
+
+.se-ad--nativo-cuerpo {
+  margin:1.75rem 0;
+}
+
+.se-ad__ficha-media {
+  position:relative;
+  display:grid;
+  place-items:center;
+  aspect-ratio:16 / 9;
+  padding:1.25rem;
+  background:var(--se-offwhite);
+  border-bottom:1px solid var(--color-hairline);
+}
+
+.se-ad__ficha-media .se-ad__etiqueta {
+  position:absolute;
+  top:0;
+  left:0;
+  margin:0;
+  padding:.28rem .6rem;
+  background:var(--color-accent);
+  color:#fff;
+  border-radius:0 0 6px;
+}
+
+
+
+
+
+
+
+
+
+.se-ad-fila {
+  padding-top:0;
+}
+
+
+/* --- F · cintillo -------------------------------------------------------- */
+/* `display: contents` para que el envoltorio no cree una caja propia: lo que se
+   vende es el patrocinio de esas cifras, y una caja intermedia lo separaría de
+   ellas justo lo suficiente para que dejara de leerse como tal. */
+.se-ticker__patrocinio { display: contents; }
+.se-ad--cintillo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: rgba(185, 83, 42, 0.16);
+  white-space: nowrap;
+}
+.se-ad__cintillo-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #e8c77a;
+}
+.se-ad__cintillo-marca {
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f6f3ed;
+}
+
+/* --- I · rail lateral ---------------------------------------------------- */
+.se-ad--rail {
+  padding: 1rem;
+  text-align: center;
+  margin-top: 1.25rem;
+}
+.se-ad__media--rail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 7;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+  background: var(--se-offwhite);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+}
+.se-ad--rail .se-ad__titular { font-size: 0.92rem; }
+
+/* --- H · barra fija inferior --------------------------------------------- */
+/* Altura acotada y botón de cierre siempre visible: nunca tapa el contenido ni
+   se interpone al navegar. Ver el componente para por qué nace apagada. */
+.se-ad-barra {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  max-height: 64px;
+  padding: 0.6rem 1rem;
+  /* El pie del móvil: sin esto, en un iPhone el botón de cerrar cae debajo de la
+     barra de gestos del sistema y deja de poder pulsarse. */
+  padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
+  background: var(--marca-verde);
+  color: #f6f3ed;
+  box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.18);
+}
+.se-ad-barra__chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  background: #fff;
+}
+.se-ad-barra__chip img { height: 20px; width: auto; display: block; }
+.se-ad-barra__texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  color: #d9eae5;
+  /* Una sola línea: la barra no puede crecer y empujar el contenido. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.se-ad-barra__etiqueta {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f0c9b6;
+}
+.se-ad-barra__marca { flex: 0 0 auto; color: #fff; }
+.se-ad-barra__titular { overflow: hidden; text-overflow: ellipsis; }
+.se-ad-barra__cta {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.9rem;
+  border-radius: 5px;
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.se-ad-barra__cerrar {
+  flex: 0 0 auto;
+  /* 44px de área táctil aunque el aspa se vea pequeña: por debajo de eso, cerrar
+     en un móvil pasa a ser cuestión de puntería. */
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #8fbbb2;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.se-ad-barra__cerrar:hover { color: #fff; }
+.se-ad-barra__cerrar:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* --- Las filas que envuelven un hueco ------------------------------------ */
+.se-ad-fila { padding-top: 0; }
+
+/* En un listado el anuncio queda justo debajo de la última tarjeta, y pegado a ella
+   se lee como si fuera parte de la rejilla -- una tarjeta más, sin foto. La
+   separación es lo único que dice "esto ya no es el listado". */
+[data-espacio="listado-nativo"] { margin-top: var(--se-space-xl); }
+
+/* El rail abre la columna, asi que arranca a ras: su borde superior queda a la altura
+   de la primera linea del articulo. Llevaba `--se-space-lg` de cuando iba **debajo** de
+   las relacionadas, y al subirlo esos 32 px lo dejaban caido respecto al texto.
+   La separacion con «Tambien te puede interesar» la pone ese titulo, no el anuncio. */
+[data-espacio="articulo-rail"] { margin-top: 0; }
+
+@media (max-width: 760px) {
+  .se-ad--nativo { flex-direction: column; align-items: stretch; }
+  .se-ad--nativo .se-ad__media { width: 100%; height: 120px; }
+  .se-ad--banner { flex-direction: column; }
+  .se-ad--banner .se-ad__banner-logo { flex: 0 0 auto; padding: 1.1rem; }
+  /* En móvil la barra pierde el titular y se queda con marca y botón: en 360px
+     no caben las tres cosas, y lo que se recorta es lo que menos informa. */
+  .se-ad-barra__titular { display: none; }
+}
+
+/* ═══ PANEL · PUBLICIDAD ══════════════════════════════════════════════════
+   Tres niveles plegables -- anunciante, campaña, pieza -- por lo mismo que en
+   Educación: un árbol abierto entero deja una pantalla de cuatro metros. Los
+   segmentos no son un cuarto nivel aunque en la base sean una tabla: se editan
+   dentro de la campaña, porque eso es lo que son para quien vende. */
+
+/* --- Mural de anunciantes: quien esta al aire, con su logotipo ---
+
+   Va en el panel y no en el sitio, asi que manda la lectura rapida por encima del
+   lucimiento: logotipo grande, nombre, estado y cifras, en ese orden. Quien abre
+   esta pantalla suele venir a contestar una sola pregunta -- "esta saliendo tal
+   marca?" -- y la respuesta tiene que estar sin desplegar nada.
+
+   El logotipo va sobre gris y no sobre blanco a proposito: casi todos llegan en PNG
+   con fondo transparente y muchos son blancos sobre su color de marca. Sobre blanco,
+   la mitad del catalogo desapareceria. */
+.se-mural {
+  margin-bottom: 1.5rem;
+}
+.se-mural__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-mural__cuenta {
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--color-accent);
+}
+
+.se-mural__rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-mural__rejilla > li { display: flex; }
+
+.se-mural__ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem 0.95rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.se-mural__ficha:hover {
+  border-color: rgba(0, 0, 0, 0.26);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+.se-mural__ficha:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* Lo que no esta al aire se atenua, pero **solo el logotipo**: el nombre, el sello y
+   las cifras tienen que seguir leyendose. Atenuar la ficha entera convierte "esta en
+   pausa" en "no se lee", que es peor que no mostrarla. */
+.se-mural__ficha--apagada .se-mural__logo { opacity: 0.45; }
+
+.se-mural__logo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 7;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: var(--se-offwhite);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+.se-mural__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+/* Sin arte cargado: la inicial sobre el verde de marca. Un icono de imagen rota se
+   lee como un fallo del panel, y lo que pasa es que esa marca aun no tiene pieza. */
+.se-mural__inicial {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--marca-verde);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.se-mural__cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.se-mural__nombre {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+
+.se-mural__sello {
+  flex: 0 0 auto;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.se-mural__sello--activa { background: #e4f2ee; color: #0e6b5e; }
+/* Tope alcanzado y fuera de fecha comparten color: los dos significan lo mismo
+   para quien mira -- esta guardada como activa y no esta saliendo. */
+.se-mural__sello--tope { background: #f6e3de; color: #8a3a1c; }
+.se-mural__sello--pausada { background: #f1e7d8; color: #7a5c1c; }
+.se-mural__sello--borrador { background: rgba(0, 0, 0, 0.06); color: var(--color-slate-2); }
+.se-mural__sello--terminada { background: rgba(0, 0, 0, 0.06); color: var(--color-slate-2); }
+.se-mural__sello--ninguna { background: #f6e3de; color: #8a3a1c; }
+
+/* Lo que anuncia. El titular entre comillas porque es una cita literal de la pieza
+   publicada, no una descripcion que haya escrito el panel: la diferencia importa el
+   dia que alguien compare esta pantalla con lo que sale en la portada. */
+.se-mural__titular {
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--color-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.se-mural__titular--falta { color: var(--color-accent); font-style: italic; }
+
+.se-mural__pie {
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-slate-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Formato y destino: en dos palabras, que esta promocionando y adonde manda. */
+.se-mural__destino {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El aviso de lo que va a pasar. En acento y sobre su propio fondo: no es un
+   estado mas -- es lo unico de la ficha que pide una llamada de telefono. */
+.se-mural__aviso {
+  align-self: flex-start;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: #f6e3de;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #8a3a1c;
+}
+
+.se-mural__contacto {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.se-mural__cifras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin-top: auto;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate-2);
+}
+.se-mural__piezas {
+  padding-left: 0.5rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.se-mural__casa,
+.se-mural--vacio p {
+  margin: 0.85rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+.se-mural--vacio p { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .se-mural__ficha { transition: none; }
+}
+
+.se-admin-pub__cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.se-admin-pub__cifra {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+.se-admin-pub__cifra-n {
+  font-family: var(--mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.se-admin-pub__cifra-t {
+  font-family: var(--se-font-ui);
+  font-size: 0.74rem;
+  color: var(--color-slate-2);
+}
+
+.se-admin-pub__interruptores {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: var(--se-offwhite);
+}
+.se-admin-pub__interruptores .se-admin-meta-hint { flex: 1 1 22rem; margin: 0; }
+
+/* El pie de una pieza: la casilla a la izquierda y el boton a la derecha.
+   Sueltos eran dos elementos en linea sin nada que los separase, y el boton
+   acababa pisando la palabra "Activa". */
+.se-admin-pub__pie-de-pieza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.se-admin-pub__casilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  color: var(--color-ink);
+}
+
+/* --- Anunciante --- */
+.se-admin-pub__anunciante {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+.se-admin-pub__anunciante-cabeza,
+.se-admin-pub__campana-cabeza,
+.se-admin-pub__pieza-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+}
+.se-admin-pub__campana-cabeza { background: var(--se-offwhite); }
+.se-admin-pub__pieza-cabeza { padding: 0.6rem 0.85rem; background: var(--se-offwhite); }
+
+.se-admin-pub__anunciante-titulo,
+.se-admin-pub__campana-titulo,
+.se-admin-pub__pieza-titulo {
+  flex: 1 1 18rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-admin-pub__anunciante-titulo { font-size: 0.95rem; }
+.se-admin-pub__campana-titulo { font-size: 0.88rem; }
+.se-admin-pub__pieza-titulo { font-size: 0.82rem; }
+.se-admin-pub__anunciante-titulo:hover,
+.se-admin-pub__campana-titulo:hover,
+.se-admin-pub__pieza-titulo:hover { color: var(--color-accent); }
+.se-admin-pub__anunciante-titulo:focus-visible,
+.se-admin-pub__campana-titulo:focus-visible,
+.se-admin-pub__pieza-titulo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-admin-pub__meta {
+  font-family: var(--se-font-ui);
+  font-size: 0.74rem;
+  font-weight: 400;
+  color: var(--color-slate-2);
+}
+
+.se-admin-pub__anunciante-cuerpo,
+.se-admin-pub__campana-cuerpo,
+.se-admin-pub__pieza-cuerpo {
+  padding: 0 1.1rem 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+.se-admin-pub__pieza-cuerpo { padding: 0.85rem; background: #fff; }
+
+/* El estado, legible de un vistazo en una lista de veinte campañas. */
+.se-admin-pub__estado {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-slate-2);
+}
+.se-admin-pub__estado--activa {
+  background: var(--marca-verde);
+  border-color: var(--marca-verde);
+  color: #fff;
+}
+.se-admin-pub__estado--pausada {
+  background: #f1e7d8;
+  border-color: #e0cda6;
+  color: #7a5c1c;
+}
+
+.se-admin-pub__sello {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--color-slate-2);
+}
+.se-admin-pub__sello--casa {
+  border-color: var(--color-accent);
+  background: rgba(185, 83, 42, 0.1);
+  color: var(--color-accent);
+}
+
+.se-admin-pub__campanas,
+.se-admin-pub__piezas {
+  margin: 0.75rem 0;
+  padding: 0;
+  list-style: none;
+}
+.se-admin-pub__campana {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.se-admin-pub__campana + .se-admin-pub__campana { margin-top: 0.75rem; }
+.se-admin-pub__piezas {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.se-admin-pub__pieza + .se-admin-pub__pieza { border-top: 1px solid rgba(0, 0, 0, 0.07); }
+
+.se-admin-pub__doble {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.se-admin-pub__sub {
+  margin: 1.4rem 0 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-admin-pub__acciones,
+.se-admin-pub__nueva {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+.se-admin-pub__nueva .se-form-control { flex: 1 1 16rem; min-width: 0; }
+.se-admin-pub__nueva--alta { margin-bottom: 1.25rem; }
+
+/* --- Segmentos --- */
+.se-admin-pub__fichas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.6rem 0;
+  padding: 0;
+  list-style: none;
+}
+.se-admin-pub__ficha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: var(--se-offwhite);
+  font-family: var(--se-font-ui);
+  font-size: 0.76rem;
+  color: var(--color-slate);
+}
+.se-admin-pub__ficha button {
+  /* 28px y no 44: va dentro de una ficha de 26px de alto, y agrandarla rompería la
+     fila. Es una acción de escritorio dentro del panel, no de lectura en móvil. */
+  min-width: 28px;
+  min-height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-slate-2);
+  cursor: pointer;
+  line-height: 1;
+}
+.se-admin-pub__ficha button:hover { color: var(--color-accent); }
+
+/* La vista previa de la creatividad, sobre cuadros para que un logotipo con fondo
+   transparente no se pierda sobre blanco. */
+.se-admin-pub__vista {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 120px;
+  margin: 0.6rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background:
+    repeating-conic-gradient(#f2f2f0 0% 25%, #ffffff 0% 50%) 50% / 16px 16px;
+}
+.se-admin-pub__vista img { max-height: 100px; max-width: 100%; object-fit: contain; }
+
+/* ═══ ANÚNCIATE AQUÍ ══════════════════════════════════════════════════════ */
+
+/* La regla global `.se-section + .se-section { padding-top: 0 }` pega el
+   primer titular al borde de la banda verde. Aquí el fondo cambia de color,
+   así que el aire tiene que volver: sin él «Formatos» parece parte del hero. */
+.se-anunciate__hero + .se-section { padding-top: var(--se-section-gap); }
+
+.se-anunciate__hero {
+  background: var(--marca-verde);
+  color: #f6f3ed;
+  text-align: center;
+}
+.se-anunciate__kicker {
+  margin: 0 0 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e8c77a;
+}
+.se-anunciate__title {
+  max-width: 34ch;
+  margin: 0 auto 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.15;
+  text-wrap: balance;
+  color: #fff;
+}
+.se-anunciate__lead {
+  max-width: 60ch;
+  margin: 0 auto 1.4rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #c9ddd8;
+}
+
+.se-anunciate__h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-anunciate__sub {
+  max-width: 62ch;
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-anunciate__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-anunciate__tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+.se-anunciate__letra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--se-offwhite);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.se-anunciate__estado {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.se-anunciate__estado--disponible { background: #e4f2ee; color: #0e6b5e; }
+.se-anunciate__estado--proximamente { background: #f1e7d8; color: #7a5c1c; }
+.se-anunciate__nombre {
+  margin: 0.2rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-anunciate__texto {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+.se-anunciate__enlace {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* Su propio contenedor con scroll: cuatro columnas no caben en un móvil, y sin
+   esto sería la página entera la que se desplazaría de lado. */
+.se-anunciate__tabla-caja { overflow-x: auto; }
+.se-anunciate__tabla {
+  width: 100%;
+  min-width: 42rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+.se-anunciate__tabla th,
+.se-anunciate__tabla td {
+  padding: 0.7rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--color-slate);
+}
+.se-anunciate__tabla thead th {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+  border-bottom-width: 2px;
+}
+.se-anunciate__tabla tbody th { font-weight: 600; color: var(--color-ink); }
+.se-anunciate__tabla tbody tr:nth-child(odd) td,
+.se-anunciate__tabla tbody tr:nth-child(odd) th { background: var(--se-offwhite); }
+
+.se-anunciate__nota {
+  max-width: 68ch;
+  margin: 1.2rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+.se-anunciate__cierre { text-align: center; }
+.se-anunciate__cierre .se-anunciate__sub { margin-left: auto; margin-right: auto; }
+
+/* ═══ CUENTA DEL LECTOR — campos, guía, retrato y lo comprado ═════════
+   Las piezas nuevas del área de cuenta. Usan los tokens de marca y no una
+   paleta propia: el gris de esta zona venía de un juego de variables aparte
+   que se había quedado a medio camino.
+
+   Es lo primero que ve alguien que acaba de registrarse, así que manda la
+   claridad sobre el lucimiento: campos con su etiqueta, errores atados al campo
+   que los produce, y ningún adorno que no diga algo. */
+
+/* --- Campos de formulario --- */
+
+.se-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.se-campo__etiqueta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+/* «opcional» escrito, no deducible por la ausencia de un asterisco: nadie cuenta
+   asteriscos, y el que falta es justo el que hace dudar. */
+.se-campo__opcional {
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--color-slate-2);
+  opacity: 0.8;
+}
+
+.se-campo__caja { position: relative; display: flex; }
+.se-campo__input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  background: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.se-campo__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.16);
+}
+.se-campo__input:disabled {
+  background: var(--se-offwhite);
+  color: var(--color-slate-2);
+  cursor: not-allowed;
+}
+.se-campo--mal .se-campo__input { border-color: #b4381c; }
+.se-campo--mal .se-campo__input:focus { box-shadow: 0 0 0 3px rgba(180, 56, 28, 0.16); }
+
+.se-campo__ojo {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.35rem 0.6rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.se-campo__ojo:hover { background: rgba(185, 83, 42, 0.08); }
+.se-campo__ojo:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+
+.se-campo__ayuda,
+.se-campo__error {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.se-campo__ayuda { color: var(--color-slate-2); }
+.se-campo__error { color: #b4381c; font-weight: 600; }
+
+/* --- Medidor de contraseña --- */
+
+.se-fuerza { display: flex; flex-direction: column; gap: 0.3rem; margin-top: -0.2rem; }
+.se-fuerza__barra {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(var(--se-tinte), 0.1);
+  overflow: hidden;
+}
+.se-fuerza__llena {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+.se-fuerza__texto {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+.se-fuerza__texto small {
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+}
+.se-fuerza--mala .se-fuerza__llena { background: #b4381c; }
+.se-fuerza--floja .se-fuerza__llena { background: #c47a1c; }
+.se-fuerza--media .se-fuerza__llena { background: #9a7412; }
+.se-fuerza--buena .se-fuerza__llena { background: #0e6b5e; }
+@media (prefers-reduced-motion: reduce) {
+  .se-fuerza__llena { transition: none; }
+}
+
+/* --- Entrar y registro ---
+
+   `se-entrada` y no `se-acceso`: ese nombre ya estaba cogido en el sitio -- lo usa
+   un panel con filete cobre a la izquierda --, y reusarlo hacia que estas dos
+   pantallas heredaran su borde. Se veia como una raya naranja pegada al margen. */
+
+.se-entrada {
+  display: grid;
+  place-items: start center;
+  min-height: 70vh;
+  padding: clamp(2rem, 6vw, 4rem) var(--se-space-sm);
+  background: var(--color-paper);
+}
+.se-entrada__caja {
+  width: 100%;
+  max-width: 30rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.07);
+}
+.se-entrada__kicker {
+  margin: 0 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-entrada__titulo {
+  margin: 0 0 0.7rem;
+  font-size: clamp(1.5rem, 3.4vw, 1.95rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.se-entrada__lead {
+  margin: 0 0 1.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+.se-entrada__form { display: grid; gap: 1rem; }
+.se-entrada__fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: 1rem;
+}
+.se-entrada__enviar { width: 100%; justify-content: center; }
+.se-entrada__error {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 9px;
+  background: #fbeae5;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  color: #8a3a1c;
+}
+.se-entrada__nota,
+.se-entrada__pie {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+.se-entrada__pie { margin-top: 1.25rem; text-align: center; }
+
+/* --- Entrar con Google --- */
+
+/* El botón lo pinta Google dentro de `__hueco`: su marcado y su tipografía son suyos, y
+   no se tocan — sus normas de marca lo exigen y cualquier retoque nuestro se rompería el
+   día que cambien algo. Lo que sí es nuestro es el sitio que ocupa y el separador. */
+
+.se-google {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  margin-top: 1.4rem;
+}
+
+/* «o» con una raya a cada lado. Las rayas son pseudoelementos de la propia línea, así
+   que el hueco del medio lo da el `gap` y no un ancho fijo que se descuadra al traducir. */
+.se-google__separador {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+.se-google__separador::before,
+.se-google__separador::after {
+  content: "";
+  height: 1px;
+  background: var(--color-hairline);
+}
+.se-google__separador span {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+/* Altura reservada: el botón de Google llega con el script, después del primer pintado.
+   Sin este mínimo, el pie salta hacia arriba y vuelve a bajar al aparecer. */
+.se-google__hueco {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+  width: 100%;
+}
+
+.se-google__aviso,
+.se-google__error {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.se-google__aviso { color: var(--color-slate-2); }
+.se-google__error { color: #b4381c; }
+
+/* --- Páginas de la cuenta --- */
+
+.se-cuenta__pagina {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 56rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+.se-cuenta__cabecera { display: grid; gap: 0.4rem; }
+.se-cuenta__kicker {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-cuenta__titulo {
+  margin: 0;
+  font-size: clamp(1.6rem, 3.6vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.se-cuenta__lead {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+.se-cuenta__h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.9rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-cuenta__h2--separado { margin-top: 1.5rem; }
+.se-cuenta__pendiente {
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-accent);
+}
+.se-cuenta__form { display: grid; gap: 1rem; }
+.se-cuenta__fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+}
+.se-cuenta__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+.se-cuenta__aviso,
+.se-cuenta__error {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  color: var(--color-slate-2);
+}
+.se-cuenta__error { color: #b4381c; font-weight: 600; }
+
+/* El vacío explica y ofrece salida. Una lista vacía sin salida es un callejón. */
+.se-cuenta__vacio {
+  max-width: 44rem;
+  padding: 1.75rem;
+  border: 1px dashed rgba(var(--se-tinte), 0.18);
+  border-radius: 14px;
+  background: #fff;
+}
+.se-cuenta__vacio h1,
+.se-cuenta__vacio h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+.se-cuenta__vacio p {
+  margin: 0 0 1.15rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+/* --- La guía: estado de la cuenta y qué se puede hacer --- */
+
+.se-guia__lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
+.se-guia__punto {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 11px;
+  background: #fff;
+}
+.se-guia__punto--falta { border-left: 3px solid var(--color-accent); }
+.se-guia__icono { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 0.15rem; }
+.se-guia__punto--bien .se-guia__icono { color: #0e6b5e; }
+.se-guia__punto--falta .se-guia__icono { color: var(--color-accent); }
+.se-guia__copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+.se-guia__copy small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.79rem;
+  color: var(--color-slate-2);
+}
+.se-guia__accion {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.se-guia__accion:hover { text-decoration: underline; }
+
+.se-guia__usos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-guia__uso {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 11px;
+  background: #fff;
+}
+.se-guia__uso h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-guia__uso p {
+  margin: 0 0 0.7rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-guia__uso a {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.se-guia__uso a:hover { text-decoration: underline; }
+
+/* --- Las tres cifras --- */
+
+.se-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: 0.85rem;
+}
+.se-resumen__ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.se-resumen__ficha:hover {
+  border-color: rgba(var(--se-tinte), 0.26);
+  transform: translateY(-2px);
+}
+.se-resumen__n {
+  font-family: var(--mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.se-resumen__t {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--color-slate-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-resumen__ficha { transition: none; }
+  .se-resumen__ficha:hover { transform: none; }
+}
+
+/* --- El retrato --- */
+
+.se-retrato {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+}
+/* --- El avatar del lector ---
+
+   Tres tamanos y un solo sitio donde se decide como se ve una cara sin foto. La
+   regla de las iniciales vivia repetida en dos pantallas; dos copias de "la primera
+   del nombre y la del apellido" se separan en cuanto alguien toque una. */
+.se-avatar {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--marca-verde);
+  border: 2px solid rgba(var(--se-tinte), 0.08);
+}
+.se-avatar__img { width: 100%; height: 100%; object-fit: cover; }
+.se-avatar__iniciales {
+  font-family: var(--mono);
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+.se-avatar--sm { width: 34px; height: 34px; }
+.se-avatar--sm .se-avatar__iniciales { font-size: 0.72rem; }
+.se-avatar--md { width: 56px; height: 56px; }
+.se-avatar--md .se-avatar__iniciales { font-size: 1.05rem; }
+.se-avatar--lg { width: 96px; height: 96px; }
+.se-avatar--lg .se-avatar__iniciales { font-size: 1.9rem; }
+
+/* El saludo con la cara al lado. `align-items: center` y no `baseline`: el avatar
+   no tiene linea base, asi que con baseline se apoyaria en su borde inferior y
+   quedaria hundido respecto al nombre. */
+.se-cuenta__cabecera--con-cara {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.se-retrato__copy { flex: 1 1 16rem; min-width: 0; }
+.se-retrato__titulo {
+  margin: 0 0 0.3rem;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-retrato__texto {
+  margin: 0 0 0.85rem;
+  max-width: 48ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+/* El input de archivo nativo no se puede estilar; se oculta y lo dispara el botón.
+   No con display:none, que lo saca del orden de tabulación. */
+.se-retrato__entrada {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.se-retrato__pista,
+.se-retrato__error {
+  margin: 0.6rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+.se-retrato__error { color: #b4381c; font-family: var(--se-font-ui); font-size: 0.8rem; }
+
+/* --- Lo mío --- */
+
+.se-mio__lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.85rem; }
+.se-mio__ficha {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
+  gap: 1.1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: #fff;
+}
+.se-mio__portada {
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--se-offwhite);
+}
+.se-mio__portada img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.se-mio__portada-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(140deg, var(--marca-verde), #0a4a26);
+}
+.se-mio__kicker {
+  margin: 0 0 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-mio__titulo {
+  margin: 0 0 0.3rem;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+.se-mio__resumen {
+  margin: 0 0 0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.se-mio__recibo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate-2);
+}
+.se-mio__ref {
+  margin-left: 0.55rem;
+  padding-left: 0.55rem;
+  border-left: 1px solid var(--color-hairline);
+}
+.se-mio__accion {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: end;
+  text-align: right;
+}
+.se-mio__temario {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.se-mio__temario:hover { text-decoration: underline; }
+.se-mio__pausa {
+  max-width: 18ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--color-slate-2);
+}
+
+.se-mio__pendientes { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
+.se-mio__pendientes li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-left: 3px solid #c47a1c;
+  border-radius: 11px;
+  background: #fff;
+}
+.se-mio__pendientes strong {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  color: var(--color-ink);
+}
+.se-mio__pendientes span {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+.se-mio__pendientes small {
+  font-family: var(--se-font-ui);
+  font-size: 0.79rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+@media (max-width: 720px) {
+  /* En vertical la portada encima y las acciones debajo: una rejilla de tres
+     columnas a 390 px deja el título en dos letras por línea. */
+  .se-mio__ficha { grid-template-columns: minmax(0, 1fr); }
+  .se-mio__portada { max-width: 10rem; }
+  .se-mio__accion { justify-items: start; text-align: left; }
+  .se-mio__pausa { max-width: none; }
+}
+
+/* ═══ CUENTA — el botón de guardar, y las pantallas que quedaban ══════
+
+   Dos cosas. El botón de marcador, que no existía en ninguna parte, y un puente
+   entre las clases viejas del área de lector y el sistema nuevo.
+
+   El puente va por CSS y no reescribiendo cinco pantallas a mano: `envíos`,
+   `nuevo envío`, `editar`, `detalle` y `marcadores` comparten esas clases, y
+   redefinirlas aquí las alinea todas de una vez — incluidas las que no se han
+   vuelto a abrir. Reescribir el marcado de cada una habría sido el mismo
+   resultado con cinco veces más superficie donde equivocarse. */
+
+/* --- Guardar una pieza --- */
+
+.se-marcar { display: inline-flex; align-items: center; gap: 0.6rem; }
+.se-marcar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.7rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  background: #fff;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-slate);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+.se-marcar__btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.se-marcar__btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* Guardado: relleno, no solo un borde de otro color. El icono lleno y el fondo
+   hacen que el estado se lea sin comparar con el de al lado — que es lo que hay
+   que hacer cuando el único cambio es el tono del contorno. */
+.se-marcar__btn--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+.se-marcar__btn--on:hover {
+  background: #a04a25;
+  border-color: #a04a25;
+  color: #fff;
+}
+.se-marcar__btn:disabled { opacity: 0.6; cursor: wait; }
+.se-marcar__error {
+  font-family: var(--se-font-ui);
+  font-size: 0.76rem;
+  color: #b4381c;
+}
+
+/* Guardar y compartir, en la misma fila y separados del resto de la firma. */
+.se-piece__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-left: auto;
+}
+
+@media (max-width: 600px) {
+  /* En vertical el botón no se arrincona a la derecha: la firma ya ocupa el ancho
+     y el botón acabaría solo en una línea, pegado al borde. */
+  .se-piece__acciones { margin-left: 0; }
+  .se-marcar__texto { display: none; }
+  .se-marcar__btn { padding: 0.45rem 0.55rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-marcar__btn { transition: none; }
+}
+
+/* --- El puente: las clases viejas del área de lector --- */
+
+.se-reader-dash__page {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 56rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+/* `--center` centraba una tarjeta en un mar de blanco. Alineada arriba como el
+   resto: una pantalla de la cuenta se lee de arriba abajo, no desde el medio. */
+.se-reader-dash__page--center { place-items: start; }
+
+.se-reader-page-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.6rem, 3.6vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.se-reader-page-lead {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+.se-reader-card {
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+}
+.se-reader-card--narrow { max-width: 44rem; }
+
+/* El vacío, con el mismo trazo discontinuo que el resto: dice «aquí no hay nada
+   todavía» en vez de parecer una tarjeta a la que le faltó el contenido. */
+.se-reader-empty {
+  max-width: 44rem;
+  border-style: dashed;
+  border-color: rgba(var(--se-tinte), 0.18);
+  text-align: left;
+}
+.se-reader-empty__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-reader-empty__text {
+  margin: 0 0 1.15rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+/* --- El formulario de envío --- */
+
+/* El `fieldset` trae borde propio del navegador y la `legend` lo atraviesa: eso
+   era la raya que cruzaba «Qué está enviando». Sin borde y sin relleno, la
+   leyenda vuelve a ser un rótulo. */
+/* El borde del `fieldset` y su leyenda se resuelven donde se definen, mas
+   arriba: una regla suelta aqui pierde por especificidad y es codigo muerto. */
+
+.se-submission-formats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+}
+.se-submission-format {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 11px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.se-submission-format:hover { border-color: rgba(var(--se-tinte), 0.28); }
+/* El elegido, con el acento. Antes el texto de la opción marcada se aclaraba
+   hasta casi desaparecer, que es lo contrario de lo que hace falta. */
+.se-submission-format:has(input:checked) {
+  border-color: var(--color-accent);
+  background: rgba(185, 83, 42, 0.05);
+}
+.se-submission-format:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.se-submission-format input { margin-top: 0.2rem; accent-color: var(--color-accent); }
+.se-submission-format span { display: block; min-width: 0; }
+.se-submission-format strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-submission-format em {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--color-slate-2);
 }

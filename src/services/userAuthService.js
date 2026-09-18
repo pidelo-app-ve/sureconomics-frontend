@@ -40,6 +40,8 @@ const normalizeProfile = (raw) => {
     city: String(raw.city ?? ""),
     occupation: String(raw.occupation ?? ""),
     phoneNumber: String(raw.phone_number ?? raw.phoneNumber ?? ""),
+    photoId: raw.photo_id ?? null,
+    photoUrl: raw.photo_url ?? null,
   };
 };
 
@@ -65,30 +67,18 @@ const userFromRegisterPayload = (data) => {
  * }} payload
  */
 export const registerUser = async (payload) => {
-  const {
-    email,
-    password,
-    firstName,
-    lastName,
-    age,
-    sex,
-    country,
-    city,
-    occupation,
-    phoneNumber,
-  } = payload;
+  const { email, password, firstName, lastName } = payload;
 
+  // Cuatro campos. Los otros seis -- edad, sexo, pais, ciudad, ocupacion y telefono --
+  // eran obligatorios en el esquema del servidor y por eso el formulario no se podia
+  // acortar; ya son opcionales alli y se piden en el perfil, cuando la persona tiene un
+  // motivo para darlos. Ni siquiera se mandan vacios: un `""` guardado es un dato falso
+  // que luego hay que distinguir de "no lo dijo".
   const json = {
     email: String(email ?? "").trim(),
     password,
     first_name: String(firstName ?? "").trim(),
     last_name: String(lastName ?? "").trim(),
-    age: Number(age),
-    sex: String(sex ?? "").trim(),
-    country: String(country ?? "").trim(),
-    city: String(city ?? "").trim(),
-    occupation: String(occupation ?? "").trim(),
-    phone_number: String(phoneNumber ?? "").trim(),
   };
 
   const data = await userPublicRequest("/user-auth/register", {
@@ -140,4 +130,63 @@ export const logoutUserRemote = async () => {
   } catch {
     /* endpoint optional */
   }
+};
+
+/**
+ * Guarda los datos del perfil.
+ *
+ * Manda **solo lo que llega** y no el objeto entero: el servidor distingue "no viene el
+ * campo" de "viene vacio", y son dos cosas distintas -- lo primero es no tocarlo, lo
+ * segundo es borrarlo. Enviar siempre los diez convertiria cualquier guardado parcial en
+ * un borrado silencioso del resto.
+ */
+export const actualizarMiPerfil = async (datos) => {
+  const mapa = {
+    firstName: "first_name",
+    lastName: "last_name",
+    age: "age",
+    sex: "sex",
+    country: "country",
+    city: "city",
+    occupation: "occupation",
+    phoneNumber: "phone_number",
+    photoId: "photo_id",
+  };
+  const json = {};
+  for (const [nuestro, suyo] of Object.entries(mapa)) {
+    if (datos[nuestro] !== undefined) json[suyo] = datos[nuestro];
+  }
+  return normalizeProfile(await userRequest("/user-auth/me", { method: "PATCH", json }));
+};
+
+/**
+ * Si el sitio puede ofrecer «entrar con Google», y con qué Client ID.
+ *
+ * El Client ID lo sirve la API en vez de venir de una variable del frontend. No es un
+ * secreto —el botón lo necesita en el navegador— y tenerlo en un solo sitio evita que
+ * las dos configuraciones se separen: el día que cambie, cambia en un lado.
+ */
+export const googleDisponible = async () => {
+  try {
+    const d = await userPublicRequest("/user-auth/google/disponible");
+    return { disponible: Boolean(d?.disponible), clientId: d?.client_id || null };
+  } catch {
+    // Que no se pueda preguntar no es un error que mostrar: simplemente no se ofrece.
+    return { disponible: false, clientId: null };
+  }
+};
+
+/**
+ * Cambia el token de Google por nuestra propia sesión.
+ *
+ * Devuelve los tokens sin guardarlos, igual que `loginUser` y por lo mismo: quien los
+ * persiste es el contexto, que además recarga el perfil. Guardarlos aquí dejaría dos
+ * sitios haciendo el mismo trabajo, y uno de los dos acabaría olvidándose de un paso.
+ */
+export const entrarConGoogle = async (credential) => {
+  const data = await userPublicRequest("/user-auth/google", {
+    method: "POST",
+    json: { credential },
+  });
+  return { data, tokens: pickTokens(data) };
 };

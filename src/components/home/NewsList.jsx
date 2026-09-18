@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
+import { conAnuncio } from "./conAnuncio";
+import {
+  EspacioPublicitario,
+  useHayAnuncio,
+} from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
 
 /**
@@ -21,33 +26,53 @@ import { listaDePiezas } from "./piezaShape";
  * them rather than cloning the rules is the point; the name reads as
  * article-specific and no longer is.
  */
-export const NewsList = ({ items }) => (
+export const NewsList = ({ items, espacioDeAnuncio }) => {
+  // Se pregunta **antes** de montar la rejilla: el anuncio le quita el sitio a
+  // una pieza, así que si no hay campaña que encaje la rejilla tiene que saberlo
+  // para no descontarla igual y quedarse corta.
+  const hay = useHayAnuncio(espacioDeAnuncio, "tarjeta");
+  const anuncio = hay ? (
+    <EspacioPublicitario espacio={espacioDeAnuncio} variante="tarjeta" />
+  ) : null;
+
+  return (
   <div className="se-artgrid">
-    {items.map((n) => (
-      <article key={n.id} className="se-artcard">
-        <Link to={rutaDePieza(n)} className="se-artcard__media" aria-label={n.titulo}>
-          {/* The body leads with the place, so the field carries the topic --
-              the one card whose copy is sparse enough to want it. */}
-          <CardMedia pieza={n} etiqueta={temaPrincipal(n)} />
-        </Link>
-        <div className="se-artcard__body">
-          {/* The place leads a note, the way the old list had it in the left
-              column: for this outlet "where" is the first thing a reader sorts by. */}
-          <span className="se-meta se-meta--category">{geoPrincipal(n)}</span>
-          <h3 className="se-artcard__title">
-            <Link to={rutaDePieza(n)}>{n.titulo}</Link>
-          </h3>
-          {n.resumen ? <p className="se-artcard__summary">{n.resumen}</p> : null}
-          <div className="se-artcard__foot">
-            <span className="se-artcard__by">{n.fecha}</span>
+    {/* El anuncio no va al final sino intercalado en el centro de la rejilla: al
+        final de tres columnas significa «pegado al borde derecho», y ahí se lee
+        como algo que sobró. Ver `conAnuncio`. Si no hay campaña que encaje no
+        pinta nada y la fila se cierra sola. */}
+    {conAnuncio(
+      items.map((n) => (
+        <article key={n.id} className="se-artcard">
+          <Link to={rutaDePieza(n)} className="se-artcard__media" aria-label={n.titulo}>
+            {/* The body leads with the place, so the field carries the topic --
+                the one card whose copy is sparse enough to want it. */}
+            <CardMedia pieza={n} etiqueta={temaPrincipal(n)} />
+          </Link>
+          <div className="se-artcard__body">
+            {/* The place leads a note, the way the old list had it in the left
+                column: for this outlet "where" is the first thing a reader sorts by. */}
+            <span className="se-meta se-meta--category">{geoPrincipal(n)}</span>
+            <h3 className="se-artcard__title">
+              <Link to={rutaDePieza(n)}>{n.titulo}</Link>
+            </h3>
+            {n.resumen ? <p className="se-artcard__summary">{n.resumen}</p> : null}
+            <div className="se-artcard__foot">
+              <span className="se-artcard__by">{n.fecha}</span>
+            </div>
           </div>
-        </div>
-      </article>
-    ))}
-  </div>
-);
+        </article>
+      )),
+      anuncio,
+    )}
+    </div>
+  );
+};
 
 NewsList.propTypes = {
+  /** La clave del hueco. La rejilla monta el anuncio ella misma: necesita saber si
+      lo habra antes de decidir cuantas piezas caben. */
+  espacioDeAnuncio: PropTypes.string,
   items: listaDePiezas({
     resumen: PropTypes.string,
     imagenUrl: PropTypes.string,

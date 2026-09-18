@@ -184,12 +184,16 @@ export const Navbar = () => {
               >
                 {t("nav.dashboard")}
               </Link>
+              {/* «Salir» y no «Cerrar sesión» en escritorio: medido, los dos botones
+                  largos dejaban el nav 36 px corto incluso a 1920 px, y «Anúnciate»
+                  salía partido siempre que había sesión. El menú móvil sí usa la
+                  etiqueta larga, que es donde hay sitio y donde conviene ser explícito. */}
               <button
                 type="button"
                 className="se-btn se-btn--secondary se-header__dash-btn"
                 onClick={handleLogout}
               >
-                {t("nav.cerrarSesion")}
+                {t("nav.salir")}
               </button>
             </nav>
           ) : (

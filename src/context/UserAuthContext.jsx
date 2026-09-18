@@ -103,6 +103,23 @@ export const UserAuthProvider = ({ children }) => {
     [loadProfile, persistFromTokenResponse]
   );
 
+  /**
+   * Entrar con Google. Mismo final que `login`: sesión puesta y perfil cargado.
+   *
+   * Una cuenta que llega por aquí viene siempre con el correo verificado — Google ya lo
+   * confirmó —, así que no hay que mandar a nadie a la pantalla del código.
+   */
+  const entrarConGoogle = useCallback(
+    async (credential) => {
+      const { tokens } = await userAuthService.entrarConGoogle(credential);
+      if (!tokens?.accessToken) throw new Error("No se pudo entrar con Google.");
+      persistFromTokenResponse(tokens);
+      const me = await loadProfile().catch(() => null);
+      return { profile: me, tokens };
+    },
+    [loadProfile, persistFromTokenResponse]
+  );
+
   const verifyEmail = useCallback(
     async ({ email, code }) => {
       const { tokens } = await userAuthService.verifyUserEmail({ email, code });
@@ -145,6 +162,7 @@ export const UserAuthProvider = ({ children }) => {
       profileStatus,
       login,
       register,
+      entrarConGoogle,
       verifyEmail,
       logout,
       loadProfile,
@@ -157,6 +175,7 @@ export const UserAuthProvider = ({ children }) => {
       profileStatus,
       login,
       register,
+      entrarConGoogle,
       verifyEmail,
       logout,
       loadProfile,

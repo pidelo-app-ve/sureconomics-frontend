@@ -356,7 +356,8 @@ AssetField.propTypes = {
   id: PropTypes.string,
   label: PropTypes.string.isRequired,
   hint: PropTypes.string,
-  kind: PropTypes.oneOf(["image", "video", "document"]).isRequired,
+  // "audio" faltaba: el podcast ya lo usaba y la consola avisaba en cada render.
+  kind: PropTypes.oneOf(["image", "video", "audio", "document"]).isRequired,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   asset: PropTypes.shape({
     // `id` y `credit` faltaban desde antes, y el linter llevaba tiempo avisando de las

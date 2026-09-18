@@ -1,146 +1,214 @@
-import { useCallback, useEffect, useRef } from "react";
-import { BRAND } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
-import { EmptyState, ErrorState, LoadingState } from "../components/content";
-import { ContentExplorer, EducativoGrid, ListingPagination } from "../components/home";
-import { usePieces } from "../hooks/usePieces";
-import { useContentFilter } from "../hooks/useContentFilter";
-import { usePagedList } from "../hooks/usePagedList";
-import { useTaxonomy } from "../hooks/useTaxonomy";
-import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import { useEffect, useState } from "react";
+import { getCatalogo } from "../services/educacionService";
+import { TarjetaDeModulo } from "../components/educacion/TarjetaDeModulo";
+import { IconEscudo, IconLlave, IconVisto } from "../components/icons/educacion";
 
 /**
- * Todo el contenido educativo, en una sola lista.
+ * Educacion: el catalogo de modulos.
  *
- * Una lista y no bloques por formato, que fue la primera versión: agrupar por formato
- * reproducía la portada -- seis encabezados con una o dos piezas debajo cada uno -- y
- * eso enterraba el punto de la página. Aquí lo que reúne a las piezas es ser
- * educativas; el formato es un dato de cada tarjeta, que es donde se dice.
+ * Esta pagina era antes una rejilla de piezas editoriales marcadas como educativas. El
+ * cliente pidio (09/2026) que "Educacion" pase a ser el catalogo de modulos de pago, y
+ * eso es lo que hay aqui. Las piezas de antes no se perdieron: siguen en su seccion de
+ * siempre -- un articulo educativo sigue estando en Articulos --, solo dejaron de tener
+ * una vista que las agrupara.
  *
- * Con el panel de filtros, como las páginas de formato: acota *dentro* de lo educativo
- * por tema, geografía y texto, que es lo que hace recorrible una sección que va a
- * mezclar formatos y años. El filtro vive en estado local y no en la dirección, igual
- * que en las páginas de formato -- a esta vista no llega ningún enlace con una
- * selección hecha; para compartir un recorte está el Explorador.
+ * ## Por que esta pagina tiene mas de una rejilla
+ *
+ * Porque es una pagina de venta y antes no lo era. Llevaba el hero institucional de
+ * "Quienes somos" -- pensado para una declaracion de principios, con casi 250 px de
+ * aire antes del contenido -- y debajo, directamente, las tarjetas. Quien llegaba veia
+ * un titulo enorme, un vacio, y tres precios sin una sola razon para pagarlos.
+ *
+ * El orden de ahora sigue el patron de una pagina de precios: que es esto y por que
+ * confiar, el producto, como funciona, y las dudas que frenan la compra. Lo que **no**
+ * se copia de los sitios de cursos: contadores de urgencia, plazas que se agotan,
+ * precios tachados y estrellas sin resenas detras. Eso convierte a corto plazo y quema
+ * justo el activo que vende estos modulos, que es la credibilidad de la casa.
+ *
+ * ## El gancho va en la tarjeta, no en la letra pequena
+ *
+ * Cada tarjeta dice cuantas lecciones tiene y cuantas se abren sin pagar. Ese numero lo
+ * calcula el servidor con la misma regla que luego aplica al servir la leccion, asi que
+ * no puede prometer una clase gratis que despues conteste 403 -- que es exactamente lo
+ * que pasaria si el texto estuviera escrito a mano en el panel.
  */
 
-const TITULO = "Educación";
-const POR_PAGINA = 12;
+/** Las tres promesas de la cabecera. Son verdad comprobable, no adjetivos. */
+const PROMESAS = [
+  {
+    Icono: IconLlave,
+    titulo: "La primera clase, abierta",
+    texto:
+      "Se lee entera antes de pagar nada. Basta con una cuenta y el correo verificado.",
+  },
+  {
+    Icono: IconEscudo,
+    titulo: "Un pago y ya",
+    texto: "No hay suscripción ni renovación automática. El módulo se compra y se queda.",
+  },
+  {
+    Icono: IconVisto,
+    titulo: "Sin caducidad",
+    texto: "Una vez comprado, el acceso no vence. Las clases nuevas del módulo entran solas.",
+  },
+];
+
+/** Las dudas que frenan una compra, contestadas antes de que haya que preguntarlas. */
+const DUDAS = [
+  {
+    p: "¿Necesito saber de economía para empezar?",
+    r: "No. Cada módulo indica su nivel, y los de nivel inicial parten de cero: se explica el término antes de usarlo.",
+  },
+  {
+    p: "¿Puedo ver algo antes de pagar?",
+    r: "Sí. La primera clase de cada módulo está abierta y es una clase completa, no un adelanto ni un índice.",
+  },
+  {
+    p: "¿Cómo se paga?",
+    r: "Con tarjeta a través de Stripe, o por Mercado Pago donde esté disponible. El cobro es único: no queda nada domiciliado.",
+  },
+  {
+    p: "¿Dónde quedan los módulos que compre?",
+    r: "En su cuenta. Entrando con el mismo correo los tiene disponibles desde cualquier dispositivo, sin límite de tiempo.",
+  },
+];
 
 export const Educacion = () => {
-  const taxonomy = useTaxonomy();
-  // Filtrado en el servidor: la sección cruza los seis formatos, así que traerse el
-  // sitio entero para quedarse con una parte sería el camino largo.
-  const { items: piezas, status, error } = usePieces({ educational: true });
-
-  const tree = {
-    geoTop: taxonomy.geoTop,
-    regiones: taxonomy.regiones,
-    ancestros: taxonomy.ancestros,
-  };
-  const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
-    useContentFilter(piezas, tree);
+  const [estado, setEstado] = useState({ cargando: true, error: "", modulos: [] });
 
   useEffect(() => {
-    applyPageMeta({
-      title: `${TITULO} — ${BRAND.name}`,
-      description: `Contenido educativo de ${BRAND.name}: material para entender cómo funcionan la economía y las finanzas.`,
-    });
+    let vivo = true;
+    getCatalogo()
+      .then((datos) => {
+        if (vivo) setEstado({ cargando: false, error: "", modulos: datos.modulos });
+      })
+      .catch(() => {
+        if (vivo)
+          setEstado({
+            cargando: false,
+            error: "No se pudo cargar el catalogo. Inténtelo de nuevo.",
+            modulos: [],
+          });
+      });
+    return () => {
+      vivo = false;
+    };
   }, []);
 
-  const listingRef = useRef(null);
-  const { page, totalPages, visible, goTo, resetPage, from, to, total } = usePagedList(
-    results,
-    POR_PAGINA,
-    { scrollTo: listingRef }
-  );
-
-  // La página cuatro del resultado anterior no significa nada en el nuevo.
-  const handleSelection = useCallback(
-    (next) => {
-      setSelection(next);
-      resetPage();
-    },
-    [setSelection, resetPage]
-  );
-
-  const handleQuery = useCallback(
-    (next) => {
-      setQuery(next);
-      resetPage();
-    },
-    [setQuery, resetPage]
-  );
-
-  const cargando = useDelayedFlag(status === "loading");
+  const hayModulos = estado.modulos.length > 0;
 
   return (
-    <main className="se-blog se-articles" role="main">
-      <section className="se-section se-articles__hero" aria-label={TITULO}>
+    <main className="se-blog se-edu" role="main">
+      {/* La cabecera: dice a quién va dirigido y qué se obtiene, y entrega las tarjetas
+          dentro de la primera pantalla. El hero institucional que había antes empujaba
+          el catálogo entero por debajo del pliegue. */}
+      <section className="se-edu__portada">
         <div className="se-container">
-          <div className="se-articles__head">
-            <p className="se-articles__kicker">{TITULO}</p>
-            <h1 className="se-articles__title">Contenido educativo</h1>
-          </div>
-        </div>
+          <p className="se-edu__portada-kicker">Educación</p>
+          <h1 className="se-edu__portada-titulo">
+            Entienda la economía que ya está leyendo
+          </h1>
+          <p className="se-edu__portada-claim">
+            Módulos cortos, escritos por la misma redacción que firma los informes. Cada
+            uno arranca con una clase abierta para que sepa qué está comprando antes de
+            comprarlo.
+          </p>
 
+          <ul className="se-edu__promesas">
+            {PROMESAS.map(({ Icono, titulo, texto }) => (
+              <li key={titulo} className="se-edu__promesa">
+                <Icono className="se-edu__promesa-icono" />
+                <span>
+                  <strong>{titulo}</strong>
+                  {texto}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="se-section">
         <div className="se-container">
-          {status === "error" ? (
-            <ErrorState title="No se pudo cargar el contenido educativo" error={error} />
+          {estado.cargando ? <p className="se-edu__aviso">Cargando…</p> : null}
+
+          {estado.error ? (
+            <p className="se-edu__aviso" role="alert">
+              {estado.error}
+            </p>
           ) : null}
 
-          {cargando ? <LoadingState title="Cargando contenido educativo…" /> : null}
+          {!estado.cargando && !estado.error && !hayModulos ? (
+            <p className="se-edu__aviso">
+              Todavía no hay módulos publicados. Están en camino.
+            </p>
+          ) : null}
 
-          {status === "success" ? (
+          {hayModulos ? (
             <>
-              {/* Los filtros sólo significan algo una vez cargado el árbol de
-                  geografía, y sólo valen la pena cuando hay algo que acotar. */}
-              {taxonomy.ready && piezas.length ? (
-                <ContentExplorer
-                  pieces={piezas}
-                  temasDisponibles={taxonomy.topics.map((t) => t.name)}
-                  geoTop={taxonomy.geoTop}
-                  continentes={taxonomy.continentes}
-                  regiones={taxonomy.regiones}
-                  ancestros={taxonomy.ancestros}
-                  temas={temas}
-                  geos={geos}
-                  query={query}
-                  onChange={handleSelection}
-                  onQueryChange={handleQuery}
-                  total={results.length}
-                  scopeLabel="en contenido educativo"
-                />
-              ) : null}
-
-              <div className="se-listing" ref={listingRef}>
-                {visible.length ? (
-                  <EducativoGrid items={visible} />
-                ) : (
-                  <EmptyState
-                    title={isFiltered ? "Sin resultados" : "Todavía no hay contenido educativo"}
-                    description={
-                      isFiltered
-                        ? "Ninguna pieza educativa coincide con los filtros. Quite alguno para ampliar la búsqueda."
-                        : "Cuando la redacción marque la primera pieza como educativa, aparecerá aquí."
-                    }
-                  />
-                )}
-              </div>
-
-              <ListingPagination
-                page={page}
-                totalPages={totalPages}
-                from={from}
-                to={to}
-                total={total}
-                unit="piezas"
-                onPageChange={goTo}
-              />
+              <h2 className="se-edu__h2">
+                {estado.modulos.length === 1
+                  ? "Un módulo disponible"
+                  : `${estado.modulos.length} módulos disponibles`}
+              </h2>
+              <ul className="se-edu__grid">
+                {estado.modulos.map((modulo) => (
+                  <li key={modulo.slug}>
+                    <TarjetaDeModulo modulo={modulo} />
+                  </li>
+                ))}
+              </ul>
             </>
           ) : null}
         </div>
       </section>
+
+      {/* Cómo funciona y las dudas van **después** de las tarjetas, no antes: quien
+          llega al catálogo viene a ver los módulos, y hacerle leer una explicación
+          primero es cobrarle peaje. Quien siga bajando es porque le interesó alguno y
+          ahora sí tiene preguntas. */}
+      {hayModulos ? (
+        <section className="se-section se-edu__banda">
+          <div className="se-container">
+            <h2 className="se-edu__h2">Cómo funciona</h2>
+            <ol className="se-edu__pasos">
+              <li className="se-edu__paso">
+                <span className="se-edu__paso-num">1</span>
+                <span className="se-edu__paso-copy">
+                  <strong>Abra la primera clase</strong>
+                  Es gratuita y completa. Solo pide una cuenta con el correo verificado.
+                </span>
+              </li>
+              <li className="se-edu__paso">
+                <span className="se-edu__paso-num">2</span>
+                <span className="se-edu__paso-copy">
+                  <strong>Compre el módulo si le sirve</strong>
+                  Un solo pago con tarjeta o Mercado Pago. Se desbloquea entero al instante.
+                </span>
+              </li>
+              <li className="se-edu__paso">
+                <span className="se-edu__paso-num">3</span>
+                <span className="se-edu__paso-copy">
+                  <strong>Vaya a su ritmo</strong>
+                  El acceso no caduca y queda guardado en su cuenta.
+                </span>
+              </li>
+            </ol>
+
+            <h2 className="se-edu__h2 se-edu__h2--separado">Antes de comprar</h2>
+            <dl className="se-edu__dudas">
+              {DUDAS.map(({ p, r }) => (
+                <div key={p} className="se-edu__duda">
+                  <dt>{p}</dt>
+                  <dd>{r}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 };
+
+export default Educacion;

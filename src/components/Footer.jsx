@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
-import { IconInstagram, IconX } from "./icons/social";
+import { IconInstagram, IconTikTok, IconX } from "./icons/social";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import { subscribeToNewsletter } from "../services/newsletterService";
 const ICONO_RED = {
   instagram: IconInstagram,
   x: IconX,
+  tiktok: IconTikTok,
 };
 
 export const Footer = () => {
@@ -165,6 +166,13 @@ export const Footer = () => {
                 retirarlo sea tan facil como haberlo dado. */}
             <Link to="/cookies" className="se-footer__legal">
               Política de cookies
+            </Link>
+            {" · "}
+            {/* La puerta de entrada comercial. Va en el pie y no en el menu
+                principal a proposito: quien viene a leer no tiene por que
+                tropezarse con ella, y quien viene a comprar espacio la busca. */}
+            <Link to="/anunciate" className="se-footer__legal">
+              Anúnciate aquí
             </Link>
           </p>
 

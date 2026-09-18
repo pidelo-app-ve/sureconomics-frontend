@@ -44,9 +44,28 @@ const IconSend = () => (
   </svg>
 );
 
+/** Lo comprado. Una bolsa, que es lo que se reconoce sin leer la etiqueta. */
+const IconCompras = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path
+      d="M5 8h14l-1.1 11.2a1.6 1.6 0 0 1-1.6 1.4H7.7a1.6 1.6 0 0 1-1.6-1.4Z"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9 8V6.2a3 3 0 0 1 6 0V8"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const RAIL_NAV = [
   { to: "/cuenta", end: true, label: "Inicio", icon: IconGrid },
   { to: "/cuenta/perfil", label: "Mi perfil", icon: IconUser },
+  { to: "/cuenta/lo-mio", label: "Lo mío", icon: IconCompras },
   { to: "/cuenta/marcadores", label: "Marcadores", icon: IconBookmark },
   { to: "/cuenta/envios", label: "Envíos", icon: IconSend },
 ];
@@ -97,24 +116,16 @@ const DashboardShell = () => {
       >
         <div className="se-reader-dash__rail-brand">
           <Link to="/" className="se-reader-dash__rail-logo" onClick={handleCloseRail}>
-            <span className="se-reader-dash__rail-logo-stack" aria-hidden="true">
-              <img
-                className="se-reader-dash__rail-logo-iso"
-                src={BRAND_PUBLIC_LOGO.dark.isotypeWithBox}
-                alt=""
-                width={40}
-                height={40}
-                decoding="async"
-              />
-              <img
-                className="se-reader-dash__rail-logo-word"
-                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
-                alt=""
-                width={200}
-                height={48}
-                decoding="async"
-              />
-            </span>
+            {/* Solo el wordmark: ya lleva el isotipo dentro. Se pintaban los dos, uno
+                encima del otro, y el nombre de la marca quedaba ilegible. */}
+            <img
+              className="se-reader-dash__rail-logo-word"
+              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+              alt=""
+              width={200}
+              height={48}
+              decoding="async"
+            />
             <span className="se-sr-only">SurEconomics — inicio</span>
           </Link>
           <span className="se-reader-dash__rail-tag">Lector</span>

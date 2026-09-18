@@ -19,15 +19,11 @@ import {
     ACCEPTED_DOCUMENT_MIME,
     ACCEPTED_IMAGE_MIME,
     ACCEPTED_VIDEO_MIME,
-    MAX_VIDEO_BYTES,
-    estadoDelVideo,
-    pedirSubidaDeVideo,
-    registrarVideoDeStream,
-    subirVideoAStream,
     uploadAdminMediaAudio,
     uploadAdminMediaDocument,
     uploadAdminMediaImage,
 } from "../../services/adminMediaService";
+import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { AxisPicker } from "../../components/admin/AxisPicker";
@@ -124,6 +120,7 @@ const emptyForm = () => ({
     // Sin marcar por omision: una pieza nueva no entra en la seccion educativa sin
     // que alguien lo decida.
     is_educational: false,
+    sin_publicidad: false,
 });
 
 const idsFromRelation = (val) => {
@@ -183,6 +180,7 @@ const postToForm = (post) => {
         byline_photo_asset_id: post.byline_photo_asset_id ?? null,
         document_open_access: Boolean(post.document_open_access),
         is_educational: Boolean(post.is_educational),
+        sin_publicidad: Boolean(post.sin_publicidad),
     };
 };
 
@@ -235,6 +233,7 @@ const formToPayload = (form) => {
     // condicion mas que puede desincronizarse del interruptor. Se manda lo que tiene
     // el formulario, que es lo que la pieza traia si no se toco.
     payload.is_educational = Boolean(form.is_educational);
+    payload.sin_publicidad = Boolean(form.sin_publicidad);
     payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
 
     Object.keys(payload).forEach((k) => {
@@ -371,44 +370,21 @@ export const AdminPostEditor = () => {
      * de callarlo.
      */
     const subirVideo = async (file, { onProgress, onAviso } = {}) => {
-        if (file.size > MAX_VIDEO_BYTES) {
-            const mb = Math.round(MAX_VIDEO_BYTES / 1048576);
-            throw new Error(
-                `El video pesa ${Math.round(file.size / 1048576)} MB y el tope es ${mb}. ` +
-                "Comprimalo o recorte la entrevista."
-            );
-        }
-
-        onAviso?.("Pidiendo permiso a Cloudflare…");
-        // Con la clave: si el editor pulsa dos veces, la segunda recibe la direccion de
-        // la primera en vez de crear un segundo hueco de video que se factura solo.
-        const permiso = await pedirSubidaDeVideo(claveDeVideo());
-
-        onAviso?.("Subiendo. No cierre esta pagina.");
-        await subirVideoAStream(file, permiso.upload_url, { onProgress });
-
-        onAviso?.("Subido. Anotandolo en la biblioteca…");
-        const fila = await registrarVideoDeStream(permiso.uid, {
-            nombre: file.name,
+        const fila = await subirVideoDeStream(file, {
+            // Con la clave: si el editor pulsa dos veces, la segunda recibe la direccion
+            // de la primera en vez de crear un segundo hueco de video que se factura solo.
             clave: claveDeVideo(),
-        });
-        // Cuajo: la proxima subida es otro video, no un reintento de este.
-        renovarClaveDeVideo();
-
-        try {
-            const est = await estadoDelVideo(permiso.uid);
-            if (!est?.listo) {
+            onProgress,
+            onAviso,
+            onProcesando: () =>
                 toastSuccess(
                     "Video subido. Cloudflare esta procesandolo; en unos minutos se vera " +
                     "en la pieza.",
                     "Video"
-                );
-            }
-        } catch {
-            // Que la consulta de estado falle no invalida la subida: el video esta
-            // arriba y la fila anotada. Callar aqui es lo correcto; lanzar haria
-            // pensar que se perdio.
-        }
+                ),
+        });
+        // Cuajo: la proxima subida es otro video, no un reintento de este.
+        renovarClaveDeVideo();
         return fila;
     };
 
@@ -793,6 +769,38 @@ export const AdminPostEditor = () => {
                                 </span>
                             </label>
                         ) : null}
+
+                        {/* Sin publicidad. Siempre visible y no detras de una condicion
+                            como la de educativo: los casos que la piden -- un obituario,
+                            una investigacion que toca a un anunciante, la cobertura de
+                            una tragedia -- son pocos al ano y siempre urgentes, y en esos
+                            momentos nadie deberia tener que averiguar donde esta. */}
+                        <label
+                            className="se-form-field se-acceso"
+                            htmlFor="post-sin-publicidad"
+                        >
+                            <span className="se-acceso__fila">
+                                <input
+                                    id="post-sin-publicidad"
+                                    type="checkbox"
+                                    checked={Boolean(form.sin_publicidad)}
+                                    onChange={(e) =>
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            sin_publicidad: e.target.checked,
+                                        }))
+                                    }
+                                />
+                                <span className="se-form-label se-acceso__titulo">
+                                    Esta pieza no lleva publicidad
+                                </span>
+                            </span>
+                            <span className="se-admin-meta-hint">
+                                Marcado, la página no pide ningún espacio publicitario: ni
+                                el rail, ni la tarjeta del cuerpo, ni el cintillo. No se
+                                ocultan después — no se piden.
+                            </span>
+                        </label>
                     </div>
 
                     <div className="se-editor-group">

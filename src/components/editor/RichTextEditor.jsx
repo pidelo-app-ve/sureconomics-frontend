@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -43,11 +43,26 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
   const [, forceRerender] = useState(0);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 
+  /**
+   * El texto del marcador, en una referencia y no capturado en la configuración.
+   *
+   * `useEditor` monta las extensiones **una sola vez**, así que un `placeholder` que
+   * dependa del estado de quien llama se quedaba congelado en el primero: el editor de
+   * piezas lo ata al formato, y cambiar de editorial a artículo dejaba puesto el texto
+   * del editorial. Se veía como una errata del sitio y era un prop muerto.
+   *
+   * La extensión admite una función, y una función que lee esta referencia ve siempre
+   * el valor de ahora. Remontar el editor con una `key` también lo arreglaría, y sería
+   * peor: se lleva por delante el cursor y el historial de deshacer de quien escribe.
+   */
+  const textoDelMarcador = useRef(placeholder);
+  textoDelMarcador.current = placeholder || "Escriba el contenido…";
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false, autolink: true }),
-      Placeholder.configure({ placeholder: placeholder || "Escriba el contenido…" }),
+      Placeholder.configure({ placeholder: () => textoDelMarcador.current }),
     ],
     content: value || "",
     editable: !disabled,
@@ -63,6 +78,14 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
     if (!editor) return;
     editor.setEditable(!disabled);
   }, [editor, disabled]);
+
+  // Las decoraciones de ProseMirror -- donde vive el marcador -- solo se recalculan
+  // cuando hay una transacción. Una vacía basta para que el texto nuevo se pinte ya y
+  // no en la siguiente pulsación.
+  useEffect(() => {
+    if (!editor) return;
+    editor.view.dispatch(editor.state.tr);
+  }, [editor, placeholder]);
 
   // Keep the editor in sync when `value` changes from outside (e.g. loading
   // an existing post) without fighting the user's own typing.

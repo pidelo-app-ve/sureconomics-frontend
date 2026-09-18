@@ -10,10 +10,23 @@ body,
   box-sizing: border-box;
 }
 
+/* El fondo y el color del texto del sitio.
+ *
+ * Eran `#0b0d10` sobre `#e9eef5` -- el tema oscuro que trae la plantilla de Vite y que
+ * nadie quito. El sitio es claro de arriba abajo, asi que cada pagina tenia que tapar
+ * ese negro con el suyo, y en cuanto una no llegaba hasta abajo -- o dejaba un hueco
+ * entre la cabecera y su contenido -- asomaba una franja negra. Es lo que se veia bajo
+ * el encabezado en el registro.
+ *
+ * El color del texto importa igual: cualquier texto que no declare el suyo heredaba un
+ * blanco azulado, invisible sobre papel. Un descuido asi no da error, solo desaparece.
+ *
+ * Las zonas oscuras -- la cabecera, la barra del area de lector, la portada de
+ * Educacion -- pintan su propio fondo y su propia tinta, asi que no dependen de esto. */
 body {
   margin: 0;
-  background: #0b0d10;
-  color: #e9eef5;
+  background: var(--color-paper, #ffffff);
+  color: var(--color-ink, #1a1a1a);
   overflow-x: hidden;
   font-family: var(--se-font-ui);
 }

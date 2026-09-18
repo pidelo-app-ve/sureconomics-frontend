@@ -20,6 +20,12 @@ import { usePagedList } from "../hooks/usePagedList";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import { ESPACIOS } from "../services/publicidadService";
+import {
+  ESPACIOS_DE_SITIO,
+  EspacioPublicitario,
+  useEspacios,
+} from "../components/publicidad";
 
 /**
  * Listing page for one content format.
@@ -102,6 +108,15 @@ export const FormatListing = ({ formatoApi }) => {
   // Only announced when the wait is long enough to be worth announcing.
   const cargando = useDelayedFlag(status === "loading");
 
+  // El patrocinio de tema/pais (formato C) solo tiene sentido con el filtro puesto:
+  // lo que se vende es aparecer delante de quien ya dijo que le interesa ese tema.
+  // Por eso los temas y paises del contexto salen de la seleccion y no del listado.
+  useEspacios({
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.LISTADO_PATROCINIO, ESPACIOS.LISTADO_NATIVO],
+    contexto: { seccion: formatoApi, formato: formatoApi, tema: temas, pais: geos },
+    listo: status === "success",
+  });
+
   return (
     <section className="se-section se-articles__hero" aria-label={titulo}>
       <div className="se-container">
@@ -140,6 +155,12 @@ export const FormatListing = ({ formatoApi }) => {
               />
             ) : null}
 
+            {/* Formato C: la franja de patrocinio, en la cabecera del listado ya
+                filtrado y **encima** de las piezas, que es donde la maqueta la
+                pone. Es la unica pieza publicitaria que va antes del contenido,
+                y se lo gana porque es una linea de texto con un logotipo. */}
+            <EspacioPublicitario espacio={ESPACIOS.LISTADO_PATROCINIO} />
+
             <div className="se-listing" ref={listingRef}>
               {visible.length ? (
                 LAYOUTS[formatoApi](visible)
@@ -154,6 +175,13 @@ export const FormatListing = ({ formatoApi }) => {
                 />
               )}
             </div>
+
+            {/* Formato A: la tarjeta nativa, entre el listado y la paginacion.
+                La maqueta la intercala cada seis u ocho piezas; aqui va en una
+                fila propia porque el listado lo pinta cada formato a su manera
+                -- seis rejillas distintas -- y colarla dentro obligaria a tocar
+                las seis para que ninguna se descuadrara. */}
+            <EspacioPublicitario espacio={ESPACIOS.LISTADO_NATIVO} variante="lista" />
 
             {truncated ? (
               <p className="se-text-body se-listing__note">

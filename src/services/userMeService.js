@@ -80,3 +80,27 @@ export const listMySubmissionNotes = async (submissionId, params = {}) =>
     method: "GET",
     query: { page: params.page ?? 1, limit: params.limit ?? 20 },
   });
+
+/** Los módulos de Educación que esta persona compró, con el recibo de cada pago. */
+export const getMisCompras = async () => {
+  const datos = await userRequest("/me/compras");
+  return {
+    modulos: Array.isArray(datos?.modulos) ? datos.modulos : [],
+    pendientes: Array.isArray(datos?.pendientes) ? datos.pendientes : [],
+    gastadoCentavos: Number(datos?.gastado_centavos) || 0,
+    moneda: datos?.moneda || "USD",
+  };
+};
+
+/**
+ * Sube el retrato del lector y lo deja adjunto.
+ *
+ * El servidor lo asocia en la misma petición: devolver solo el id y esperar a un
+ * segundo paso deja una ventana en la que la imagen existe y no es de nadie.
+ */
+export const subirMiFoto = async (file) => {
+  const cuerpo = new FormData();
+  cuerpo.append("file", file);
+  const datos = await userRequest("/me/foto", { method: "POST", body: cuerpo });
+  return { fotoId: datos?.photo_id ?? null, fotoUrl: datos?.photo_url ?? null };
+};

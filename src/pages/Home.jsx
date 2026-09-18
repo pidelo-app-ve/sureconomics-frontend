@@ -19,6 +19,12 @@ import { FORMATO_META } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
+import { ESPACIOS } from "../services/publicidadService";
+import {
+  ESPACIOS_DE_SITIO,
+  FilaDeAnuncio,
+  useEspacios,
+} from "../components/publicidad";
 
 /**
  * Homepage.
@@ -56,9 +62,21 @@ const PREVIEW = {
   podcast: 3,
 };
 
+/* Las dos rejillas de tarjetas de la portada llevan dentro su tarjeta nativa. Los
+   demas formatos no: editorial es una lista, y entrevista, informe y podcast tienen
+   retícula propia -- meter ahi una tarjeta de anuncio obligaria a un pintor por
+   formato para que no desentonara, y la portada acabaria siendo mas anuncio que
+   portada. Con dos basta. */
 const LAYOUTS = {
-  noticia: (items) => <NewsList items={items} />,
-  articulo: (items) => <ArticleCardGrid items={items} />,
+  noticia: (items) => (
+    <NewsList items={items} espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO} />
+  ),
+  articulo: (items) => (
+    <ArticleCardGrid
+      items={items}
+      espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO_ARTICULOS}
+    />
+  ),
   editorial: (items) => <EditorialList items={items} />,
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
@@ -115,6 +133,25 @@ export const Home = () => {
   const nombrePlural = (formatoApi) =>
     taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural ??
     FORMATO_META[formatoApi].plural;
+
+  // Los huecos de la portada, declarados de una vez: el sorteo necesita ver la
+  // pagina entera para no repetir anunciante entre el banner y la tarjeta.
+  //
+  // `listo` espera a que haya contenido: una portada que todavia esta cargando no
+  // es una pagina vista, y contarla seria facturar una impresion que nadie miro.
+  useEspacios({
+    espacios: [
+      ...ESPACIOS_DE_SITIO,
+      ESPACIOS.PORTADA_BANNER,
+      ESPACIOS.PORTADA_NATIVO,
+      ESPACIOS.PORTADA_NATIVO_ARTICULOS,
+      // El bloque del boletin lo pinta esta misma vista, asi que su hueco se pide
+      // aqui: es la pagina la que declara, no el componente.
+      ESPACIOS.BOLETIN,
+    ],
+    contexto: { seccion: "portada" },
+    listo: status === "success",
+  });
 
   // La editorial va detras de noticias. Si el filtro dejo la portada sin bloque de
   // noticias, va delante de todo: no puede caerse de la pagina por un filtro.
@@ -190,7 +227,7 @@ export const Home = () => {
 
       {hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 
-      {blocks.map(({ formatoApi, items, total }) => (
+      {blocks.map(({ formatoApi, items, total }, i) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={nombrePlural(formatoApi)}
@@ -199,7 +236,15 @@ export const Home = () => {
           >
             {LAYOUTS[formatoApi](items)}
           </FormatSection>
+          {/* La franja nativa ancha que iba aqui se movio **dentro** de la rejilla
+              -- ver LAYOUTS. Iba detras de las noticias, a lo ancho del contenedor,
+              y el cliente pidio lo que decia la maqueta: misma retícula que una
+              pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
+              tarjeta en la rejilla ocupa el hueco que ya habia. */}
           {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
+          {i === 1 ? (
+            <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
+          ) : null}
         </Fragment>
       ))}
 

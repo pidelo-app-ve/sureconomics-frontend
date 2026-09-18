@@ -9,7 +9,12 @@
  * cuando la API no responde, porque estas rutas antes eran archivos estáticos que
  * no podían fallar.
  */
-import handler, { descripcionDe, esNuestroShell, inyectar } from "./pieza.js";
+import handler, {
+  descripcionDe,
+  esNuestroShell,
+  imagenParaCompartir,
+  inyectar,
+} from "./pieza.js";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -193,6 +198,44 @@ const sucio = inyectar(SHELL, {
 });
 check("no se puede cerrar el title desde el contenido", !sucio.includes("<script>alert(1)"));
 check("no se puede escapar de un atributo", !sucio.includes('onload="alert(2)"'));
+
+// --- 6. La imagen: absoluta siempre ---
+//
+// El fallo que tuvo esto en produccion. La API devuelve `/media/image/...` para lo
+// que vive en R2, y una `og:image` relativa no la resuelve nadie: WhatsApp, X,
+// Facebook y Telegram la descartan. La etiqueta estaba, se veia bien, y no valia
+// nada -- que es el modo exacto en que esto falla sin que nadie lo note.
+check(
+  "una ruta de /media sale absoluta",
+  imagenParaCompartir("/media/image/2026/09/foto.jpg").url ===
+    "https://www.sureconomics.com/media/image/2026/09/foto.jpg"
+);
+check(
+  "una direccion completa se respeta",
+  imagenParaCompartir("https://otro.example/foto.jpg").url === "https://otro.example/foto.jpg"
+);
+check("sin imagen, nada", imagenParaCompartir(null) === null);
+
+// --- 7. Las medidas solo se declaran cuando se conocen ---
+//
+// Se anunciaba 1200x630 sobre fotografias de 679x452. Quien confia en esos numeros
+// recorta a un tamano que no existe; quien los comprueba concluye que las etiquetas
+// no son de fiar.
+const sinMedir = inyectar(SHELL, {
+  titulo: "Una pieza",
+  url: "https://www.sureconomics.com/noticias/x",
+  imagen: imagenParaCompartir("/media/image/2026/09/foto.jpg"),
+});
+check("una imagen servida tal cual no declara tamano", !sinMedir.includes("og:image:width"));
+check("pero si sale en og:image", sinMedir.includes('property="og:image"'));
+
+const medida = inyectar(SHELL, {
+  titulo: "Una pieza",
+  url: "https://www.sureconomics.com/noticias/x",
+  imagen: imagenParaCompartir("https://res.cloudinary.com/x/image/upload/v1/foto.jpg"),
+});
+check("una recortada por nosotros si lo declara", medida.includes('content="1200"'));
+check("y pide tarjeta grande", medida.includes("summary_large_image"));
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

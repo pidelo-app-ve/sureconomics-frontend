@@ -10,6 +10,10 @@ import { Pieza } from "./pages/Pieza";
 import { PiezaRedirect } from "./pages/PiezaRedirect";
 import { Explorar } from "./pages/Explorar";
 import { Educacion } from "./pages/Educacion";
+import { Anunciate } from "./pages/Anunciate";
+import { EducacionModulo } from "./pages/EducacionModulo";
+import { EducacionLeccion } from "./pages/EducacionLeccion";
+import { EducacionPagoVuelta } from "./pages/EducacionPagoVuelta";
 import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
 import { Cookies } from "./pages/Cookies";
@@ -22,6 +26,8 @@ import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
 import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
 import { AdminEquipo } from "./pages/admin/AdminEquipo";
 import { AdminRedes } from "./pages/admin/AdminRedes";
+import { AdminEducacion } from "./pages/admin/AdminEducacion";
+import { AdminPublicidad } from "./pages/admin/AdminPublicidad";
 import { AdminAnalitica } from "./pages/admin/AdminAnalitica";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
@@ -40,6 +46,7 @@ import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
 import { CuentaDashboardLayout } from "./pages/cuenta/CuentaDashboardLayout";
 import { CuentaDashboardHome } from "./pages/cuenta/CuentaDashboardHome";
+import { CuentaLoMio } from "./pages/cuenta/CuentaLoMio";
 import { CuentaPerfil } from "./pages/cuenta/CuentaPerfil";
 import { CuentaMarcadores } from "./pages/cuenta/CuentaMarcadores";
 import { CuentaEnviosList } from "./pages/cuenta/CuentaEnviosList";
@@ -65,6 +72,14 @@ export const router = createBrowserRouter([
             // Cruza los seis formatos, como /explorar, pero por un valor de la pieza
             // en vez de por los filtros. De ahi su propia ruta y no un parametro mas.
             { path: "educacion", element: <Educacion /> },
+            // La pagina de venta del inventario. Publica y sin publicidad propia:
+            // no declara ningun espacio, asi que no pide ninguno.
+            { path: "anunciate", element: <Anunciate /> },
+            // La vuelta del pago va ANTES que "/educacion/:slug": si fuera despues, la
+            // ruta comodin se tragaria "pago" como si fuera el slug de un modulo.
+            { path: "educacion/pago/volver", element: <EducacionPagoVuelta /> },
+            { path: "educacion/:slug", element: <EducacionModulo /> },
+            { path: "educacion/:slug/:leccionSlug", element: <EducacionLeccion /> },
             // Everything published before the redesign lives at "articulo/<slug>".
             // Those addresses are indexed and shared, so they redirect to wherever
             // the piece sits now instead of 404ing. Same for "categoria/<slug>":
@@ -97,6 +112,7 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <CuentaDashboardHome /> },
             { path: "perfil", element: <CuentaPerfil /> },
+            { path: "lo-mio", element: <CuentaLoMio /> },
             { path: "marcadores", element: <CuentaMarcadores /> },
             { path: "envios", element: <CuentaEnviosList /> },
             { path: "envios/nuevo", element: <CuentaEnviosNuevo /> },
@@ -132,6 +148,8 @@ export const router = createBrowserRouter([
                     // Las publicaciones de redes que se destacan al pie de todas
                     // las vistas. Curadas a mano: ver `redes_service.py`.
                     { path: "redes", element: <AdminRedes /> },
+                    { path: "educacion", element: <AdminEducacion /> },
+                    { path: "publicidad", element: <AdminPublicidad /> },
                     { path: "analitica", element: <AdminAnalitica /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "boletin", element: <AdminNewsletterList /> },

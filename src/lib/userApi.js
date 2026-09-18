@@ -248,7 +248,7 @@ export const userRequest = async (path, options = {}) => {
  */
 export const descargarArchivoDeUsuario = async (
   path,
-  { nombreSugerido, exigirSesion = true } = {},
+  { nombreSugerido, exigirSesion = true, comoBlob = false } = {},
 ) => {
   if (!API_BASE) {
     throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
@@ -296,6 +296,13 @@ export const descargarArchivoDeUsuario = async (
   }
 
   const blob = await res.blob();
+
+  // `comoBlob` devuelve los bytes en vez de provocar la descarga. Lo pide el audio de
+  // una leccion de pago: un `<audio src>` no manda la cabecera de sesion, asi que la
+  // unica forma de reproducir un archivo cerrado es traerlo con `fetch` y darle al
+  // elemento un blob ya descargado.
+  if (comoBlob) return blob;
+
   // El nombre lo pone el servidor en `Content-Disposition`; si no llega, el sugerido.
   const cabecera = res.headers.get("Content-Disposition") || "";
   const enCabecera = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cabecera);

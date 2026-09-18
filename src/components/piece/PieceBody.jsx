@@ -15,6 +15,13 @@ import { imagenAncho } from "../../lib/pieza";
  * trust model has applied to `content` since that editor existed: the only way in
  * is an authenticated newsroom account.
  */
+/**
+ * Body copy, as the writer formatted it.
+ *
+ * Rendered as markup because that is what the rich editor produces, and the same
+ * trust model has applied to `content` since that editor existed: the only way in
+ * is an authenticated newsroom account.
+ */
 const Cuerpo = ({ html }) => {
   if (!html) return null;
   return <div className="se-piece__body" dangerouslySetInnerHTML={{ __html: html }} />;

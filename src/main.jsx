@@ -9,6 +9,7 @@ import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StorePr
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { AuthProvider } from "./context/AuthContext";
 import { UserAuthProvider } from "./context/UserAuthContext";
+import { ProveedorDeMarcadores } from "./context/MarcadoresContext";
 
 const Main = () => {
     return (
@@ -18,7 +19,9 @@ const Main = () => {
               <StoreProvider> 
                   <AuthProvider>
                     <UserAuthProvider>
+                        <ProveedorDeMarcadores>
                       <RouterProvider router={router} />
+                    </ProveedorDeMarcadores>
                     </UserAuthProvider>
                   </AuthProvider>
               </StoreProvider>

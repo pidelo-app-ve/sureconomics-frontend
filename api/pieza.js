@@ -77,17 +77,31 @@ const textoLlano = (html, maximo = 200) => {
  * crawler a two-megabyte original it will refuse to fetch. A photograph hosted
  * anywhere else goes out untouched.
  */
-const imagenParaCompartir = (url) => {
+export const imagenParaCompartir = (url) => {
   if (!url) return null;
+
+  // Absolute, always. The API now answers `/media/image/...` for anything stored in
+  // R2, and a relative `og:image` is simply dropped: WhatsApp, X, Facebook and
+  // Telegram all require a full URL and none of them resolve one against the page.
+  // This was the bug -- the tag was there, correct-looking, and worth nothing.
+  const absoluta = url.startsWith("/") ? `${SITIO}${url}` : url;
+
   const marca = "/image/upload/";
-  const corte = url.indexOf(marca);
-  if (!url.includes("res.cloudinary.com") || corte === -1) return url;
-  const resto = url.slice(corte + marca.length);
-  if (!/^v\d+\//.test(resto)) return url;
+  const corte = absoluta.indexOf(marca);
+  if (!absoluta.includes("res.cloudinary.com") || corte === -1) {
+    // Served as it is, so its real size is unknown here. `medido: false` is what
+    // stops the tags from claiming 1200x630 over a photograph that is not.
+    return { url: absoluta, medido: false };
+  }
+  const resto = absoluta.slice(corte + marca.length);
+  if (!/^v\d+\//.test(resto)) return { url: absoluta, medido: false };
   // `f_jpg` and not `f_auto`: the only consumer of this URL is a crawler, and
   // `f_auto` makes the format depend on who asks. It happens to answer JPEG to
   // WhatsApp today, which is one more thing that could quietly change.
-  return `${url.slice(0, corte + marca.length)}f_jpg,q_auto,c_fill,w_1200,h_630/${resto}`;
+  return {
+    url: `${absoluta.slice(0, corte + marca.length)}f_jpg,q_auto,c_fill,w_1200,h_630/${resto}`,
+    medido: true,
+  };
 };
 
 /**
@@ -117,16 +131,23 @@ const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion }) => 
     filas.push(`<meta name="description" content="${escapar(descripcion)}" />`);
     filas.push(`<meta property="og:description" content="${escapar(descripcion)}" />`);
   }
-  if (imagen) {
-    filas.push(`<meta property="og:image" content="${escapar(imagen)}" />`);
-    // Some clients read only `secure_url`, and a couple want the type spelled out
-    // rather than sniffed.
-    filas.push(`<meta property="og:image:secure_url" content="${escapar(imagen)}" />`);
-    filas.push(`<meta property="og:image:type" content="image/jpeg" />`);
-    filas.push(`<meta property="og:image:width" content="1200" />`);
-    filas.push(`<meta property="og:image:height" content="630" />`);
+  if (imagen?.url) {
+    filas.push(`<meta property="og:image" content="${escapar(imagen.url)}" />`);
+    // Some clients read only `secure_url`.
+    filas.push(`<meta property="og:image:secure_url" content="${escapar(imagen.url)}" />`);
+    // Size and type only when this function produced the file and therefore knows
+    // them. They used to be printed always, and were wrong for every piece whose
+    // image is served straight from storage: 1200x630 declared over a 679x452
+    // photograph. A crawler that trusts those numbers crops to a size that does
+    // not exist; one that checks decides the tags are unreliable. Left out, every
+    // client measures the file itself, which is right by definition.
+    if (imagen.medido) {
+      filas.push(`<meta property="og:image:type" content="image/jpeg" />`);
+      filas.push(`<meta property="og:image:width" content="1200" />`);
+      filas.push(`<meta property="og:image:height" content="630" />`);
+    }
     filas.push(`<meta property="og:image:alt" content="${escapar(titulo)}" />`);
-    filas.push(`<meta name="twitter:image" content="${escapar(imagen)}" />`);
+    filas.push(`<meta name="twitter:image" content="${escapar(imagen.url)}" />`);
     // Large card only when there is a photograph to fill it; asking for one
     // without an image gets a broken-looking empty card.
     filas.push(`<meta name="twitter:card" content="summary_large_image" />`);

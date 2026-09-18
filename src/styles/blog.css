@@ -3738,9 +3738,32 @@
 
 @media (min-width: 980px) {
   .se-contact__grid {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    /* 1.1 contra 0.9 dejaba las dos columnas casi iguales -- 600 y 491 px -- y eso
+       era defendible cuando al lado habia tres bloques de datos. Ahora hay dos
+       tarjetas cortas, y dos columnas del mismo peso hacen que el formulario, que es
+       a lo que se viene, no se lea como lo principal. */
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     align-items: start;
   }
+}
+
+/* --- Contacto: el aire de arriba ----------------------------------------- */
+/*
+   El hero cerraba con 100 px y la seccion abria con 96: casi 200 px de nada entre el
+   lead y el formulario, con la pagina pidiendo desplazarse para ver a que ha venido.
+   Y el titular a 104 px es escala de portada, no de una pagina de una sola palabra. */
+
+.se-contact__hero {
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+.se-contact .se-section {
+  padding-top: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+.se-contact .se-heading-hero {
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+}
+.se-contact .se-institutional-hero .se-text-lead {
+  max-width: 46ch;
 }
 
 .se-contact__panel {
@@ -3795,10 +3818,102 @@
 .se-contact__module {
   border: 1px solid rgba(var(--se-tinte), 0.12);
   border-radius: 18px;
-  background:
-    #ffffff;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  background: #ffffff;
+  /* Era `0 18px 44px rgba(0,0,0,.55)`, de cuando la pagina era oscura. Sobre blanco
+     esa opacidad no es profundidad, es un manchon gris debajo de la tarjeta. */
+  box-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.3);
   padding: clamp(1rem, 2.2vw, 1.25rem);
+}
+
+/* --- Contacto: la columna de al lado ------------------------------------- */
+
+.se-contact__tarjeta {
+  display: grid;
+  gap: 0.6rem;
+  padding: clamp(1.15rem, 2.4vw, 1.5rem);
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+}
+/* La primera lleva el acento: es la respuesta a "y si no quiero el formulario". */
+.se-contact__tarjeta:first-child {
+  border-left: 3px solid var(--color-accent);
+}
+.se-contact__tarjeta-titulo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-contact__tarjeta-texto {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-contact__correo {
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.se-contact__correo:hover { text-decoration: underline; }
+
+/* Los dos caminos. Toda la fila es el enlace y no solo el titulo: un destino de
+   44 px de alto se acierta con el pulgar; una palabra subrayada, no. */
+.se-contact__camino {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.se-contact__camino:hover {
+  border-color: var(--color-accent);
+  background: rgba(185, 83, 42, 0.04);
+}
+.se-contact__camino:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.se-contact__camino-titulo {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-contact__camino-texto {
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+
+/* --- El aviso de un campo ------------------------------------------------ */
+
+.se-form-error {
+  margin: 0.35rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #a33417;
+}
+/* El borde rojo acompana al texto, nunca lo sustituye: el color solo no llega a
+   quien no lo distingue. */
+.se-form-field--mal .se-form-control {
+  border-color: #c0522f;
+}
+.se-form-field--mal .se-form-control:focus-visible {
+  outline-color: #c0522f;
 }
 
 .se-contact__module .se-heading-section {

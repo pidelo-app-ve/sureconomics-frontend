@@ -309,19 +309,15 @@ export const CONTACT = {
   // dia vuelven a separarse, cada uno ya tiene su sitio.
   primaryEmail: "info@sureconomics.com",
   privacyEmail: "info@sureconomics.com",
-  // Estos si son personas, no el buzon del sitio: el correo directo de cada quien
-  // no cambia con lo de arriba.
+  // Fuera de la pagina de Contacto (a pedido del cliente, 18/09/2026): ahi el unico
+  // contacto que se publica es el buzon del sitio. Siguen aqui porque Consultoria los
+  // usa, y esa pagina no entraba en el encargo.
   leadershipEmails: [
     { name: "Juan Francisco Paz", email: "jpaz@rendigroup.com" },
     { name: "Mafe Yáñez", email: "myanez@rendigroup.com" },
   ],
-  offices: [
-    { city: "Miami", address: "Dirección próximamente" },
-    { city: "Caracas", address: "Dirección próximamente" },
-    { city: "Bogotá", address: "Dirección próximamente" },
-    { city: "Asunción", address: "Dirección próximamente" },
-    { city: "Buenos Aires", address: "Dirección próximamente" },
-  ],
+  // Las oficinas se quitaron enteras: las cinco decian "Direccion proximamente", que
+  // es media pantalla para no decir nada. Vuelven cuando haya direcciones.
 };
 
 /**

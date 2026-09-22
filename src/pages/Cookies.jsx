@@ -22,7 +22,7 @@ import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from ".
  * quien lee: no se cruza con la cuenta, no sale de aqui y se puede borrar de un clic.
  */
 
-const ACTUALIZADO = "15 de septiembre de 2026";
+const ACTUALIZADO = "22 de septiembre de 2026";
 
 /** Las cinco que el sitio puede llegar a poner. Ni una mas: esta tabla se contrasta con el codigo. */
 const COOKIES = [
@@ -211,10 +211,10 @@ export const Cookies = () => {
           <p className="se-legal__kicker">Aviso legal</p>
           <h1 className="se-legal__titulo">Política de cookies</h1>
           <p className="se-legal__entrada">
-            {BRAND.name} mide cuánta gente lo lee con cuatro cookies propias, y con nada
-            más. No hay publicidad, no hay redes sociales incrustadas y no hay ninguna
-            empresa de terceros recibiendo su navegación. Esta página explica qué guarda
-            cada cookie, durante cuánto tiempo y cómo retirar su permiso en un clic.
+            {BRAND.name} mide cuánta gente lo lee con cuatro cookies propias, y con
+            nada más: ninguna empresa de terceros mide su lectura ni recibe un perfil
+            suyo. Esta página explica qué guarda cada cookie, durante cuánto tiempo y
+            cómo retirar su permiso en un clic.
           </p>
           <p className="se-legal__fecha">Última actualización: {ACTUALIZADO}</p>
           {!MEDICION_HABILITADA ? (
@@ -350,8 +350,9 @@ export const Cookies = () => {
             <strong>estos datos no son anónimos, son seudónimos</strong>. La diferencia
             importa. Un dato anónimo no permite volver a reconocer a nadie; el identificador
             que guardamos sí permite reconocer <em>al mismo navegador</em> cuando vuelve, y
-            por eso sigue siendo un dato personal a efectos del RGPD y de la LGPD, aunque no
-            lleve su nombre. Cualquier sitio que le diga que su analítica es «totalmente
+            por eso sigue siendo un dato personal a efectos de la Ley de Protección de
+            Datos Personales de Venezuela —y, para quien nos lee desde la Unión Europea o
+            Brasil, también del RGPD y de la LGPD—, aunque no lleve su nombre. Cualquier sitio que le diga que su analítica es «totalmente
             anónima» mientras le pone un identificador de dos años le está diciendo algo que
             no es cierto.
           </p>
@@ -406,10 +407,15 @@ export const Cookies = () => {
             en ese momento.
           </p>
           <p>
-            Le asisten además los derechos de acceso, rectificación, supresión, oposición,
-            limitación y portabilidad que reconocen el Reglamento (UE) 2016/679 (RGPD), la
-            Ley Orgánica 3/2018 (LOPDGDD) y la Lei 13.709/2018 (LGPD), según la norma que le
-            resulte aplicable. Hay un detalle honesto que conviene explicar: como no
+            Le asisten los derechos de acceso, rectificación, cancelación y oposición
+            (derechos ARCO) que reconocen el artículo 28 de la Constitución de la República
+            Bolivariana de Venezuela y la Ley de Protección de Datos Personales. Si nos lee
+            desde la Unión Europea o Brasil, le asisten además los derechos de limitación y
+            portabilidad que reconocen el Reglamento (UE) 2016/679 (RGPD) y la Lei
+            13.709/2018 (LGPD), según la norma que le resulte aplicable.
+          </p>
+          <p>
+            Hay un detalle honesto que conviene explicar: como no
             guardamos su nombre ni su correo junto a estos datos,{" "}
             <strong>no podemos localizar «sus» registros si usted nos escribe</strong> — no
             tenemos forma de saber cuál de los identificadores es el suyo, y pedirle datos
@@ -429,8 +435,9 @@ export const Cookies = () => {
               {CONTACT.privacyEmail}
             </a>
             . Si considera que no hemos atendido su solicitud, puede reclamar ante la
-            autoridad de control de su país — en España, la Agencia Española de Protección
-            de Datos; en Brasil, la ANPD.
+            Superintendencia Nacional de Protección de Datos de Venezuela o, si nos lee
+            desde otro país, ante la autoridad de control que le corresponda — en España,
+            la Agencia Española de Protección de Datos; en Brasil, la ANPD.
           </p>
         </section>
 

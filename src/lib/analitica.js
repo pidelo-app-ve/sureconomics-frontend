@@ -31,19 +31,23 @@
  */
 
 /**
- * El interruptor general. En `false` mientras el aviso de cookies esta en revision
- * legal: nadie ve la barra, nadie puede aceptar ni rechazar -- ni siquiera desde la
- * pagina `/cookies`, que se deja visitable para poder compartir su URL con el cliente --
- * y la medicion no arranca aunque alguien hubiera aceptado antes de esta pausa.
+ * El interruptor general. Encendido el 22/09/2026, con el texto del aviso aprobado.
  *
- * Un solo punto de apagado y no una bandera por componente: `arrancar` y `decidir` lo
- * comprueban ademas de `AvisoDeCookies`, asi que un enlace directo a `/cookies` no puede
- * activar nada por otra puerta mientras esto siga en `false`.
+ * Estuvo en `false` mientras la politica estaba en revision legal: nadie veia la barra,
+ * nadie podia aceptar ni rechazar -- ni siquiera desde `/cookies`, que se dejaba
+ * visitable para compartir su URL con el cliente -- y la medicion no arrancaba aunque
+ * alguien hubiera aceptado antes de esa pausa.
  *
- * Cuando el texto quede aprobado, este valor pasa a `true` y no hace falta tocar nada
- * mas.
+ * Sigue siendo un solo punto de apagado y no una bandera por componente: `arrancar` y
+ * `decidir` lo comprueban ademas de `AvisoDeCookies`. Volver a `false` apaga la medicion
+ * entera sin tocar nada mas, que es lo que hace falta el dia que haya que pararla.
+ *
+ * Lo que este interruptor **no** gobierna son los terceros que el sitio carga por otros
+ * motivos -- el guion de TradingView en la cinta de mercado, los iframes de video de
+ * TikTok, YouTube y Vimeo --, que siguen cargandose se acepte o no. Ver
+ * `POLITICA-COOKIES-PENDIENTE.md`, en la raiz de este repositorio.
  */
-export const MEDICION_HABILITADA = false;
+export const MEDICION_HABILITADA = true;
 
 const COOKIE_CONSENTIMIENTO = "cookie_consent";
 const COOKIE_USUARIO = "user_id";

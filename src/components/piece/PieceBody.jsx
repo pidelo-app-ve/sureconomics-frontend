@@ -100,8 +100,16 @@ const embedDe = (url) => {
     return { tipo: "iframe", src: url };
   }
 
+  // Se reconoce la direccion que pegue la redaccion, venga de donde venga, pero se
+  // incrusta siempre desde `youtube-nocookie.com`. Es el mismo reproductor y el mismo
+  // video; lo que cambia es que ese dominio no escribe las cookies de seguimiento de
+  // Google hasta que alguien le da a reproducir. El aviso de cookies promete que ningun
+  // tercero perfila al lector, y `youtube.com` a secas lo desmentia en cada entrevista
+  // -- por una linea, y sin que nadie ganara nada a cambio.
   const youtube = /(?:youtube\.com\/.*[?&]v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/.exec(url);
-  if (youtube) return { tipo: "iframe", src: `https://www.youtube.com/embed/${youtube[1]}` };
+  if (youtube) {
+    return { tipo: "iframe", src: `https://www.youtube-nocookie.com/embed/${youtube[1]}` };
+  }
   const vimeo = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url);
   if (vimeo) return { tipo: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
   if (/\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)) return { tipo: "video", src: url };

@@ -1,5 +1,10 @@
 import PropTypes from "prop-types";
 
+import {
+  GUIA_DE_FORMATO,
+  nombreDeFormato,
+} from "../../lib/formatosDePublicidad";
+
 /**
  * Quién está al aire: un mosaico con el logotipo de cada anunciante que paga.
  *
@@ -87,7 +92,11 @@ const piezaDeMuestra = (anunciante) => {
     for (const soloActivas of [true, false]) {
       for (const campana of lote) {
         const pieza = (campana.creatividades ?? []).find(
-          (cr) => (soloActivas ? cr.activa : true) && (cr.imagen || cr.titular),
+          (cr) =>
+            (soloActivas ? cr.activa : true) &&
+            // `cinta` incluida: un banner no tiene `imagen`, y sin esto el anunciante
+            // que solo compra banners se pintaba como «Sin pieza» teniendo varias.
+            (cr.imagen || cr.cinta || cr.titular),
         );
         if (pieza) return pieza;
       }
@@ -210,9 +219,9 @@ export const MuralDeAnunciantes = ({ anunciantes, cifrasPorPieza, onAbrir }) => 
                     reconocer al anunciante, no a su campaña. El arte queda de respaldo
                     para quien todavía no haya cargado su logotipo. */}
                 <span className="se-mural__logo">
-                  {anunciante.logo?.url || pieza?.imagen ? (
+                  {anunciante.logo?.url || pieza?.imagen || pieza?.cinta ? (
                     <img
-                      src={anunciante.logo?.url || pieza.imagen}
+                      src={anunciante.logo?.url || pieza.imagen || pieza.cinta}
                       alt=""
                       loading="lazy"
                     />
@@ -238,16 +247,20 @@ export const MuralDeAnunciantes = ({ anunciantes, cifrasPorPieza, onAbrir }) => 
                   <span className="se-mural__titular">
                     «{pieza.titular || pieza.titular_corto}»
                   </span>
-                ) : (
+                ) : /* Reclamarlo sólo donde se publica. Un banner no imprime titular en
+                      ninguna parte, así que a un anunciante de sólo banners esto le
+                      pintaba una falta en rojo por no rellenar un campo que la pieza
+                      ni siquiera enseña ya. */
+                GUIA_DE_FORMATO[pieza?.formato]?.titular ? (
                   <span className="se-mural__titular se-mural__titular--falta">
                     Sin titular todavía
                   </span>
-                )}
+                ) : null}
 
                 {pieza?.pie ? <span className="se-mural__pie">{pieza.pie}</span> : null}
 
                 <span className="se-mural__destino">
-                  {pieza?.formato_nombre ?? "Sin pieza"}
+                  {pieza ? nombreDeFormato(pieza.formato, null) : "Sin pieza"}
                   {destino ? (
                     <>
                       <span aria-hidden="true"> → </span>

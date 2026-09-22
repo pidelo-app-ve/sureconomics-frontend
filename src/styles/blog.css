@@ -5939,10 +5939,142 @@ a.se-topics__chip:focus-visible {
 }
 
 /* Admin confirm dialog (delete) */
+/* La proporcion que necesita un hueco, dibujada. Un rectangulo con la forma exacta
+   contesta «que es un arte apaisado» sin usar la palabra, que era el problema. */
+.se-asset__forma {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0.5rem 0 0.2rem;
+  flex-wrap: wrap;
+}
+.se-asset__forma-caja {
+  flex: 0 0 auto;
+  width: 11rem;
+  max-width: 55%;
+  border: 2px dashed rgba(0, 0, 0, 0.32);
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.05) 5px,
+    rgba(0, 0, 0, 0.05) 10px
+  );
+}
+.se-asset__forma-pie {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-slate-2);
+}
+
+/* --- Elegir de la biblioteca, dentro de un AssetField --- */
+.se-asset__reusar {
+  margin: 0.6rem 0 0.2rem;
+}
+.se-biblio {
+  margin: 0.6rem 0 0.9rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.025);
+}
+.se-biblio__nota,
+.se-biblio__error {
+  margin: 0.6rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.se-biblio__error {
+  color: #7d2412;
+}
+.se-biblio__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.6rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.se-biblio__opcion {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.45rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+.se-biblio__opcion:hover {
+  border-color: var(--color-accent);
+}
+.se-biblio__opcion--puesta {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.se-biblio__opcion:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* Fondo a cuadros: casi todos estos archivos son PNG con transparencia, y sobre
+   blanco un logotipo blanco no se ve -- parecia una miniatura rota. */
+.se-biblio__lienzo {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.se-biblio__lienzo img {
+  width: 100%;
+  height: 100%;
+  /* `contain`: recortar una cinta de 1456x180 a un cuadrado la deja irreconocible. */
+  object-fit: contain;
+}
+.se-biblio__nombre {
+  font-size: 0.76rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+/* Las medidas, en monoespaciada: es lo que distingue una cinta de un logotipo. */
+.se-biblio__medidas {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--color-slate-2);
+}
+
+/* El envoltorio de los modales colgados del `body`.
+   Lleva `se-admin-app` por dos motivos: las variables de color del panel viven ahi, y
+   todo el CSS del dialogo esta escrito como `.se-admin-app .se-adm-dialog` -- un
+   descendiente, asi que el dialogo tiene que ir *dentro* y no compartir el elemento.
+   `display: contents` quita su caja: sin esto se traia consigo el `min-height: 100vh`
+   y el `display: flex` del panel, y metia una columna vacia de una pantalla de alto al
+   final del `body`. Las variables siguen heredando, que es lo unico que se le pide. */
+.se-admin-app.se-adm-portal {
+  display: contents;
+  min-height: 0;
+}
+
+/* Centrado de verdad, con flex, y no con `left: 50%` mas un desplazamiento fijo desde
+   arriba. Lo de antes pegaba el dialogo a 18vh del borde superior: en una pantalla alta
+   quedaba flotando en el tercio de arriba, y en una baja el pie se salia por debajo. */
 .se-admin-app .se-adm-dialog {
   position: fixed;
   inset: 0;
   z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
 }
 
 .se-admin-app .se-adm-dialog__backdrop {
@@ -5954,10 +6086,8 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-admin-app .se-adm-dialog__surface {
-  position: absolute;
-  left: 50%;
-  top: min(18vh, 9rem);
-  transform: translateX(-50%);
+  position: relative;
+  max-height: calc(100vh - 2rem);
   width: min(560px, calc(100vw - 2rem));
   border-radius: var(--adm-radius-lg);
   border: 1px solid rgba(var(--se-tinte), 0.12);
@@ -6067,14 +6197,19 @@ a.se-topics__chip:focus-visible {
   }
 }
 
+/* Sin el `translateX(-50%)`, que ya no hace falta al centrar con flex -- y que ademas
+   dejaba un `transform` puesto al terminar, convirtiendo la superficie en el bloque
+   contenedor de cualquier `position: fixed` de dentro.
+   El desplazamiento baja de 10px a 4px y sube un pelin de escala: a 10px el dialogo
+   entraba dando un salto que se lee como un tiron, sobre todo en el modal grande. */
 @keyframes se-adm-dialog-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(10px);
+    transform: translateY(4px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -15773,6 +15908,15 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   font-size: 0.8rem;
   color: #8a3a1c;
 }
+/* El destino, en tono de dato y no de alarma: es información, no un problema. */
+.se-vista__destino {
+  margin: 0.8rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+  overflow-wrap: anywhere;
+}
 .se-vista--sin p {
   margin: 0;
   font-family: var(--se-font-ui);
@@ -17312,6 +17456,272 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: 1rem;
   align-items: end;
+}
+
+/* El archivo que quedó en la columna que este formato no usa, y qué hacer con él.
+   Tiene que verse como una interrupción y no como un campo más: si se confunde con el
+   resto del formulario, se pasa de largo -- y en los formatos de cinta ese archivo
+   sigue saliendo publicado de respaldo, sin que haya ningún campo donde mirarlo. */
+.se-admin-pub__rescate {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--color-accent);
+  border-left-width: 3px;
+  border-radius: 6px;
+  background: rgba(185, 83, 42, 0.07);
+}
+.se-admin-pub__rescate p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.se-admin-pub__rescate .se-admin-pub__acciones {
+  margin-top: 0.7rem;
+}
+
+/* Las filas de campaña y pieza abren un modal, no se despliegan. Sin una señal se
+   leen como texto muerto: nada indica que ahí dentro está todo el formulario. */
+.se-admin-pub__campana-titulo::after,
+.se-admin-pub__pieza-titulo::after {
+  content: "Editar ›";
+  /* El botón apila en columna, así que el eje horizontal es el transversal: aquí
+     `margin-left: auto` alinea a la derecha en vez de empujar en la fila. */
+  margin-left: auto;
+  margin-top: 0.15rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-admin-pub__campana-titulo:hover::after,
+.se-admin-pub__pieza-titulo:hover::after {
+  color: var(--color-accent);
+}
+
+/* --- Modal de contenido libre, y el asistente que vive dentro --- */
+/* Más alto que un diálogo de confirmación y con el cuerpo desplazándose solo, para
+   que los botones no se vayan de la pantalla en el paso largo. */
+/* Estrecho a propósito. A 64rem los campos de una sola columna —un nombre, una
+   fecha— se estiraban de lado a lado y el modal parecía medio vacío; el texto
+   explicativo, que es el motivo de que esto exista, pasaba de los 120 caracteres por
+   línea y dejaba de leerse de corrido. */
+.se-admin-app .se-modalp__caja {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(calc(100vh - 2rem), 54rem);
+  display: flex;
+  flex-direction: column;
+}
+.se-admin-app .se-modalp__caja--ancho {
+  width: min(48rem, calc(100vw - 2rem));
+}
+.se-modalp__cuerpo {
+  overflow-y: auto;
+  padding: 1.1rem 1.25rem 1.4rem;
+}
+.se-modalp__subtitulo {
+  margin: 0.4rem 0 0;
+}
+
+/* Los tres pasos. Numerarlos sería redundante: el orden ya lo da la fila, y lo que
+   hace falta saber es en cuál se está y cuáles quedan. */
+.se-asis__pasos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.se-asis__paso {
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-asis__paso--hoy {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+.se-asis__paso--hecho {
+  border-color: rgba(0, 0, 0, 0.3);
+  color: var(--color-ink, #1a1a1a);
+}
+
+.se-asis__cuerpo > * + * {
+  margin-top: 0.7rem;
+}
+/* Una etiqueta pertenece a su campo, no al campo de arriba: sin esto el hueco por
+   encima y por debajo era el mismo y los pares no se leían como pares. */
+.se-asis__cuerpo > .se-form-label {
+  margin-top: 1.2rem;
+}
+.se-asis__cuerpo > .se-form-label + .se-form-control {
+  margin-top: 0.3rem;
+}
+.se-asis__cuerpo > fieldset,
+.se-asis__cuerpo > .se-admin-pub__sub {
+  margin-top: 1.4rem;
+}
+.se-asis__titulo {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+/* Opciones excluyentes, una por línea. */
+.se-asis__opciones {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+/* La frase que explica el paso. Es el motivo de que esto exista, así que se lee
+   antes que cualquier campo y no en letra pequeña de nota al pie. */
+.se-asis__lede {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+.se-asis__final {
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* --- Dónde sale --- */
+.se-donde__modo {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+}
+/* El grid de países baja a dos columnas dentro del modal, que es más estrecho que
+   la página. Sin esto la tercera columna se salía y aparecía barra horizontal. */
+.se-modalp .se-donde__casillas {
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+}
+.se-donde__grupo {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+}
+.se-donde__grupo > legend {
+  padding: 0 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+/* En columnas y no en una lista larga: son dieciséis temas y treinta países, y en
+   una sola columna el grupo mide más que la pantalla. */
+.se-donde__casillas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.3rem 1rem;
+  margin-top: 0.5rem;
+}
+.se-donde__casilla {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.se-donde__casilla input {
+  flex: 0 0 auto;
+}
+
+/* Lo guardado que no encaja con nada. En tono de alarma porque hoy está impidiendo
+   que la campaña salga, que es justo lo que antes no se veía. */
+.se-donde__huerfanas {
+  margin-top: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--color-accent);
+  background: rgba(185, 83, 42, 0.07);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.se-donde__huerfanas p {
+  margin: 0 0 0.6rem;
+}
+.se-donde__huerfanas ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+.se-donde__huerfanas li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* La combinación que se guarda bien y no sale nunca. En rojo y no en gris: es un
+   error de configuración, sólo que uno que no da ningún mensaje de error. */
+.se-donde__imposible {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid #b4341c;
+  background: rgba(180, 52, 28, 0.08);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #7d2412;
+}
+
+/* La frase que traduce las casillas. Es el único sitio donde se lee, de corrido, lo
+   que el servidor va a hacer con todo esto. */
+.se-donde__resumen {
+  margin: 1rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+/* Lo que no hace falta tocar para publicar. Plegado y sin borde: tiene que leerse
+   como una nota al pie del formulario, no como un campo pendiente. */
+.se-admin-pub__extra {
+  margin: 1rem 0 0;
+}
+.se-admin-pub__extra > summary {
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-admin-pub__extra > summary:hover {
+  color: var(--color-accent);
+}
+.se-admin-pub__extra > * + * {
+  margin-top: 0.5rem;
+}
+
+/* Un formato que se puede guardar pero que hoy no se publica en ninguna parte. */
+.se-admin-pub__aviso {
+  margin: 0.75rem 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--color-slate-2);
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .se-admin-pub__sub {

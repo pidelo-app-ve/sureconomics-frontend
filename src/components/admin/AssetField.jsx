@@ -1,4 +1,6 @@
 import PropTypes from "prop-types";
+
+import { SelectorDeBiblioteca } from "./SelectorDeBiblioteca";
 import { useEffect, useState } from "react";
 import {
   createAdminExternalMedia,
@@ -25,6 +27,7 @@ export const AssetField = ({
   id,
   label,
   hint,
+  forma,
   kind,
   value,
   asset,
@@ -36,6 +39,9 @@ export const AssetField = ({
   const [url, setUrl] = useState("");
   const [extra, setExtra] = useState("");
   const [busy, setBusy] = useState(false);
+  // El selector de la biblioteca, plegado. Abierto por defecto empujaria los dos
+  // modos de siempre fuera de la pantalla en un formulario que ya es largo.
+  const [biblioteca, setBiblioteca] = useState(false);
   const [error, setError] = useState("");
   // Nulo mientras no haya nada que informar. Un video de medio giga tarda minutos, y
   // una barra que no se mueve es indistinguible de algo colgado: la redaccion cancela
@@ -193,6 +199,26 @@ export const AssetField = ({
       </legend>
       {hint ? <p className="se-asset__hint">{hint}</p> : null}
 
+      {/* La forma, dibujada. Escribir «apaisado» o «1456 x 180» obliga a imaginarse la
+          proporcion, y quien no trabaja con imagenes no tiene por que saber traducir
+          una cifra a una forma -- de hecho la pregunta que provoco esto fue
+          literalmente «ese arte apaisado que es». Un rectangulo con la proporcion
+          exacta lo contesta sin leer nada. */}
+      {forma ? (
+        <p className="se-asset__forma">
+          <span
+            className="se-asset__forma-caja"
+            style={{ aspectRatio: `${forma.ancho} / ${forma.alto}` }}
+            aria-hidden="true"
+          />
+          <span className="se-asset__forma-pie">
+            {forma.ancho >= 8 * forma.alto
+              ? "Una franja: mucho mas ancha que alta."
+              : "Esta es la forma que necesita."}
+          </span>
+        </p>
+      ) : null}
+
       {value ? (
         <div className="se-asset__current">
           <div className="se-asset__current-body">
@@ -293,6 +319,34 @@ export const AssetField = ({
         <p className="se-asset__empty">Nada adjunto todavía.</p>
       )}
 
+      {/* Reutilizar antes que volver a subir.
+          El servidor no duplica -- la clave en R2 lleva el SHA-256 del contenido --,
+          pero encontrar otra vez el archivo en el disco y esperar la subida si era
+          trabajo de verdad, y el mismo arte se reutiliza constantemente entre piezas
+          de un mismo anunciante. Va primero porque es el camino barato. */}
+      <div className="se-asset__reusar">
+        <button
+          type="button"
+          className="se-btn se-btn--secondary se-btn--small"
+          onClick={() => setBiblioteca((v) => !v)}
+          aria-expanded={biblioteca}
+        >
+          {biblioteca ? "Cerrar la biblioteca" : "Elegir uno ya subido"}
+        </button>
+      </div>
+
+      {biblioteca ? (
+        <SelectorDeBiblioteca
+          id={`${id}-biblio`}
+          kind={kind}
+          puesto={value}
+          onElegir={(fila) => {
+            attach(fila);
+            setBiblioteca(false);
+          }}
+        />
+      ) : null}
+
       <div className="se-asset__ways">
         {onUpload ? (
           <label className="se-asset__way">
@@ -356,6 +410,11 @@ AssetField.propTypes = {
   id: PropTypes.string,
   label: PropTypes.string.isRequired,
   hint: PropTypes.string,
+  /** La proporcion que necesita este hueco, dibujada bajo la pista. */
+  forma: PropTypes.shape({
+    ancho: PropTypes.number.isRequired,
+    alto: PropTypes.number.isRequired,
+  }),
   // "audio" faltaba: el podcast ya lo usaba y la consola avisaba en cada render.
   kind: PropTypes.oneOf(["image", "video", "audio", "document"]).isRequired,
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

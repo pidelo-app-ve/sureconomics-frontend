@@ -31,7 +31,13 @@ const VARIANTES = [
   { valor: "cuerpo", etiqueta: "Dentro del artículo" },
 ];
 
-export const VistaDeLaPieza = ({ pieza, anunciante, variante, onVariante }) => {
+export const VistaDeLaPieza = ({
+  pieza,
+  anunciante,
+  variante,
+  onVariante,
+  usaTitular,
+}) => {
   const Pintor = POR_FORMATO[pieza.formato];
 
   if (!Pintor) {
@@ -47,6 +53,11 @@ export const VistaDeLaPieza = ({ pieza, anunciante, variante, onVariante }) => {
 
   // Lo mismo que sirve el decisor, armado con lo que hay en el formulario. Sin
   // `enlace`, para que no se pueda hacer clic desde aquí.
+  //
+  // `cinta` va aparte de `imagen` porque el sitio la prefiere: los formatos de cinta se
+  // pintan con `cinta || imagen`. Faltaba aquí, y el efecto era el peor posible para
+  // quien monta un banner -- subía la cinta, que es el arte correcto, y la vista previa
+  // seguía enseñando la imagen de respaldo. El campo parecía roto sin estarlo.
   const hueco = {
     formato: pieza.formato,
     anunciante: anunciante?.nombre ?? "Anunciante",
@@ -56,10 +67,13 @@ export const VistaDeLaPieza = ({ pieza, anunciante, variante, onVariante }) => {
     pie: pieza.pie,
     alt: pieza.alt,
     imagen: pieza.imagen ?? null,
+    cinta: pieza.cinta ?? null,
     enlace: null,
   };
 
-  const faltaTitular = !pieza.titular && !pieza.titular_corto;
+  // Sólo donde el titular se publica de verdad. En un banner no se imprime en ninguna
+  // parte, así que reclamarlo mandaba a rellenar un campo que no se ve nunca.
+  const faltaTitular = usaTitular && !pieza.titular && !pieza.titular_corto;
 
   return (
     <div className="se-vista">
@@ -90,6 +104,20 @@ export const VistaDeLaPieza = ({ pieza, anunciante, variante, onVariante }) => {
         <Pintor hueco={hueco} variante={variante} />
       </div>
 
+      {/* El destino, escrito. El clic está apagado aquí a propósito, pero desde fuera
+          eso se lee como un anuncio roto: se pega la dirección, se pulsa el banner y no
+          pasa nada. Decirlo cuesta una línea; averiguarlo cuesta media tarde. */}
+      {pieza.enlace ? (
+        <p className="se-vista__destino">
+          En el sitio lleva a <b>{pieza.enlace}</b>. Aquí el clic está apagado para no
+          sumarle clics a la campaña.
+        </p>
+      ) : (
+        <p className="se-vista__aviso">
+          Sin destino. La pieza se publica, pero al pulsarla no lleva a ninguna parte.
+        </p>
+      )}
+
       {faltaTitular ? (
         <p className="se-vista__aviso">
           Sin titular la pieza sale vacía. Es lo único que el lector lee de un anuncio
@@ -106,8 +134,10 @@ VistaDeLaPieza.propTypes = {
   anunciante: PropTypes.object,
   variante: PropTypes.oneOf(["tarjeta", "lista", "cuerpo"]),
   onVariante: PropTypes.func,
+  /** Si este formato publica el titular. Decide si se reclama cuando falta. */
+  usaTitular: PropTypes.bool,
 };
 
-VistaDeLaPieza.defaultProps = { variante: "tarjeta" };
+VistaDeLaPieza.defaultProps = { variante: "tarjeta", usaTitular: true };
 
 export default VistaDeLaPieza;

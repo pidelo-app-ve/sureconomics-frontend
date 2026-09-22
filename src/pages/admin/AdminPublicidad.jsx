@@ -2,14 +2,24 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useState } from "react";
 
 import { MuralDeAnunciantes } from "../../components/admin/MuralDeAnunciantes";
+import { useAdminToast } from "../../context/AdminToastContext";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useConfirmacionDeGuardado } from "../../hooks/useConfirmacionDeGuardado";
 import { AssetField } from "../../components/admin/AssetField";
+import { AsistenteDeAnuncio } from "../../components/admin/AsistenteDeAnuncio";
+import { DondeSale } from "../../components/admin/DondeSale";
+import { ModalDelPanel } from "../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "../../components/admin/VistaDeLaPieza";
 import {
   ACCEPTED_IMAGE_MIME,
   uploadAdminMediaImage,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import {
+  GUIA_DE_FORMATO,
+  nombreDeFormato,
+  resumenDePieza,
+} from "../../lib/formatosDePublicidad";
 import {
   actualizarAnunciante,
   actualizarCampana,
@@ -43,12 +53,22 @@ import {
  * «pendiente de guardar» acabaría enseñando una campaña activa que el servidor tiene en
  * borrador.
  *
- * ## La imagen va por id de la biblioteca
+ * ## El formulario enseña lo que ese formato publica, y nada más
  *
- * Y no por un selector visual, todavía. Es la rugosidad conocida de esta primera
- * versión: se copia el id desde Archivos. Cambiarlo por el selector que ya usa el editor
- * de piezas es trabajo de pantalla, no de modelo -- el backend ya valida que el id sea
- * una imagen pública de la biblioteca.
+ * Los ocho formatos comparten una sola tabla, así que una pieza tiene ocho campos
+ * aunque un banner sólo imprima dos. Enseñarlos todos siempre era barato de escribir y
+ * caro de usar: quien monta un banner rellenaba titular, titular corto y pie sin que
+ * ninguno saliera publicado, y no había forma de enterarse -- se guardan sin protestar.
+ *
+ * Peor era el par de campos de imagen. «Imagen de la pieza» iba primero y «Cinta»
+ * después, pero un banner se pinta con la cinta y la imagen es sólo un respaldo: el
+ * orden invitaba a subir el arte al campo equivocado, y lo que salía era el respaldo
+ * estirado. [GUIA_DE_FORMATO] nombra cada campo por lo que hace en *ese* formato, y
+ * esconde el que ese formato no usa.
+ *
+ * Las dos columnas siguen existiendo porque la tarjeta nativa necesita dos artes de
+ * verdad -- logotipo en la rejilla, cinta a sangre en un listado -- y con un solo
+ * archivo, acertar en un hueco garantiza fallar en el otro.
  */
 
 /* ─── Piezas ─────────────────────────────────────────────────────────────── */
@@ -73,20 +93,68 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
     setBorrador((antes) => ({ ...antes, [campo]: valor }));
   };
 
+  // Lo que publica el formato que está elegido *ahora mismo en el desplegable*, no el
+  // que tiene guardado: cambiar el formato reordena el formulario al momento, que es
+  // cuando sirve saber qué hace falta.
+  const guia = GUIA_DE_FORMATO[borrador.formato] ?? {};
+  const artes = guia.arte ?? [];
+  const usaCinta = artes.some((a) => a.campo === "cinta");
+  const usaImagen = artes.some((a) => a.campo === "imagen");
+
+  // Una imagen guardada en la columna que este formato no usa. Pasa al cambiar de
+  // formato, y pasaba mucho más cuando los dos campos salían siempre uno encima de
+  // otro. Callarla sería lo peor: en los formatos de cinta la imagen todavía hace de
+  // respaldo, así que seguiría saliendo publicada desde un campo que ya no se ve.
+  const imagenPerdida = !usaImagen && (borrador.imagen_id ?? null) !== null;
+  const cintaPerdida = !usaCinta && (borrador.cinta_id ?? null) !== null;
+
+  /** El selector de archivo de una de las dos columnas, con el nombre que le toca. */
+  const campoDeArte = ({ campo, etiqueta, pista, forma }) => {
+    const esCinta = campo === "cinta";
+    return (
+      <AssetField
+        key={campo}
+        id={`p-${pieza.id}-${campo}`}
+        label={etiqueta}
+        hint={pista}
+        forma={forma}
+        kind="image"
+        value={borrador[`${campo}_id`] ?? null}
+        asset={esCinta ? cinta : imagen}
+        onChange={(idNuevo, objeto) => {
+          setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
+          (esCinta ? setCinta : setImagen)(objeto ?? null);
+        }}
+        onUpload={uploadAdminMediaImage}
+        accept={ACCEPTED_IMAGE_MIME}
+      />
+    );
+  };
+
+  /** Mueve el archivo de una columna a la otra sin volver a subirlo. */
+  const mover = (desde, hacia) => {
+    const objeto = desde === "cinta" ? cinta : imagen;
+    setBorrador((b) => ({ ...b, [`${hacia}_id`]: b[`${desde}_id`], [`${desde}_id`]: null }));
+    (hacia === "cinta" ? setCinta : setImagen)(objeto);
+    (desde === "cinta" ? setCinta : setImagen)(null);
+  };
+
+  const soltar = (campo) => {
+    setBorrador((b) => ({ ...b, [`${campo}_id`]: null }));
+    (campo === "cinta" ? setCinta : setImagen)(null);
+  };
+
   return (
     <li className="se-admin-pub__pieza">
       <div className="se-admin-pub__pieza-cabeza">
         <button
           type="button"
           className="se-admin-pub__pieza-titulo"
-          onClick={() => setAbierta((v) => !v)}
-          aria-expanded={abierta}
+          onClick={() => setAbierta(true)}
         >
-          <span>
-            {pieza.formato} · {formatos?.[pieza.formato] ?? "—"}
-          </span>
+          <span>{nombreDeFormato(pieza.formato, formatos)}</span>
           <span className="se-admin-pub__meta">
-            {pieza.titular_corto || pieza.titular || "Sin titular"}
+            {resumenDePieza(pieza, GUIA_DE_FORMATO[pieza.formato])}
           </span>
         </button>
         {!pieza.activa ? <span className="se-admin-pub__sello">Apagada</span> : null}
@@ -100,146 +168,19 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
         </button>
       </div>
 
-      {abierta ? (
-        <div className="se-admin-pub__pieza-cuerpo">
-          <div className="se-admin-pub__doble">
-            <div>
-              <label className="se-form-label" htmlFor={`p-${pieza.id}-formato`}>
-                Formato
-              </label>
-              <select
-                id={`p-${pieza.id}-formato`}
-                className="se-form-control"
-                value={borrador.formato}
-                onChange={cambiar("formato")}
-              >
-                {Object.entries(formatos ?? {}).map(([letra, nombre]) => (
-                  <option key={letra} value={letra}>
-                    {letra} · {nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* La imagen, con el mismo selector que las piezas del sitio: se sube aquí y
-              se ve al momento. Antes había que abrir Archivos en otra pestaña, subirla,
-              copiar el id y pegarlo en un campo numérico -- cuatro pasos y un número que
-              no dice nada, para poner un logotipo. */}
-          <AssetField
-            id={`p-${pieza.id}-imagen`}
-            label="Imagen de la pieza"
-            hint="El logotipo o el arte del anuncio. Súbalo aquí, o pegue la dirección si vive en otro sitio."
-            kind="image"
-            value={borrador.imagen_id ?? null}
-            asset={imagen}
-            onChange={(idDeLaImagen, objeto) => {
-              setBorrador((b) => ({ ...b, imagen_id: idDeLaImagen ?? null }));
-              setImagen(objeto ?? null);
-            }}
-            onUpload={uploadAdminMediaImage}
-            accept={ACCEPTED_IMAGE_MIME}
-          />
-
-          {/* La cinta, aparte de la imagen. Son dos artes distintos, no dos tamaños del
-              mismo: una pieza de formato A se pinta como tarjeta en la rejilla —logotipo
-              sobre placa— y como cinta a sangre en un listado. Con un solo archivo, subir
-              el correcto para un hueco garantiza el incorrecto en el otro, y falla en
-              silencio: guarda bien, sale publicada, y solo se ve mal. */}
-          <AssetField
-            id={`p-${pieza.id}-cinta`}
-            label="Cinta (1456 × 180)"
-            hint="El arte apaisado que se ve entero en el banner, las franjas, el patrocinio y el boletín. Si no la sube, se usa la imagen de arriba centrada."
-            kind="image"
-            value={borrador.cinta_id ?? null}
-            asset={cinta}
-            onChange={(idDeLaCinta, objeto) => {
-              setBorrador((b) => ({ ...b, cinta_id: idDeLaCinta ?? null }));
-              setCinta(objeto ?? null);
-            }}
-            onUpload={uploadAdminMediaImage}
-            accept={ACCEPTED_IMAGE_MIME}
-          />
-
-          {/* Montada con el mismo componente que la publica. Se dibuja con lo que hay
-              escrito ahora, no con lo guardado: así el titular que se acaba de teclear
-              se ve antes de guardarlo, que es cuando sirve mirarlo. */}
-          <VistaDeLaPieza
-            pieza={{
-              ...borrador,
-              imagen: imagen?.url ?? pieza.imagen ?? null,
-              cinta: cinta?.url ?? pieza.cinta ?? null,
-            }}
-            anunciante={anunciante}
-            variante={variante}
-            onVariante={setVariante}
-          />
-
-          <label className="se-form-label" htmlFor={`p-${pieza.id}-titular`}>
-            Titular
-          </label>
-          <input
-            id={`p-${pieza.id}-titular`}
-            className="se-form-control"
-            value={borrador.titular ?? ""}
-            onChange={cambiar("titular")}
-          />
-
-          <label className="se-form-label" htmlFor={`p-${pieza.id}-corto`}>
-            Titular corto
-          </label>
-          <input
-            id={`p-${pieza.id}-corto`}
-            className="se-form-control"
-            value={borrador.titular_corto ?? ""}
-            onChange={cambiar("titular_corto")}
-          />
-          <p className="se-admin-meta-hint">
-            El rail y la barra inferior tienen la mitad de ancho que un banner. Sin este,
-            o el banner se queda corto o la barra se rompe.
-          </p>
-
-          <div className="se-admin-pub__doble">
-            <div>
-              <label className="se-form-label" htmlFor={`p-${pieza.id}-pie`}>
-                Pie
-              </label>
-              <input
-                id={`p-${pieza.id}-pie`}
-                className="se-form-control"
-                value={borrador.pie ?? ""}
-                onChange={cambiar("pie")}
-                placeholder="Contenido patrocinado"
-              />
-            </div>
-            <div>
-              <label className="se-form-label" htmlFor={`p-${pieza.id}-alt`}>
-                Texto alternativo
-              </label>
-              <input
-                id={`p-${pieza.id}-alt`}
-                className="se-form-control"
-                value={borrador.alt ?? ""}
-                onChange={cambiar("alt")}
-              />
-            </div>
-          </div>
-
-          <label className="se-form-label" htmlFor={`p-${pieza.id}-enlace`}>
-            Destino
-          </label>
-          <input
-            id={`p-${pieza.id}-enlace`}
-            className="se-form-control"
-            value={borrador.enlace ?? ""}
-            onChange={cambiar("enlace")}
-            placeholder="https://…"
-          />
-
-          {/* La casilla y el botón, en una fila con espacio propio. Sueltos eran dos
-              elementos en línea sin separación, y el botón acababa montado encima de la
-              palabra «Activa». */}
-          <div className="se-admin-pub__pie-de-pieza">
+      {/* El formulario, en un modal y no desplegado bajo la fila. Con anunciante,
+          campana y pieza desplegandose cada uno en el sitio, la pagina se convertia en
+          un muro donde el campo que se esta rellenando y el boton de guardar quedaban a
+          pantallas de distancia. Aqui se abre una cosa a la vez. */}
+      <ModalDelPanel
+        abierto={abierta}
+        ocupado={ocupado}
+        onCerrar={() => setAbierta(false)}
+        ancho="ancho"
+        titulo={nombreDeFormato(pieza.formato, formatos)}
+        subtitulo={anunciante?.nombre}
+        pie={
+          <>
             <label className="se-admin-pub__casilla">
               <input
                 type="checkbox"
@@ -248,7 +189,14 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
               />
               Activa
             </label>
-
+            <button
+              type="button"
+              className="se-btn se-btn--secondary"
+              disabled={ocupado}
+              onClick={() => setAbierta(false)}
+            >
+              Cerrar
+            </button>
             <button
               type="button"
               className="se-btn se-btn--primary"
@@ -267,11 +215,179 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
                 })
               }
             >
-              Guardar la pieza
+              {ocupado ? "Guardando…" : "Guardar la pieza"}
             </button>
-          </div>
+          </>
+        }
+      >
+        <div className="se-asis__cuerpo">
+          <label className="se-form-label" htmlFor={`p-${pieza.id}-formato`}>
+            Formato
+          </label>
+          <select
+            id={`p-${pieza.id}-formato`}
+            className="se-form-control"
+            value={borrador.formato}
+            onChange={cambiar("formato")}
+          >
+            {Object.keys(formatos ?? {}).map((letra) => (
+              <option key={letra} value={letra}>
+                {nombreDeFormato(letra, formatos)}
+              </option>
+            ))}
+          </select>
+          {guia.donde ? <p className="se-admin-meta-hint">{guia.donde}</p> : null}
+
+          {guia.sinSalida ? (
+            <p className="se-admin-pub__aviso">{guia.sinSalida}</p>
+          ) : null}
+          {guia.soloTexto ? (
+            <p className="se-admin-meta-hint">{guia.soloTexto}</p>
+          ) : null}
+
+          {/* Sólo los campos de arte que este formato publica, con el nombre de lo que
+              hacen aquí. El selector sube el archivo en el sitio y lo enseña al momento:
+              no hay que abrir Archivos en otra pestaña ni copiar ningún identificador. */}
+          {artes.map(campoDeArte)}
+
+          {imagenPerdida || cintaPerdida ? (
+            <div className="se-admin-pub__rescate">
+              <p>
+                Hay un archivo subido en el campo que <b>{guia.nombre ?? "este formato"}</b>{" "}
+                no usa
+                {imagenPerdida && usaCinta
+                  ? ", y por eso la pieza no se ve como debería."
+                  : "."}
+              </p>
+              <div className="se-admin-pub__acciones">
+                {imagenPerdida && usaCinta ? (
+                  <button
+                    type="button"
+                    className="se-btn se-btn--primary"
+                    onClick={() => mover("imagen", "cinta")}
+                  >
+                    Usarlo como arte de este formato
+                  </button>
+                ) : null}
+                {cintaPerdida && usaImagen ? (
+                  <button
+                    type="button"
+                    className="se-btn se-btn--primary"
+                    onClick={() => mover("cinta", "imagen")}
+                  >
+                    Usarlo como arte de este formato
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="se-btn se-btn--secondary"
+                  onClick={() => soltar(imagenPerdida ? "imagen" : "cinta")}
+                >
+                  Quitarlo
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {guia.titular ? (
+            <>
+              <label className="se-form-label" htmlFor={`p-${pieza.id}-titular`}>
+                Titular
+              </label>
+              <input
+                id={`p-${pieza.id}-titular`}
+                className="se-form-control"
+                value={borrador.titular ?? ""}
+                onChange={cambiar("titular")}
+              />
+
+              <label className="se-form-label" htmlFor={`p-${pieza.id}-corto`}>
+                Titular corto
+              </label>
+              <input
+                id={`p-${pieza.id}-corto`}
+                className="se-form-control"
+                value={borrador.titular_corto ?? ""}
+                onChange={cambiar("titular_corto")}
+              />
+              <p className="se-admin-meta-hint">
+                Para donde no cabe el largo: el rail tiene menos de la mitad de ancho que
+                un banner. Si lo deja vacío, allí se usa el titular entero y se corta.
+              </p>
+            </>
+          ) : null}
+
+          {guia.pie ? (
+            <>
+              <label className="se-form-label" htmlFor={`p-${pieza.id}-pie`}>
+                Pie
+              </label>
+              <input
+                id={`p-${pieza.id}-pie`}
+                className="se-form-control"
+                value={borrador.pie ?? ""}
+                onChange={cambiar("pie")}
+                placeholder="Contenido patrocinado"
+              />
+            </>
+          ) : null}
+
+          <label className="se-form-label" htmlFor={`p-${pieza.id}-enlace`}>
+            Destino
+          </label>
+          <input
+            id={`p-${pieza.id}-enlace`}
+            className="se-form-control"
+            value={borrador.enlace ?? ""}
+            onChange={cambiar("enlace")}
+            placeholder="https://…"
+          />
+
+          {/* El texto alternativo, plegado. No se publica en ninguna parte: es lo que
+              lee en voz alta un lector de pantalla y lo que sale si la imagen no carga.
+              Estaba al mismo nivel que el arte y el destino, y en un banner —donde lo
+              único que se ve es la cinta— parecía un campo más que hay que rellenar
+              para que la pieza salga. Vacío no rompe nada: el sitio usa el nombre del
+              anunciante. */}
+          {artes.length ? (
+            <details className="se-admin-pub__extra">
+              <summary>Texto alternativo (opcional)</summary>
+              <p className="se-admin-meta-hint">
+                No se publica. Lo lee en voz alta un lector de pantalla, y es lo que
+                aparece si la imagen no carga. Si lo deja vacío se usa
+                «{anunciante?.nombre ?? "el nombre del anunciante"}».
+              </p>
+              <input
+                id={`p-${pieza.id}-alt`}
+                className="se-form-control"
+                aria-label="Texto alternativo"
+                value={borrador.alt ?? ""}
+                onChange={cambiar("alt")}
+                placeholder={anunciante?.nombre ?? "Nombre del anunciante"}
+              />
+            </details>
+          ) : null}
+
+          {/* Al final y no en medio del formulario: se mira cuando ya está todo puesto.
+              Montada con el mismo componente que la publica, y con lo que hay escrito
+              ahora — no con lo guardado —, que es cuando sirve mirarlo. */}
+          <VistaDeLaPieza
+            pieza={{
+              ...borrador,
+              imagen: imagen?.url ?? pieza.imagen ?? null,
+              cinta: cinta?.url ?? pieza.cinta ?? null,
+            }}
+            anunciante={anunciante}
+            variante={variante}
+            onVariante={setVariante}
+            usaTitular={!!guia.titular}
+          />
+
+          {/* La casilla y el botón, en una fila con espacio propio. Sueltos eran dos
+              elementos en línea sin separación, y el botón acababa montado encima de la
+              palabra «Activa». */}
         </div>
-      ) : null}
+      </ModalDelPanel>
     </li>
   );
 };
@@ -286,85 +402,6 @@ FilaDePieza.propTypes = {
   onBorrar: PropTypes.func.isRequired,
 };
 
-/* ─── Segmentos ──────────────────────────────────────────────────────────── */
-
-const Segmentos = ({ valor, tipos, onChange }) => {
-  const [tipo, setTipo] = useState(tipos?.[0] ?? "seccion");
-  const [texto, setTexto] = useState("");
-
-  return (
-    <div className="se-admin-pub__segmentos">
-      <p className="se-admin-meta-hint">
-        Varias condiciones del <b>mismo tipo</b> son alternativas («Venezuela o
-        Colombia»); de <b>tipos distintos</b> se exigen a la vez («Venezuela y además
-        Mercados»). Sin ninguna, la campaña sale en todas partes.
-      </p>
-
-      <ul className="se-admin-pub__fichas">
-        {valor.map((s) => (
-          <li key={`${s.tipo}-${s.valor}`} className="se-admin-pub__ficha">
-            <span>
-              {s.tipo}: <b>{s.valor}</b>
-            </span>
-            <button
-              type="button"
-              aria-label={`Quitar ${s.tipo} ${s.valor}`}
-              onClick={() =>
-                onChange(valor.filter((x) => !(x.tipo === s.tipo && x.valor === s.valor)))
-              }
-            >
-              ✕
-            </button>
-          </li>
-        ))}
-        {!valor.length ? <li className="se-admin-meta-hint">En todas partes.</li> : null}
-      </ul>
-
-      <div className="se-admin-pub__nueva">
-        <select
-          className="se-form-control"
-          value={tipo}
-          onChange={(e) => setTipo(e.target.value)}
-          aria-label="Tipo de condición"
-        >
-          {(tipos ?? []).map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        <input
-          className="se-form-control"
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder="venezuela, mercados, informes…"
-          aria-label="Valor de la condición"
-        />
-        <button
-          type="button"
-          className="se-btn se-btn--secondary"
-          disabled={!texto.trim()}
-          onClick={() => {
-            const nuevo = { tipo, valor: texto.trim().toLowerCase() };
-            if (!valor.some((x) => x.tipo === nuevo.tipo && x.valor === nuevo.valor)) {
-              onChange([...valor, nuevo]);
-            }
-            setTexto("");
-          }}
-        >
-          Añadir
-        </button>
-      </div>
-    </div>
-  );
-};
-
-Segmentos.propTypes = {
-  valor: PropTypes.array.isRequired,
-  tipos: PropTypes.array,
-  onChange: PropTypes.func.isRequired,
-};
-
 /* ─── Campañas ───────────────────────────────────────────────────────────── */
 
 const TarjetaDeCampana = ({
@@ -374,6 +411,7 @@ const TarjetaDeCampana = ({
   cifras,
   ocupado,
   correr,
+  preguntar,
   onCambio,
 }) => {
   const [abierta, setAbierta] = useState(false);
@@ -388,17 +426,24 @@ const TarjetaDeCampana = ({
   };
 
   const guardar = (extra = {}) =>
-    correr(() =>
-      actualizarCampana(campana.id, {
-        nombre: borrador.nombre,
-        desde: borrador.desde || null,
-        hasta: borrador.hasta || null,
-        peso: Number(borrador.peso) || 1,
-        tope_impresiones: borrador.tope_impresiones === "" ? null : borrador.tope_impresiones,
-        exclusiva: !!borrador.exclusiva,
-        segmentos: borrador.segmentos ?? [],
-        ...extra,
-      }),
+    correr(
+      () =>
+        actualizarCampana(campana.id, {
+          nombre: borrador.nombre,
+          desde: borrador.desde || null,
+          hasta: borrador.hasta || null,
+          peso: Number(borrador.peso) || 1,
+          tope_impresiones:
+            borrador.tope_impresiones === "" ? null : borrador.tope_impresiones,
+          exclusiva: !!borrador.exclusiva,
+          segmentos: borrador.segmentos ?? [],
+          ...extra,
+        }),
+      // Cambiar el estado es lo único de esta pantalla que altera si la campaña sale
+      // publicada o no, así que se dice en vez de un «guardada» que suena a nada.
+      extra.estado
+        ? `Campaña «${campana.nombre}» ahora está ${extra.estado}`
+        : `Campaña «${campana.nombre}» guardada`,
     ).then(onCambio);
 
   const totales = (campana.creatividades ?? []).reduce(
@@ -418,8 +463,7 @@ const TarjetaDeCampana = ({
         <button
           type="button"
           className="se-admin-pub__campana-titulo"
-          onClick={() => setAbierta((v) => !v)}
-          aria-expanded={abierta}
+          onClick={() => setAbierta(true)}
         >
           <span>{campana.nombre}</span>
           <span className="se-admin-pub__meta">
@@ -439,8 +483,51 @@ const TarjetaDeCampana = ({
         </span>
       </div>
 
-      {abierta ? (
-        <div className="se-admin-pub__campana-cuerpo">
+      {/* Los ajustes de la campana, en modal. La lista de piezas se queda fuera --
+          debajo de esta fila-- porque es navegacion y no formulario: hay que verla para
+          saber que falta, y meterla dentro obligaria a abrir el modal para mirarla. */}
+      <ModalDelPanel
+        abierto={abierta}
+        ocupado={ocupado}
+        onCerrar={() => setAbierta(false)}
+        ancho="ancho"
+        titulo={campana.nombre}
+        subtitulo={anunciante?.nombre}
+        pie={
+          <>
+            <select
+              className="se-form-control"
+              value={campana.estado}
+              disabled={ocupado}
+              onChange={(e) => guardar({ estado: e.target.value })}
+              aria-label="Estado de la campana"
+            >
+              {(ajustes?.estados ?? []).map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="se-btn se-btn--secondary"
+              disabled={ocupado}
+              onClick={() => setAbierta(false)}
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              className="se-btn se-btn--primary"
+              disabled={ocupado}
+              onClick={() => guardar()}
+            >
+              {ocupado ? "Guardando…" : "Guardar la campana"}
+            </button>
+          </>
+        }
+      >
+        <div className="se-asis__cuerpo">
           <label className="se-form-label" htmlFor={`c-${campana.id}-nombre`}>
             Nombre
           </label>
@@ -522,48 +609,43 @@ const TarjetaDeCampana = ({
           </label>
 
           <h4 className="se-admin-pub__sub">Dónde sale</h4>
-          <Segmentos
+          <DondeSale
             valor={borrador.segmentos ?? []}
-            tipos={ajustes?.tipos_de_segmento}
             onChange={(segmentos) => setBorrador((a) => ({ ...a, segmentos }))}
           />
 
           <div className="se-admin-pub__acciones">
             <button
               type="button"
-              className="se-btn se-btn--primary"
-              disabled={ocupado}
-              onClick={() => guardar()}
-            >
-              Guardar la campaña
-            </button>
-            <select
-              className="se-form-control"
-              value={campana.estado}
-              disabled={ocupado}
-              onChange={(e) => guardar({ estado: e.target.value })}
-              aria-label="Estado de la campaña"
-            >
-              {(ajustes?.estados ?? []).map((e) => (
-                <option key={e} value={e}>
-                  {e}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
               className="se-btn se-btn--secondary"
               disabled={ocupado}
-              onClick={() => {
-                if (!window.confirm(`¿Borrar la campaña «${campana.nombre}» y sus piezas?`))
-                  return;
-                correr(() => borrarCampana(campana.id)).then(() => onCambio(null));
+              onClick={async () => {
+                const n = campana.creatividades?.length ?? 0;
+                const vale = await preguntar({
+                  title: `¿Borrar la campaña «${campana.nombre}»?`,
+                  description:
+                    n > 0
+                      ? `Se van con ella sus ${n} ${n === 1 ? "pieza" : "piezas"} y las cifras de cada una.`
+                      : "No tiene piezas, así que no se pierde ningún arte.",
+                  confirmLabel: "Borrar la campaña",
+                  busyLabel: "Borrando…",
+                  warning:
+                    "Las impresiones y los clics ya contados se pierden, y eso no se puede deshacer.",
+                });
+                if (!vale) return;
+                correr(
+                  () => borrarCampana(campana.id),
+                  `Campaña «${campana.nombre}» borrada`,
+                ).then(() => onCambio(null));
               }}
             >
               Borrar la campaña
             </button>
           </div>
+        </div>
+      </ModalDelPanel>
 
+      <div className="se-admin-pub__campana-cuerpo">
           <h4 className="se-admin-pub__sub">Piezas</h4>
           {campana.creatividades?.length ? (
             <ul className="se-admin-pub__piezas">
@@ -575,17 +657,32 @@ const TarjetaDeCampana = ({
                   anunciante={anunciante}
                   ocupado={ocupado}
                   onGuardar={(datos) =>
-                    correr(async () => {
-                      await actualizarPieza(pieza.id, datos);
-                      return actualizarCampana(campana.id, {});
-                    }).then(onCambio)
+                    correr(
+                      async () => {
+                        await actualizarPieza(pieza.id, datos);
+                        return actualizarCampana(campana.id, {});
+                      },
+                      `${nombreDeFormato(datos.formato, ajustes?.formatos)} guardado`,
+                    ).then(onCambio)
                   }
-                  onBorrar={() => {
-                    if (!window.confirm("¿Quitar esta pieza?")) return;
-                    correr(async () => {
-                      await borrarPieza(pieza.id);
-                      return actualizarCampana(campana.id, {});
-                    }).then(onCambio);
+                  onBorrar={async () => {
+                    const vale = await preguntar({
+                      title: `¿Quitar ${nombreDeFormato(pieza.formato, ajustes?.formatos).toLowerCase()}?`,
+                      description:
+                        "Se borra la pieza y sus cifras. El arte se queda en Archivos, así que se puede volver a usar.",
+                      confirmLabel: "Quitar la pieza",
+                      busyLabel: "Quitando…",
+                      // La descripcion ya dice exactamente que se pierde y que no.
+                      warning: null,
+                    });
+                    if (!vale) return;
+                    correr(
+                      async () => {
+                        await borrarPieza(pieza.id);
+                        return actualizarCampana(campana.id, {});
+                      },
+                      `${nombreDeFormato(pieza.formato, ajustes?.formatos)} quitado`,
+                    ).then(onCambio);
                   }}
                 />
               ))}
@@ -604,9 +701,9 @@ const TarjetaDeCampana = ({
               onChange={(e) => setFormatoNuevo(e.target.value)}
               aria-label="Formato de la nueva pieza"
             >
-              {Object.entries(ajustes?.formatos ?? {}).map(([letra, nombre]) => (
+              {Object.keys(ajustes?.formatos ?? {}).map((letra) => (
                 <option key={letra} value={letra}>
-                  {letra} · {nombre}
+                  {nombreDeFormato(letra, ajustes?.formatos)}
                 </option>
               ))}
             </select>
@@ -615,17 +712,19 @@ const TarjetaDeCampana = ({
               className="se-btn se-btn--secondary"
               disabled={ocupado}
               onClick={() =>
-                correr(async () => {
-                  await crearPieza(campana.id, { formato: formatoNuevo });
-                  return actualizarCampana(campana.id, {});
-                }).then(onCambio)
+                correr(
+                  async () => {
+                    await crearPieza(campana.id, { formato: formatoNuevo });
+                    return actualizarCampana(campana.id, {});
+                  },
+                  `${nombreDeFormato(formatoNuevo, ajustes?.formatos)} añadido — ábralo para ponerle el arte`,
+                ).then(onCambio)
               }
             >
               Añadir pieza
             </button>
           </div>
-        </div>
-      ) : null}
+      </div>
     </li>
   );
 };
@@ -638,6 +737,8 @@ TarjetaDeCampana.propTypes = {
   cifras: PropTypes.object,
   ocupado: PropTypes.bool,
   correr: PropTypes.func.isRequired,
+  /** Abre el diálogo del panel y resuelve a `true` si se confirmó. */
+  preguntar: PropTypes.func.isRequired,
   onCambio: PropTypes.func.isRequired,
 };
 
@@ -649,6 +750,7 @@ const TarjetaDeAnunciante = ({
   cifras,
   ocupado,
   correr,
+  preguntar,
   onCambio,
   destacada,
 }) => {
@@ -691,7 +793,9 @@ const TarjetaDeAnunciante = ({
   }, [destacada]);
   const [nombreCampana, setNombreCampana] = useState("");
 
-  const recargar = () => correr(() => listar()).then((d) => onCambio(d));
+  // Sin aviso: releer la lista después de un cambio no es un suceso propio, y avisarlo
+  // tapaba el mensaje del cambio que acababa de producirlo.
+  const recargar = () => correr(() => listar(), null).then((d) => onCambio(d));
 
   return (
     <section className="se-admin-pub__anunciante" id={`anunciante-${anunciante.id}`}>
@@ -817,17 +921,20 @@ const TarjetaDeAnunciante = ({
               className="se-btn"
               disabled={ocupado || !ficha.nombre.trim()}
               onClick={() =>
-                correr(async () => {
-                  await actualizarAnunciante(anunciante.id, {
-                    nombre: ficha.nombre.trim(),
-                    sitio_web: ficha.sitio_web.trim(),
-                    contacto_email: ficha.contacto_email.trim(),
-                    notas: ficha.notas,
-                    activo: ficha.activo,
-                    logo_id: ficha.logo_id,
-                  });
-                  return listar();
-                }).then(onCambio)
+                correr(
+                  async () => {
+                    await actualizarAnunciante(anunciante.id, {
+                      nombre: ficha.nombre.trim(),
+                      sitio_web: ficha.sitio_web.trim(),
+                      contacto_email: ficha.contacto_email.trim(),
+                      notas: ficha.notas,
+                      activo: ficha.activo,
+                      logo_id: ficha.logo_id,
+                    });
+                    return listar();
+                  },
+                  `Ficha de «${ficha.nombre.trim()}» guardada`,
+                ).then(onCambio)
               }
             >
               Guardar el anunciante
@@ -845,6 +952,7 @@ const TarjetaDeAnunciante = ({
                 cifras={cifras}
                 ocupado={ocupado}
                 correr={correr}
+                preguntar={preguntar}
                 onCambio={recargar}
               />
             ))}
@@ -862,11 +970,16 @@ const TarjetaDeAnunciante = ({
               className="se-btn se-btn--secondary"
               disabled={ocupado || !nombreCampana.trim()}
               onClick={() =>
-                correr(async () => {
-                  await crearCampana(anunciante.id, { nombre: nombreCampana.trim() });
-                  setNombreCampana("");
-                  return listar();
-                }).then(onCambio)
+                correr(
+                  async () => {
+                    await crearCampana(anunciante.id, { nombre: nombreCampana.trim() });
+                    setNombreCampana("");
+                    return listar();
+                  },
+                  // Nace en borrador, y eso decide si sale publicada. Decirlo aquí
+                  // evita la pregunta de por qué no se ve nada en el sitio.
+                  `Campaña «${nombreCampana.trim()}» creada en borrador`,
+                ).then(onCambio)
               }
             >
               Nueva campaña
@@ -879,10 +992,17 @@ const TarjetaDeAnunciante = ({
               className="se-btn se-btn--secondary"
               disabled={ocupado}
               onClick={() =>
-                correr(async () => {
-                  await actualizarAnunciante(anunciante.id, { activo: !anunciante.activo });
-                  return listar();
-                }).then(onCambio)
+                correr(
+                  async () => {
+                    await actualizarAnunciante(anunciante.id, {
+                      activo: !anunciante.activo,
+                    });
+                    return listar();
+                  },
+                  anunciante.activo
+                    ? `«${anunciante.nombre}» desactivado — sus campañas dejan de salir`
+                    : `«${anunciante.nombre}» activado`,
+                ).then(onCambio)
               }
             >
               {anunciante.activo ? "Desactivar" : "Activar"}
@@ -891,17 +1011,24 @@ const TarjetaDeAnunciante = ({
               type="button"
               className="se-btn se-btn--secondary"
               disabled={ocupado}
-              onClick={() => {
-                if (
-                  !window.confirm(
-                    `¿Borrar «${anunciante.nombre}»? Se van con él sus campañas, sus piezas y sus cifras.`,
-                  )
-                )
-                  return;
-                correr(async () => {
-                  await borrarAnunciante(anunciante.id);
-                  return listar();
-                }).then(onCambio);
+              onClick={async () => {
+                const n = anunciante.campanas?.length ?? 0;
+                const vale = await preguntar({
+                  title: `¿Borrar «${anunciante.nombre}»?`,
+                  description: `Se van con él sus ${n} ${n === 1 ? "campaña" : "campañas"}, todas sus piezas y el histórico de impresiones y clics. Si sólo quiere que deje de salir, use «Desactivar».`,
+                  confirmLabel: "Borrar el anunciante",
+                  busyLabel: "Borrando…",
+                  warning:
+                    "Las cifras históricas se pierden, y eso no se puede deshacer.",
+                });
+                if (!vale) return;
+                correr(
+                  async () => {
+                    await borrarAnunciante(anunciante.id);
+                    return listar();
+                  },
+                  `«${anunciante.nombre}» borrado con sus campañas y sus cifras`,
+                ).then(onCambio);
               }}
             >
               Borrar
@@ -921,6 +1048,8 @@ TarjetaDeAnunciante.propTypes = {
   cifras: PropTypes.object,
   ocupado: PropTypes.bool,
   correr: PropTypes.func.isRequired,
+  /** Abre el dialogo del panel y resuelve a `true` si se confirmo. */
+  preguntar: PropTypes.func.isRequired,
   onCambio: PropTypes.func.isRequired,
 };
 
@@ -935,7 +1064,14 @@ export const AdminPublicidad = () => {
   // veces el mismo logotipo tiene que volver a llevarte alli, y con solo el id la
   // segunda pulsacion no cambiaria el estado y no pasaria nada.
   const [destacado, setDestacado] = useState({ id: null, n: 0 });
+  const [asistente, setAsistente] = useState(false);
   const { guardado, confirmar } = useConfirmacionDeGuardado();
+  const { toastSuccess, toastError } = useAdminToast();
+  // El diálogo del panel, el mismo que usan Medios, Lugares y las otras cinco páginas
+  // con borrados. Aquí se usaba `window.confirm`, que pinta una caja del navegador con
+  // «localhost:3000 dice» encima de la página: no es del producto, no se puede explicar
+  // qué se lleva por delante, y en el móvil sale donde el navegador quiera.
+  const { confirm: preguntar, ConfirmDialog } = useAdminConfirm();
   const [ocupado, setOcupado] = useState(false);
   const [nombreNuevo, setNombreNuevo] = useState("");
 
@@ -955,8 +1091,20 @@ export const AdminPublicidad = () => {
     cargar();
   }, [cargar]);
 
-  /** Ejecuta, enseña el error si lo hay, y devuelve lo que salió (o `undefined`). */
-  const correr = async (accion) => {
+  /**
+   * Ejecuta, avisa de cómo fue, y devuelve lo que salió (o `undefined`).
+   *
+   * El aviso va flotante y no sólo en la cabecera. Esta pantalla mide más de mil
+   * líneas y sus botones están al fondo de cada campaña: el «Guardado ✓» del `<h1>`
+   * se pintaba fuera de la pantalla, así que desde abajo pulsar Guardar no producía
+   * ninguna señal. Es justo el caso que el propio `AdminToastContext` dice que existe
+   * para resolver, y esta página era la única grande que no lo usaba.
+   *
+   * `aviso` viaja por parámetro en vez de ser un «Guardado» único porque desde abajo
+   * no se ve *qué* se guardó: activar una campaña y borrar una pieza son sucesos
+   * distintos y quien pulsa tiene que poder distinguirlos sin subir a mirar.
+   */
+  const correr = async (accion, aviso = "Guardado") => {
     setOcupado(true);
     setError("");
     try {
@@ -964,9 +1112,16 @@ export const AdminPublicidad = () => {
       // Sólo si salió bien. Confirmar en el `finally` diría «guardado» también cuando
       // el servidor rechazó el cambio, que es la mentira más cara de esta pantalla.
       confirmar();
+      // `aviso` nulo = recarga interna, que no es un suceso del que informar. Sin esto
+      // cada guardado avisaba dos veces: una por el cambio y otra por releer la lista.
+      if (aviso) toastSuccess(aviso);
       return resultado;
     } catch (err) {
-      setError(adminErrorMessage(err));
+      const mensaje = adminErrorMessage(err);
+      // En los dos sitios: el flotante se ve donde se pulsó pero se desvanece, y el de
+      // la cabecera se queda para poder releerlo. Ver `AdminFormFeedback`.
+      setError(mensaje);
+      toastError(mensaje);
       return undefined;
     } finally {
       setOcupado(false);
@@ -1000,6 +1155,17 @@ export const AdminPublicidad = () => {
             instale bloqueadores.
           </p>
         </div>
+        {/* El camino guiado, arriba y destacado. La lista de abajo sigue haciendo lo
+            mismo para quien ya sabe cómo encajan los tres niveles; esto existe para
+            quien no, que antes se encontraba una lista vacía y ninguna pista. */}
+        <button
+          type="button"
+          className="se-btn se-btn--primary"
+          onClick={() => setAsistente(true)}
+          disabled={carga.estado !== "listo"}
+        >
+          Publicar un anuncio
+        </button>
       </header>
 
       {carga.estado === "error" ? (
@@ -1055,9 +1221,12 @@ export const AdminPublicidad = () => {
                 checked={ajustes.activa !== false}
                 disabled={ocupado}
                 onChange={(e) =>
-                  correr(() => fijarAjustes({ activa: e.target.checked })).then((a) =>
-                    a ? setDatos((d) => ({ ...d, ajustes: a })) : null,
-                  )
+                  correr(
+                    () => fijarAjustes({ activa: e.target.checked }),
+                    e.target.checked
+                      ? "Publicidad encendida en todo el sitio"
+                      : "Publicidad apagada — los diez espacios dejan de servir",
+                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
                 }
               />
               Publicidad encendida
@@ -1068,17 +1237,42 @@ export const AdminPublicidad = () => {
                 checked={!!ajustes.barra_inferior}
                 disabled={ocupado}
                 onChange={(e) =>
-                  correr(() => fijarAjustes({ barra_inferior: e.target.checked })).then((a) =>
-                    a ? setDatos((d) => ({ ...d, ajustes: a })) : null,
-                  )
+                  correr(
+                    () => fijarAjustes({ barra_inferior: e.target.checked }),
+                    e.target.checked
+                      ? "Barra fija inferior encendida"
+                      : "Barra fija inferior apagada",
+                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
                 }
               />
               Barra fija inferior
+            </label>
+            <label className="se-admin-pub__casilla">
+              <input
+                type="checkbox"
+                checked={!!ajustes.repetir_anunciante}
+                disabled={ocupado}
+                onChange={(e) =>
+                  correr(
+                    () => fijarAjustes({ repetir_anunciante: e.target.checked }),
+                    e.target.checked
+                      ? "Un anunciante ya puede ocupar varios espacios de la misma página"
+                      : "Vuelve a repartirse: un anunciante, un espacio por página",
+                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
+                }
+              />
+              Un anunciante puede repetir en la misma página
             </label>
             <p className="se-admin-meta-hint">
               La barra nace apagada: es el formato que más molesta y en móvil se come la
               franja donde está el pulgar. El interruptor general apaga los diez espacios
               de golpe, que es lo que hace falta el día de una noticia delicada.
+            </p>
+            <p className="se-admin-meta-hint">
+              <b>Repetir</b> está pensado para cuando hay poco inventario. Apagado, cada
+              marca ocupa un solo espacio por página y el resto queda libre para otras —
+              con pocos anunciantes eso deja huecos vacíos. Encendido, una misma marca
+              puede llevarse el banner, el boletín y la tarjeta de la misma portada.
             </p>
           </section>
 
@@ -1094,11 +1288,14 @@ export const AdminPublicidad = () => {
               className="se-btn se-btn--primary"
               disabled={ocupado || !nombreNuevo.trim()}
               onClick={() =>
-                correr(async () => {
-                  await crearAnunciante({ nombre: nombreNuevo.trim() });
-                  setNombreNuevo("");
-                  return listar();
-                }).then(aplicar)
+                correr(
+                  async () => {
+                    await crearAnunciante({ nombre: nombreNuevo.trim() });
+                    setNombreNuevo("");
+                    return listar();
+                  },
+                  `Anunciante «${nombreNuevo.trim()}» creado — ahora hace falta una campaña`,
+                ).then(aplicar)
               }
             >
               Nuevo anunciante
@@ -1115,6 +1312,7 @@ export const AdminPublicidad = () => {
                 cifras={cifrasPorPieza}
                 ocupado={ocupado}
                 correr={correr}
+                preguntar={preguntar}
                 onCambio={aplicar}
               />
             ))
@@ -1127,6 +1325,22 @@ export const AdminPublicidad = () => {
           )}
         </>
       ) : null}
+
+      <AsistenteDeAnuncio
+        abierto={asistente}
+        anunciantes={datos.anunciantes ?? []}
+        formatos={ajustes?.formatos}
+        correr={correr}
+        onCerrar={() => setAsistente(false)}
+        onListo={() => {
+          setAsistente(false);
+          cargar();
+        }}
+      />
+
+      {/* Uno solo para toda la pantalla: lo abre quien lo necesite a través de
+          `preguntar`, que viaja por props igual que `correr`. */}
+      <ConfirmDialog />
     </div>
   );
 };

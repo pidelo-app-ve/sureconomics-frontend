@@ -249,12 +249,25 @@ export const POR_FORMATO = {
  */
 const FORMATOS_DE_CINTA = new Set(["B", "C", "D"]);
 
+/** El cintillo no lleva arte ni titular: publica el nombre del anunciante y ya. */
+const FORMATOS_SIN_ARTE = new Set(["F"]);
+
 export const pintaAlgo = (hueco, variante) => {
   if (!hueco) return false;
+  if (FORMATOS_SIN_ARTE.has(hueco.formato)) return true;
+
   const esCinta =
     FORMATOS_DE_CINTA.has(hueco.formato) ||
     (hueco.formato === "A" && variante && variante !== "tarjeta");
-  return esCinta ? Boolean(hueco.cinta || hueco.imagen) : true;
+  if (esCinta) return Boolean(hueco.cinta || hueco.imagen);
+
+  // La tarjeta y el rail se sostienen con el titular aunque falte el logotipo, y al
+  // revés. Sin ninguno de los dos no se sostienen con nada: antes se devolvía `true`
+  // igualmente y la rejilla acababa con una celda rayada, sin imagen y sin texto,
+  // entre dos noticias -- que es exactamente el «recuadro vacío que se lee como un
+  // error de la página» que este módulo dice no querer. Y le quitaba el sitio a una
+  // noticia para no enseñar nada.
+  return Boolean(hueco.imagen || hueco.titular || hueco.titular_corto);
 };
 
 /**

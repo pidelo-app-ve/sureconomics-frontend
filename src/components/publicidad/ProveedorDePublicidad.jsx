@@ -17,11 +17,17 @@ import { ESPACIOS, getEspacios } from "../../services/publicidadService";
  * puede aplicar si quien decide ve la página entera.** Con una llamada por hueco cada
  * una decidiría a ciegas y el lector acabaría viendo el mismo logotipo tres veces.
  *
- * **Una impresión de más es una impresión que se factura y no existió.** Por eso se
- * pide una vez, cuando la vista dice que está lista, y no se vuelve a pedir hasta que
- * cambia la ruta. Una vista que carga su contenido en dos pasos -- la pieza primero, sus
- * temas después -- tiene que esperar a tenerlo todo y pasar `listo`, o contaría dos
- * veces cada hueco.
+ * **Con el contexto correcto, o no se pide.** Se pide una vez por ruta. Una vista cuyo
+ * contexto sale de su contenido -- una pieza y sus temas, un listado y su filtro --
+ * tiene que esperar a tenerlo y pasar `listo`: pedir antes serviría anuncios elegidos
+ * con un contexto que todavía no es el de la página.
+ *
+ * Lo que **no** es motivo para esperar es la facturación. La impresión no se cuenta al
+ * entregar sino cuando el navegador avisa de que la pieza apareció de verdad en
+ * pantalla (`POST /publicidad/visto`), así que pedir pronto no cobra nada de más. Por
+ * eso la portada, cuyo contexto es la constante `portada`, no espera a nada: hacerlo
+ * sólo ponía la petición de publicidad detrás de la del contenido y el anuncio
+ * aparecía notablemente después que la página.
  *
  * ## Qué pasa cuando una vista no declara nada
  *
@@ -56,15 +62,35 @@ export const ProveedorDePublicidad = ({ children }) => {
   // Cambiar de ruta borra lo anterior. Sin esto, el banner de la portada seguiría
   // pintado durante el primer fotograma de un artículo -- con su anunciante y su
   // contexto, que ya no son los de esta página.
+  //
+  // Aquí **sólo se borra lo pintado**, nunca el pedido. React ejecuta los efectos de
+  // los hijos antes que los del padre: cuando este efecto corre, una vista que declara
+  // sus huecos al montar ya ha llamado a `registrar`. Un `setPedido(null)` a secas
+  // borraba ese pedido recién hecho y no se pedía nada -- el fallo llevaba aquí desde
+  // siempre, tapado porque todas las vistas esperaban a tener contenido antes de
+  // registrarse, y para entonces este efecto ya había pasado.
+  //
+  // Un pedido de la ruta anterior no hace falta borrarlo: lo descarta el efecto de
+  // abajo al ver que su `ruta` ya no es la de ahora. Así el resultado no depende de en
+  // qué orden corran los dos efectos, que es la clase de detalle que vuelve a morder
+  // meses después.
   useEffect(() => {
-    setPedido(null);
     setEstado(VACIO);
   }, [pathname]);
 
-  const registrar = useCallback((nuevo) => setPedido(nuevo), []);
+  // El pedido se sella con la ruta desde la que se hizo, que es lo que permite al
+  // efecto de arriba distinguir «esto es de la página anterior» de «esto acaba de
+  // declararlo la página nueva».
+  const registrar = useCallback(
+    (nuevo) => setPedido({ ...nuevo, ruta: pathname }),
+    [pathname],
+  );
 
   useEffect(() => {
     if (!pedido || !pedido.espacios?.length) return undefined;
+    // De la página anterior: la vista nueva todavía no ha declarado los suyos, o no
+    // lleva publicidad. Pedirlo serviría anuncios con el contexto equivocado.
+    if (pedido.ruta !== pathname) return undefined;
 
     let vivo = true;
     getEspacios(pedido.espacios, pedido.contexto)
@@ -77,7 +103,7 @@ export const ProveedorDePublicidad = ({ children }) => {
     return () => {
       vivo = false;
     };
-  }, [pedido]);
+  }, [pedido, pathname]);
 
   const valor = useMemo(
     () => ({ activa: estado.activa, huecos: estado.huecos, registrar }),

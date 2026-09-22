@@ -137,8 +137,19 @@ export const Home = () => {
   // Los huecos de la portada, declarados de una vez: el sorteo necesita ver la
   // pagina entera para no repetir anunciante entre el banner y la tarjeta.
   //
-  // `listo` espera a que haya contenido: una portada que todavia esta cargando no
-  // es una pagina vista, y contarla seria facturar una impresion que nadie miro.
+  // **Sin esperar al contenido, y a proposito.** Aqui el contexto es la constante
+  // `portada`: no sale de la pieza ni de sus temas, asi que no hay nada que esperar.
+  // Con `listo` puesto, la peticion de publicidad no arrancaba hasta que terminaba la
+  // del contenido -- dos viajes en fila en vez de dos en paralelo -- y el anuncio
+  // aparecia notablemente despues que la pagina.
+  //
+  // No hay riesgo de facturar de mas: la impresion no se cuenta al entregar sino
+  // cuando el navegador avisa de que la pieza aparecio de verdad en pantalla
+  // (`POST /publicidad/visto`). Pedir antes no cuenta nada antes.
+  //
+  // Las vistas cuyo contexto SI depende del contenido -- una pieza y sus temas, un
+  // listado y su filtro -- siguen esperando, porque ahi pedir pronto seria pedir con
+  // el contexto equivocado.
   useEspacios({
     espacios: [
       ...ESPACIOS_DE_SITIO,
@@ -150,7 +161,6 @@ export const Home = () => {
       ESPACIOS.BOLETIN,
     ],
     contexto: { seccion: "portada" },
-    listo: status === "success",
   });
 
   // La editorial va detras de noticias. Si el filtro dejo la portada sin bloque de

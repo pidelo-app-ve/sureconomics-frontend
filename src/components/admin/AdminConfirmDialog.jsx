@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 
 const focusableSelector =
@@ -10,6 +11,8 @@ export const AdminConfirmDialog = ({
   description,
   confirmLabel,
   cancelLabel,
+  warning,
+  busyLabel,
   variant,
   isBusy,
   errorMessage,
@@ -38,6 +41,18 @@ export const AdminConfirmDialog = ({
     if (el && typeof el.focus === "function") {
       el.focus();
     }
+  }, [open]);
+
+  // La página de detrás, quieta. Se guarda el valor anterior en vez de poner "" al
+  // cerrar: cuando esto se abre sobre otro modal que ya lo había bloqueado, restaurar a
+  // vacío desbloquearía el de debajo, que sigue abierto.
+  useEffect(() => {
+    if (!open) return undefined;
+    const previo = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previo;
+    };
   }, [open]);
 
   useEffect(() => {
@@ -86,8 +101,17 @@ export const AdminConfirmDialog = ({
     onClose();
   };
 
-  return (
-    <div className="se-adm-dialog" role="presentation">
+  /*
+   * Colgado del `body`. `.se-admin-main__outlet` termina su animacion de entrada con un
+   * `transform` puesto (`animation-fill-mode: both`), y un elemento transformado es el
+   * bloque contenedor de sus descendientes `position: fixed`: el `inset: 0` de aqui
+   * cubria solo la columna de contenido, dejando la barra lateral sin oscurecer y el
+   * dialogo descentrado. El envoltorio `se-admin-app` mantiene el CSS, que cuelga
+   * entero de esa clase.
+   */
+  return createPortal(
+    <div className="se-admin-app se-adm-portal">
+      <div className="se-adm-dialog" role="presentation">
       <div
         className="se-adm-dialog__backdrop"
         role="button"
@@ -122,9 +146,12 @@ export const AdminConfirmDialog = ({
 
         <div id={descId} className="se-adm-dialog__body">
           {typeof description === "string" ? <p className="se-adm-dialog__text">{description}</p> : description}
-          <p className="se-adm-dialog__warn">
-            Esta acción es irreversible. Si continúa, el contenido se eliminará de forma permanente.
-          </p>
+          {/* El aviso era fijo, y eso lo puso a contradecir a quien lo abría: una
+              pieza de publicidad avisa de que el arte se conserva en Archivos y justo
+              debajo aparecía «el contenido se eliminará de forma permanente». Quien
+              sabe exactamente qué se pierde lo dice en `description` y pasa `warning`
+              en nulo; los demás siguen con el texto de siempre. */}
+          {warning ? <p className="se-adm-dialog__warn">{warning}</p> : null}
           {errorMessage ? (
             <p className="se-adm-dialog__error" role="alert">
               {errorMessage}
@@ -143,11 +170,13 @@ export const AdminConfirmDialog = ({
             {cancelLabel}
           </button>
           <button type="button" className="se-btn se-adm-dialog__danger" onClick={onConfirm} disabled={isBusy}>
-            {isBusy ? "Eliminando…" : confirmLabel}
+            {isBusy ? busyLabel : confirmLabel}
           </button>
         </footer>
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
@@ -157,6 +186,10 @@ AdminConfirmDialog.propTypes = {
   description: PropTypes.node.isRequired,
   confirmLabel: PropTypes.string,
   cancelLabel: PropTypes.string,
+  /** El recuadro de aviso. En nulo no se pinta, para quien ya lo dijo mejor arriba. */
+  warning: PropTypes.node,
+  /** Lo que dice el botón mientras trabaja. */
+  busyLabel: PropTypes.string,
   variant: PropTypes.oneOf(["danger"]),
   isBusy: PropTypes.bool,
   errorMessage: PropTypes.string,
@@ -167,6 +200,9 @@ AdminConfirmDialog.propTypes = {
 AdminConfirmDialog.defaultProps = {
   confirmLabel: "Eliminar",
   cancelLabel: "Cancelar",
+  warning:
+    "Esta acción es irreversible. Si continúa, el contenido se eliminará de forma permanente.",
+  busyLabel: "Eliminando…",
   variant: "danger",
   isBusy: false,
   errorMessage: "",

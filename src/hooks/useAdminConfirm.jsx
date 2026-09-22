@@ -7,6 +7,8 @@ import { AdminConfirmDialog } from "../components/admin/AdminConfirmDialog";
  *  description: import('react').ReactNode,
  *  confirmLabel?: string,
  *  cancelLabel?: string,
+ *  warning?: import('react').ReactNode,
+ *  busyLabel?: string,
  *  onConfirm?: () => Promise<void> | void,
  * }} ConfirmOptions
  */
@@ -20,6 +22,8 @@ export const useAdminConfirm = () => {
     description: "",
     confirmLabel: "Eliminar",
     cancelLabel: "Cancelar",
+    warning: undefined,
+    busyLabel: undefined,
     isBusy: false,
     errorMessage: "",
     onConfirm: null,
@@ -46,6 +50,11 @@ export const useAdminConfirm = () => {
           description: options.description,
           confirmLabel: options.confirmLabel ?? "Eliminar",
           cancelLabel: options.cancelLabel ?? "Cancelar",
+          // `undefined` deja que el dialogo ponga su texto de siempre; `null` lo
+          // quita. La diferencia importa: quien ya explico que se pierde no quiere
+          // un aviso generico debajo contradiciendole.
+          warning: options.warning,
+          busyLabel: options.busyLabel,
           isBusy: false,
           errorMessage: "",
           onConfirm: typeof options.onConfirm === "function" ? options.onConfirm : null,
@@ -89,6 +98,8 @@ export const useAdminConfirm = () => {
             description={state.description}
             confirmLabel={state.confirmLabel}
             cancelLabel={state.cancelLabel}
+            warning={state.warning}
+            busyLabel={state.busyLabel}
             isBusy={state.isBusy}
             errorMessage={state.errorMessage}
             onConfirm={handleConfirm}
@@ -99,8 +110,10 @@ export const useAdminConfirm = () => {
     [
       handleClose,
       handleConfirm,
+      state.busyLabel,
       state.cancelLabel,
       state.confirmLabel,
+      state.warning,
       state.description,
       state.errorMessage,
       state.isBusy,

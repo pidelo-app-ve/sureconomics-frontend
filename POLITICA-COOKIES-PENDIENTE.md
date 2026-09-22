@@ -60,23 +60,23 @@ mercado en blanco a quien rechace, que es una decisión de producto y no técnic
 ## 2. Los vídeos incrustados son terceros
 
 El sitio monta iframes de `tiktok.com` (bloque «En redes»), `player.vimeo.com` y
-`youtube.com`. Un iframe de esos dominios puede poner su propio almacenamiento dentro de
-su marco, y de nuevo recibe IP y URL.
+YouTube. Un iframe de esos dominios puede poner su propio almacenamiento dentro de su
+marco, y de nuevo recibe IP y URL.
 
-Dos matices que juegan a favor y uno en contra:
+Tres matices, todos a favor:
 
-- **A favor:** son iframes y no guiones. El contenido ajeno queda encerrado en su propio
-  marco en vez de ejecutarse dentro de nuestra página — es la técnica que ya se eligió a
-  propósito frente a cargar el `embed.js` de TikTok.
-- **A favor:** el vídeo de TikTok sólo se monta cuando alguien pulsa para verlo. Hasta
-  entonces no hay iframe.
-- **En contra:** YouTube se incrusta desde `youtube.com` y no desde
-  `youtube-nocookie.com`. El CSP permite los dos; el código usa el que sí pone cookies.
-  Cambiarlo es una línea y no cuesta nada.
+- Son iframes y no guiones. El contenido ajeno queda encerrado en su propio marco en vez
+  de ejecutarse dentro de nuestra página — es la técnica que ya se eligió a propósito
+  frente a cargar el `embed.js` de TikTok.
+- El vídeo de TikTok sólo se monta cuando alguien pulsa para verlo. Hasta entonces no hay
+  iframe.
+- **Resuelto el 22/09/2026:** YouTube se incrustaba desde `youtube.com`, que escribe las
+  cookies de seguimiento de Google. Ahora se incrusta desde `youtube-nocookie.com`
+  (`components/piece/PieceBody.jsx`). El CSP ya permitía los dos; el código usaba el
+  equivocado. Mismo reproductor, mismo vídeo, una línea.
 
-**Qué decidir:** cambiar YouTube a `youtube-nocookie.com` es gratis y debería hacerse ya.
-Lo demás —declarar los iframes de vídeo en la tabla, o pedir un clic previo con aviso—
-puede esperar, porque hoy ninguno se carga solo.
+**Qué queda por decidir:** declarar los iframes de vídeo en la tabla de cookies, o pedir
+un clic previo con aviso. Puede esperar, porque hoy ninguno se carga solo.
 
 ## 3. La publicidad ya existe
 

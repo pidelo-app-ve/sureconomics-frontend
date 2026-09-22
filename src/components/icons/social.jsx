@@ -41,3 +41,12 @@ export const IconTikTok = (props) => (
     />
   </svg>
 );
+
+/** El triángulo de "reproducir", sobre la miniatura de un video de TikTok: sin él,
+ *  una tarjeta de video se ve idéntica a una foto de Instagram. */
+export const IconReproducir = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <circle cx="12" cy="12" r="11" fill="currentColor" opacity="0.32" />
+    <path fill="currentColor" d="M9.8 7.6l7.4 4.4-7.4 4.4Z" />
+  </svg>
+);

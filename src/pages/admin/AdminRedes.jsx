@@ -8,11 +8,14 @@ import { getSocial, putSocial } from "../../services/adminSettingsService";
  * «En redes»: qué publicaciones se destacan al pie de todas las vistas.
  *
  * **Curado, no automático.** La redacción pega el enlace de la publicación, escribe
- * el texto tal como quiere que se lea, y en Instagram sube la imagen. Se probaron las
- * dos vías automáticas y ninguna sirve hoy: la API de X que lee cronologías es de
- * pago, el widget gratuito pinta cero píxeles, y la de Instagram pide un token que no
- * puede vivir en el navegador. Curar cuesta un minuto a la semana y deja elegir qué se
- * enseña -- ver `redes_service.py` para el detalle.
+ * el texto tal como quiere que se lea, y en Instagram y TikTok sube la imagen -- en
+ * TikTok, un fotograma o una captura del video. Se probaron las vías automáticas y
+ * ninguna sirve hoy: la API de X que lee cronologías es de pago, el widget gratuito
+ * pinta cero píxeles, la de Instagram pide un token que no puede vivir en el
+ * navegador, y el oEmbed público de TikTok sólo describe un video que ya se conoce --
+ * no sirve para listar los últimos de la cuenta, que es lo que haría falta -- y carga
+ * su propio script igual que el widget de X. Curar cuesta un minuto a la semana y
+ * deja elegir qué se enseña -- ver `redes_service.py` para el detalle.
  *
  * **Se guarda al terminar.** Como las fotos del equipo: se arma la lista entera en
  * pantalla y se pulsa Guardar una vez. El servidor reemplaza todo, así que quitar una
@@ -24,20 +27,24 @@ import { getSocial, putSocial } from "../../services/adminSettingsService";
 
 const MAX_POR_RED = 8;
 
-const NOMBRE = { instagram: "Instagram", x: "X" };
+//: Qué redes llevan una imagen (foto o fotograma) además del texto. X es sólo texto.
+const REDES_CON_IMAGEN = new Set(["instagram", "tiktok"]);
+
+const NOMBRE = { instagram: "Instagram", x: "X", tiktok: "TikTok" };
 const EJEMPLO_ENLACE = {
   instagram: "https://www.instagram.com/p/…",
   x: "https://x.com/Sur_economics/status/…",
+  tiktok: "https://www.tiktok.com/@surecon0mics/video/…",
 };
 
 const vacia = (red) =>
-  red === "instagram"
+  REDES_CON_IMAGEN.has(red)
     ? { imagen: null, url: "", texto: "", enlace: "", fecha: "" }
     : { texto: "", enlace: "", fecha: "" };
 
 const Publicacion = ({ red, indice, total, valor, ocupada, onCambiar, onQuitar, onMover, onSubir }) => {
   const id = `redes-${red}-${indice}`;
-  const esFoto = red === "instagram";
+  const esFoto = REDES_CON_IMAGEN.has(red);
 
   return (
     <li className="se-admin-redes__pub">
@@ -116,7 +123,7 @@ const Publicacion = ({ red, indice, total, valor, ocupada, onCambiar, onQuitar, 
 };
 
 Publicacion.propTypes = {
-  red: PropTypes.oneOf(["instagram", "x"]).isRequired,
+  red: PropTypes.oneOf(["instagram", "x", "tiktok"]).isRequired,
   indice: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
   valor: PropTypes.object.isRequired,
@@ -127,8 +134,18 @@ Publicacion.propTypes = {
   onSubir: PropTypes.func.isRequired,
 };
 
+//: Normaliza lo que llega del servidor para las tres redes de una vez, rellenando
+//: los campos que falten con la fila vacía de cada una.
+const normalizar = (d) =>
+  Object.fromEntries(
+    ["instagram", "x", "tiktok"].map((red) => [
+      red,
+      (d[red] || []).map((p) => ({ ...vacia(red), ...p, fecha: p.fecha || "" })),
+    ])
+  );
+
 export const AdminRedes = () => {
-  const [listas, setListas] = useState({ instagram: [], x: [] });
+  const [listas, setListas] = useState({ instagram: [], x: [], tiktok: [] });
   const [inicial, setInicial] = useState(null);
   const [carga, setCarga] = useState({ status: "loading", error: "" });
   const [guardado, setGuardado] = useState({ status: "idle", mensaje: "" });
@@ -139,10 +156,7 @@ export const AdminRedes = () => {
     getSocial()
       .then((d) => {
         if (!vivo) return;
-        const normal = {
-          instagram: (d.instagram || []).map((p) => ({ ...vacia("instagram"), ...p, fecha: p.fecha || "" })),
-          x: (d.x || []).map((p) => ({ ...vacia("x"), ...p, fecha: p.fecha || "" })),
-        };
+        const normal = normalizar(d);
         setListas(normal);
         setInicial(JSON.stringify(normal));
         setCarga({ status: "ready", error: "" });
@@ -187,12 +201,12 @@ export const AdminRedes = () => {
     );
   }, []);
 
-  const subir = useCallback(async (i, archivo) => {
-    setSubiendo(`instagram-${i}`);
+  const subir = useCallback(async (red, i, archivo) => {
+    setSubiendo(`${red}-${i}`);
     setGuardado({ status: "idle", mensaje: "" });
     try {
       const fila = await uploadAdminMediaImage(archivo);
-      cambiar("instagram", i, { imagen: fila.id, url: fila.url || "" });
+      cambiar(red, i, { imagen: fila.id, url: fila.url || "" });
     } catch (err) {
       setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo subir la imagen.") });
     } finally {
@@ -208,12 +222,12 @@ export const AdminRedes = () => {
           imagen, texto, enlace, fecha: fecha || null,
         })),
         x: listas.x.map(({ texto, enlace, fecha }) => ({ texto, enlace, fecha: fecha || null })),
+        tiktok: listas.tiktok.map(({ imagen, texto, enlace, fecha }) => ({
+          imagen, texto, enlace, fecha: fecha || null,
+        })),
       };
       const d = await putSocial(cuerpo);
-      const normal = {
-        instagram: (d.instagram || []).map((p) => ({ ...vacia("instagram"), ...p, fecha: p.fecha || "" })),
-        x: (d.x || []).map((p) => ({ ...vacia("x"), ...p, fecha: p.fecha || "" })),
-      };
+      const normal = normalizar(d);
       setListas(normal);
       setInicial(JSON.stringify(normal));
       setGuardado({ status: "ok", mensaje: "Guardado. Ya se ve al pie de todas las páginas." });
@@ -244,7 +258,7 @@ export const AdminRedes = () => {
               onCambiar={(parche) => cambiar(red, i, parche)}
               onQuitar={() => quitar(red, i)}
               onMover={(delta) => mover(red, i, delta)}
-              onSubir={(archivo) => subir(i, archivo)}
+              onSubir={(archivo) => subir(red, i, archivo)}
             />
           ))}
         </ul>
@@ -270,9 +284,10 @@ export const AdminRedes = () => {
           <h1 className="se-heading-section" style={{ margin: 0 }}>En redes</h1>
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
             Lo que se destaca al pie de todas las páginas. Pegue el enlace de la
-            publicación y escriba el texto como quiere que se lea; en Instagram, suba
-            también la imagen. El orden de aquí es el orden de la fila. Se guarda todo
-            de una vez al pulsar Guardar.
+            publicación y escriba el texto como quiere que se lea; en Instagram y en
+            TikTok, suba también la imagen -- en TikTok, un fotograma o una captura
+            del video. El orden de aquí es el orden de la fila. Se guarda todo de una
+            vez al pulsar Guardar.
           </p>
         </div>
       </header>
@@ -286,6 +301,7 @@ export const AdminRedes = () => {
         <>
           {bloque("instagram")}
           {bloque("x")}
+          {bloque("tiktok")}
 
           <div className="se-admin-form-actions" style={{ marginTop: "1.25rem" }}>
             <button

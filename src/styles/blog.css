@@ -13715,6 +13715,22 @@ a.se-topics__chip:focus-visible {
 .se-redes__pieza--foto:hover img,
 .se-redes__pieza--foto:focus-visible img { transform: scale(1.06); }
 
+/* TikTok: el mismo marco cuadrado que Instagram, con el triángulo de reproducir
+   encima -- si no, un fotograma de video se confunde con una foto. */
+.se-redes__reproducir {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 2.4rem;
+  height: 2.4rem;
+  color: #fff;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  transition: transform 0.35s var(--redes-frenado);
+  pointer-events: none;
+}
+.se-redes__pieza--video:hover .se-redes__reproducir,
+.se-redes__pieza--video:focus-visible .se-redes__reproducir { transform: scale(1.12); }
+
 .se-redes__pie {
   position: absolute;
   inset: auto 0 0 0;
@@ -13800,10 +13816,130 @@ a.se-topics__chip:focus-visible {
   }
   .se-redes__fila--dentro .se-redes__pieza:hover,
   .se-redes__fila--dentro .se-redes__pieza:focus-visible { transform: none; }
-  .se-redes__pieza--foto img, .se-redes__pieza--texto p, .se-redes__fecha, .se-redes__pieza--texto::before { transition: none; }
-  .se-redes__pieza--foto:hover img, .se-redes__pieza--texto:hover p, .se-redes__pieza--texto:hover .se-redes__fecha { transform: none; }
+  .se-redes__pieza--foto img, .se-redes__pieza--texto p, .se-redes__fecha, .se-redes__pieza--texto::before, .se-redes__reproducir { transition: none; }
+  .se-redes__pieza--foto:hover img, .se-redes__pieza--texto:hover p, .se-redes__pieza--texto:hover .se-redes__fecha, .se-redes__pieza--video:hover .se-redes__reproducir { transform: none; }
   .se-redes__pie { transform: translateY(0); transition: none; }
   .se-redes__progreso i { transition: none; }
+}
+
+/* El cuadro con el video de TikTok, sobre todo lo demás -- por encima incluso de la
+   cabecera fija, que llega a 1002. */
+.se-redes-video {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+}
+
+.se-redes-video__fondo {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  opacity: 0;
+  animation: se-redes-video-fondo-in 0.2s ease both;
+}
+
+.se-redes-video__superficie {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: min(420px, calc(100vw - 2.4rem));
+  max-height: calc(100vh - 3rem);
+  opacity: 0;
+  animation: se-redes-video-superficie-in 0.24s ease both;
+}
+
+.se-redes-video__cerrar {
+  position: absolute;
+  top: -3rem;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--redes-paso), border-color var(--redes-paso);
+}
+.se-redes-video__cerrar:hover,
+.se-redes-video__cerrar:focus-visible {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.se-redes-video__cerrar:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* 9/16: TikTok es vertical. La proporción se queda en la caja y el marco la
+   rellena, mismo motivo que `.se-videostage` de la pieza -- sin ella el iframe cae
+   a su tamaño por omisión del navegador mientras carga. */
+.se-redes-video__marco {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: calc(100vh - 8rem);
+  margin-inline: auto;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.se-redes-video__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.se-redes-video__nota {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  padding: 0 1.5rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+}
+
+.se-redes-video__pie {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.se-redes-video__pie a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+.se-redes-video__pie a:hover,
+.se-redes-video__pie a:focus-visible { color: var(--color-accent); }
+
+@keyframes se-redes-video-fondo-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes se-redes-video-superficie-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.97); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (max-width: 640px) {
+  .se-redes-video__superficie { width: calc(100vw - 1.6rem); }
+  .se-redes-video__cerrar { top: -3.2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-redes-video__fondo, .se-redes-video__superficie { animation: none; opacity: 1; }
 }
 
 /* ═══ Panel: curar las publicaciones ═════════════════════════════════ */

@@ -49,9 +49,10 @@ export const getFotosDelEquipo = async () => {
 };
 
 /**
- * Las publicaciones de redes curadas por la redaccion: `{ instagram: [...], x: [...] }`.
+ * Las publicaciones de redes curadas por la redaccion:
+ * `{ instagram: [...], x: [...], tiktok: [...] }`.
  *
- * Como las fotos del equipo, un fallo devuelve las dos listas vacias en vez de
+ * Como las fotos del equipo, un fallo devuelve las tres listas vacias en vez de
  * propagarse: el bloque entonces no pinta nada, y la pagina sigue completa.
  */
 export const getRedes = async () => {
@@ -61,9 +62,10 @@ export const getRedes = async () => {
     return {
       instagram: Array.isArray(d.instagram) ? d.instagram : [],
       x: Array.isArray(d.x) ? d.x : [],
+      tiktok: Array.isArray(d.tiktok) ? d.tiktok : [],
     };
   } catch {
-    return { instagram: [], x: [] };
+    return { instagram: [], x: [], tiktok: [] };
   }
 };
 

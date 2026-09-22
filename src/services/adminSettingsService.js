@@ -37,7 +37,7 @@ export const putTeamPhotos = async (fotos) => {
 
 /** Las publicaciones curadas, con el id de imagen y su direccion. */
 export const getSocial = async () =>
-  unwrapEntity(await adminRequest("/admin/settings/social")) ?? { instagram: [], x: [] };
+  unwrapEntity(await adminRequest("/admin/settings/social")) ?? { instagram: [], x: [], tiktok: [] };
 
 /**
  * Reemplaza las dos listas de una vez. Devuelve como quedan, con las imagenes

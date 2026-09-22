@@ -51,8 +51,8 @@ export const PRIMARY_NAV = [
   // La puerta comercial, al lado de la institucional y la ultima de la fila: quien
   // entra a leer pasa por delante de las nueve secciones antes de llegar a ella, y
   // quien viene a comprar espacio la encuentra sin que nadie le pase un enlace.
-  // «Anúnciate» ya no va en la navegación principal: es una página comercial, no una
-  // sección para el lector, y en la barra competía por sitio con las que sí lo son.
+  // «Anúnciate» ya no va en la navegación principal: es una página comercial, no una
+  // sección para el lector, y en la barra competía por sitio con las que sí lo son.
   // Vive en el pie, junto a la política de cookies.
 ];
 
@@ -103,9 +103,8 @@ export const PARTNERS = [
     logo: aliada("invicto-logo.png"),
     url: "https://capitalinvicto.com",
   },
-  // Queda LOG Consultancy Group, que estaba en esta lista pero no aparece en el
-  // sitio del grupo y no tiene logo. Se dibujaría con el nombre si se repone:
-  // { id: "log-consultancy", name: "LOG Consultancy Group", logo: null, url: null },
+  // LOG Consultancy Group estuvo en esta lista y ya no existe (confirmado por el
+  // cliente el 21/09/2026). No se repone.
 ];
 
 

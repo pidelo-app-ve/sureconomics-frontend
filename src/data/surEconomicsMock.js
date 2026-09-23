@@ -112,8 +112,9 @@ export const PARTNERS = [
  * El perfil de LinkedIn de cada persona, **una sola vez**.
  *
  * Hace falta un mapa y no un campo suelto en cada ficha porque la misma persona sale en
- * varios bloques: Óscar Doval en tres —junta, consejo y comité—, Pablo Quintero en otros
- * tres, Alex Lund y Saúl Benarroch en dos. Con la dirección escrita en cada sitio,
+ * varios bloques: Óscar Doval en cuatro —junta, consejo, comité y colaboradores—, Pablo
+ * Quintero en otros cuatro, Alex Lund y Saúl Benarroch en dos. Con la dirección en cada
+ * sitio,
  * corregir un perfil obliga a acordarse de los demás, y el día que alguien cambie su
  * vanity URL quedarían fichas apuntando a una página que ya no existe.
  *
@@ -143,6 +144,7 @@ const LINKEDIN = {
   luisOjeda: "https://www.linkedin.com/in/luisojeda-dev",
   manuelOropeza:
     "https://www.linkedin.com/in/manuel-eduardo-oropeza-perez-84072891",
+  mateoRodriguez: "https://www.linkedin.com/in/mateo-r-025673219",
 };
 
 export const TEAM = {
@@ -258,7 +260,7 @@ export const TEAM = {
       bio: "Estudiante de Economía, Universidad Católica Andrés Bello, Caracas, Venezuela.",
       cvUrl: "#",
       email: "",
-      links: [],
+      links: [], linkedin: LINKEDIN.mateoRodriguez,
     },
     {
       id: "colaborador-saul-benarroch",

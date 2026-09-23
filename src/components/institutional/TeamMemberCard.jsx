@@ -16,6 +16,7 @@ export const TeamMemberCard = ({ member, foto }) => {
 
   const hasExternalCv = Boolean(member?.cvUrl && member.cvUrl !== "#");
   const hasEmail = Boolean(member?.email);
+  const hasLinkedin = Boolean(member?.linkedin);
 
   return (
     <article className="se-member-card">
@@ -52,7 +53,7 @@ export const TeamMemberCard = ({ member, foto }) => {
         </div>
       </div>
 
-      {(hasEmail || hasExternalCv) && (
+      {(hasEmail || hasExternalCv || hasLinkedin) && (
         <div className="se-member-card__links">
           {hasEmail && (
             <a
@@ -73,6 +74,25 @@ export const TeamMemberCard = ({ member, foto }) => {
               CV / Perfil
             </a>
           )}
+          {/* El último de la fila: el correo es la vía de contacto que ofrece la casa,
+              y el perfil es de la persona. `noopener` además de `noreferrer` -- este
+              último ya lo implica en los navegadores actuales, pero escribirlo es lo
+              que evita que una pestaña ajena pueda manipular la nuestra si alguno se
+              queda atrás.
+
+              El nombre va en el `aria-label` porque en una rejilla de veinte tarjetas
+              un lector de pantalla leería «LinkedIn» veinte veces sin decir de quién. */}
+          {hasLinkedin && (
+            <a
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="se-link se-member-card__link"
+              aria-label={`Perfil de ${member.name} en LinkedIn`}
+            >
+              LinkedIn
+            </a>
+          )}
         </div>
       )}
     </article>
@@ -86,6 +106,8 @@ TeamMemberCard.propTypes = {
     bio: PropTypes.string,
     cvUrl: PropTypes.string,
     email: PropTypes.string,
+    /** Su perfil. Sale de `LINKEDIN` en los datos, que lo guarda una sola vez. */
+    linkedin: PropTypes.string,
   }).isRequired,
   /** La dirección de su foto, si alguien la subió desde el panel. */
   foto: PropTypes.string,

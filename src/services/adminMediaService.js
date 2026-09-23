@@ -39,7 +39,13 @@ export const createAdminExternalMedia = async (body) =>
   unwrapEntity(await adminRequest("/admin/media/external", { method: "POST", json: body }));
 
 /** Kept in sync with `ALLOWED_IMAGE_KINDS` in the backend's `upload_service.py`. */
-export const ACCEPTED_IMAGE_MIME = "image/jpeg,image/png,image/webp,image/gif,image/avif";
+/**
+ * El SVG va aquí porque un banner exportado en vectorial se ve nítido a cualquier
+ * tamaño. Llega saneado en el servidor -- `svg_seguro` -- y se sirve encerrado en un
+ * `sandbox`: un SVG no es sólo una imagen, es un documento que puede llevar código.
+ */
+export const ACCEPTED_IMAGE_MIME =
+  "image/jpeg,image/png,image/webp,image/gif,image/avif,image/svg+xml";
 
 /** Reports are PDFs and nothing else — the backend checks the magic bytes. */
 export const ACCEPTED_DOCUMENT_MIME = "application/pdf";

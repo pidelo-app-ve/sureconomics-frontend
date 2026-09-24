@@ -103,18 +103,31 @@ const Montaje = ({ hueco, modificador }) => {
   if (!arte) return null;
 
   return (
-    <Envoltorio hueco={hueco} className={`se-ad se-ad--montaje se-ad--${modificador}`}>
+    <Envoltorio
+      hueco={hueco}
+      className={`se-ad se-ad--montaje se-ad--${modificador}${hueco.cinta_movil ? " se-ad--con-movil" : ""}`}
+    >
       <div className="se-ad__cinta">
-        <img
-          className="se-ad__cinta-img"
-          src={arte}
-          alt={hueco.alt || hueco.anunciante || ""}
-          loading="lazy"
-        />
-        <span className="se-ad__cinta-sello">
-          <Etiqueta anunciante={hueco.anunciante} esCasa={hueco.es_casa} />
-        </span>
+        {/* En el teléfono, su propia composición si la hay. El corte de 640 px tiene
+            que ser el mismo que el de la hoja (`.se-ad--con-movil`), que es la que
+            cambia la forma del recuadro. */}
+        <picture>
+          {hueco.cinta_movil ? (
+            <source media="(max-width: 640px)" srcSet={hueco.cinta_movil} />
+          ) : null}
+          <img
+            className="se-ad__cinta-img"
+            src={arte}
+            alt={hueco.alt || hueco.anunciante || ""}
+            loading="lazy"
+          />
+        </picture>
       </div>
+      {/* Debajo del arte y no encima: sobrepuesta tapaba el logo del anunciante, que es
+          justo lo que paga por enseñar. Pegada al borde inferior y en una línea. */}
+      <span className="se-ad__cinta-sello">
+        <Etiqueta anunciante={hueco.anunciante} esCasa={hueco.es_casa} />
+      </span>
     </Envoltorio>
   );
 };

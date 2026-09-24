@@ -16762,17 +16762,19 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   object-position: center;
 }
 
-/* La etiqueta, sobrepuesta y con placa propia: va encima del arte del anunciante,
-   que puede ser de cualquier color, y sin placa desaparece sobre la mitad. */
+/* La etiqueta, **debajo** del arte, pegada a su borde inferior y en una sola línea
+   baja. Antes iba sobrepuesta en la esquina y tapaba el logo del anunciante -- lo
+   primero que se ve de un banner y lo que se paga por enseñar. */
 .se-ad__cinta-sello {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0.26rem 0.58rem 0.28rem;
-  background: rgba(255, 255, 255, 0.94);
-  border-right: 1px solid var(--color-hairline);
-  border-bottom: 1px solid var(--color-hairline);
-  border-bottom-right-radius: 6px;
+  display: block;
+  padding: 0.16rem 0.55rem 0.18rem;
+  background: var(--se-offwhite);
+  border-top: 1px solid var(--color-hairline);
+  line-height: 1.2;
+}
+.se-ad__cinta-sello .se-ad__etiqueta {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
 }
 .se-ad__cinta-sello .se-ad__etiqueta { color: var(--color-slate-2); }
 
@@ -16813,12 +16815,25 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 
 @media (max-width: 640px) {
-  /* En vertical una cinta de 8:1 queda en una franja donde no se lee nada. Se abre, y
-     la imagen sigue entrando entera por ir en `contain`. */
+  /* En el telefono la tira sale **entera**: el recuadro toma la forma del arte, 8:1.
+     Antes se abria a 3:1 (4:1 en patrocinio y boletin) y, en los huecos que van en
+     `cover`, eso recortaba mas de la mitad del ancho -- el boton y parte del logo
+     desaparecian. Mas baja pero completa se lee mejor que alta y mutilada. */
   .se-ad--banner .se-ad__cinta,
-  .se-ad--franja .se-ad__cinta { aspect-ratio: 3 / 1; }
+  .se-ad--franja .se-ad__cinta,
   .se-ad--patrocinio .se-ad__cinta,
-  .se-ad--boletin .se-ad__cinta { aspect-ratio: 4 / 1; }
+  .se-ad--boletin .se-ad__cinta { aspect-ratio: 1456 / 180; }
+  .se-ad--patrocinio .se-ad__cinta-img,
+  .se-ad--boletin .se-ad__cinta-img { object-fit: contain; }
+
+  /* Con arte propio para el telefono (logo, frase y boton apilados, 2:1), ese manda.
+     El corte de 640 px es el mismo que el `<source>` de `Montaje`. */
+  .se-ad--con-movil .se-ad__cinta,
+  .se-ad--con-movil.se-ad--banner .se-ad__cinta,
+  .se-ad--con-movil.se-ad--franja .se-ad__cinta,
+  .se-ad--con-movil.se-ad--patrocinio .se-ad__cinta,
+  .se-ad--con-movil.se-ad--boletin .se-ad__cinta { aspect-ratio: 2 / 1; }
+  .se-ad--con-movil .se-ad__cinta-img { object-fit: cover; }
 }
 
 /* --- Lo que pinta cada formato ------------------------------------------

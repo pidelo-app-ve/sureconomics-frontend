@@ -80,12 +80,14 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
   // selector pinta mientras tanto.
   const [imagen, setImagen] = useState(pieza.imagen_asset ?? null);
   const [cinta, setCinta] = useState(pieza.cinta_asset ?? null);
+  const [movil, setMovil] = useState(pieza.cinta_movil_asset ?? null);
   const [variante, setVariante] = useState("tarjeta");
 
   useEffect(() => {
     setBorrador(pieza);
     setImagen(pieza.imagen_asset ?? null);
     setCinta(pieza.cinta_asset ?? null);
+    setMovil(pieza.cinta_movil_asset ?? null);
   }, [pieza]);
 
   const cambiar = (campo) => (e) => {
@@ -211,6 +213,7 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
                   enlace: borrador.enlace,
                   imagen_id: borrador.imagen_id === "" ? null : borrador.imagen_id,
                   cinta_id: borrador.cinta_id === "" ? null : borrador.cinta_id,
+                  cinta_movil_id: borrador.cinta_movil_id === "" ? null : borrador.cinta_movil_id ?? null,
                   activa: !!borrador.activa,
                 })
               }
@@ -249,6 +252,26 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
               hacen aquí. El selector sube el archivo en el sitio y lo enseña al momento:
               no hay que abrir Archivos en otra pestaña ni copiar ningún identificador. */}
           {artes.map(campoDeArte)}
+          {/* La tira es 8:1: en un teléfono mide unos 48 px de alto y el texto deja de
+              leerse. Escalar no reacomoda -- da igual SVG o JPEG --, así que el
+              teléfono necesita su propia composición. Sin ella, sale la tira entera. */}
+          {usaCinta ? (
+            <AssetField
+              id={`p-${pieza.id}-cinta-movil`}
+              label="Arte para teléfono — 1200 × 600 px (opcional)"
+              hint="Lo mismo que la tira, pero con el logo, la frase y el botón apilados. Se usa en pantallas de menos de 640 px. Sin él, en el teléfono sale la tira entera, más pequeña."
+              forma={{ ancho: 2, alto: 1 }}
+              kind="image"
+              value={borrador.cinta_movil_id ?? null}
+              asset={movil}
+              onChange={(idNuevo, objeto) => {
+                setBorrador((b) => ({ ...b, cinta_movil_id: idNuevo ?? null }));
+                setMovil(objeto ?? null);
+              }}
+              onUpload={uploadAdminMediaImage}
+              accept={ACCEPTED_IMAGE_MIME}
+            />
+          ) : null}
 
           {imagenPerdida || cintaPerdida ? (
             <div className="se-admin-pub__rescate">

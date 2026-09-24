@@ -202,6 +202,27 @@ export const imagenSrcSet = (url, anchos, anchoOriginal = null) => {
 };
 
 /** Where a piece lives. */
+/**
+ * El `?v=` que se añade a la dirección de una pieza al compartirla.
+ *
+ * X guarda la tarjeta de un enlace durante días -- también la fallida, sin imagen -- y
+ * no ofrece forma de borrarla: la única salida es una dirección distinta. Esta la da
+ * sola: la última edición en segundos, en base 36. Cambiar la foto o el título estrena
+ * dirección y X la vuelve a leer, sin que nadie en la redacción tenga que saberlo.
+ *
+ * Tiene que dar lo mismo que `version_para_compartir` en `vista_previa.py` del
+ * backend, que calienta esta misma dirección al publicar.
+ */
+export const versionParaCompartir = (iso) => {
+  const ms = Date.parse(iso ?? "");
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  return Math.floor(ms / 1000).toString(36);
+};
+
+/** La ruta de la pieza con su versión, que es la que se comparte. */
+export const enlaceParaCompartir = (ruta, version) =>
+  version ? `${ruta}?v=${version}` : ruta;
+
 export const rutaDePieza = (pieza) => {
   if (!pieza) return "/";
   const meta = Object.values(FORMATO_META).find((m) => m.plural === pieza.formato);
@@ -249,6 +270,7 @@ export const piezaFromApi = (row) => {
     geoSlugs: (row.places ?? []).map((p) => p.slug),
     fecha: fechaCorta(row.published_at),
     fechaIso: row.published_at ?? null,
+    version: versionParaCompartir(row.updated_at || row.published_at),
     // The byline the piece is published under, and nothing else.
     //
     // It deliberately does NOT fall back to `author.name`, which is the account

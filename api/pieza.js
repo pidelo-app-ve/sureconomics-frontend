@@ -27,8 +27,8 @@ const API =
   process.env.API_BASE_URL ||
   "https://sureconomics-backend.onrender.com";
 
-/** The API is on Render's free tier, which sleeps. A cold start must not become a
- *  blank page, and the function's own ceiling is ten seconds. */
+/** A slow API must not become a blank page, and the function's own ceiling is ten
+ *  seconds. Past this, the page goes out with the site's generic card instead. */
 const LIMITE_MS = 3500;
 
 const SITIO = "https://www.sureconomics.com";
@@ -49,6 +49,24 @@ const SECCIONES = {
   editorial: "editorial",
   entrevistas: "entrevista",
   informes: "informe",
+  podcast: "podcast",
+};
+
+/**
+ * The brand card: a static 21 KB JPEG served by Vercel itself, so it is never slow and
+ * never missing. It stands in whenever the piece's own image cannot be trusted to
+ * arrive -- no photograph, an SVG (X does not draw SVG), or the API not answering.
+ *
+ * Why never "no image": X caches a card for days, and it caches a failed one too. A
+ * preview that went out bare stays bare long after the cause is fixed. The brand
+ * card at least says whose link it is.
+ */
+export const IMAGEN_DE_MARCA = { url: `${SITIO}/brand/og-default.jpg`, medido: true };
+
+/** What a page says about itself when there is no piece to describe. */
+const GENERICO = {
+  titulo: "SurEconomics — Economía, mercados e inversión",
+  descripcion: "Economía, mercados e inversión con inteligencia regional.",
 };
 
 const escapar = (valor) =>
@@ -79,12 +97,25 @@ const textoLlano = (html, maximo = 200) => {
  */
 export const imagenParaCompartir = (url) => {
   if (!url) return null;
+  if (/\.svg(\?|$)/i.test(url)) return IMAGEN_DE_MARCA;
 
   // Absolute, always. The API now answers `/media/image/...` for anything stored in
   // R2, and a relative `og:image` is simply dropped: WhatsApp, X, Facebook and
   // Telegram all require a full URL and none of them resolve one against the page.
   // This was the bug -- the tag was there, correct-looking, and worth nothing.
   const absoluta = url.startsWith("/") ? `${SITIO}${url}` : url;
+
+  // R2: the backend keeps a sibling made for exactly this -- `foo-abc.png` has
+  // `foo-abc-og.jpg`, always a 1200x630 JPEG of ~150 KB -- and creates it on first
+  // request if an older photo does not have one yet (`vista_previa.py`). Before
+  // this, X was handed the 1.9 MB original, uncached, in ~2 s, and gave up.
+  const enR2 = absoluta.indexOf(`${SITIO}/media/image/`) === 0;
+  if (enR2) {
+    const sinConsulta = absoluta.split("?")[0];
+    const punto = sinConsulta.lastIndexOf(".");
+    const base = punto > sinConsulta.lastIndexOf("/") ? sinConsulta.slice(0, punto) : sinConsulta;
+    return { url: `${base}-og.jpg`, medido: true };
+  }
 
   const marca = "/image/upload/";
   const corte = absoluta.indexOf(marca);
@@ -175,9 +206,18 @@ const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion }) => 
  */
 export const inyectar = (shell, { titulo, ...resto }) => {
   const bloque = etiquetas({ titulo, ...resto });
-  const conTitulo = shell.replace(
+  // The shell carries the site's generic card for every other page (`index.html`,
+  // between these markers). Left in, a piece would have two `og:image` tags and each
+  // crawler would pick whichever it likes.
+  const sinGenerico = shell.replace(
+    /<!-- og:generico -->[\s\S]*?<!-- \/og:generico -->\s*/i,
+    ""
+  );
+  const conTitulo = sinGenerico.replace(
     /<title>[\s\S]*?<\/title>/i,
-    `<title>${escapar(titulo)} — SurEconomics</title>`
+    titulo.includes("SurEconomics")
+      ? `<title>${escapar(titulo)}</title>`
+      : `<title>${escapar(titulo)} — SurEconomics</title>`
   );
   return conTitulo.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
 };
@@ -228,12 +268,19 @@ export default async function handler(req, res) {
   }
 
   const seco = (mensaje) => {
-    // Fell back: the page works, the preview does not. Cached briefly so the next
-    // request tries again instead of inheriting the miss for a day.
+    // Fell back: the page works, and the preview is the site's generic card rather
+    // than nothing -- X would cache "nothing" for days. Cached briefly here so the
+    // next request tries for the real one instead of inheriting the miss.
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "public, s-maxage=30");
     res.setHeader("X-Pieza-Meta", mensaje);
-    res.status(200).send(shell);
+    res.status(200).send(
+      inyectar(shell, {
+        ...GENERICO,
+        imagen: IMAGEN_DE_MARCA,
+        url: `${SITIO}/${seccion ?? ""}${slug ? `/${slug}` : ""}`,
+      })
+    );
   };
 
   const formato = SECCIONES[seccion];
@@ -267,7 +314,9 @@ export default async function handler(req, res) {
   const html = inyectar(shell, {
     titulo: pieza.title,
     descripcion: descripcionDe(pieza),
-    imagen: imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url),
+    imagen:
+      imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url) ??
+      IMAGEN_DE_MARCA,
     url: `${SITIO}/${seccion}/${slug}`,
     publicado: pieza.published_at || null,
     seccion: pieza.topics?.[0]?.name || null,

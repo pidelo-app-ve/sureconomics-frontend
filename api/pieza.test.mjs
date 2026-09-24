@@ -10,6 +10,7 @@
  * no podían fallar.
  */
 import handler, {
+  IMAGEN_DE_MARCA,
   descripcionDe,
   esNuestroShell,
   imagenParaCompartir,
@@ -21,6 +22,10 @@ const SHELL = `<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <title>Sur Economics — Economía, mercados e inversión</title>
+    <!-- og:generico -->
+    <meta property="og:image" content="https://www.sureconomics.com/brand/og-default.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- /og:generico -->
   </head>
   <body><div id="root"></div><script src="/assets/index-abc123.js"></script></body>
 </html>`;
@@ -93,13 +98,34 @@ await conFetch(fetchNormal(PIEZA), async () => {
   check("se cachea en el borde", /s-maxage=600/.test(res.headers["Cache-Control"]));
 });
 
-// —— 2. Sin fotografía: tarjeta pequeña, no una grande vacía ——
+// —— 2. Sin fotografía: la tarjeta de marca, nunca una tarjeta sin imagen ——
+//
+// X guarda la tarjeta durante días, también la fallida. Una vista previa que salió
+// sin imagen se queda así mucho después de arreglar la causa.
 await conFetch(fetchNormal({ ...PIEZA, image_asset: null }), async () => {
   const res = respuestaFalsa();
   await handler({ query: { seccion: "noticias", slug: "sin-foto" } }, res);
-  check("sin foto no promete tarjeta grande",
-    !res.body.includes("summary_large_image") && res.body.includes('content="summary"'));
-  check("sin foto no emite og:image", !res.body.includes("og:image"));
+  check("sin foto sale la tarjeta de marca",
+    res.body.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
+  check("y en grande, con medidas", res.body.includes("summary_large_image")
+    && res.body.includes('og:image:width" content="1200"'));
+});
+
+// —— 2c. Una sola og:image: el bloque genérico del shell se quita ——
+await conFetch(fetchNormal(PIEZA), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "concertacion-tripartita" } }, res);
+  check("una sola og:image", (res.body.match(/property="og:image"/g) || []).length === 1);
+  check("sin el bloque genérico", !res.body.includes("og:generico"));
+});
+
+// —— 2d. Los podcasts también tienen vista previa ——
+await conFetch(fetchNormal(PIEZA), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "podcast", slug: "un-episodio" } }, res);
+  check("podcast arma sus etiquetas",
+    res.body.includes('og:url" content="https://www.sureconomics.com/podcast/un-episodio"'),
+    res.headers["X-Pieza-Meta"]);
 });
 
 // —— 3. Falla abierto: la página funciona aunque la API no ——
@@ -125,6 +151,8 @@ for (const [nombre, impl, marca] of casos) {
       res.code === 200 && res.body.includes('id="root"') && res.headers["X-Pieza-Meta"] === marca,
       res.headers["X-Pieza-Meta"]);
     check(`${nombre}: no se cachea largo`, res.headers["Cache-Control"] === "public, s-maxage=30");
+    check(`${nombre}: aun así lleva imagen, la de marca`,
+      res.body.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
   });
 }
 
@@ -186,8 +214,8 @@ check("el de Vercel no", !esNuestroShell(LOGIN_DE_VERCEL));
 await conFetch(fetchNormal(PIEZA), async () => {
   const res = respuestaFalsa();
   await handler({ query: { seccion: "recetas", slug: "x" } }, res);
-  check("sección desconocida devuelve el shell",
-    res.code === 200 && !res.body.includes("og:title"), res.headers["X-Pieza-Meta"]);
+  check("sección desconocida no inventa la pieza",
+    res.code === 200 && !res.body.includes("tripartita"), res.headers["X-Pieza-Meta"]);
 });
 
 // —— 5. Inyección de HTML por el título ——
@@ -206,10 +234,14 @@ check("no se puede escapar de un atributo", !sucio.includes('onload="alert(2)"')
 // Facebook y Telegram la descartan. La etiqueta estaba, se veia bien, y no valia
 // nada -- que es el modo exacto en que esto falla sin que nadie lo note.
 check(
-  "una ruta de /media sale absoluta",
-  imagenParaCompartir("/media/image/2026/09/foto.jpg").url ===
-    "https://www.sureconomics.com/media/image/2026/09/foto.jpg"
+  "una ruta de /media sale absoluta, y en su versión para compartir",
+  imagenParaCompartir("/media/image/2026/09/foto-abc.png").url ===
+    "https://www.sureconomics.com/media/image/2026/09/foto-abc-og.jpg"
 );
+check("la versión para compartir se declara medida",
+  imagenParaCompartir("/media/image/2026/09/foto-abc.png").medido === true);
+check("un SVG no se manda a X: tarjeta de marca",
+  imagenParaCompartir("/media/image/2026/09/logo-abc.svg") === IMAGEN_DE_MARCA);
 check(
   "una direccion completa se respeta",
   imagenParaCompartir("https://otro.example/foto.jpg").url === "https://otro.example/foto.jpg"
@@ -224,7 +256,7 @@ check("sin imagen, nada", imagenParaCompartir(null) === null);
 const sinMedir = inyectar(SHELL, {
   titulo: "Una pieza",
   url: "https://www.sureconomics.com/noticias/x",
-  imagen: imagenParaCompartir("/media/image/2026/09/foto.jpg"),
+  imagen: imagenParaCompartir("https://otro.example/foto.jpg"),
 });
 check("una imagen servida tal cual no declara tamano", !sinMedir.includes("og:image:width"));
 check("pero si sale en og:image", sinMedir.includes('property="og:image"'));

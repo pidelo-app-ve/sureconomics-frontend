@@ -14,7 +14,7 @@ import {
   RelatedPieces,
 } from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
-import { FORMATO_META, rutaDePieza } from "../lib/pieza";
+import { FORMATO_META, enlaceParaCompartir, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
@@ -95,6 +95,23 @@ export const Pieza = () => {
       title: `${pieza.titulo} — ${BRAND.name}`,
       description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
     });
+  }, [pieza]);
+
+  // La barra de direcciones también lleva la versión: quien copia el enlace de ahí para
+  // pegarlo en X comparte el mismo que el botón. `replaceState` y no `navigate`: sólo
+  // cambia lo que se ve y se copia, sin volver a pintar ni a pedir nada. La canónica
+  // de la página sigue sin el parámetro, así que para Google es la misma pieza.
+  useEffect(() => {
+    if (!pieza?.version) return;
+    const actual = new URL(window.location.href);
+    if (actual.pathname !== rutaDePieza(pieza)) return;
+    if (actual.searchParams.get("v") === pieza.version) return;
+    actual.searchParams.set("v", pieza.version);
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${actual.pathname}${actual.search}${actual.hash}`
+    );
   }, [pieza]);
 
   // Los huecos de esta pieza, declarados **antes** de los returns tempranos de abajo:
@@ -203,7 +220,11 @@ export const Pieza = () => {
                     marcadores de la cuenta existía con su pantalla y su endpoint, pero
                     nada la alimentaba, así que no podía tener nada dentro. */}
                 <BotonDeMarcador postId={pieza.id} />
-                <ShareButtons url={canonica} title={pieza.titulo} className="se-piece__share" />
+                <ShareButtons
+                  url={enlaceParaCompartir(canonica, pieza.version)}
+                  title={pieza.titulo}
+                  className="se-piece__share"
+                />
               </div>
             </div>
 

@@ -19,7 +19,7 @@
             "destination": "https://sureconomics-backend.onrender.com/media/:ruta*"
         },
         {
-            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
             "has": [
                 {
                     "type": "query",
@@ -29,7 +29,7 @@
             "destination": "/index.html"
         },
         {
-            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes)/:slug",
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
             "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {
@@ -38,6 +38,15 @@
         }
     ],
     "headers": [
+        {
+            "source": "/media/:ruta*",
+            "headers": [
+                {
+                    "key": "x-vercel-enable-rewrite-caching",
+                    "value": "1"
+                }
+            ]
+        },
         {
             "source": "/(.*)",
             "headers": [

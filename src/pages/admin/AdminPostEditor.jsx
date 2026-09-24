@@ -139,14 +139,47 @@ const pickStr = (obj, keys, fallback = "") => {
     return fallback;
 };
 
-/** `datetime-local` value in local time (API returns ISO8601). */
+/**
+ * Las fechas del editor van **en hora de Caracas**, se abra el panel desde donde se abra.
+ *
+ * Venezuela está fija en UTC-4 y no cambia de hora, así que basta un desfase constante.
+ * Hacerlo explícito, y no dejarlo a la zona del navegador, es lo que evita que alguien de
+ * viaje programe "las 9:00" y la pieza salga a las 9:00 de otro país.
+ */
+const DESFASE_CARACAS_MS = -4 * 60 * 60 * 1000;
+
+/** ISO de la API -> valor de `datetime-local` en hora de Caracas. */
 const isoToDateTimeLocal = (iso) => {
     if (!iso) return "";
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "";
+    const c = new Date(d.getTime() + DESFASE_CARACAS_MS);
     const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${c.getUTCFullYear()}-${pad(c.getUTCMonth() + 1)}-${pad(c.getUTCDate())}T${pad(c.getUTCHours())}:${pad(c.getUTCMinutes())}`;
 };
+
+/** Valor de `datetime-local` (hora de Caracas) -> ISO en UTC para la API. */
+const caracasToIso = (valor) => {
+    const d = new Date(`${valor}:00-04:00`);
+    return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+};
+
+/** «lunes 28 de septiembre, 9:00» en hora de Caracas. */
+const fechaDeCaracas = (valor) => {
+    const iso = caracasToIso(valor);
+    if (!iso) return "";
+    return new Date(iso).toLocaleString("es", {
+        timeZone: "America/Caracas",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        hour: "numeric",
+        minute: "2-digit",
+    });
+};
+
+/** Lo que no se programa: una noticia sale cuando pasa. Igual que en el backend. */
+const FORMATOS_SIN_PROGRAMAR = new Set(["noticia"]);
 
 const postToForm = (post) => {
     if (!post || typeof post !== "object") return emptyForm();
@@ -187,8 +220,7 @@ const postToForm = (post) => {
 const formToPayload = (form) => {
     let publishedAtValue;
     if (form.published_at && String(form.published_at).trim()) {
-        const d = new Date(form.published_at);
-        publishedAtValue = Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+        publishedAtValue = caracasToIso(String(form.published_at).trim());
     }
 
     const payload = {
@@ -434,8 +466,13 @@ export const AdminPostEditor = () => {
                 document: updated.document_asset ?? null,
                 audio: updated.audio_asset ?? null,
             }));
-            setSaveState({ status: "success", message: "Cambios guardados correctamente." });
-            toastSuccess("Cambios guardados correctamente.", "Contenido guardado");
+            // Programada: que lo diga con la fecha, que es lo que hay que comprobar.
+            const aviso =
+                updated?.status === "scheduled"
+                    ? `Programada: sale sola el ${fechaDeCaracas(isoToDateTimeLocal(updated.published_at))} (hora de Caracas).`
+                    : "Cambios guardados correctamente.";
+            setSaveState({ status: "success", message: aviso });
+            toastSuccess(aviso, updated?.status === "scheduled" ? "Programada" : "Contenido guardado");
         } catch (err) {
             const message = adminErrorMessage(
                 err,
@@ -473,10 +510,15 @@ export const AdminPostEditor = () => {
     const handleUnpublish = runAction(
         "unpublish",
         unpublishAdminPost,
-        "Se despublicó y ya no es visible en el sitio.",
+        form.status === "scheduled"
+            ? "Se canceló la programación: vuelve a ser un borrador."
+            : "Se despublicó y ya no es visible en el sitio.",
         "No se pudo despublicar.",
         "Despublicar"
     );
+
+    const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);
+    const programada = form.status === "scheduled";
 
     const handleDelete = async () => {
         if (isCreate) return;
@@ -546,7 +588,12 @@ export const AdminPostEditor = () => {
                             : `Editar ${currentFormat?.name?.toLowerCase() ?? "pieza"} #${postId}`}
                     </h1>
                     <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
-                        Estado: {form.status === "published" ? "publicado" : "borrador"}
+                        Estado:{" "}
+                        {form.status === "published"
+                            ? "publicado"
+                            : programada
+                              ? `programado para el ${fechaDeCaracas(form.published_at) || "…"} (hora de Caracas)`
+                              : "borrador"}
                     </p>
                 </div>
                 <Link to="/admin/posts" className="se-link">
@@ -941,6 +988,9 @@ export const AdminPostEditor = () => {
                                 onChange={handleChange("status")}
                             >
                                 <option value="draft">Borrador</option>
+                                {sePuedeProgramar || programada ? (
+                                    <option value="scheduled">Programado</option>
+                                ) : null}
                                 {canPublish || form.status === "published" ? (
                                     <option value="published">Publicado</option>
                                 ) : null}
@@ -948,16 +998,32 @@ export const AdminPostEditor = () => {
                         </label>
                         <label className="se-form-field" htmlFor="post-published-at">
                             <span className="se-form-label">
-                                Fecha de publicación (opcional)
+                                {programada
+                                    ? "Se publica el (hora de Caracas)"
+                                    : "Fecha de publicación (opcional, hora de Caracas)"}
                             </span>
                             <input
                                 id="post-published-at"
                                 type="datetime-local"
                                 className="se-form-control"
                                 value={form.published_at}
+                                required={programada}
+                                min={programada ? isoToDateTimeLocal(new Date().toISOString()) : undefined}
                                 onChange={handleChange("published_at")}
                             />
                         </label>
+                        {programada ? (
+                            <p className="se-admin-meta-hint">
+                                {form.published_at
+                                    ? `Sale sola el ${fechaDeCaracas(form.published_at)}. Hasta entonces no se ve en el sitio. Pulse «Programar» para dejarla en cola.`
+                                    : "Elija el día y la hora en que sale: tiene que ser en el futuro."}
+                            </p>
+                        ) : null}
+                        {canPublish && FORMATOS_SIN_PROGRAMAR.has(form.format) ? (
+                            <p className="se-admin-meta-hint">
+                                Las noticias no se programan: se publican cuando pasan.
+                            </p>
+                        ) : null}
 
                         {missingMedia ? (
                             <p className="se-admin-warning">
@@ -1034,9 +1100,13 @@ export const AdminPostEditor = () => {
                         >
                             {saveState.status === "loading"
                                 ? "Guardando…"
-                                : isCreate
-                                  ? "Crear"
-                                  : "Guardar cambios"}
+                                : programada
+                                  ? isCreate
+                                      ? "Crear y programar"
+                                      : "Programar"
+                                  : isCreate
+                                    ? "Crear"
+                                    : "Guardar cambios"}
                         </button>
                         {!isCreate && canPublish ? (
                             <>
@@ -1049,7 +1119,9 @@ export const AdminPostEditor = () => {
                                     {actionState.status === "loading" &&
                                     actionState.kind === "publish"
                                         ? "Publicando…"
-                                        : "Publicar"}
+                                        : programada
+                                          ? "Publicar ya"
+                                          : "Publicar"}
                                 </button>
                                 <button
                                     type="button"
@@ -1060,7 +1132,9 @@ export const AdminPostEditor = () => {
                                     {actionState.status === "loading" &&
                                     actionState.kind === "unpublish"
                                         ? "Despublicando…"
-                                        : "Despublicar"}
+                                        : programada
+                                          ? "Volver a borrador"
+                                          : "Despublicar"}
                                 </button>
                                 <button
                                     type="button"

@@ -19211,3 +19211,12 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Programada: ni borrador ni publicada. En el color de acento, suave, para que en la
+   lista se vea de un vistazo lo que está en cola. */
+.se-status-pill--programado {
+  background: rgba(185, 83, 42, 0.12);
+  color: #8f3a17;
+  border-color: rgba(185, 83, 42, 0.35);
+  white-space: nowrap;
+}

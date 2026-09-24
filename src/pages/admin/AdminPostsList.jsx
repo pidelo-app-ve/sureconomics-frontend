@@ -17,6 +17,19 @@ const pick = (row, keys, fallback = "—") => {
     return fallback;
 };
 
+/** «28 sep, 9:00» en hora de Caracas: cuándo sale una programada. */
+const cuandoSale = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    if (!d || Number.isNaN(d.getTime())) return "";
+    return d.toLocaleString("es", {
+        timeZone: "America/Caracas",
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "2-digit",
+    });
+};
+
 /** The tag a row shows: the first topic, which is the principal one. */
 const principalTopic = (row) => row?.topics?.[0]?.name ?? null;
 
@@ -147,6 +160,7 @@ export const AdminPostsList = () => {
                     <select className="se-form-control" value={filters.status} onChange={setFilter("status")}>
                         <option value="">Todos</option>
                         <option value="draft">Borrador</option>
+                        <option value="scheduled">Programado</option>
                         <option value="published">Publicado</option>
                     </select>
                 </label>
@@ -237,7 +251,8 @@ export const AdminPostsList = () => {
                                     // Says why publishing would be refused before anyone tries.
                                     const missing =
                                         (row.format === "entrevista" && !row.video_asset_id && "sin video") ||
-                                        (row.format === "informe" && !row.document_asset_id && "sin documento");
+                                        (row.format === "informe" && !row.document_asset_id && "sin documento") ||
+                                        (row.format === "podcast" && !row.audio_asset_id && "sin audio");
                                     return (
                                         <tr key={id || slug || title}>
                                             <td>{id}</td>
@@ -264,14 +279,18 @@ export const AdminPostsList = () => {
                                                     className={`se-status-pill ${
                                                         status === "published"
                                                             ? "se-status-pill--positive"
-                                                            : "se-status-pill--neutral"
+                                                            : status === "scheduled"
+                                                              ? "se-status-pill--programado"
+                                                              : "se-status-pill--neutral"
                                                     }`}
                                                 >
                                                     {status === "published"
                                                         ? "Publicado"
-                                                        : status === "draft"
-                                                          ? "Borrador"
-                                                          : status}
+                                                        : status === "scheduled"
+                                                          ? `Programado · ${cuandoSale(row.published_at)}`
+                                                          : status === "draft"
+                                                            ? "Borrador"
+                                                            : status}
                                                 </span>
                                                 {missing ? (
                                                     <>
@@ -293,7 +312,11 @@ export const AdminPostsList = () => {
                                                             disabled={busy}
                                                             onClick={() => handlePublish(id, title)}
                                                         >
-                                                            {busy ? "Publicando…" : "Publicar"}
+                                                            {busy
+                                                                ? "Publicando…"
+                                                                : status === "scheduled"
+                                                                  ? "Publicar ya"
+                                                                  : "Publicar"}
                                                         </button>
                                                     </>
                                                 ) : null}

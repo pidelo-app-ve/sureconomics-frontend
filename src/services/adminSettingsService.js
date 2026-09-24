@@ -45,3 +45,18 @@ export const getSocial = async () =>
  */
 export const putSocial = async (cuerpo) =>
   unwrapEntity(await adminRequest("/admin/settings/social", { method: "PUT", json: cuerpo }));
+
+/** Instagram en automático: traer ya las últimas, sin esperar a la hora. */
+export const sincronizarInstagram = async () =>
+  unwrapEntity(
+    await adminRequest("/admin/settings/social/instagram/sincronizar", { method: "POST" })
+  );
+
+/** Las publicaciones de Instagram que no salen en el sitio (lista completa de ids). */
+export const ocultarInstagram = async (ids) =>
+  unwrapEntity(
+    await adminRequest("/admin/settings/social/instagram/ocultas", {
+      method: "PUT",
+      json: { ids },
+    })
+  );

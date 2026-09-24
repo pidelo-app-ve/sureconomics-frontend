@@ -2,7 +2,12 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
-import { getSocial, putSocial } from "../../services/adminSettingsService";
+import {
+  getSocial,
+  ocultarInstagram,
+  putSocial,
+  sincronizarInstagram,
+} from "../../services/adminSettingsService";
 
 /**
  * «En redes»: qué publicaciones se destacan al pie de todas las vistas.
@@ -20,6 +25,10 @@ import { getSocial, putSocial } from "../../services/adminSettingsService";
  * **Se guarda al terminar.** Como las fotos del equipo: se arma la lista entera en
  * pantalla y se pulsa Guardar una vez. El servidor reemplaza todo, así que quitar una
  * es simplemente no mandarla.
+ *
+ * **Instagram, en automático** cuando el backend tiene el token de la cuenta: trae solo
+ * las últimas publicaciones cada hora, y aquí sólo se ven, se actualizan al momento o
+ * se ocultan. Ver `instagram_service.py`.
  *
  * **El enlace tiene que ir a su red.** Lo comprueba el servidor: un post de Instagram
  * no puede apuntar a otro sitio. Si se cuela uno mal, Guardar lo dice y no guarda nada.
@@ -134,6 +143,106 @@ Publicacion.propTypes = {
   onSubir: PropTypes.func.isRequired,
 };
 
+/** «hace 12 minutos», «hace 3 horas»: cuándo llegó lo último de Instagram. */
+const haceCuanto = (iso) => {
+  if (!iso) return "nunca";
+  const min = Math.round((Date.now() - Date.parse(iso)) / 60000);
+  if (min < 1) return "hace un momento";
+  if (min < 60) return `hace ${min} ${min === 1 ? "minuto" : "minutos"}`;
+  const h = Math.round(min / 60);
+  if (h < 48) return `hace ${h} ${h === 1 ? "hora" : "horas"}`;
+  return `hace ${Math.round(h / 24)} días`;
+};
+
+const TIPO = { VIDEO: "Reel", CAROUSEL_ALBUM: "Carrusel", IMAGE: "Foto" };
+
+/**
+ * Instagram en automático. Nada que escribir: se ve lo que llegó, en el orden en que
+ * saldrá, y cada publicación se puede ocultar. Las ocultas no cuentan para las ocho,
+ * así que la siguiente ocupa su hueco.
+ */
+const InstagramAutomatico = ({ auto, ocupado, onActualizar, onOcultar }) => {
+  let visibles = 0;
+  return (
+    <section className="se-admin-redes__red">
+      <header className="se-admin-redes__red-cabeza">
+        <h2 className="se-admin-redes__red-titulo">
+          Instagram <span className="se-admin-redes__auto">Automático</span>
+        </h2>
+        <button
+          type="button"
+          className="se-btn se-btn--secondary se-btn--small"
+          onClick={onActualizar}
+          disabled={ocupado}
+        >
+          {ocupado ? "Actualizando…" : "Actualizar ahora"}
+        </button>
+      </header>
+      <p className="se-admin-meta-hint">
+        Se actualiza sola cada hora desde @sur_economics. Última vez:{" "}
+        {haceCuanto(auto.sincronizado_en)}. Salen las {auto.mostrar} primeras que no estén
+        ocultas.
+      </p>
+      {auto.error ? (
+        <p className="se-admin-form-feedback" role="alert">
+          La última actualización falló: {auto.error} Se sigue mostrando lo que llegó antes.
+        </p>
+      ) : null}
+      {auto.publicaciones.length ? (
+        <ul className="se-admin-redes__auto-lista">
+          {auto.publicaciones.map((p) => {
+            const sale = !p.oculta && visibles < auto.mostrar;
+            if (sale) visibles += 1;
+            return (
+              <li
+                key={p.id}
+                className={`se-admin-redes__auto-pub${sale ? "" : " se-admin-redes__auto-pub--fuera"}`}
+              >
+                <a href={p.enlace} target="_blank" rel="noreferrer" className="se-admin-redes__auto-foto">
+                  <img src={p.url} alt="" loading="lazy" />
+                  <span className="se-admin-redes__auto-tipo">{TIPO[p.tipo] ?? "Publicación"}</span>
+                </a>
+                <div className="se-admin-redes__auto-texto">
+                  <span className="se-admin-meta-hint">
+                    {p.fecha}
+                    {" · "}
+                    {p.oculta ? "Oculta" : sale ? "Sale en el sitio" : "De reserva"}
+                  </span>
+                  <p>{p.texto || "Sin texto"}</p>
+                </div>
+                <button
+                  type="button"
+                  className="se-btn se-btn--secondary se-btn--small"
+                  disabled={ocupado}
+                  onClick={() => onOcultar(p.id, !p.oculta)}
+                >
+                  {p.oculta ? "Mostrar" : "Ocultar"}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="se-admin-meta-hint">
+          Todavía no llegó nada. Pulse «Actualizar ahora» para traer las últimas.
+        </p>
+      )}
+    </section>
+  );
+};
+
+InstagramAutomatico.propTypes = {
+  auto: PropTypes.shape({
+    sincronizado_en: PropTypes.string,
+    error: PropTypes.string,
+    mostrar: PropTypes.number,
+    publicaciones: PropTypes.arrayOf(PropTypes.object),
+  }).isRequired,
+  ocupado: PropTypes.bool,
+  onActualizar: PropTypes.func.isRequired,
+  onOcultar: PropTypes.func.isRequired,
+};
+
 //: Normaliza lo que llega del servidor para las tres redes de una vez, rellenando
 //: los campos que falten con la fila vacía de cada una.
 const normalizar = (d) =>
@@ -150,12 +259,15 @@ export const AdminRedes = () => {
   const [carga, setCarga] = useState({ status: "loading", error: "" });
   const [guardado, setGuardado] = useState({ status: "idle", mensaje: "" });
   const [subiendo, setSubiendo] = useState("");
+  const [auto, setAuto] = useState(null);
+  const [autoOcupado, setAutoOcupado] = useState(false);
 
   useEffect(() => {
     let vivo = true;
     getSocial()
       .then((d) => {
         if (!vivo) return;
+        setAuto(d.instagram_auto?.activo ? d.instagram_auto : null);
         const normal = normalizar(d);
         setListas(normal);
         setInicial(JSON.stringify(normal));
@@ -236,6 +348,30 @@ export const AdminRedes = () => {
     }
   };
 
+  // Actualizar u ocultar sólo toca Instagram: la respuesta trae el panel entero, pero
+  // de ella se toma sólo esa parte para no pisar lo que se esté editando en X o TikTok.
+  const conInstagram = async (accion, exito) => {
+    setAutoOcupado(true);
+    try {
+      const d = await accion();
+      setAuto(d.instagram_auto?.activo ? d.instagram_auto : null);
+      setGuardado({ status: "ok", mensaje: exito });
+    } catch (err) {
+      setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo tocar Instagram.") });
+    } finally {
+      setAutoOcupado(false);
+    }
+  };
+
+  const ocultar = (id, ocultarla) => {
+    const actuales = auto.publicaciones.filter((p) => p.oculta).map((p) => p.id);
+    const ids = ocultarla ? [...actuales, id] : actuales.filter((x) => x !== id);
+    conInstagram(
+      () => ocultarInstagram(ids),
+      ocultarla ? "Oculta: ya no sale en el sitio." : "Vuelve a salir en el sitio."
+    );
+  };
+
   const bloque = (red) => (
     <section className="se-admin-redes__red" key={red}>
       <header className="se-admin-redes__red-cabeza">
@@ -299,7 +435,18 @@ export const AdminRedes = () => {
 
       {carga.status === "ready" ? (
         <>
-          {bloque("instagram")}
+          {auto ? (
+            <InstagramAutomatico
+              auto={auto}
+              ocupado={autoOcupado}
+              onActualizar={() =>
+                conInstagram(sincronizarInstagram, "Instagram actualizado con lo último.")
+              }
+              onOcultar={ocultar}
+            />
+          ) : (
+            bloque("instagram")
+          )}
           {bloque("x")}
           {bloque("tiktok")}
 

@@ -10,6 +10,7 @@
  * no podían fallar.
  */
 import handler, {
+  ENTORNO,
   IMAGEN_DE_MARCA,
   descripcionDe,
   esNuestroShell,
@@ -268,6 +269,20 @@ const medida = inyectar(SHELL, {
 });
 check("una recortada por nosotros si lo declara", medida.includes('content="1200"'));
 check("y pide tarjeta grande", medida.includes("summary_large_image"));
+
+// --- 8. /entorno: la puerta del boletín, con su propia tarjeta ---
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, status: 200, text: async () => SHELL };
+  throw new Error("no debería pedir la API");
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "entorno" } }, res);
+  check("entorno responde 200 sin tocar la API", res.code === 200, res.headers["X-Pieza-Meta"]);
+  check("entorno lleva su tarjeta", res.body.includes(`property="og:image" content="${ENTORNO.imagen.url}"`));
+  check("entorno es un sitio, no un artículo", res.body.includes('og:type" content="website"'));
+  check("entorno con una sola og:image", (res.body.match(/property="og:image"/g) || []).length === 1);
+  check("entorno se cachea", /s-maxage=3600/.test(res.headers["Cache-Control"]));
+});
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

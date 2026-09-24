@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Subscribe } from "./pages/Subscribe";
+import { Entorno } from "./pages/Entorno";
 import { BoletinBaja } from "./pages/BoletinBaja";
 import { QuienesSomos } from "./pages/QuienesSomos";
 import { Articulos } from "./pages/Articulos";
@@ -56,6 +57,9 @@ import { CuentaEnvioDetail } from "./pages/cuenta/CuentaEnvioDetail";
 import { CuentaEnvioEditar } from "./pages/cuenta/CuentaEnvioEditar";
 
 export const router = createBrowserRouter([
+    // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
+    // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
+    { path: "/entorno", element: <Entorno />, errorElement: <NotFound /> },
     {
         path: "/",
         element: <Layout />,

@@ -63,6 +63,19 @@ const SECCIONES = {
  */
 export const IMAGEN_DE_MARCA = { url: `${SITIO}/brand/og-default.jpg`, medido: true };
 
+/**
+ * `/entorno`, la puerta del boletín desde Instagram. No es una pieza, pero sí se comparte
+ * -- es el enlace del perfil --, así que lleva su propia tarjeta en vez de la genérica.
+ */
+export const ENTORNO = {
+  titulo: "Entorno en Viñetas — SurEconomics",
+  descripcion:
+    "El boletín semanal de SurEconomics: el entorno económico de la semana, contado en viñetas. Gratis, cada lunes.",
+  imagen: { url: `${SITIO}/brand/og-entorno.jpg`, medido: true },
+  url: `${SITIO}/entorno`,
+  tipo: "website",
+};
+
 /** What a page says about itself when there is no piece to describe. */
 const GENERICO = {
   titulo: "SurEconomics — Economía, mercados e inversión",
@@ -149,9 +162,9 @@ export const descripcionDe = (pieza) =>
   textoLlano(pieza?.content) ||
   null;
 
-const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion }) => {
+const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion, tipo = "article" }) => {
   const filas = [
-    `<meta property="og:type" content="article" />`,
+    `<meta property="og:type" content="${escapar(tipo)}" />`,
     `<meta property="og:site_name" content="SurEconomics" />`,
     `<meta property="og:locale" content="es_LA" />`,
     `<meta property="og:title" content="${escapar(titulo)}" />`,
@@ -248,7 +261,8 @@ export default async function handler(req, res) {
   const alEstatico = (motivo) => {
     res.setHeader("X-Pieza-Meta", motivo);
     res.setHeader("Cache-Control", "public, s-maxage=30");
-    res.redirect(307, `/${seccion}/${slug}?${SIN_META}=1`);
+    const ruta = seccion === "entorno" ? "/entorno" : `/${seccion}/${slug}`;
+    res.redirect(307, `${ruta}?${SIN_META}=1`);
   };
 
   let shell = "";
@@ -282,6 +296,15 @@ export default async function handler(req, res) {
       })
     );
   };
+
+  // Una página fija, sin pieza detrás: sus etiquetas no dependen de la API.
+  if (seccion === "entorno") {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+    res.setHeader("X-Pieza-Meta", "entorno");
+    res.status(200).send(inyectar(shell, ENTORNO));
+    return;
+  }
 
   const formato = SECCIONES[seccion];
   if (!formato || !slug) {

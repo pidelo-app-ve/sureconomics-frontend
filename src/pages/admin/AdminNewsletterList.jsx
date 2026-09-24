@@ -17,7 +17,13 @@ const fecha = (valor) => {
   return Number.isNaN(d.getTime()) ? "—" : FECHA.format(d);
 };
 
-const ORIGEN = { home: "Portada", footer: "Pie de página", admin: "Panel", otro: "—" };
+const ORIGEN = {
+  home: "Portada",
+  footer: "Pie de página",
+  instagram: "Instagram",
+  admin: "Panel",
+  otro: "—",
+};
 
 /**
  * La lista del boletín.

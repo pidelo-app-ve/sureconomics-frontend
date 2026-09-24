@@ -33,6 +33,20 @@
             "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {
+            "source": "/entorno",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/index.html"
+        },
+        {
+            "source": "/entorno",
+            "destination": "/api/pieza?seccion=entorno"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

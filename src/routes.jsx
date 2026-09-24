@@ -31,6 +31,7 @@ import { AdminPublicidad } from "./pages/admin/AdminPublicidad";
 import { AdminAnalitica } from "./pages/admin/AdminAnalitica";
 import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
 import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
+import { AdminBoletin } from "./pages/admin/AdminBoletin";
 import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
 import { AdminSubmissionsList } from "./pages/admin/AdminSubmissionsList";
 import { AdminSubmissionDetail } from "./pages/admin/AdminSubmissionDetail";
@@ -153,6 +154,9 @@ export const router = createBrowserRouter([
                     { path: "analitica", element: <AdminAnalitica /> },
                     { path: "comments", element: <AdminCommentsList /> },
                     { path: "boletin", element: <AdminNewsletterList /> },
+                    // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
+                    // queda en `boletin`, donde ya la buscaba la redaccion.
+                    { path: "boletin/numeros", element: <AdminBoletin /> },
                     { path: "submissions", element: <AdminSubmissionsList /> },
                     { path: "submissions/:id", element: <AdminSubmissionDetail /> },
                     { path: "settings/collaboration", element: <AdminCollaborationSettings /> },

@@ -174,8 +174,11 @@ const AdminShell = () => {
                 <NavLink to="/admin/submissions" className={linkClass} end onClick={closeMenu}>
                   Envíos
                 </NavLink>
-                <NavLink to="/admin/boletin" className={linkClass} end onClick={closeMenu}>
+                <NavLink to="/admin/boletin/numeros" className={linkClass} end onClick={closeMenu}>
                   Boletín
+                </NavLink>
+                <NavLink to="/admin/boletin" className={linkClass} end onClick={closeMenu}>
+                  Suscriptores
                 </NavLink>
               </NavGroup>
             ) : null}

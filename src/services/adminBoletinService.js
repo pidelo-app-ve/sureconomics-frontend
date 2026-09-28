@@ -58,6 +58,18 @@ export const enviarPrueba = async (id, destino) =>
     await adminRequest(`${base}/${id}/prueba`, { method: "POST", json: { destino } }),
   );
 
+/**
+ * Vuelve a poner en cola un número ya enviado, con un asunto nuevo si se da. No manda
+ * nada: después se llama a `enviarLote` por lotes, como en un envío normal.
+ */
+export const reenviarNumero = async (id, asunto) =>
+  unwrapEntity(
+    await adminRequest(`${base}/${id}/reenviar`, {
+      method: "POST",
+      json: { asunto: asunto || undefined },
+    }),
+  );
+
 /** Un lote. Hay que volver a llamarlo mientras `terminado` sea falso. */
 export const enviarLote = async (id) =>
   unwrapEntity(await adminRequest(`${base}/${id}/enviar`, { method: "POST" }));

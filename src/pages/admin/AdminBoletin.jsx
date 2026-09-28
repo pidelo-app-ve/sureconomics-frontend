@@ -18,6 +18,7 @@ import {
   listarNumeros,
   ordenarPaginas,
   quitarPagina,
+  reenviarNumero,
   verNumero,
 } from "../../services/adminBoletinService";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
@@ -302,6 +303,7 @@ Paginas.propTypes = {
 const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
   const [destino, setDestino] = useState(leerDestino);
   const [progreso, setProgreso] = useState(null);
+  const [asuntoReenvio, setAsuntoReenvio] = useState(numero.subject ?? "");
   const { toastSuccess, toastError } = useAdminToast();
   const entregas = numero.entregas ?? {};
   const enviados = entregas.sent ?? 0;
@@ -330,10 +332,13 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
       warning: null,
     });
     if (!vale) return;
+    await porLotes(enviados, n - enviados, "Número enviado a toda la lista");
+  };
 
-    // Por lotes: el servidor manda 25 o durante 12 segundos por llamada, lo que llegue
-    // antes, y aquí se vuelve a llamar hasta que no quede nadie. Ver `boletin.py`.
-    setProgreso({ enviados: enviados, pendientes: n - enviados });
+  // Por lotes: el servidor manda 25 o durante 12 segundos por llamada, lo que llegue
+  // antes, y aquí se vuelve a llamar hasta que no quede nadie. Ver `boletin.py`.
+  const porLotes = async (yaEnviados, pendientes, avisoFinal) => {
+    setProgreso({ enviados: yaEnviados, pendientes });
     let r;
     do {
       r = await correr(() => enviarLote(numero.id), null);
@@ -346,7 +351,28 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
     setProgreso(null);
     const fresco = await correr(() => verNumero(numero.id), null);
     if (fresco) onCambio(fresco);
-    if (r?.terminado) toastSuccess("Número enviado a toda la lista");
+    if (r?.terminado) toastSuccess(avisoFinal);
+  };
+
+  /**
+   * Mandar otra vez un número que ya salió -- el del 28 de septiembre llegó sin
+   * imágenes --. Le llega a quien sigue suscrito, también a quien se sumó después, y
+   * no a quien se dio de baja. El asunto se puede cambiar para que el bueno se
+   * distinga en la bandeja del roto.
+   */
+  const reenviar = async () => {
+    const n = numero.suscriptores ?? 0;
+    const vale = await preguntar({
+      title: `¿Reenviar este número a ${n} ${n === 1 ? "suscriptor" : "suscriptores"}?`,
+      description: `Llega otra vez a toda la lista con el asunto «${asuntoReenvio.trim() || numero.subject}». Quien se dio de baja no lo recibe. No se puede deshacer: mande antes una prueba.`,
+      confirmLabel: "Reenviar ahora",
+      warning: null,
+    });
+    if (!vale) return;
+    const r = await correr(() => reenviarNumero(numero.id, asuntoReenvio.trim()), null);
+    if (!r) return;
+    onCambio(r);
+    await porLotes(0, n, "Número reenviado a toda la lista");
   };
 
   const listo = numero.status === "ready";
@@ -364,9 +390,11 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
           suscriptores
           {entregas.failed ? ` · ${entregas.failed} no se pudieron entregar` : ""}.
         </p>
-      ) : (
-        <>
-          <div className="se-bol__prueba">
+      ) : null}
+
+      {/* La prueba también en un número ya enviado: es lo que hay que mirar antes de
+          reenviarlo. */}
+      <div className="se-bol__prueba">
             <label className="se-form-label" htmlFor={`bol-${numero.id}-prueba`}>
               Mandar una prueba a
             </label>
@@ -394,6 +422,39 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
             </p>
           </div>
 
+      {numero.status === "sent" ? (
+        <div className="se-bol__reenvio">
+          <label className="se-form-label" htmlFor={`bol-${numero.id}-reenvio`}>
+            Asunto del reenvío
+          </label>
+          <input
+            id={`bol-${numero.id}-reenvio`}
+            className="se-form-control"
+            value={asuntoReenvio}
+            maxLength={300}
+            onChange={(e) => setAsuntoReenvio(e.target.value)}
+          />
+          <p className="se-admin-meta-hint">
+            Por ejemplo, añádale «(con imágenes)» para que se distinga del que ya llegó.
+          </p>
+          <div className="se-bol__mandar">
+            <span className="se-admin-meta-hint">
+              Vuelve a llegar a quien sigue suscrito. Quien se dio de baja no lo recibe.
+            </span>
+            <button
+              type="button"
+              className="se-btn se-btn--primary"
+              disabled={Boolean(progreso)}
+              onClick={reenviar}
+            >
+              {progreso
+                ? `Reenviando… ${progreso.enviados} enviados, quedan ${progreso.pendientes}`
+                : `Reenviar a ${numero.suscriptores ?? 0} suscriptores`}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
           <div className="se-bol__mandar">
             {!enCurso ? (
               <label className="se-admin-pub__casilla">

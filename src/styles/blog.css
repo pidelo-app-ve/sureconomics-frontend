@@ -19380,3 +19380,17 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 @media (prefers-reduced-motion: reduce) {
   .se-entorno__boton { transition: none; }
 }
+
+/* El reenvío de un número ya enviado: el asunto nuevo y el botón, separados de la
+   prueba por el mismo filete que el envío normal. */
+.se-bol__reenvio {
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+.se-bol__reenvio > .se-admin-meta-hint { margin: 0; }
+.se-bol__reenvio .se-bol__mandar {
+  border-top: 0;
+  padding-top: 0.5rem;
+}

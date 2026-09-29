@@ -13981,8 +13981,13 @@ a.se-topics__chip:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  width: min(420px, calc(100vw - 2.4rem));
-  max-height: calc(100vh - 3rem);
+  /* El ancho sale del alto disponible: un video vertical a 420 px de ancho mide 746
+     de alto, y en una pantalla más baja se recortaba la altura pero no el ancho -- se
+     rompía la proporción y el reproductor quedaba cortado con barra de desplazamiento.
+     Ahora cabe entero: alto de la ventana menos el pie y el botón de cerrar, por 9/16. */
+  --video-alto-libre: calc(100dvh - 10rem);
+  width: min(420px, calc(100vw - 2.4rem), calc(var(--video-alto-libre) * 9 / 16));
+  max-height: calc(100dvh - 2rem);
   opacity: 0;
   animation: se-redes-video-superficie-in 0.24s ease both;
 }
@@ -14015,7 +14020,7 @@ a.se-topics__chip:focus-visible {
 .se-redes-video__marco {
   position: relative;
   aspect-ratio: 9 / 16;
-  max-height: calc(100vh - 8rem);
+  width: 100%;
   margin-inline: auto;
   border-radius: 14px;
   overflow: hidden;
@@ -14069,7 +14074,10 @@ a.se-topics__chip:focus-visible {
 }
 
 @media (max-width: 640px) {
-  .se-redes-video__superficie { width: calc(100vw - 1.6rem); }
+  .se-redes-video__superficie {
+    --video-alto-libre: calc(100dvh - 9rem);
+    width: min(calc(100vw - 1.6rem), calc(var(--video-alto-libre) * 9 / 16));
+  }
   .se-redes-video__cerrar { top: -3.2rem; }
 }
 

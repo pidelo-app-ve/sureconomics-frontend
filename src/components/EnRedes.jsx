@@ -56,6 +56,23 @@ const idDeVideoTikTok = (enlace) => {
 
 const enElemento = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
+/** Lo que muestra el reproductor de TikTok: el video con sus controles, y nada más. */
+const PARAMETROS_DEL_REPRODUCTOR = new URLSearchParams({
+  autoplay: "1",
+  controls: "1",
+  progress_bar: "1",
+  play_button: "1",
+  volume_control: "1",
+  fullscreen_button: "1",
+  timestamp: "1",
+  closed_caption: "1",
+  // Fuera lo que ya dice la página o lo que manda al lector a otros videos.
+  description: "0",
+  music_info: "0",
+  rel: "0",
+  native_context_menu: "0",
+}).toString();
+
 /**
  * El video de una publicación de TikTok, grande y reproduciéndose, sin salir del
  * sitio.
@@ -63,21 +80,29 @@ const enElemento = 'button, [href], input, select, textarea, [tabindex]:not([tab
  * **El mismo truco que ya usa la pieza para YouTube y Vimeo.** En vez de cargar el
  * *widget* de TikTok -- un `<script>` que se mete en la página, que ya se probó y se
  * descartó para X, y que contradice lo que `Cookies.jsx` le promete al lector --, se
- * construye directamente la dirección de su reproductor
- * (`tiktok.com/embed/v2/<id>`), que es a donde ese script termina llevando de todas
- * formas. El contenido ajeno queda encerrado en su `<iframe>`; nada de TikTok corre
- * en esta página.
+ * construye directamente la dirección de su reproductor oficial para insertar
+ * (`tiktok.com/player/v1/<id>`). El contenido ajeno queda encerrado en su `<iframe>`;
+ * nada de TikTok corre en esta página.
  *
- * Esa dirección no es un contrato publicado como el oEmbed -- es donde su propio
- * `embed.js` resuelve el video, no algo que TikTok documente --, así que puede
- * cambiar de forma sin aviso. Por eso el enlace real a TikTok sigue debajo: si el
- * marco no carga, queda una salida.
+ * **`player/v1` y no `embed/v2`.** El de antes cargaba la tarjeta entera de TikTok --
+ * cabecera, texto, música, recomendados --: tardaba, no cabía en el marco vertical y
+ * dejaba una barra de desplazamiento dentro, y con varios seguidos TikTok lo frenaba
+ * con «overload-protect triggered». `player/v1` es sólo el video, a pantalla completa
+ * del marco, y lo configuran los parámetros de `PARAMETROS_DEL_REPRODUCTOR`. El texto
+ * ya va debajo, así que el del reproductor se apaga.
+ *
+ * **Arranca en silencio**, que es como lo pone TikTok; el sonido, con su botón de
+ * volumen. Se probó pedirle el sonido por su API de mensajes y con un toque real el
+ * reproductor se quedaba cargando sin arrancar: mejor en movimiento y mudo que quieto.
+ *
+ * El enlace real a TikTok sigue debajo: si el marco no carga, queda una salida.
  */
 const VideoTikTok = ({ pieza, onCerrar }) => {
   const id = idDeVideoTikTok(pieza.enlace);
   const superficie = useRef(null);
   const activoAntes = useRef(null);
   const tituloId = "se-redes-video-titulo";
+
 
   // Foco dentro al abrir, y de vuelta a la tarjeta que lo abrió al cerrar -- quien
   // navega con teclado no puede perder el sitio en el que estaba.
@@ -148,7 +173,7 @@ const VideoTikTok = ({ pieza, onCerrar }) => {
           {id ? (
             <iframe
               className="se-redes-video__frame"
-              src={`https://www.tiktok.com/embed/v2/${id}`}
+              src={`https://www.tiktok.com/player/v1/${id}?${PARAMETROS_DEL_REPRODUCTOR}`}
               title={`Video de TikTok: ${(pieza.texto || "").slice(0, 90)}`}
               allow="autoplay; encrypted-media; fullscreen; clipboard-write"
               allowFullScreen

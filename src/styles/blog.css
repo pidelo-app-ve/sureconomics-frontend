@@ -19423,6 +19423,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  /* Dentro de una rejilla, sin esto un resumen largo ensancha la fila. */
+  min-width: 0;
   min-height: 3.5rem;
   padding: 0.7rem 0.1rem;
   border: 0;
@@ -19824,5 +19826,188 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
   .se-admin-shell__header > .se-campo-movil .se-campo-movil__titulo {
     color: var(--adm-accent);
+  }
+}
+
+/* —— Boletín y ventanas del panel, en el teléfono —— */
+
+/* En el computador el grupo no pinta caja: los tres bloques siguen siendo hijos
+   directos de la rejilla del editor, con su separación de siempre. */
+.se-bol__grupo {
+  display: contents;
+}
+
+/* Dentro de una hoja el bloque ya tiene título arriba (el de la hoja): sin caja ni
+   título repetido. */
+.se-campo-movil__cuerpo > .se-bol__bloque {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.se-campo-movil__cuerpo > .se-bol__bloque > .se-bol__bloque-cabeza > .se-bol__bloque-titulo {
+  display: none;
+}
+
+.se-campo-movil__cuerpo > .se-bol__intro .se-richtext {
+  overflow: visible;
+}
+
+.se-campo-movil__cuerpo > .se-bol__intro .se-richtext__toolbar {
+  position: sticky;
+  top: -1rem;
+  z-index: 2;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.se-campo-movil__cuerpo > .se-bol__intro .se-richtext__btn {
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  height: 2.75rem;
+}
+
+.se-campo-movil__cuerpo > .se-bol__intro .se-richtext__content {
+  max-height: none;
+  min-height: 40vh;
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .se-bol__filas {
+    gap: 0;
+    padding: 0.2rem 1rem;
+  }
+
+  /* La fila del listado: miniatura a la izquierda y el texto al lado, con el estado
+     debajo del texto. Antes se envolvía y la miniatura quedaba sola arriba. */
+  .se-bol__fila {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 0.9rem;
+    row-gap: 0.45rem;
+    align-items: start;
+  }
+
+  .se-bol__fila .se-bol__portadita {
+    grid-row: span 2;
+  }
+
+  .se-bol__fila .se-bol__estado {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .se-bol__fila-asunto {
+    white-space: normal;
+  }
+
+  .se-bol__borrar {
+    margin-left: 0;
+  }
+
+  /* La columna del editor encoge con la pantalla: sin esto la rejilla se ensanchaba
+     hasta el botón más largo («Enviar ahora, sin esperar al lunes») y todo el editor
+     se salía por la derecha. */
+  .se-bol__editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-bol__editor .se-btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Guardar asunto e introducción: sólo aparece si hay cambios, pegado abajo. */
+  .se-bol__guardar--movil {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 0 -1rem;
+    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--adm-border);
+    background: var(--adm-surface);
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .se-bol__guardar--movil .se-btn {
+    flex: 1 1 100%;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  /* Las ventanas del panel (asistente de anuncios, pieza, campaña, anunciante,
+     biblioteca): a pantalla completa, con los botones pegados abajo. Por encima de
+     las hojas, porque algunas se abren desde dentro de una. */
+  .se-admin-app .se-adm-dialog {
+    z-index: 150;
+  }
+
+  .se-admin-app .se-modalp {
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .se-admin-app .se-modalp .se-modalp__caja,
+  .se-admin-app .se-modalp .se-modalp__caja--ancho {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    padding: calc(0.7rem + env(safe-area-inset-top)) 1rem calc(0.7rem + env(safe-area-inset-bottom));
+  }
+
+  .se-admin-app .se-modalp .se-modalp__cuerpo {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1rem 0.1rem 1.25rem;
+    overscroll-behavior: contain;
+  }
+
+  .se-admin-app .se-modalp .se-adm-dialog__actions {
+    margin-top: 0;
+    padding-top: 0.7rem;
+  }
+
+  .se-admin-app .se-modalp .se-adm-dialog__actions > .se-btn {
+    flex: 1 1 0;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  .se-admin-app .se-modalp .se-form-control,
+  .se-admin-app .se-modalp input,
+  .se-admin-app .se-modalp select,
+  .se-admin-app .se-modalp textarea {
+    font-size: 16px;
+  }
+
+  /* Publicidad: las tres cifras en una fila, y logos más bajos en el mural para que
+     cada anunciante no ocupe media pantalla. */
+  .se-admin-pub__cifras {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .se-admin-pub__cifra {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .se-admin-pub__cifra-n {
+    font-size: 1.15rem;
+  }
+
+  /* Alto fijo y no `aspect-ratio`: un logo alto impone su altura natural por
+     encima de la proporción. */
+  .se-mural__logo {
+    aspect-ratio: auto;
+    height: 4.5rem;
+  }
+
+  .se-mural__logo img {
+    max-height: 3.5rem;
   }
 }

@@ -1,11 +1,13 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AssetField } from "../../components/admin/AssetField";
+import { CampoMovil } from "../../components/admin/CampoMovil";
 import { ModalDelPanel } from "../../components/admin/ModalDelPanel";
 import { SelectorDeBiblioteca } from "../../components/admin/SelectorDeBiblioteca";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useEsMovil } from "../../hooks/useEsMovil";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
   actualizarNumero,
@@ -511,8 +513,20 @@ Envio.propTypes = {
   preguntar: PropTypes.func.isRequired,
 };
 
+/** Cuántas palabras tiene un HTML del editor: para el resumen de la fila. */
+const palabras = (html) => {
+  const t = String(html ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+  return t ? t.split(/\s+/).length : 0;
+};
+
 // ------------------------------------------------------------------ el editor
 const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) => {
+  // En el teléfono cada bloque es una fila que abre su hoja, como en el editor de
+  // piezas. «Probar y enviar» se queda a la vista: es la acción, no un campo.
+  const esMovil = useEsMovil();
   const [texto, setTexto] = useState({
     subject: numero.subject ?? "",
     preheader: numero.preheader ?? "",
@@ -540,10 +554,29 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
       r ? onCambio(r) : null,
     );
 
+  // Volver a la lista con el asunto o la introducción a medias: en el teléfono se
+  // pregunta, que un toque de más no se lleve lo escrito.
+  const volver = async () => {
+    if (esMovil && cambios) {
+      const salir = await preguntar({
+        title: "¿Salir sin guardar?",
+        description: "El asunto o la introducción tienen cambios que todavía no se guardaron.",
+        confirmLabel: "Salir sin guardar",
+        cancelLabel: "Seguir editando",
+        warning: null,
+      });
+      if (!salir) return;
+    }
+    onVolver();
+  };
+
+  const nPaginas = numero.pages?.length ?? 0;
+  const nPalabras = palabras(texto.body_html);
+
   return (
     <div className="se-bol__editor">
       <div className="se-bol__editor-barra">
-        <button type="button" className="se-btn se-btn--secondary" onClick={onVolver}>
+        <button type="button" className="se-btn se-btn--secondary" onClick={volver}>
           ← Todos los números
         </button>
         <Estado status={numero.status} />
@@ -579,6 +612,13 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
         </p>
       ) : null}
 
+      <div className={esMovil ? "se-bol__bloque se-bol__filas" : "se-bol__grupo"}>
+      <CampoMovil
+        movil={esMovil}
+        titulo="Bandeja de entrada"
+        resumen={texto.subject.trim() || "Sin asunto"}
+        estado={texto.subject.trim() ? "ok" : "falta"}
+      >
       <section className="se-bol__bloque">
         <div className="se-bol__bloque-cabeza">
           <h2 className="se-bol__bloque-titulo">Bandeja de entrada</h2>
@@ -608,7 +648,15 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
           onChange={(e) => setTexto((t) => ({ ...t, preheader: e.target.value }))}
         />
       </section>
+      </CampoMovil>
 
+      <CampoMovil
+        movil={esMovil}
+        titulo="Portada"
+        resumen={numero.cover_url ? "Puesta" : "Sin portada (opcional)"}
+        miniatura={numero.cover_url || undefined}
+        estado={numero.cover_url ? "ok" : undefined}
+      >
       <section className="se-bol__bloque">
         <div className="se-bol__bloque-cabeza">
           <h2 className="se-bol__bloque-titulo">Portada</h2>
@@ -644,8 +692,15 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
           ) : null}
         </div>
       </section>
+      </CampoMovil>
 
-      <section className="se-bol__bloque">
+      <CampoMovil
+        movil={esMovil}
+        titulo="Introducción"
+        resumen={nPalabras ? `${nPalabras} ${nPalabras === 1 ? "palabra" : "palabras"}` : "Vacía (opcional)"}
+        estado={nPalabras ? "ok" : undefined}
+      >
+      <section className="se-bol__bloque se-bol__intro">
         <div className="se-bol__bloque-cabeza">
           <h2 className="se-bol__bloque-titulo">
             Introducción <span className="se-admin-meta-hint">(opcional)</span>
@@ -663,9 +718,24 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
           onChange={(html) => setTexto((t) => ({ ...t, body_html: html }))}
         />
       </section>
+      </CampoMovil>
+      {/* En el teléfono las páginas van con las demás filas; en el computador, debajo
+          del botón de guardar, como siempre. */}
+      {esMovil ? (
+        <CampoMovil
+          movil
+          titulo="Páginas"
+          resumen={nPaginas ? `${nPaginas} ${nPaginas === 1 ? "página" : "páginas"}` : "Ninguna todavía"}
+          miniatura={numero.pages?.[0]?.url || undefined}
+          estado={nPaginas ? "ok" : "falta"}
+        >
+          <Paginas numero={numero} bloqueado={bloqueado} correr={correr} onCambio={onCambio} />
+        </CampoMovil>
+      ) : null}
+      </div>
 
-      {!bloqueado ? (
-        <div className="se-bol__guardar">
+      {!bloqueado && (!esMovil || cambios) ? (
+        <div className={`se-bol__guardar${esMovil ? " se-bol__guardar--movil" : ""}`}>
           <button
             type="button"
             className="se-btn se-btn--primary"
@@ -678,7 +748,9 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
         </div>
       ) : null}
 
-      <Paginas numero={numero} bloqueado={bloqueado} correr={correr} onCambio={onCambio} />
+      {!esMovil ? (
+        <Paginas numero={numero} bloqueado={bloqueado} correr={correr} onCambio={onCambio} />
+      ) : null}
 
       <section className="se-bol__bloque se-bol__auto">
         <div className="se-bol__bloque-cabeza">

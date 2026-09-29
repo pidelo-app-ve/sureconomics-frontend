@@ -7,6 +7,10 @@ import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
+import { CampoMovil } from "../../components/admin/CampoMovil";
+import { useEsMovil } from "../../hooks/useEsMovil";
+
+const NOMBRE_DE_ESTADO = { draft: "Borrador", scheduled: "Programado", published: "Publicado" };
 
 const pick = (row, keys, fallback = "—") => {
     if (!row || typeof row !== "object") return fallback;
@@ -116,6 +120,49 @@ export const AdminPostsList = () => {
         });
     };
 
+    // En el teléfono la tabla son seis columnas de tres palabras cada una: se vuelve
+    // tarjetas, y los filtros y el menú de crear se recogen en hojas (`CampoMovil`).
+    const esMovil = useEsMovil();
+
+    /** Lo que muestra cada pieza, igual en la tabla y en las tarjetas. */
+    const describir = (row) => {
+        const id = pick(row, ["id"], "");
+        const status = pick(row, ["status"], "—");
+        return {
+            id,
+            slug: pick(row, ["slug"], ""),
+            title: pick(row, ["title"], "(sin título)"),
+            status,
+            busy: actionId === id,
+            tema: principalTopic(row),
+            lugar: principalPlace(row),
+            // Says why publishing would be refused before anyone tries.
+            missing:
+                (row.format === "entrevista" && !row.video_asset_id && "sin video") ||
+                (row.format === "informe" && !row.document_asset_id && "sin documento") ||
+                (row.format === "podcast" && !row.audio_asset_id && "sin audio"),
+            estadoClase:
+                status === "published"
+                    ? "se-status-pill--positive"
+                    : status === "scheduled"
+                      ? "se-status-pill--programado"
+                      : "se-status-pill--neutral",
+            estadoTexto:
+                status === "scheduled"
+                    ? `Programado · ${cuandoSale(row.published_at)}`
+                    : NOMBRE_DE_ESTADO[status] ?? status,
+        };
+    };
+
+    const resumenDeFiltros =
+        [
+            filters.format ? formatName(filters.format) : null,
+            filters.status ? NOMBRE_DE_ESTADO[filters.status] : null,
+            filters.unclassified ? "sin clasificar" : null,
+        ]
+            .filter(Boolean)
+            .join(" · ") || "Todas las piezas";
+
     const meta = state.meta;
     const totalPages = meta?.pages ?? 1;
 
@@ -126,6 +173,7 @@ export const AdminPostsList = () => {
                     Contenido
                 </h1>
                 {canCreate ? (
+                    <CampoMovil movil={esMovil} titulo="Crear contenido" resumen="Elija el formato">
                     <nav className="se-admin-create" aria-label="Crear contenido">
                         {formats.map((f) => (
                             <Link
@@ -140,52 +188,104 @@ export const AdminPostsList = () => {
                             </Link>
                         ))}
                     </nav>
+                    </CampoMovil>
                 ) : null}
             </header>
 
             <div className="se-admin-filters">
-                <label className="se-admin-filters__field">
-                    <span className="se-form-label">Formato</span>
-                    <select className="se-form-control" value={filters.format} onChange={setFilter("format")}>
-                        <option value="">Todos</option>
-                        {formats.map((f) => (
-                            <option key={f.slug} value={f.slug}>
-                                {f.name}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <label className="se-admin-filters__field">
-                    <span className="se-form-label">Estado</span>
-                    <select className="se-form-control" value={filters.status} onChange={setFilter("status")}>
-                        <option value="">Todos</option>
-                        <option value="draft">Borrador</option>
-                        <option value="scheduled">Programado</option>
-                        <option value="published">Publicado</option>
-                    </select>
-                </label>
-                <label className="se-admin-filters__field se-admin-filters__field--grow">
-                    <span className="se-form-label">Buscar</span>
-                    <input
-                        className="se-form-control"
-                        value={filters.q}
-                        onChange={setFilter("q")}
-                        placeholder="Título o resumen"
-                    />
-                </label>
-                <label className="se-admin-filters__check">
-                    <input
-                        type="checkbox"
-                        checked={filters.unclassified}
-                        onChange={setFilter("unclassified")}
-                    />
-                    <span>
-                        Sin clasificar
-                        <em>
-                            lo que quedó de la categorización vieja y todavía no tiene tema
-                        </em>
-                    </span>
-                </label>
+                {esMovil ? (
+                    <>
+                        <label className="se-admin-filters__field se-admin-filters__field--grow">
+                            <span className="se-form-label">Buscar</span>
+                            <input
+                                className="se-form-control"
+                                value={filters.q}
+                                onChange={setFilter("q")}
+                                placeholder="Título o resumen"
+                            />
+                        </label>
+                        <CampoMovil movil titulo="Filtros" resumen={resumenDeFiltros}>
+                            <label className="se-admin-filters__field">
+                                <span className="se-form-label">Formato</span>
+                                <select className="se-form-control" value={filters.format} onChange={setFilter("format")}>
+                                    <option value="">Todos</option>
+                                    {formats.map((f) => (
+                                        <option key={f.slug} value={f.slug}>
+                                            {f.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <label className="se-admin-filters__field">
+                                <span className="se-form-label">Estado</span>
+                                <select className="se-form-control" value={filters.status} onChange={setFilter("status")}>
+                                    <option value="">Todos</option>
+                                    <option value="draft">Borrador</option>
+                                    <option value="scheduled">Programado</option>
+                                    <option value="published">Publicado</option>
+                                </select>
+                            </label>
+                            <label className="se-admin-filters__check">
+                                <input
+                                    type="checkbox"
+                                    checked={filters.unclassified}
+                                    onChange={setFilter("unclassified")}
+                                />
+                                <span>
+                                    Sin clasificar
+                                    <em>
+                                        lo que quedó de la categorización vieja y todavía no tiene tema
+                                    </em>
+                                </span>
+                            </label>
+                        </CampoMovil>
+                    </>
+                ) : (
+                    <>
+                        <label className="se-admin-filters__field">
+                            <span className="se-form-label">Formato</span>
+                            <select className="se-form-control" value={filters.format} onChange={setFilter("format")}>
+                                <option value="">Todos</option>
+                                {formats.map((f) => (
+                                    <option key={f.slug} value={f.slug}>
+                                        {f.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="se-admin-filters__field">
+                            <span className="se-form-label">Estado</span>
+                            <select className="se-form-control" value={filters.status} onChange={setFilter("status")}>
+                                <option value="">Todos</option>
+                                <option value="draft">Borrador</option>
+                                <option value="scheduled">Programado</option>
+                                <option value="published">Publicado</option>
+                            </select>
+                        </label>
+                        <label className="se-admin-filters__field se-admin-filters__field--grow">
+                            <span className="se-form-label">Buscar</span>
+                            <input
+                                className="se-form-control"
+                                value={filters.q}
+                                onChange={setFilter("q")}
+                                placeholder="Título o resumen"
+                            />
+                        </label>
+                        <label className="se-admin-filters__check">
+                            <input
+                                type="checkbox"
+                                checked={filters.unclassified}
+                                onChange={setFilter("unclassified")}
+                            />
+                            <span>
+                                Sin clasificar
+                                <em>
+                                    lo que quedó de la categorización vieja y todavía no tiene tema
+                                </em>
+                            </span>
+                        </label>
+                    </>
+                )}
             </div>
 
             {flash ? (
@@ -227,6 +327,65 @@ export const AdminPostsList = () => {
                     <p className="se-text-body" style={{ marginBottom: "1rem" }}>
                         Página {meta?.page ?? page} de {totalPages} — {meta?.total ?? state.items.length} en total
                     </p>
+                    {esMovil ? (
+                        <ul className="se-admin-tarjetas">
+                            {state.items.map((row) => {
+                                const d = describir(row);
+                                return (
+                                    <li key={d.id || d.slug || d.title} className="se-admin-tarjeta">
+                                        <Link to={`/admin/posts/${d.id}`} className="se-admin-tarjeta__enlace">
+                                            <span className="se-admin-tarjeta__meta">
+                                                {formatName(row.format)} · #{d.id}
+                                            </span>
+                                            <span className="se-admin-tarjeta__titulo">{d.title}</span>
+                                            <span className="se-admin-tarjeta__clasif">
+                                                {d.tema ? (
+                                                    `${d.tema}${d.lugar ? ` · ${d.lugar}` : ""}`
+                                                ) : (
+                                                    <span className="se-status-pill se-status-pill--neutral">
+                                                        sin clasificar
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </Link>
+                                        <div className="se-admin-tarjeta__pie">
+                                            <span className={`se-status-pill ${d.estadoClase}`}>{d.estadoTexto}</span>
+                                            {d.missing ? (
+                                                <em className="se-admin-table__note">{d.missing}</em>
+                                            ) : null}
+                                            {canPublish ? (
+                                                <span className="se-admin-tarjeta__acciones">
+                                                    {d.status !== "published" ? (
+                                                        <button
+                                                            type="button"
+                                                            className="se-btn se-btn--small"
+                                                            disabled={d.busy}
+                                                            onClick={() => handlePublish(d.id, d.title)}
+                                                        >
+                                                            {d.busy
+                                                                ? "Publicando…"
+                                                                : d.status === "scheduled"
+                                                                  ? "Publicar ya"
+                                                                  : "Publicar"}
+                                                        </button>
+                                                    ) : null}
+                                                    <button
+                                                        type="button"
+                                                        className="se-admin-tarjeta__eliminar"
+                                                        disabled={d.busy}
+                                                        onClick={() => handleDelete(d.id, d.title)}
+                                                        aria-label={`Eliminar «${d.title}»`}
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </span>
+                                            ) : null}
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
                     <div className="se-admin-table-wrap">
                         <table className="se-admin-table">
                             <thead>
@@ -241,18 +400,7 @@ export const AdminPostsList = () => {
                             </thead>
                             <tbody>
                                 {state.items.map((row) => {
-                                    const id = pick(row, ["id"], "");
-                                    const slug = pick(row, ["slug"], "");
-                                    const title = pick(row, ["title"], "(sin título)");
-                                    const status = pick(row, ["status"], "—");
-                                    const busy = actionId === id;
-                                    const tema = principalTopic(row);
-                                    const lugar = principalPlace(row);
-                                    // Says why publishing would be refused before anyone tries.
-                                    const missing =
-                                        (row.format === "entrevista" && !row.video_asset_id && "sin video") ||
-                                        (row.format === "informe" && !row.document_asset_id && "sin documento") ||
-                                        (row.format === "podcast" && !row.audio_asset_id && "sin audio");
+                                    const { id, slug, title, status, busy, tema, lugar, missing } = describir(row);
                                     return (
                                         <tr key={id || slug || title}>
                                             <td>{id}</td>
@@ -340,6 +488,7 @@ export const AdminPostsList = () => {
                             </tbody>
                         </table>
                     </div>
+                    )}
                     <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
                 </>
             ) : null}

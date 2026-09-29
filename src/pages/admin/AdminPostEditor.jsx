@@ -1,5 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CampoMovil } from "../../components/admin/CampoMovil";
+import { useEsMovil } from "../../hooks/useEsMovil";
+import {
+    Link,
+    unstable_useBlocker as useBlocker,
+    useLocation,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
 import {
     createAdminPost,
     deleteAdminPost,
@@ -178,6 +187,31 @@ const fechaDeCaracas = (valor) => {
     });
 };
 
+/** El texto de un campo del editor, sin etiquetas: para los resúmenes de las filas. */
+const textoPlano = (html) =>
+    String(html ?? "")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+/** El formulario, listo para comparar. El editor de texto devuelve `<p></p>` por un
+    campo vacío: sin esto, abrir una pieza y no tocar nada ya contaría como cambio. */
+const comparable = (f) =>
+    JSON.stringify({
+        ...f,
+        content: String(f?.content ?? "").replace(/<p><\/p>/g, "").trim(),
+        excerpt: String(f?.excerpt ?? "").replace(/<p><\/p>/g, "").trim(),
+    });
+
+const recortar = (texto, max = 48) =>
+    texto.length > max ? `${texto.slice(0, max - 1).trimEnd()}…` : texto;
+
+const palabras = (html) => {
+    const t = textoPlano(html);
+    return t ? t.split(" ").length : 0;
+};
+
 /** Lo que no se programa: una noticia sale cuando pasa. Igual que en el backend. */
 const FORMATOS_SIN_PROGRAMAR = new Set(["noticia"]);
 
@@ -277,6 +311,12 @@ const formToPayload = (form) => {
 export const AdminPostEditor = () => {
     const { role } = useAuth();
     const canPublish = role === "publicador" || role === "admin";
+    // En el teléfono cada campo es una fila que abre su propia hoja. Ver `CampoMovil`.
+    const esMovil = useEsMovil();
+    // Lo último que se cargó o guardó, para saber si hay algo sin guardar. `saltarGuarda`
+    // deja pasar las salidas que hace el propio editor (tras crear o eliminar).
+    const [base, setBase] = useState(null);
+    const saltarGuarda = useRef(false);
     const canCreate = role === "escritor" || role === "admin";
     const { postId } = useParams();
     const { pathname } = useLocation();
@@ -330,7 +370,10 @@ export const AdminPostEditor = () => {
             // `?format=noticia` comes from the "create" menu, so the newsroom lands
             // on the right form instead of picking the format twice.
             const requested = searchParams.get("format") || "";
-            setForm({ ...emptyForm(), format: requested });
+            const inicial = { ...emptyForm(), format: requested };
+            setForm(inicial);
+            setBase(inicial);
+            saltarGuarda.current = false;
             setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
             setLoadState({ status: "success", error: null });
             return;
@@ -339,6 +382,8 @@ export const AdminPostEditor = () => {
         try {
             const post = await getAdminPost(numericPostId);
             setForm(postToForm(post));
+            setBase(postToForm(post));
+            saltarGuarda.current = false;
             setAssets({
                 image: post.image_asset ?? null,
                 video: post.video_asset ?? null,
@@ -444,6 +489,7 @@ export const AdminPostEditor = () => {
                 const newId = created?.id ?? null;
                 // Same reason: no gendered adjective on a name that comes from data.
                 const label = currentFormat?.name ?? "La pieza";
+                saltarGuarda.current = true;
                 if (newId != null) {
                     navigate(`/admin/posts/${newId}`, {
                         replace: true,
@@ -459,6 +505,7 @@ export const AdminPostEditor = () => {
             }
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
+            setBase(postToForm(updated));
             setAssets((prev) => ({
                 ...prev,
                 image: updated.image_asset ?? null,
@@ -490,6 +537,7 @@ export const AdminPostEditor = () => {
         try {
             const updated = await fn(numericPostId);
             setForm(postToForm(updated));
+            setBase(postToForm(updated));
             setActionState({ status: "success", message: successMessage, kind });
             toastSuccess(successMessage, toastTitle);
         } catch (err) {
@@ -529,6 +577,7 @@ export const AdminPostEditor = () => {
             confirmLabel: "Eliminar",
             onConfirm: async () => {
                 await deleteAdminPost(numericPostId);
+                saltarGuarda.current = true;
                 navigate("/admin/posts", {
                     replace: true,
                     state: { flash: "Pieza eliminada correctamente." },
@@ -536,6 +585,34 @@ export const AdminPostEditor = () => {
             },
         });
     };
+
+    // Salir con cambios sin guardar, en el teléfono: allí un toque de más en «Volver»
+    // o en el menú se lleva lo escrito, así que se pregunta antes. Cerrar una hoja no
+    // cuenta: lo escrito sigue en el editor.
+    const sinGuardar = esMovil && base !== null && comparable(form) !== comparable(base);
+    const blocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+            sinGuardar && !saltarGuarda.current && currentLocation.pathname !== nextLocation.pathname,
+    );
+    useEffect(() => {
+        if (blocker.state !== "blocked") return;
+        confirm({
+            title: "¿Salir sin guardar?",
+            description: "Hay cambios en esta pieza que todavía no se guardaron.",
+            confirmLabel: "Salir sin guardar",
+            cancelLabel: "Seguir editando",
+            warning: null,
+        }).then((salir) => (salir ? blocker.proceed() : blocker.reset()));
+    }, [blocker, confirm]);
+    useEffect(() => {
+        if (!sinGuardar) return undefined;
+        const alSalir = (e) => {
+            e.preventDefault();
+            e.returnValue = "";
+        };
+        window.addEventListener("beforeunload", alSalir);
+        return () => window.removeEventListener("beforeunload", alSalir);
+    }, [sinGuardar]);
 
     const feedback = (() => {
         for (const state of [actionState, saveState]) {
@@ -576,8 +653,42 @@ export const AdminPostEditor = () => {
         (requiredMedia === "document" && !form.document_asset_id) ||
         (requiredMedia === "audio" && !form.audio_asset_id);
 
+    const nombresDe = (ids, lista) => {
+        const porId = new Map(lista.map((x) => [String(x.id), x.name]));
+        return (ids ?? []).map((i) => porId.get(String(i))).filter(Boolean);
+    };
+    const temasElegidos = nombresDe(form.topic_ids, topics ?? []);
+    const lugaresElegidos = nombresDe(
+        form.place_ids,
+        (placeGroups ?? []).flatMap((g) => g.children ?? []),
+    );
+    const listaCorta = (nombres, vacio) =>
+        nombres.length ? `${nombres[0]}${nombres.length > 1 ? ` +${nombres.length - 1}` : ""}` : vacio;
+    const nombreDeArchivo = (asset) =>
+        asset?.label || asset?.original_filename || (asset ? "Adjunto" : "");
+    const nPalabras = palabras(form.content);
+    const nFuentes = (form.sources ?? []).filter((f) => (f.name ?? "").trim()).length;
+    const resumenDeEstado =
+        form.status === "published"
+            ? "Publicado"
+            : programada
+              ? `Programado · ${fechaDeCaracas(form.published_at) || "falta la fecha"}`
+              : "Borrador";
+    // Lo que impediría publicar, dicho en la barra fija de abajo antes de intentarlo.
+    const faltas = [
+        !form.title.trim() ? "título" : null,
+        missingMedia
+            ? requiredMedia === "video"
+                ? "video"
+                : requiredMedia === "audio"
+                  ? "audio"
+                  : "documento"
+            : null,
+        programada && !form.published_at ? "fecha" : null,
+    ].filter(Boolean);
+
     return (
-        <main role="main">
+        <main role="main" className={esMovil ? "se-editor-movil" : undefined}>
             <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
                 <div>
                     <h1 className="se-heading-section" style={{ margin: 0 }}>
@@ -603,6 +714,12 @@ export const AdminPostEditor = () => {
 
             <div className="se-editor-group">
                 <p className="se-editor-group__title">Formato</p>
+                <CampoMovil
+                    movil={esMovil}
+                    titulo="Qué es esta pieza"
+                    resumen={currentFormat?.name || "Elija un formato"}
+                    estado={form.format ? "ok" : "falta"}
+                >
                 <label className="se-form-field" htmlFor="post-format">
                     <span className="se-form-label">Qué es esta pieza</span>
                     <select
@@ -628,12 +745,19 @@ export const AdminPostEditor = () => {
                         sitio. Elíjalo para continuar.
                     </p>
                 ) : null}
+                </CampoMovil>
             </div>
 
             {form.format ? (
                 <>
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">La pieza</p>
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Título"
+                            resumen={form.title.trim() ? recortar(form.title.trim()) : "Sin escribir"}
+                            estado={form.title.trim() ? "ok" : "falta"}
+                        >
                         <label className="se-form-field" htmlFor="post-title">
                             <span className="se-form-label">Título</span>
                             <input
@@ -644,9 +768,16 @@ export const AdminPostEditor = () => {
                                 required
                             />
                         </label>
+                        </CampoMovil>
                         {/* The same editor as the body: a summary is prose, and a
                             writer who needs an emphasis or a link in it should not
                             have to give it up because the field is smaller. */}
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo={form.format === "editorial" ? "Entradilla" : "Resumen"}
+                            resumen={recortar(textoPlano(form.excerpt)) || "Vacío"}
+                            estado={textoPlano(form.excerpt) ? "ok" : undefined}
+                        >
                         <div className="se-form-field se-form-field--brief" id="post-excerpt">
                             <span className="se-form-label">
                                 {form.format === "editorial" ? "Entradilla" : "Resumen"}
@@ -661,13 +792,19 @@ export const AdminPostEditor = () => {
                                 }
                             />
                         </div>
+                        </CampoMovil>
 
                         {/* The published byline. Not the account that uploads the
                             piece -- nobody wants their personal login printed on
                             the site, and an editor rarely publishes under their
                             own name. */}
                         {currentFormat?.shows_author !== false ? (
-                            <>
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Firma y foto"
+                                resumen={form.byline.trim() || "Sin firma"}
+                                miniatura={assets.bylinePhoto?.url || undefined}
+                            >
                                 <label className="se-form-field" htmlFor="post-byline">
                                     <span className="se-form-label">
                                         Firma — nombre con el que se publica
@@ -696,16 +833,29 @@ export const AdminPostEditor = () => {
                                     byline={form.byline}
                                     onChange={setAsset("byline_photo_asset_id", "bylinePhoto")}
                                 />
-                            </>
+                            </CampoMovil>
                         ) : null}
 
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Fuentes"
+                            resumen={nFuentes ? `${nFuentes} ${nFuentes === 1 ? "fuente" : "fuentes"}` : "Ninguna"}
+                        >
                         <SourcesField
                             value={form.sources}
                             onChange={(sources) => setForm((prev) => ({ ...prev, sources }))}
                         />
+                        </CampoMovil>
 
                         {shows("interviewee") ? (
-                            <>
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Entrevistado"
+                                resumen={
+                                    [form.interviewee, form.interviewee_role].filter((x) => x?.trim()).join(" · ") ||
+                                    "Sin escribir"
+                                }
+                            >
                                 <label className="se-form-field" htmlFor="post-interviewee">
                                     <span className="se-form-label">Entrevistado</span>
                                     <input
@@ -724,10 +874,15 @@ export const AdminPostEditor = () => {
                                         onChange={handleChange("interviewee_role")}
                                     />
                                 </label>
-                            </>
+                            </CampoMovil>
                         ) : null}
 
                         {shows("unit") ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Unidad que firma"
+                                resumen={form.unit.trim() || "Sin escribir"}
+                            >
                             <label className="se-form-field" htmlFor="post-unit">
                                 <span className="se-form-label">Unidad que firma</span>
                                 <input
@@ -738,6 +893,7 @@ export const AdminPostEditor = () => {
                                     placeholder="RendiGroup Advisors, …"
                                 />
                             </label>
+                            </CampoMovil>
                         ) : null}
 
                         {currentFormat?.shows_author === false ? (
@@ -750,7 +906,13 @@ export const AdminPostEditor = () => {
 
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">Cuerpo</p>
-                        <div className="se-form-field">
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo={form.format === "entrevista" ? "Resumen de la conversación" : "Contenido"}
+                            resumen={nPalabras ? `${nPalabras} ${nPalabras === 1 ? "palabra" : "palabras"}` : "Sin escribir"}
+                            estado={nPalabras ? "ok" : undefined}
+                        >
+                        <div className="se-form-field se-editor-cuerpo">
                             <span className="se-form-label">
                                 {form.format === "entrevista"
                                     ? "Resumen escrito de la conversación"
@@ -761,12 +923,20 @@ export const AdminPostEditor = () => {
                                 onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
                             />
                         </div>
+                        </CampoMovil>
 
                     </div>
 
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">Clasificación</p>
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Temas"
+                            resumen={listaCorta(temasElegidos, "Ninguno")}
+                            estado={temasElegidos.length ? "ok" : undefined}
+                        >
                         <AxisPicker
+                            buscar={esMovil}
                             id="post-topics"
                             legend="Temas"
                             hint="El primero es el principal: es el único que se muestra en las tarjetas."
@@ -774,7 +944,15 @@ export const AdminPostEditor = () => {
                             value={form.topic_ids}
                             onChange={(next) => setForm((prev) => ({ ...prev, topic_ids: next }))}
                         />
+                        </CampoMovil>
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Lugares"
+                            resumen={listaCorta(lugaresElegidos, "Ninguno")}
+                            estado={lugaresElegidos.length ? "ok" : undefined}
+                        >
                         <AxisPicker
+                            buscar={esMovil}
                             id="post-places"
                             legend="Lugares"
                             hint="Elija el lugar más específico que aplique. Al filtrar por una región aparecen sus países."
@@ -782,12 +960,23 @@ export const AdminPostEditor = () => {
                             value={form.place_ids}
                             onChange={(next) => setForm((prev) => ({ ...prev, place_ids: next }))}
                         />
+                        </CampoMovil>
 
                         {/* Deliberadamente un interruptor aparte y no una entrada mas en
                             la lista de temas. Los temas topan en tres y el primero es el
                             que imprime la tarjeta: como tema, marcar algo de educativo
                             habria gastado uno de esos huecos y competido por ser el
                             principal, para decir algo que no descarta ningun tema. */}
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Sello y publicidad"
+                            resumen={[
+                                form.is_educational ? "Educativo" : null,
+                                form.sin_publicidad ? "Sin publicidad" : "Con publicidad",
+                            ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                        >
                         {muestraEducativo ? (
                             <label
                                 className="se-form-field se-acceso se-acceso--educativo"
@@ -848,12 +1037,19 @@ export const AdminPostEditor = () => {
                                 ocultan después — no se piden.
                             </span>
                         </label>
+                        </CampoMovil>
                     </div>
 
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">Archivos</p>
 
                         {requiredMedia === "video" ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Video de la entrevista"
+                                resumen={nombreDeArchivo(assets.video) || "Sin video"}
+                                estado={form.video_asset_id ? "ok" : "falta"}
+                            >
                             <AssetField
                                 id="post-video"
                                 label="Video de la entrevista"
@@ -866,10 +1062,20 @@ export const AdminPostEditor = () => {
                                 accept={ACCEPTED_VIDEO_MIME}
                                 required
                             />
+                            </CampoMovil>
                         ) : null}
 
                         {requiredMedia === "document" ? (
-                            <>
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Documento (PDF)"
+                                resumen={
+                                    form.document_asset_id
+                                        ? `${nombreDeArchivo(assets.document)}${form.document_open_access ? " · abierto" : ""}`
+                                        : "Sin documento"
+                                }
+                                estado={form.document_asset_id ? "ok" : "falta"}
+                            >
                             <AssetField
                                 id="post-document"
                                 label="Documento del informe (PDF)"
@@ -914,10 +1120,16 @@ export const AdminPostEditor = () => {
                                     tenía la dirección.
                                 </span>
                             </label>
-                            </>
+                            </CampoMovil>
                         ) : null}
 
                         {requiredMedia === "audio" ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Audio del podcast"
+                                resumen={nombreDeArchivo(assets.audio) || "Sin audio"}
+                                estado={form.audio_asset_id ? "ok" : "falta"}
+                            >
                             <AssetField
                                 id="post-audio"
                                 label="Audio del podcast (MP3 o M4A)"
@@ -930,11 +1142,24 @@ export const AdminPostEditor = () => {
                                 accept={ACCEPTED_AUDIO_MIME}
                                 required
                             />
+                            </CampoMovil>
                         ) : null}
 
                         {/* Every format, because every format has a card in a listing
                             and any piece may arrive with a photo. */}
-                        <>
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Imagen"
+                            resumen={
+                                form.image_asset_id
+                                    ? nombreDeArchivo(assets.image)
+                                    : legacyImage
+                                      ? "Imagen antigua por dirección"
+                                      : "Sin imagen"
+                            }
+                            miniatura={assets.image?.url || undefined}
+                            estado={form.image_asset_id || legacyImage ? "ok" : undefined}
+                        >
                                 <AssetField
                                     id="post-image-asset"
                                     label="Imagen"
@@ -974,11 +1199,17 @@ export const AdminPostEditor = () => {
                                         </button>
                                     </p>
                                 ) : null}
-                            </>
+                        </CampoMovil>
                         </div>
 
                     <div className="se-editor-group">
                         <p className="se-editor-group__title">Publicación</p>
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Estado y fecha"
+                            resumen={resumenDeEstado}
+                            estado={programada && !form.published_at ? "falta" : undefined}
+                        >
                         <label className="se-form-field" htmlFor="post-status">
                             <span className="se-form-label">Estado</span>
                             <select
@@ -1032,11 +1263,19 @@ export const AdminPostEditor = () => {
                                 que lo adjunte.
                             </p>
                         ) : null}
+                        </CampoMovil>
                     </div>
 
                     {/* Slug and SEO are real needs and belong to the machine, not to the
                         story. Folded away so the form reads as editorial work first. */}
-                    <details className="se-editor-advanced">
+                    {/* En el teléfono va en su tarjeta, como las demás filas. */}
+                    <div className={esMovil ? "se-editor-group" : undefined}>
+                    <CampoMovil
+                        movil={esMovil}
+                        titulo="Dirección y SEO"
+                        resumen={form.slug.trim() ? `/${form.slug.trim()}` : "Automáticas"}
+                    >
+                    <details className="se-editor-advanced" open={esMovil || undefined}>
                         <summary>Avanzado — dirección y SEO</summary>
                         <div className="se-editor-advanced__body">
                             <label className="se-form-field" htmlFor="post-slug">
@@ -1088,10 +1327,15 @@ export const AdminPostEditor = () => {
                             </p>
                         </div>
                     </details>
+                    </CampoMovil>
+                    </div>
 
                     <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
 
-                    <div className="se-admin-form-actions">
+                    <div className={`se-admin-form-actions${esMovil ? " se-admin-form-actions--movil" : ""}`}>
+                        {esMovil && faltas.length ? (
+                            <p className="se-admin-form-actions__faltas">Falta: {faltas.join(", ")}</p>
+                        ) : null}
                         <button
                             type="button"
                             className="se-btn"

@@ -19394,3 +19394,435 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border-top: 0;
   padding-top: 0.5rem;
 }
+
+/* —— El editor en el teléfono ——
+   Sólo por debajo de 640 px, el mismo corte que `useEsMovil`. Cada campo es una fila
+   (`CampoMovil`) que abre el campo en una hoja a pantalla completa; la página queda
+   en una lista corta que se lee de un vistazo, y Guardar/Publicar viven en una barra
+   fija abajo, al alcance del pulgar. En el computador nada de esto se aplica. */
+
+/* La subida de archivos se salía de la pantalla: `flex: 1 1 17rem` no encoge por
+   debajo del contenido, y el input nativo de archivo tiene su propio ancho mínimo. */
+.se-asset__way {
+  min-width: 0;
+}
+
+.se-asset__way input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.se-axis__buscar {
+  width: 100%;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.se-campo-movil {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.7rem 0.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--adm-border);
+  background: none;
+  color: var(--adm-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--adm-dur) var(--adm-ease);
+}
+
+.se-campo-movil:last-child {
+  border-bottom: 0;
+}
+
+.se-campo-movil:active {
+  background: rgba(var(--se-tinte), 0.04);
+}
+
+.se-campo-movil:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.se-campo-movil__mini {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--adm-surface-2);
+}
+
+.se-campo-movil__texto {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.se-campo-movil__titulo {
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.se-campo-movil__resumen {
+  overflow: hidden;
+  color: var(--adm-text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-campo-movil__estado {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.se-campo-movil--ok .se-campo-movil__estado {
+  color: var(--adm-ok);
+  font-size: 1rem;
+}
+
+.se-campo-movil--falta .se-campo-movil__estado {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--adm-err-border);
+  border-radius: 999px;
+  background: var(--adm-err-bg);
+  color: var(--adm-err);
+}
+
+.se-campo-movil__flecha {
+  flex: 0 0 auto;
+  color: var(--adm-text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* La hoja. Fija sobre todo el panel, con su propio desplazamiento: la cabecera y el
+   «Listo» de abajo no se van al bajar por un texto largo. */
+.se-campo-movil__hoja {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  flex-direction: column;
+  background: var(--adm-surface);
+  color: var(--adm-text);
+  outline: none;
+  animation: se-hoja-sube 0.24s var(--adm-ease);
+}
+
+.se-campo-movil__hoja[hidden] {
+  display: none;
+}
+
+@keyframes se-hoja-sube {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-campo-movil__hoja {
+    animation: none;
+  }
+}
+
+.se-campo-movil__cabeza {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.25rem;
+  padding: calc(0.35rem + env(safe-area-inset-top)) 0.5rem 0.35rem;
+  border-bottom: 1px solid var(--adm-border);
+  background: var(--adm-surface);
+}
+
+.se-campo-movil__volver,
+.se-campo-movil__listo-arriba {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  color: var(--adm-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.se-campo-movil__volver {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.se-campo-movil__listo-arriba {
+  padding: 0 0.5rem;
+  font-weight: 600;
+}
+
+.se-campo-movil__cabeza-titulo {
+  margin: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-campo-movil__cuerpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1rem 1rem 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.se-campo-movil__pie {
+  padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--adm-border);
+  background: var(--adm-surface);
+}
+
+.se-campo-movil__listo {
+  width: 100%;
+  min-height: 3rem;
+  justify-content: center;
+}
+
+/* Dentro de la hoja, el campo ocupa lo que haya: 16 px en los controles para que
+   el iPhone no acerque la vista al tocar un campo. */
+.se-campo-movil__cuerpo .se-form-control,
+.se-campo-movil__cuerpo input,
+.se-campo-movil__cuerpo select,
+.se-campo-movil__cuerpo textarea {
+  font-size: 16px;
+}
+
+.se-campo-movil__cuerpo .se-editor-advanced {
+  margin: 0;
+  border: 0;
+}
+
+.se-campo-movil__cuerpo .se-editor-advanced > summary {
+  display: none;
+}
+
+.se-campo-movil__cuerpo .se-editor-advanced__body {
+  padding: 0;
+}
+
+/* El contenido, a toda la hoja: la barra de formato se queda arriba mientras se
+   escribe y el texto crece con la hoja en vez de con una caja de 32 rem. */
+.se-campo-movil__cuerpo .se-editor-cuerpo .se-richtext {
+  overflow: visible;
+}
+
+.se-campo-movil__cuerpo .se-editor-cuerpo .se-richtext__toolbar {
+  position: sticky;
+  top: -1rem;
+  z-index: 2;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: 12px 12px 0 0;
+}
+
+.se-campo-movil__cuerpo .se-editor-cuerpo .se-richtext__btn {
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  height: 2.75rem;
+}
+
+.se-campo-movil__cuerpo .se-editor-cuerpo .se-richtext__content {
+  max-height: none;
+  min-height: 60vh;
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .se-editor-movil .se-editor-group {
+    margin-bottom: var(--se-space-md);
+    padding: 0.4rem 1rem;
+  }
+
+  .se-editor-movil .se-editor-group__title {
+    margin: 0.6rem 0 0.1rem;
+  }
+
+  /* La barra de acciones: pegada abajo mientras se recorre el editor. Pegada y no
+     fija porque el contenedor del panel lleva un `transform`, que rompería el
+     `position: fixed`. */
+  .se-admin-form-actions--movil {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: var(--se-space-md) -1rem 0;
+    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--adm-border);
+    background: var(--adm-surface);
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .se-admin-form-actions--movil > .se-btn,
+  .se-admin-form-actions--movil > button {
+    flex: 1 1 8rem;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  .se-admin-form-actions__faltas {
+    flex: 1 1 100%;
+    margin: 0;
+    color: var(--adm-err);
+    font-size: 0.82rem;
+  }
+}
+
+/* —— El listado de piezas en el teléfono ——
+   Tarjetas en vez de tabla: el título entero se lee y se toca para editar, y las
+   acciones quedan abajo con tamaño de dedo. */
+.se-admin-tarjetas {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 var(--se-space-lg);
+  padding: 0;
+  list-style: none;
+}
+
+.se-admin-tarjeta {
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-surface);
+}
+
+.se-admin-tarjeta__enlace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem 0.7rem;
+  color: var(--adm-text);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.se-admin-tarjeta__enlace:active {
+  background: rgba(var(--se-tinte), 0.03);
+}
+
+.se-admin-tarjeta__enlace:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: -2px;
+  border-radius: var(--adm-radius-md);
+}
+
+.se-admin-tarjeta__meta {
+  color: var(--adm-text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.se-admin-tarjeta__titulo {
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.se-admin-tarjeta__clasif {
+  color: var(--adm-text-muted);
+  font-size: 0.85rem;
+}
+
+.se-admin-tarjeta__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem 0.75rem;
+  border-top: 1px solid var(--adm-border);
+}
+
+.se-admin-tarjeta__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.se-admin-tarjeta__acciones .se-btn {
+  min-height: 2.75rem;
+}
+
+.se-admin-tarjeta__eliminar {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.6rem;
+  border: 0;
+  background: none;
+  color: var(--adm-err);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.se-admin-tarjeta__eliminar:disabled {
+  opacity: 0.4;
+}
+
+/* La hoja de «Crear»: un formato por línea, a todo el ancho. */
+.se-campo-movil__cuerpo .se-admin-create {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.se-campo-movil__cuerpo .se-admin-create .se-btn {
+  justify-content: center;
+  min-height: 3rem;
+}
+
+.se-campo-movil__cuerpo .se-admin-filters__field {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.se-campo-movil__cuerpo .se-admin-filters__field .se-form-control {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .se-admin-filters .se-campo-movil {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  /* «Crear contenido» es la acción principal del listado: tarjeta propia y el
+     título en el acento, no una fila más sobre el fondo. */
+  .se-admin-shell__header > .se-campo-movil {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--adm-border);
+    border-radius: var(--adm-radius-md);
+    background: var(--adm-surface);
+  }
+
+  .se-admin-shell__header > .se-campo-movil .se-campo-movil__titulo {
+    color: var(--adm-accent);
+  }
+}

@@ -1,4 +1,12 @@
 import PropTypes from "prop-types";
+import { useState } from "react";
+
+/** Sin tildes ni mayúsculas: «peru» encuentra «Perú». */
+const plano = (texto) =>
+  String(texto ?? "")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
 
 /**
  * Pick up to three tags on one axis, in order.
@@ -20,7 +28,9 @@ export const AxisPicker = ({
   onChange,
   max = 3,
   principalLabel = "principal",
+  buscar = false,
 }) => {
+  const [consulta, setConsulta] = useState("");
   const selected = value ?? [];
   const isSelected = (optionId) => selected.some((x) => String(x) === String(optionId));
   const full = selected.length >= max;
@@ -47,6 +57,16 @@ export const AxisPicker = ({
     [next[index], next[target]] = [next[target], next[index]];
     onChange(next);
   };
+
+  // El buscador, en el teléfono: cuarenta botones sueltos son varias pantallas de
+  // desplazamiento para encontrar «Venezuela». Filtra por nombre, sin tildes.
+  const filtro = buscar ? plano(consulta.trim()) : "";
+  const pasa = (option) => !filtro || plano(option.name).includes(filtro);
+  const gruposVisibles = (groups ?? [])
+    .map((group) => ({ ...group, children: group.children.filter(pasa) }))
+    .filter((group) => group.children.length);
+  const opcionesVisibles = (options ?? []).filter(pasa);
+  const sinResultados = filtro && !(groups ? gruposVisibles.length : opcionesVisibles.length);
 
   const renderOption = (option) => {
     const chosen = isSelected(option.id);
@@ -128,9 +148,22 @@ export const AxisPicker = ({
         </p>
       ) : null}
 
+      {buscar ? (
+        <input
+          type="search"
+          className="se-form-control se-axis__buscar"
+          placeholder={`Buscar ${legend.toLowerCase()}…`}
+          aria-label={`Buscar ${legend.toLowerCase()}`}
+          value={consulta}
+          onChange={(e) => setConsulta(e.target.value)}
+          autoComplete="off"
+        />
+      ) : null}
+      {sinResultados ? <p className="se-axis__empty">Nada coincide con «{consulta}».</p> : null}
+
       {groups ? (
         <div className="se-axis__groups">
-          {groups.map((group) => (
+          {gruposVisibles.map((group) => (
             <div key={String(group.id)} className="se-axis__group">
               <p className="se-axis__group-name">{group.name}</p>
               <div className="se-axis__options">{group.children.map(renderOption)}</div>
@@ -138,7 +171,7 @@ export const AxisPicker = ({
           ))}
         </div>
       ) : (
-        <div className="se-axis__options">{(options ?? []).map(renderOption)}</div>
+        <div className="se-axis__options">{opcionesVisibles.map(renderOption)}</div>
       )}
     </fieldset>
   );
@@ -166,4 +199,6 @@ AxisPicker.propTypes = {
   onChange: PropTypes.func.isRequired,
   max: PropTypes.number,
   principalLabel: PropTypes.string,
+  /** Un buscador encima de las opciones. El editor lo enciende en el teléfono. */
+  buscar: PropTypes.bool,
 };

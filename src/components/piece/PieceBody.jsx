@@ -6,7 +6,10 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
 import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
-import { imagenAncho } from "../../lib/pieza";
+import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
+
+/** Las mismas tallas que las tarjetas: las que genera el backend al subir. */
+const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
 
 /**
  * Body copy, as the writer formatted it.
@@ -367,8 +370,17 @@ export const Media = ({ pieza, conMarcador = false }) => {
         <img
           className="se-piece__img"
           src={imagenAncho(pieza.imagenUrl, 1400)}
+          srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS_DE_PORTADA, pieza.imagenAnchoOriginal) ?? undefined}
+          sizes="(max-width: 960px) 100vw, 1100px"
           alt={pieza.titulo}
-          loading="lazy"
+          // La foto de arriba es lo primero que se ve de la pieza: pedirla la primera, no
+          // dejarla para después como a las de más abajo. Con `lazy` el navegador la
+          // retrasaba, y el artículo tardaba en "aparecer" aunque el texto ya estuviera.
+          loading="eager"
+          // En minúsculas a propósito: React 18.2 no conoce `fetchPriority` y avisaría
+          // por consola; así pasa tal cual al HTML, que es lo que lee el navegador.
+          // eslint-disable-next-line react/no-unknown-property
+          fetchpriority="high"
         />
         {/* Printed only when there is one: the newsroom asked for somewhere to
             record who holds the rights, and an empty credit line under every

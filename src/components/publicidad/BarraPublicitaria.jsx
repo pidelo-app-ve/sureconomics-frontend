@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import { EVENTO_CONSENTIMIENTO, avisoPendiente } from "../../lib/analitica";
 import { ESPACIOS, enlaceDeClic } from "../../services/publicidadService";
 import { useCiclo } from "./ProveedorDePublicidad";
 import { useRotacion } from "./useRotacion";
@@ -63,7 +64,19 @@ export const BarraPublicitaria = () => {
     setCerrada(yaCerrada());
   }, []);
 
-  if (!hueco || cerrada) return null;
+  // Mientras el aviso de cookies espera respuesta, la barra no sale. Las dos van pegadas
+  // al borde de abajo y la barra quedaba encima: con ella encendida, un lector nuevo
+  // podía no ver nunca el aviso, y un aviso que no se ve no pide consentimiento. Sale
+  // en cuanto contesta, sin recargar.
+  const [esperandoAviso, setEsperandoAviso] = useState(true);
+  useEffect(() => {
+    const mirar = () => setEsperandoAviso(avisoPendiente());
+    mirar();
+    window.addEventListener(EVENTO_CONSENTIMIENTO, mirar);
+    return () => window.removeEventListener(EVENTO_CONSENTIMIENTO, mirar);
+  }, []);
+
+  if (!hueco || cerrada || esperandoAviso) return null;
 
   const cerrar = () => {
     setCerrada(true);

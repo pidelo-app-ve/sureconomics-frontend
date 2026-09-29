@@ -151,8 +151,24 @@ export const decidir = (respuesta) => {
   escribir(COOKIE_CONSENTIMIENTO, valor, SEIS_MESES);
   if (valor === "si") arrancar();
   else parar({ borrarCookies: true });
+  // Para quien espera a que el lector conteste: la barra publicitaria no sale mientras
+  // el aviso esté en pantalla (ver `BarraPublicitaria`).
+  try {
+    window.dispatchEvent(new Event(EVENTO_CONSENTIMIENTO));
+  } catch {
+    /* Sin eventos no hay nada que avisar; la decisión ya quedó guardada. */
+  }
   return valor;
 };
+
+/** Se dispara en `window` cada vez que el lector contesta el aviso de cookies. */
+export const EVENTO_CONSENTIMIENTO = "sureconomics:consentimiento";
+
+/**
+ * Si el aviso de cookies está esperando respuesta. Mientras lo esté, nada fijo puede
+ * ponerse encima: un aviso tapado no es un aviso.
+ */
+export const avisoPendiente = () => MEDICION_HABILITADA && consentimiento() === null;
 
 /**
  * Revoca y borra. Devuelve la promesa del borrado en el servidor para que la pantalla

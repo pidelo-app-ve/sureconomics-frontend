@@ -19,42 +19,22 @@ import { Consultoria } from "./pages/Consultoria";
 import { Contacto } from "./pages/Contacto";
 import { Cookies } from "./pages/Cookies";
 import { NotFound } from "./pages/NotFound";
-import { AdminLayout } from "./pages/admin/AdminLayout";
-import { AdminPostsList } from "./pages/admin/AdminPostsList";
-import { AdminPostEditor } from "./pages/admin/AdminPostEditor";
-import { AdminTopicsList } from "./pages/admin/AdminTopicsList";
-import { AdminPlacesList } from "./pages/admin/AdminPlacesList";
-import { AdminMediaLibrary } from "./pages/admin/AdminMediaLibrary";
-import { AdminEquipo } from "./pages/admin/AdminEquipo";
-import { AdminRedes } from "./pages/admin/AdminRedes";
-import { AdminEducacion } from "./pages/admin/AdminEducacion";
-import { AdminPublicidad } from "./pages/admin/AdminPublicidad";
-import { AdminAnalitica } from "./pages/admin/AdminAnalitica";
-import { AdminMarketTicker } from "./pages/admin/AdminMarketTicker";
-import { AdminNewsletterList } from "./pages/admin/AdminNewsletterList";
-import { AdminBoletin } from "./pages/admin/AdminBoletin";
-import { AdminCommentsList } from "./pages/admin/AdminCommentsList";
-import { AdminSubmissionsList } from "./pages/admin/AdminSubmissionsList";
-import { AdminSubmissionDetail } from "./pages/admin/AdminSubmissionDetail";
-import { AdminCollaborationSettings } from "./pages/admin/AdminCollaborationSettings";
-import { AdminUsersList } from "./pages/admin/AdminUsersList";
-import { AdminUserDetail } from "./pages/admin/AdminUserDetail";
-import { AdminStaffList } from "./pages/admin/AdminStaffList";
-import { AdminMiPerfil } from "./pages/admin/AdminMiPerfil";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import { CuentaEntrar } from "./pages/cuenta/CuentaEntrar";
 import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
 import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
-import { CuentaDashboardLayout } from "./pages/cuenta/CuentaDashboardLayout";
-import { CuentaDashboardHome } from "./pages/cuenta/CuentaDashboardHome";
-import { CuentaLoMio } from "./pages/cuenta/CuentaLoMio";
-import { CuentaPerfil } from "./pages/cuenta/CuentaPerfil";
-import { CuentaMarcadores } from "./pages/cuenta/CuentaMarcadores";
-import { CuentaEnviosList } from "./pages/cuenta/CuentaEnviosList";
-import { CuentaEnviosNuevo } from "./pages/cuenta/CuentaEnviosNuevo";
-import { CuentaEnvioDetail } from "./pages/cuenta/CuentaEnvioDetail";
-import { CuentaEnvioEditar } from "./pages/cuenta/CuentaEnvioEditar";
+
+/**
+ * Una página que se descarga al entrar en ella, no con el resto del sitio.
+ *
+ * El panel de administración y el área de cuenta son casi la mitad del código -- y
+ * traen el editor de texto (TipTap), lo más pesado de todo --, pero sólo los usa la
+ * redacción y quien tiene sesión. Antes iban en el mismo archivo que la portada, y cada
+ * lector se descargaba el panel entero para leer una noticia. Con `lazy` del router cada
+ * página va en su propio archivo y se pide la primera vez que alguien la abre.
+ */
+const pagina = (cargar, nombre) => async () => ({ Component: (await cargar())[nombre] });
 
 export const router = createBrowserRouter([
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
@@ -113,16 +93,16 @@ export const router = createBrowserRouter([
     },
     {
         path: "/cuenta",
-        element: <CuentaDashboardLayout />,
+        lazy: pagina(() => import("./pages/cuenta/CuentaDashboardLayout"), "CuentaDashboardLayout"),
         children: [
-            { index: true, element: <CuentaDashboardHome /> },
-            { path: "perfil", element: <CuentaPerfil /> },
-            { path: "lo-mio", element: <CuentaLoMio /> },
-            { path: "marcadores", element: <CuentaMarcadores /> },
-            { path: "envios", element: <CuentaEnviosList /> },
-            { path: "envios/nuevo", element: <CuentaEnviosNuevo /> },
-            { path: "envios/:id/editar", element: <CuentaEnvioEditar /> },
-            { path: "envios/:id", element: <CuentaEnvioDetail /> },
+            { index: true, lazy: pagina(() => import("./pages/cuenta/CuentaDashboardHome"), "CuentaDashboardHome") },
+            { path: "perfil", lazy: pagina(() => import("./pages/cuenta/CuentaPerfil"), "CuentaPerfil") },
+            { path: "lo-mio", lazy: pagina(() => import("./pages/cuenta/CuentaLoMio"), "CuentaLoMio") },
+            { path: "marcadores", lazy: pagina(() => import("./pages/cuenta/CuentaMarcadores"), "CuentaMarcadores") },
+            { path: "envios", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosList"), "CuentaEnviosList") },
+            { path: "envios/nuevo", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosNuevo"), "CuentaEnviosNuevo") },
+            { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar") },
+            { path: "envios/:id", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioDetail"), "CuentaEnvioDetail") },
         ],
     },
     {
@@ -134,40 +114,40 @@ export const router = createBrowserRouter([
         element: <RequireAdmin />,
         children: [
             {
-                element: <AdminLayout />,
+                lazy: pagina(() => import("./pages/admin/AdminLayout"), "AdminLayout"),
                 children: [
                     { index: true, element: <Navigate to="posts" replace /> },
-                    { path: "posts", element: <AdminPostsList /> },
-                    { path: "posts/new", element: <AdminPostEditor /> },
-                    { path: "posts/:postId", element: <AdminPostEditor /> },
+                    { path: "posts", lazy: pagina(() => import("./pages/admin/AdminPostsList"), "AdminPostsList") },
+                    { path: "posts/new", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor") },
+                    { path: "posts/:postId", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor") },
                     // The two axes. Neither has a create route: topics are a
                     // closed list of fourteen and places only grow by country,
                     // which the Lugares screen does inline.
-                    { path: "topics", element: <AdminTopicsList /> },
-                    { path: "places", element: <AdminPlacesList /> },
-                    { path: "media", element: <AdminMediaLibrary /> },
-                    { path: "cinta", element: <AdminMarketTicker /> },
+                    { path: "topics", lazy: pagina(() => import("./pages/admin/AdminTopicsList"), "AdminTopicsList") },
+                    { path: "places", lazy: pagina(() => import("./pages/admin/AdminPlacesList"), "AdminPlacesList") },
+                    { path: "media", lazy: pagina(() => import("./pages/admin/AdminMediaLibrary"), "AdminMediaLibrary") },
+                    { path: "cinta", lazy: pagina(() => import("./pages/admin/AdminMarketTicker"), "AdminMarketTicker") },
                     // Solo las fotos del equipo: los nombres y los cargos viven en
                     // el codigo, y esta pantalla no los toca.
-                    { path: "equipo", element: <AdminEquipo /> },
+                    { path: "equipo", lazy: pagina(() => import("./pages/admin/AdminEquipo"), "AdminEquipo") },
                     // Las publicaciones de redes que se destacan al pie de todas
                     // las vistas. Curadas a mano: ver `redes_service.py`.
-                    { path: "redes", element: <AdminRedes /> },
-                    { path: "educacion", element: <AdminEducacion /> },
-                    { path: "publicidad", element: <AdminPublicidad /> },
-                    { path: "analitica", element: <AdminAnalitica /> },
-                    { path: "comments", element: <AdminCommentsList /> },
-                    { path: "boletin", element: <AdminNewsletterList /> },
+                    { path: "redes", lazy: pagina(() => import("./pages/admin/AdminRedes"), "AdminRedes") },
+                    { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion") },
+                    { path: "publicidad", lazy: pagina(() => import("./pages/admin/AdminPublicidad"), "AdminPublicidad") },
+                    { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },
+                    { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
+                    { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.
-                    { path: "boletin/numeros", element: <AdminBoletin /> },
-                    { path: "submissions", element: <AdminSubmissionsList /> },
-                    { path: "submissions/:id", element: <AdminSubmissionDetail /> },
-                    { path: "settings/collaboration", element: <AdminCollaborationSettings /> },
-                    { path: "users", element: <AdminUsersList /> },
-                    { path: "users/:id", element: <AdminUserDetail /> },
-                    { path: "staff", element: <AdminStaffList /> },
-                    { path: "perfil", element: <AdminMiPerfil /> },
+                    { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin") },
+                    { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList") },
+                    { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail") },
+                    { path: "settings/collaboration", lazy: pagina(() => import("./pages/admin/AdminCollaborationSettings"), "AdminCollaborationSettings") },
+                    { path: "users", lazy: pagina(() => import("./pages/admin/AdminUsersList"), "AdminUsersList") },
+                    { path: "users/:id", lazy: pagina(() => import("./pages/admin/AdminUserDetail"), "AdminUserDetail") },
+                    { path: "staff", lazy: pagina(() => import("./pages/admin/AdminStaffList"), "AdminStaffList") },
+                    { path: "perfil", lazy: pagina(() => import("./pages/admin/AdminMiPerfil"), "AdminMiPerfil") },
                 ],
             },
         ],

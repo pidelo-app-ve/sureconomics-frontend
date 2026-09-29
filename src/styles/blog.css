@@ -20013,3 +20013,37 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
     max-height: 3.5rem;
   }
 }
+
+/* TikTok: el aviso para conectar la cuenta, encima de la lista manual. Verde de marca
+   como la etiqueta «Automático», que es en lo que se convierte la fila al conectar. */
+.se-admin-redes__conectar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-top: 1.75rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(0, 51, 24, 0.22);
+  border-left: 3px solid var(--marca-verde);
+  border-radius: 12px;
+  background: rgba(0, 51, 24, 0.04);
+}
+.se-admin-redes__conectar > div {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+.se-admin-redes__conectar .se-admin-meta-hint {
+  margin: 0.3rem 0 0;
+}
+.se-admin-redes__conectar-titulo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.se-admin-redes__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

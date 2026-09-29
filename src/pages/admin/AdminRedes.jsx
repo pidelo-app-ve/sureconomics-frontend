@@ -1,12 +1,18 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
 import {
+  autorizarTiktok,
+  desconectarTiktok,
   getSocial,
   ocultarInstagram,
+  ocultarTiktok,
   putSocial,
   sincronizarInstagram,
+  sincronizarTiktok,
 } from "../../services/adminSettingsService";
 
 /**
@@ -29,6 +35,11 @@ import {
  * **Instagram, en automático** cuando el backend tiene el token de la cuenta: trae solo
  * las últimas publicaciones cada hora, y aquí sólo se ven, se actualizan al momento o
  * se ocultan. Ver `instagram_service.py`.
+ *
+ * **TikTok, en automático** una vez conectada la cuenta: con las claves de la app en el
+ * servidor aparece «Conectar TikTok»; se pulsa una vez con la sesión de @surecon0mics
+ * abierta en TikTok, se da permiso allí y TikTok vuelve a `/admin/redes/tiktok`. Desde
+ * entonces los videos llegan solos cada hora. Ver `tiktok_service.py`.
  *
  * **El enlace tiene que ir a su red.** Lo comprueba el servidor: un post de Instagram
  * no puede apuntar a otro sitio. Si se cuela uno mal, Guardar lo dice y no guarda nada.
@@ -243,6 +254,139 @@ InstagramAutomatico.propTypes = {
   onOcultar: PropTypes.func.isRequired,
 };
 
+/**
+ * TikTok todavía sin conectar, con las claves ya puestas en el servidor: el botón que
+ * lleva a TikTok. Debajo sigue la lista manual, que es lo que se ve hasta conectar.
+ */
+const ConectarTikTok = ({ ocupado, bloqueado, onConectar }) => (
+  <div className="se-admin-redes__conectar">
+    <div>
+      <p className="se-admin-redes__conectar-titulo">TikTok en automático</p>
+      <p className="se-admin-meta-hint">
+        Conecte la cuenta una vez y los últimos videos llegan solos cada hora, como en
+        Instagram. Hágalo con la sesión de @surecon0mics abierta en TikTok: allí se pide
+        permiso para leer sus videos públicos, y se vuelve aquí.
+      </p>
+      {bloqueado ? (
+        <p className="se-admin-meta-hint">Guarde antes los cambios de abajo: la página se va a TikTok.</p>
+      ) : null}
+    </div>
+    <button
+      type="button"
+      className="se-btn se-btn--small"
+      onClick={onConectar}
+      disabled={ocupado || bloqueado}
+    >
+      {ocupado ? "Abriendo TikTok…" : "Conectar TikTok"}
+    </button>
+  </div>
+);
+
+ConectarTikTok.propTypes = {
+  ocupado: PropTypes.bool,
+  bloqueado: PropTypes.bool,
+  onConectar: PropTypes.func.isRequired,
+};
+
+/**
+ * TikTok conectado. Como Instagram: se ve lo que llegó, en el orden en que saldrá, y cada
+ * video se puede ocultar. Los ocultos no cuentan para los ocho.
+ */
+const TikTokAutomatico = ({ auto, ocupado, onActualizar, onOcultar, onDesconectar }) => {
+  let visibles = 0;
+  const cuenta = auto.cuenta?.nombre;
+  return (
+    <section className="se-admin-redes__red">
+      <header className="se-admin-redes__red-cabeza">
+        <h2 className="se-admin-redes__red-titulo">
+          TikTok <span className="se-admin-redes__auto">Automático</span>
+        </h2>
+        <span className="se-admin-redes__acciones">
+          <button
+            type="button"
+            className="se-btn se-btn--secondary se-btn--small"
+            onClick={onActualizar}
+            disabled={ocupado}
+          >
+            {ocupado ? "Actualizando…" : "Actualizar ahora"}
+          </button>
+          <button
+            type="button"
+            className="se-btn se-btn--secondary se-btn--small"
+            onClick={onDesconectar}
+            disabled={ocupado}
+          >
+            Desconectar
+          </button>
+        </span>
+      </header>
+      <p className="se-admin-meta-hint">
+        Conectado{cuenta ? ` como ${cuenta}` : ""}. Se actualiza solo cada hora. Última vez:{" "}
+        {haceCuanto(auto.sincronizado_en)}. Salen los {auto.mostrar} primeros que no estén
+        ocultos.
+      </p>
+      {auto.error ? (
+        <p className="se-admin-form-feedback" role="alert">
+          La última actualización falló: {auto.error} Se sigue mostrando lo que llegó antes.
+        </p>
+      ) : null}
+      {auto.videos.length ? (
+        <ul className="se-admin-redes__auto-lista">
+          {auto.videos.map((v) => {
+            const sale = !v.oculto && visibles < auto.mostrar;
+            if (sale) visibles += 1;
+            return (
+              <li
+                key={v.id}
+                className={`se-admin-redes__auto-pub${sale ? "" : " se-admin-redes__auto-pub--fuera"}`}
+              >
+                <a href={v.enlace} target="_blank" rel="noreferrer" className="se-admin-redes__auto-foto">
+                  <img src={v.url} alt="" loading="lazy" />
+                  <span className="se-admin-redes__auto-tipo">Video</span>
+                </a>
+                <div className="se-admin-redes__auto-texto">
+                  <span className="se-admin-meta-hint">
+                    {v.fecha}
+                    {" · "}
+                    {v.oculto ? "Oculto" : sale ? "Sale en el sitio" : "De reserva"}
+                  </span>
+                  <p>{v.texto || "Sin texto"}</p>
+                </div>
+                <button
+                  type="button"
+                  className="se-btn se-btn--secondary se-btn--small"
+                  disabled={ocupado}
+                  onClick={() => onOcultar(v.id, !v.oculto)}
+                >
+                  {v.oculto ? "Mostrar" : "Ocultar"}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="se-admin-meta-hint">
+          Todavía no llegó ningún video. Pulse «Actualizar ahora» para traer los últimos.
+        </p>
+      )}
+    </section>
+  );
+};
+
+TikTokAutomatico.propTypes = {
+  auto: PropTypes.shape({
+    cuenta: PropTypes.object,
+    sincronizado_en: PropTypes.string,
+    error: PropTypes.string,
+    mostrar: PropTypes.number,
+    videos: PropTypes.arrayOf(PropTypes.object),
+  }).isRequired,
+  ocupado: PropTypes.bool,
+  onActualizar: PropTypes.func.isRequired,
+  onOcultar: PropTypes.func.isRequired,
+  onDesconectar: PropTypes.func.isRequired,
+};
+
 //: Normaliza lo que llega del servidor para las tres redes de una vez, rellenando
 //: los campos que falten con la fila vacía de cada una.
 const normalizar = (d) =>
@@ -261,6 +405,14 @@ export const AdminRedes = () => {
   const [subiendo, setSubiendo] = useState("");
   const [auto, setAuto] = useState(null);
   const [autoOcupado, setAutoOcupado] = useState(false);
+  const [tiktok, setTiktok] = useState(null);
+  const [tiktokOcupado, setTiktokOcupado] = useState(false);
+  const { confirm, ConfirmDialog } = useAdminConfirm();
+  // Lo que deja dicho la vuelta de TikTok (`AdminRedesTikTok`) al traer de nuevo aquí.
+  const aviso = useLocation().state?.aviso;
+  useEffect(() => {
+    if (aviso) setGuardado({ status: "ok", mensaje: aviso });
+  }, [aviso]);
 
   useEffect(() => {
     let vivo = true;
@@ -268,6 +420,7 @@ export const AdminRedes = () => {
       .then((d) => {
         if (!vivo) return;
         setAuto(d.instagram_auto?.activo ? d.instagram_auto : null);
+        setTiktok(d.tiktok_auto ?? null);
         const normal = normalizar(d);
         setListas(normal);
         setInicial(JSON.stringify(normal));
@@ -372,6 +525,54 @@ export const AdminRedes = () => {
     );
   };
 
+  // Lo mismo para TikTok: de la respuesta sólo se toma su parte.
+  const conTiktok = async (accion, exito) => {
+    setTiktokOcupado(true);
+    try {
+      const d = await accion();
+      setTiktok(d.tiktok_auto ?? null);
+      setGuardado({ status: "ok", mensaje: exito });
+    } catch (err) {
+      setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo tocar TikTok.") });
+    } finally {
+      setTiktokOcupado(false);
+    }
+  };
+
+  const conectarTiktok = async () => {
+    setTiktokOcupado(true);
+    try {
+      const url = await autorizarTiktok();
+      if (!url) throw new Error("El servidor no devolvió la dirección de TikTok.");
+      // En la misma pestaña: la sesión del panel vive en ella, y TikTok vuelve aquí.
+      window.location.assign(url);
+    } catch (err) {
+      setTiktokOcupado(false);
+      setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo abrir TikTok.") });
+    }
+  };
+
+  const ocultarVideo = (id, ocultarlo) => {
+    const actuales = tiktok.videos.filter((v) => v.oculto).map((v) => v.id);
+    const ids = ocultarlo ? [...actuales, id] : actuales.filter((x) => x !== id);
+    conTiktok(
+      () => ocultarTiktok(ids),
+      ocultarlo ? "Oculto: ya no sale en el sitio." : "Vuelve a salir en el sitio."
+    );
+  };
+
+  const desconectar = async () => {
+    const vale = await confirm({
+      title: "¿Desconectar TikTok?",
+      description:
+        "Dejan de llegar los videos nuevos y la fila de TikTok vuelve a la lista manual. Para volver a automático hay que conectar otra vez desde aquí.",
+      confirmLabel: "Desconectar",
+      cancelLabel: "Seguir conectado",
+      warning: null,
+    });
+    if (vale) conTiktok(desconectarTiktok, "TikTok desconectado. La fila vuelve a la lista manual.");
+  };
+
   const bloque = (red) => (
     <section className="se-admin-redes__red" key={red}>
       <header className="se-admin-redes__red-cabeza">
@@ -448,7 +649,26 @@ export const AdminRedes = () => {
             bloque("instagram")
           )}
           {bloque("x")}
-          {bloque("tiktok")}
+          {tiktok?.conectado ? (
+            <TikTokAutomatico
+              auto={tiktok}
+              ocupado={tiktokOcupado}
+              onActualizar={() => conTiktok(sincronizarTiktok, "TikTok actualizado con lo último.")}
+              onOcultar={ocultarVideo}
+              onDesconectar={desconectar}
+            />
+          ) : (
+            <>
+              {tiktok?.configurado ? (
+                <ConectarTikTok
+                  ocupado={tiktokOcupado}
+                  bloqueado={hayCambios}
+                  onConectar={conectarTiktok}
+                />
+              ) : null}
+              {bloque("tiktok")}
+            </>
+          )}
 
           <div className="se-admin-form-actions" style={{ marginTop: "1.25rem" }}>
             <button
@@ -474,6 +694,7 @@ export const AdminRedes = () => {
           ) : null}
         </>
       ) : null}
+      <ConfirmDialog />
     </div>
   );
 };

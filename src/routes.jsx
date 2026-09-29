@@ -133,6 +133,9 @@ export const router = createBrowserRouter([
                     // Las publicaciones de redes que se destacan al pie de todas
                     // las vistas. Curadas a mano: ver `redes_service.py`.
                     { path: "redes", lazy: pagina(() => import("./pages/admin/AdminRedes"), "AdminRedes") },
+                    // La vuelta de TikTok tras dar permiso: es la Redirect URI de Login Kit,
+                    // así que la dirección no puede cambiar sin cambiarla también allí.
+                    { path: "redes/tiktok", lazy: pagina(() => import("./pages/admin/AdminRedesTikTok"), "AdminRedesTikTok") },
                     { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion") },
                     { path: "publicidad", lazy: pagina(() => import("./pages/admin/AdminPublicidad"), "AdminPublicidad") },
                     { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },

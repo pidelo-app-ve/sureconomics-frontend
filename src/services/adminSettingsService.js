@@ -60,3 +60,36 @@ export const ocultarInstagram = async (ids) =>
       json: { ids },
     })
   );
+
+/* —— TikTok en automático ——
+   La conexión es un ida y vuelta con TikTok: `autorizarTiktok` da la dirección a la que
+   se manda a quien tiene la sesión de la cuenta, y TikTok vuelve a /admin/redes/tiktok
+   con `code` y `state`, que `conectarTiktok` entrega al servidor. Los tokens se quedan
+   en el servidor: aquí nunca llegan. */
+
+/** La dirección de TikTok a la que manda «Conectar TikTok». */
+export const autorizarTiktok = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/social/tiktok/autorizar"))?.url ?? null;
+
+/** La vuelta de TikTok. Devuelve el panel de redes con la cuenta ya conectada. */
+export const conectarTiktok = async (code, state) =>
+  unwrapEntity(
+    await adminRequest("/admin/settings/social/tiktok/conectar", {
+      method: "POST",
+      json: { code, state },
+    })
+  );
+
+/** Traer ya los últimos videos, sin esperar a la hora. */
+export const sincronizarTiktok = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/social/tiktok/sincronizar", { method: "POST" }));
+
+/** Los videos de TikTok que no salen en el sitio (lista completa de ids). */
+export const ocultarTiktok = async (ids) =>
+  unwrapEntity(
+    await adminRequest("/admin/settings/social/tiktok/ocultos", { method: "PUT", json: { ids } })
+  );
+
+/** Olvida la conexión: «En redes» vuelve a la lista manual de TikTok. */
+export const desconectarTiktok = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/social/tiktok", { method: "DELETE" }));

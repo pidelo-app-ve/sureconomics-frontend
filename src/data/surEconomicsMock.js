@@ -466,7 +466,7 @@ export const REPORTS = [
 export const SUBSCRIPTION = {
   benefits: [
     "Investigaciones extensas en economía, finanzas y aspectos políticos de diferentes países y bloques latinoamericanos.",
-    "Boletín mensual sobre economía, finanzas y política en la región latinoamericana.",
+    "Boletín semanal, cada lunes, sobre economía, finanzas y política en la región latinoamericana.",
     "Oportunidades de inversión directa en Latinoamérica.",
     "Conexión con potenciales inversores interesados en América Latina.",
     "Cursos en economía y finanzas con orientación práctica.",

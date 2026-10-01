@@ -21,16 +21,31 @@ const matiz = (texto) => {
 };
 
 /**
- * A two-stop gradient for the card's media area.
+ * Los rellenos posibles: sólo tonos de la marca. Verde Cardin y sus vecinos, el cobre,
+ * la tierra y el grafito. Todos oscuros, para que el nombre del tema se lea en blanco.
  *
- * Lightness is kept low on both stops: these sit on a near-black page beside real
- * photographs, and a panel brighter than the photographs would pull the eye to
- * exactly the pieces that have nothing to show.
+ * Antes el tono salía del círculo cromático entero y la portada se llenaba de morados,
+ * cianes y azul marino que el brandbook no tiene. El comentario de entonces decía que
+ * estos paneles iban «sobre una página casi negra»; la página ya es blanca, y sobre
+ * blanco un morado saturado es lo primero que se ve.
+ */
+const RELLENOS = [
+  ["#0f4a2c", "#03210f"], // verde Cardin
+  ["#2f4a1f", "#16260d"], // musgo
+  ["#14403d", "#07201e"], // petróleo
+  ["#7a3519", "#3a170a"], // cobre
+  ["#5a3a22", "#2a1a0e"], // tierra
+  ["#2c312e", "#121513"], // grafito
+];
+
+/**
+ * A two-stop gradient for the card's media area. The same topic always gets the same
+ * pair, which is what makes a grid of them read as a system instead of as noise.
  *
  * @param {string | null | undefined} tema
  * @returns {string} a CSS `background` value
  */
 export const fondoDeTema = (tema) => {
-  const h = matiz(tema || "SurEconomics");
-  return `linear-gradient(135deg, hsl(${h} 44% 26%), hsl(${(h + 32) % 360} 50% 13%))`;
+  const [claro, oscuro] = RELLENOS[matiz(tema || "SurEconomics") % RELLENOS.length];
+  return `linear-gradient(135deg, ${claro}, ${oscuro})`;
 };

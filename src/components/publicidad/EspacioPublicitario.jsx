@@ -161,7 +161,7 @@ const TarjetaNativa = ({ hueco, variante }) => {
           <Logo hueco={hueco} className="se-ad__logo se-ad__logo--ficha" />
         </div>
         <div className="se-ad__ficha-cuerpo">
-          <h3 className="se-ad__titular">{hueco.titular_corto || hueco.titular}</h3>
+          <p className="se-ad__titular">{hueco.titular_corto || hueco.titular}</p>
           {hueco.pie ? <p className="se-ad__pie">{hueco.pie}</p> : null}
           <span className="se-ad__cta">
             {hueco.es_casa ? "Ver tarifas →" : "Conocer más →"}
@@ -206,7 +206,7 @@ const Rail = ({ hueco }) => (
       <Logo hueco={hueco} className="se-ad__logo" />
     </div>
     <Etiqueta anunciante={hueco.anunciante} esCasa={hueco.es_casa} />
-    <h3 className="se-ad__titular">{hueco.titular_corto || hueco.titular}</h3>
+    <p className="se-ad__titular">{hueco.titular_corto || hueco.titular}</p>
     <span className="se-ad__cta">Conocer más →</span>
   </Envoltorio>
 );

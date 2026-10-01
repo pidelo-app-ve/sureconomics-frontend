@@ -121,7 +121,6 @@ export const FormatListing = ({ formatoApi }) => {
     <section className="se-section se-articles__hero" aria-label={titulo}>
       <div className="se-container">
         <div className="se-articles__head">
-          <p className="se-articles__kicker">{titulo}</p>
           <h1 className="se-articles__title">{titulo}</h1>
         </div>
       </div>
@@ -162,6 +161,8 @@ export const FormatListing = ({ formatoApi }) => {
             <EspacioPublicitario espacio={ESPACIOS.LISTADO_PATROCINIO} />
 
             <div className="se-listing" ref={listingRef}>
+              {/* El nivel que faltaba entre el h1 y los h3 de las tarjetas. */}
+              <h2 className="se-sr-only">Todas las piezas de {titulo.toLowerCase()}</h2>
               {visible.length ? (
                 LAYOUTS[formatoApi](visible)
               ) : (

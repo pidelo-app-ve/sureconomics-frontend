@@ -59,6 +59,12 @@
   --se-font-heading: var(--display);
   --se-font-ui: var(--sans);
   --se-font-reading: var(--serif);
+  /* Rótulos, fechas, chips, botones: la Grotesk de la interfaz. La mono queda para lo
+     que es dato -- el cintillo, el reloj, las cifras, las duraciones --, que es lo
+     único que se lee mejor con todas las letras del mismo ancho. Antes la llevaba
+     casi todo el texto pequeño del sitio, y eso acercaba la portada a una app de
+     cripto más que a la prensa económica. */
+  --se-font-label: var(--sans);
 
   /* —— La rampa de grises, desinvertida ——
      Estaba al revés: `--se-gray-100` valía #f2f2f0 y `--se-gray-900` era blanco.
@@ -69,7 +75,7 @@
   --se-gray-900: #111111;
   --se-gray-700: #3d3d3d;
   --se-gray-500: var(--marca-gris);
-  --se-gray-400: #8a8a8a;
+  --se-gray-400: #707070; /* 4.95:1 sobre blanco; #8a8a8a no llegaba a AA */
   --se-gray-300: #c9c9c9;
   --se-gray-200: #e4e4e2;
   --se-gray-100: #f2f2f0;
@@ -371,11 +377,11 @@
 }
 
 .se-meta {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   color: var(--color-slate-2);
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   font-weight: 600;
 }
 
@@ -450,7 +456,7 @@
   border-color: var(--se-btn-primary-hover-border);
   color: var(--se-btn-primary-text);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(185, 83, 42, 0.35);
+  box-shadow: 0 3px 10px rgba(185, 83, 42, 0.22);
 }
 
 .se-btn:focus-visible {
@@ -581,7 +587,7 @@
 }
 
 .se-hora__lugar {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.62);
@@ -1263,7 +1269,20 @@
   background: var(--marca-rojo);
   border-color: var(--marca-rojo);
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+}
+
+/* El secundario con borde y no relleno: dos botones cobre del mismo peso, «Entrar» y
+   «Registrarse», competían entre sí. Ahora el que invita es uno. */
+.se-header .se-btn--secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+}
+
+.se-header .se-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
 }
 
 .se-header .se-btn:hover,
@@ -1413,12 +1432,12 @@
 }
 
 .se-footer__contact-title {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--se-accent-hover);
   margin-bottom: var(--se-space-xs);
 }
 
@@ -1470,7 +1489,7 @@
 }
 
 .se-footer__newsletter-input::placeholder {
-  color: rgba(var(--se-tinte), 0.42);
+  color: rgba(var(--se-tinte), 0.6);
   opacity: 1;
 }
 
@@ -1488,8 +1507,8 @@
   min-height: 2.75rem;
   padding: 0.65rem 1rem;
   border-radius: 12px;
-  border: 1.5px solid rgba(185, 83, 42, 0.95);
-  background: rgba(185, 83, 42, 0.95);
+  border: 1.5px solid var(--se-accent-hover);
+  background: var(--se-accent-hover);
   color: #ffffff;
   font-family: var(--se-font-ui);
   font-size: 0.85rem;
@@ -1582,8 +1601,8 @@
 
 .se-footer__link::after {
   content: "→";
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   opacity: 0.55;
   transform: translateX(-2px);
   transition: transform 180ms ease, opacity 180ms ease;
@@ -1610,9 +1629,9 @@
 }
 
 .se-footer__copy {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
   margin: 0;
 }
@@ -1650,10 +1669,10 @@
 }
 
 .se-footer__social-title {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -2094,9 +2113,9 @@
 }
 
 .se-card__meta {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
   margin-top: auto;
   padding-top: 14px;
@@ -2588,12 +2607,13 @@
    pieza traida de fuera. */
 .se-newsletter__kicker {
   display: block;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
   margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .se-newsletter__title {
@@ -2621,9 +2641,9 @@
    de pantalla no tiene nada estable que anunciar. */
 .se-newsletter__label {
   display: block;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(var(--se-tinte), 0.62);
   margin-bottom: 8px;
@@ -2663,7 +2683,7 @@
 }
 
 .se-newsletter__input::placeholder {
-  color: rgba(var(--se-tinte), 0.45);
+  color: rgba(var(--se-tinte), 0.6);
 }
 
 .se-newsletter__btn {
@@ -2675,10 +2695,10 @@
   padding: 0 26px;
   background: var(--color-accent);
   color: #ffffff;
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
@@ -2953,10 +2973,10 @@
 
 .se-about__kicker {
   margin: 0 0 0.75rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--about-dim);
   animation: se-about-reveal 0.65s var(--about-ease) both;
@@ -2964,10 +2984,10 @@
 
 .se-about__title {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: clamp(1.85rem, 4.2vw, 3.35rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   line-height: 1.02;
   color: var(--about-text);
   animation: se-about-reveal 0.65s var(--about-ease) both;
@@ -3074,7 +3094,7 @@
 
 .se-about__band-title {
   margin: 0 0 0.75rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -3171,7 +3191,7 @@
 }
 
 .se-about__acc-title {
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -3469,10 +3489,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.9rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   /* Blanco, no `--se-tinte`. El token es "0, 0, 0", asi que sobre este verde daba
      negro sobre negro: las iniciales estaban ahi y no se leian. Es el mismo fallo
      que ya esta avisado en `.se-header__nav-link`, que se arreglo alli y quedo sin
@@ -3503,7 +3523,7 @@
 }
 
 .se-member-card__name {
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -3696,20 +3716,20 @@
 
 .se-consulting__kicker {
   margin: 0 0 0.65rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--se-suite-dim);
 }
 
 .se-consulting__title {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: clamp(1.85rem, 4.2vw, 3.1rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   line-height: 1.06;
   color: var(--se-suite-text);
 }
@@ -3760,10 +3780,10 @@
 
 .se-consulting__service-meta {
   margin: 0 0 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(var(--se-tinte), 0.58);
 }
@@ -3818,7 +3838,7 @@
 }
 
 .se-contact .se-form-label {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3936,10 +3956,10 @@
 }
 .se-contact__tarjeta-titulo {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -3951,7 +3971,7 @@
   color: var(--color-slate);
 }
 .se-contact__correo {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -3981,7 +4001,7 @@
   outline-offset: 2px;
 }
 .se-contact__camino-titulo {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -4029,7 +4049,7 @@
 }
 
 .se-contact .se-contact-office__city {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-weight: 700;
   color: rgba(var(--se-tinte), 0.92);
 }
@@ -4239,20 +4259,20 @@
 
 .se-articles__kicker {
   margin: 0 0 0.65rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(var(--se-tinte), 0.56);
 }
 
 .se-articles__title {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: clamp(1.9rem, 4.2vw, 3.2rem);
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   line-height: 1.06;
   color: rgba(var(--se-tinte), 0.92);
 }
@@ -4283,7 +4303,7 @@
 }
 
 .se-articles .se-filters__label {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -4637,7 +4657,7 @@
 .se-subscription-price__value,
 .se-subscription-method__value {
   font-family: var(--se-font-heading);
-  font-size: var(--se-text-hero);
+  font-size: clamp(1.35rem, 1rem + 1.6vw, 1.9rem); /* era el tamaño de portada: desbordaba en el teléfono */
   font-weight: 400;
   line-height: var(--se-line-height-tight);
   letter-spacing: -0.02em;
@@ -5060,8 +5080,8 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    contacto. El color es el del arranque del degradado del propio fieldset:
    la leyenda se apoya en su borde superior, que es donde empieza. */
 .se-contact-form fieldset.se-form-field legend {
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -5149,9 +5169,9 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   border: 1px solid var(--color-hairline);
   background: transparent;
   border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   font-weight: 500;
   color: var(--color-slate);
   transition: all 0.2s ease;
@@ -8482,7 +8502,7 @@ a.se-topics__chip:focus-visible {
   border: 1px solid rgba(var(--se-tinte), 0.16);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(var(--se-tinte), 0.9);
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
@@ -8587,7 +8607,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-headlines__title {
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.08rem;
   line-height: 1.28;
   margin: 0;
@@ -8785,10 +8805,10 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-article .se-comments .se-form-label {
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(var(--se-tinte), 0.62);
 }
@@ -10330,7 +10350,7 @@ a.se-topics__chip:focus-visible {
 
 /* La etiqueta hace de nombre del simbolo: pequena y apagada, como en el widget. */
 .se-ticker__k {
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.25;
   color: rgba(255, 255, 255, 0.62);
   letter-spacing: 0.06em;
@@ -10363,8 +10383,8 @@ a.se-topics__chip:focus-visible {
   align-items: center;
   padding: 0 14px;
   border-left: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
   letter-spacing: 0.04em;
   line-height: 1.3;
   white-space: nowrap;
@@ -10388,7 +10408,6 @@ a.se-topics__chip:focus-visible {
 
 .se-explorer {
   border: 1px solid rgba(var(--se-tinte), 0.12);
-  border-left: 4px solid rgba(185, 83, 42, 0.75);
   border-radius: 14px;
   padding: var(--se-space-md);
   /* Verde Cardin plano, igual que la cabecera. El radial cobrizo se descartó por
@@ -10566,7 +10585,7 @@ a.se-topics__chip:focus-visible {
 
 .se-explorer__total {
   margin-left: auto;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 13px;
   color: var(--color-slate);
   font-variant-numeric: tabular-nums;
@@ -10574,6 +10593,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-explorer__total strong {
+  font-family: var(--mono);
   color: var(--color-cream);
   font-size: 15px;
   font-weight: 700;
@@ -10586,8 +10606,8 @@ a.se-topics__chip:focus-visible {
   border-radius: 10px;
   background: transparent;
   color: var(--color-slate);
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: color 0.18s ease, border-color 0.18s ease;
@@ -10641,9 +10661,11 @@ a.se-topics__chip:focus-visible {
   border-top: 1px solid var(--color-hairline);
 }
 
+.se-pager__count strong { font-family: var(--mono); }
+
 .se-pager__count {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 12px;
   letter-spacing: 0.04em;
   color: var(--color-slate-2);
@@ -10696,13 +10718,14 @@ a.se-topics__chip:focus-visible {
 .se-pager__btn--edge {
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  font-family: var(--se-font-label);
   font-size: 11px;
 }
 
 .se-pager__btn--on {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-cream);
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -10747,8 +10770,8 @@ a.se-topics__chip:focus-visible {
 .se-format__title { margin: 0; }
 
 .se-format__more {
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-slate);
@@ -10765,9 +10788,9 @@ a.se-topics__chip:focus-visible {
   padding: 3px 11px;
   border: 1px solid var(--color-hairline);
   border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.03em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate);
   white-space: nowrap;
 }
@@ -10789,8 +10812,8 @@ a.se-topics__chip:focus-visible {
   padding: 3px 9px;
   border-radius: 3px;
   background: var(--marca-verde);
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   /* Blanco fijo, no `--color-cream`: ése es el texto de la página y en tema claro es
@@ -10828,8 +10851,8 @@ a.se-topics__chip:focus-visible {
 
 .se-newslist__geo {
   flex: 0 0 160px;
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--color-slate-2);
@@ -10849,8 +10872,8 @@ a.se-topics__chip:focus-visible {
 
 .se-newslist__date {
   flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
   white-space: nowrap;
 }
@@ -10990,8 +11013,8 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-artcard__by {
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -11027,9 +11050,9 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-cardfill__geo {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.62);
 }
@@ -11067,8 +11090,8 @@ a.se-topics__chip:focus-visible {
    es un dato de la fotografía, no parte del texto que se está leyendo. */
 .se-piece__credit {
   margin: 8px 0 0;
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   line-height: 1.5;
   color: var(--color-slate-2);
 }
@@ -11149,11 +11172,12 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-eddia__kicker {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
+  font-weight: 600;
 }
 
 .se-eddia__title {
@@ -11174,16 +11198,16 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-eddia__fecha {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
 
 .se-eddia__cta {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   color: var(--color-cream);
 }
 
@@ -11284,7 +11308,7 @@ a.se-topics__chip:focus-visible {
   font-weight: 600;
 }
 
-.se-vidcard__title a { color: var(--color-cream); transition: color 0.18s ease; }
+.se-vidcard__title a { color: var(--color-cream); text-decoration: none; transition: color 0.18s ease; }
 .se-vidcard__title a:hover { color: var(--color-accent); }
 
 .se-vidcard__foot {
@@ -11295,8 +11319,8 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-vidcard__who {
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -11346,11 +11370,12 @@ a.se-topics__chip:focus-visible {
 .se-doccard:hover { border-left-color: var(--color-accent); }
 
 .se-doccard__kicker {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
+  font-weight: 600;
 }
 
 .se-doccard__title {
@@ -11380,8 +11405,8 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-doccard__unit {
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -11411,9 +11436,9 @@ a.se-topics__chip:focus-visible {
 
 .se-piece__crumbs {
   margin: 0 0 var(--se-space-md);
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
 
@@ -11422,20 +11447,20 @@ a.se-topics__chip:focus-visible {
 
 .se-piece__kicker {
   margin: 0 0 0.6rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
 
 .se-piece__title {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: clamp(1.6rem, 3.4vw, 2.5rem);
   font-weight: 700;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   line-height: 1.1;
   text-wrap: balance;
   color: var(--color-cream);
@@ -11449,8 +11474,8 @@ a.se-topics__chip:focus-visible {
   margin-top: var(--se-space-sm);
   padding-bottom: var(--se-space-md);
   border-bottom: 1px solid var(--color-hairline);
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -11522,10 +11547,10 @@ a.se-topics__chip:focus-visible {
 
 .se-opinion__k {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -11541,10 +11566,10 @@ a.se-topics__chip:focus-visible {
 .se-sources__k,
 .se-toc__k {
   margin: 0 0 0.6rem;
-  font-family: var(--mono);
-  font-size: 0.66rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -11610,7 +11635,7 @@ a.se-topics__chip:focus-visible {
 .se-videostage--live .se-videostage__note {
   position: absolute;
   right: 10px;
-  bottom: 10px;
+  top: 10px;
   margin: 0;
   padding: 3px 8px;
   border-radius: 999px;
@@ -11640,9 +11665,9 @@ a.se-topics__chip:focus-visible {
 .se-videostage__note {
   margin: 0;
   font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
   color: var(--color-slate-2);
 }
 
@@ -11671,9 +11696,9 @@ a.se-topics__chip:focus-visible {
 .se-audiostage__note {
   margin: 0;
   font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
   color: var(--color-slate-2);
 }
 
@@ -11705,7 +11730,7 @@ a.se-topics__chip:focus-visible {
 
 .se-gate__title {
   margin: 0 0 6px;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -11725,10 +11750,10 @@ a.se-topics__chip:focus-visible {
 .se-gate__field { display: grid; gap: 5px; flex: 1 1 170px; min-width: 0; }
 
 .se-gate__label {
-  font-family: var(--mono);
-  font-size: 0.62rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -11752,9 +11777,10 @@ a.se-topics__chip:focus-visible {
   border: 1px solid var(--color-accent);
   border-radius: 8px;
   background: var(--color-accent);
-  color: var(--color-cream);
-  font-family: var(--mono);
-  font-size: 12px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -11774,8 +11800,8 @@ a.se-topics__chip:focus-visible {
 
 .se-gate__origin {
   margin: var(--se-space-md) 0 0;
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   line-height: 1.55;
   color: var(--color-slate-2);
 }
@@ -11792,10 +11818,10 @@ a.se-topics__chip:focus-visible {
 .se-piece__tags-label {
   display: block;
   margin-bottom: 10px;
-  font-family: var(--mono);
-  font-size: 0.66rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -11812,13 +11838,13 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-piece__tag:hover { border-color: var(--color-accent); color: var(--color-cream); }
-.se-piece__tag--geo { font-family: var(--mono); font-size: 12px; }
+.se-piece__tag--geo { font-family: var(--se-font-label); font-size: 0.75rem; }
 
 .se-piece__related { margin-top: var(--se-space-2xl); }
 
 .se-piece__related-title {
   margin: 0 0 var(--se-space-sm);
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -11847,7 +11873,7 @@ a.se-topics__chip:focus-visible {
 
 .se-heading-sub {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.9rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -12468,7 +12494,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-explorer__search::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .se-explorer__search:focus,
@@ -12643,6 +12669,12 @@ a.se-topics__chip:focus-visible {
   color: var(--se-gray-500);
 }
 
+/* Sin firma delante, la raya no separa nada: la fecha va sola, alineada al margen. */
+.se-firma__cuando:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
 .se-firma__cal {
   flex: 0 0 auto;
 }
@@ -12687,8 +12719,8 @@ a.se-topics__chip:focus-visible {
 
 .se-piece__lead--head {
   margin-top: var(--se-space-sm);
-  font-size: 1.15rem;
-  line-height: 1.6;
+  font-size: clamp(1.05rem, 0.9rem + 1vw, 1.3rem);
+  line-height: 1.5;
   color: var(--se-gray-700);
 }
 
@@ -12731,7 +12763,7 @@ a.se-topics__chip:focus-visible {
 .se-piece__main .se-piece__body {
   font-family: var(--se-font-reading);
   font-size: 1.125rem;
-  line-height: 1.75;
+  line-height: 1.6;
   max-width: 68ch;
 }
 
@@ -13499,7 +13531,7 @@ a.se-topics__chip:focus-visible {
 
 .se-ticker__d--up { color: #6ee7a0; }
 .se-ticker__d--down { color: #ff9d8a; }
-.se-ticker__d--flat { color: rgba(255, 255, 255, 0.45); }
+.se-ticker__d--flat { color: rgba(255, 255, 255, 0.68); }
 
 /* Por debajo de 860 los dos segmentos se apilan, que es el mismo corte que decide
    cual de las dos listas de simbolos se pide. Nuestra mitad va arriba: es la que el
@@ -13693,7 +13725,7 @@ a.se-topics__chip:focus-visible {
    invisible. Un titulo sin color propio es un titulo que funciona por suerte. */
 .se-recorte__titulo {
   margin: 0 0 0.35rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -13704,9 +13736,9 @@ a.se-topics__chip:focus-visible {
   accent-color: var(--color-accent);
 }
 .se-recorte__zoom {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
 
@@ -13763,7 +13795,7 @@ a.se-topics__chip:focus-visible {
 
 .se-redes {
   --redes-alto: 152px;
-  --redes-llegada: cubic-bezier(0.34, 1.3, 0.64, 1);
+  --redes-llegada: cubic-bezier(0.22, 1, 0.36, 1);
   --redes-frenado: cubic-bezier(0.22, 1, 0.36, 1);
   --redes-paso: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -13792,10 +13824,10 @@ a.se-topics__chip:focus-visible {
 
 .se-redes__rotulo {
   margin: 0 0 1rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
   opacity: 0;
@@ -13834,7 +13866,7 @@ a.se-topics__chip:focus-visible {
 
 .se-redes__nombre {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -14021,9 +14053,9 @@ a.se-topics__chip:focus-visible {
 
 .se-redes__fecha {
   margin-top: auto;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
   transition: color var(--redes-paso), transform 0.35s var(--redes-frenado);
@@ -14296,17 +14328,16 @@ a.se-topics__chip:focus-visible {
   gap: 1rem 2rem;
   padding: 1.05rem 1.25rem;
   border: 1px solid var(--color-hairline);
-  border-left: 4px solid var(--color-accent);
   border-radius: 14px;
   background: var(--color-paper);
-  box-shadow: 0 18px 44px rgba(0, 51, 24, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 51, 24, 0.14);
 }
 
 .se-cookies__texto { flex: 1 1 380px; min-width: 0; }
 
 .se-cookies__titulo {
   margin: 0 0 0.2rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -14339,10 +14370,10 @@ a.se-topics__chip:focus-visible {
   min-width: 132px;
   padding: 0.7rem 1.1rem;
   border-radius: 10px;
-  font-family: var(--mono);
-  font-size: 0.78rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
@@ -14403,17 +14434,17 @@ a.se-topics__chip:focus-visible {
 
 .se-legal__kicker {
   margin: 0 0 0.6rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
 
 .se-legal__titulo {
   margin: 0 0 1rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: clamp(1.9rem, 4.5vw, 2.6rem);
   line-height: 1.12;
   letter-spacing: -0.02em;
@@ -14423,8 +14454,8 @@ a.se-topics__chip:focus-visible {
 .se-legal__entrada { font-size: 1.1rem; line-height: 1.65; }
 
 .se-legal__fecha {
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
@@ -14451,7 +14482,7 @@ a.se-topics__chip:focus-visible {
   margin: 0 0 1rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--color-hairline);
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.15rem;
   letter-spacing: -0.01em;
 }
@@ -14494,8 +14525,8 @@ a.se-topics__chip:focus-visible {
   padding: 0.25rem 0.7rem;
   border: 1px solid rgba(var(--se-tinte), 0.35);
   border-radius: 7px;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -14568,7 +14599,7 @@ a.se-topics__chip:focus-visible {
 
 .se-legal__estado-titulo {
   margin: 0 0 0.5rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.92rem;
   font-weight: 700;
 }
@@ -14586,8 +14617,8 @@ a.se-topics__chip:focus-visible {
   grid-template-columns: 8.5rem minmax(0, 1fr);
   gap: 0.75rem;
   align-items: baseline;
-  font-family: var(--mono);
-  font-size: 0.76rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
 }
 .se-legal__valor dt { color: var(--color-slate-2); }
 .se-legal__valor dd {
@@ -14603,10 +14634,10 @@ a.se-topics__chip:focus-visible {
   border-radius: 10px;
   background: var(--marca-verde);
   color: #ffffff;
-  font-family: var(--mono);
-  font-size: 0.78rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: background 0.18s ease;
 }
@@ -15176,10 +15207,10 @@ a.se-topics__chip:focus-visible {
 
 .se-edu__h2 {
   margin: 0 0 1.25rem;
-  font-family: var(--mono);
-  font-size: 0.78rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -15194,10 +15225,10 @@ a.se-topics__chip:focus-visible {
 }
 .se-edu__portada-kicker {
   margin: 0 0 0.7rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #e8c77a;
 }
@@ -15241,8 +15272,8 @@ a.se-topics__chip:focus-visible {
 .se-edu__promesa strong {
   display: block;
   margin-bottom: 0.2rem;
-  font-family: var(--mono);
-  font-size: 0.82rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: #ffffff;
@@ -15324,10 +15355,10 @@ a.se-topics__chip:focus-visible {
   gap: 0.75rem;
 }
 .se-modulo__etiqueta {
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -15338,7 +15369,8 @@ a.se-topics__chip:focus-visible {
    ponia a una altura distinta segun lo alta que fuera su imagen, y un precio que
    no esta a la misma altura en todas las tarjetas no se puede comparar. */
 .se-modulo__precio {
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
+  font-variant-numeric: tabular-nums;
   font-size: 1.02rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -15347,7 +15379,7 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-modulo__titulo {
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1.08rem;
   font-weight: 700;
   line-height: 1.28;
@@ -15376,8 +15408,8 @@ a.se-topics__chip:focus-visible {
   margin-top: auto;
   padding-top: 0.85rem;
   border-top: 1px solid var(--color-hairline);
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
@@ -15398,8 +15430,8 @@ a.se-topics__chip:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--mono);
-  font-size: 0.78rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--color-accent);
@@ -15454,7 +15486,7 @@ a.se-topics__chip:focus-visible {
 .se-edu__paso-copy strong {
   display: block;
   margin-bottom: 0.25rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.88rem;
   color: var(--color-ink);
 }
@@ -15471,7 +15503,7 @@ a.se-topics__chip:focus-visible {
 }
 .se-edu__duda dt {
   margin-bottom: 0.35rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -15487,9 +15519,9 @@ a.se-topics__chip:focus-visible {
 /* --- Detalle del modulo --- */
 
 .se-edu__migas {
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.06em;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
   margin-bottom: 1.25rem;
 }
@@ -15511,10 +15543,10 @@ a.se-topics__chip:focus-visible {
 
 .se-modulo-detalle__kicker {
   margin: 0 0 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -15594,7 +15626,7 @@ a.se-temario__enlace:focus-visible {
 .se-temario__copy { display: block; min-width: 0; }
 .se-temario__titulo {
   display: block;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 0.94rem;
   font-weight: 700;
   line-height: 1.35;
@@ -15609,8 +15641,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   align-items: center;
   gap: 0.3rem;
   margin-top: 0.22rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
@@ -15624,10 +15656,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
   border: 1px solid var(--color-hairline);
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   color: var(--color-slate);
 }
@@ -15686,8 +15718,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
 }
 .se-compra__nota {
   margin: 0.35rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
@@ -15727,8 +15759,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
 .se-compra__acciones .se-btn { width: 100%; justify-content: center; }
 .se-compra__pie {
   margin: 0.8rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -15743,7 +15775,7 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
 }
 .se-edu__pago-titulo {
   margin: 0 0 0.4rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -15776,10 +15808,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
   margin: 0 0 0.4rem;
@@ -15837,8 +15869,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   margin: 1.25rem 0;
 }
 .se-edu__descarga-meta {
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -15857,7 +15889,7 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
 }
 .se-edu__continuar-titulo {
   margin: 0 0 0.35rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -15885,8 +15917,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   margin-top: 2.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--color-hairline);
-  font-family: var(--mono);
-  font-size: 0.82rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
 }
 
 .se-edu__muro {
@@ -15966,10 +15998,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   margin-bottom: 0.85rem;
 }
 .se-vista__etiqueta {
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -15979,8 +16011,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   border: 1px solid rgba(0, 0, 0, 0.14);
   border-radius: 999px;
   background: #fff;
-  font-family: var(--mono);
-  font-size: 0.66rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   color: var(--color-slate-2);
   cursor: pointer;
 }
@@ -16040,10 +16072,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   background: #e4f2ee;
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: #0e6b5e;
   vertical-align: middle;
   animation: se-guardado-entra 0.18s ease-out;
@@ -16070,10 +16102,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   align-items: baseline;
   gap: 0.5rem;
   margin: 0 0 0.7rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -16135,9 +16167,9 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   color: var(--color-ink);
 }
 .se-edunum__t {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
 
@@ -16147,10 +16179,10 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   align-items: baseline;
   gap: 0.6rem;
   margin: 0 0 0.8rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -16173,7 +16205,7 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.84rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -16204,8 +16236,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
 }
 
 .se-edunum__detalle {
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-slate-2);
   white-space: nowrap;
@@ -16503,12 +16535,14 @@ a.se-ad:focus-visible {
    separan del antetítulo de una pieza, que es serif y va en el color del tema. */
 .se-ad__etiqueta {
   display: inline-block;
-  font-family: var(--mono);
-  font-size: 0.64rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  /* Gris y no cobre: el cobre marca lo editorial y la acción principal, y con él
+     «Publicidad» se leía igual que «Editorial del día». */
+  color: var(--color-slate-2);
 }
 .se-ad__etiqueta--casa { color: var(--color-slate-2); }
 .se-ad__marca { font-weight: 700; }
@@ -16536,8 +16570,8 @@ a.se-ad:focus-visible {
 .se-ad__cta {
   display: inline-block;
   margin-top: 0.7rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent);
 }
@@ -16590,9 +16624,10 @@ a.se-ad:focus-visible {
      sobre hueso, un blanco mas lo unico que hace es desaparecer. Este medio tono la
      separa del fondo sin gritar, y de paso le da un cuerpo que antes no tenia. */
   background: #fffdfb;
-  border: 1px solid rgba(185, 83, 42, 0.18);
-  border-left: 4px solid var(--color-accent);
-  border-radius: 0 10px 10px 0;
+  /* Borde neutro y parejo: la franja cobriza a la izquierda la hacía pasar por una
+     pieza editorial. */
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
   text-decoration: none;
   color: inherit;
   overflow: hidden;
@@ -16600,8 +16635,7 @@ a.se-ad:focus-visible {
 }
 a.se-ad--ficha:hover {
   transform: translateY(-2px);
-  border-color: rgba(185, 83, 42, 0.42);
-  border-left-color: var(--color-accent);
+  border-color: rgba(var(--se-tinte), 0.28);
   box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.35);
 }
 a.se-ad--ficha:focus-visible {
@@ -16654,10 +16688,10 @@ a.se-ad--ficha:focus-visible {
   z-index: 1;
   margin: 0;
   padding: 0.3rem 0.62rem 0.32rem;
-  background: var(--color-accent);
+  background: #2c312e;
   color: #fff;
   border-radius: 0 0 8px 0;
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
   letter-spacing: 0.1em;
   box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.4);
 }
@@ -16714,10 +16748,10 @@ a.se-ad--ficha:focus-visible {
   margin-top: auto;
   padding-top: 0.7rem;
   border-top: 1px solid rgba(185, 83, 42, 0.16);
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--color-accent);
 }
 /* La flecha avanza al pasar por encima. Es el unico movimiento de la tarjeta y va
@@ -16815,7 +16849,7 @@ a.se-ad--ficha:hover .se-ad__cta {
 .se-ad-hueco--cambia .se-ad--ficha,
 .se-ad-hueco--cambia .se-ad--nativo,
 .se-ad-hueco--cambia .se-ad--rail {
-  animation: se-ad-acomodar 0.42s cubic-bezier(0.18, 0.89, 0.32, 1.18) both;
+  animation: se-ad-acomodar 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .se-ad-hueco__saliente .se-ad--ficha,
 .se-ad-hueco__saliente .se-ad--nativo,
@@ -16878,7 +16912,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   line-height: 1.2;
 }
 .se-ad__cinta-sello .se-ad__etiqueta {
-  font-size: 0.6rem;
+  font-size: 0.6875rem;
   letter-spacing: 0.08em;
 }
 .se-ad__cinta-sello .se-ad__etiqueta { color: var(--color-slate-2); }
@@ -16948,12 +16982,12 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-ad__etiqueta {
   display:inline-block;
-  font-family:var(--mono);
-  font-size:.64rem;
+  font-family:var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight:700;
-  letter-spacing:.09em;
+  letter-spacing: 0.08em;
   text-transform:uppercase;
-  color:var(--color-accent);
+  color:var(--color-slate-2);
 }
 
 .se-ad--nativo-cuerpo {
@@ -16976,7 +17010,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   left:0;
   margin:0;
   padding:.28rem .6rem;
-  background:var(--color-accent);
+  background:#2c312e;
   color:#fff;
   border-radius:0 0 6px;
 }
@@ -17010,8 +17044,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   white-space: nowrap;
 }
 .se-ad__cintillo-tag {
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -17090,8 +17124,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-ad-barra__etiqueta {
   flex: 0 0 auto;
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -17735,10 +17769,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-donde__grupo > legend {
   padding: 0 0.4rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -17930,10 +17964,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-anunciate__kicker {
   margin: 0 0 0.6rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #e8c77a;
 }
@@ -17955,10 +17989,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-anunciate__h2 {
   margin: 0 0 0.35rem;
-  font-family: var(--mono);
-  font-size: 0.8rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -17996,7 +18030,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   height: 2rem;
   border-radius: 8px;
   background: var(--se-offwhite);
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -18007,8 +18041,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   right: 1.1rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -18030,8 +18064,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 .se-anunciate__enlace {
   margin-top: auto;
   padding-top: 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent);
 }
@@ -18096,8 +18130,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   display: flex;
   align-items: baseline;
   gap: 0.45rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -18148,8 +18182,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border: 0;
   border-radius: 7px;
   background: transparent;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent);
   cursor: pointer;
@@ -18224,10 +18258,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-entrada__kicker {
   margin: 0 0 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -18271,6 +18305,11 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate-2);
 }
 .se-entrada__pie { margin-top: 1.25rem; text-align: center; }
+.se-entrada__pie a {
+  color: var(--se-accent-hover);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
 
 /* --- Entrar con Google --- */
 
@@ -18301,10 +18340,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   background: var(--color-hairline);
 }
 .se-google__separador span {
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -18340,10 +18379,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 .se-cuenta__cabecera { display: grid; gap: 0.4rem; }
 .se-cuenta__kicker {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -18368,10 +18407,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   align-items: baseline;
   gap: 0.6rem;
   margin: 0 0 0.9rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -18459,7 +18498,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-guia__accion {
   flex: 0 0 auto;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -18484,7 +18523,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-guia__uso h3 {
   margin: 0 0 0.35rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--color-ink);
@@ -18497,7 +18536,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
 }
 .se-guia__uso a {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -18536,9 +18575,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-ink);
 }
 .se-resumen__t {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--color-slate-2);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -18660,16 +18699,16 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-mio__kicker {
   margin: 0 0 0.2rem;
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
 .se-mio__titulo {
   margin: 0 0 0.3rem;
-  font-family: var(--mono);
+  font-family: var(--se-font-heading);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.25;
@@ -18688,8 +18727,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-mio__recibo {
   margin: 0;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-slate-2);
 }
@@ -18705,8 +18744,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   text-align: right;
 }
 .se-mio__temario {
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-accent);
   text-decoration: none;
 }
@@ -18730,13 +18769,13 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   background: #fff;
 }
 .se-mio__pendientes strong {
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.9rem;
   color: var(--color-ink);
 }
 .se-mio__pendientes span {
-  font-family: var(--mono);
-  font-size: 0.72rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 .se-mio__pendientes small {
@@ -18777,10 +18816,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border: 1px solid var(--color-hairline);
   border-radius: 999px;
   background: #fff;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   color: var(--color-slate);
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
@@ -19358,10 +19397,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-entorno__kicker {
   margin: 0 0 0.65rem;
-  font-family: var(--mono);
-  font-size: 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
@@ -19391,10 +19430,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   text-align: left;
 }
 .se-entorno__label {
-  font-family: var(--mono);
-  font-size: 0.68rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-slate-2);
 }
@@ -19431,7 +19470,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border-radius: 10px;
   background: var(--color-accent);
   color: #fff;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -20220,7 +20259,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border: 0;
   border-radius: 999px;
   background: transparent;
-  font-family: var(--mono);
+  font-family: var(--se-font-label);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -20343,9 +20382,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 
 .se-alpunto__lateral-meta {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: rgba(var(--se-tinte), 0.58);
 }
 
@@ -20374,8 +20413,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   margin-top: auto;
   padding-top: 1rem;
   align-self: flex-start;
-  font-family: var(--mono);
-  font-size: 0.74rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -20475,8 +20514,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   padding: 3px 9px;
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.75);
-  font-family: var(--mono);
-  font-size: 10.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #ffffff;
@@ -20552,8 +20591,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate);
 }
 
@@ -20588,8 +20627,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 
 .se-alpunto__date {
-  font-family: var(--mono);
-  font-size: 11.5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
   color: var(--color-slate-2);
 }
 
@@ -20652,5 +20691,193 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
   .se-alpunto__thumb:hover .se-alpunto__play {
     transform: translate(-50%, -50%);
+  }
+}
+
+/* ═══ Portada: la apertura ═════════════════════════════════════════════
+   La noticia principal en grande y una columna de titulares al lado. Es lo que le
+   da jerarquía a la portada: sin ella, la primera noticia medía lo mismo que la
+   sexta. Ver `components/home/AperturaPortada.jsx`. */
+/* Con las dos clases: la regla global `.se-section + .se-section { padding-top: 0 }`
+   pegaba la apertura al filtro y el bloque de Noticias a la apertura. */
+.se-section.se-apertura {
+  padding-top: var(--se-space-lg);
+  padding-bottom: var(--se-space-2xl);
+}
+
+.se-apertura__rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr);
+  gap: var(--se-space-xl);
+  align-items: start;
+}
+
+.se-apertura__rejilla--sola {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 900px;
+}
+
+.se-apertura__principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-md);
+  min-width: 0;
+}
+
+.se-apertura__media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.se-apertura__media > * {
+  width: 100%;
+  height: 100%;
+}
+
+.se-apertura__media .se-artcard__img {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.se-apertura__principal:hover .se-apertura__media .se-artcard__img {
+  transform: scale(1.02);
+}
+
+.se-apertura__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.se-apertura__meta {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-apertura__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.se-apertura__titulo a,
+.se-apertura__enlace {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-apertura__titulo a:hover,
+.se-apertura__titulo a:focus-visible,
+.se-apertura__enlace:hover,
+.se-apertura__enlace:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.se-apertura__titulo a:focus-visible,
+.se-apertura__enlace:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-apertura__resumen {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--se-font-reading);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+/* La columna: titulares entre reglas finas, como la segunda columna de un diario. */
+.se-apertura__columna {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-apertura__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: var(--se-space-md) 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-apertura__enlace {
+  font-family: var(--se-font-heading);
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+@media (max-width: 900px) {
+  .se-apertura__rejilla {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--se-space-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-apertura__media .se-artcard__img {
+    transition: none;
+  }
+
+  .se-apertura__principal:hover .se-apertura__media .se-artcard__img {
+    transform: none;
+  }
+}
+
+/* —— El filtro de la portada, en franja ——
+   Sigue siendo lo primero bajo la cabecera, como pidió el socio, pero delgado: la
+   caja alta con sombra grande y filo cobrizo pesaba más que la noticia de debajo,
+   y en el teléfono ocupaba media pantalla con tres renglones. */
+.se-explorer-section--primera {
+  padding-top: var(--se-space-md);
+  padding-bottom: 0;
+}
+
+.se-explorer-section--primera .se-explorer {
+  padding: 10px 12px;
+  border-left-width: 1px;
+  border-color: rgba(0, 51, 24, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 51, 24, 0.14);
+}
+
+.se-explorer-section--primera .se-explorer__search,
+.se-explorer-section--primera .se-explorer__btn {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .se-explorer-section--primera .se-explorer__bar {
+    gap: 8px;
+  }
+
+  .se-explorer-section--primera .se-explorer__field {
+    flex: 1 1 100%;
+  }
+
+  /* Tema y Dónde comparten renglón: dos renglones en vez de tres. */
+  .se-explorer-section--primera .se-explorer__sel {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
   }
 }

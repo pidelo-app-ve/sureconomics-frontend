@@ -157,8 +157,10 @@ export const Pieza = () => {
 
   // La entradilla sale del campo que cada formato usa para ella.
   const entradilla = pieza.resumenHtml || pieza.entradaHtml || "";
-  // La entrevista no lleva portada en la cabecera: su portada es el video.
-  const conPortada = pieza.formato !== "Entrevistas";
+  // La entrevista no lleva portada en la cabecera: su portada es el video. Y sin
+  // fotografía tampoco: la cabecera de dos columnas dejaba la de la derecha vacía y el
+  // titular encajonado en la mitad del ancho.
+  const conPortada = pieza.formato !== "Entrevistas" && Boolean(pieza.imagenUrl);
 
   return (
     <main className="se-blog se-articles" role="main">

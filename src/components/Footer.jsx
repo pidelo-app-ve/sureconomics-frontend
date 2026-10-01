@@ -105,7 +105,7 @@ export const Footer = () => {
           <div className="se-footer__newsletter" aria-label="Boletín">
             <div className="se-footer__contact-title">Boletín</div>
             <p className="se-footer__newsletter-text">
-              Reciba un resumen ejecutivo con señales y contexto. Una vez al mes.
+              Reciba un resumen ejecutivo con señales y contexto. Cada lunes por la mañana.
             </p>
             <form className="se-footer__newsletter-form" onSubmit={handleNewsletterSubmit}>
               <label className="se-sr-only" htmlFor="footer-newsletter-email">
@@ -115,7 +115,7 @@ export const Footer = () => {
                 id="footer-newsletter-email"
                 type="email"
                 className="se-footer__newsletter-input"
-                placeholder="Correo electrónico"
+                placeholder="Su correo"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 disabled={newsletterState.status === "loading"}

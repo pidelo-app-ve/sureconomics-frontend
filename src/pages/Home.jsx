@@ -4,6 +4,7 @@ import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { applyPageMeta } from "../lib/seo";
 import { EmptyState, ErrorState } from "../components/content";
+import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import {
   ArticleCardGrid,
   ContentExplorer,
@@ -32,6 +33,10 @@ import {
  * El orden lo cambio el socio: primero el filtro, pegado al navbar, porque es la
  * entrada al sitio; despues noticias, que ocupa el lugar donde estaba el hero; y
  * detras la editorial del dia.
+ *
+ * Desde octubre de 2026, entre el filtro y las noticias va la apertura
+ * (`AperturaPortada`): la noticia principal en grande y tres titulares al lado. El
+ * filtro sigue primero, como pidio el socio, pero en una franja delgada.
  *
  * El hero -- logotipo grande, claim, descripcion y los dos botones -- se queda en
  * `components/blog/Hero.jsx` sin renderizarse, a peticion expresa: "dejalo por ahi,
@@ -100,6 +105,16 @@ export const Home = () => {
   // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
   const editorialDelDia = pieces.find((p) => p.formatoApi === "editorial") ?? null;
 
+  // La apertura: la noticia que manda y su columna. Como la editorial del día, sale de
+  // la lista sin filtrar; pero con un filtro puesto se retira, porque entonces el
+  // lector está buscando y lo que pide es lo que coincide, no la portada del día.
+  const apertura = isFiltered
+    ? { principal: null, secundarias: [] }
+    : elegirApertura(pieces.filter((p) => p.formatoApi === "noticia"));
+  const enApertura = new Set(
+    [apertura.principal, ...apertura.secundarias].filter(Boolean).map((p) => p.id)
+  );
+
   useEffect(() => {
     applyPageMeta({
       title: `${BRAND.name} — Economía, mercados e inversión`,
@@ -116,10 +131,13 @@ export const Home = () => {
       // bloque -- las dos son "la mas reciente", asi que la repeticion era segura, no
       // casual. Se quita tambien cuando hay filtro, porque el bloque de arriba se pinta
       // igual: esta en pantalla de las dos maneras.
+      // Lo mismo con las noticias de la apertura: ya están arriba, en grande.
       const visibles =
         formatoApi === "editorial" && editorialDelDia
           ? all.filter((p) => p.id !== editorialDelDia.id)
-          : all;
+          : formatoApi === "noticia"
+            ? all.filter((p) => !enApertura.has(p.id))
+            : all;
 
       const items = isFiltered ? visibles : visibles.slice(0, PREVIEW[formatoApi]);
 
@@ -234,6 +252,8 @@ export const Home = () => {
           </div>
         </section>
       ) : null}
+
+      <AperturaPortada principal={apertura.principal} secundarias={apertura.secundarias} />
 
       {hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 

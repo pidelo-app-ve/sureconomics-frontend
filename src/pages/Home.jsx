@@ -15,7 +15,7 @@ import {
   PodcastGrid,
   ReportGrid,
 } from "../components/home";
-import { FORMATO_META } from "../lib/pieza";
+import { FORMATO_META, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -241,7 +241,7 @@ export const Home = () => {
         <Fragment key={formatoApi}>
           <FormatSection
             title={nombrePlural(formatoApi)}
-            to={`/articulos?formato=${FORMATO_META[formatoApi].slug}`}
+            to={rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? `Ver los ${total}` : "Ver todas"}
           >
             {LAYOUTS[formatoApi](items)}

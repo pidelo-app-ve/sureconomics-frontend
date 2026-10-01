@@ -7,6 +7,7 @@ import { BoletinBaja } from "./pages/BoletinBaja";
 import { QuienesSomos } from "./pages/QuienesSomos";
 import { Articulos } from "./pages/Articulos";
 import { Informes } from "./pages/Informes";
+import { Audiovisual } from "./pages/Audiovisual";
 import { Pieza } from "./pages/Pieza";
 import { PiezaRedirect } from "./pages/PiezaRedirect";
 import { Explorar } from "./pages/Explorar";
@@ -53,6 +54,9 @@ export const router = createBrowserRouter([
             { path: "quienes-somos", element: <QuienesSomos /> },
             { path: "articulos", element: <Articulos /> },
             { path: "informes", element: <Informes /> },
+            // «Al punto»: entrevistas y podcast juntos. Antes cada uno era un filtro de
+            // /articulos; esas direcciones redirigen aquí (ver `Articulos`).
+            { path: "audiovisual", element: <Audiovisual /> },
             { path: "explorar", element: <Explorar /> },
             // Cruza los seis formatos, como /explorar, pero por un valor de la pieza
             // en vez de por los filtros. De ahi su propia ruta y no un parametro mas.

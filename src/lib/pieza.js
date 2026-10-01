@@ -229,6 +229,21 @@ export const rutaDePieza = (pieza) => {
   return meta ? `/${meta.slug}/${pieza.slug}` : "/";
 };
 
+/**
+ * Dónde vive el listado de un formato.
+ *
+ * Casi todos comparten `/articulos?formato=`. Entrevistas y podcast no: viven juntos
+ * en «Al punto» (`/audiovisual`), y allí el formato es una vista dentro de la página
+ * (`?ver=`) y no una sección aparte. Los enlaces «Ver todas» de la portada y de
+ * Explorar pasan por aquí para no tener que saberlo cada uno.
+ */
+export const rutaDeFormato = (formatoApi) => {
+  if (formatoApi === "entrevista") return "/audiovisual?ver=entrevistas";
+  if (formatoApi === "podcast") return "/audiovisual?ver=podcast";
+  const meta = FORMATO_META[formatoApi];
+  return meta ? `/articulos?formato=${meta.slug}` : "/articulos";
+};
+
 /** The tag a card shows: the first, which the backend stores as the principal one. */
 export const temaPrincipal = (pieza) => pieza?.temas?.[0] ?? null;
 

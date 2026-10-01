@@ -18,6 +18,11 @@ export const translations = {
     "nav.contacto": "Contacto",
     "nav.entrar": "Entrar",
     "nav.registrar": "Registrarse",
+    // «Al punto» es nombre propio del espacio audiovisual (entrevistas y podcast),
+    // asi que no se traduce. La pista es lo que oye el lector de pantalla en vez
+    // del nombre solo, que sin la luz roja de al lado no dice a donde lleva.
+    "nav.alPunto": "Al punto",
+    "nav.alPuntoHint": "Al punto: entrevistas y podcast",
     "nav.readerAuth": "Acceso de lectores",
     "nav.cuenta": "Cuenta",
     "nav.perfil": "Perfil",
@@ -55,6 +60,8 @@ export const translations = {
     "nav.contacto": "Contact",
     "nav.entrar": "Sign in",
     "nav.registrar": "Sign up",
+    "nav.alPunto": "Al punto",
+    "nav.alPuntoHint": "Al punto: interviews and podcast",
     "nav.readerAuth": "Reader sign-in",
     "nav.cuenta": "Account",
     "nav.perfil": "Profile",

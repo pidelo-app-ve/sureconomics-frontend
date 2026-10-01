@@ -14,7 +14,7 @@ import {
   RelatedPieces,
 } from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
-import { FORMATO_META, enlaceParaCompartir, rutaDePieza } from "../lib/pieza";
+import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
@@ -152,7 +152,6 @@ export const Pieza = () => {
   const canonica = rutaDePieza(pieza);
   if (pathname !== canonica) return <Navigate to={canonica} replace />;
 
-  const meta = FORMATO_META[pieza.formatoApi];
   const lugar = pieza.geos?.[0] ?? geoTop;
   const tema = temaPrincipal(pieza);
 
@@ -169,7 +168,7 @@ export const Pieza = () => {
             <nav className="se-piece__crumbs" aria-label="Ubicación">
               <Link to="/">Inicio</Link>
               <span aria-hidden="true"> › </span>
-              <Link to={`/articulos?formato=${meta?.slug ?? ""}`}>{pieza.formato}</Link>
+              <Link to={rutaDeFormato(pieza.formatoApi)}>{pieza.formato}</Link>
               {lugar ? (
                 <>
                   <span aria-hidden="true"> › </span>

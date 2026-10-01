@@ -23,23 +23,26 @@ export const BRAND = {
  * intact while dropping it from the header — the pages are still reachable by
  * URL and from the footer. Flip the flag to bring one back.
  *
- * The format entries mirror the five formats in the functional mockup. Only
- * Artículos and Informes have their own route today, so the rest point at the
- * article listing with a `formato` hint; the real per-format pages arrive with
- * the content-model work.
+ * Aquí van solo los formatos que se LEEN. Entrevistas y podcast ya no están en la
+ * fila: los dos son audiovisuales y viven juntos en `/audiovisual`, a la que se
+ * entra por el botón «Al punto» que el Navbar pinta al lado de ENTRAR/REGISTRARSE
+ * (no sale de esta lista a propósito: es un botón con luz propia, no un enlace más).
+ * Quitarlos de aquí también le devuelve a la barra de escritorio el sitio que le
+ * faltaba entre 1100 y 1365 px -- ver la nota de la franja estrecha en blog.css.
+ *
+ * Solo Artículos e Informes tienen ruta propia; los demás apuntan al listado de
+ * artículos con la pista `formato`.
  */
 export const PRIMARY_NAV = [
   { id: "inicio", to: "/", labelKey: "nav.inicio" },
   { id: "noticias", to: "/articulos?formato=noticias", labelKey: "nav.noticias" },
   { id: "articulos", to: "/articulos", labelKey: "nav.articulos" },
   { id: "editorial", to: "/articulos?formato=editorial", labelKey: "nav.editorial" },
-  { id: "entrevistas", to: "/articulos?formato=entrevistas", labelKey: "nav.entrevistas" },
   {
     id: "informes",
     to: "/informes",
     labelKey: "nav.informesReportes",
   },
-  { id: "podcast", to: "/articulos?formato=podcast", labelKey: "nav.podcast" },
   // Despues de los formatos y no entre ellos: los de arriba son formatos, y este es
   // un corte transversal -- las mismas piezas, reunidas por ser educativas. Su ruta
   // es propia porque el criterio es un valor de la pieza y no un filtro.

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { HoraCaracas } from "./HoraCaracas";
@@ -43,6 +44,41 @@ const isReaderDashboardActive = (pathname) => {
   return !READER_DASHBOARD_EXCLUDED.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
+};
+
+const isAlPuntoActive = (pathname) => pathname.startsWith("/audiovisual");
+
+/**
+ * El botón «Al punto»: la puerta al espacio audiovisual (entrevistas y podcast),
+ * que salió de la fila de enlaces para ir con los botones de cuenta. Va como botón
+ * y no como enlace porque es otra cosa que una sección de lectura, y lleva delante
+ * la luz de grabar -- el punto rojo que late -- que es lo que lo cuenta de un
+ * vistazo. Se pinta dos veces, en la barra y en el cajón, así que vive aquí.
+ *
+ * El `aria-label` sustituye al texto visible para el lector de pantalla: «Al punto»
+ * solo, sin la luz, no dice a dónde lleva.
+ */
+const AlPuntoLink = ({ active, label, hint, onClick, className = "" }) => (
+  <Link
+    to="/audiovisual"
+    className={`se-btn se-btn--secondary se-header__alpunto${
+      active ? " se-header__alpunto--active" : ""
+    }${className ? ` ${className}` : ""}`}
+    aria-current={active ? "page" : undefined}
+    aria-label={hint}
+    onClick={onClick}
+  >
+    <span className="se-header__alpunto-punto" aria-hidden="true" />
+    {label}
+  </Link>
+);
+
+AlPuntoLink.propTypes = {
+  active: PropTypes.bool.isRequired,
+  label: PropTypes.string.isRequired,
+  hint: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
 };
 
 export const Navbar = () => {
@@ -169,6 +205,14 @@ export const Navbar = () => {
           </ul>
         </nav>
         <div className="se-header__actions se-header__actions--desktop">
+          {/* Antes de los botones de cuenta y con o sin sesión: es contenido, no
+              cuenta, y quien entra a ver una entrevista no tiene por qué haber
+              entrado a su cuenta primero. */}
+          <AlPuntoLink
+            active={isAlPuntoActive(location.pathname)}
+            label={t("nav.alPunto")}
+            hint={t("nav.alPuntoHint")}
+          />
           {isAuthenticated ? (
             <nav className="se-header__user-nav" aria-label="Cuenta de lector">
               <Link
@@ -292,6 +336,13 @@ export const Navbar = () => {
             <HoraCaracas className="se-hora--cajon" />
 
             <div className="se-header__actions se-header__actions--mobile">
+              <AlPuntoLink
+                active={isAlPuntoActive(location.pathname)}
+                label={t("nav.alPunto")}
+                hint={t("nav.alPuntoHint")}
+                onClick={closeMenu}
+                className="se-header__cta"
+              />
               {isAuthenticated ? (
                 <nav
                   className="se-header__user-nav se-header__user-nav--stack"

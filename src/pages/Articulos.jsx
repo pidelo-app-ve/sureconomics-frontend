@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
 import { applyPageMeta } from "../lib/seo";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
@@ -212,17 +212,33 @@ FormatListing.propTypes = {
 export const Articulos = () => {
   const [searchParams] = useSearchParams();
 
+  const formato = searchParams.get("formato") ?? "";
+
   // An unknown slug falls back to Artículos rather than rendering an error — a
   // stale link should still land the reader somewhere useful.
-  const formatoApi = FORMATO_POR_RUTA[searchParams.get("formato") ?? ""] ?? "articulo";
+  const formatoApi = FORMATO_POR_RUTA[formato] ?? "articulo";
   const meta = FORMATO_META[formatoApi];
 
   useEffect(() => {
+    // Los dos formatos que se van a «Al punto» no ponen título: lo pone su página.
+    if (formato === "podcast" || formato === "entrevistas") return;
     applyPageMeta({
       title: `${meta.plural} — ${BRAND.name}`,
       description: `${meta.plural} de ${BRAND.name}.`,
     });
-  }, [meta]);
+  }, [meta, formato]);
+
+  // Entrevistas y podcast ya no se listan aquí sino juntos en «Al punto». Los enlaces
+  // viejos -- el menú de antes, las piezas compartidas, los buscadores -- siguen
+  // llegando a esta dirección, así que se reenvían a la vista que corresponde.
+  if (formato === "podcast" || formato === "entrevistas") {
+    return (
+      <Navigate
+        to={`/audiovisual${formato === "podcast" ? "?ver=podcast" : "?ver=entrevistas"}`}
+        replace
+      />
+    );
+  }
 
   return (
     <main className="se-blog se-articles" role="main">

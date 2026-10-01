@@ -72,10 +72,41 @@ export const AvisoDeCookies = () => {
     setDecision(decidir(respuesta));
   }, []);
 
-  if (!MEDICION_HABILITADA || decision) return null;
+  const visible = MEDICION_HABILITADA && !decision;
+  const barra = useRef(null);
+
+  // WCAG 2.4.11: la barra va fija al pie, y lo que recibe el foco al tabular podia
+  // quedar debajo de ella. Mientras esta abierta, el documento reserva su alto con
+  // `scroll-padding-bottom` (ver `accesibilidad.css`) y el navegador deja el foco por
+  // encima. El alto se mide en vivo y no se supone: cambia con el ancho, con el tamaño
+  // de letra y con el texto, y una cifra fija se queda corta en cuanto algo de eso se
+  // mueve.
+  useEffect(() => {
+    if (!visible) return undefined;
+    const raiz = document.documentElement;
+    raiz.classList.add("se-con-aviso-cookies");
+    const medir = () => {
+      const alto = barra.current?.getBoundingClientRect().height;
+      if (alto) raiz.style.setProperty("--se-aviso-cookies-alto", `${Math.ceil(alto)}px`);
+    };
+    medir();
+    let vigia = null;
+    if (typeof ResizeObserver !== "undefined" && barra.current) {
+      vigia = new ResizeObserver(medir);
+      vigia.observe(barra.current);
+    }
+    return () => {
+      vigia?.disconnect();
+      raiz.classList.remove("se-con-aviso-cookies");
+      raiz.style.removeProperty("--se-aviso-cookies-alto");
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <aside
+      ref={barra}
       className="se-cookies"
       // `region` y no `dialog`: un dialogo se lleva el foco y atrapa el teclado, y esto
       // no debe interrumpir la lectura. Se anuncia, y quien quiera llega tabulando.

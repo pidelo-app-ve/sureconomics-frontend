@@ -567,8 +567,23 @@
      ENTRAR y salia cortado como "Quie...".
      Un mastil puede ser mas ancho que el texto que enmarca; es lo que hace casi
      cualquier periodico. Con 1440 hay holgura de sobra a partir de 1280, y por
-     debajo entra la consulta de abajo. */
-  max-width: 1440px;
+     debajo entra la consulta de abajo.
+     `max()` con la variable del contenedor: de 1920 arriba el contenedor sube a
+     1440 (ver la consulta de `:root` de mas abajo) y las dos piezas comparten
+     borde. Por debajo el mastil sigue siendo el mas ancho, porque a 1120 utiles los
+     nueve enlaces, el reloj y los botones no caben. */
+  max-width: max(1440px, var(--se-container-max));
+}
+
+/* En una pantalla de 1920 o mas el contenedor de 1200 dejaba el logotipo 120 px a
+   la izquierda del borde del contenido, con dos margenes de casi 400 px. A ese
+   ancho 1440 sigue siendo tres cuartos de la pantalla -- no es una linea de
+   lectura, que la fija cada columna por su cuenta -- y alinea la marca con todo lo
+   que hay debajo. */
+@media (min-width: 1920px) {
+  :root {
+    --se-container-max: 1440px;
+  }
 }
 
 /* —— La hora de Caracas ——
@@ -1511,7 +1526,7 @@
   background: var(--se-accent-hover);
   color: #ffffff;
   font-family: var(--se-font-ui);
-  font-size: 0.85rem;
+  font-size: 0.8125rem; /* 13 px; 0,85rem daba 13,6, fuera de la escala */
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2863,7 +2878,8 @@
 .se-about {
   --about-canvas: #ffffff;
   --about-surface: #ffffff;
-  --about-surface-2: var(--adm-ink-3);
+  /* Era `--adm-ink-3`, que fuera del panel no existe: la variable quedaba invalida. */
+  --about-surface-2: var(--se-gray-100);
   --about-border: rgba(var(--se-tinte), 0.12);
   --about-border-strong: rgba(var(--se-tinte), 0.18);
   --about-text: rgba(var(--se-tinte), 0.92);
@@ -2955,7 +2971,10 @@
 @media (max-width: 959px) {
   .se-about__hero-grid {
     grid-template-columns: 1fr;
-    justify-items: center;
+    /* `start` y no `center`: centrado, el bloque de texto quedaba a 104 px del
+       borde a 768 mientras "Proposito" y "Equipo" arrancan a 32 -- justo el
+       escalon que el comentario de `.se-about__hero-copy` dice evitar. */
+    justify-items: start;
   }
 }
 
@@ -3607,7 +3626,7 @@
 :root {
   --se-suite-ink: #ffffff;
   --se-suite-surface: #ffffff;
-  --se-suite-surface-2: var(--adm-ink-3);
+  --se-suite-surface-2: var(--se-gray-100); /* era `--adm-ink-3`: solo existe dentro del panel */
   --se-suite-border: rgba(var(--se-tinte), 0.12);
   --se-suite-border-strong: rgba(var(--se-tinte), 0.18);
   --se-suite-text: rgba(var(--se-tinte), 0.92);
@@ -4738,9 +4757,11 @@
   background: var(--se-form-surface);
   border: 1px solid var(--se-form-border);
   border-radius: var(--se-form-radius);
+  /* `--adm-ink-2` solo existe dentro del panel; fuera, la sombra entera era invalida
+     y no se pintaba. El respaldo es para el sitio publico; en el panel no cambia. */
   box-shadow:
-    0 1px 2px var(--adm-ink-2),
-    0 6px 20px var(--adm-ink-2);
+    0 1px 2px var(--adm-ink-2, rgba(var(--se-tinte), 0.06)),
+    0 6px 20px var(--adm-ink-2, rgba(var(--se-tinte), 0.06));
 }
 
 .se-contact-form:first-child {
@@ -4755,7 +4776,7 @@
   gap: 1rem;
   padding: 0.85rem 1rem 1rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px var(--adm-ink-2);
+  box-shadow: 0 1px 3px var(--adm-ink-2, rgba(var(--se-tinte), 0.06));
 }
 
 .se-contact-form.se-contact-form--toolbar .se-form-field {
@@ -4802,7 +4823,8 @@
   line-height: 1.45;
   color: var(--se-form-text);
   outline: none;
-  box-shadow: inset 0 1px 2px var(--adm-ink-2);
+  /* Respaldo publico: sin el, fuera del panel la sombra era invalida (ver arriba). */
+  box-shadow: inset 0 1px 2px var(--adm-ink-2, rgba(var(--se-tinte), 0.06));
   transition:
     border-color 0.18s var(--se-form-ease),
     box-shadow 0.18s var(--se-form-ease),
@@ -4820,8 +4842,9 @@
 
 .se-form-control:focus {
   border-color: var(--se-form-focus);
+  /* Con el respaldo, el anillo de foco tambien se ve en los formularios publicos. */
   box-shadow:
-    inset 0 1px 2px var(--adm-ink-2),
+    inset 0 1px 2px var(--adm-ink-2, rgba(var(--se-tinte), 0.06)),
     0 0 0 3px var(--se-form-focus-glow);
 }
 
@@ -4840,7 +4863,7 @@
 
 .se-form-control[aria-invalid="true"]:focus {
   box-shadow:
-    inset 0 1px 2px var(--adm-ink-2),
+    inset 0 1px 2px var(--adm-ink-2, rgba(var(--se-tinte), 0.06)),
     0 0 0 3px rgba(180, 35, 58, 0.18);
 }
 
@@ -8733,7 +8756,7 @@ a.se-topics__chip:focus-visible {
 
 .se-comments__pending {
   font-size: var(--se-text-caption);
-  color: var(--se-gray-600);
+  color: var(--se-gray-500); /* `--se-gray-600` no existe: heredaba el color sin querer */
   margin-top: var(--se-space-xs);
 }
 
@@ -10358,7 +10381,7 @@ a.se-topics__chip:focus-visible {
 
 /* La cifra es el dato: la mas grande y la unica en blanco puro. */
 .se-ticker__v {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.25;
   color: #ffffff;
@@ -10467,23 +10490,22 @@ a.se-topics__chip:focus-visible {
 
 .se-explorer__field:focus-within .se-explorer__lupa { color: #ffffff; }
 
+/* El campo y los disparadores van sobre la franja verde: blanco translucido y
+   texto blanco. Estaba en dos bloques que se pisaban (este y otro unas dos mil
+   lineas mas abajo); ahora vive solo aqui. */
 .se-explorer__search {
   width: 100%;
   padding: 11px 14px 11px 38px;
-  border: 1px solid rgba(var(--se-tinte), 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.28);
-  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   font-family: var(--sans);
   font-size: 14px;
-  transition: border-color 0.18s ease;
+  transition: border-color 0.18s ease, background 0.18s ease;
 }
 
-.se-explorer__search::placeholder { color: var(--color-slate-2); }
-.se-explorer__search:focus-visible {
-  outline: none;
-  border-color: var(--color-accent);
-}
+.se-explorer__search::placeholder { color: rgba(255, 255, 255, 0.72); }
 
 .se-explorer__sel { position: relative; flex: 0 0 auto; }
 
@@ -10494,23 +10516,39 @@ a.se-topics__chip:focus-visible {
   justify-content: space-between;
   min-width: 170px;
   padding: 11px 15px;
-  border: 1px solid rgba(var(--se-tinte), 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.28);
-  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   font-family: var(--sans);
   font-size: 14px;
   transition: border-color 0.18s ease, background 0.18s ease;
 }
 
-.se-explorer__btn:hover { border-color: var(--color-accent); }
+.se-explorer__search:focus,
+.se-explorer__btn:hover,
+.se-explorer__btn:focus-visible {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+/* Un anillo de verdad para el teclado. El cambio de borde de arriba, de 0,22 a 0,5
+   de blanco, no se distinguia a simple vista; el blanco sobre el verde oscuro, si. */
+.se-explorer__search:focus-visible,
+.se-explorer__btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
 
 /* Filled = this axis has a selection; on = its panel is open. */
 .se-explorer__btn--filled { border-color: rgba(185, 83, 42, 0.55); }
 
+/* Abierto: el mismo realce que al pasar el ratón. Relleno cobrizo no: con la opción
+   elegida y la pastilla ya en cobre, el disparador también en cobre era demasiado. */
 .se-explorer__btn--on {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .se-explorer__caret { font-size: 11px; opacity: 0.7; }
@@ -10694,7 +10732,7 @@ a.se-topics__chip:focus-visible {
   background: transparent;
   color: var(--color-slate);
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
@@ -10732,7 +10770,7 @@ a.se-topics__chip:focus-visible {
 .se-pager__gap {
   padding: 0 2px;
   font-family: var(--mono);
-  font-size: 12.5px;
+  font-size: 12px; /* el mismo cuerpo que los botones de al lado */
   color: var(--color-slate-2);
 }
 
@@ -11466,6 +11504,14 @@ a.se-topics__chip:focus-visible {
   color: var(--color-cream);
 }
 
+/* De tableta arriba el minimo sube: entre 640 y 1000 el 3,4vw dejaba el titular en
+   26 px, a cuatro de la entradilla (22 px), y el H1 no se distinguia de ella. */
+@media (min-width: 640px) {
+  .se-piece__title {
+    font-size: clamp(1.9rem, 3.4vw, 2.5rem);
+  }
+}
+
 .se-piece__meta {
   display: flex;
   flex-wrap: wrap;
@@ -11482,7 +11528,9 @@ a.se-topics__chip:focus-visible {
 .se-piece__share { margin-left: auto; }
 
 .se-piece__lead {
-  margin: var(--se-space-md) 0 0;
+  /* Con margen abajo: el primer parrafo del cuerpo no lleva margen de arriba y la
+     entradilla del cuerpo se le pegaba. */
+  margin: var(--se-space-md) 0 var(--se-space-md);
   font-size: 1.08rem;
   line-height: 1.6;
   color: var(--color-slate);
@@ -12429,13 +12477,16 @@ a.se-topics__chip:focus-visible {
 /* A place inherited from the tree rather than tagged on the piece. Same control,
    quieter, because it is context: the newsroom chose "Venezuela", the region and
    the continent come with it. */
+/* Mas callado por el color y el borde discontinuo, no por la opacidad: al 66 % el
+   texto bajaba a 4,0:1 y no llegaba al 4,5 que pide la letra pequeña. */
 .se-piece__tag--heredado {
-  opacity: 0.66;
+  color: var(--se-gray-500);
+  border-style: dashed;
 }
 
 .se-piece__tag--heredado:hover,
 .se-piece__tag--heredado:focus-visible {
-  opacity: 1;
+  border-style: solid;
 }
 
 /* The report wall: an account, not a lead form. */
@@ -12483,27 +12534,14 @@ a.se-topics__chip:focus-visible {
   color: var(--se-gray-500);
 }
 
-/* `__btn` es el disparador de cada eje -- Tema, Dónde -- y era el que quedaba
-   negro sobre el verde. `__field` no existe en el marcado; lo había puesto de
-   memoria en vez de leer el componente. */
-.se-explorer__search,
-.se-explorer__btn {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #ffffff;
+/* En la opción elegida el fondo es cobre: la cifra va en el color de su texto. */
+.se-explorer__panel .se-explorer__opt--on .se-explorer__n {
+  color: inherit;
+  opacity: 0.85;
 }
 
-.se-explorer__search::placeholder {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.se-explorer__search:focus,
-.se-explorer__btn:hover,
-.se-explorer__btn:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.5);
-  outline: none;
-}
+/* El campo y los disparadores (`__search`, `__btn`) se pintan en su bloque de
+   origen, junto a `.se-explorer__bar`: aqui habia una copia que los pisaba. */
 
 .se-explorer__chip,
 .se-explorer__clear {
@@ -12826,7 +12864,7 @@ a.se-topics__chip:focus-visible {
 .se-piece__aside .se-newslist__date {
   display: block;
   margin-top: 5px;
-  font-size: 11.5px;
+  font-size: 12px; /* 11,5 no estaba en la escala; 12 como la fecha de la lista base */
   color: var(--se-gray-500);
 }
 
@@ -13108,9 +13146,11 @@ a.se-topics__chip:focus-visible {
 
   /* "EDITORIAL DEL DÍA" salía a 10,5 px. Va en versalitas y con mucho espaciado,
      que a ese tamaño y en la mano es donde peor se lee. */
+  /* 11 px, como `.se-meta` y el resto de las versalitas: 0,72rem daba 11,52, un
+     tamaño suelto entre dos peldaños de la escala. */
   .se-eddia__kicker,
   .se-doccard__kicker {
-    font-size: 0.72rem;
+    font-size: 0.6875rem;
   }
 
   .se-format__more {
@@ -13507,7 +13547,7 @@ a.se-topics__chip:focus-visible {
 .se-ticker__mundo-credito {
   flex: 0 0 auto;
   padding: 0 12px;
-  font-size: 10.5px;
+  font-size: 11px; /* el suelo de lo legible; a 10,5 se quedaba medio punto por debajo */
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.5);
@@ -13562,13 +13602,13 @@ a.se-topics__chip:focus-visible {
 
   /* El credito, mas discreto en el telefono.
      Medido a 393: ocupaba unos 180 px de los 393 de su fila, casi un tercio, para una
-     atribucion. Sus condiciones exigen que este, no que grite: a 9 px y con menos
-     relleno cumple igual y le devuelve el sitio a las cifras, que es lo que el lector
-     vino a ver. */
+     atribucion. Sus condiciones exigen que este, no que grite: con menos relleno y
+     menos espaciado cumple igual y le devuelve el sitio a las cifras. La letra, en
+     cambio, sube de 9 a 11 px: a 9 era una licencia que no se podia leer. */
   .se-ticker__mundo-credito {
     padding: 0 8px;
-    font-size: 9px;
-    letter-spacing: 0.04em;
+    font-size: 11px;
+    letter-spacing: 0.02em;
     border-left: none;
   }
 }
@@ -13867,15 +13907,16 @@ a.se-topics__chip:focus-visible {
 .se-redes__nombre {
   margin: 0;
   font-family: var(--se-font-heading);
-  font-size: 0.78rem;
+  font-size: 0.75rem; /* 12 px; 0,78rem daba 12,48 */
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--color-ink);
 }
 
 .se-redes__cuenta {
+  position: relative; /* ancla del blanco tactil (`::before`, mas abajo) */
   font-family: var(--se-font-ui);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--color-slate-2);
   text-decoration: none;
   border-bottom: 1px solid transparent;
@@ -13921,6 +13962,15 @@ a.se-topics__chip:focus-visible {
   opacity: 1;
   height: 3px;
   background: rgba(185, 83, 42, 0.22);
+}
+
+/* La linea de progreso sola no bastaba: al 22 % de cobrizo y 3 px no se veia que
+   el foco estaba en la fila. El anillo va en la fila entera y no en la pista, cuya
+   mascara se comeria cualquier contorno dibujado por fuera. */
+.se-redes__fila:has(> .se-redes__pista:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 .se-redes__progreso i {
   display: block;
@@ -13998,7 +14048,7 @@ a.se-topics__chip:focus-visible {
   inset: auto 0 0 0;
   padding: 2rem 0.75rem 0.65rem;
   font-family: var(--se-font-ui);
-  font-size: 0.72rem;
+  font-size: 0.75rem; /* 12 px; 0,72rem daba 11,52 */
   line-height: 1.4;
   color: #fff;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.82));
@@ -18088,7 +18138,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 .se-anunciate__tabla thead th {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.6875rem; /* 11 px: 0,68rem daba 10,9, bajo el suelo de lo legible */
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -18185,7 +18235,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   font-family: var(--se-font-label);
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-accent);
+  /* El tono oscuro del cobre: sobre el azul del autocompletado el claro no llega a 4,5:1. */
+  color: var(--se-accent-hover);
   cursor: pointer;
 }
 .se-campo__ojo:hover { background: rgba(185, 83, 42, 0.08); }
@@ -20879,5 +20930,124 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   .se-explorer-section--primera .se-explorer__sel {
     flex: 1 1 calc(50% - 4px);
     min-width: 0;
+  }
+}
+
+/* ═══ Accesibilidad y apaisado: lo que la auditoría midió en la pieza y la portada ═══
+   Al final de la hoja a propósito: varias de estas reglas tienen que ganar por orden
+   a las de cada componente, que se escribieron antes con la misma especificidad. */
+
+/* —— La cabecera fija no tapa el foco (WCAG 2.4.11) ——
+   La barra verde mide 77 px en el teléfono y en el escritorio; sin esto, un enlace al
+   que se llega con el tabulador o con un ancla queda debajo de ella. 77 + 12 de aire.
+   Solo el borde de arriba: el de abajo lo pone el aviso de cookies en su hoja. */
+html {
+  scroll-padding-top: 89px;
+}
+
+/* —— Menos aire sobre las migas de la pieza ——
+   El relleno de sección (80 px en el teléfono, 96 en el escritorio) está pensado para
+   separar bloques de la portada; sobre las migas solo empujaba el titular hacia abajo. */
+.se-section:has(> .se-container > .se-piece) {
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+/* —— Blancos pequeños: al menos 24 px con cualquier puntero (WCAG 2.5.8) ——
+   Con relleno vertical en enlaces en línea, que crece el área que responde sin mover
+   el renglón; y con una capa `::before` donde el borde inferior ya es el subrayado. */
+.se-piece__crumbs a {
+  padding-block: 4px;
+}
+
+.se-redes__cuenta::before,
+.se-format__more::before {
+  content: "";
+  position: absolute;
+  inset: -4px -2px;
+}
+
+.se-format__more {
+  position: relative;
+}
+
+/* —— Y 44 px con el dedo ——
+   Solo con puntero grueso: en el escritorio esas medidas funcionan y agrandarlas
+   rompería la cabecera de la pieza y la fila de la paginación. Con `min-*` y no con
+   `width`/`height`, para que la caja dibujada siga igual donde ya mide lo suficiente. */
+@media (pointer: coarse) {
+  .se-share__btn,
+  .se-feed__list .se-share__btn,
+  .se-marcar__btn,
+  .se-pager__btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .se-header__actions--mobile .se-btn,
+  .se-explorer__search,
+  .se-explorer__btn,
+  .se-explorer-section--primera .se-explorer__search,
+  .se-explorer-section--primera .se-explorer__btn {
+    min-height: 44px;
+  }
+
+  /* Las migas, en línea: 14 px por arriba y por abajo llevan los 16 de la letra a 44. */
+  .se-piece__crumbs a {
+    padding-block: 14px;
+  }
+
+  /* El "@cuenta" de cada red: su borde inferior es el subrayado, así que no admite
+     relleno; la capa invisible pasa de 18 a 44 px. */
+  .se-redes__cuenta::before {
+    inset: -14px -4px;
+  }
+
+  /* Mostrar contraseña: va dentro del campo, así que crece hacia los lados y hasta
+     el alto del campo, no por fuera de él. */
+  .se-campo__ojo {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* —— El teléfono en horizontal ——
+   A 844x390 la foto de apertura medía 780x439: más alta que la pantalla, y el
+   titular caía dos pantallas más abajo. Foto y texto lado a lado, como en el
+   escritorio, y la foto con techo por si la columna sale ancha. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .se-apertura__principal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--se-space-md);
+    align-items: start;
+  }
+
+  .se-apertura__media {
+    max-height: 60svh;
+  }
+
+  /* La cabecera de la pieza, igual: a dos columnas, que es lo que ya hace de 900
+     arriba, y la portada con el mismo techo. */
+  .se-piece__head--media {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--se-space-lg);
+  }
+
+  .se-piece__head-media img {
+    max-height: 60svh;
+    object-fit: cover;
+  }
+}
+
+/* —— La portada del podcast en tableta ——
+   Entre 640 y 899 la cabecera va a una columna y la portada se estiraba a todo el
+   ancho (704x528 a 768), así que el reproductor, que es la pieza, empezaba a 1245 px.
+   La portada pasa al lado del titular, estrecha: la imagen acompaña, el audio es lo
+   que se viene a buscar. `:has()` porque el artículo no lleva clase de formato y el
+   reproductor solo existe en el podcast. */
+@media (min-width: 640px) and (max-width: 899px) {
+  .se-piece:has(.se-audiostage) .se-piece__head--media {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+    gap: var(--se-space-lg);
   }
 }

@@ -1,0 +1,162 @@
+/* ═══ ACCESIBILIDAD ═══════════════════════════════════════════════════
+   Lo que pidio la auditoria WCAG 2.1 AA y no tiene casa en un componente concreto.
+   Va en su propio archivo, importado justo detras de `blog.css`, para que estas
+   reglas ganen por orden sin subir la especificidad de nadie. */
+
+/* —— Saltar al contenido ——
+   Invisible hasta que llega el foco: es el primer tabulador de la pagina y su unico
+   trabajo es ahorrarle a quien navega con teclado la cinta y la cabecera enteras.
+   Fuera de la pantalla con `transform` y no con `display: none`, que lo sacaria
+   tambien del orden del tabulador. Blanco sobre la cabecera verde: el contraste lo
+   pone el propio fondo y el foco se ve sin depender del tema. */
+.se-saltar {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  z-index: 2000;
+  padding: 0.7rem 1.1rem;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--marca-verde, #003318);
+  font-family: var(--se-font-ui, system-ui, sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  transform: translateY(-200%);
+}
+
+.se-saltar:focus,
+.se-saltar:focus-visible {
+  transform: none;
+  outline: 3px solid #b9532a;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .se-saltar { transition: transform 0.15s ease-out; }
+}
+
+/* El envoltorio del contenido recibe el foco por programa -- al saltar y al cambiar
+   de ruta --, nunca tabulando. Un recuadro alrededor de la pagina entera no le dice
+   nada a nadie, asi que solo aqui se quita el contorno. */
+#contenido.se-page:focus {
+  outline: none;
+}
+
+/* —— Lo que solo oye un lector de pantalla ——
+   El aviso de cambio de ruta. Mismo recorte que `.se-sr-only`, repetido aqui para no
+   depender de que una regla de otro archivo siga existiendo. */
+.se-aviso-de-ruta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* —— Pausar el cintillo (WCAG 2.2.2) ——
+   Algo que se mueve solo mas de cinco segundos necesita una forma de pararlo, y
+   pasar el raton por encima no existe para el teclado ni para el dedo. El boton va
+   sobre el verde de la cinta, discreto pero con 28 px de blanco -- por encima de los
+   24 que pide 2.5.8 -- y un foco que se ve sobre fondo oscuro. */
+.se-ticker__pausa {
+  flex: 0 0 auto;
+  align-self: center;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 4px 0 10px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.se-ticker__pausa:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.se-ticker__pausa:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.se-ticker__pausa svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+/* Con movimiento reducido la pista ya no anda, asi que el boton no tendria nada que
+   parar: se quita en vez de ofrecer un control que no hace nada. */
+@media (prefers-reduced-motion: reduce) {
+  .se-ticker__pausa { display: none; }
+}
+
+.se-ticker--pausado .se-ticker__track {
+  animation-play-state: paused;
+}
+
+/* Quieto tambien mientras el foco esta dentro: nadie puede leer ni pulsar un enlace
+   que se le escapa por el borde mientras tabula. Vale para los dos desfiles. */
+.se-ticker:focus-within .se-ticker__track,
+.se-partners__viewport:focus-within .se-partners__track {
+  animation-play-state: paused;
+}
+
+/* —— Las tarjetas de "En redes" ——
+   El `listitem` es ahora un envoltorio y no el propio enlace, que asi vuelve a
+   anunciarse como enlace. El envoltorio hace de elemento de la fila: no se encoge y
+   es el que se ajusta al desplazar. La tarjeta de dentro conserva sus medidas. */
+.se-redes__item {
+  display: flex;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* —— El aviso de cookies no tapa el foco (WCAG 2.4.11) ——
+   Mientras la barra esta abierta ocupa el pie de la pantalla, y un campo o un enlace
+   que recibe el foco al tabular puede quedar debajo. `scroll-padding-bottom` hace que
+   el navegador lo deje por encima de ella. El alto se mide en vivo desde el
+   componente (`--se-aviso-cookies-alto`); los 240 px son la reserva si no hay medida,
+   que es lo que mide la barra en un telefono de 390 (en escritorio, a 1440, son 159). */
+html.se-con-aviso-cookies {
+  scroll-padding-bottom: calc(var(--se-aviso-cookies-alto, 240px) + 12px);
+}
+
+/* —— Mientras carga la portada (CLS) ——
+   La portada no dibujaba nada hasta tener el contenido, asi que el boletin, los
+   aliados y el pie subian hasta la cabecera y luego bajaban de golpe. El hueco
+   guarda una pantalla de alto: lo que hay debajo ya nace donde va a quedarse. */
+.se-portada-cargando {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* —— Entrar y crear cuenta: el boton mientras se envia ——
+   Va con `aria-disabled` y no con `disabled`, para que el foco no se caiga al `body`.
+   Se ve igual que uno deshabilitado; el cursor dice que esta trabajando, no que no se
+   pueda. */
+.se-entrada__enviar[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: progress;
+  box-shadow: none;
+}
+
+/* El aviso general recibe el foco por programa tras un fallo. Un contorno fino del
+   mismo cobre del texto marca donde esta el foco sin parecer otro control. */
+.se-entrada__error:focus {
+  outline: 2px solid #8a3a1c;
+  outline-offset: 2px;
+}

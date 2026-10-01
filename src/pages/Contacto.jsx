@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
-import { CONTACT } from "../data/surEconomicsMock";
+import { useEffect, useState } from "react";
+import { BRAND, CONTACT } from "../data/surEconomicsMock";
+import { applyPageMeta } from "../lib/seo";
 import { Link, useSearchParams } from "react-router-dom";
 import { contactService } from "../services/contactService";
 import { useClaveIdempotente } from "../hooks/useClaveIdempotente";
@@ -42,6 +43,10 @@ const Campo = ({
         onBlur={onBlur}
         disabled={bloqueado}
         autoComplete={autoComplete}
+        // Los cuatro son obligatorios, y eso se dice antes de fallar, no despues. El
+        // formulario va con `noValidate`, asi que esto anuncia "obligatorio" sin que
+        // salte el globo del navegador por encima de nuestros avisos.
+        required
         // `aria-invalid` y no solo el borde rojo: el color no llega a quien no lo ve.
         aria-invalid={error ? "true" : undefined}
         aria-describedby={error ? idDelError : undefined}
@@ -68,9 +73,25 @@ Campo.propTypes = {
   autoComplete: PropTypes.string,
 };
 
+/** El id de cada control, para llevar el foco al primero que falle. */
+const ID_DE_CAMPO = {
+  name: "contacto-nombre",
+  email: "contacto-correo",
+  subject: "contacto-asunto",
+  message: "contacto-mensaje",
+};
+
 export const Contacto = () => {
   const [searchParams] = useSearchParams();
   const prefilledSubject = searchParams.get("asunto") || "";
+
+  useEffect(() => {
+    applyPageMeta({
+      title: `Contacto — ${BRAND.name}`,
+      description:
+        "Escriba a la redacción de SurEconomics: consultas, alianzas, publicidad y proyectos de investigación o asesoría.",
+    });
+  }, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -127,8 +148,12 @@ export const Contacto = () => {
     // aviso, en vez de rebotar contra un mensaje general que no dice cuál falta.
     const todos = Object.fromEntries(Object.keys(form).map((k) => [k, true]));
     setTocado(todos);
-    if (Object.keys(form).some((k) => revisar(k, form[k]))) {
+    const primero = Object.keys(form).find((k) => revisar(k, form[k]));
+    if (primero) {
       setSubmitState({ status: "error", message: "Revise los campos marcados." });
+      // El foco al primer campo que falla: el aviso general dice que algo falla, y el
+      // campo dice cual. Sin esto quien usa teclado tenia que buscarlo.
+      document.getElementById(ID_DE_CAMPO[primero])?.focus();
       return;
     }
     setSubmitState({ status: "loading", message: "" });
@@ -171,18 +196,27 @@ export const Contacto = () => {
                   un formulario a la vista. Ese titulo con su filete no decia nada y
                   dejaba la caja 92 px por debajo de la tarjeta de al lado, que es lo
                   que hacia que las dos columnas no casaran. */}
-              <form className="se-contact-form se-contact__form" onSubmit={handleSubmit} aria-describedby="contact-submit-status">
-                <div id="contact-submit-status" className="se-contact__status" aria-live="polite">
+              <form
+                className="se-contact-form se-contact__form"
+                onSubmit={handleSubmit}
+                aria-describedby="contact-submit-status"
+                noValidate
+              >
+                {/* Una sola region viva, que existe siempre y cambia de texto. Antes
+                    el contenedor era `aria-live` y cada aviso traia ademas su propio
+                    `role="status"` o `role="alert"`, y el mismo mensaje se anunciaba
+                    dos veces. Los avisos de dentro son ya solo dibujo. */}
+                <div id="contact-submit-status" className="se-contact__status" role="status">
                   {submitState.status === "success" ? (
-                    <div className="se-contact__banner" role="status">
+                    <div className="se-contact__banner">
                       <strong>Enviado.</strong> {submitState.message}
                     </div>
                   ) : submitState.status === "loading" ? (
-                    <div className="se-contact__banner se-contact__banner--loading" role="status">
+                    <div className="se-contact__banner se-contact__banner--loading">
                       Enviando…
                     </div>
                   ) : submitState.status === "error" ? (
-                    <div className="se-contact__banner se-contact__banner--error" role="alert">
+                    <div className="se-contact__banner se-contact__banner--error">
                       {submitState.message}
                     </div>
                   ) : null}

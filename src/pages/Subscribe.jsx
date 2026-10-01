@@ -1,7 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { SUBSCRIPTION } from "../data/surEconomicsMock";
+import { BRAND, SUBSCRIPTION } from "../data/surEconomicsMock";
+import { applyPageMeta } from "../lib/seo";
 
 export const Subscribe = () => {
+  // Titulo propio: con el generico del sitio, la pestaña y el lector de pantalla
+  // decian lo mismo aqui que en la portada.
+  useEffect(() => {
+    applyPageMeta({
+      title: `Suscripción — ${BRAND.name}`,
+      description:
+        "Suscripción a SurEconomics: investigaciones, reportes y boletines con lectura ejecutiva para América Latina.",
+    });
+  }, []);
+
   return (
     <main className="se-blog" role="main">
       <section className="se-hero se-hero--institutional">

@@ -3,7 +3,7 @@ import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { applyPageMeta } from "../lib/seo";
-import { EmptyState, ErrorState } from "../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import {
   ArticleCardGrid,
@@ -185,6 +185,14 @@ export const Home = () => {
   // noticias, va delante de todo: no puede caerse de la pagina por un filtro.
   const hayNoticias = blocks.some((b) => b.formatoApi === "noticia");
 
+  // Mientras llega el contenido -- y el arbol de temas, sin el cual el filtro de arriba
+  // no se pinta -- la portada guarda una pantalla de alto. Antes no dibujaba nada: el
+  // boletin, los aliados y el pie subian hasta la cabecera y bajaban de golpe al
+  // llegar las piezas. Medido, un CLS de 0,9, casi todo de ese salto.
+  const cargando =
+    status === "loading" ||
+    (status === "success" && pieces.length > 0 && taxonomy.status === "loading");
+
   return (
     <main className="se-blog" role="main">
       {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
@@ -194,6 +202,14 @@ export const Home = () => {
         {BRAND.name} — análisis y perspectiva sobre economía, mercados e inversión en
         América Latina
       </h1>
+
+      {cargando ? (
+        <section className="se-section se-portada-cargando" aria-busy="true">
+          <div className="se-container">
+            <LoadingState title="Cargando la portada…" />
+          </div>
+        </section>
+      ) : null}
 
       {status === "error" ? (
         <section className="se-section">
@@ -206,7 +222,7 @@ export const Home = () => {
       {/* El filtro, lo primero bajo el navbar. Nada que explorar antes de que haya
           algo publicado, y una barra de filtros vacia el dia del lanzamiento se lee
           como un control roto y no como uno honesto. */}
-      {status === "success" && taxonomy.ready && pieces.length ? (
+      {!cargando && status === "success" && taxonomy.ready && pieces.length ? (
         <section
           className="se-section se-explorer-section se-explorer-section--primera"
           aria-label="Explorar contenido"
@@ -253,11 +269,13 @@ export const Home = () => {
         </section>
       ) : null}
 
-      <AperturaPortada principal={apertura.principal} secundarias={apertura.secundarias} />
+      {cargando ? null : (
+        <AperturaPortada principal={apertura.principal} secundarias={apertura.secundarias} />
+      )}
 
-      {hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
+      {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 
-      {blocks.map(({ formatoApi, items, total }, i) => (
+      {(cargando ? [] : blocks).map(({ formatoApi, items, total }, i) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={nombrePlural(formatoApi)}

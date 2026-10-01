@@ -6,6 +6,20 @@ import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 import { AvisoDeCookies } from "../components/AvisoDeCookies"
 import { BarraPublicitaria, ProveedorDePublicidad } from "../components/publicidad"
+import { AvisoDeRuta } from "../components/AvisoDeRuta"
+
+/** El envoltorio del contenido: destino del enlace de salto y del foco al cambiar de ruta. */
+const CONTENIDO_ID = "contenido"
+
+// El salto se resuelve aqui y no con el ancla sola: el ancla dejaria "#contenido"
+// escrito en la direccion, y el router lo tomaria por una navegacion. El `href` se
+// queda para que el enlace siga siendo un enlace -- y funcione si este codigo no.
+const saltarAlContenido = (e) => {
+    const destino = document.getElementById(CONTENIDO_ID)
+    if (!destino) return
+    e.preventDefault()
+    destino.focus()
+}
 
 // Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
 export const Layout = () => {
@@ -20,14 +34,23 @@ export const Layout = () => {
                 quiere. Una que no declare ninguno -- contacto, cookies -- no lleva
                 publicidad, y esa es la manera de decirlo. */}
             <ProveedorDePublicidad>
+                {/* Lo primero que se tabula, antes que la cinta y la cabecera: sin el,
+                    llegar al articulo con teclado pasa por todo el menu en cada pagina. */}
+                <a className="se-saltar" href={`#${CONTENIDO_ID}`} onClick={saltarAlContenido}>
+                    Saltar al contenido
+                </a>
                 {/* Above every view, not just the homepage: the closing figures are
                     ambient context for the whole site. It renders nothing at all when
                     the newsroom has not filled it in. */}
                 <MarketTicker />
                 <Navbar />
-                <main className="se-page" role="main">
+                {/* Un `div` y no `main`: cada vista pinta ya su propio `main`, y dos
+                    anidados son dos regiones principales para un lector de pantalla.
+                    `tabIndex={-1}` lo deja recibir el foco por programa sin meterlo en
+                    el orden del tabulador. */}
+                <div className="se-page" id={CONTENIDO_ID} tabIndex={-1}>
                     <Outlet />
-                </main>
+                </div>
                 {/* Lo ultimo en redes, curado desde el panel, encima del pie y por
                     tanto en todas las vistas. Como la cinta, no pinta nada si la
                     redaccion no ha destacado ninguna publicacion. */}
@@ -42,6 +65,7 @@ export const Layout = () => {
                     avisa de los cambios de ruta -- el sitio no recarga al cambiar de
                     pieza, asi que alguien tiene que contarlo. */}
                 <AvisoDeCookies />
+                <AvisoDeRuta destinoId={CONTENIDO_ID} />
             </ProveedorDePublicidad>
         </ScrollToTop>
     )

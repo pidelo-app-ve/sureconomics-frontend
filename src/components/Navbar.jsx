@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
@@ -8,6 +8,10 @@ import useI18n from "../i18n/useI18n";
 import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
+
+/** Lo que se puede tabular dentro del cajón: el mismo criterio que el cuadro de TikTok. */
+const FOCALES =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Several format entries share the `/articulos` path and differ only by the
@@ -87,6 +91,8 @@ export const Navbar = () => {
   const location = useLocation();
   const { t } = useI18n();
   const { isAuthenticated, logout } = useUserAuth();
+  const botonRef = useRef(null);
+  const panelRef = useRef(null);
 
   const mainNavItems = useMemo(
     () => PRIMARY_NAV.filter((item) => item.id !== "suscripcion" && !item.hidden),
@@ -114,9 +120,37 @@ export const Navbar = () => {
     setIsMenuOpen((prev) => !prev);
   }, []);
 
+  // Escape cierra (y el efecto de abajo devuelve el foco al botón); Tab no sale del
+  // cajón mientras está abierto. Es un `aria-modal`: lo de detrás está tapado por la
+  // capa oscura, y tabular hasta un enlace que no se ve es perderse.
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === "Escape") closeMenu();
+      if (e.key === "Escape") {
+        closeMenu();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focales = Array.from(panel.querySelectorAll(FOCALES)).filter(
+        (el) => el.getClientRects().length > 0
+      );
+      if (!focales.length) return;
+      const primero = focales[0];
+      const ultimo = focales[focales.length - 1];
+      const activo = document.activeElement;
+      if (!panel.contains(activo)) {
+        e.preventDefault();
+        (e.shiftKey ? ultimo : primero).focus();
+        return;
+      }
+      if (e.shiftKey && activo === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && activo === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
     },
     [closeMenu]
   );
@@ -134,6 +168,41 @@ export const Navbar = () => {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Al abrir, el foco entra en el cajón -- en el primer enlace, que es a lo que se
+  // viene --; al cerrar por la vía que sea, vuelve al botón que lo abrió. Sin esto el
+  // foco se quedaba en la hamburguesa con el cajón tapándola, o caía al `body` al
+  // ocultarse el enlace que lo tenía.
+  //
+  // Solo se devuelve si el foco seguía dentro del cajón o se había perdido: si quien
+  // cierra es un cambio de ruta, el `Layout` lleva el foco al contenido justo después,
+  // y esa es la decisión buena.
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const panel = panelRef.current;
+    const boton = botonRef.current;
+    // Se reintenta unos cuadros: el cajón pasa de `visibility: hidden` a visible con
+    // una transición, y en su primer cuadro todavía cuenta como oculto -- medido, el
+    // `focus()` de ese cuadro no hacía nada y el foco seguía en la hamburguesa.
+    let cuadro = 0;
+    let intentos = 0;
+    const entrar = () => {
+      const primero =
+        panel?.querySelector(".se-header__nav-link") || panel?.querySelector(FOCALES);
+      primero?.focus();
+      if (primero && document.activeElement !== primero && intentos++ < 20) {
+        cuadro = window.requestAnimationFrame(entrar);
+      }
+    };
+    cuadro = window.requestAnimationFrame(entrar);
+    return () => {
+      window.cancelAnimationFrame(cuadro);
+      const activo = document.activeElement;
+      if (!activo || activo === document.body || panel?.contains(activo)) {
+        boton?.focus();
+      }
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -262,6 +331,7 @@ export const Navbar = () => {
         <HoraCaracas className="se-hora--header" />
 
         <button
+          ref={botonRef}
           type="button"
           className="se-header__burger"
           onClick={handleToggleMenu}
@@ -287,7 +357,13 @@ export const Navbar = () => {
             tabIndex={0}
             aria-label="Cerrar menú"
           />
-          <div className="se-header__menu-panel">
+          <div
+            ref={panelRef}
+            className="se-header__menu-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menú"
+          >
             <div className="se-header__menu-header">
               {/* La marca arriba, como en el carril del panel de administración:
                   es lo que hace que ese se lea bien y el cajón no. Antes decía

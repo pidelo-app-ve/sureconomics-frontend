@@ -155,7 +155,9 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
   if (!absoluteUrl) return null;
 
   return (
-    <div className={`se-share ${className}`.trim()} aria-label="Compartir">
+    // `group` para que "Compartir" se oiga al entrar en los botones: sin papel, el
+    // `aria-label` de un `div` no lo lee ningun lector de pantalla.
+    <div className={`se-share ${className}`.trim()} role="group" aria-label="Compartir">
       <button
         type="button"
         className="se-share__btn se-share__btn--ig"

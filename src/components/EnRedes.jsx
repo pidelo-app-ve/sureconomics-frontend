@@ -337,12 +337,14 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
         onPointerCancel={alSoltar}
         onKeyDown={alTeclado}
       >
-        {piezas.map((p, i) =>
-          esFoto ? (
+        {/* Cada tarjeta va en su propio `listitem`, y el enlace dentro. Con el papel
+            puesto sobre el `<a>` el lector de pantalla lo anunciaba como elemento de
+            lista y no como enlace, que es lo que es. */}
+        {piezas.map((p, i) => (
+          <div className="se-redes__item" role="listitem" key={`${p.enlace}-${i}`}>
+          {esFoto ? (
             <a
-              key={`${p.enlace}-${i}`}
               className={`se-redes__pieza se-redes__pieza--foto${esVideo ? " se-redes__pieza--video" : ""}`}
-              role="listitem"
               style={{ "--d": retardo(i) }}
               href={p.enlace}
               target="_blank"
@@ -374,22 +376,24 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
               <span className="se-redes__pie">{p.texto}</span>
             </a>
           ) : (
+            // Sin `aria-label`: el nombre del enlace es el texto de la publicacion,
+            // que es lo que se ve. Uno fijo -- "Publicacion en X" -- tapaba ese texto
+            // y quien dicta "pulsa <lo que lee>" no encontraba el enlace (WCAG 2.5.3).
+            // La red ya la dice el rotulo de la fila.
             <a
-              key={`${p.enlace}-${i}`}
               className="se-redes__pieza se-redes__pieza--texto"
-              role="listitem"
               style={{ "--d": retardo(i) }}
               href={p.enlace}
               target="_blank"
               rel="noreferrer"
               draggable="false"
-              aria-label="Publicación en X"
             >
               <p>{p.texto}</p>
               <span className="se-redes__fecha">{fechaCorta(p.fecha)}</span>
             </a>
-          )
-        )}
+          )}
+          </div>
+        ))}
       </div>
 
       <div

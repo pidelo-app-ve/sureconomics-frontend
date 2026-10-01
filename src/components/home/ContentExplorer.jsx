@@ -32,15 +32,23 @@ export const ContentExplorer = ({
 }) => {
   const [open, setOpen] = useState(null);
   const rootRef = useRef(null);
+  // Los dos botones que abren, para devolverles el foco al cerrar con Escape.
+  const temaRef = useRef(null);
+  const geoRef = useRef(null);
 
-  // Close on outside click or Escape, the way a real dropdown does.
+  // Close on outside click or Escape, the way a real dropdown does. Escape also hands
+  // focus back to the button that opened it: closing the panel under the focused
+  // option would otherwise drop the keyboard user at the top of the page.
   useEffect(() => {
     if (!open) return undefined;
     const onDown = (e) => {
       if (!rootRef.current?.contains(e.target)) setOpen(null);
     };
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(null);
+      if (e.key !== "Escape") return;
+      const boton = (open === "tema" ? temaRef : geoRef).current;
+      setOpen(null);
+      boton?.focus();
     };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -62,6 +70,33 @@ export const ContentExplorer = ({
     if (next.has(value)) next.delete(value);
     else next.add(value);
     onChange(axis === "tema" ? { temas: next, geos } : { temas, geos: next });
+  };
+
+  // Tabular fuera del desplegable lo cierra: un panel abierto que ya no tiene el foco
+  // tapa lo que viene detras. Solo si el foco se fue a otro sitio de la pagina --
+  // `relatedTarget` nulo es cambiar de ventana o pulsar en vacio, y del clic fuera ya se
+  // ocupa `mousedown`.
+  const alSalirDelDesplegable = (e) => {
+    const destino = e.relatedTarget;
+    if (destino && !e.currentTarget.contains(destino)) setOpen(null);
+  };
+
+  // Flechas arriba y abajo entre las opciones, como en cualquier lista de casillas.
+  // Tab sigue funcionando igual; esto solo ahorra recorrer una lista larga de lugares.
+  const alTeclearEnPanel = (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") {
+      return;
+    }
+    const opciones = Array.from(e.currentTarget.querySelectorAll(".se-explorer__opt"));
+    if (!opciones.length) return;
+    e.preventDefault();
+    const i = opciones.indexOf(document.activeElement);
+    let siguiente;
+    if (e.key === "Home") siguiente = 0;
+    else if (e.key === "End") siguiente = opciones.length - 1;
+    else if (e.key === "ArrowDown") siguiente = i < 0 ? 0 : Math.min(i + 1, opciones.length - 1);
+    else siguiente = i < 0 ? opciones.length - 1 : Math.max(i - 1, 0);
+    opciones[siguiente].focus();
   };
 
   const clearAll = () => {
@@ -121,9 +156,11 @@ export const ContentExplorer = ({
           </div>
         ) : null}
 
-        <div className="se-explorer__sel">
+        <div className="se-explorer__sel" onBlur={alSalirDelDesplegable}>
           <button
+            ref={temaRef}
             type="button"
+            aria-controls={open === "tema" ? "explorer-panel-tema" : undefined}
             className={`se-explorer__btn${open === "tema" ? " se-explorer__btn--on" : ""}${
               temas.size ? " se-explorer__btn--filled" : ""
             }`}
@@ -136,14 +173,22 @@ export const ContentExplorer = ({
             </span>
           </button>
           {open === "tema" ? (
-            <div className="se-explorer__panel" role="listbox" aria-label="Temas">
+            // Un grupo de botones que se encienden y apagan, y no un `listbox`: la
+            // seleccion es multiple y cada opcion es un boton de verdad, asi que
+            // `aria-pressed` dice exactamente lo que pasa al pulsarla.
+            <div
+              id="explorer-panel-tema"
+              className="se-explorer__panel"
+              role="group"
+              aria-label="Temas"
+              onKeyDown={alTeclearEnPanel}
+            >
               {topicOptions.length ? (
                 topicOptions.map((o) => (
                   <button
                     type="button"
                     key={o.value}
-                    role="option"
-                    aria-selected={temas.has(o.value)}
+                    aria-pressed={temas.has(o.value)}
                     className={`se-explorer__opt${temas.has(o.value) ? " se-explorer__opt--on" : ""}`}
                     onClick={() => toggle("tema", o.value)}
                   >
@@ -158,9 +203,11 @@ export const ContentExplorer = ({
           ) : null}
         </div>
 
-        <div className="se-explorer__sel">
+        <div className="se-explorer__sel" onBlur={alSalirDelDesplegable}>
           <button
+            ref={geoRef}
             type="button"
+            aria-controls={open === "geo" ? "explorer-panel-geo" : undefined}
             className={`se-explorer__btn${open === "geo" ? " se-explorer__btn--on" : ""}${
               geos.size ? " se-explorer__btn--filled" : ""
             }`}
@@ -173,11 +220,16 @@ export const ContentExplorer = ({
             </span>
           </button>
           {open === "geo" ? (
-            <div className="se-explorer__panel" role="listbox" aria-label="Lugares">
+            <div
+              id="explorer-panel-geo"
+              className="se-explorer__panel"
+              role="group"
+              aria-label="Lugares"
+              onKeyDown={alTeclearEnPanel}
+            >
               <button
                 type="button"
-                role="option"
-                aria-selected={geos.has(geoTop)}
+                aria-pressed={geos.has(geoTop)}
                 className={`se-explorer__opt${geos.has(geoTop) ? " se-explorer__opt--on" : ""}`}
                 onClick={() => toggle("geo", geoTop)}
               >
@@ -196,8 +248,7 @@ export const ContentExplorer = ({
                     <button
                       type="button"
                       key={continente}
-                      role="option"
-                      aria-selected={geos.has(continente)}
+                      aria-pressed={geos.has(continente)}
                       className={`se-explorer__opt se-explorer__opt--region${
                         geos.has(continente) ? " se-explorer__opt--on" : ""
                       }`}
@@ -216,8 +267,7 @@ export const ContentExplorer = ({
                   <div key={region} className="se-explorer__group">
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={geos.has(region)}
+                      aria-pressed={geos.has(region)}
                       className={`se-explorer__opt se-explorer__opt--region${
                         geos.has(region) ? " se-explorer__opt--on" : ""
                       }`}
@@ -233,8 +283,7 @@ export const ContentExplorer = ({
                         <button
                           type="button"
                           key={pais}
-                          role="option"
-                          aria-selected={geos.has(pais)}
+                          aria-pressed={geos.has(pais)}
                           className={`se-explorer__opt se-explorer__opt--child${
                             geos.has(pais) ? " se-explorer__opt--on" : ""
                           }`}

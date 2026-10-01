@@ -204,8 +204,9 @@ export const Cookies = () => {
   return (
     /* `se-blog` pinta el papel. `main` es transparente y el fondo del documento es
        casi negro, asi que sin este envoltorio la pagina sale negro sobre negro --
-       el mismo tropiezo que la franja del bloque de redes. */
-    <div className="se-blog">
+       el mismo tropiezo que la franja del bloque de redes. Y es `main` porque el
+       envoltorio del `Layout` ya no lo es: cada vista declara su region principal. */
+    <main className="se-blog" role="main">
       <article className="se-legal">
           <header className="se-legal__cabeza">
           <p className="se-legal__kicker">Aviso legal</p>
@@ -451,7 +452,7 @@ export const Cookies = () => {
           </p>
           </footer>
       </article>
-    </div>
+    </main>
   );
 };
 

@@ -36,6 +36,15 @@ import { applyPageMeta } from "../../lib/seo";
 /** Un correo con forma de correo. No valida que exista — eso lo hace el código. */
 const pareceCorreo = (valor) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(valor.trim());
 
+/** El id de cada campo, en el orden en que se leen: el primero que falle se lleva el foco. */
+const IDS = {
+  firstName: "reg-nombre",
+  lastName: "reg-apellido",
+  email: "reg-correo",
+  password: "reg-clave",
+};
+const ID_ERROR = "reg-error";
+
 export const CuentaRegistro = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isEmailVerified, register, profile } = useUserAuth();
@@ -51,6 +60,14 @@ export const CuentaRegistro = () => {
   const [tocados, setTocados] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
   const [enviando, setEnviando] = useState(false);
+  // Tras un intento fallido el foco va a lo que hay que arreglar. Objeto nuevo en cada
+  // intento, para que repetir el mismo fallo vuelva a llevarlo alli.
+  const [enfocar, setEnfocar] = useState(null);
+
+  useEffect(() => {
+    if (!enfocar) return;
+    document.getElementById(enfocar.id)?.focus();
+  }, [enfocar]);
 
   useEffect(() => {
     applyPageMeta({
@@ -82,11 +99,17 @@ export const CuentaRegistro = () => {
 
   const enviar = async (e) => {
     e.preventDefault();
+    // El boton no se deshabilita mientras se envia (ver abajo): el doble envio se para aqui.
+    if (enviando) return;
     setErrorGeneral("");
     // Al enviar se marcan todos: si algo falta, hay que verlo señalado y no en un
     // aviso general que no dice dónde.
     setTocados({ firstName: true, lastName: true, email: true, password: true });
-    if (!valido) return;
+    if (!valido) {
+      const primero = Object.keys(IDS).find((campo) => errores[campo]);
+      if (primero) setEnfocar({ id: IDS[primero] });
+      return;
+    }
 
     setEnviando(true);
     try {
@@ -112,11 +135,13 @@ export const CuentaRegistro = () => {
         );
       } else if (estado === 429) {
         setErrorGeneral("Demasiados intentos. Espere unos minutos.");
-      } else if (estado === 422) {
-        setErrorGeneral(err?.message || "Revise los datos.");
+      } else if (estado === 422 || err?.code === "validation_error") {
+        // El mensaje del servidor llega en ingles ("Validation failed."): no se enseña.
+        setErrorGeneral("Revise los datos: alguno no tiene el formato esperado.");
       } else {
         setErrorGeneral("No se pudo crear la cuenta. Inténtelo de nuevo.");
       }
+      setEnfocar({ id: ID_ERROR });
     } finally {
       setEnviando(false);
     }
@@ -136,7 +161,7 @@ export const CuentaRegistro = () => {
         <form className="se-entrada__form" onSubmit={enviar} noValidate>
           <div className="se-entrada__fila">
             <CampoDeTexto
-              id="reg-nombre"
+              id={IDS.firstName}
               etiqueta="Nombre"
               valor={campos.firstName}
               onCambio={cambiar("firstName")}
@@ -145,7 +170,7 @@ export const CuentaRegistro = () => {
               autoComplete="given-name"
             />
             <CampoDeTexto
-              id="reg-apellido"
+              id={IDS.lastName}
               etiqueta="Apellido"
               valor={campos.lastName}
               onCambio={cambiar("lastName")}
@@ -156,7 +181,7 @@ export const CuentaRegistro = () => {
           </div>
 
           <CampoDeTexto
-            id="reg-correo"
+            id={IDS.email}
             etiqueta="Correo electrónico"
             tipo="email"
             valor={campos.email}
@@ -168,7 +193,7 @@ export const CuentaRegistro = () => {
           />
 
           <CampoDeTexto
-            id="reg-clave"
+            id={IDS.password}
             etiqueta="Contraseña"
             tipo="password"
             valor={campos.password}
@@ -179,13 +204,20 @@ export const CuentaRegistro = () => {
           />
           <FuerzaDeClave clave={campos.password} />
 
+          {/* Sin `role="alert"`: el foco llega aqui al aparecer, y eso ya lo hace leer. */}
           {errorGeneral ? (
-            <p className="se-entrada__error" role="alert">
+            <p className="se-entrada__error" id={ID_ERROR} tabIndex={-1}>
               {errorGeneral}
             </p>
           ) : null}
 
-          <button type="submit" className="se-btn se-entrada__enviar" disabled={enviando}>
+          {/* `aria-disabled` y no `disabled`: deshabilitado, el boton soltaba el foco
+              al `body` mientras se enviaba. */}
+          <button
+            type="submit"
+            className="se-btn se-entrada__enviar"
+            aria-disabled={enviando ? "true" : undefined}
+          >
             {enviando ? "Creando su cuenta…" : "Crear mi cuenta"}
           </button>
 

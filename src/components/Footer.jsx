@@ -95,19 +95,27 @@ export const Footer = () => {
             </ul>
           </nav>
 
-          <div className="se-footer__contact" aria-label="Contacto">
+          {/* Sin `aria-label`: sobre un `div` sin papel no lo lee nadie, y el rotulo
+              visible de debajo ya dice que es. */}
+          <div className="se-footer__contact">
             <div className="se-footer__contact-title">{t("nav.contacto")}</div>
             <a className="se-footer__link" href={`mailto:${CONTACT.primaryEmail}`}>
               {CONTACT.primaryEmail}
             </a>
           </div>
 
-          <div className="se-footer__newsletter" aria-label="Boletín">
+          <div className="se-footer__newsletter">
             <div className="se-footer__contact-title">Boletín</div>
             <p className="se-footer__newsletter-text">
               Reciba un resumen ejecutivo con señales y contexto. Cada lunes por la mañana.
             </p>
-            <form className="se-footer__newsletter-form" onSubmit={handleNewsletterSubmit}>
+            {/* El nombre va en el formulario, que si lo anuncia: con nombre es una
+                region de formulario y se puede saltar a ella. */}
+            <form
+              className="se-footer__newsletter-form"
+              onSubmit={handleNewsletterSubmit}
+              aria-label="Suscripción al boletín"
+            >
               <label className="se-sr-only" htmlFor="footer-newsletter-email">
                 Correo electrónico
               </label>

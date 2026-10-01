@@ -114,6 +114,9 @@ const SIMBOLOS_MOVIL = [
 /** El mismo corte que usa el componente original: por debajo, los dos se apilan. */
 const CORTE_MOVIL = "(max-width: 860px)";
 
+/** El nombre con el que se anuncia el marco de TradingView. */
+const TITULO_DEL_MARCO = "Índices mundiales (TradingView)";
+
 const CintaMundial = () => {
   const caja = useRef(null);
   const [estrecho, setEstrecho] = useState(() => {
@@ -176,7 +179,36 @@ const CintaMundial = () => {
     contenedor.appendChild(script);
     destino.appendChild(contenedor);
 
+    // El iframe lo crea su script cuando quiere, no nosotros, asi que se le espera.
+    // Dentro trae un enlace por simbolo: hasta trece paradas del tabulador antes de llegar a
+    // la cabecera, en cada pagina. `tabindex="-1"` saca el marco entero del recorrido
+    // del teclado sin esconderselo a un lector de pantalla, que sigue pudiendo leerlo,
+    // y el `title` le da el nombre que un marco necesita para anunciarse.
+    const domar = () => {
+      destino.querySelectorAll("iframe").forEach((marco) => {
+        if (marco.getAttribute("tabindex") !== "-1") marco.setAttribute("tabindex", "-1");
+        if (marco.getAttribute("title") !== TITULO_DEL_MARCO) {
+          marco.setAttribute("title", TITULO_DEL_MARCO);
+        }
+      });
+    };
+    domar();
+    let vigia = null;
+    if (typeof MutationObserver !== "undefined") {
+      // Tambien atributos: si el script reescribe el `title` o el `tabindex` despues
+      // de crear el marco, se vuelven a poner. `domar` no escribe si ya estan bien, asi
+      // que esto no se realimenta.
+      vigia = new MutationObserver(domar);
+      vigia.observe(destino, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["tabindex", "title"],
+      });
+    }
+
     return () => {
+      vigia?.disconnect();
       destino.innerHTML = "";
     };
   }, [estrecho]);
@@ -200,9 +232,27 @@ const CintaMundial = () => {
   );
 };
 
+/** Los dos dibujos del boton de pausa: dos barras mientras anda, un triangulo parada. */
+const IconoPausa = () => (
+  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+    <rect x="2" y="1.5" width="2.8" height="9" rx="0.6" />
+    <rect x="7.2" y="1.5" width="2.8" height="9" rx="0.6" />
+  </svg>
+);
+
+const IconoSeguir = () => (
+  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+    <path d="M3 1.5v9l7.5-4.5z" />
+  </svg>
+);
+
 export const MarketTicker = () => {
   const [ticker, setTicker] = useState(null);
   const [cargando, setCargando] = useState(true);
+  // WCAG 2.2.2: lo que se mueve solo tiene que poder pararse, y pasar el raton por
+  // encima no lo puede hacer quien usa teclado o el dedo. Dura lo que la pagina: la
+  // cinta vuelve a andar en la visita siguiente, que es lo que se espera de ella.
+  const [pausado, setPausado] = useState(false);
 
   useEffect(() => {
     let vivo = true;
@@ -284,9 +334,30 @@ export const MarketTicker = () => {
   ));
 
   return (
-    <div className="se-ticker" aria-label="Cifras de mercado">
+    // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
+    // papel no lo lee ningun lector de pantalla.
+    <div
+      className={`se-ticker${pausado ? " se-ticker--pausado" : ""}`}
+      role="region"
+      aria-label="Cifras de mercado"
+    >
       {hayCifras ? (
         <div className="se-ticker__casa">
+          {/* Solo con nuestras cifras: es lo unico que este boton puede parar. El
+              desfile de TradingView vive en su marco y no se deja mandar desde
+              fuera; ofrecer un boton para el seria prometer algo que no hace.
+              Nombre fijo y `aria-pressed`, que es como se anuncia un interruptor:
+              si el nombre tambien cambiara, el lector diria dos veces lo mismo. */}
+          <button
+            type="button"
+            className="se-ticker__pausa"
+            aria-pressed={pausado}
+            aria-label="Pausar cintillo"
+            title={pausado ? "Reanudar cintillo" : "Pausar cintillo"}
+            onClick={() => setPausado((p) => !p)}
+          >
+            {pausado ? <IconoSeguir /> : <IconoPausa />}
+          </button>
           <div className="se-ticker__viewport">
             <div className="se-ticker__track">
               <div className="se-ticker__run">{run}</div>

@@ -21091,48 +21091,58 @@ html {
 }
 
 /* ═══ INVITACION AL BOLETIN ═══════════════════════════════════════════
-   Tarjeta pequena abajo a la derecha, con la misma caja que el aviso de cookies
-   -- papel, filete de hairline, 14 px de radio, la misma sombra -- y el mismo
-   tratamiento del boletin de la portada en el cintillo, el titulo y el boton.
-   Nada de capa oscura: se lee el sitio con ella puesta. Las reglas de cuando
-   sale estan en `lib/invitacionBoletin.js`. */
+   Ventana en medio de la pantalla sobre una capa oscura: la redaccion la quiso
+   visible, no en una esquina. La caja es la del aviso de cookies -- papel, filete
+   de hairline, 14 px de radio -- y el cintillo, el titulo y el boton son los del
+   boletin de la portada. Las reglas de cuando sale estan en
+   `lib/invitacionBoletin.js`; el foco y el teclado, en el componente. */
 
 .se-invitacion {
   position: fixed;
-  right: var(--se-content-gutter);
-  bottom: max(var(--se-content-gutter), env(safe-area-inset-bottom));
-  width: min(360px, calc(100vw - 2 * var(--se-content-gutter)));
-  /* Entre la barra publicitaria (900) y el aviso de cookies (950): el aviso siempre
-     manda, y la invitacion ni existe mientras el este abierto. Debajo del menu
-     movil (1001). */
-  z-index: 940;
-  animation: se-invitacion-entra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  inset: 0;
+  /* Sobre todo, menu movil incluido (1001): mientras esta abierta es lo unico que
+     se puede tocar. El aviso de cookies no compite: la invitacion no existe hasta
+     que se contesta. */
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* El verde de la marca, casi negro, y no un negro neutro: la pagina de detras se
+     sigue intuyendo como el mismo sitio. */
+  background: rgba(0, 26, 12, 0.58);
+  animation: se-invitacion-fondo 200ms ease-out both;
+}
+
+/* Entrada: la capa se funde y la ventana crece un poco desde casi su tamano, nunca
+   desde cero, con un ease-out fuerte -- lo que se ve es que llega rapido y se posa.
+   Por debajo de 300 ms: es una interrupcion, no un espectaculo. */
+@keyframes se-invitacion-fondo {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes se-invitacion-entra {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
   to { opacity: 1; transform: none; }
-}
-
-/* La barra publicitaria fija no avisa de que esta; se mira si existe y se sube la
-   tarjeta su alto maximo. Si se cierra, la tarjeta baja sola. */
-body:has(.se-ad-barra) .se-invitacion {
-  bottom: calc(64px + var(--se-content-gutter));
 }
 
 .se-invitacion__caja {
   position: relative;
-  padding: 1.1rem 1.25rem 1.15rem;
+  width: min(440px, 100%);
+  padding: 1.75rem 1.75rem 1.6rem;
   border: 1px solid var(--color-hairline);
   border-radius: 14px;
   background: var(--color-paper);
-  box-shadow: 0 8px 24px rgba(0, 51, 24, 0.14);
+  box-shadow: 0 24px 60px rgba(0, 26, 12, 0.32);
+  animation: se-invitacion-entra 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
 .se-invitacion__cerrar {
   position: absolute;
-  top: 0.35rem;
-  right: 0.35rem;
+  top: 0.6rem;
+  right: 0.6rem;
   /* 44 px de area aunque el aspa se vea pequena: cerrar en un movil no puede ser
      cuestion de punteria. */
   min-width: 44px;
@@ -21151,7 +21161,7 @@ body:has(.se-ad-barra) .se-invitacion {
 .se-invitacion__cerrar:hover { color: var(--color-ink); background: var(--se-offwhite); }
 
 .se-invitacion__kicker {
-  margin: 0 2.25rem 0.45rem 0;
+  margin: 0 2.25rem 0.55rem 0;
   font-family: var(--se-font-label);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -21161,9 +21171,10 @@ body:has(.se-ad-barra) .se-invitacion {
 }
 
 .se-invitacion__titulo {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.55rem;
   font-family: var(--se-font-heading);
-  font-size: 1.35rem;
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.85rem);
+  text-wrap: balance;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -21171,9 +21182,9 @@ body:has(.se-ad-barra) .se-invitacion {
 }
 
 .se-invitacion__texto {
-  margin: 0 0 0.9rem;
+  margin: 0 0 1.15rem;
   font-family: var(--se-font-ui);
-  font-size: 0.86rem;
+  font-size: 0.95rem;
   line-height: 1.55;
   color: var(--color-slate-2);
 }
@@ -21231,9 +21242,10 @@ body:has(.se-ad-barra) .se-invitacion {
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
-  transition: background 0.18s ease;
+  transition: background 0.18s ease, transform 140ms ease-out;
 }
 .se-invitacion__btn:hover { background: #00250f; }
+.se-invitacion__btn:active:not(:disabled) { transform: scale(0.98); }
 .se-invitacion__btn:disabled { opacity: 0.72; cursor: progress; }
 
 /* «Ahora no» es un boton de texto: ni escondido ni del mismo peso que el de
@@ -21285,24 +21297,18 @@ body:has(.se-ad-barra) .se-invitacion {
   background: rgba(185, 83, 42, 0.1);
 }
 
-/* En un telefono va centrada y a lo ancho, con 16 px de margen a cada lado: una
-   tarjeta de 360 px pegada a la derecha dejaria una franja inutil a la izquierda. */
+/* En el telefono, la misma ventana centrada con 16 px de margen; algo menos de
+   relleno para que el boton no quede bajo el pulgar del teclado. */
 @media (max-width: 699px) {
-  .se-invitacion {
-    left: 16px;
-    right: 16px;
-    width: auto;
-    bottom: max(16px, env(safe-area-inset-bottom));
-  }
-  body:has(.se-ad-barra) .se-invitacion {
-    bottom: calc(64px + 12px);
-  }
+  .se-invitacion__caja { padding: 1.4rem 1.25rem 1.25rem; }
 }
 
 @media (pointer: coarse) {
   .se-invitacion__luego { padding: 0 0.9rem; }
 }
 
+/* Con movimiento reducido la ventana no crece ni sube: solo aparece, fundida. */
 @media (prefers-reduced-motion: reduce) {
-  .se-invitacion { animation: none; }
+  .se-invitacion__caja { animation: se-invitacion-fondo 160ms ease-out both; }
+  .se-invitacion__btn:active:not(:disabled) { transform: none; }
 }

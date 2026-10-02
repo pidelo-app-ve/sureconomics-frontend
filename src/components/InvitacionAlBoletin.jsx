@@ -15,8 +15,8 @@ import {
 import { subscribeToNewsletter } from "../services/newsletterService";
 
 /**
- * La invitación al boletín: una tarjeta pequeña, abajo a la derecha, que aparece a
- * quien ya está leyendo y se va cuando se le dice que se vaya.
+ * La invitación al boletín: una ventana en medio de la pantalla, sobre una capa oscura,
+ * que aparece a quien ya está leyendo y se va cuando se le dice que se vaya.
  *
  * Es el cuarto formulario del boletín en el sitio -- portada, pie, `/entorno` y éste --
  * y el único que no espera a que lo busquen. Por eso tiene más reglas para callarse que
@@ -24,11 +24,16 @@ import { subscribeToNewsletter } from "../services/newsletterService";
  * sólo se mide lo que esas reglas necesitan -- páginas vistas, tiempo, cuánto se bajó --
  * y se pinta.
  *
- * ## Lo que no hace, a propósito
+ * ## Interrumpe, y por eso se porta como un diálogo de verdad
  *
- * **No bloquea ni se lleva el foco.** Sin capa oscura y sin `dialog`: es
- * `complementary`, se anuncia, y quien quiera llega tabulando. Robar el foco a mitad de
- * un párrafo para pedir un correo es la definición de interrumpir.
+ * Empezó como una tarjeta en la esquina que no molestaba; la redacción la quiso en el
+ * centro, para que se vea. Si interrumpe, tiene que hacerlo bien: `role="dialog"` con
+ * `aria-modal`, el foco entra al campo del correo, Tab no se escapa a la página de
+ * detrás, la página no se desplaza mientras está abierta, y al cerrarse el foco vuelve
+ * a donde estaba. Se cierra con el aspa, «Ahora no», Escape o pulsando fuera; las cuatro
+ * cuentan como «ahora no».
+ *
+ * ## Lo que no hace, a propósito
  *
  * **No sale encima del aviso de cookies.** Mientras el aviso espera respuesta esta
  * tarjeta no existe; sale cuando se contesta, sin recargar, escuchando el mismo evento
@@ -38,12 +43,6 @@ import { subscribeToNewsletter } from "../services/newsletterService";
  * recuerda catorce días; tres seguidos, noventa. Y un acierto en cualquiera de los
  * cuatro formularios la apaga del todo.
  *
- * ## Por qué `:has` y no una clase en `<html>`
- *
- * La barra publicitaria fija no anuncia que está: no pone clase ni variable. En vez de
- * enseñarle a avisar sólo para esto, la hoja de estilo mira si existe
- * (`body:has(.se-ad-barra)`) y sube la tarjeta su altura. Si la barra se cierra, la
- * tarjeta baja sola. Ver el bloque `.se-invitacion` al final de `blog.css`.
  */
 
 /** Cuándo se cargó el sitio. Al evaluarse el módulo y no al montar: es la visita, no el componente. */
@@ -51,6 +50,10 @@ const INICIO_VISITA = Date.now();
 
 /** El acierto se queda en pantalla este tiempo y se va solo: ya cumplió. */
 const AUTOCIERRE_MS = 6000;
+
+/** Lo que recibe el foco dentro de la ventana, para que Tab dé la vuelta sin salir. */
+const FOCALES =
+  'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
 
 const medirLectura = () =>
   fraccionLeida({
@@ -80,6 +83,13 @@ export const InvitacionAlBoletin = () => {
   const maximoLeido = useRef(0);
   const abiertaRef = useRef(false);
   abiertaRef.current = abierta;
+  const cajaRef = useRef(null);
+  const campoRef = useRef(null);
+  // Dónde estaba el foco antes de abrir, para devolverlo al cerrar: quien leía con el
+  // teclado no puede quedarse en lo alto de la página.
+  const focoPrevio = useRef(null);
+  // Dónde empezó el clic: seleccionar texto del campo y soltar fuera no debe cerrarla.
+  const inicioDelClic = useRef(null);
 
   const evaluar = useCallback(() => {
     if (abiertaRef.current) return;
@@ -158,13 +168,70 @@ export const InvitacionAlBoletin = () => {
     setAbierta(false);
   }, []);
 
-  const alPulsarTecla = (e) => {
-    // Sólo llega aquí si el foco está dentro de la tarjeta: es el único caso en que
-    // Escape debe cerrarla y no otra cosa de la página.
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      cerrar();
-    }
+  // Abierta: la página de detrás queda quieta y el foco entra al campo. Al cerrarse,
+  // por la vía que sea, todo vuelve como estaba.
+  useEffect(() => {
+    if (!abierta) return undefined;
+    focoPrevio.current = document.activeElement;
+    const html = document.documentElement;
+    const antes = html.style.overflow;
+    html.style.overflow = "hidden";
+    // Un fotograma de margen: el campo existe ya, pero la entrada todavía no se pintó.
+    const id = window.requestAnimationFrame(() =>
+      campoRef.current?.focus({ preventScroll: true })
+    );
+    return () => {
+      window.cancelAnimationFrame(id);
+      html.style.overflow = antes;
+      const previo = focoPrevio.current;
+      if (previo && typeof previo.focus === "function" && document.contains(previo)) {
+        previo.focus({ preventScroll: true });
+      }
+    };
+  }, [abierta]);
+
+  // Escape y Tab, escuchados en el documento y no en la caja: si un clic deja el foco
+  // en el fondo, Escape sigue cerrando y Tab lo trae de vuelta.
+  useEffect(() => {
+    if (!abierta) return undefined;
+    const alPulsarTecla = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cerrar();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const caja = cajaRef.current;
+      if (!caja) return;
+      const focales = Array.from(caja.querySelectorAll(FOCALES)).filter(
+        (el) => el.getClientRects().length > 0
+      );
+      if (!focales.length) return;
+      const primero = focales[0];
+      const ultimo = focales[focales.length - 1];
+      const activo = document.activeElement;
+      if (!caja.contains(activo)) {
+        e.preventDefault();
+        (e.shiftKey ? ultimo : primero).focus();
+      } else if (e.shiftKey && activo === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && activo === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    };
+    document.addEventListener("keydown", alPulsarTecla);
+    return () => document.removeEventListener("keydown", alPulsarTecla);
+  }, [abierta, cerrar]);
+
+  // Pulsar en la capa oscura cierra; pulsar dentro de la ventana, no.
+  const alApretarFondo = (e) => {
+    inicioDelClic.current = e.target;
+  };
+  const alSoltarFondo = (e) => {
+    if (e.target === e.currentTarget && inicioDelClic.current === e.currentTarget) cerrar();
+    inicioDelClic.current = null;
   };
 
   const enviar = async (e) => {
@@ -195,13 +262,17 @@ export const InvitacionAlBoletin = () => {
   if (!abierta) return null;
 
   return (
-    <aside
-      className="se-invitacion"
-      role="complementary"
-      aria-label="Invitación al boletín"
-      onKeyDown={alPulsarTecla}
-    >
-      <div className="se-invitacion__caja">
+    // La capa no es un control: el clic en ella es un atajo de ratón, y Escape y el aspa
+    // hacen lo mismo con teclado.
+    <div className="se-invitacion" onMouseDown={alApretarFondo} onClick={alSoltarFondo}>
+      <div
+        className="se-invitacion__caja"
+        ref={cajaRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="invitacion-boletin-titulo"
+        aria-describedby={listo ? undefined : "invitacion-boletin-texto"}
+      >
         <button
           type="button"
           className="se-invitacion__cerrar"
@@ -212,17 +283,18 @@ export const InvitacionAlBoletin = () => {
         </button>
 
         {listo ? (
-          // `role="status"` y no `alert`: es una confirmación, no una urgencia.
-          <p className="se-invitacion__ok" role="status">
+          // `role="status"` y no `alert`: es una confirmación, no una urgencia. Lleva el
+          // id del título para que el diálogo siga teniendo nombre cuando el título se va.
+          <p className="se-invitacion__ok" role="status" id="invitacion-boletin-titulo">
             {estado.mensaje}
           </p>
         ) : (
           <>
             <p className="se-invitacion__kicker">Boletín semanal · los lunes por la mañana</p>
-            <p className="se-invitacion__titulo" id="invitacion-boletin-titulo">
+            <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
               Entorno en Viñetas
-            </p>
-            <p className="se-invitacion__texto">
+            </h2>
+            <p className="se-invitacion__texto" id="invitacion-boletin-texto">
               El entorno económico de la semana, contado en viñetas. Le llega cada lunes,
               antes de que la semana empiece a moverse.
             </p>
@@ -238,6 +310,7 @@ export const InvitacionAlBoletin = () => {
                 Su correo
               </label>
               <input
+                ref={campoRef}
                 id="invitacion-boletin-email"
                 type="email"
                 inputMode="email"
@@ -282,6 +355,6 @@ export const InvitacionAlBoletin = () => {
           </>
         )}
       </div>
-    </aside>
+    </div>
   );
 };

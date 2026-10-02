@@ -30,8 +30,10 @@ import { subscribeToNewsletter } from "../services/newsletterService";
  * centro, para que se vea. Si interrumpe, tiene que hacerlo bien: `role="dialog"` con
  * `aria-modal`, el foco entra al campo del correo, Tab no se escapa a la página de
  * detrás, la página no se desplaza mientras está abierta, y al cerrarse el foco vuelve
- * a donde estaba. Se cierra con el aspa, «Ahora no», Escape o pulsando fuera; las cuatro
- * cuentan como «ahora no».
+ * a donde estaba. Se cierra con el aspa o «Ahora no», y Escape para quien usa teclado;
+ * las tres cuentan como «ahora no». Pulsar en la capa oscura **no** la cierra, a
+ * propósito: la redacción la quiere ahí hasta que se responda, no hasta el primer clic
+ * distraído en el margen.
  *
  * ## Lo que no hace, a propósito
  *
@@ -88,8 +90,6 @@ export const InvitacionAlBoletin = () => {
   // Dónde estaba el foco antes de abrir, para devolverlo al cerrar: quien leía con el
   // teclado no puede quedarse en lo alto de la página.
   const focoPrevio = useRef(null);
-  // Dónde empezó el clic: seleccionar texto del campo y soltar fuera no debe cerrarla.
-  const inicioDelClic = useRef(null);
 
   const evaluar = useCallback(() => {
     if (abiertaRef.current) return;
@@ -225,14 +225,6 @@ export const InvitacionAlBoletin = () => {
     return () => document.removeEventListener("keydown", alPulsarTecla);
   }, [abierta, cerrar]);
 
-  // Pulsar en la capa oscura cierra; pulsar dentro de la ventana, no.
-  const alApretarFondo = (e) => {
-    inicioDelClic.current = e.target;
-  };
-  const alSoltarFondo = (e) => {
-    if (e.target === e.currentTarget && inicioDelClic.current === e.currentTarget) cerrar();
-    inicioDelClic.current = null;
-  };
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -262,9 +254,7 @@ export const InvitacionAlBoletin = () => {
   if (!abierta) return null;
 
   return (
-    // La capa no es un control: el clic en ella es un atajo de ratón, y Escape y el aspa
-    // hacen lo mismo con teclado.
-    <div className="se-invitacion" onMouseDown={alApretarFondo} onClick={alSoltarFondo}>
+    <div className="se-invitacion">
       <div
         className="se-invitacion__caja"
         ref={cajaRef}

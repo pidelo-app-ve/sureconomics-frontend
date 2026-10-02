@@ -130,7 +130,21 @@ const emptyForm = () => ({
     // que alguien lo decida.
     is_educational: false,
     sin_publicidad: false,
+    // «Abrir la portada con esta pieza». Tres campos del formulario para un solo campo
+    // de la API (`destacada_hasta`): la casilla, cuánto dura y, si se eligió una fecha,
+    // cuál. Sin marcar por omisión: fijar la portada es una decisión, no un efecto.
+    portada: false,
+    portada_durante: "24",
+    portada_hasta: "",
 });
+
+/** Las duraciones que ofrece el selector «Durante». `fecha` abre el `datetime-local`. */
+const DURACIONES_DE_PORTADA = [
+    { value: "24", label: "24 horas" },
+    { value: "48", label: "48 horas" },
+    { value: "72", label: "72 horas" },
+    { value: "fecha", label: "Hasta una fecha" },
+];
 
 const idsFromRelation = (val) => {
     if (!Array.isArray(val)) return [];
@@ -187,6 +201,43 @@ const fechaDeCaracas = (valor) => {
     });
 };
 
+/** «lunes 5 de octubre a las 9:00», en hora de Caracas, de un ISO. Para el «hasta». */
+const hastaDeCaracas = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    if (!d || Number.isNaN(d.getTime())) return "";
+    const opciones = { timeZone: "America/Caracas" };
+    const dia = d.toLocaleDateString("es", { ...opciones, weekday: "long", day: "numeric", month: "long" });
+    const hora = d.toLocaleTimeString("es", { ...opciones, hour: "numeric", minute: "2-digit" });
+    return `${dia} a las ${hora}`;
+};
+
+/** Si un ISO de la API está en el futuro: lo que decide si la pieza sigue fijada. */
+const enElFuturo = (iso) => {
+    const ms = iso ? Date.parse(iso) : NaN;
+    return Number.isFinite(ms) && ms > Date.now();
+};
+
+/**
+ * El `destacada_hasta` que se manda, a partir de los tres campos del formulario.
+ *
+ * `null` con la casilla sin marcar: es lo que suelta la portada, y un `undefined`
+ * la dejaría como estaba. Con horas se cuenta desde **ahora**, no desde que se
+ * marcó la casilla: lo que la redacción quiere es «un día desde que lo guardo».
+ * Con fecha pero sin fecha escrita se omite el campo -- es un formulario a medias,
+ * y la barra de abajo ya lo dice -- antes que mandar un nulo que se leería como
+ * «quítala».
+ */
+const destacadaHastaDe = (form) => {
+    if (!form.portada) return null;
+    if (form.portada_durante === "fecha") {
+        const valor = String(form.portada_hasta ?? "").trim();
+        return valor ? caracasToIso(valor) : undefined;
+    }
+    const horas = Number(form.portada_durante);
+    if (!Number.isFinite(horas) || horas <= 0) return undefined;
+    return new Date(Date.now() + horas * 60 * 60 * 1000).toISOString();
+};
+
 /** El texto de un campo del editor, sin etiquetas: para los resúmenes de las filas. */
 const textoPlano = (html) =>
     String(html ?? "")
@@ -218,8 +269,16 @@ const FORMATOS_SIN_PROGRAMAR = new Set(["noticia"]);
 const postToForm = (post) => {
     if (!post || typeof post !== "object") return emptyForm();
     const publishedAt = post.published_at ?? post.publishedAt;
+    // Fijada si la fecha está en el futuro, aunque sea un borrador y `en_portada` diga
+    // que no: lo que se edita aquí es lo que la redacción decidió, y una pieza fijada
+    // que todavía no se publicó tiene que abrir con la casilla marcada para que se vea.
+    const destacadaHasta = post.destacada_hasta ?? post.destacadaHasta ?? null;
+    const fijada = typeof destacadaHasta === "string" && enElFuturo(destacadaHasta);
     return {
         ...emptyForm(),
+        portada: fijada,
+        portada_durante: fijada ? "fecha" : "24",
+        portada_hasta: fijada ? isoToDateTimeLocal(destacadaHasta) : "",
         format: pickStr(post, ["format"]),
         title: pickStr(post, ["title"]),
         slug: pickStr(post, ["slug"]),
@@ -301,6 +360,9 @@ const formToPayload = (form) => {
     payload.is_educational = Boolean(form.is_educational);
     payload.sin_publicidad = Boolean(form.sin_publicidad);
     payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
+    // Nulo cuando la casilla no está marcada -- se manda, porque es lo que la suelta --
+    // e indefinido (se borra abajo) cuando falta la fecha. Ver `destacadaHastaDe`.
+    payload.destacada_hasta = destacadaHastaDe(form);
 
     Object.keys(payload).forEach((k) => {
         if (payload[k] === undefined) delete payload[k];
@@ -513,11 +575,14 @@ export const AdminPostEditor = () => {
                 document: updated.document_asset ?? null,
                 audio: updated.audio_asset ?? null,
             }));
-            // Programada: que lo diga con la fecha, que es lo que hay que comprobar.
+            // Programada: que lo diga con la fecha, que es lo que hay que comprobar. Y
+            // fijada en portada, igual: el «hasta» es lo que la redacción quiere ver.
             const aviso =
                 updated?.status === "scheduled"
                     ? `Programada: sale sola el ${fechaDeCaracas(isoToDateTimeLocal(updated.published_at))} (hora de Caracas).`
-                    : "Cambios guardados correctamente.";
+                    : updated?.en_portada && updated?.destacada_hasta
+                      ? `Cambios guardados. Abre la portada hasta el ${hastaDeCaracas(updated.destacada_hasta)} (hora de Caracas).`
+                      : "Cambios guardados correctamente.";
             setSaveState({ status: "success", message: aviso });
             toastSuccess(aviso, updated?.status === "scheduled" ? "Programada" : "Contenido guardado");
         } catch (err) {
@@ -668,12 +733,24 @@ export const AdminPostEditor = () => {
         asset?.label || asset?.original_filename || (asset ? "Adjunto" : "");
     const nPalabras = palabras(form.content);
     const nFuentes = (form.sources ?? []).filter((f) => (f.name ?? "").trim()).length;
-    const resumenDeEstado =
+    // La portada: a quien puede publicar, o a cualquiera si la pieza ya está fijada,
+    // para que al menos lo vea y pueda soltarla. Decidir qué abre el sitio es del
+    // mismo rango que decidir qué se publica.
+    const muestraPortada = canPublish || form.portada;
+    const faltaFechaDePortada = form.portada && form.portada_durante === "fecha" && !form.portada_hasta;
+    // El «hasta» que se va a mandar, para decirlo antes de guardar. Con horas se cuenta
+    // desde ahora, así que el texto es una estimación por unos segundos, no una promesa.
+    const portadaHastaIso = form.portada ? destacadaHastaDe(form) : null;
+    const resumenDeEstado = [
         form.status === "published"
             ? "Publicado"
             : programada
               ? `Programado · ${fechaDeCaracas(form.published_at) || "falta la fecha"}`
-              : "Borrador";
+              : "Borrador",
+        form.portada ? "Abre la portada" : null,
+    ]
+        .filter(Boolean)
+        .join(" · ");
     // Lo que impediría publicar, dicho en la barra fija de abajo antes de intentarlo.
     const faltas = [
         !form.title.trim() ? "título" : null,
@@ -685,6 +762,7 @@ export const AdminPostEditor = () => {
                   : "documento"
             : null,
         programada && !form.published_at ? "fecha" : null,
+        faltaFechaDePortada ? "hasta cuándo abre la portada" : null,
     ].filter(Boolean);
 
     return (
@@ -1208,7 +1286,7 @@ export const AdminPostEditor = () => {
                             movil={esMovil}
                             titulo="Estado y fecha"
                             resumen={resumenDeEstado}
-                            estado={programada && !form.published_at ? "falta" : undefined}
+                            estado={(programada && !form.published_at) || faltaFechaDePortada ? "falta" : undefined}
                         >
                         <label className="se-form-field" htmlFor="post-status">
                             <span className="se-form-label">Estado</span>
@@ -1254,6 +1332,86 @@ export const AdminPostEditor = () => {
                             <p className="se-admin-meta-hint">
                                 Las noticias no se programan: se publican cuando pasan.
                             </p>
+                        ) : null}
+
+                        {/* Abrir la portada con esta pieza. Un solo campo en la API
+                            (`destacada_hasta`), tres controles aquí: la casilla, cuánto
+                            dura y, si hace falta, hasta cuándo. Va en esta misma hoja
+                            porque es una decisión de publicación -- qué abre el sitio y
+                            hasta cuándo -- y no un atributo de la pieza. La casilla y el
+                            selector son hermanos, no anidados: un `<select>` dentro de
+                            la etiqueta de la casilla la marcaría al tocar la lista. */}
+                        {muestraPortada ? (
+                            <div className="se-form-field se-acceso se-acceso--portada">
+                                <label className="se-acceso__fila" htmlFor="post-portada">
+                                    <input
+                                        id="post-portada"
+                                        type="checkbox"
+                                        checked={Boolean(form.portada)}
+                                        disabled={!canPublish}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({ ...prev, portada: e.target.checked }))
+                                        }
+                                    />
+                                    <span className="se-form-label se-acceso__titulo">
+                                        Abrir la portada con esta pieza
+                                    </span>
+                                </label>
+                                {form.portada ? (
+                                    <>
+                                        <div className="se-portada-pin__durante">
+                                            <label className="se-form-field" htmlFor="post-portada-durante">
+                                                <span className="se-form-label">Durante</span>
+                                                <select
+                                                    id="post-portada-durante"
+                                                    className="se-form-control"
+                                                    value={form.portada_durante}
+                                                    disabled={!canPublish}
+                                                    onChange={handleChange("portada_durante")}
+                                                >
+                                                    {DURACIONES_DE_PORTADA.map((d) => (
+                                                        <option key={d.value} value={d.value}>
+                                                            {d.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                            {form.portada_durante === "fecha" ? (
+                                                <label className="se-form-field" htmlFor="post-portada-hasta">
+                                                    <span className="se-form-label">Hasta (hora de Caracas)</span>
+                                                    <input
+                                                        id="post-portada-hasta"
+                                                        type="datetime-local"
+                                                        className="se-form-control"
+                                                        value={form.portada_hasta}
+                                                        required
+                                                        disabled={!canPublish}
+                                                        min={isoToDateTimeLocal(new Date().toISOString())}
+                                                        onChange={handleChange("portada_hasta")}
+                                                    />
+                                                </label>
+                                            ) : null}
+                                        </div>
+                                        <p className="se-admin-meta-hint se-portada-pin__hasta">
+                                            {portadaHastaIso
+                                                ? `Hasta el ${hastaDeCaracas(portadaHastaIso)}${
+                                                      form.portada_durante === "fecha" ? "" : ", contando desde que guarde"
+                                                  }.`
+                                                : "Elija hasta cuándo: tiene que ser en el futuro."}
+                                        </p>
+                                    </>
+                                ) : null}
+                                <p className="se-admin-meta-hint">
+                                    Mientras dure, esta pieza abre la portada en grande. Cuando
+                                    venza, la portada vuelve sola a la noticia más reciente.
+                                </p>
+                                {form.portada && form.status !== "published" ? (
+                                    <p className="se-admin-meta-hint">
+                                        Sólo cuenta mientras la pieza esté publicada: un borrador
+                                        o una programada no abren nada hasta que salgan.
+                                    </p>
+                                ) : null}
+                            </div>
                         ) : null}
 
                         {missingMedia ? (

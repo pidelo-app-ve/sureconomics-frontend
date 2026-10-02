@@ -151,6 +151,9 @@ export const AdminPostsList = () => {
                 status === "scheduled"
                     ? `Programado · ${cuandoSale(row.published_at)}`
                     : NOMBRE_DE_ESTADO[status] ?? status,
+            // Fijada como apertura de la portada: `en_portada` lo decide el servidor
+            // (publicada y con fecha en el futuro), aquí sólo se dice hasta cuándo.
+            portadaHasta: row.en_portada ? cuandoSale(row.destacada_hasta) : null,
         };
     };
 
@@ -350,6 +353,11 @@ export const AdminPostsList = () => {
                                         </Link>
                                         <div className="se-admin-tarjeta__pie">
                                             <span className={`se-status-pill ${d.estadoClase}`}>{d.estadoTexto}</span>
+                                            {d.portadaHasta ? (
+                                                <span className="se-status-pill se-status-pill--portada">
+                                                    En portada hasta {d.portadaHasta}
+                                                </span>
+                                            ) : null}
                                             {d.missing ? (
                                                 <em className="se-admin-table__note">{d.missing}</em>
                                             ) : null}
@@ -400,7 +408,8 @@ export const AdminPostsList = () => {
                             </thead>
                             <tbody>
                                 {state.items.map((row) => {
-                                    const { id, slug, title, status, busy, tema, lugar, missing } = describir(row);
+                                    const { id, slug, title, status, busy, tema, lugar, missing, portadaHasta } =
+                                        describir(row);
                                     return (
                                         <tr key={id || slug || title}>
                                             <td>{id}</td>
@@ -440,6 +449,14 @@ export const AdminPostsList = () => {
                                                             ? "Borrador"
                                                             : status}
                                                 </span>
+                                                {portadaHasta ? (
+                                                    <>
+                                                        <br />
+                                                        <span className="se-status-pill se-status-pill--portada">
+                                                            En portada hasta {portadaHasta}
+                                                        </span>
+                                                    </>
+                                                ) : null}
                                                 {missing ? (
                                                     <>
                                                         <br />

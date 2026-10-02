@@ -61,55 +61,11 @@
   border: 0;
 }
 
-/* —— Pausar el cintillo (WCAG 2.2.2) ——
-   Algo que se mueve solo mas de cinco segundos necesita una forma de pararlo, y
-   pasar el raton por encima no existe para el teclado ni para el dedo. El boton va
-   sobre el verde de la cinta, discreto pero con 28 px de blanco -- por encima de los
-   24 que pide 2.5.8 -- y un foco que se ve sobre fondo oscuro. */
-.se-ticker__pausa {
-  flex: 0 0 auto;
-  align-self: center;
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  margin: 0 4px 0 10px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 50%;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.85);
-  cursor: pointer;
-}
-
-.se-ticker__pausa:hover {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.se-ticker__pausa:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-.se-ticker__pausa svg {
-  width: 12px;
-  height: 12px;
-  fill: currentColor;
-}
-
-/* Con movimiento reducido la pista ya no anda, asi que el boton no tendria nada que
-   parar: se quita en vez de ofrecer un control que no hace nada. */
-@media (prefers-reduced-motion: reduce) {
-  .se-ticker__pausa { display: none; }
-}
-
-.se-ticker--pausado .se-ticker__track {
-  animation-play-state: paused;
-}
-
-/* Quieto tambien mientras el foco esta dentro: nadie puede leer ni pulsar un enlace
-   que se le escapa por el borde mientras tabula. Vale para los dos desfiles. */
+/* —— Pausar el cintillo al tabular (WCAG 2.2.2) ——
+   El boton propio se quito: no paraba bien la cinta y confundia mas de lo que
+   ayudaba. Queda la pausa automatica mientras el foco esta dentro, que es la que
+   de verdad hace falta -- nadie puede leer ni pulsar un enlace que se le escapa
+   por el borde mientras tabula. Vale para los dos desfiles. */
 .se-ticker:focus-within .se-ticker__track,
 .se-partners__viewport:focus-within .se-partners__track {
   animation-play-state: paused;

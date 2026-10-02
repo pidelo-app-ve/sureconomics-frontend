@@ -35,8 +35,10 @@ import {
  * detras la editorial del dia.
  *
  * Desde octubre de 2026, entre el filtro y las noticias va la apertura
- * (`AperturaPortada`): la noticia principal en grande y tres titulares al lado. El
- * filtro sigue primero, como pidio el socio, pero en una franja delgada.
+ * (`AperturaPortada`): la pieza principal en grande y tres titulares al lado. La
+ * principal la fija la redaccion desde el editor por un tiempo («Abrir la portada con
+ * esta pieza») o, si no hay nada fijado, es la noticia mas reciente. El filtro sigue
+ * primero, como pidio el socio, pero en una franja delgada.
  *
  * El hero -- logotipo grande, claim, descripcion y los dos botones -- se queda en
  * `components/blog/Hero.jsx` sin renderizarse, a peticion expresa: "dejalo por ahi,
@@ -100,20 +102,25 @@ export const Home = () => {
   const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
     useContentFilter(pieces, tree);
 
-  // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
-  // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
-  // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
-  const editorialDelDia = pieces.find((p) => p.formatoApi === "editorial") ?? null;
-
-  // La apertura: la noticia que manda y su columna. Como la editorial del día, sale de
-  // la lista sin filtrar; pero con un filtro puesto se retira, porque entonces el
-  // lector está buscando y lo que pide es lo que coincide, no la portada del día.
+  // La apertura: la pieza que manda y su columna. Sale de la lista sin filtrar; pero
+  // con un filtro puesto se retira, porque entonces el lector está buscando y lo que
+  // pide es lo que coincide, no la portada del día. Se le pasa la lista entera y no
+  // sólo las noticias: la redacción puede fijar como apertura una pieza de cualquier
+  // formato (`enPortada`), y `elegirApertura` la busca entre todas.
   const apertura = isFiltered
-    ? { principal: null, secundarias: [] }
-    : elegirApertura(pieces.filter((p) => p.formatoApi === "noticia"));
+    ? { principal: null, secundarias: [], fijada: false }
+    : elegirApertura(pieces);
   const enApertura = new Set(
     [apertura.principal, ...apertura.secundarias].filter(Boolean).map((p) => p.id)
   );
+
+  // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
+  // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
+  // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
+  // Si la editorial más reciente es la que está fijada arriba, pasa a la siguiente:
+  // la misma pieza dos veces en la primera pantalla no es énfasis, es un error.
+  const editorialDelDia =
+    pieces.find((p) => p.formatoApi === "editorial" && !enApertura.has(p.id)) ?? null;
 
   useEffect(() => {
     applyPageMeta({
@@ -131,13 +138,14 @@ export const Home = () => {
       // bloque -- las dos son "la mas reciente", asi que la repeticion era segura, no
       // casual. Se quita tambien cuando hay filtro, porque el bloque de arriba se pinta
       // igual: esta en pantalla de las dos maneras.
-      // Lo mismo con las noticias de la apertura: ya están arriba, en grande.
+      // Lo mismo con lo que está en la apertura: ya está arriba, en grande. Se mira en
+      // todos los formatos y no sólo en noticias, porque la pieza fijada puede ser una
+      // entrevista o un informe, y sin esto abriría también su propio bloque.
+      const sinApertura = all.filter((p) => !enApertura.has(p.id));
       const visibles =
         formatoApi === "editorial" && editorialDelDia
-          ? all.filter((p) => p.id !== editorialDelDia.id)
-          : formatoApi === "noticia"
-            ? all.filter((p) => !enApertura.has(p.id))
-            : all;
+          ? sinApertura.filter((p) => p.id !== editorialDelDia.id)
+          : sinApertura;
 
       const items = isFiltered ? visibles : visibles.slice(0, PREVIEW[formatoApi]);
 
@@ -270,7 +278,11 @@ export const Home = () => {
       ) : null}
 
       {cargando ? null : (
-        <AperturaPortada principal={apertura.principal} secundarias={apertura.secundarias} />
+        <AperturaPortada
+          principal={apertura.principal}
+          secundarias={apertura.secundarias}
+          fijada={apertura.fijada}
+        />
       )}
 
       {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}

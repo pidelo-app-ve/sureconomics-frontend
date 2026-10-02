@@ -232,27 +232,9 @@ const CintaMundial = () => {
   );
 };
 
-/** Los dos dibujos del boton de pausa: dos barras mientras anda, un triangulo parada. */
-const IconoPausa = () => (
-  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-    <rect x="2" y="1.5" width="2.8" height="9" rx="0.6" />
-    <rect x="7.2" y="1.5" width="2.8" height="9" rx="0.6" />
-  </svg>
-);
-
-const IconoSeguir = () => (
-  <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">
-    <path d="M3 1.5v9l7.5-4.5z" />
-  </svg>
-);
-
 export const MarketTicker = () => {
   const [ticker, setTicker] = useState(null);
   const [cargando, setCargando] = useState(true);
-  // WCAG 2.2.2: lo que se mueve solo tiene que poder pararse, y pasar el raton por
-  // encima no lo puede hacer quien usa teclado o el dedo. Dura lo que la pagina: la
-  // cinta vuelve a andar en la visita siguiente, que es lo que se espera de ella.
-  const [pausado, setPausado] = useState(false);
 
   useEffect(() => {
     let vivo = true;
@@ -336,28 +318,9 @@ export const MarketTicker = () => {
   return (
     // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
     // papel no lo lee ningun lector de pantalla.
-    <div
-      className={`se-ticker${pausado ? " se-ticker--pausado" : ""}`}
-      role="region"
-      aria-label="Cifras de mercado"
-    >
+    <div className="se-ticker" role="region" aria-label="Cifras de mercado">
       {hayCifras ? (
         <div className="se-ticker__casa">
-          {/* Solo con nuestras cifras: es lo unico que este boton puede parar. El
-              desfile de TradingView vive en su marco y no se deja mandar desde
-              fuera; ofrecer un boton para el seria prometer algo que no hace.
-              Nombre fijo y `aria-pressed`, que es como se anuncia un interruptor:
-              si el nombre tambien cambiara, el lector diria dos veces lo mismo. */}
-          <button
-            type="button"
-            className="se-ticker__pausa"
-            aria-pressed={pausado}
-            aria-label="Pausar cintillo"
-            title={pausado ? "Reanudar cintillo" : "Pausar cintillo"}
-            onClick={() => setPausado((p) => !p)}
-          >
-            {pausado ? <IconoSeguir /> : <IconoPausa />}
-          </button>
           <div className="se-ticker__viewport">
             <div className="se-ticker__track">
               <div className="se-ticker__run">{run}</div>

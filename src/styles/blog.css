@@ -21051,3 +21051,41 @@ html {
     gap: var(--se-space-lg);
   }
 }
+
+/* —— Admin: «Abrir la portada con esta pieza» ——
+   En el listado, la etiqueta de la pieza fijada: en verde de marca y no en el cobre
+   de «Programado», porque no es un estado de la pieza sino un sitio que ocupa, y las
+   dos pueden ir juntas en la misma celda. En el editor, el selector «Durante» y la
+   fecha cuelgan alineados con el texto de la casilla, como las lineas de ayuda de
+   `.se-acceso`; en el telefono, a lo ancho y uno debajo del otro. */
+.se-status-pill--portada {
+  background: rgba(0, 51, 24, 0.1);
+  color: var(--marca-verde, #003318);
+  border-color: rgba(0, 51, 24, 0.3);
+  white-space: nowrap;
+  margin-top: 0.3rem;
+}
+
+.se-acceso--portada .se-acceso__fila {
+  margin-bottom: var(--se-space-xs);
+}
+
+.se-portada-pin__durante {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--se-space-sm) var(--se-space-md);
+  padding-left: calc(1.05rem + var(--se-space-sm));
+  margin: var(--se-space-xs) 0 var(--se-space-sm);
+}
+
+.se-portada-pin__durante .se-form-field {
+  flex: 1 1 12rem;
+}
+
+.se-editor-movil .se-portada-pin__durante {
+  padding-left: 0;
+}
+
+.se-editor-movil .se-portada-pin__durante .se-form-field {
+  flex-basis: 100%;
+}

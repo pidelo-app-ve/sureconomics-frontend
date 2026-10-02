@@ -250,6 +250,13 @@ export const temaPrincipal = (pieza) => pieza?.temas?.[0] ?? null;
 export const geoPrincipal = (pieza, geoTop = "Las Américas") =>
   pieza?.geos?.[0] ?? geoTop;
 
+/** Un ISO de la API -> `Date`, o nulo si no hay nada o no se puede leer. */
+const fechaValida = (iso) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
 /**
  * One API row → one `pieza`.
  *
@@ -362,6 +369,14 @@ export const piezaFromApi = (row) => {
     // -- tiene que leerse como abierta y no como cerrada, o al desplegar el frontend
     // primero desaparecerían los comentarios de todo el sitio.
     admiteComentarios: row.content_format?.allows_comments !== false,
+    // Hasta cuándo la redacción fijó esta pieza como apertura de la portada. `Date` y
+    // no texto porque lo único que se hace con ella es compararla con «ahora»; nulo
+    // cuando nunca se fijó, ya venció y se limpió, o la fecha no se puede leer.
+    destacadaHasta: fechaValida(row.destacada_hasta),
+    // Lo que el servidor opina: publicada y con `destacada_hasta` en el futuro. La
+    // portada lo vuelve a comprobar contra el reloj del navegador, porque una
+    // respuesta guardada en caché puede decir «sí» de una pieza que ya venció.
+    enPortada: Boolean(row.en_portada),
   };
 };
 

@@ -1,0 +1,287 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { EVENTO_CONSENTIMIENTO, consentimiento } from "../lib/analitica";
+import {
+  ESPERA_MS,
+  debeInvitar,
+  contarVista,
+  fraccionLeida,
+  leerInvitacion,
+  marcarSuscrito,
+  registrarCierre,
+  rutaExcluida,
+  yaSuscrito,
+} from "../lib/invitacionBoletin";
+import { subscribeToNewsletter } from "../services/newsletterService";
+
+/**
+ * La invitación al boletín: una tarjeta pequeña, abajo a la derecha, que aparece a
+ * quien ya está leyendo y se va cuando se le dice que se vaya.
+ *
+ * Es el cuarto formulario del boletín en el sitio -- portada, pie, `/entorno` y éste --
+ * y el único que no espera a que lo busquen. Por eso tiene más reglas para callarse que
+ * para salir; todas están en `lib/invitacionBoletin.js`, que es donde se prueban. Aquí
+ * sólo se mide lo que esas reglas necesitan -- páginas vistas, tiempo, cuánto se bajó --
+ * y se pinta.
+ *
+ * ## Lo que no hace, a propósito
+ *
+ * **No bloquea ni se lleva el foco.** Sin capa oscura y sin `dialog`: es
+ * `complementary`, se anuncia, y quien quiera llega tabulando. Robar el foco a mitad de
+ * un párrafo para pedir un correo es la definición de interrumpir.
+ *
+ * **No sale encima del aviso de cookies.** Mientras el aviso espera respuesta esta
+ * tarjeta no existe; sale cuando se contesta, sin recargar, escuchando el mismo evento
+ * que la barra publicitaria.
+ *
+ * **No vuelve a los dos minutos.** Un «ahora no» -- el botón, el aspa o Escape -- se
+ * recuerda catorce días; tres seguidos, noventa. Y un acierto en cualquiera de los
+ * cuatro formularios la apaga del todo.
+ *
+ * ## Por qué `:has` y no una clase en `<html>`
+ *
+ * La barra publicitaria fija no anuncia que está: no pone clase ni variable. En vez de
+ * enseñarle a avisar sólo para esto, la hoja de estilo mira si existe
+ * (`body:has(.se-ad-barra)`) y sube la tarjeta su altura. Si la barra se cierra, la
+ * tarjeta baja sola. Ver el bloque `.se-invitacion` al final de `blog.css`.
+ */
+
+/** Cuándo se cargó el sitio. Al evaluarse el módulo y no al montar: es la visita, no el componente. */
+const INICIO_VISITA = Date.now();
+
+/** El acierto se queda en pantalla este tiempo y se va solo: ya cumplió. */
+const AUTOCIERRE_MS = 6000;
+
+const medirLectura = () =>
+  fraccionLeida({
+    scrollY: window.scrollY,
+    altoVentana: window.innerHeight,
+    altoDocumento: document.documentElement.scrollHeight,
+  });
+
+export const InvitacionAlBoletin = () => {
+  const { pathname } = useLocation();
+  const [abierta, setAbierta] = useState(false);
+
+  const [email, setEmail] = useState("");
+  // El campo trampa, el mismo que en los otros formularios: una persona no lo ve y
+  // los rastreadores rellenan todo lo que encuentran.
+  const [trampa, setTrampa] = useState("");
+  const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
+
+  const enviando = estado.status === "loading";
+  const hayError = estado.status === "error";
+  const listo = estado.status === "success";
+
+  // Lo que miden los efectos, en referencias y no en estado: cambia en cada scroll y
+  // no hay nada que repintar hasta que la decisión sea «sí».
+  const vistas = useRef(0);
+  const rutaContada = useRef(null);
+  const maximoLeido = useRef(0);
+  const abiertaRef = useRef(false);
+  abiertaRef.current = abierta;
+
+  const evaluar = useCallback(() => {
+    if (abiertaRef.current) return;
+    const invitar = debeInvitar({
+      pathname,
+      consentimiento: consentimiento(),
+      vistas: vistas.current,
+      msEnVisita: Date.now() - INICIO_VISITA,
+      maximoLeido: maximoLeido.current,
+      suscrito: yaSuscrito(),
+      invitacion: leerInvitacion(),
+    });
+    if (invitar) setAbierta(true);
+  }, [pathname]);
+
+  // Cambio de ruta: una página vista más y la lectura vuelve a cero. La misma ruta no
+  // se cuenta dos veces seguidas -- en desarrollo React monta cada efecto dos veces.
+  useEffect(() => {
+    if (rutaContada.current !== pathname) {
+      rutaContada.current = pathname;
+      vistas.current = contarVista();
+      maximoLeido.current = 0;
+    }
+    // Si la tarjeta estaba abierta y se entra en una página donde no cabe -- la de
+    // suscripción, por ejemplo --, se retira sin contarlo como un «ahora no».
+    if (abiertaRef.current && rutaExcluida(pathname)) setAbierta(false);
+    evaluar();
+  }, [pathname, evaluar]);
+
+  // Scroll, con un fotograma de margen entre medidas: el evento llega decenas de veces
+  // por segundo y la decisión no cambia más deprisa que la pantalla. `passive` porque
+  // nunca se cancela el desplazamiento.
+  useEffect(() => {
+    let pendiente = false;
+    const alBajar = () => {
+      if (pendiente) return;
+      pendiente = true;
+      window.requestAnimationFrame(() => {
+        pendiente = false;
+        maximoLeido.current = Math.max(maximoLeido.current, medirLectura());
+        evaluar();
+      });
+    };
+    window.addEventListener("scroll", alBajar, { passive: true });
+    return () => window.removeEventListener("scroll", alBajar);
+  }, [evaluar]);
+
+  // Los cuarenta segundos de visita: un despertador para el caso de quien lee una sola
+  // página despacio. Si ya pasaron, se mira ahora mismo.
+  useEffect(() => {
+    const falta = ESPERA_MS - (Date.now() - INICIO_VISITA);
+    if (falta <= 0) {
+      evaluar();
+      return undefined;
+    }
+    const reloj = window.setTimeout(evaluar, falta);
+    return () => window.clearTimeout(reloj);
+  }, [evaluar]);
+
+  // Contestar el aviso de cookies levanta el silencio. Mismo evento que escucha la
+  // barra publicitaria.
+  useEffect(() => {
+    window.addEventListener(EVENTO_CONSENTIMIENTO, evaluar);
+    return () => window.removeEventListener(EVENTO_CONSENTIMIENTO, evaluar);
+  }, [evaluar]);
+
+  // El acierto se despide solo.
+  useEffect(() => {
+    if (!listo) return undefined;
+    const reloj = window.setTimeout(() => setAbierta(false), AUTOCIERRE_MS);
+    return () => window.clearTimeout(reloj);
+  }, [listo]);
+
+  const cerrar = useCallback(() => {
+    registrarCierre();
+    setAbierta(false);
+  }, []);
+
+  const alPulsarTecla = (e) => {
+    // Sólo llega aquí si el foco está dentro de la tarjeta: es el único caso en que
+    // Escape debe cerrarla y no otra cosa de la página.
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      cerrar();
+    }
+  };
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    if (enviando) return;
+    const correo = email.trim();
+    if (!correo) return;
+
+    setEstado({ status: "loading", mensaje: "" });
+    try {
+      await subscribeToNewsletter(correo, { source: "invitacion", honeypot: trampa });
+      marcarSuscrito();
+      setEmail("");
+      setEstado({ status: "success", mensaje: "Listo. El primer número le llega el lunes." });
+    } catch (err) {
+      setEstado({
+        status: "error",
+        mensaje:
+          err?.status === 422
+            ? "Ese correo no parece completo. Revíselo y vuelva a probar."
+            : err?.status === 429
+              ? "Demasiados intentos seguidos. Espere un momento."
+              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+      });
+    }
+  };
+
+  if (!abierta) return null;
+
+  return (
+    <aside
+      className="se-invitacion"
+      role="complementary"
+      aria-label="Invitación al boletín"
+      onKeyDown={alPulsarTecla}
+    >
+      <div className="se-invitacion__caja">
+        <button
+          type="button"
+          className="se-invitacion__cerrar"
+          onClick={cerrar}
+          aria-label="Cerrar"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+
+        {listo ? (
+          // `role="status"` y no `alert`: es una confirmación, no una urgencia.
+          <p className="se-invitacion__ok" role="status">
+            {estado.mensaje}
+          </p>
+        ) : (
+          <>
+            <p className="se-invitacion__kicker">Boletín semanal · los lunes por la mañana</p>
+            <p className="se-invitacion__titulo" id="invitacion-boletin-titulo">
+              Entorno en Viñetas
+            </p>
+            <p className="se-invitacion__texto">
+              El entorno económico de la semana, contado en viñetas. Le llega cada lunes,
+              antes de que la semana empiece a moverse.
+            </p>
+
+            <form
+              className="se-invitacion__form"
+              onSubmit={enviar}
+              aria-busy={enviando}
+              aria-labelledby="invitacion-boletin-titulo"
+              noValidate
+            >
+              <label htmlFor="invitacion-boletin-email" className="se-invitacion__label">
+                Su correo
+              </label>
+              <input
+                id="invitacion-boletin-email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                className="se-invitacion__input"
+                placeholder="nombre@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={enviando}
+                required
+                aria-invalid={hayError || undefined}
+                aria-describedby={hayError ? "invitacion-boletin-error" : undefined}
+              />
+              {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
+                  rellenara sin querer, su suscripción se descartaría. */}
+              <input
+                type="text"
+                name="website"
+                className="se-sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                autoComplete="off"
+                value={trampa}
+                onChange={(e) => setTrampa(e.target.value)}
+              />
+
+              {hayError ? (
+                <p id="invitacion-boletin-error" className="se-invitacion__error" role="alert">
+                  {estado.mensaje}
+                </p>
+              ) : null}
+
+              <div className="se-invitacion__acciones">
+                <button type="submit" className="se-invitacion__btn" disabled={enviando}>
+                  {enviando ? "Enviando…" : "Únase al boletín"}
+                </button>
+                <button type="button" className="se-invitacion__luego" onClick={cerrar}>
+                  Ahora no
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+      </div>
+    </aside>
+  );
+};

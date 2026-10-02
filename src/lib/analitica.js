@@ -73,6 +73,7 @@ const MINIMO_LEGIBLE = 3;
 
 const RUTA_EVENTOS = "/analitica/eventos";
 const RUTA_OLVIDAR = "/analitica/olvidar";
+const RUTA_CONSENTIMIENTO = "/analitica/consentimiento";
 
 /* ─── Cookies ──────────────────────────────────────────────────────────────── */
 
@@ -233,6 +234,48 @@ const enviar = (eventos, { conBeacon = false } = {}) => {
     }).catch(() => {});
   } catch {
     // Medir nunca puede romper una pagina.
+  }
+};
+
+/**
+ * Suma uno al contador del dia de «aceptaron» o «rechazaron». Es lo unico que un «no»
+ * manda al servidor, y por eso el cuerpo es exactamente `{"decision":"si"|"no"}`: ni
+ * identificador, ni ruta, ni nada que `identidad()` pueda haber puesto. No lee cookies
+ * ni las escribe; la del consentimiento la pone `decidir`, que es otra cosa.
+ *
+ * No vive dentro de `decidir` a proposito. `decidir` se llama tambien desde `/cookies`
+ * -- al aceptar desde la pagina, al revocar -- y desde `revocar`, y contar esas veces
+ * mezclaria «cuantos aceptan cuando se les pregunta» con «cuantos cambian de idea
+ * despues», que son dos preguntas distintas. Esto cuenta solo la primera: la llama la
+ * barra, una vez por clic, y nadie mas.
+ *
+ * Beacon y `text/plain` por lo mismo que `enviar`: la peticion es simple, sale sin
+ * preflight y llega aunque la persona pulse y se vaya.
+ */
+export const contarDecision = (respuesta) => {
+  if (!MEDICION_HABILITADA || !base()) return;
+  const url = base() + RUTA_CONSENTIMIENTO;
+  const cuerpo = JSON.stringify({ decision: respuesta === "si" ? "si" : "no" });
+
+  if (navigator.sendBeacon) {
+    try {
+      const ok = navigator.sendBeacon(url, new Blob([cuerpo], { type: "text/plain;charset=UTF-8" }));
+      if (ok) return;
+    } catch {
+      // Cae al fetch de abajo.
+    }
+  }
+
+  try {
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      body: cuerpo,
+      keepalive: true,
+      credentials: "omit",
+    }).catch(() => {});
+  } catch {
+    // Contar nunca puede romper una pagina.
   }
 };
 

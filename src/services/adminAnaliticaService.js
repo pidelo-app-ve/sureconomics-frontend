@@ -92,3 +92,25 @@ export const getResumen = async (dias = 7) => {
     salidas: listaDe(d.salidas),
   };
 };
+
+/**
+ * Cuántos aceptaron y cuántos rechazaron el aviso de cookies, por día y en total.
+ *
+ * Sin zona: el día se fijó al contar, en la hora editorial, y el servidor dice cuál. La
+ * tasa viene `null` -- y no cero -- cuando nadie ha contestado, por lo mismo que las
+ * cifras derivadas del resumen.
+ */
+export const getConsentimiento = async (dias = 30) => {
+  const d =
+    unwrapEntity(
+      await adminRequest("/admin/analitica/consentimiento", { query: { dias } })
+    ) ?? {};
+  return {
+    dias: numeroDe(d.dias, dias),
+    zona: typeof d.zona === "string" ? d.zona : null,
+    si: numeroDe(d.si),
+    no: numeroDe(d.no),
+    tasa_aceptacion: cifraDe(d.tasa_aceptacion),
+    serie: listaDe(d.serie),
+  };
+};

@@ -5,6 +5,7 @@ import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import useI18n from "../i18n/useI18n";
 import { useState } from "react";
 import { subscribeToNewsletter } from "../services/newsletterService";
+import { marcarSuscrito } from "../lib/invitacionBoletin";
 
 /** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
  *  salga un hueco con el nombre suelto rompiendo la fila. */
@@ -44,6 +45,8 @@ export const Footer = () => {
         source: "footer",
         honeypot: newsletterTrampa,
       });
+      // Quien ya está en la lista no tiene que ver la invitación flotante.
+      marcarSuscrito();
       setNewsletterEmail("");
       setNewsletterState({
         status: "success",

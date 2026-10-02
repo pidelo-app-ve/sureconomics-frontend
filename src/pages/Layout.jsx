@@ -5,6 +5,7 @@ import { Footer } from "../components/Footer"
 import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 import { AvisoDeCookies } from "../components/AvisoDeCookies"
+import { InvitacionAlBoletin } from "../components/InvitacionAlBoletin"
 import { BarraPublicitaria, ProveedorDePublicidad } from "../components/publicidad"
 import { AvisoDeRuta } from "../components/AvisoDeRuta"
 
@@ -65,6 +66,10 @@ export const Layout = () => {
                     avisa de los cambios de ruta -- el sitio no recarga al cambiar de
                     pieza, asi que alguien tiene que contarlo. */}
                 <AvisoDeCookies />
+                {/* Solo en el marco publico: /entorno va fuera de este Layout y el
+                    panel y la cuenta tienen el suyo. Nace cerrada y decide sola
+                    cuando salir; ver `lib/invitacionBoletin.js`. */}
+                <InvitacionAlBoletin />
                 <AvisoDeRuta destinoId={CONTENIDO_ID} />
             </ProveedorDePublicidad>
         </ScrollToTop>

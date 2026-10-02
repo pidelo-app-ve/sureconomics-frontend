@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
+import { marcarSuscrito } from "../../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../../services/newsletterService";
 import { ESPACIOS } from "../../services/publicidadService";
 import { EspacioPublicitario } from "../publicidad";
@@ -51,6 +52,8 @@ export const NewsletterBlock = () => {
     setEstado({ status: "loading", mensaje: "" });
     try {
       await subscribeToNewsletter(correo, { source: "home", honeypot: trampa });
+      // Quien ya está en la lista no tiene que ver la invitación flotante.
+      marcarSuscrito();
       setEmail("");
       setEstado({
         status: "success",

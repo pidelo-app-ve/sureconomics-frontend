@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { applyPageMeta } from "../lib/seo";
+import { marcarSuscrito } from "../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../services/newsletterService";
 
 /**
@@ -43,6 +44,8 @@ export const Entorno = () => {
     setEstado({ status: "loading", mensaje: "" });
     try {
       await subscribeToNewsletter(correo, { source: "instagram", honeypot: trampa });
+      // Quien ya está en la lista no tiene que ver la invitación flotante del sitio.
+      marcarSuscrito();
       setEmail("");
       setEstado({ status: "success", mensaje: "" });
     } catch (err) {

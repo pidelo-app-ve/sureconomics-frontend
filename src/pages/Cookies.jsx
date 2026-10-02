@@ -22,7 +22,7 @@ import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from ".
  * quien lee: no se cruza con la cuenta, no sale de aqui y se puede borrar de un clic.
  */
 
-const ACTUALIZADO = "22 de septiembre de 2026";
+const ACTUALIZADO = "2 de octubre de 2026";
 
 /** Las cinco que el sitio puede llegar a poner. Ni una mas: esta tabla se contrasta con el codigo. */
 const COOKIES = [
@@ -375,6 +375,18 @@ export const Cookies = () => {
             sitio. Son dos sistemas separados a propósito: quien lee los números de audiencia
             no puede saber qué leyó una persona con nombre y apellidos, porque ese vínculo no
             existe en ninguna parte.
+          </p>
+          {/* Lo unico que ocurre tambien cuando la respuesta es no. Va dicho aqui, en la
+              seccion de los datos, y no escondido: la promesa de que un no no deja rastro
+              se sostiene porque lo que se manda es un uno sin nadie detras. */}
+          <p>
+            Hay una cosa más que conviene decir, porque ocurre también si usted rechaza.
+            Cuando responde al aviso —en un sentido o en otro— sumamos uno a un contador
+            diario de «aceptaron» o «rechazaron». Ese contador no lleva identificador, ni
+            cookie, ni dirección IP, ni la página en la que usted estaba: es un número por
+            día, y sirve para saber qué parte de los lectores acepta la medición. Es lo
+            único que un «no» envía a nuestro servidor, y no hay manera de saber que ese
+            uno fue usted.
           </p>
         </section>
 

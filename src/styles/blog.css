@@ -21089,3 +21089,220 @@ html {
 .se-editor-movil .se-portada-pin__durante .se-form-field {
   flex-basis: 100%;
 }
+
+/* ═══ INVITACION AL BOLETIN ═══════════════════════════════════════════
+   Tarjeta pequena abajo a la derecha, con la misma caja que el aviso de cookies
+   -- papel, filete de hairline, 14 px de radio, la misma sombra -- y el mismo
+   tratamiento del boletin de la portada en el cintillo, el titulo y el boton.
+   Nada de capa oscura: se lee el sitio con ella puesta. Las reglas de cuando
+   sale estan en `lib/invitacionBoletin.js`. */
+
+.se-invitacion {
+  position: fixed;
+  right: var(--se-content-gutter);
+  bottom: max(var(--se-content-gutter), env(safe-area-inset-bottom));
+  width: min(360px, calc(100vw - 2 * var(--se-content-gutter)));
+  /* Entre la barra publicitaria (900) y el aviso de cookies (950): el aviso siempre
+     manda, y la invitacion ni existe mientras el este abierto. Debajo del menu
+     movil (1001). */
+  z-index: 940;
+  animation: se-invitacion-entra 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes se-invitacion-entra {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* La barra publicitaria fija no avisa de que esta; se mira si existe y se sube la
+   tarjeta su alto maximo. Si se cierra, la tarjeta baja sola. */
+body:has(.se-ad-barra) .se-invitacion {
+  bottom: calc(64px + var(--se-content-gutter));
+}
+
+.se-invitacion__caja {
+  position: relative;
+  padding: 1.1rem 1.25rem 1.15rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: var(--color-paper);
+  box-shadow: 0 8px 24px rgba(0, 51, 24, 0.14);
+}
+
+.se-invitacion__cerrar {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  /* 44 px de area aunque el aspa se vea pequena: cerrar en un movil no puede ser
+     cuestion de punteria. */
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-slate-2);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.se-invitacion__cerrar:hover { color: var(--color-ink); background: var(--se-offwhite); }
+
+.se-invitacion__kicker {
+  margin: 0 2.25rem 0.45rem 0;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-invitacion__titulo {
+  margin: 0 0 0.4rem;
+  font-family: var(--se-font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+.se-invitacion__texto {
+  margin: 0 0 0.9rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+
+.se-invitacion__form { margin: 0; }
+
+.se-invitacion__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(var(--se-tinte), 0.62);
+}
+
+.se-invitacion__input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(var(--se-tinte), 0.18);
+  border-radius: 10px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.se-invitacion__input::placeholder { color: rgba(var(--se-tinte), 0.5); }
+.se-invitacion__input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.18);
+}
+.se-invitacion__input[aria-invalid="true"] { border-color: rgba(185, 83, 42, 0.6); }
+
+.se-invitacion__acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+}
+
+.se-invitacion__btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--marca-verde);
+  border-radius: 10px;
+  background: var(--marca-verde);
+  color: #ffffff;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.se-invitacion__btn:hover { background: #00250f; }
+.se-invitacion__btn:disabled { opacity: 0.72; cursor: progress; }
+
+/* «Ahora no» es un boton de texto: ni escondido ni del mismo peso que el de
+   suscribirse -- rechazar una invitacion no es rechazar un consentimiento. */
+.se-invitacion__luego {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-slate-2);
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.se-invitacion__luego:hover { color: var(--color-ink); }
+
+.se-invitacion__cerrar:focus-visible,
+.se-invitacion__btn:focus-visible,
+.se-invitacion__luego:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* El acierto y el error, con los colores del boletin de la portada: en el filete y el
+   relleno, nunca en las letras. */
+.se-invitacion__ok,
+.se-invitacion__error {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  color: rgba(var(--se-tinte), 0.92);
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.se-invitacion__ok {
+  /* Hueco a la derecha para el aspa, que sigue ahi mientras el mensaje se despide. */
+  margin: 0 2.25rem 0 0;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+}
+.se-invitacion__error {
+  border: 1px solid rgba(185, 83, 42, 0.32);
+  background: rgba(185, 83, 42, 0.1);
+}
+
+/* En un telefono va centrada y a lo ancho, con 16 px de margen a cada lado: una
+   tarjeta de 360 px pegada a la derecha dejaria una franja inutil a la izquierda. */
+@media (max-width: 699px) {
+  .se-invitacion {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  body:has(.se-ad-barra) .se-invitacion {
+    bottom: calc(64px + 12px);
+  }
+}
+
+@media (pointer: coarse) {
+  .se-invitacion__luego { padding: 0 0.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-invitacion { animation: none; }
+}

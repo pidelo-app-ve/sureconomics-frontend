@@ -5,6 +5,7 @@ import {
   aceptado,
   arrancar,
   consentimiento,
+  contarDecision,
   decidir,
   registrarVista,
 } from "../lib/analitica";
@@ -69,6 +70,11 @@ export const AvisoDeCookies = () => {
   }, [pathname]);
 
   const responder = useCallback((respuesta) => {
+    // Se cuenta la respuesta -- las dos -- en un contador diario sin identificador: ver
+    // `contarDecision`. Aqui y no en `decidir`, porque esto es la unica vez que se
+    // *pregunta*; lo que se cambie despues desde `/cookies` es otra pregunta. La barra
+    // desaparece con la respuesta, asi que el clic no puede repetirse.
+    contarDecision(respuesta);
     setDecision(decidir(respuesta));
   }, []);
 

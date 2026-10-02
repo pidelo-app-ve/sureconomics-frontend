@@ -1,0 +1,75 @@
+/* La ficha del aviso de cookies en el panel de audiencia (AdminAnalitica).
+
+   Solo lo que las clases de `se-aud__*` no tienen: una pila de dos tramos por dia --
+   aceptaron abajo, rechazaron encima -- y su leyenda. Lo demas (fichas, bloque, tabla)
+   lo reutiliza de blog.css. */
+
+.se-cons__dias {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 120px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-cons__dia {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+/* La pila: dos tramos de un mismo total. Extremo superior redondeado, base recta, como
+   las columnas del resto del panel. */
+.se-cons__pila {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 24px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+}
+
+.se-cons__si,
+.se-cons__no {
+  display: block;
+  width: 100%;
+  transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* El si lleva el color de la marca -- es lo que el resto del panel mide --; el no va en
+   un gris que se distingue del fondo pero no compite. */
+.se-cons__si { background: var(--aud-marca); }
+.se-cons__no { background: rgba(0, 0, 0, 0.22); }
+
+.se-cons__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+
+.se-cons__leyenda li { display: inline-flex; align-items: center; gap: 0.35rem; }
+
+.se-cons__muestra {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-cons__si,
+  .se-cons__no { transition: none; }
+}

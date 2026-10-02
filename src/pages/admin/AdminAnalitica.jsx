@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { getEnVivo, getResumen } from "../../services/adminAnaliticaService";
+import { getConsentimiento, getEnVivo, getResumen } from "../../services/adminAnaliticaService";
+import "../../styles/analitica-consentimiento.css";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
@@ -427,6 +428,128 @@ Barras.propTypes = {
   enlazar: PropTypes.bool,
 };
 
+/* ─── El aviso de cookies: cuántos dicen que sí ────────────────────────────── */
+
+/**
+ * Una pila por día: aceptaron abajo, rechazaron encima. Dos tramos de un mismo total,
+ * así que la altura dice cuántos contestaron y el reparto dice qué parte aceptó.
+ *
+ * Es la única serie del panel con dos valores, y por eso la única con leyenda.
+ */
+const PilasDeConsentimiento = ({ serie }) => {
+  const max = Math.max(1, ...serie.map((d) => d.si + d.no));
+  return (
+    <>
+      <ul className="se-cons__dias" aria-hidden="true">
+        {serie.map((d) => {
+          const total = d.si + d.no;
+          return (
+            <li
+              key={d.fecha}
+              className="se-cons__dia"
+              title={`${diaLargo(d.fecha)}: ${numero(d.si)} aceptaron · ${numero(d.no)} rechazaron`}
+            >
+              <span className="se-cons__pila" style={{ height: `${total ? Math.max(2, (total / max) * 100) : 0}%` }}>
+                <span className="se-cons__no" style={{ height: `${total ? (d.no / total) * 100 : 0}%` }} />
+                <span className="se-cons__si" style={{ height: `${total ? (d.si / total) * 100 : 0}%` }} />
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <ul className="se-cons__leyenda">
+        <li>
+          <span className="se-cons__muestra se-cons__si" aria-hidden="true" /> aceptaron
+        </li>
+        <li>
+          <span className="se-cons__muestra se-cons__no" aria-hidden="true" /> rechazaron
+        </li>
+      </ul>
+    </>
+  );
+};
+
+PilasDeConsentimiento.propTypes = { serie: PropTypes.arrayOf(PropTypes.object).isRequired };
+
+/**
+ * Lo único del panel que cuenta también a quien dijo que no.
+ *
+ * Por eso va en su propio bloque y con su propia petición: el resto de la pantalla sale
+ * de quien aceptó, y esto es la respuesta a «¿qué parte de la audiencia real es eso?».
+ * Un fallo aquí no tumba el panel -- se dice dentro de la tarjeta y ya --, porque es
+ * un dato nuevo que el servidor puede no tener todavía.
+ */
+const AvisoDeCookiesBloque = ({ dias, recarga }) => {
+  const [datos, setDatos] = useState(null);
+  const [fallo, setFallo] = useState("");
+
+  useEffect(() => {
+    let vigente = true;
+    getConsentimiento(dias)
+      .then((d) => {
+        if (vigente) {
+          setDatos(d);
+          setFallo("");
+        }
+      })
+      .catch((e) => {
+        if (vigente) setFallo(adminErrorMessage(e));
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [dias, recarga]);
+
+  const total = datos ? datos.si + datos.no : 0;
+  const titulo = `Aviso de cookies · últimos ${dias} días`;
+
+  return (
+    <Bloque
+      titulo={titulo}
+      apunte="Cuántos aceptan la medición. Un número por día y por respuesta, sin identificador: es lo único que un «no» envía."
+      tabla={
+        total ? (
+          <Tabla
+            columnas={["Día", "Aceptaron", "Rechazaron", "Tasa"]}
+            filas={(datos?.serie ?? []).map((d) => [
+              diaLargo(d.fecha),
+              numero(d.si),
+              numero(d.no),
+              d.si + d.no ? `${Math.round((100 * d.si) / (d.si + d.no))} %` : "—",
+            ])}
+          />
+        ) : null
+      }
+    >
+      {fallo ? (
+        <p className="se-admin-meta-hint">No se pudo cargar: {fallo}</p>
+      ) : !datos ? (
+        <p className="se-admin-meta-hint">Cargando…</p>
+      ) : !total ? (
+        <p className="se-admin-meta-hint">Sin respuestas todavía.</p>
+      ) : (
+        <>
+          <div className="se-aud__fichas">
+            <Ficha valor={numero(datos.si)} etiqueta="aceptaron" />
+            <Ficha valor={numero(datos.no)} etiqueta="rechazaron" />
+            <Ficha
+              valor={datos.tasa_aceptacion === null ? null : `${datos.tasa_aceptacion} %`}
+              etiqueta="tasa de aceptación"
+              nota="sobre quienes contestaron"
+            />
+          </div>
+          <PilasDeConsentimiento serie={datos.serie} />
+        </>
+      )}
+    </Bloque>
+  );
+};
+
+AvisoDeCookiesBloque.propTypes = {
+  dias: PropTypes.number.isRequired,
+  recarga: PropTypes.number.isRequired,
+};
+
 const Tabla = ({ columnas, filas }) => (
   <table className="se-aud__tabla">
     <thead>
@@ -682,6 +805,10 @@ export const AdminAnalitica = () => {
               nota="leyeron una página y salieron"
             />
           </div>
+
+          {/* Justo debajo de las fichas y antes de la serie: es el dato que dice cuánto
+              de la audiencia real está viendo todo lo demás. */}
+          <AvisoDeCookiesBloque dias={dias} recarga={recarga} />
 
           <Bloque
             titulo="Visitas por día"

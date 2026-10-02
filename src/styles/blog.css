@@ -21130,6 +21130,8 @@ html {
 
 .se-invitacion__caja {
   position: relative;
+  /* Recorta la barra de cuenta atrás del acierto a las esquinas redondas. */
+  overflow: hidden;
   width: min(440px, 100%);
   padding: 1.75rem 1.75rem 1.6rem;
   border: 1px solid var(--color-hairline);
@@ -21274,9 +21276,8 @@ html {
   outline-offset: 2px;
 }
 
-/* El acierto y el error, con los colores del boletin de la portada: en el filete y el
-   relleno, nunca en las letras. */
-.se-invitacion__ok,
+/* El error, con los colores del boletin de la portada: en el filete y el relleno,
+   nunca en las letras. */
 .se-invitacion__error {
   margin: 0.6rem 0 0;
   padding: 0.6rem 0.75rem;
@@ -21286,15 +21287,132 @@ html {
   font-size: 0.88rem;
   line-height: 1.5;
 }
-.se-invitacion__ok {
-  /* Hueco a la derecha para el aspa, que sigue ahi mientras el mensaje se despide. */
-  margin: 0 2.25rem 0 0;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  background: rgba(34, 197, 94, 0.12);
-}
 .se-invitacion__error {
   border: 1px solid rgba(185, 83, 42, 0.32);
   background: rgba(185, 83, 42, 0.1);
+}
+
+/* —— El acierto ——
+   Se vive una vez, asi que puede celebrar, pero con la voz del sitio: nada de
+   rebotes ni confeti. El sello verde llega desde casi su tamano con un ease-out
+   fuerte, la marca se dibuja dentro, un anillo se expande y se apaga detras, y el
+   texto entra escalonado. Todo termina antes de 900 ms; luego la barra de abajo se
+   vacia, lineal, mientras la ventana se despide sola. */
+.se-invitacion__exito {
+  display: grid;
+  justify-items: center;
+  padding: 0.6rem 0.5rem 0.9rem;
+  text-align: center;
+  outline: none;
+}
+
+.se-invitacion__sello {
+  position: relative;
+  display: block;
+  width: 68px;
+  height: 68px;
+  margin-bottom: 1rem;
+  animation: se-exito-sello 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* El anillo que se expande una vez detras del sello: el «hecho» se ve de reojo. */
+.se-invitacion__sello::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--marca-verde);
+  opacity: 0;
+  animation: se-exito-anillo 900ms cubic-bezier(0.23, 1, 0.32, 1) 180ms both;
+}
+
+.se-invitacion__sello svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.se-invitacion__sello-aro { fill: var(--marca-verde); }
+
+.se-invitacion__sello-marca {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Largo del trazo: la marca se dibuja de punta a punta, no aparece entera. */
+  stroke-dasharray: 34;
+  stroke-dashoffset: 34;
+  animation: se-exito-marca 380ms cubic-bezier(0.65, 0, 0.35, 1) 260ms forwards;
+}
+
+.se-invitacion__exito .se-invitacion__titulo,
+.se-invitacion__exito .se-invitacion__texto,
+.se-invitacion__nota {
+  animation: se-exito-texto 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.se-invitacion__exito .se-invitacion__titulo { animation-delay: 380ms; }
+.se-invitacion__exito .se-invitacion__texto { animation-delay: 440ms; }
+.se-invitacion__nota { animation-delay: 500ms; }
+
+.se-invitacion__texto--exito {
+  max-width: 32ch;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink);
+}
+
+/* El correo, en la letra de datos: es una direccion, no prosa, y asi se lee
+   exacta. Corta donde haga falta para que uno largo no desborde en el telefono. */
+.se-invitacion__correo {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  overflow-wrap: anywhere;
+}
+
+.se-invitacion__nota {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+
+/* La cuenta atras: una barra cobriza al pie de la ventana que se vacia en lo que
+   tarda en cerrarse. Dice «esto se va solo» sin un numero que lea nadie. */
+.se-invitacion__cuenta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--color-accent);
+  transform-origin: left center;
+  animation: se-exito-cuenta linear both;
+}
+
+@keyframes se-exito-sello {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes se-exito-anillo {
+  0% { opacity: 0.45; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.55); }
+}
+
+@keyframes se-exito-marca {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes se-exito-texto {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes se-exito-cuenta {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 /* En el telefono, la misma ventana centrada con 16 px de margen; algo menos de
@@ -21307,8 +21425,17 @@ html {
   .se-invitacion__luego { padding: 0 0.9rem; }
 }
 
-/* Con movimiento reducido la ventana no crece ni sube: solo aparece, fundida. */
+/* Con movimiento reducido la ventana no crece ni sube: solo aparece, fundida. El
+   acierto, igual: la marca ya dibujada, sin anillo, el texto quieto, y la barra no
+   se mueve -- la ventana se cierra sola de todos modos. */
 @media (prefers-reduced-motion: reduce) {
   .se-invitacion__caja { animation: se-invitacion-fondo 160ms ease-out both; }
   .se-invitacion__btn:active:not(:disabled) { transform: none; }
+  .se-invitacion__sello,
+  .se-invitacion__exito .se-invitacion__titulo,
+  .se-invitacion__exito .se-invitacion__texto,
+  .se-invitacion__nota { animation: se-invitacion-fondo 160ms ease-out both; }
+  .se-invitacion__sello::after { animation: none; }
+  .se-invitacion__sello-marca { animation: none; stroke-dashoffset: 0; }
+  .se-invitacion__cuenta { display: none; }
 }

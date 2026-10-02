@@ -73,6 +73,9 @@ export const InvitacionAlBoletin = () => {
   // los rastreadores rellenan todo lo que encuentran.
   const [trampa, setTrampa] = useState("");
   const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
+  // El correo con el que se suscribió, para decírselo en la bienvenida: el campo se
+  // vacía al acertar y el lector merece ver a dónde le va a llegar.
+  const [correoSuscrito, setCorreoSuscrito] = useState("");
 
   const enviando = estado.status === "loading";
   const hayError = estado.status === "error";
@@ -87,6 +90,7 @@ export const InvitacionAlBoletin = () => {
   abiertaRef.current = abierta;
   const cajaRef = useRef(null);
   const campoRef = useRef(null);
+  const exitoRef = useRef(null);
   // Dónde estaba el foco antes de abrir, para devolverlo al cerrar: quien leía con el
   // teclado no puede quedarse en lo alto de la página.
   const focoPrevio = useRef(null);
@@ -156,9 +160,11 @@ export const InvitacionAlBoletin = () => {
     return () => window.removeEventListener(EVENTO_CONSENTIMIENTO, evaluar);
   }, [evaluar]);
 
-  // El acierto se despide solo.
+  // El acierto se despide solo. Y mientras dura, el foco va a la bienvenida: el campo
+  // donde estaba ya no existe, y un foco perdido cae al fondo de la página.
   useEffect(() => {
     if (!listo) return undefined;
+    exitoRef.current?.focus({ preventScroll: true });
     const reloj = window.setTimeout(() => setAbierta(false), AUTOCIERRE_MS);
     return () => window.clearTimeout(reloj);
   }, [listo]);
@@ -236,6 +242,7 @@ export const InvitacionAlBoletin = () => {
     try {
       await subscribeToNewsletter(correo, { source: "invitacion", honeypot: trampa });
       marcarSuscrito();
+      setCorreoSuscrito(correo);
       setEmail("");
       setEstado({ status: "success", mensaje: "Listo. El primer número le llega el lunes." });
     } catch (err) {
@@ -273,11 +280,39 @@ export const InvitacionAlBoletin = () => {
         </button>
 
         {listo ? (
-          // `role="status"` y no `alert`: es una confirmación, no una urgencia. Lleva el
-          // id del título para que el diálogo siga teniendo nombre cuando el título se va.
-          <p className="se-invitacion__ok" role="status" id="invitacion-boletin-titulo">
-            {estado.mensaje}
-          </p>
+          // El único momento de celebración del sitio, y se vive una vez: un sello que se
+          // dibuja, la bienvenida con su correo y una barra que se vacía mientras la
+          // ventana se despide sola. `role="status"` y no `alert`: es una confirmación,
+          // no una urgencia. El título conserva el id para que el diálogo siga teniendo
+          // nombre.
+          <div className="se-invitacion__exito" role="status" tabIndex={-1} ref={exitoRef}>
+            <span className="se-invitacion__sello" aria-hidden="true">
+              <svg viewBox="0 0 52 52" focusable="false">
+                <circle className="se-invitacion__sello-aro" cx="26" cy="26" r="25" />
+                <path className="se-invitacion__sello-marca" d="M15.5 27.5l7 7 14.5-16" />
+              </svg>
+            </span>
+            <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
+              Ya está dentro
+            </h2>
+            <p className="se-invitacion__texto se-invitacion__texto--exito">
+              El primer número de <strong>Entorno en Viñetas</strong> le llega el lunes por
+              la mañana{correoSuscrito ? (
+                <>
+                  {" "}a <span className="se-invitacion__correo">{correoSuscrito}</span>
+                </>
+              ) : null}
+              .
+            </p>
+            <p className="se-invitacion__nota">
+              Si no lo ve, búsquelo en «Promociones» o en el correo no deseado.
+            </p>
+            <span
+              className="se-invitacion__cuenta"
+              aria-hidden="true"
+              style={{ animationDuration: `${AUTOCIERRE_MS}ms` }}
+            />
+          </div>
         ) : (
           <>
             <p className="se-invitacion__kicker">Boletín semanal · los lunes por la mañana</p>

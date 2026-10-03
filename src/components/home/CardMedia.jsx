@@ -34,14 +34,34 @@ import { piezaShape } from "./piezaShape";
  * fotos van a fallar de vez en cuando para el lector, y sin esto la tarjeta se queda
  * con el recuadro roto del navegador. El color del tema ya existia para las piezas
  * sin foto; sirve igual para la foto que no llega, y la maqueta no se mueve.
+ *
+ * *La foto entera cuando no es 16:9.* La caja de todas las rejillas es 16:9 y recorta
+ * con `cover`. Con fotos de agencia da igual, pero el motor y la redacción suben de
+ * todo -- logos, capturas, retratos, fotos 3:2 -- y la de Ecopetrol perdía la cabeza
+ * de la iguana. Al cargar se mide la proporción real: si se aparta más de un 8 % de
+ * 16:9, la foto se muestra entera (`contain`) sobre ella misma ampliada y
+ * desenfocada, que rellena los márgenes con sus propios colores. La caja no cambia de
+ * forma y no hay petición de más: el fondo usa la misma dirección, ya en caché.
  */
 /** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x. */
 const ANCHOS = [400, 640, 800, 1100, 1400];
 /** Una columna en telefono, dos en tablet, tres en escritorio. */
 const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
 
-export const CardMedia = ({ pieza, ancho, etiqueta }) => {
+/** Cuánto puede apartarse una foto de 16:9 antes de mostrarla entera en vez de recortarla. */
+const TOLERANCIA = 0.08;
+
+export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
   const [fallo, setFallo] = useState(false);
+  // null mientras carga: hasta saber la proporción se pinta como siempre, recortada,
+  // para que la tarjeta no parpadee entre dos formas.
+  const [entera, setEntera] = useState(null);
+
+  const medir = (e) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    if (!w || !h) return;
+    setEntera(Math.abs(w / h / (16 / 9) - 1) > TOLERANCIA);
+  };
 
   // El sello va aquí y no en cada rejilla porque cinco de las seis pintan su imagen
   // a través de este componente. La que falta es la de entrevistas, que tiene su
@@ -53,16 +73,28 @@ export const CardMedia = ({ pieza, ancho, etiqueta }) => {
   if (pieza.imagenUrl && !fallo) {
     return (
       <>
+        {entera ? (
+          <img
+            className="se-artcard__fondo"
+            src={imagenAncho(pieza.imagenUrl, ancho)}
+            srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
+            sizes={sizes}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+          />
+        ) : null}
         <img
-          className="se-artcard__img"
+          className={`se-artcard__img${entera ? " se-artcard__img--entera" : ""}`}
           src={imagenAncho(pieza.imagenUrl, ancho)}
           // El ancho original decide qué tallas existen en nuestro bucket. Para
           // Cloudinary se ignora: allí los anchos los calcula el servidor.
           srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
-          sizes={SIZES}
+          sizes={sizes}
           alt=""
           loading="lazy"
           decoding="async"
+          onLoad={medir}
           onError={() => setFallo(true)}
         />
         <SelloEducativo pieza={pieza} />
@@ -89,6 +121,8 @@ CardMedia.propTypes = {
   pieza: piezaShape({ imagenUrl: PropTypes.string, educativo: PropTypes.bool }).isRequired,
   ancho: PropTypes.number,
   etiqueta: PropTypes.string,
+  /** El `sizes` de la imagen: el de una tarjeta de rejilla salvo que quien llama ocupe otra cosa. */
+  sizes: PropTypes.string,
 };
 
-CardMedia.defaultProps = { ancho: 800, etiqueta: null };
+CardMedia.defaultProps = { ancho: 800, etiqueta: null, sizes: SIZES };

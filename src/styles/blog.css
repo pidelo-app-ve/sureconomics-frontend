@@ -11000,6 +11000,26 @@ a.se-topics__chip:focus-visible {
   object-fit: cover;
 }
 
+/* La foto que no es 16:9 se ve entera, sobre ella misma ampliada y desenfocada.
+   Dos clases a proposito: `.se-doccard__media img` pide `cover` con mas peso que una
+   sola clase. El fondo va antes en el DOM y la foto, posicionada, se pinta encima;
+   el sello educativo, que va despues, sigue por encima de las dos. */
+.se-artcard__img.se-artcard__img--entera {
+  position: relative;
+  object-fit: contain;
+}
+
+.se-artcard__fondo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  object-fit: cover;
+  /* Ampliada para que el borde del desenfoque, que se aclara, quede fuera de la caja. */
+  transform: scale(1.18);
+  filter: blur(22px) saturate(1.15) brightness(0.82);
+  pointer-events: none;
+}
+
 .se-artcard__summary {
   margin: 0;
   font-size: var(--se-text-small);

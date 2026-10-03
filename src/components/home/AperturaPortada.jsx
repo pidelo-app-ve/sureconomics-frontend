@@ -96,7 +96,15 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
               aria-hidden="true"
               tabIndex={-1}
             >
-              <CardMedia pieza={principal} ancho={1400} etiqueta={temaPrincipal(principal)} />
+              {/* Su propio `sizes`: con el de las tarjetas (un tercio de pantalla) el
+                  navegador pedía la talla pequeña para una imagen que ocupa la mitad,
+                  y en la apertura se veía blanda. */}
+              <CardMedia
+                pieza={principal}
+                ancho={1400}
+                etiqueta={temaPrincipal(principal)}
+                sizes="(max-width: 899px) 92vw, 56vw"
+              />
             </Link>
             <div className="se-apertura__cuerpo">
               <span className="se-apertura__meta">

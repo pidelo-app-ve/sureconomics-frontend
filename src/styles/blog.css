@@ -43,14 +43,19 @@
   --color-red: #c1272d;
 
   /* —— Tipografía ——
-     Host Grotesk es la que da concepto al logo, así que titulares e interfaz van
-     con ella. El cuerpo de lectura va en serif, como la maqueta del brandbook: el
-     brandbook no nombra cuál, así que queda una decisión abierta y esta es la
-     propuesta. */
+     Una sola familia, Host Grotesk, la que da concepto al logo: titulares,
+     interfaz, lectura y datos. La jerarquía la llevan el peso y el tamaño.
+
+     Los datos no necesitan otra letra: en Host Grotesk las diez cifras ya tienen
+     el mismo ancho, así que el cintillo y el reloj no bailan, y el «0» mide lo
+     mismo que el de la mono que había, de modo que las medidas en `ch` de esas
+     reglas no cambian. `--serif` y `--mono` se quedan como nombres para no tocar
+     las reglas que los piden. Antes: Source Serif 4 en el cuerpo y Azeret Mono en
+     los datos, tres familias y ~169 KB de fuentes por pieza; ahora una, ~20 KB. */
   --display: "Host Grotesk", "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
   --sans: "Host Grotesk", "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
-  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --mono: "Azeret Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --serif: var(--sans);
+  --mono: var(--sans);
 
   /* Apuntaba a `--serif`, que entonces era Poppins. Ahora `--serif` es una serif
      de verdad, así que la interfaz tiene que pedir la sans explícitamente o cada
@@ -12816,13 +12821,22 @@ a.se-topics__chip:focus-visible {
   }
 }
 
-/* El cuerpo en serif, como la maqueta. La medida se limita aunque la columna dé
-   más: pasado cierto ancho el ojo pierde el comienzo del renglón siguiente. */
+/* La medida se limita aunque la columna dé más: pasado cierto ancho el ojo pierde
+   el comienzo del renglón siguiente. En `em` y no en `ch`: el `ch` mide el «0», que
+   en Host Grotesk es ancho (0,65 em), y 68ch daban unos 89 caracteres por línea.
+   34em son unos 70. */
 .se-piece__main .se-piece__body {
   font-family: var(--se-font-reading);
-  font-size: 1.125rem;
-  line-height: 1.6;
-  max-width: 68ch;
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  max-width: 34em;
+}
+
+@media (min-width: 1000px) {
+  .se-piece__main .se-piece__body {
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
 }
 
 .se-piece__main .se-piece__body h2,
@@ -14482,7 +14496,7 @@ a.se-topics__chip:focus-visible {
    nadie, asi que aqui manda la medida del renglon y no aprovechar el ancho. */
 
 .se-legal {
-  max-width: 74ch;
+  max-width: 40em; /* en em: el `ch` de la Grotesk es ancho, ver el cuerpo de las piezas */
   margin: 0 auto;
   padding: clamp(2.5rem, 6vw, 4.5rem) var(--se-content-gutter) 5rem;
   font-family: var(--se-font-reading);
@@ -20865,9 +20879,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-apertura__resumen {
   margin: 0;
-  max-width: 62ch;
+  max-width: 34em;
   font-family: var(--se-font-reading);
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   line-height: 1.55;
   color: var(--color-slate);
 }

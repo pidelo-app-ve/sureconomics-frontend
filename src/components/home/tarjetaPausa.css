@@ -135,31 +135,109 @@
   }
 }
 
-/* —— La línea del final de las piezas —— */
-.se-pausa-invitacion {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* —— El banner del final de las piezas ——
+   La tarjeta de la portada en horizontal: paisaje a la izquierda, invitación a la
+   derecha. Más bajo que la tarjeta, porque va dentro de la columna de lectura. */
+.se-pausa-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
   margin: var(--se-space-md, 1.5rem) 0 0;
-  padding: 12px 14px;
-  border: 1px solid var(--color-hairline);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  color: var(--color-slate);
+  overflow: hidden;
+  border-radius: 14px;
+  background: #2a2440;
+  color: #fff4dc;
+  text-decoration: none;
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
 }
 
-.se-pausa-invitacion__ave {
-  flex: 0 0 auto;
-  width: 42px;
-  height: auto;
-  overflow: visible;
+@media (hover: hover) and (pointer: fine) {
+  .se-pausa-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(29, 22, 48, 0.26);
+  }
+  .se-pausa-banner:hover .se-pausa-banner__boton {
+    background: #ffd84f;
+  }
 }
 
-.se-pausa-invitacion a {
-  color: var(--se-accent-hover);
-  font-weight: 650;
-  text-underline-offset: 3px;
+.se-pausa-banner:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-pausa-banner__escena {
+  position: relative;
+  min-height: 150px;
+}
+
+.se-pausa-banner__paisaje {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.se-pausa-banner__vuelo {
+  position: absolute;
+  left: 22%;
+  top: 24%;
+  width: 76px;
+  animation: se-pausa-flota 3.2s ease-in-out infinite;
+}
+
+.se-pausa-banner__cuerpo {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 8px;
+  padding: 18px 22px;
+}
+
+.se-pausa-banner__kicker {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffc928;
+}
+
+.se-pausa-banner__titulo {
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  color: #fff4dc;
+}
+
+.se-pausa-banner__boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  margin-top: 4px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #ffc928;
+  color: #1d1630;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 3px 0 #f2a90f;
+  transition: background 160ms ease-out;
+}
+
+@media (max-width: 560px) {
+  .se-pausa-banner {
+    grid-template-columns: 1fr;
+  }
+  .se-pausa-banner__escena {
+    min-height: 120px;
+  }
+  .se-pausa-banner__cuerpo {
+    padding: 16px 18px 20px;
+  }
 }
 
 @keyframes se-pausa-flota {
@@ -174,10 +252,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .se-pausa-tarjeta__vuelo,
+  .se-pausa-banner__vuelo,
   .se-pausa-ave__ala {
     animation: none;
   }
-  .se-pausa-tarjeta__enlace {
+  .se-pausa-tarjeta__enlace,
+  .se-pausa-banner,
+  .se-pausa-banner__boton {
     transition: none;
   }
 }

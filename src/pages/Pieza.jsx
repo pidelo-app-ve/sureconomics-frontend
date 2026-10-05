@@ -237,7 +237,7 @@ export const Pieza = () => {
               <div className="se-piece__main">
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
-                {/* Para quien llegó al final: una línea, no un bloque. */}
+                {/* Para quien llegó al final: un minuto de pausa antes de lo siguiente. */}
                 <InvitacionPausa />
 
                 {/* La tarjeta nativa del cuerpo, detrás del texto y de las etiquetas.

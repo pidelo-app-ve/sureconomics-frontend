@@ -145,8 +145,6 @@ const LINKEDIN = {
     "https://www.linkedin.com/in/ver%C3%B3nica-acosta-noguera-20088b2b9",
   saulBenarroch: "https://www.linkedin.com/in/saul-benarroch-3361bb411",
   luisOjeda: "https://www.linkedin.com/in/luisojeda-dev",
-  manuelOropeza:
-    "https://www.linkedin.com/in/manuel-eduardo-oropeza-perez-84072891",
   mateoRodriguez: "https://www.linkedin.com/in/mateo-r-025673219",
 };
 
@@ -201,7 +199,9 @@ export const TEAM = {
     {
       id: "consejo-pablo-quintero",
       name: "Pablo Quintero",
-      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      // Sin CV a pedido del cliente (10/2026): solo LinkedIn, como los demás. Su
+      // página personal era https://www.pabloandresquintero.com/sobre-mi.
+      cvUrl: "#",
       email: "",
       links: [], linkedin: LINKEDIN.pabloQuintero,
     },
@@ -212,7 +212,7 @@ export const TEAM = {
       id: "comite-pablo-quintero",
       fotoId: "consejo-pablo-quintero",
       name: "Pablo Quintero",
-      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      cvUrl: "#",
       email: "",
       links: [], linkedin: LINKEDIN.pabloQuintero,
     },
@@ -235,7 +235,7 @@ export const TEAM = {
       id: "equipo-pablo-quintero",
       fotoId: "consejo-pablo-quintero",
       name: "Pablo Quintero",
-      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      cvUrl: "#",
       email: "",
       links: [], linkedin: LINKEDIN.pabloQuintero,
     },
@@ -250,7 +250,7 @@ export const TEAM = {
     { id: "diseno-veronica-acosta", name: "Verónica Acosta", cvUrl: "#", email: "", links: [], linkedin: LINKEDIN.veronicaAcosta },
     { id: "operativo-saul-benarroch", name: "Saúl Benarroch", cvUrl: "#", email: "", links: [], linkedin: LINKEDIN.saulBenarroch },
     { id: "ti-luis-ojeda", name: "Luis Ojeda", cvUrl: "#", email: "", links: [], linkedin: LINKEDIN.luisOjeda },
-    { id: "operativo-manuel-oropeza", name: "Manuel Oropeza", cvUrl: "#", email: "", links: [], linkedin: LINKEDIN.manuelOropeza },
+    // Manuel Oropeza salió del equipo a pedido del cliente (10/2026).
   ],
   // Vuelve (15/09/2026): se habia retirado en 10/2026 porque un titulo de seccion sin
   // nadie debajo se leeria como un hueco, y el documento la trae con gente adentro.
@@ -288,7 +288,7 @@ export const TEAM = {
       fotoId: "consejo-pablo-quintero",
       name: "Pablo Quintero",
       bio: "Politólogo, Caracas, Venezuela.",
-      cvUrl: "https://www.pabloandresquintero.com/sobre-mi",
+      cvUrl: "#",
       email: "",
       links: [], linkedin: LINKEDIN.pabloQuintero,
     },

@@ -13,6 +13,7 @@
  */
 
 import { ALTO, DURACION, SUELO, mulberry32, xDeLaGuacamaya, forma } from "./motor";
+import { PLUMAJE_BASE } from "./plumajes";
 
 /* —— Color ——————————————————————————————————————————————————————————— */
 
@@ -85,25 +86,198 @@ const dibujarSierra = (ctx, ancho, desplazamiento, base, amplitud, semilla, colo
 
 /* —— Las figuras ————————————————————————————————————————————————————— */
 
+const TAU = Math.PI * 2;
+
+const elipse = (ctx, color, x, y, rx, ry, rot = 0) => {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, rot, 0, TAU);
+  ctx.fill();
+};
+
+const circulo = (ctx, color, x, y, r) => {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, TAU);
+  ctx.fill();
+};
+
 /**
- * La guacamaya azul y amarilla. Mira a la derecha; `angulo` la inclina según sube o
- * cae, `fase` mueve el ala.
+ * Los accesorios se dibujaron sobre una guacamaya algo más chica (cabeza en 11,-6 de
+ * radio 8; esta la tiene en 13,-5 de radio 9). En vez de recalcular cada trazo, se
+ * dibujan en ese espacio y se llevan a este con una escala y un desplazamiento.
  */
-export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1) => {
+const enEspacioDeAccesorios = (ctx, dibujo) => {
+  ctx.save();
+  ctx.translate(0.625, 1.75);
+  ctx.scale(1.125, 1.125);
+  dibujo();
+  ctx.restore();
+};
+
+/** Lo que va detrás del cuerpo: el fajo bajo las patas, orejas y cuernos tras la cabeza. */
+const accesoriosDetras = (ctx, extra) => {
+  if (extra === "dolar") {
+    for (let i = 0; i < 3; i += 1) {
+      ctx.fillStyle = i % 2 ? "#7ab873" : "#8fcb88";
+      ctx.fillRect(-5 + i, 8 + i * 1.6, 15, 6);
+      ctx.strokeStyle = "#3f7a3a";
+      ctx.lineWidth = 0.6;
+      ctx.strokeRect(-5 + i, 8 + i * 1.6, 15, 6);
+    }
+    ctx.fillStyle = "#e8c34a";
+    ctx.fillRect(1.5, 8, 2.6, 10);
+  } else if (extra === "oso") {
+    for (const ox of [6, 15]) circulo(ctx, "#5a341c", ox, -13, 3.8);
+    for (const ox of [6, 15]) circulo(ctx, "#e0a3a0", ox, -13, 1.8);
+  } else if (extra === "toro") {
+    ctx.strokeStyle = "#f3e6c4";
+    ctx.lineWidth = 2.6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(7, -11);
+    ctx.quadraticCurveTo(1, -17, 5, -21);
+    ctx.moveTo(15, -12);
+    ctx.quadraticCurveTo(21, -18, 17, -22);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+  }
+};
+
+/** Una gorra sobre la cabeza: la copa recortada al casco, con sus franjas, y la visera. */
+const gorra = (ctx, franjas, visera, adorno) => {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(11, -8.5, 8.6, Math.PI, 0);
+  ctx.closePath();
+  ctx.clip();
+  for (const [color, y, alto] of franjas) {
+    ctx.fillStyle = color;
+    ctx.fillRect(1, y, 22, alto);
+  }
+  adorno?.();
+  ctx.restore();
+  elipse(ctx, visera, 19, -8.6, 6.3, 1.5, 0.08);
+};
+
+/** Lo que va encima: flotador, pelota, botones, lentes, gorras y sombrero. */
+const accesoriosDelante = (ctx, extra) => {
+  if (extra === "roques") {
+    ctx.lineWidth = 4.5;
+    ctx.strokeStyle = "#ff5a5a";
+    ctx.beginPath();
+    ctx.ellipse(1, 5, 16, 5, 0, 0, TAU);
+    ctx.stroke();
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+    ctx.setLineDash([]);
+    elipse(ctx, "#111", 14.8, -6.8, 3.8, 2.9);
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(11, -7.5);
+    ctx.lineTo(5, -8);
+    ctx.stroke();
+    elipse(ctx, "rgba(255,255,255,0.7)", 13.6, -7.8, 1.2, 0.6, -0.4);
+  } else if (extra === "pelotera") {
+    circulo(ctx, "#fbf8f0", 5, 11.5, 3.4);
+    ctx.strokeStyle = "#d6282b";
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.arc(2.6, 11.5, 2.4, -0.9, 0.9);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(7.4, 11.5, 2.4, Math.PI - 0.9, Math.PI + 0.9);
+    ctx.stroke();
+    gorra(ctx, [["#f4f1ea", -18, 10], ["#1b2a4a", -10.6, 2]], "#14203a");
+    circulo(ctx, "#1b2a4a", 11, -17, 1.1);
+  } else if (extra === "tricolor") {
+    gorra(ctx, [["#ffcc00", -18, 4.4], ["#0b3fa8", -13.6, 2.6], ["#d21f2a", -11, 2.6]], "#d21f2a", () => {
+      for (let i = 0; i < 8; i += 1) {
+        const an = Math.PI * (1.12 + i * 0.11);
+        circulo(ctx, "#fff", 11 + Math.cos(an) * 6.8, -6.2 + Math.sin(an) * 6.8, 0.55);
+      }
+    });
+  } else if (extra === "liqui") {
+    for (const [bx, by] of [[8, -3], [9, 0.5], [9.5, 4], [9, 7.5]]) circulo(ctx, "#d9b44a", bx, by, 1);
+    // El sombrero llanero.
+    elipse(ctx, "#2b1d12", 11, -13, 11.5, 2.3);
+    ctx.beginPath();
+    ctx.moveTo(5, -13);
+    ctx.lineTo(6, -20);
+    ctx.quadraticCurveTo(11, -22, 16, -20);
+    ctx.lineTo(17, -13);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#7a1f1f";
+    ctx.fillRect(5.4, -15.6, 11.2, 1.8);
+  } else if (extra === "toro") {
+    ctx.strokeStyle = "#d9b44a";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(22.4, -1.2, 2, 0, TAU);
+    ctx.stroke();
+  }
+};
+
+/** El zamuro arrepentido: el plumaje que cambia el ave entera. */
+const dibujarZamuroJugador = (ctx, fase) => {
+  const w = Math.sin(fase);
+  ctx.scale(-1, 1);
+  ctx.fillStyle = "#17141c";
+  ctx.beginPath();
+  ctx.moveTo(-4, -2);
+  ctx.quadraticCurveTo(-10, -14 - w * 10, -30, -8 - w * 16);
+  ctx.lineTo(-24, -2 - w * 8);
+  ctx.lineTo(-30, 0 - w * 10);
+  ctx.quadraticCurveTo(-12, 4, -4, 4);
+  ctx.moveTo(4, -2);
+  ctx.quadraticCurveTo(10, -14 - w * 10, 28, -10 - w * 16);
+  ctx.lineTo(22, -3 - w * 8);
+  ctx.lineTo(26, -1 - w * 10);
+  ctx.quadraticCurveTo(12, 4, 4, 4);
+  ctx.fill();
+  elipse(ctx, "#1f1b24", 0, 1, 13, 7);
+  circulo(ctx, "#4a4550", -13, -1, 4.5);
+  ctx.fillStyle = "#cfc6b8";
+  ctx.beginPath();
+  ctx.moveTo(-17, -2);
+  ctx.lineTo(-23, 0);
+  ctx.lineTo(-17, 1.5);
+  ctx.fill();
+  circulo(ctx, "#ff6a3d", -14, -2, 1);
+};
+
+/**
+ * La guacamaya, con el plumaje que lleve puesto. Mira a la derecha; `angulo` la inclina
+ * según sube o cae, `fase` mueve el ala.
+ */
+export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1, plumaje = PLUMAJE_BASE) => {
+  const c = plumaje.c;
+  const extra = plumaje.extra;
   ctx.save();
   ctx.globalAlpha = alfa;
   ctx.translate(x, y);
   ctx.rotate(angulo);
 
+  if (extra === "zamuro") {
+    enEspacioDeAccesorios(ctx, () => dibujarZamuroJugador(ctx, fase));
+    ctx.restore();
+    return;
+  }
+
+  enEspacioDeAccesorios(ctx, () => accesoriosDetras(ctx, extra));
+
   // La cola larga, en dos plumas.
-  ctx.fillStyle = "#1a58ad";
+  ctx.fillStyle = c.cola;
   ctx.beginPath();
   ctx.moveTo(-12, 2);
   ctx.quadraticCurveTo(-30, 4, -40, 14);
   ctx.quadraticCurveTo(-28, 8, -12, 7);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#2f7fe0";
+  ctx.fillStyle = c.colaB;
   ctx.beginPath();
   ctx.moveTo(-12, 0);
   ctx.quadraticCurveTo(-28, -1, -38, 6);
@@ -111,55 +285,54 @@ export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1) => {
   ctx.closePath();
   ctx.fill();
 
-  // El cuerpo azul y el pecho amarillo.
-  ctx.fillStyle = "#1f6fd1";
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 17, 12, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#ffc928";
-  ctx.beginPath();
-  ctx.ellipse(4, 5, 11, 7, -0.2, 0, Math.PI * 2);
-  ctx.fill();
+  // El cuerpo y el pecho.
+  elipse(ctx, c.cuerpo, 0, 0, 17, 12);
+  elipse(ctx, c.barriga, 4, 5, 11, 7, -0.2);
+  if (extra === "brillo") elipse(ctx, "rgba(255,255,255,0.45)", -3, -6, 8, 2.5, -0.2);
 
-  // La cabeza: frente verde, cara blanca, ojo y pico negro curvo.
-  ctx.fillStyle = "#1f6fd1";
-  ctx.beginPath();
-  ctx.arc(13, -5, 9, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#3aa66b";
+  // La cabeza: frente, cara, ojo y pico curvo.
+  circulo(ctx, c.cabeza, 13, -5, 9);
+  ctx.fillStyle = c.frente;
   ctx.beginPath();
   ctx.arc(12, -11, 4.5, Math.PI, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#f4efe6";
-  ctx.beginPath();
-  ctx.ellipse(16, -4, 5, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#111";
-  ctx.beginPath();
-  ctx.arc(16.5, -6, 1.7, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#1d1d22";
+  elipse(ctx, c.cara, 16, -4, 5, 4);
+  if (extra === "turpial") {
+    // El antifaz azul y el ojo amarillo del turpial.
+    elipse(ctx, "#3c7be0", 16.5, -6, 3.8, 3);
+    circulo(ctx, "#ffd27a", 16.5, -6, 1.8);
+    circulo(ctx, "#111", 16.7, -6, 1);
+  } else {
+    circulo(ctx, "#111", 16.5, -6, 1.7);
+  }
+  ctx.fillStyle = c.pico;
   ctx.beginPath();
   ctx.moveTo(20, -7);
   ctx.quadraticCurveTo(29, -6, 27, 1);
   ctx.quadraticCurveTo(24, -2, 20, -1);
   ctx.closePath();
   ctx.fill();
+  if (extra === "roja") {
+    // El pico claro de la roja, con la punta oscura.
+    ctx.fillStyle = "#1c1c1c";
+    ctx.beginPath();
+    ctx.moveTo(24.5, -2);
+    ctx.lineTo(27, 1);
+    ctx.lineTo(27.4, -2.6);
+    ctx.closePath();
+    ctx.fill();
+  }
 
-  // El ala, que bate. Por debajo asoma el amarillo.
+  // El ala, que bate. Por debajo asoma el otro color.
   const batida = Math.sin(fase) * 0.9;
   ctx.save();
   ctx.translate(-2, -2);
   ctx.rotate(-0.4 + batida);
-  ctx.fillStyle = "#e0a91f";
-  ctx.beginPath();
-  ctx.ellipse(-6, -2, 14, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#1556a8";
-  ctx.beginPath();
-  ctx.ellipse(-7, -4, 14, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
+  elipse(ctx, c.alaBajo, -6, -2, 14, 6);
+  elipse(ctx, c.ala, -7, -4, 14, 6);
   ctx.restore();
+
+  enEspacioDeAccesorios(ctx, () => accesoriosDelante(ctx, extra));
 
   ctx.restore();
 };
@@ -282,7 +455,7 @@ const dibujarZamuro = (ctx, o) => {
   ctx.fill();
 };
 
-const dibujarTormenta = (ctx, o, conRayos) => {
+const dibujarTormenta = (ctx, o, conRayos, rayo) => {
   const { x, y, w, h } = o;
   ctx.fillStyle = "#4a4766";
   ctx.beginPath();
@@ -295,8 +468,14 @@ const dibujarTormenta = (ctx, o, conRayos) => {
   ctx.arc(x + w / 6, y - 14, h / 3, 0, Math.PI * 2);
   ctx.fill();
   // El rayo, de vez en cuando: avisa de que esa nube no se atraviesa.
+  // Con la guacamaya del Catatumbo el rayo sale morado, con su resplandor.
   if (conRayos && Math.sin(o.fase * 2.3) > 0.82) {
-    ctx.strokeStyle = "#ffe25a";
+    ctx.save();
+    ctx.strokeStyle = rayo?.trazo ?? "#ffe25a";
+    if (rayo) {
+      ctx.shadowColor = rayo.sombra;
+      ctx.shadowBlur = 18;
+    }
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x + 6, y + 18);
@@ -304,6 +483,7 @@ const dibujarTormenta = (ctx, o, conRayos) => {
     ctx.lineTo(x + 6, y + 34);
     ctx.lineTo(x - 6, y + 54);
     ctx.stroke();
+    ctx.restore();
   }
 };
 
@@ -311,9 +491,10 @@ const dibujarTormenta = (ctx, o, conRayos) => {
 
 /**
  * Dibuja el estado `p` del motor. `ahora` es el reloj real (para titilar luces y batir
- * alas aunque el juego esté en la portada); `reducido` quita los destellos.
+ * alas aunque el juego esté en la portada); `reducido` quita los destellos y la estela;
+ * `plumaje` es el que lleva puesto la guacamaya.
  */
-export const dibujar = (ctx, p, escena, ahora, { reducido = false } = {}) => {
+export const dibujar = (ctx, p, escena, ahora, { reducido = false, plumaje = PLUMAJE_BASE } = {}) => {
   const { ancho } = escena;
   const prog = p.t / DURACION;
 
@@ -381,7 +562,7 @@ export const dibujar = (ctx, p, escena, ahora, { reducido = false } = {}) => {
     if (o.tipo === "edificio") dibujarEdificio(ctx, o, prog, ahora);
     else if (o.tipo === "papagayo") dibujarPapagayo(ctx, o);
     else if (o.tipo === "zamuro") dibujarZamuro(ctx, o);
-    else dibujarTormenta(ctx, o, !reducido);
+    else dibujarTormenta(ctx, o, !reducido, plumaje.rayo);
   }
 
   // Lo que hay que recoger.
@@ -404,7 +585,34 @@ export const dibujar = (ctx, p, escena, ahora, { reducido = false } = {}) => {
   const angulo = Math.max(-0.5, Math.min(0.7, p.vy / 700));
   const fase = p.aleteo > 0 ? ahora * 40 : ahora * 9;
   const parpadeo = p.invulnerable > 0 && Math.floor(ahora * 12) % 2 === 0 ? 0.35 : 1;
-  dibujarGuacamaya(ctx, gx, p.y, angulo, fase, parpadeo);
+
+  // La estela de los plumajes que brillan: chispas que nacen detrás y se quedan atrás.
+  const dt = Math.min(1 / 30, Math.max(0, ahora - (escena.ultimoCuadro ?? ahora)));
+  escena.ultimoCuadro = ahora;
+  escena.rastro = (escena.rastro ?? []).filter((q) => q.vida > 0);
+  if (plumaje.rastro && !reducido && !p.terminada) {
+    for (let n = Math.random() < dt * 30 ? 1 : 0; n > 0; n -= 1) {
+      escena.rastro.push({
+        x: gx - 18,
+        y: p.y + (Math.random() - 0.5) * 10,
+        vx: -30 - Math.random() * 40,
+        vy: (Math.random() - 0.5) * 40,
+        r: 1 + Math.random() * 1.4,
+        color: plumaje.rastro[Math.random() < 0.5 ? 0 : 1],
+        vida: 0.7,
+      });
+    }
+  }
+  for (const q of escena.rastro) {
+    q.x += q.vx * dt;
+    q.y += q.vy * dt;
+    q.vida -= dt * 1.4;
+    ctx.globalAlpha = Math.max(0, Math.min(1, q.vida));
+    circulo(ctx, q.color, q.x, q.y, q.r);
+  }
+  ctx.globalAlpha = 1;
+
+  dibujarGuacamaya(ctx, gx, p.y, angulo, fase, parpadeo, plumaje);
 
   // Los efectos: el «+10» de cada mango, que sube y se apaga.
   escena.efectos = escena.efectos.filter((e) => ahora - e.desde < 0.8);

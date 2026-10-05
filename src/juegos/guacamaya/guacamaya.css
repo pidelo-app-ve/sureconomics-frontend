@@ -54,7 +54,8 @@
 }
 
 .se-guaca--portada .se-guaca__hud,
-.se-guaca--fin .se-guaca__hud {
+.se-guaca--fin .se-guaca__hud,
+.se-guaca--tienda .se-guaca__hud {
   opacity: 0;
 }
 
@@ -351,7 +352,8 @@
 }
 
 .se-guaca--jugando .se-guaca__pie,
-.se-guaca--pausa .se-guaca__pie {
+.se-guaca--pausa .se-guaca__pie,
+.se-guaca--tienda .se-guaca__pie {
   opacity: 0;
   visibility: hidden;
 }
@@ -385,6 +387,149 @@
 @keyframes se-guaca-entra {
   from { opacity: 0; transform: translateY(8px) scale(0.97); }
   to { opacity: 1; transform: none; }
+}
+
+/* —— La tienda de plumajes ——
+   Va arriba y no centrada: es más alta que el escenario y se recorre con el dedo. Sin
+   el pie del patrocinio, que taparía la última fila. */
+.se-guaca__pantalla--tienda {
+  place-items: start center;
+  padding: 18px 14px 22px;
+  background: rgba(29, 22, 48, 0.9);
+  overscroll-behavior: contain;
+  user-select: none;
+}
+
+.se-guaca__tienda {
+  width: min(460px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.se-guaca__saldo {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.se-guaca__saldo strong {
+  color: var(--guaca-mango);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__saldo .se-guaca__icono-mango,
+.se-guaca__alcancia .se-guaca__icono-mango {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.se-guaca__alcancia {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__plumajes {
+  list-style: none;
+  margin: 4px 0 6px;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.se-guaca__plumaje {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 10px 12px;
+  border: 1px solid rgba(255, 244, 220, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 244, 220, 0.05);
+}
+
+.se-guaca__plumaje--puesto {
+  border-color: var(--guaca-mango);
+  background: rgba(255, 201, 40, 0.1);
+}
+
+.se-guaca__vista {
+  width: 120px;
+  height: 72px;
+  max-width: 100%;
+}
+
+.se-guaca__plumaje-nombre {
+  font-size: 0.9rem;
+  line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.se-guaca__precio {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--guaca-mango);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__nota {
+  flex: 1;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: rgba(255, 244, 220, 0.75);
+}
+
+.se-guaca__chip {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 244, 220, 0.3);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--guaca-crema);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.se-guaca__chip:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.se-guaca__chip--comprar {
+  border-color: transparent;
+  background: var(--guaca-mango);
+  color: var(--guaca-tinta);
+}
+
+.se-guaca__chip--pagar {
+  border-color: transparent;
+  background: #ff8a4c;
+  color: #2a0f00;
+}
+
+.se-guaca__chip--puesto:disabled {
+  opacity: 1;
+  border-color: var(--guaca-mango);
+  color: var(--guaca-mango);
+}
+
+.se-guaca__chip:focus-visible {
+  outline: 2px solid var(--guaca-crema);
+  outline-offset: 2px;
 }
 
 @media (max-width: 520px) {

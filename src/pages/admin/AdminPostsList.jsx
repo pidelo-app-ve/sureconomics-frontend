@@ -327,9 +327,18 @@ export const AdminPostsList = () => {
 
             {state.status === "success" && state.items.length > 0 ? (
                 <>
-                    <p className="se-text-body" style={{ marginBottom: "1rem" }}>
-                        Página {meta?.page ?? page} de {totalPages} — {meta?.total ?? state.items.length} en total
-                    </p>
+                    <div className="se-admin-paginas">
+                        <p className="se-text-body" style={{ margin: 0 }}>
+                            Página {meta?.page ?? page} de {totalPages} — {meta?.total ?? state.items.length} en total
+                        </p>
+                        <Pagination
+                            page={page}
+                            totalPages={totalPages}
+                            onPageChange={setPage}
+                            compacta
+                            etiqueta="Paginación (arriba)"
+                        />
+                    </div>
                     {esMovil ? (
                         <ul className="se-admin-tarjetas">
                             {state.items.map((row) => {
@@ -506,7 +515,15 @@ export const AdminPostsList = () => {
                         </table>
                     </div>
                     )}
-                    <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                    <Pagination
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={(n) => {
+                            setPage(n);
+                            // Desde la de abajo, volver arriba: la página nueva empieza ahí.
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                    />
                 </>
             ) : null}
 

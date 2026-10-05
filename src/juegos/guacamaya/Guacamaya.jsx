@@ -16,7 +16,8 @@ import {
   puntuacion,
   semillaDelDia,
 } from "./motor";
-import { crearEscena, dibujar, efecto } from "./dibujo";
+import { crearEscena, dibujar, dibujarGuacamaya, efecto } from "./dibujo";
+import { PLUMAJES, comprar, guardarMangos, leerTienda, plumajePorId, ponerse } from "./plumajes";
 import { apuntar, resumen } from "./registro";
 import "./guacamaya.css";
 
@@ -26,7 +27,8 @@ import "./guacamaya.css";
  * Este componente solo junta las piezas: el motor (`motor.js`) decide qué pasa, el
  * dibujo (`dibujo.js`) lo pinta en un canvas y el registro (`registro.js`) recuerda
  * récord y racha. Aquí viven el bucle de fotogramas, la entrada (dedo, ratón, teclado)
- * y las tres pantallas que tapan el escenario: la de inicio, la pausa y la final.
+ * y las pantallas que tapan el escenario: la de inicio, la pausa, la final y la tienda
+ * de plumajes (`plumajes.js`), donde se gastan los mangos que llegaron a casa.
  *
  * ## Lo que se decidió, y por qué
  *
@@ -85,6 +87,23 @@ const IconoMango = () => (
   </svg>
 );
 
+/** La vista previa de un plumaje en la tienda: la guacamaya quieta, en su canvas. */
+const VistaPlumaje = ({ plumaje }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const lienzo = ref.current;
+    if (!lienzo) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    lienzo.width = Math.round(120 * dpr);
+    lienzo.height = Math.round(72 * dpr);
+    const ctx = lienzo.getContext("2d");
+    ctx.setTransform(1.45 * dpr, 0, 0, 1.45 * dpr, 64 * dpr, 42 * dpr);
+    dibujarGuacamaya(ctx, 0, 0, -0.08, 1.1, 1, plumaje);
+  }, [plumaje]);
+  return <canvas ref={ref} className="se-guaca__vista" aria-hidden="true" />;
+};
+VistaPlumaje.propTypes = { plumaje: PropTypes.object.isRequired };
+
 export const Guacamaya = ({ patrocinio }) => {
   const escenarioRef = useRef(null);
   const lienzoRef = useRef(null);
@@ -101,6 +120,13 @@ export const Guacamaya = ({ patrocinio }) => {
   const [dolar, setDolar] = useState(null);
   const [memoria, setMemoria] = useState(() => resumen());
   const [dia] = useState(() => diaDeCaracas());
+  const [tienda, setTienda] = useState(() => leerTienda());
+  // Comprar pide dos toques: el primero marca el plumaje, el segundo paga.
+  const [porConfirmar, setPorConfirmar] = useState(null);
+  // El bucle de fotogramas lee el plumaje de una referencia: cambiarlo no lo reinicia.
+  const plumajeRef = useRef(plumajePorId(tienda.puesto));
+  plumajeRef.current = plumajePorId(tienda.puesto);
+  const volverDeTiendaRef = useRef("portada");
 
   const cambiarFase = useCallback((f) => {
     faseRef.current = f;
@@ -148,6 +174,8 @@ export const Guacamaya = ({ patrocinio }) => {
       const puntos = puntuacion(p);
       const guardado = apuntar(puntos, dia);
       setMemoria(resumen(dia));
+      // Solo llegan a la alcancía los mangos que llegaron a casa.
+      if (p.llego && p.mangos > 0) setTienda(guardarMangos(p.mangos));
       setFin({
         llego: p.llego,
         puntos,
@@ -197,7 +225,7 @@ export const Guacamaya = ({ patrocinio }) => {
           p.aleteo = 0;
           if (!reducido) p.recorrido += 30 * dt;
         }
-        dibujar(ctx, p, escena, ahora, { reducido });
+        dibujar(ctx, p, escena, ahora, { reducido, plumaje: plumajeRef.current });
       }
       raf = requestAnimationFrame(cuadro);
     };
@@ -229,6 +257,23 @@ export const Guacamaya = ({ patrocinio }) => {
     // El foco al escenario: desde ahí la barra espaciadora aletea sin desplazar la página.
     escenarioRef.current?.focus({ preventScroll: true });
   }, [cambiarFase, dia]);
+
+  const abrirTienda = () => {
+    volverDeTiendaRef.current = faseRef.current;
+    setPorConfirmar(null);
+    cambiarFase("tienda");
+  };
+
+  const cerrarTienda = () => {
+    setPorConfirmar(null);
+    cambiarFase(volverDeTiendaRef.current);
+  };
+
+  const pagar = (id) => {
+    const nueva = comprar(id);
+    setPorConfirmar(null);
+    if (nueva) setTienda(nueva);
+  };
 
   const seguir = useCallback(() => {
     cambiarFase("jugando");
@@ -347,9 +392,15 @@ export const Guacamaya = ({ patrocinio }) => {
               Cae la tarde frente al Ávila. Esquive papagayos, zamuros y tormentas, recoja
               mangos y llegue a casa antes de que oscurezca.
             </p>
-            <button type="button" className="se-guaca__boton" onClick={empezar}>
-              Volar
-            </button>
+            <div className="se-guaca__acciones">
+              <button type="button" className="se-guaca__boton" onClick={empezar}>
+                Volar
+              </button>
+              <button type="button" className="se-guaca__secundario se-guaca__alcancia" onClick={abrirTienda}>
+                <IconoMango />
+                {tienda.mangos} · Plumajes
+              </button>
+            </div>
             <p className="se-guaca__ayuda">Toque la pantalla o pulse la barra espaciadora para aletear.</p>
             <p className="se-guaca__reto">
               Reto del {fechaLarga(dia)}: el mismo vuelo para todos, hoy.
@@ -389,6 +440,12 @@ export const Guacamaya = ({ patrocinio }) => {
               {fin.llego
                 ? `Recogió ${fin.mangos} ${fin.mangos === 1 ? "mango" : "mangos"} y llegó con ${fin.vidas} ${fin.vidas === 1 ? "vida" : "vidas"}.`
                 : `Recogió ${fin.mangos} ${fin.mangos === 1 ? "mango" : "mangos"}. Le faltaron ${fin.faltaban} segundos para llegar.`}
+              {fin.llego && fin.mangos > 0
+                ? ` Guardó ${fin.mangos} en casa: ya tiene ${tienda.mangos} para plumajes.`
+                : ""}
+              {!fin.llego && fin.mangos > 0
+                ? ` ${fin.mangos === 1 ? "El mango de este vuelo se perdió" : `Los ${fin.mangos} mangos de este vuelo se perdieron`}: solo se guardan los que llegan a casa.`
+                : ""}
               {fin.nuevoRecord ? " ¡Nuevo récord!" : ""}
               {fin.racha > 1 ? ` Racha: ${fin.racha} días seguidos.` : ""}
             </p>
@@ -406,10 +463,78 @@ export const Guacamaya = ({ patrocinio }) => {
               <button type="button" className="se-guaca__boton" onClick={empezar}>
                 Volar otra vez
               </button>
+              <button type="button" className="se-guaca__secundario se-guaca__alcancia" onClick={abrirTienda}>
+                <IconoMango />
+                {tienda.mangos} · Plumajes
+              </button>
               <button type="button" className="se-guaca__secundario" onClick={compartir}>
                 {copiado ? "Copiado: péguelo donde quiera" : "Compartir resultado"}
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {fase === "tienda" ? (
+        <div className="se-guaca__pantalla se-guaca__pantalla--tienda">
+          <div className="se-guaca__tienda">
+            <p className="se-guaca__kicker">Tienda del chaguaramo</p>
+            <h2 className="se-guaca__titulo se-guaca__titulo--chico">Plumajes</h2>
+            <p className="se-guaca__saldo">
+              <IconoMango />
+              Tiene <strong>{tienda.mangos}</strong> {tienda.mangos === 1 ? "mango guardado" : "mangos guardados"}
+            </p>
+            <ul className="se-guaca__plumajes">
+              {PLUMAJES.map((k) => {
+                const tiene = tienda.tiene.includes(k.id);
+                const puesto = tienda.puesto === k.id;
+                const falta = k.precio - tienda.mangos;
+                let accion;
+                if (puesto) {
+                  accion = (
+                    <button type="button" className="se-guaca__chip se-guaca__chip--puesto" disabled>
+                      Puesto
+                    </button>
+                  );
+                } else if (tiene) {
+                  accion = (
+                    <button type="button" className="se-guaca__chip" onClick={() => setTienda(ponerse(k.id))}>
+                      Ponérmelo
+                    </button>
+                  );
+                } else if (porConfirmar === k.id) {
+                  accion = (
+                    <button type="button" className="se-guaca__chip se-guaca__chip--pagar" onClick={() => pagar(k.id)}>
+                      Toque otra vez para pagar {k.precio}
+                    </button>
+                  );
+                } else if (falta > 0) {
+                  accion = (
+                    <button type="button" className="se-guaca__chip" disabled>
+                      Le faltan {falta}
+                    </button>
+                  );
+                } else {
+                  accion = (
+                    <button type="button" className="se-guaca__chip se-guaca__chip--comprar" onClick={() => setPorConfirmar(k.id)}>
+                      Comprar
+                    </button>
+                  );
+                }
+                return (
+                  <li key={k.id} className={`se-guaca__plumaje${puesto ? " se-guaca__plumaje--puesto" : ""}`}>
+                    <VistaPlumaje plumaje={k} />
+                    <strong className="se-guaca__plumaje-nombre">{k.nombre}</strong>
+                    <span className="se-guaca__precio">{tiene ? "Suyo" : `${k.precio} mangos`}</span>
+                    <span className="se-guaca__nota">{k.nota}</span>
+                    {accion}
+                  </li>
+                );
+              })}
+            </ul>
+            <button type="button" className="se-guaca__boton" onClick={cerrarTienda}>
+              Volver
+            </button>
           </div>
         </div>
       ) : null}

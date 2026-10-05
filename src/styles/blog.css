@@ -21684,3 +21684,13 @@ html {
     transition: none;
   }
 }
+
+/* Contenido del panel: cuántas hay y la paginación, también arriba de la lista. */
+.se-admin-paginas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}

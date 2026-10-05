@@ -16,6 +16,7 @@ import {
 import { temaPrincipal } from "../lib/contentFilter";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import { getPiece, getRelated } from "../services/publicContentService";
+import { piezaFromApi } from "../lib/pieza";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
@@ -52,32 +53,68 @@ const NoEncontrada = () => (
   </main>
 );
 
+/**
+ * La pieza que ya vino dentro del HTML, si es esta.
+ *
+ * `api/pieza.js` la mete en `window.__SE_PIEZA__` al servir la página, para que los
+ * buscadores vean el texto. Aprovecharla aquí ahorra pedirla otra vez a la API y, sobre
+ * todo, evita que el artículo que ya se veía desaparezca tras un «Cargando…» y vuelva.
+ * Se usa una sola vez: al navegar a otra pieza dentro del sitio, se pide como siempre.
+ */
+const tomarPiezaDelHtml = (slug) => {
+  // Solo lee. Se borra en el efecto, ya usada: React, en modo estricto, llama dos veces
+  // a la función que prepara el estado inicial, y borrarla aquí dejaba la segunda
+  // llamada sin pieza -- y la página la volvía a pedir a la API.
+  try {
+    const datos = window.__SE_PIEZA__;
+    return datos && datos.slug === slug ? piezaFromApi(datos) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const Pieza = () => {
   const { slug } = useParams();
   const { pathname } = useLocation();
   const { geoTop } = useTaxonomy();
-  const [state, setState] = useState({ status: "loading", pieza: null });
+  const [state, setState] = useState(() => {
+    const pieza = tomarPiezaDelHtml(slug);
+    return pieza ? { status: "success", pieza, delHtml: true } : { status: "loading", pieza: null };
+  });
   const [relacionadas, setRelacionadas] = useState([]);
 
   useEffect(() => {
     let alive = true;
+    const cargarRelacionadas = (pieza) => {
+      // Related pieces load after the piece and never block it: the article is
+      // what the reader came for, and a slow sidebar must not hold it back.
+      getRelated(pieza)
+        .then((items) => {
+          if (alive) setRelacionadas(items);
+        })
+        .catch(() => {
+          if (alive) setRelacionadas([]);
+        });
+    };
+    // La pieza ya llegó con el HTML: solo faltan las relacionadas.
+    if (state.delHtml && state.pieza?.slug === slug) {
+      try {
+        window.__SE_PIEZA__ = null;
+      } catch {
+        /* nada */
+      }
+      cargarRelacionadas(state.pieza);
+      return () => {
+        alive = false;
+      };
+    }
     setState({ status: "loading", pieza: null });
     setRelacionadas([]);
     getPiece(slug)
       .then((pieza) => {
         if (!alive) return;
         setState({ status: pieza ? "success" : "missing", pieza });
-        // Related pieces load after the piece and never block it: the article is
-        // what the reader came for, and a slow sidebar must not hold it back.
-        if (pieza) {
-          getRelated(pieza)
-            .then((items) => {
-              if (alive) setRelacionadas(items);
-            })
-            .catch(() => {
-              if (alive) setRelacionadas([]);
-            });
-        }
+        if (pieza) cargarRelacionadas(pieza);
       })
       .catch(() => {
         if (alive) setState({ status: "missing", pieza: null });
@@ -85,7 +122,18 @@ export const Pieza = () => {
     return () => {
       alive = false;
     };
+    // `state` no va en las dependencias a propósito: solo se mira para saber si la
+    // pieza del primer render vino con el HTML, y volver a correr con cada cambio de
+    // estado pediría la pieza en bucle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
+
+  // Una dirección que no lleva a ninguna pieza no debe quedar en los buscadores.
+  useEffect(() => {
+    if (state.status === "missing") {
+      applyPageMeta({ title: `Pieza no encontrada — ${BRAND.name}`, noindex: true });
+    }
+  }, [state.status]);
 
   const pieza = state.pieza;
   const cargando = useDelayedFlag(state.status === "loading");

@@ -11,7 +11,10 @@ export const NotFound = () => {
   useEffect(() => {
     applyPageMeta({
       title: `Página no encontrada — ${BRAND.name}`,
-      description: "La página que buscás no existe o fue movida.",
+      description: "La página que busca no existe o fue movida.",
+      // Responde 200 (el sitio es una sola página), así que esto es lo que le dice al
+      // buscador que no la guarde.
+      noindex: true,
     });
   }, []);
 

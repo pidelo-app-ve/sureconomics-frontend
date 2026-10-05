@@ -41,7 +41,9 @@ export const applyPageMeta = ({
   if (noindex) {
     upsertMeta("robots", "noindex, nofollow");
   } else {
-    upsertMeta("robots", "index, follow");
+    // Imagen grande y fragmento sin límite: sin `max-image-preview:large`, Google no
+    // usa la foto en grande en Noticias destacadas ni en Discover.
+    upsertMeta("robots", "index, follow, max-image-preview:large, max-snippet:-1");
   }
 };
 

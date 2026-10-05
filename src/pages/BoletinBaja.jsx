@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { unsubscribeFromNewsletter } from "../services/newsletterService";
+import { applyPageMeta } from "../lib/seo";
 
 /**
  * Darse de baja del boletín.
@@ -24,6 +25,11 @@ import { unsubscribeFromNewsletter } from "../services/newsletterService";
  */
 export const BoletinBaja = () => {
   const [params] = useSearchParams();
+
+  // Una página personal (lleva el token de quien se da de baja): fuera de los buscadores.
+  useEffect(() => {
+    applyPageMeta({ title: "Darse de baja del boletín — SurEconomics", noindex: true });
+  }, []);
   const token = params.get("token") || "";
   const [estado, setEstado] = useState({ status: token ? "loading" : "sin-token", email: "" });
 

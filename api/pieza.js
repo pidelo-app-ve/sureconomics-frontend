@@ -14,6 +14,24 @@
  * plain shell goes out with a 200. The reader gets the page; only the preview is
  * missing, and only until the next request.
  *
+ * ## Lo que ve un buscador (octubre de 2026)
+ *
+ * Hasta entonces esto solo ponía las etiquetas de la tarjeta: Google y Bing recibían el
+ * título y nada más -- cero párrafos --, porque el cuerpo lo pinta el navegador después.
+ * Bing apenas ejecuta JavaScript, y Google lo hace tarde y poco con un dominio joven:
+ * medido con `site:sureconomics.com`, las secciones salían con el título genérico de la
+ * plantilla y casi ninguna noticia con el suyo. Una noticia sin texto no compite.
+ *
+ * Así que ahora la página sale **con la pieza dentro**: titular, entradilla, firma,
+ * fecha, imagen y cuerpo en el `<div id="root">`, y la ficha `NewsArticle` (JSON-LD)
+ * que Google usa para Noticias destacadas. No es contenido para el robot y otro para la
+ * persona: es el mismo texto que React pinta al cargar, y React lo sustituye. Para que
+ * ese relevo no parpadee, la pieza también viaja en `window.__SE_PIEZA__` y la página
+ * la usa en vez de volver a pedirla (ver `pages/Pieza.jsx`).
+ *
+ * Y una dirección que no corresponde a ninguna pieza responde 404 con `noindex`. Antes
+ * respondía 200 con la portada: para un buscador, miles de páginas iguales.
+ *
  * The shell is read from the public domain and then *checked*, which is not
  * belt-and-braces caution -- it is the lesson from breaking this once. The first
  * version fetched `VERCEL_URL`, which has deployment protection on it, so what
@@ -211,28 +229,150 @@ const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion, tipo 
   return filas.join("\n    ");
 };
 
+/** El nombre del formato tal como lo ve el lector, para el kicker del HTML previo. */
+const NOMBRE_DE_FORMATO = {
+  noticia: "Noticias",
+  articulo: "Artículos",
+  editorial: "Editorial",
+  entrevista: "Entrevistas",
+  informe: "Informes y reportes",
+  podcast: "Podcast",
+};
+
+const LOGO = `${SITIO}/brand/v2/lockup-verde.png`;
+
+/**
+ * El cuerpo de la redacción, sin nada que pueda ejecutarse.
+ *
+ * Ya llega saneado: el backend lo pasa por una lista blanca al guardarlo, y es el mismo
+ * HTML que la página mete con `dangerouslySetInnerHTML`. Esto es una segunda red, porque
+ * aquí el HTML sale del servidor con nuestro dominio: scripts, estilos, marcos,
+ * manejadores `on…` y enlaces `javascript:` no pasan, aunque la primera red fallara.
+ */
+export const cuerpoSeguro = (html) =>
+  String(html ?? "")
+    .replace(/<(script|style|iframe|object|embed|form)[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<(script|style|iframe|object|embed|form|link|meta)[^>]*>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, '$1="#"');
+
+/** Para meter datos en un `<script>`: un `</script>` dentro del texto lo cortaría. */
+const jsonEnScript = (valor) =>
+  JSON.stringify(valor)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+
+const fechaLarga = (iso) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Caracas" });
+};
+
+/**
+ * La ficha de la pieza para Google (schema.org `NewsArticle`).
+ *
+ * Es lo que permite que Google la trate como noticia -- fecha, autor, medio, imagen --
+ * y la considere para Noticias destacadas. Todos los formatos van como `NewsArticle`:
+ * Google no hace nada distinto con los subtipos de opinión o análisis, y uno mal
+ * elegido es peor que el genérico.
+ */
+export const fichaDeNoticia = (pieza, { url, imagen }) => {
+  const autor = String(pieza.byline || "").trim();
+  const esRedaccion = !autor || /redacci[oó]n|sureconomics/i.test(autor);
+  const ficha = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    url,
+    headline: String(pieza.title).slice(0, 110),
+    description: descripcionDe(pieza) || undefined,
+    image: imagen?.url ? [imagen.url] : undefined,
+    datePublished: pieza.published_at || undefined,
+    dateModified: pieza.updated_at || pieza.published_at || undefined,
+    inLanguage: "es",
+    isAccessibleForFree: true,
+    articleSection: pieza.topics?.[0]?.name || NOMBRE_DE_FORMATO[pieza.format] || undefined,
+    author: esRedaccion
+      ? { "@type": "Organization", name: "SurEconomics", url: SITIO }
+      : { "@type": "Person", name: autor },
+    publisher: {
+      "@type": "NewsMediaOrganization",
+      name: "SurEconomics",
+      url: SITIO,
+      logo: { "@type": "ImageObject", url: LOGO },
+    },
+  };
+  return ficha;
+};
+
+/**
+ * La pieza en HTML sencillo, para el `<div id="root">`.
+ *
+ * Lleva las mismas clases que la página de verdad, así que mientras carga el JavaScript
+ * se ve como el artículo y no como texto suelto. React la reemplaza al montar.
+ */
+export const piezaEnHtml = (pieza, { imagen }) => {
+  const kicker = NOMBRE_DE_FORMATO[pieza.format] || "";
+  const firma = String(pieza.byline || "Redacción SurEconomics").trim();
+  const fecha = pieza.published_at ? fechaLarga(pieza.published_at) : "";
+  const entradilla = textoLlano(pieza.excerpt, 600);
+  const foto = pieza.image_asset?.url || pieza.featured_image_url;
+  const fotoAbsoluta = foto ? (foto.startsWith("/") ? `${SITIO}${foto}` : foto) : null;
+  const partes = [
+    `<main class="se-blog se-articles se-previa"><section class="se-section"><div class="se-container"><article class="se-piece">`,
+    kicker ? `<p class="se-piece__kicker">${escapar(kicker)}</p>` : "",
+    `<h1 class="se-piece__title">${escapar(pieza.title)}</h1>`,
+    entradilla ? `<p class="se-piece__lead">${escapar(entradilla)}</p>` : "",
+    `<p class="se-piece__meta">Por ${escapar(firma)}${fecha ? ` · <time datetime="${escapar(pieza.published_at)}">${escapar(fecha)}</time>` : ""}</p>`,
+    fotoAbsoluta && !/\.svg(\?|$)/i.test(fotoAbsoluta)
+      ? `<img class="se-previa__foto" src="${escapar(fotoAbsoluta)}" alt="${escapar(pieza.title)}" style="max-width:100%;height:auto" />`
+      : "",
+    `<div class="se-piece__body">${cuerpoSeguro(pieza.content)}</div>`,
+    `</article></div></section></main>`,
+  ];
+  void imagen;
+  return partes.filter(Boolean).join("");
+};
+
 /**
  * Replace the shell's title and add the piece's tags.
  *
  * Exported for the tests, which is the only way to check this without deploying:
  * a wrong `<head>` looks fine to a person and is invisible to every crawler.
  */
-export const inyectar = (shell, { titulo, ...resto }) => {
-  const bloque = etiquetas({ titulo, ...resto });
+export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, ...resto }) => {
+  let bloque = etiquetas({ titulo, ...resto });
+  if (ficha) {
+    bloque += `\n    <script type="application/ld+json">${jsonEnScript(ficha)}</script>`;
+  }
+  if (datos) {
+    // La pieza tal como la da la API, para que la página no la pida otra vez.
+    bloque += `\n    <script>window.__SE_PIEZA__=${jsonEnScript(datos)}</script>`;
+  }
+  if (noindex) {
+    bloque += `\n    <meta name="robots" content="noindex, follow" />`;
+  }
   // The shell carries the site's generic card for every other page (`index.html`,
   // between these markers). Left in, a piece would have two `og:image` tags and each
   // crawler would pick whichever it likes.
-  const sinGenerico = shell.replace(
+  let sinGenerico = shell.replace(
     /<!-- og:generico -->[\s\S]*?<!-- \/og:generico -->\s*/i,
     ""
   );
+  // El shell dice «indexar» para todo el sitio; una pieza que no existe lo cambia por
+  // «no indexar», en vez de dejar las dos y que cada buscador elija.
+  if (noindex) sinGenerico = sinGenerico.replace(/\s*<meta name="robots"[^>]*>/i, "");
   const conTitulo = sinGenerico.replace(
     /<title>[\s\S]*?<\/title>/i,
     titulo.includes("SurEconomics")
       ? `<title>${escapar(titulo)}</title>`
       : `<title>${escapar(titulo)} — SurEconomics</title>`
   );
-  return conTitulo.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
+  const conCabecera = conTitulo.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
+  if (!html) return conCabecera;
+  // El shell trae `<div id="root"></div>` vacío: la pieza va dentro.
+  return conCabecera.replace(/<div id="root"><\/div>/i, `<div id="root">${html}</div>`);
 };
 
 const conDeadline = async (url, ms) => {
@@ -318,6 +458,23 @@ export default async function handler(req, res) {
       `${API}/posts/${encodeURIComponent(slug)}`,
       LIMITE_MS
     );
+    if (respuesta.status === 404) {
+      // No hay pieza con ese nombre: un 404 de verdad, para que el buscador la olvide.
+      // La página sigue siendo la aplicación, que dice «No encontramos esta pieza».
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, s-maxage=60");
+      res.setHeader("X-Pieza-Meta", "pieza-inexistente");
+      res.status(404).send(
+        inyectar(shell, {
+          ...GENERICO,
+          titulo: "Pieza no encontrada — SurEconomics",
+          imagen: IMAGEN_DE_MARCA,
+          url: `${SITIO}/${seccion}/${slug}`,
+          noindex: true,
+        })
+      );
+      return;
+    }
     if (!respuesta.ok) {
       seco(`api-${respuesta.status}`);
       return;
@@ -334,15 +491,19 @@ export default async function handler(req, res) {
     return;
   }
 
+  const url = `${SITIO}/${seccion}/${slug}`;
+  const imagen =
+    imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url) ?? IMAGEN_DE_MARCA;
   const html = inyectar(shell, {
     titulo: pieza.title,
     descripcion: descripcionDe(pieza),
-    imagen:
-      imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url) ??
-      IMAGEN_DE_MARCA,
-    url: `${SITIO}/${seccion}/${slug}`,
+    imagen,
+    url,
     publicado: pieza.published_at || null,
     seccion: pieza.topics?.[0]?.name || null,
+    html: piezaEnHtml(pieza, { imagen }),
+    ficha: fichaDeNoticia(pieza, { url, imagen }),
+    datos: pieza,
   });
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");

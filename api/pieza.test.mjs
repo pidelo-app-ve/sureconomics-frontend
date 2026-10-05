@@ -22,6 +22,7 @@ const SHELL = `<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <title>Sur Economics — Economía, mercados e inversión</title>
     <!-- og:generico -->
     <meta property="og:image" content="https://www.sureconomics.com/brand/og-default.jpg" />
@@ -135,10 +136,6 @@ const casos = [
     if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
     throw new Error("ECONNREFUSED");
   }, "api-sin-respuesta"],
-  ["la API devuelve 404", async (url) => {
-    if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
-    return { ok: false, status: 404 };
-  }, "api-404"],
   ["la API devuelve 500", async (url) => {
     if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
     return { ok: false, status: 500 };
@@ -156,6 +153,64 @@ for (const [nombre, impl, marca] of casos) {
       res.body.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
   });
 }
+
+// —— 3b. Una pieza que no existe: 404 de verdad, con noindex ——
+//
+// Antes respondía 200 con la portada, y para un buscador eso es una página más igual a
+// todas. La aplicación sigue intacta: es ella la que dice «No encontramos esta pieza».
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  return { ok: false, status: 404 };
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "noticias", slug: "no-existe" } }, res);
+  check("pieza inexistente: 404", res.code === 404, String(res.code));
+  check("pieza inexistente: la app intacta", res.body.includes('id="root"') && res.body.includes('src="/assets/index-abc123.js"'));
+  check("pieza inexistente: noindex", res.body.includes('name="robots" content="noindex, follow"'));
+  check("pieza inexistente: una sola etiqueta robots", (res.body.match(/name="robots"/g) || []).length === 1);
+  check("pieza inexistente: cache corta", res.headers["Cache-Control"] === "public, s-maxage=60");
+});
+
+// —— 3c. Lo que ve un buscador: la pieza dentro del HTML y su ficha ——
+const CON_CUERPO = {
+  ...PIEZA,
+  slug: "concertacion-tripartita",
+  format: "articulo",
+  byline: "Pablo Quintero",
+  updated_at: "2026-08-25T16:00:00+00:00",
+  content: '<p>Primer párrafo con <strong>datos</strong>.</p><p onclick="robar()">Segundo.</p><script>alert(1)</script>',
+};
+await conFetch(fetchNormal(CON_CUERPO), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "concertacion-tripartita" } }, res);
+  const h = res.body;
+  const raiz = (h.match(/<div id="root">([\s\S]*?)<\/div><script/) || [])[1] || "";
+  check("el titular va en un h1 dentro del root", /<h1 class="se-piece__title">Concertación &quot;tripartita&quot;/.test(raiz));
+  check("el cuerpo va en el HTML", raiz.includes("Primer párrafo con <strong>datos</strong>"));
+  check("la firma y la fecha también", raiz.includes("Por Pablo Quintero") && raiz.includes('datetime="2026-08-25T15:00:00+00:00"'));
+  // En el HTML visible no queda nada ejecutable. (En `__SE_PIEZA__` el cuerpo viaja
+  // escapado como texto, igual que llegaba antes de la API a la página.)
+  check("sin scripts ni manejadores del cuerpo", !raiz.includes("<script") && !raiz.includes("onclick") && !raiz.includes("alert(1)"));
+  const ld = (h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
+  let ficha = null;
+  try { ficha = JSON.parse(ld); } catch { /* falla abajo */ }
+  check("ficha NewsArticle válida", ficha?.["@type"] === "NewsArticle", ld?.slice(0, 80));
+  check("ficha con titular, fechas, imagen, autor y medio",
+    ficha?.headline?.startsWith("Concertación") && ficha?.datePublished && ficha?.dateModified
+    && ficha?.image?.[0]?.includes("w_1200") && ficha?.author?.name === "Pablo Quintero"
+    && ficha?.publisher?.name === "SurEconomics" && ficha?.publisher?.logo?.url);
+  check("la URL de la ficha es la canónica", ficha?.mainEntityOfPage?.["@id"] === "https://www.sureconomics.com/articulos/concertacion-tripartita");
+  check("los datos para React viajan escapados",
+    h.includes("window.__SE_PIEZA__=") && !/window\.__SE_PIEZA__=[^\n]*<\/script>[^\n]*alert/.test(h) && h.includes("\\u003cscript"));
+});
+
+// Una firma de la redacción sale como el medio, no como una persona llamada «Redacción».
+await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Redacción SurEconomics" }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "noticias", slug: "x" } }, res);
+  const ld = (res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
+  check("la redacción firma como organización", JSON.parse(ld).author["@type"] === "Organization");
+});
 
 // —— 2b. La descripción sale de donde la haya ——
 //

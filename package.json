@@ -9,7 +9,8 @@
         "build": "vite build",
         "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
-        "test:og": "node api/pieza.test.mjs"
+        "test:og": "node api/pieza.test.mjs",
+        "test:sitemap": "node api/sitemap.test.mjs"
     },
     "dependencies": {
         "@tiptap/extension-link": "^3.28.0",

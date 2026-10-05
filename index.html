@@ -11,6 +11,10 @@
       rel="stylesheet"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <!-- Quién publica: la ficha del medio para Google (logo, nombre, redes). Va en todas
+         las páginas; las piezas añaden la suya, NewsArticle, desde api/pieza.js. -->
+    <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "NewsMediaOrganization", "@id": "https://www.sureconomics.com/#medio", "name": "SurEconomics", "url": "https://www.sureconomics.com/", "logo": {"@type": "ImageObject", "url": "https://www.sureconomics.com/brand/v2/lockup-verde.png"}, "description": "Medio digital de economía, mercados e inversión en América Latina.", "sameAs": ["https://www.instagram.com/sur_economics", "https://x.com/Sur_economics", "https://www.tiktok.com/@surecon0mics"]}, {"@type": "WebSite", "@id": "https://www.sureconomics.com/#sitio", "url": "https://www.sureconomics.com/", "name": "SurEconomics", "inLanguage": "es", "publisher": {"@id": "https://www.sureconomics.com/#medio"}}]}</script>
     <title>Sur Economics — Economía, mercados e inversión</title>
     <!-- og:generico -->
     <!-- La tarjeta de cualquier página que no sea una pieza. Estática y servida por

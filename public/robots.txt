@@ -1,0 +1,14 @@
+# SurEconomics — qué pueden recorrer los buscadores.
+#
+# Todo el sitio público, sí. El panel de la redacción, no: no hay nada para un lector y
+# solo gastaría el presupuesto de rastreo. La cuenta del lector NO se bloquea aquí a
+# propósito: sus páginas llevan `noindex`, y si el buscador no pudiera entrar no vería
+# esa etiqueta y podría seguir mostrando la dirección (ya pasó con /cuenta/entrar).
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /backoffice
+
+Sitemap: https://www.sureconomics.com/sitemap.xml
+Sitemap: https://www.sureconomics.com/sitemap-noticias.xml

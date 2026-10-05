@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMarketTicker } from "../../services/marketTickerService";
+import { rutaDeFormato } from "../../lib/pieza";
 import {
   ALTO,
   DURACION,
@@ -66,6 +67,9 @@ const fechaLarga = (dia) =>
   });
 
 const DIRECCION = "https://www.sureconomics.com/pausa";
+/** El listado de noticias. No hay `/noticias` a secas: se sale de la misma función que
+ * usa el resto del sitio, para que no se rompa si el listado cambia de dirección. */
+const NOTICIAS = rutaDeFormato("noticia");
 
 const Corazon = ({ lleno }) => (
   <svg viewBox="0 0 24 24" className={`se-guaca__corazon${lleno ? "" : " se-guaca__corazon--vacio"}`} aria-hidden="true" focusable="false">
@@ -391,11 +395,11 @@ export const Guacamaya = ({ patrocinio }) => {
             {dolar ? (
               <p className="se-guaca__dato">
                 Mientras volaba, el dólar oficial del BCV estaba en <strong>{dolar}</strong>.{" "}
-                <Link to="/noticias">Ver las noticias de hoy</Link>
+                <Link to={NOTICIAS}>Ver las noticias de hoy</Link>
               </p>
             ) : (
               <p className="se-guaca__dato">
-                <Link to="/noticias">Ver las noticias de hoy</Link>
+                <Link to={NOTICIAS}>Ver las noticias de hoy</Link>
               </p>
             )}
             <div className="se-guaca__acciones">

@@ -21473,3 +21473,64 @@ html {
   .se-invitacion__sello-marca { animation: none; stroke-dashoffset: 0; }
   .se-invitacion__cuenta { display: none; }
 }
+
+/* ─── Patrocinio compacto («Patrocinado por [marca]») ──────────────────────────
+   El crédito del juego de /pausa. Neutro a propósito: va sobre la pantalla de otro
+   (el juego) y no puede competir con ella. Gris y no cobre por lo mismo que la
+   etiqueta de `.se-ad__etiqueta`: el cobre es lo editorial. */
+.se-patrocinio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 24px;
+  color: var(--color-slate-2);
+}
+.se-patrocinio__etiqueta {
+  font-family: var(--se-font-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.se-patrocinio__marca {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-ink);
+  text-decoration: none;
+  border-radius: 3px;
+}
+.se-patrocinio__marca:hover .se-patrocinio__nombre { text-decoration: underline; }
+.se-patrocinio__marca:focus-visible {
+  outline: 2px solid var(--se-btn-focus-ring);
+  outline-offset: 2px;
+}
+/* Alto fijo y ancho libre: los logotipos son de todas las proporciones, y uno
+   apaisado a 20 px ya se lee. El ancho se acota para que uno muy largo no parta
+   la línea. */
+.se-patrocinio__logo {
+  display: block;
+  max-height: 20px;
+  max-width: 120px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.se-patrocinio__nombre {
+  font-family: var(--se-font-label);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Sobre fondo oscuro el texto se aclara, y el logotipo va sobre placa clara: casi
+   todos están hechos para papel blanco y sin placa la mitad desaparecen. */
+.se-patrocinio--oscuro { color: rgba(255, 255, 255, 0.72); }
+.se-patrocinio--oscuro .se-patrocinio__marca { color: #ffffff; }
+.se-patrocinio--oscuro .se-patrocinio__marca:focus-visible { outline-color: #ffffff; }
+.se-patrocinio--oscuro .se-patrocinio__logo {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 3px;
+  box-sizing: content-box;
+}

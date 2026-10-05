@@ -14,3 +14,4 @@ export { ReportGrid } from "./ReportGrid";
 export { PodcastGrid } from "./PodcastGrid";
 export { ListingPagination } from "./ListingPagination";
 export { AperturaPortada } from "./AperturaPortada";
+export { TarjetaPausa, InvitacionPausa } from "./TarjetaPausa";

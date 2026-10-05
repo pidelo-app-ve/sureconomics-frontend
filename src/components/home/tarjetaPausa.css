@@ -1,0 +1,183 @@
+/* ═══ UN MINUTO DE PAUSA: la tarjeta de la portada y la línea del final de pieza ═══
+   Ligera a propósito: va en el paquete principal, así que no lleva nada del juego,
+   solo una ilustración en SVG y un enlace. */
+
+.se-section.se-pausa-tarjeta {
+  padding-top: var(--se-space-md, 1.5rem);
+  padding-bottom: var(--se-space-md, 1.5rem);
+}
+
+.se-pausa-tarjeta__enlace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #2a2440;
+  color: #fff4dc;
+  text-decoration: none;
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-pausa-tarjeta__enlace:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(29, 22, 48, 0.28);
+  }
+}
+
+.se-pausa-tarjeta__enlace:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-pausa-tarjeta__escena {
+  position: relative;
+  min-height: 200px;
+}
+
+.se-pausa-tarjeta__paisaje {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* La guacamaya cruza despacio y bate las alas. */
+.se-pausa-tarjeta__vuelo {
+  position: absolute;
+  left: 18%;
+  top: 30%;
+  width: 92px;
+  animation: se-pausa-flota 3.2s ease-in-out infinite;
+}
+
+.se-pausa-ave {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.se-pausa-ave__ala {
+  transform-box: fill-box;
+  transform-origin: 80% 60%;
+  animation: se-pausa-aleteo 0.42s ease-in-out infinite alternate;
+}
+
+.se-pausa-tarjeta__cuerpo {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 8px;
+  padding: 24px 26px;
+}
+
+.se-pausa-tarjeta__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffc928;
+}
+
+.se-pausa-tarjeta__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: #fff4dc;
+}
+
+.se-pausa-tarjeta__texto {
+  margin: 0;
+  max-width: 30em;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 244, 220, 0.86);
+}
+
+.se-pausa-tarjeta__boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #ffc928;
+  color: #1d1630;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 0 #f2a90f;
+}
+
+.se-pausa-tarjeta__memoria {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 244, 220, 0.75);
+}
+
+@media (max-width: 700px) {
+  .se-pausa-tarjeta__enlace {
+    grid-template-columns: 1fr;
+  }
+  .se-pausa-tarjeta__escena {
+    min-height: 150px;
+  }
+  .se-pausa-tarjeta__cuerpo {
+    padding: 18px 20px 22px;
+  }
+}
+
+/* —— La línea del final de las piezas —— */
+.se-pausa-invitacion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: var(--se-space-md, 1.5rem) 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--color-slate);
+}
+
+.se-pausa-invitacion__ave {
+  flex: 0 0 auto;
+  width: 42px;
+  height: auto;
+  overflow: visible;
+}
+
+.se-pausa-invitacion a {
+  color: var(--se-accent-hover);
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+
+@keyframes se-pausa-flota {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(14px, -10px); }
+}
+
+@keyframes se-pausa-aleteo {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(22deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-pausa-tarjeta__vuelo,
+  .se-pausa-ave__ala {
+    animation: none;
+  }
+  .se-pausa-tarjeta__enlace {
+    transition: none;
+  }
+}

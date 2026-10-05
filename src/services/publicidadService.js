@@ -34,6 +34,9 @@ export const ESPACIOS = {
   PORTADA_NATIVO_ARTICULOS: "portada-nativo-articulos",
   PORTADA_BANNER: "portada-banner",
   LISTADO_PATROCINIO: "listado-patrocinio",
+  // «Patrocinado por» del juego de /pausa. Formato C, como la franja de los listados:
+  // se vende igual, apuntando la campaña a la sección `pausa`.
+  PAUSA_PATROCINIO: "pausa-patrocinio",
   LISTADO_NATIVO: "listado-nativo",
   ARTICULO_NATIVO: "articulo-nativo",
   ARTICULO_RAIL: "articulo-rail",

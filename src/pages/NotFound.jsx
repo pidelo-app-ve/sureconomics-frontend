@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { applyPageMeta } from "../lib/seo";
 import { BRAND } from "../data/surEconomicsMock";
+
+// La 404 no es una página que se visite a propósito: el juego se descarga solo si
+// alguien llega aquí, y convierte un enlace roto en un minuto agradable.
+const Guacamaya = lazy(() => import("../juegos/guacamaya/Guacamaya"));
 
 export const NotFound = () => {
   useEffect(() => {
@@ -27,6 +31,16 @@ export const NotFound = () => {
               Explorar artículos
             </Link>
           </div>
+        </div>
+      </section>
+      <section className="se-section" aria-label="Un minuto de pausa">
+        <div className="se-container" style={{ maxWidth: 560 }}>
+          <p className="se-text-body" style={{ marginBottom: "1rem" }}>
+            Ya que está aquí, un minuto de pausa:
+          </p>
+          <Suspense fallback={null}>
+            <Guacamaya />
+          </Suspense>
         </div>
       </section>
     </main>

@@ -1,0 +1,43 @@
+import { useEffect } from "react";
+import { applyPageMeta } from "../lib/seo";
+import { BRAND } from "../data/surEconomicsMock";
+import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
+import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
+
+/**
+ * `/pausa`: un minuto de juego entre lecturas.
+ *
+ * Es la dirección que se comparte («¿lo superas? sureconomics.com/pausa»), así que
+ * lleva su título y su descripción propios para que la tarjeta de WhatsApp o de X diga
+ * de qué se trata. Va con la cabecera y el pie del sitio: quien llega desde un enlace
+ * compartido tiene que ver dónde está y tener a un toque las noticias.
+ */
+export const Pausa = () => {
+  useEffect(() => {
+    applyPageMeta({
+      title: `Un minuto de pausa: la guacamaya va a su casa — ${BRAND.name}`,
+      description:
+        "Un juego de un minuto sobre Caracas al atardecer. Cada día, un vuelo nuevo y el mismo para todos: esquive papagayos y zamuros, recoja mangos y llegue a casa.",
+    });
+  }, []);
+
+  return (
+    <main className="se-blog">
+      <section className="se-section se-pausa">
+        <div className="se-container se-pausa__caja">
+          <header className="se-pausa__cabeza">
+            <p className="se-pausa__kicker">Un minuto de pausa</p>
+            <h1 className="se-pausa__titulo">Entre lectura y lectura, un vuelo</h1>
+            <p className="se-pausa__entrada">
+              Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su
+              resultado y vuelva a la lectura.
+            </p>
+          </header>
+          <Guacamaya patrocinio={<PatrocinioDelJuego />} />
+        </div>
+      </section>
+    </main>
+  );
+};
+
+export default Pausa;

@@ -1,0 +1,453 @@
+/* ═══ LA GUACAMAYA VA A SU CASA ═══════════════════════════════════════════
+   Solo se descarga con el juego (carga perezosa), así que no pesa en la portada.
+   La paleta es la del atardecer que pinta el canvas: el amarillo del mango para lo
+   que se pulsa, un malva de tarde para las pantallas, blanco cálido para el texto.
+   Todo en Host Grotesk, la letra del sitio. */
+
+.se-guaca {
+  --guaca-mango: #ffc928;
+  --guaca-mango-oscuro: #f2a90f;
+  --guaca-tinta: #1d1630;
+  --guaca-crema: #fff4dc;
+  --guaca-velo: rgba(34, 22, 54, 0.62);
+
+  position: relative;
+  width: 100%;
+  height: clamp(460px, 74svh, 720px);
+  overflow: hidden;
+  border-radius: 18px;
+  background: #2a2440;
+  color: var(--guaca-crema);
+  font-family: var(--se-font-ui, "Host Grotesk", system-ui, sans-serif);
+  /* Sin zoom por doble toque ni selección de texto: aquí se toca para aletear. */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  isolation: isolate;
+}
+
+.se-guaca:focus-visible {
+  box-shadow: 0 0 0 3px var(--guaca-mango);
+}
+
+.se-guaca__lienzo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* —— El marcador —— */
+.se-guaca__hud {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  padding: 12px 12px 0 14px;
+  display: grid;
+  gap: 6px;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  transition: opacity 200ms ease-out;
+}
+
+.se-guaca--portada .se-guaca__hud,
+.se-guaca--fin .se-guaca__hud {
+  opacity: 0;
+}
+
+.se-guaca__fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.se-guaca__tiempo {
+  min-width: 2.6em;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__camino {
+  --prog: 0;
+  position: relative;
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.se-guaca__camino-relleno {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--guaca-mango);
+  transform-origin: left center;
+  transform: scaleX(var(--prog));
+}
+
+/* La guacamaya pequeña que avanza por el camino hacia la casa. */
+.se-guaca__camino-ave {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--prog) * (100% - 22px));
+  width: 22px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50% 60% 45% 55%;
+  background: linear-gradient(180deg, #1f6fd1 55%, #ffc928 55%);
+  box-shadow: 0 0 0 2px rgba(29, 22, 48, 0.35);
+}
+
+.se-guaca__casa {
+  position: absolute;
+  right: -26px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -11px;
+  fill: var(--guaca-crema);
+}
+
+.se-guaca__mangos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 26px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__icono-mango {
+  width: 20px;
+  height: 20px;
+}
+
+.se-guaca__pausar {
+  pointer-events: auto;
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -6px -8px 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--guaca-crema);
+  cursor: pointer;
+}
+
+.se-guaca__pausar svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.se-guaca__pausar:focus-visible {
+  outline: 2px solid var(--guaca-mango);
+  outline-offset: -2px;
+}
+
+.se-guaca__vidas {
+  display: flex;
+  gap: 4px;
+}
+
+.se-guaca__corazon {
+  width: 18px;
+  height: 18px;
+  fill: #ff5a5f;
+  transition: transform 160ms ease-out, opacity 160ms ease-out;
+}
+
+.se-guaca__corazon--vacio {
+  fill: rgba(255, 255, 255, 0.25);
+  transform: scale(0.85);
+}
+
+/* —— Las pantallas: inicio, pausa y final —— */
+.se-guaca__pantalla {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  /* Abajo deja sitio al pie del patrocinio, que va por encima de las pantallas. */
+  padding: 20px 20px 52px;
+  overflow-y: auto;
+  background: var(--guaca-velo);
+  animation: se-guaca-velo 220ms ease-out both;
+}
+
+.se-guaca__tarjeta {
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  animation: se-guaca-entra 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.se-guaca__kicker {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--guaca-mango);
+}
+
+.se-guaca__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading, "Host Grotesk", system-ui, sans-serif);
+  font-size: clamp(1.9rem, 1.4rem + 2.6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--guaca-crema);
+}
+
+.se-guaca__titulo--chico {
+  font-size: 1.7rem;
+}
+
+.se-guaca__texto {
+  margin: 0;
+  max-width: 32em;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 244, 220, 0.9);
+  text-wrap: pretty;
+}
+
+.se-guaca__puntos {
+  margin: 0;
+  font-size: clamp(2.4rem, 2rem + 3vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--guaca-mango);
+}
+
+.se-guaca__puntos span {
+  font-size: 0.45em;
+  font-weight: 700;
+}
+
+.se-guaca__boton {
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--guaca-mango);
+  color: var(--guaca-tinta);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--guaca-mango-oscuro);
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+.se-guaca__boton:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--guaca-mango-oscuro);
+}
+
+.se-guaca__secundario {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 244, 220, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--guaca-crema);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.se-guaca__boton:focus-visible,
+.se-guaca__secundario:focus-visible {
+  outline: 2px solid var(--guaca-crema);
+  outline-offset: 3px;
+}
+
+/* Reiniciar desde la pausa: pequeño y lejos del centro, para que no lo pulse un
+   toque que solo quería seguir volando. */
+.se-guaca__reiniciar {
+  margin-top: 18px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 244, 220, 0.75);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.se-guaca__reiniciar:focus-visible {
+  outline: 2px solid var(--guaca-crema);
+  outline-offset: 2px;
+}
+
+.se-guaca__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.se-guaca__ayuda,
+.se-guaca__reto {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(255, 244, 220, 0.78);
+}
+
+.se-guaca__reto {
+  max-width: 30em;
+}
+
+.se-guaca__dato {
+  margin: 4px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.se-guaca__dato strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--guaca-mango);
+}
+
+.se-guaca__dato a {
+  color: var(--guaca-crema);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.se-guaca__pie {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 14px;
+  transition: opacity 200ms ease-out, visibility 200ms;
+}
+
+.se-guaca--jugando .se-guaca__pie,
+.se-guaca--pausa .se-guaca__pie {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.se-guaca__pie .se-patrocinio {
+  margin: 0;
+}
+
+/* En el juego el crédito va solo al pie de una pantalla grande: el logotipo puede
+   crecer un poco sobre los 20 px del crédito en línea, o no se lee. */
+.se-guaca__pie .se-patrocinio__logo {
+  max-height: 30px;
+}
+
+.se-guaca__patrocinio {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 244, 220, 0.75);
+}
+
+.se-guaca__patrocinio strong {
+  color: var(--guaca-crema);
+}
+
+@keyframes se-guaca-velo {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes se-guaca-entra {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 520px) {
+  .se-guaca {
+    border-radius: 14px;
+  }
+  .se-guaca__mangos {
+    margin-left: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-guaca__pantalla,
+  .se-guaca__tarjeta {
+    animation: se-guaca-velo 160ms ease-out both;
+  }
+  .se-guaca__boton,
+  .se-guaca__corazon {
+    transition: none;
+  }
+}
+
+/* —— La página /pausa ——
+   Una columna estrecha: el juego es vertical, como en el teléfono, y en escritorio
+   se agradece que no ocupe todo el ancho. */
+.se-section.se-pausa {
+  padding-top: var(--se-space-lg, 2rem);
+}
+
+.se-pausa__caja {
+  max-width: 560px;
+  display: grid;
+  gap: 18px;
+}
+
+.se-pausa__cabeza {
+  display: grid;
+  gap: 6px;
+}
+
+.se-pausa__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-pausa__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.se-pausa__entrada {
+  margin: 0;
+  color: var(--color-slate);
+  font-size: 1rem;
+  line-height: 1.5;
+}

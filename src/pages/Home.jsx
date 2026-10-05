@@ -5,6 +5,7 @@ import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud
 import { applyPageMeta } from "../lib/seo";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
+import { TarjetaPausa } from "../components/home/TarjetaPausa";
 import {
   ArticleCardGrid,
   ContentExplorer,
@@ -302,6 +303,10 @@ export const Home = () => {
               pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
           {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
+          {/* Un minuto de pausa, entre las noticias y lo que sigue: después de lo
+              urgente, antes de lo largo. Solo sin filtro: quien busca algo concreto
+              no vino a jugar. */}
+          {formatoApi === "noticia" && !isFiltered ? <TarjetaPausa /> : null}
           {i === 1 ? (
             <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
           ) : null}

@@ -87,6 +87,8 @@ export const router = createBrowserRouter([
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
             { path: "cookies", element: <Cookies /> },
+            // El juego se descarga al abrir la página, no con el resto del sitio.
+            { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },

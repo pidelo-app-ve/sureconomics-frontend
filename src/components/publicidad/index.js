@@ -4,6 +4,7 @@ export {
   FilaDeAnuncio,
   useHayAnuncio,
 } from "./EspacioPublicitario";
+export { PatrocinioCompacto } from "./PatrocinioCompacto";
 export {
   ESPACIOS_DE_SITIO,
   ProveedorDePublicidad,

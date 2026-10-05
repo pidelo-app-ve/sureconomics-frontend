@@ -19,6 +19,7 @@ import { getPiece, getRelated } from "../services/publicContentService";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
+import { InvitacionPausa } from "../components/home/TarjetaPausa";
 import {
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
@@ -236,6 +237,8 @@ export const Pieza = () => {
               <div className="se-piece__main">
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
+                {/* Para quien llegó al final: una línea, no un bloque. */}
+                <InvitacionPausa />
 
                 {/* La tarjeta nativa del cuerpo, detrás del texto y de las etiquetas.
                     Se probó a mitad del cuerpo, partiendo los párrafos, y el cliente

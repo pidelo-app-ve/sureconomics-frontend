@@ -57,7 +57,11 @@ export const GUIA_DE_FORMATO = {
   },
   C: {
     nombre: "Franja de patrocinio",
-    donde: "Sólo en los listados (Noticias, Artículos, Editorial…), encabezándolos.",
+    // El juego de /pausa también es C (`pausa-patrocinio`), pero no publica el arte:
+    // pinta el logotipo del anunciante, de su ficha. Decirlo aquí evita que alguien
+    // suba una franja pensando que es lo que sale en el juego.
+    donde:
+      "En los listados (Noticias, Artículos, Editorial…), encabezándolos. Y en el juego «Un minuto de pausa» como «Patrocinado por», con el logotipo del anunciante (el de su ficha, no este arte): para venderlo solo, elija la sección «Juego: Un minuto de pausa» en «Dónde sale».",
     arte: [
       {
         campo: "cinta",

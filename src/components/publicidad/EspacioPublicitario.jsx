@@ -37,7 +37,9 @@ Etiqueta.propTypes = {
   esCasa: PropTypes.bool,
 };
 
-const Envoltorio = ({ hueco, className, children }) => {
+// Exportado para el crédito compacto (`PatrocinioCompacto`): el clic de un patrocinio
+// tiene que pasar por el mismo salto que cuenta y redirige, no por una copia.
+export const Envoltorio = ({ hueco, className, children }) => {
   const destino = enlaceDeClic(hueco.enlace);
   if (!destino) return <div className={className}>{children}</div>;
   return (

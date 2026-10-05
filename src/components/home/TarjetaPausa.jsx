@@ -1,0 +1,121 @@
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { resumen } from "../../juegos/guacamaya/registro";
+import "./tarjetaPausa.css";
+
+/**
+ * «Un minuto de pausa» en la portada y al final de las piezas.
+ *
+ * Solo una ilustración y un enlace a `/pausa`: el juego no se descarga hasta que
+ * alguien lo abre. La ilustración es la misma escena del juego -- el Ávila, el sol que
+ * baja, la ciudad -- en SVG, con la guacamaya batiendo las alas por CSS (quieta si el
+ * sistema pide menos movimiento).
+ *
+ * Va entre Noticias y Artículos, no arriba del todo: la portada abre con el filtro y
+ * las noticias, que es lo que el socio fijó, y un juego delante haría que el sitio
+ * pareciera de juegos antes que de prensa.
+ */
+
+/** La guacamaya en SVG, mirando a la derecha. El ala tiene su propia clase para batir. */
+export const GuacamayaSvg = ({ className }) => (
+  <svg className={className} viewBox="-44 -22 76 44" aria-hidden="true" focusable="false">
+    <path d="M-12 2 Q-30 4 -40 14 Q-28 8 -12 7 Z" fill="#1a58ad" />
+    <path d="M-12 0 Q-28 -1 -38 6 Q-26 4 -12 5 Z" fill="#2f7fe0" />
+    <ellipse cx="0" cy="0" rx="17" ry="12" fill="#1f6fd1" />
+    <ellipse cx="4" cy="5" rx="11" ry="7" transform="rotate(-11 4 5)" fill="#ffc928" />
+    <circle cx="13" cy="-5" r="9" fill="#1f6fd1" />
+    <path d="M7.5 -11 A4.5 4.5 0 0 1 16.5 -11 Z" fill="#3aa66b" />
+    <ellipse cx="16" cy="-4" rx="5" ry="4" fill="#f4efe6" />
+    <circle cx="16.5" cy="-6" r="1.7" fill="#111" />
+    <path d="M20 -7 Q29 -6 27 1 Q24 -2 20 -1 Z" fill="#1d1d22" />
+    <g className="se-pausa-ave__ala">
+      <ellipse cx="-8" cy="-4" rx="14" ry="6" transform="rotate(-23 -8 -4)" fill="#e0a91f" />
+      <ellipse cx="-9" cy="-6" rx="14" ry="6" transform="rotate(-23 -9 -6)" fill="#1556a8" />
+    </g>
+  </svg>
+);
+GuacamayaSvg.propTypes = { className: PropTypes.string };
+GuacamayaSvg.defaultProps = { className: undefined };
+
+/** Lo que el juego recuerda de quien ya jugó, dicho en una línea. */
+const lineaDeMemoria = (m) => {
+  if (!m) return null;
+  if (m.mejorHoy) {
+    return `Su mejor de hoy: ${m.mejorHoy} pts${m.racha > 1 ? ` · racha de ${m.racha} días` : ""}.`;
+  }
+  if (m.racha > 0) return `No rompa su racha de ${m.racha} ${m.racha === 1 ? "día" : "días"}.`;
+  return null;
+};
+
+export const TarjetaPausa = () => {
+  // La memoria vive en el navegador: se lee después de montar.
+  const [memoria, setMemoria] = useState(null);
+  useEffect(() => setMemoria(resumen()), []);
+  const linea = lineaDeMemoria(memoria);
+
+  return (
+    <section className="se-section se-pausa-tarjeta" aria-labelledby="pausa-tarjeta-titulo">
+      <div className="se-container">
+        <Link to="/pausa" className="se-pausa-tarjeta__enlace">
+          <div className="se-pausa-tarjeta__escena" aria-hidden="true">
+            <svg className="se-pausa-tarjeta__paisaje" viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" focusable="false">
+              <defs>
+                <linearGradient id="pausa-cielo" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#d9655b" />
+                  <stop offset="0.65" stopColor="#f6a15f" />
+                  <stop offset="1" stopColor="#ffd89a" />
+                </linearGradient>
+              </defs>
+              <rect width="400" height="220" fill="url(#pausa-cielo)" />
+              <circle cx="285" cy="74" r="26" fill="#ffd36b" />
+              <path d="M0 150 C60 105 110 120 160 112 C210 104 250 80 300 98 C340 112 370 100 400 108 L400 220 L0 220Z" fill="#7b5aa6" />
+              <path d="M0 172 C50 150 90 158 140 150 C200 140 240 156 290 146 C340 138 370 150 400 146 L400 220 L0 220Z" fill="#3c7347" />
+              <g fill="#56466f">
+                <rect x="10" y="168" width="26" height="40" />
+                <rect x="40" y="158" width="20" height="50" />
+                <rect x="66" y="172" width="34" height="36" />
+                <rect x="108" y="150" width="22" height="58" />
+                <rect x="138" y="166" width="30" height="42" />
+                <rect x="176" y="160" width="18" height="48" />
+                <rect x="232" y="164" width="28" height="44" />
+                <rect x="266" y="152" width="22" height="56" />
+                <rect x="296" y="170" width="36" height="38" />
+                <rect x="340" y="160" width="24" height="48" />
+                <rect x="370" y="168" width="30" height="40" />
+              </g>
+              <rect y="206" width="400" height="14" fill="#2d2838" />
+              <rect y="204" width="400" height="2" fill="#f2b632" />
+            </svg>
+            <span className="se-pausa-tarjeta__vuelo">
+              <GuacamayaSvg className="se-pausa-ave" />
+            </span>
+          </div>
+          <div className="se-pausa-tarjeta__cuerpo">
+            <p className="se-pausa-tarjeta__kicker">Un minuto de pausa</p>
+            <h2 id="pausa-tarjeta-titulo" className="se-pausa-tarjeta__titulo">
+              La guacamaya va a su casa
+            </h2>
+            <p className="se-pausa-tarjeta__texto">
+              El reto de hoy: llévela a casa antes de que oscurezca. Un minuto, con un dedo.
+            </p>
+            <span className="se-pausa-tarjeta__boton">Jugar el reto de hoy</span>
+            {linea ? <p className="se-pausa-tarjeta__memoria">{linea}</p> : null}
+          </div>
+        </Link>
+      </div>
+    </section>
+  );
+};
+
+/** La versión de una línea, para el final de las piezas: premia a quien leyó entero. */
+export const InvitacionPausa = () => (
+  <p className="se-pausa-invitacion">
+    <GuacamayaSvg className="se-pausa-invitacion__ave" />
+    <span>
+      ¿Terminó de leer? <Link to="/pausa">Tómese un minuto: lleve la guacamaya a casa</Link>.
+    </span>
+  </p>
+);
+
+export default TarjetaPausa;

@@ -45,6 +45,16 @@ import { useTaxonomy } from "../../hooks/useTaxonomy";
 /** El grupo que no viene de la taxonomía: la portada no es un formato de contenido. */
 const PORTADA = { slug: "portada", nombre: "Portada" };
 
+/**
+ * El juego de /pausa, que tampoco es un formato: su página pide su hueco con
+ * `seccion: "pausa"`. Es lo que permite vender el patrocinio del juego por separado de
+ * la franja de los listados, que es el mismo formato (C).
+ */
+const PAUSA = { slug: "pausa", nombre: "Juego: Un minuto de pausa" };
+
+/** Las secciones que no tienen ni tema ni país con que comparar. */
+const SIN_CONTENIDO = new Set([PORTADA.slug, PAUSA.slug]);
+
 const GRUPOS = [
   {
     tipo: "seccion",
@@ -88,6 +98,7 @@ export const DondeSale = ({ valor, onChange }) => {
     return {
       seccion: [
         PORTADA,
+        PAUSA,
         ...(formats ?? []).map((f) => ({
           slug: f.slug,
           nombre: f.name_plural ?? f.name,
@@ -133,13 +144,14 @@ export const DondeSale = ({ valor, onChange }) => {
    * Comprobado contra el decisor real: con «Portada» + «Mercados e Inversión» la portada
    * devuelve cero; quitando el tema, sale.
    */
-  const marcaPortada = puestas.some(
-    (s) => s.tipo === "seccion" && s.valor === PORTADA.slug,
+  // El juego cae en el mismo caso que la portada: tampoco tiene tema ni país.
+  const marcaSinContenido = puestas.some(
+    (s) => s.tipo === "seccion" && SIN_CONTENIDO.has(s.valor),
   );
   const marcaContenido = puestas.some((s) => s.tipo === "tema" || s.tipo === "pais");
   const soloPortada =
-    marcaPortada &&
-    !puestas.some((s) => s.tipo === "seccion" && s.valor !== PORTADA.slug);
+    marcaSinContenido &&
+    !puestas.some((s) => s.tipo === "seccion" && !SIN_CONTENIDO.has(s.valor));
   const combinacionImposible = soloPortada && marcaContenido;
 
   const resumen = useMemo(() => {
@@ -252,8 +264,8 @@ export const DondeSale = ({ valor, onChange }) => {
 
       {combinacionImposible ? (
         <p className="se-donde__imposible">
-          <b>Así no va a salir en ninguna parte.</b> La portada no tiene tema ni país, y
-          las condiciones de grupos distintos se exigen a la vez. Marque también alguna
+          <b>Así no va a salir en ninguna parte.</b> La portada y el juego no tienen
+          tema ni país, y las condiciones de grupos distintos se exigen a la vez. Marque también alguna
           sección de contenido, o quite los temas y países.
         </p>
       ) : null}

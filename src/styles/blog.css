@@ -21534,3 +21534,153 @@ html {
   border-radius: 3px;
   box-sizing: content-box;
 }
+
+/* ═══ EL ANALISTA EN LA CABECERA ═══════════════════════════════════════════
+   Un botón como «Al punto», a su lado y del mismo alto: indicador animado y un verbo. La gráfica se dibuja
+   subiendo y se enciende el punto final, cada cinco segundos: se mueve lo justo para
+   que se note, sin competir con el latido rojo de «Al punto». El nombre sale debajo
+   al pasar el ratón o con el foco, posicionado, así que no empuja nada. */
+.se-header .se-btn.se-header__analista {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.se-header .se-btn.se-header__analista:hover,
+.se-header .se-btn.se-header__analista:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+.se-header__analista-icono {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.se-header__analista-eje {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.se-header__analista-linea {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* El largo del trazo (algo más de 21 unidades): se dibuja de punta a punta. */
+  stroke-dasharray: 22;
+  stroke-dashoffset: 0;
+  animation: se-analista-traza 5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.se-header__analista-punto {
+  fill: #ffc928;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: se-analista-punto 5s ease-out infinite;
+}
+
+@keyframes se-analista-traza {
+  0% { stroke-dashoffset: 22; }
+  30%, 100% { stroke-dashoffset: 0; }
+}
+
+@keyframes se-analista-punto {
+  0%, 26% { opacity: 0; transform: scale(0.4); }
+  34% { opacity: 1; transform: scale(1.35); }
+  42%, 100% { opacity: 1; transform: scale(1); }
+}
+
+.se-header__analista-globo {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  z-index: 5;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--marca-verde);
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translate(-50%, -4px);
+  pointer-events: none;
+  transition: opacity 140ms ease-out, transform 140ms ease-out;
+}
+
+.se-header__analista:hover .se-header__analista-globo,
+.se-header__analista:focus-visible .se-header__analista-globo {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* El sitio que necesita, sin quitarle nada al menú ------------------------------
+   Con el botón nuevo, al menú le faltaban 74 px a 1200, 37 a 1240, 16 a 1366 y 6 a
+   1440 (medido: lo que la tira pide menos lo que recibe). Se cede en este orden, y
+   ningún enlace: entre 1200 y 1279 el botón se queda en la gráfica, sin la palabra
+   (el nombre sale igual al pasar el ratón), y hasta 1599 los botones de la cabecera
+   pierden un poco de relleno y de hueco entre ellos, que es invisible al lado de un
+   enlace del menú cortado. */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .se-header .se-header__actions--desktop .se-btn {
+    padding-inline: 0.75rem;
+  }
+  .se-header .se-header__actions--desktop {
+    gap: 0.375rem;
+  }
+  .se-header .se-header__inner {
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1279px) {
+  /* A 1200 justos todavía faltaban 9 px sin sesión. */
+  .se-header .se-header__actions--desktop .se-btn {
+    padding-inline: 0.65rem;
+  }
+  .se-header .se-header__actions--desktop .se-btn.se-header__analista {
+    padding-inline: 0.55rem;
+  }
+  .se-header__actions--desktop .se-header__analista-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* En el cajón del teléfono, a lo ancho y con el nombre, como «Al punto». */
+.se-header__actions--mobile .se-btn.se-header__analista--texto {
+  padding: 0.55rem 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-header__analista-linea,
+  .se-header__analista-punto {
+    animation: none;
+  }
+  .se-header__analista-punto {
+    opacity: 1;
+  }
+  .se-header__analista-globo {
+    transition: none;
+  }
+}

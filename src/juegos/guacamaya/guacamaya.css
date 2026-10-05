@@ -451,3 +451,79 @@
   font-size: 1rem;
   line-height: 1.5;
 }
+
+/* —— El Analista: el juego largo, en su propio sitio ——
+   Tarjeta sobria debajo de la guacamaya: el verde de la casa en vez del atardecer,
+   para que se lea como otra cosa y no como una segunda pantalla del mismo juego. */
+.se-analista {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 22px 22px 24px;
+  border-radius: 16px;
+  background: var(--marca-verde, #003318);
+  color: #f3f5ef;
+}
+
+.se-analista__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9fd3b0;
+}
+
+.se-analista__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+.se-analista__texto {
+  margin: 0;
+  max-width: 34em;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: rgba(243, 245, 239, 0.86);
+}
+
+.se-analista__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  margin-top: 8px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--marca-verde, #003318);
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: transform 140ms ease-out, background 160ms ease-out;
+}
+
+.se-analista__boton:hover {
+  background: #e9f4ec;
+}
+
+.se-analista__boton:active {
+  transform: scale(0.98);
+}
+
+.se-analista__boton:focus-visible {
+  outline: 3px solid #9fd3b0;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-analista__boton {
+    transition: none;
+  }
+}

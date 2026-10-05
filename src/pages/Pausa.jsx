@@ -5,6 +5,15 @@ import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
 
 /**
+ * El Analista: el juego largo de la casa, que vive en su propio sitio.
+ *
+ * Por ahora se abre en otra pestaña. Está previsto servirlo dentro del sitio, en
+ * `/el-analista/`, con la cuenta del lector guardando su carrera; mientras eso no
+ * exista, esta es la dirección de su despliegue.
+ */
+const EL_ANALISTA = "https://el-analista-delta.vercel.app/";
+
+/**
  * `/pausa`: un minuto de juego entre lecturas.
  *
  * Es la dirección que se comparte («¿lo superas? sureconomics.com/pausa»), así que
@@ -34,6 +43,26 @@ export const Pausa = () => {
             </p>
           </header>
           <Guacamaya patrocinio={<PatrocinioDelJuego />} />
+
+          <section className="se-analista" aria-labelledby="analista-titulo">
+            <p className="se-analista__kicker">Para cuando tenga más de un minuto</p>
+            <h2 id="analista-titulo" className="se-analista__titulo">El Analista</h2>
+            <p className="se-analista__texto">
+              Un simulador de carrera e inversión: treinta años, un año por turno, con
+              decisiones que pesan, noticias que sacuden el mercado, una cartera que reparte
+              usted y un temario de finanzas que sube con su carrera.
+            </p>
+            <a
+              className="se-analista__boton"
+              href={EL_ANALISTA}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Jugar El Analista
+              <span className="se-analista__fuera" aria-hidden="true">↗</span>
+              <span className="se-sr-only"> (se abre en otra pestaña)</span>
+            </a>
+          </section>
         </div>
       </section>
     </main>

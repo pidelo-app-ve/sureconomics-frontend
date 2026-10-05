@@ -85,6 +85,55 @@ AlPuntoLink.propTypes = {
   className: PropTypes.string,
 };
 
+/**
+ * El Analista: el juego largo de la casa. Por ahora vive en su propio sitio y se abre
+ * en otra pestaña; está previsto servirlo dentro, en `/el-analista/`.
+ */
+const EL_ANALISTA = "https://el-analista-delta.vercel.app/";
+
+/** Una gráfica que se dibuja subiendo y termina en un punto: una carrera que despega. */
+const IconoAnalista = () => (
+  <svg viewBox="0 0 24 24" className="se-header__analista-icono" aria-hidden="true" focusable="false">
+    <path className="se-header__analista-eje" d="M3.5 20.5h17" />
+    <polyline className="se-header__analista-linea" points="4,16 9,12 13,14 20,6" />
+    <circle className="se-header__analista-punto" cx="20" cy="6" r="2.4" />
+  </svg>
+);
+
+/**
+ * El botón de El Analista, junto a «Al punto» y con su misma forma: el indicador animado
+ * a la izquierda -- aquí una gráfica que sube, en vez del punto rojo -- y un verbo,
+ * JUGAR, como ENTRAR y REGISTRARSE. Dice que es un juego sin decir cuál: la curiosidad
+ * es la mitad del botón. El nombre del juego aparece debajo al pasar el ratón o con el
+ * foco. En el cajón del teléfono va a lo ancho y con el nombre entero.
+ */
+const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => (
+  <a
+    href={EL_ANALISTA}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`se-btn se-btn--secondary se-header__analista${
+      conTexto ? " se-header__analista--texto" : ""
+    }${className ? ` ${className}` : ""}`}
+    aria-label="El Analista: el juego de carrera e inversión (se abre en otra pestaña)"
+    onClick={onClick}
+  >
+    <IconoAnalista />
+    <span className="se-header__analista-texto">{conTexto ? "Jugar El Analista" : "Jugar"}</span>
+    {conTexto ? null : (
+      <span className="se-header__analista-globo" aria-hidden="true">
+        El Analista · simulador de carrera e inversión
+      </span>
+    )}
+  </a>
+);
+
+AnalistaLink.propTypes = {
+  conTexto: PropTypes.bool,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
+};
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -276,7 +325,9 @@ export const Navbar = () => {
         <div className="se-header__actions se-header__actions--desktop">
           {/* Antes de los botones de cuenta y con o sin sesión: es contenido, no
               cuenta, y quien entra a ver una entrevista no tiene por qué haber
-              entrado a su cuenta primero. */}
+              entrado a su cuenta primero. El juego va al lado: también es
+              contenido. */}
+          <AnalistaLink />
           <AlPuntoLink
             active={isAlPuntoActive(location.pathname)}
             label={t("nav.alPunto")}
@@ -419,6 +470,7 @@ export const Navbar = () => {
                 onClick={closeMenu}
                 className="se-header__cta"
               />
+              <AnalistaLink conTexto onClick={closeMenu} className="se-header__cta" />
               {isAuthenticated ? (
                 <nav
                   className="se-header__user-nav se-header__user-nav--stack"

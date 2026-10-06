@@ -1274,7 +1274,8 @@
   }
 }
 
-@media (min-width: 1200px) and (max-width: 1439px) {
+/* El reloj cede hasta 1499: con la palabra «Analista» a la vista, a 1440 faltaban 13 px. */
+@media (min-width: 1200px) and (max-width: 1499px) {
   .se-header__inner .se-hora--header {
     display: none;
   }
@@ -21633,10 +21634,11 @@ html {
 /* El sitio que necesita, sin quitarle nada al menú ------------------------------
    Con el botón nuevo, al menú le faltaban 74 px a 1200, 37 a 1240, 16 a 1366 y 6 a
    1440 (medido: lo que la tira pide menos lo que recibe). Se cede en este orden, y
-   ningún enlace: entre 1200 y 1279 el botón se queda en la gráfica, sin la palabra
-   (el nombre sale igual al pasar el ratón), y hasta 1599 los botones de la cabecera
-   pierden un poco de relleno y de hueco entre ellos, que es invisible al lado de un
-   enlace del menú cortado. */
+   ningún enlace: hasta 1599 el botón se queda en la gráfica, sin la palabra (el
+   nombre sale igual al pasar el ratón), y los botones de la cabecera pierden un poco
+   de relleno y de hueco entre ellos, que es invisible al lado de un enlace del menú
+   cortado. Era hasta 1279; el conmutador de idioma («EN») pidió los 40 px de la palabra
+   también entre 1440 y 1599, donde además vuelve a verse el reloj. */
 @media (min-width: 1200px) and (max-width: 1599px) {
   .se-header .se-header__actions--desktop .se-btn {
     padding-inline: 0.75rem;
@@ -21649,11 +21651,12 @@ html {
   }
 }
 
-@media (min-width: 1200px) and (max-width: 1279px) {
-  /* A 1200 justos todavía faltaban 9 px sin sesión. */
-  .se-header .se-header__actions--desktop .se-btn {
-    padding-inline: 0.65rem;
-  }
+/* El botón de El Analista dice «Analista» para que quien llega entienda qué es. Solo
+   por debajo de 1440 se queda en el icono (el nombre sale al pasar el ratón): ahí no
+   cabe la palabra sin cortar «Quiénes somos». De 1440 en adelante la cabecera tiene
+   sitio, y por encima de 1600 se ensancha un poco (ver más abajo). Medido con el menú
+   completo a cada ancho. */
+@media (min-width: 1200px) and (max-width: 1439px) {
   .se-header .se-header__actions--desktop .se-btn.se-header__analista {
     padding-inline: 0.55rem;
   }
@@ -21664,6 +21667,30 @@ html {
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
+  }
+}
+
+@media (min-width: 1600px) {
+  .se-header__inner {
+    max-width: max(1600px, var(--se-container-max));
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1279px) {
+  /* A 1200 justos todavía faltaban 9 px sin sesión, y con el conmutador de idioma y
+     el botón del juego, 34. Se aprieta lo que no es un enlace: botones, huecos y el
+     relleno de la cabecera. */
+  .se-header .se-header__actions--desktop .se-btn {
+    padding-inline: 0.55rem;
+  }
+  .se-header .se-header__actions--desktop {
+    gap: 0.25rem;
+  }
+  .se-header .se-header__inner {
+    gap: 0.25rem;
+  }
+  .se-header__nav--desktop .se-header__nav-list {
+    column-gap: 0.3rem;
   }
 }
 
@@ -21693,4 +21720,97 @@ html {
   justify-content: space-between;
   gap: 0.75rem 1rem;
   margin-bottom: 1rem;
+}
+
+/* —— El conmutador de idioma ——
+   Un enlace a la misma página en el otro idioma. En la barra, la abreviatura («EN»)
+   con la letra pequeña y espaciada del reloj, para que se lea como un dato de la
+   cabecera y no como un botón más que compita con JUGAR y AL PUNTO. En el cajón del
+   teléfono, el nombre entero del idioma de destino. */
+.se-header__idioma {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 0 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 999px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: border-color 140ms ease-out, background-color 140ms ease-out;
+}
+
+.se-header__idioma:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.se-header__idioma:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* En la barra, sin caja: solo las dos letras, con el tamaño y el espaciado del
+   rótulo del reloj. Un botón más con borde pesaba lo mismo que ENTRAR y competía. */
+.se-header__idioma--barra {
+  min-height: 0;
+  margin-left: 0.35rem;
+  padding: 0.25rem 0.2rem;
+  border: 0;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.se-header__idioma--barra:hover {
+  background: transparent;
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-header__idioma--barra .se-header__idioma-largo {
+  display: none;
+}
+
+.se-header__idioma--cajon {
+  align-self: flex-start;
+  margin-top: var(--se-space-sm);
+}
+
+.se-header__idioma--cajon .se-header__idioma-corto::after {
+  content: "·";
+  margin-left: 0.4rem;
+  opacity: 0.6;
+}
+
+/* En el teléfono la barra ya va justa con el logotipo y la hamburguesa: ahí el
+   conmutador vive solo en el cajón. */
+@media (max-width: 767px) {
+  .se-header__idioma--barra {
+    display: none;
+  }
+}
+
+/* El aviso de «solo en español» encima del cuerpo de una pieza en /en: pequeño y
+   tenue, para que no compita con el titular ni con el texto. */
+.se-pieza__solo-espanol {
+  margin: 0 0 var(--se-space-md);
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  color: var(--color-slate-2);
+}
+
+/* El aviso de que un contenido (un módulo o una lección de Educación) solo existe en
+   español: en `/en` va encima del contenido, en letra pequeña y tenue. */
+.se-solo-espanol {
+  margin: 0 0 var(--se-space-sm);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
 }

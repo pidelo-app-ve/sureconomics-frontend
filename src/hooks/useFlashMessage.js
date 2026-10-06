@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useNavegar } from "../components/Enlace";
 
 /**
  * Reads a one-time `location.state.flash` message (set via `navigate(path, { state: { flash } })`)
@@ -8,7 +9,7 @@ import { useLocation, useNavigate } from "react-router-dom";
  */
 export const useFlashMessage = () => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigate = useNavegar();
   const [flash] = useState(() => location.state?.flash ?? null);
   const cleared = useRef(false);
 

@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useRef } from "react";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const SuggestedReading = ({ posts = [] }) => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -15,14 +17,14 @@ export const SuggestedReading = ({ posts = [] }) => {
     >
       <div className="se-container">
         <h2 id="suggested-title" className="se-heading-section">
-          También te puede interesar
+          {t("portada.blog.tambien")}
         </h2>
         <ul className="se-suggested__list">
           {posts.map((post) => {
             const hasImage = Boolean(post?.imageUrl);
             return (
               <li key={post.id} className="se-suggested__item">
-                <Link
+                <Enlace
                   to={`/articulo/${post.slug}`}
                   className={`se-suggested__link-wrap ${!hasImage ? "se-suggested__link-wrap--no-thumb" : ""}`}
                 >
@@ -44,7 +46,7 @@ export const SuggestedReading = ({ posts = [] }) => {
                       <span className="se-suggested__read-time">{post.readTime}</span>
                     ) : null}
                   </span>
-                </Link>
+                </Enlace>
               </li>
             );
           })}

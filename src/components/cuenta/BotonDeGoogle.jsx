@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { googleDisponible } from "../../services/userAuthService";
 
 /**
@@ -52,8 +53,11 @@ const cargarGoogle = () => {
 };
 
 export const BotonDeGoogle = ({ onEntrado, texto = "signin_with" }) => {
+  const { t, lang } = useIdioma();
   const hueco = useRef(null);
   const { entrarConGoogle } = useUserAuth();
+  // El error se guarda como código y se traduce al pintar: así el texto sale siempre en
+  // el idioma de la página, aunque el callback de Google se registrara en otro render.
   const [estado, setEstado] = useState({ fase: "mirando", error: "" });
   // El callback que se le pasa a Google se registra **una vez**, al montar. Todo lo que
   // use dentro va por referencia: capturado del render de entonces, llamaría siempre a
@@ -89,10 +93,7 @@ export const BotonDeGoogle = ({ onEntrado, texto = "signin_with" }) => {
             if (!vivo) return;
             setEstado({
               fase: "listo",
-              error:
-                err?.status === 403
-                  ? "Google no confirma que ese correo sea suyo. Entre con su contraseña."
-                  : "No se pudo entrar con Google. Inténtelo de nuevo.",
+              error: err?.status === 403 ? "noConfirma" : "fallo",
             });
           }
         },
@@ -102,7 +103,8 @@ export const BotonDeGoogle = ({ onEntrado, texto = "signin_with" }) => {
         size: "large",
         shape: "pill",
         text: texto,
-        locale: "es",
+        // El rótulo del botón lo pinta Google: se le pide en el idioma de la página.
+        locale: lang,
         width: 320,
       });
       setEstado({ fase: "listo", error: "" });
@@ -115,7 +117,7 @@ export const BotonDeGoogle = ({ onEntrado, texto = "signin_with" }) => {
     return () => {
       vivo = false;
     };
-  }, [texto]);
+  }, [texto, lang]);
 
   // Ni hueco ni separador cuando no se puede ofrecer: un espacio vacío con una raya
   // encima se lee como algo que no cargó.
@@ -124,17 +126,17 @@ export const BotonDeGoogle = ({ onEntrado, texto = "signin_with" }) => {
   return (
     <div className="se-google">
       <div className="se-google__separador">
-        <span>o</span>
+        <span>{t("cuenta.google.o")}</span>
       </div>
       <div ref={hueco} className="se-google__hueco" />
       {estado.fase === "entrando" ? (
         <p className="se-google__aviso" role="status">
-          Entrando…
+          {t("cuenta.google.entrando")}
         </p>
       ) : null}
       {estado.error ? (
         <p className="se-google__error" role="alert">
-          {estado.error}
+          {estado.error === "noConfirma" ? t("cuenta.google.noConfirma") : t("cuenta.google.fallo")}
         </p>
       ) : null}
     </div>

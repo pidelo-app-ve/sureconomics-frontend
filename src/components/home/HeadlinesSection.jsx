@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
-import { formatDateEs } from "../../lib/date";
+import { formatearFecha } from "../../i18n/motor";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { ErrorState, LoadingState } from "../content";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const HeadlinesSection = ({ state, onRetry }) => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   const railRef = useRef(null);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -56,15 +58,15 @@ export const HeadlinesSection = ({ state, onRetry }) => {
         {state.status === "success" && headlines.length ? (
           <div className="se-headlines__top">
             <h2 id="se-headlines-title" className="se-heading-section se-heading-section--small">
-              Titulares
+              {t("portada.titulares.titulo")}
             </h2>
-            <div className="se-headlines__controls" aria-label="Controles de titulares">
+            <div className="se-headlines__controls" aria-label={t("portada.titulares.controles")}>
               <button
                 type="button"
                 className="se-headlines__ctrl"
                 onClick={handlePrev}
                 disabled={activeIdx <= 0}
-                aria-label="Anterior titular"
+                aria-label={t("portada.titulares.anterior")}
               >
                 ←
               </button>
@@ -73,7 +75,7 @@ export const HeadlinesSection = ({ state, onRetry }) => {
                 className="se-headlines__ctrl"
                 onClick={handleNext}
                 disabled={activeIdx >= items.length - 1}
-                aria-label="Siguiente titular"
+                aria-label={t("portada.titulares.siguiente")}
               >
                 →
               </button>
@@ -81,21 +83,21 @@ export const HeadlinesSection = ({ state, onRetry }) => {
           </div>
         ) : (
           <h2 id="se-headlines-title" className="se-heading-section se-heading-section--small">
-            Titulares
+            {t("portada.titulares.titulo")}
           </h2>
         )}
 
         {state.status === "loading" || state.status === "idle" ? (
-          <LoadingState title="Cargando titulares…" description="Obteniendo resumen de noticias desde el servidor." />
+          <LoadingState title={t("portada.titulares.cargando")} description={t("portada.titulares.cargandoTexto")} />
         ) : null}
 
         {state.status === "error" ? (
-          <ErrorState title="No pudimos cargar los titulares" error={state.error} onRetry={onRetry} />
+          <ErrorState title={t("portada.titulares.error")} error={state.error} onRetry={onRetry} />
         ) : null}
 
         {state.status === "success" && !headlines.length ? (
           <p className="se-text-body se-headlines__empty" role="status">
-            No hay titulares publicados por el momento.
+            {t("portada.titulares.vacio")}
           </p>
         ) : null}
 
@@ -107,7 +109,7 @@ export const HeadlinesSection = ({ state, onRetry }) => {
                 ref={railRef}
                 tabIndex={0}
                 role="list"
-                aria-label="Titulares (desplazamiento horizontal)"
+                aria-label={t("portada.titulares.carril")}
                 onKeyDown={handleKeyDown}
               >
                 {items.map((h, idx) => (
@@ -115,7 +117,7 @@ export const HeadlinesSection = ({ state, onRetry }) => {
                     <article
                       className="se-headlines__card"
                       data-headline-card
-                      aria-label={`Titular ${idx + 1} de ${items.length}`}
+                      aria-label={t("portada.titulares.titularNDeM", { n: idx + 1, total: items.length })}
                     >
                       <h3 className="se-headlines__title">{h.title}</h3>
                       {h.summary ? <p className="se-text-body se-headlines__summary">{h.summary}</p> : null}
@@ -131,7 +133,7 @@ export const HeadlinesSection = ({ state, onRetry }) => {
                         ) : null}
                         {h.publishedAt ? (
                           <time className="se-meta" dateTime={h.publishedAt}>
-                            {formatDateEs(h.publishedAt)}
+                            {formatearFecha(h.publishedAt, "larga") || h.publishedAt}
                           </time>
                         ) : null}
                       </div>

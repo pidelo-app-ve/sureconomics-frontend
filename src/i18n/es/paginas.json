@@ -1,0 +1,327 @@
+{
+  "paginas": {
+    "cookies": {
+      "aviso": {
+        "region": "Aviso de cookies",
+        "titulo": "Medimos cuánta gente nos lee",
+        "cuerpo": "Con su permiso usamos cuatro cookies propias para saber cuántas personas nos leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten con nadie y no le siguen fuera de este sitio.",
+        "enlace": "Qué guarda cada una",
+        "rechazar": "Rechazar",
+        "aceptar": "Aceptar"
+      },
+      "meta": {
+        "titulo": "Política de cookies — {marca}",
+        "descripcion": "Qué guarda cada una de las cuatro cookies propias de SurEconomics, durante cuánto tiempo y cómo retirar el permiso en un clic."
+      },
+      "kicker": "Aviso legal",
+      "titulo": "Política de cookies",
+      "entrada": "{marca} mide cuánta gente lo lee con cuatro cookies propias, y con nada más: ninguna empresa de terceros mide su lectura ni recibe un perfil suyo. Esta página explica qué guarda cada cookie, durante cuánto tiempo y cómo retirar su permiso en un clic.",
+      "actualizacion": "Última actualización: {fecha}",
+      "revision": "Esta página está en revisión antes de activarse: el aviso todavía no aparece en el sitio y los botones de abajo no hacen nada por ahora. Se publica aquí para que el equipo legal pueda leer el texto completo antes de que empiece a pedirse permiso.",
+      "tabla": {
+        "cookie_consent": {
+          "tipo": "Propia · técnica necesaria",
+          "finalidad": "Recordar si usted aceptó o rechazó la medición de audiencia, para no volver a preguntárselo en cada página. Es la única que se instala aunque usted diga que no: sin ella, su negativa se olvidaría al cambiar de página.",
+          "duracion": "6 meses",
+          "base": "No requiere consentimiento"
+        },
+        "user_id": {
+          "tipo": "Propia · analítica",
+          "finalidad": "Identificador aleatorio que distingue a un navegador de otro, para saber cuántas personas distintas nos leen y cuántas vuelven. Se genera al azar en su equipo; no procede de su cuenta, ni de su correo, ni de ningún dato que usted nos haya dado.",
+          "duracion": "2 años",
+          "base": "Requiere su consentimiento"
+        },
+        "session_id": {
+          "tipo": "Propia · analítica",
+          "finalidad": "Identificador aleatorio de la visita en curso, para contar cuántas personas están leyendo en un momento dado y cuántas páginas ve cada visita.",
+          "duracion": "De sesión: se borra al cerrar el navegador y, antes de eso, se renueva tras 30 minutos sin actividad",
+          "base": "Requiere su consentimiento"
+        },
+        "last_activity": {
+          "tipo": "Propia · analítica",
+          "finalidad": "Marca de tiempo de su última actividad. Sirve para dos cosas: cerrar la visita tras 30 minutos de inactividad, y calcular cuánto tiempo estuvo realmente visible una pieza en su pantalla.",
+          "duracion": "De sesión",
+          "base": "Requiere su consentimiento"
+        },
+        "exit_page": {
+          "tipo": "Propia · analítica",
+          "finalidad": "La última dirección que usted vio dentro de este sitio, para saber por dónde se abandona la lectura y mejorar esas páginas.",
+          "duracion": "De sesión",
+          "base": "Requiere su consentimiento"
+        }
+      },
+      "noSeGuarda": {
+        "l1": "Su dirección IP. No se registra ni completa ni recortada.",
+        "l2": "Su nombre, su correo electrónico ni ningún dato de su cuenta, si es que tiene una.",
+        "l3": "Lo que escribe en el buscador del sitio: la dirección se guarda sin lo que va después del signo de interrogación.",
+        "l4": "Su navegador, su sistema operativo, su idioma ni el tamaño de su pantalla.",
+        "l5": "Ninguna categoría especial de datos: salud, ideología, religión, afiliación sindical, origen étnico, vida u orientación sexual, ni datos biométricos o genéticos."
+      },
+      "estado": {
+        "noPuesta": "no está puesta",
+        "acepto": "Usted aceptó la medición de audiencia.",
+        "guardadoAhora": "Esto es exactamente lo que hay guardado en su navegador ahora mismo:",
+        "enRevisionRetirar": "En revisión: no se puede retirar por ahora.",
+        "enRevisionAceptar": "En revisión: no se puede aceptar por ahora.",
+        "borrando": "Borrando…",
+        "retirar": "Retirar el consentimiento y borrar mis datos",
+        "alPulsar": "Al pulsar, esas cookies se borran de su navegador y se elimina del servidor todo lo que esté asociado a ese identificador. No hay que escribir ningún correo ni esperar respuesta.",
+        "rechazo": "Usted rechazó la medición de audiencia.",
+        "sinResponder": "Todavía no ha respondido al aviso.",
+        "borrados": "Sus datos de medición se han borrado. ",
+        "ningunaCookie": "No hay ninguna cookie de analítica en su navegador. La única que tiene de este sitio es {codigo}, que guarda esta misma decisión.",
+        "aceptar": "Aceptar la medición de audiencia"
+      },
+      "situacion": "Su situación ahora mismo",
+      "queSon": "Qué son y por qué las usamos",
+      "queSon1": "Una cookie es un archivo diminuto que este sitio guarda en su navegador y que puede volver a leer después. Todas las nuestras son {propias}: las instala el dominio que usted está visitando, no un tercero, y ningún otro sitio puede leerlas.",
+      "queSon1Propias": "propias",
+      "queSon2": "Las usamos con una sola finalidad: {medir}. Saber cuánta gente nos lee, cuánta vuelve, qué piezas se leen de verdad y en cuáles se abandona la lectura a la mitad. Es la información con la que una redacción decide qué cubrir y en qué formato. No se usa para perfilar a nadie, no alimenta publicidad y no se toma ninguna decisión automatizada sobre usted.",
+      "queSon2Medir": "medir la audiencia",
+      "tablaTitulo": "Tabla de cookies",
+      "tablaCaption": "Cookies que instala {marca}, con su tipo, finalidad y duración",
+      "colNombre": "Nombre",
+      "colTipo": "Dominio y tipo",
+      "colFinalidad": "Finalidad",
+      "colDuracion": "Duración",
+      "colBase": "Base",
+      "notaSesion": "«De sesión» significa que la cookie desaparece al cerrar el navegador. {codigo} además se renueva sola si pasan 30 minutos sin que usted haga nada, de modo que una pestaña olvidada no cuenta como una visita eterna.",
+      "permiso": "Cómo pedimos su permiso",
+      "permiso1": "La primera vez que entra verá una barra al pie de la pantalla con este texto:",
+      "permiso2": "Cuatro cosas de ese aviso que queremos que sepa, porque son las que lo hacen válido:",
+      "valido1": "{fuerte} Ni el identificador, ni la marca de tiempo, ni ninguna otra. Entrar al sitio y leer no equivale a aceptar.",
+      "valido1Fuerte": "Antes de que usted responda no se instala nada.",
+      "valido2": "{fuerte} un clic, en un botón del mismo tamaño y del mismo color que el otro.",
+      "valido2Fuerte": "Rechazar cuesta exactamente lo mismo que aceptar:",
+      "valido3": "{fuerte} Cerrarlo sin responder no puede interpretarse como un sí, así que sencillamente no se puede cerrar sin responder. Tampoco le impide leer mientras decide.",
+      "valido3Fuerte": "No hay aspa para cerrar el aviso.",
+      "valido4": "{fuerte} Un permiso dado una vez no vale para siempre.",
+      "valido4Fuerte": "Le volveremos a preguntar a los seis meses.",
+      "datos": "Qué datos son, exactamente",
+      "datos1": "Preferimos ser precisos antes que tranquilizadores: {fuerte}. La diferencia importa. Un dato anónimo no permite volver a reconocer a nadie; el identificador que guardamos sí permite reconocer {enfasis} cuando vuelve, y por eso sigue siendo un dato personal a efectos de la Ley de Protección de Datos Personales de Venezuela —y, para quien nos lee desde la Unión Europea o Brasil, también del RGPD y de la LGPD—, aunque no lleve su nombre. Cualquier sitio que le diga que su analítica es «totalmente anónima» mientras le pone un identificador de dos años le está diciendo algo que no es cierto.",
+      "datos1Fuerte": "estos datos no son anónimos, son seudónimos",
+      "datos1Enfasis": "al mismo navegador",
+      "datos2": "Dicho eso, esto es todo lo que ese identificador puede llegar a contar de usted:",
+      "cuenta1": "Que un mismo navegador ha vuelto a este sitio varias veces en dos años.",
+      "cuenta2": "Qué páginas de este sitio vio en cada visita y en qué orden.",
+      "cuenta3": "Cuántos segundos estuvo cada pieza visible en su pantalla.",
+      "cuenta4": "Por qué página dejó de leer.",
+      "noGuardamos": "Y esto es lo que no guardamos, en ningún caso:",
+      "datos3": "El identificador tampoco se cruza con su cuenta si usted tiene una en este sitio. Son dos sistemas separados a propósito: quien lee los números de audiencia no puede saber qué leyó una persona con nombre y apellidos, porque ese vínculo no existe en ninguna parte.",
+      "datos4": "Hay una cosa más que conviene decir, porque ocurre también si usted rechaza. Cuando responde al aviso —en un sentido o en otro— sumamos uno a un contador diario de «aceptaron» o «rechazaron». Ese contador no lleva identificador, ni cookie, ni dirección IP, ni la página en la que usted estaba: es un número por día, y sirve para saber qué parte de los lectores acepta la medición. Es lo único que un «no» envía a nuestro servidor, y no hay manera de saber que ese uno fue usted.",
+      "conservacion": "Cuánto lo conservamos",
+      "conservacion1": "{fuerte} Es el plazo que permite comparar un mes con el mismo mes del año anterior, y ni un día más. Pasado ese tiempo, los registros se borran de forma automática; no es una promesa de buena voluntad, es una tarea programada que corre sola.",
+      "conservacion1Fuerte": "Catorce meses.",
+      "conservacion2": "Los datos se guardan en servidores propios contratados a proveedores de alojamiento de la Unión Europea y Estados Unidos, y no se ceden, venden ni comparten con terceros para ninguna finalidad. No hay ninguna herramienta de analítica externa en este sitio.",
+      "derechos": "Sus derechos",
+      "derechos1": "Puede {fuerte}, y retirarlo tiene que ser tan fácil como haberlo dado: el botón está más arriba en esta misma página. Al pulsarlo, las cookies se borran de su navegador y se eliminan del servidor todos los registros asociados a su identificador. La medición se detiene en ese momento.",
+      "derechos1Fuerte": "retirar su consentimiento cuando quiera",
+      "derechos2": "Le asisten los derechos de acceso, rectificación, cancelación y oposición (derechos ARCO) que reconocen el artículo 28 de la Constitución de la República Bolivariana de Venezuela y la Ley de Protección de Datos Personales. Si nos lee desde la Unión Europea o Brasil, le asisten además los derechos de limitación y portabilidad que reconocen el Reglamento (UE) 2016/679 (RGPD) y la Lei 13.709/2018 (LGPD), según la norma que le resulte aplicable.",
+      "derechos3": "Hay un detalle honesto que conviene explicar: como no guardamos su nombre ni su correo junto a estos datos, {fuerte} — no tenemos forma de saber cuál de los identificadores es el suyo, y pedirle datos personales para averiguarlo sería recopilar más información de la que queríamos evitar. Por eso el ejercicio de esos derechos está puesto donde sí funciona: en el botón de esta página, que actúa sobre el identificador que tiene su navegador delante.",
+      "derechos3Fuerte": "no podemos localizar «sus» registros si usted nos escribe",
+      "derechos4": "También puede borrar las cookies desde la configuración de su navegador, o navegar en una ventana privada. Si rechaza la medición, el sitio funciona exactamente igual: no hay ningún contenido que dependa de que usted acepte.",
+      "derechos5": "Para cualquier consulta sobre este aviso puede escribir a {correo}. Si considera que no hemos atendido su solicitud, puede reclamar ante la Superintendencia Nacional de Protección de Datos de Venezuela o, si nos lee desde otro país, ante la autoridad de control que le corresponda — en España, la Agencia Española de Protección de Datos; en Brasil, la ANPD.",
+      "pie": "¿Prefiere leer cómo tratamos el resto de sus datos? Escríbanos a {correo} o vuelva a la {portada}.",
+      "piePortada": "portada"
+    },
+    "contacto": {
+      "meta": {
+        "titulo": "Contacto — {marca}",
+        "descripcion": "Escriba a la redacción de SurEconomics: consultas, alianzas, publicidad y proyectos de investigación o asesoría."
+      },
+      "titulo": "Contacto",
+      "claim": "Contacto institucional para consultas, alianzas y proyectos de investigación/asesoría.",
+      "campos": {
+        "nombre": "Nombre",
+        "correo": "Correo electrónico",
+        "asunto": "Asunto",
+        "mensaje": "Mensaje"
+      },
+      "errores": {
+        "nombre": "Escriba su nombre.",
+        "correo": "Escriba su correo.",
+        "asunto": "Diga de qué se trata.",
+        "mensaje": "Escriba su mensaje.",
+        "correoIncompleto": "Ese correo no parece completo.",
+        "mensajeCorto": "Cuéntenos un poco más.",
+        "revise": "Revise los campos marcados.",
+        "demasiadas": "Demasiadas solicitudes. Intente de nuevo en unos minutos.",
+        "fallo": "No se pudo enviar el mensaje. Intente de nuevo o escríbanos directamente por email."
+      },
+      "gracias": "Gracias por escribirnos. Le responderemos a la brevedad.",
+      "enviado": "Enviado.",
+      "enviando": "Enviando…",
+      "enviar": "Enviar",
+      "enviarFormulario": "Enviar formulario",
+      "directoTitulo": "Escríbanos directamente",
+      "directoTexto": "Si prefiere su propio correo, esta es la dirección del medio.",
+      "otrosCaminos": "Otros caminos",
+      "vienePorAlgo": "¿Viene por algo concreto?",
+      "anunciarse": "Anunciarse",
+      "anunciarseTexto": "Formatos, espacios del sitio y medidas.",
+      "consultoria": "Consultoría",
+      "consultoriaTexto": "Investigación y asesoría por encargo."
+    },
+    "consultoria": {
+      "meta": {
+        "titulo": "Consultoría — {marca}",
+        "descripcion": "Investigación y acompañamiento institucional orientado a decisiones en economía, finanzas y escenarios políticos."
+      },
+      "kicker": "Consultoría",
+      "titulo": "Decisiones con criterio, estructura y señal",
+      "lead": "Investigación y acompañamiento institucional orientado a decisiones en economía, finanzas y escenarios políticos.",
+      "entregables": "Entregables",
+      "chip1": "Lectura ejecutiva",
+      "chip2": "Modelos + escenarios",
+      "chip3": "Reporte institucional",
+      "contactoRegion": "Contacto consultoría",
+      "contacto": "Contacto",
+      "emailsDireccion": "Emails de dirección editorial:",
+      "irAContacto": "Ir a Contacto",
+      "contactar": "Contactar",
+      "servicios": "Servicios",
+      "serviciosTexto": "Diseñamos entregables con estructura ejecutiva para apoyar inversión, valuación y evaluación financiera. Nuestro enfoque conecta lectura macro con implicaciones operativas.",
+      "metodologia": "Metodología",
+      "metodologiaTexto": "Convertimos datos y señales cualitativas en entregables accionables: marco, escenarios, riesgos, próximos pasos.",
+      "serviciosRegion": "Servicios de consultoría",
+      "servicioMeta": "Entregable · Confidencial · Executive-ready",
+      "solicitar": "Solicitar conversación",
+      "solicitarCon": "Solicitar conversación: {servicio}",
+      "servicio": {
+        "invest-market-research": {
+          "titulo": "Investigaciones de mercado",
+          "descripcion": "Estudios con enfoque regional que transforman datos en lectura ejecutiva para decisiones de inversión y expansión."
+        },
+        "global-sector-econ": {
+          "titulo": "Estudios económicos globales y sectoriales",
+          "descripcion": "Análisis comparados de variables macro y micro, con síntesis ejecutiva y recomendaciones por horizonte."
+        },
+        "financial-evaluations": {
+          "titulo": "Evaluaciones financieras",
+          "descripcion": "Evaluaciones orientadas al riesgo y a la estructura financiera para proyectos e instrumentos en Latinoamérica."
+        },
+        "political-reports": {
+          "titulo": "Informes políticos",
+          "descripcion": "Lecturas institucionales de escenarios, marcos regulatorios y riesgos geopolíticos con claridad operativa."
+        },
+        "asset-valuation": {
+          "titulo": "Valuación de activos",
+          "descripcion": "Acompañamiento en metodología de valuación y entrega de criterios para negociación y toma de decisiones."
+        },
+        "investment-banking": {
+          "titulo": "Asesoría y acompañamiento en banca de inversión",
+          "descripcion": "Soporte analítico para rondas, estructuras y estrategia de inversión, con acompañamiento conceptual y ejecutivo."
+        }
+      }
+    },
+    "anunciate": {
+      "meta": {
+        "titulo": "Anúnciate aquí — {marca}",
+        "descripcion": "Formatos publicitarios de SurEconomics: claros, medibles y sin interrumpir la lectura. Ocho maneras de llegar a quienes toman decisiones económicas en América Latina."
+      },
+      "kicker": "Anúnciate aquí",
+      "titulo": "Llegue a quienes toman decisiones económicas en la región",
+      "lead": "Formatos claros, medibles y sin interrupciones forzadas: pensados para acompañar el contenido, no para competir con él. Nada de código de terceros, nada de rastreo del lector.",
+      "solicitar": "Solicitar información",
+      "formatos": "Formatos",
+      "formatosSub": "Ocho maneras de aparecer en {marca}, cada una con un lugar y un propósito distintos.",
+      "disponible": "Disponible",
+      "proximamente": "Próximamente",
+      "consultar": "Consultar este formato →",
+      "asunto": "Publicidad — formato {letra} ({nombre})",
+      "asuntoGeneral": "Publicidad",
+      "especificaciones": "Especificaciones",
+      "especificacionesSub": "Referencia rápida por formato.",
+      "colFormato": "Formato",
+      "colUbicacion": "Ubicación",
+      "colRotacion": "Rotación",
+      "colMedicion": "Medición",
+      "nota": "Las impresiones se cuentan en el servidor al servir el anuncio, y los clics con una redirección propia. No hay pixeles de terceros ni etiquetas externas: las cifras salen de nuestro sistema y se pueden auditar.",
+      "hablemos": "Hablemos",
+      "hablemosSub": "Cuéntenos qué formato le interesa. El equipo comercial responde en un día hábil.",
+      "escribirComercial": "Escribir al equipo comercial",
+      "formato": {
+        "A": {
+          "nombre": "Tarjeta nativa",
+          "texto": "Se integra en los listados y dentro del cuerpo de los artículos, con la misma retícula que una pieza editorial y siempre etiquetada como publicidad.",
+          "ubicacion": "Listados y cuerpo de artículos",
+          "rotacion": "Rotación entre campañas activas",
+          "medicion": "Impresiones y clics por espacio"
+        },
+        "B": {
+          "nombre": "Banner",
+          "texto": "Espacio destacado dentro del flujo de la portada, después de dos bloques de contenido. Nunca es lo primero que ve el lector.",
+          "ubicacion": "Portada, dentro del flujo",
+          "rotacion": "Por peso de campaña",
+          "medicion": "Impresiones y clics"
+        },
+        "C": {
+          "nombre": "Patrocinio de tema o país",
+          "texto": "Su marca asociada a un tema o a un país concreto, en la cabecera del listado filtrado. Máxima relevancia: el lector ya dijo que le interesa.",
+          "ubicacion": "Cabecera del listado filtrado",
+          "rotacion": "Exclusivo por periodo",
+          "medicion": "Impresiones por sesión"
+        },
+        "D": {
+          "nombre": "Patrocinio del boletín",
+          "texto": "Presencia fija en «Entorno en Viñetas», que llega a una audiencia que ya mostró interés recurrente.",
+          "ubicacion": "Entorno en Viñetas",
+          "rotacion": "Exclusivo por edición",
+          "medicion": "Aperturas y clics del correo"
+        },
+        "E": {
+          "nombre": "Mención pre-roll",
+          "texto": "Al inicio de una entrevista o un episodio. Se activa cuando publiquemos los primeros contenidos de este formato."
+        },
+        "H": {
+          "nombre": "Barra fija inferior",
+          "texto": "Franja delgada y descartable en la parte baja de la pantalla. Alta visibilidad, sin bloquear la lectura y con botón de cierre siempre visible.",
+          "ubicacion": "Todas las páginas, descartable",
+          "rotacion": "Rotación",
+          "medicion": "Impresiones, clics y cierres"
+        },
+        "I": {
+          "nombre": "Rail lateral",
+          "texto": "En páginas de artículo, junto al cuerpo del texto y por debajo de las piezas relacionadas.",
+          "ubicacion": "Páginas de artículo",
+          "rotacion": "Rotación",
+          "medicion": "Impresiones y clics"
+        }
+      }
+    },
+    "quienesSomos": {
+      "meta": {
+        "titulo": "Quiénes somos — {marca}",
+        "descripcion": "Plataforma editorial de economía, mercados e inversión en América Latina. Grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires."
+      },
+      "kicker": "Quiénes somos",
+      "intro1": "Plataforma editorial de economía, mercados e inversión en América Latina",
+      "intro2": "Grupo intergeneracional de profesionales",
+      "intro3": "Miami, Caracas, Bogotá, Asunción, Buenos Aires",
+      "proposito": "Propósito",
+      "propositoTexto": "Construir una plataforma sólida para informar, analizar y comprender la realidad económica y financiera de América Latina.",
+      "equipo": "Equipo",
+      "equipoLead": "La estructura editorial y operativa detrás de SurEconomics.",
+      "abrirSeccion": "Abrir sección {seccion}",
+      "integrantes": {
+        "one": "{n} integrante",
+        "other": "{n} integrantes"
+      },
+      "secciones": {
+        "junta": "Junta Directiva",
+        "directorGeneral": "Director General",
+        "editorEnJefe": "Editor en Jefe",
+        "comiteEditorial": "Comité Editorial",
+        "equipo": "Equipo",
+        "colaboradores": "Colaboradores"
+      },
+      "correo": "Correo",
+      "enviarCorreoA": "Enviar correo a {nombre}",
+      "cvPerfil": "CV / Perfil",
+      "perfilLinkedin": "Perfil de {nombre} en LinkedIn",
+      "aliadosRegion": "Partners y aliados",
+      "aliados": "Aliados institucionales",
+      "aliadosTexto": "Una red de marcas asociadas al ecosistema de investigación, inversión y asesoría."
+    }
+  }
+}

@@ -1,13 +1,10 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
-import {
-  EspacioPublicitario,
-  useHayAnuncio,
-} from "../publicidad";
+import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
 
 /**
@@ -44,17 +41,17 @@ export const NewsList = ({ items, espacioDeAnuncio }) => {
     {conAnuncio(
       items.map((n) => (
         <article key={n.id} className="se-artcard">
-          <Link to={rutaDePieza(n)} className="se-artcard__media" aria-label={n.titulo}>
+          <Enlace to={rutaDePieza(n)} className="se-artcard__media" aria-label={n.titulo}>
             {/* The body leads with the place, so the field carries the topic --
                 the one card whose copy is sparse enough to want it. */}
             <CardMedia pieza={n} etiqueta={temaPrincipal(n)} />
-          </Link>
+          </Enlace>
           <div className="se-artcard__body">
             {/* The place leads a note, the way the old list had it in the left
                 column: for this outlet "where" is the first thing a reader sorts by. */}
             <span className="se-meta se-meta--category">{geoPrincipal(n)}</span>
             <h3 className="se-artcard__title">
-              <Link to={rutaDePieza(n)}>{n.titulo}</Link>
+              <Enlace to={rutaDePieza(n)}>{n.titulo}</Enlace>
             </h3>
             {n.resumen ? <p className="se-artcard__summary">{n.resumen}</p> : null}
             <div className="se-artcard__foot">

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Enlace } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";
 import * as userMeService from "../../services/userMeService";
 import { ErrorState, LoadingState, Pagination } from "../../components/content";
@@ -27,6 +30,7 @@ const PencilIcon = () => (
 );
 
 export const CuentaEnvioDetail = () => {
+  const { t } = useIdioma();
   const { id } = useParams();
   const { isEmailVerified } = useUserAuth();
   const flash = useFlashMessage();
@@ -35,13 +39,11 @@ export const CuentaEnvioDetail = () => {
   const [notesState, setNotesState] = useState({ status: "idle", items: [], meta: null, error: null });
   const [featuredImageFailed, setFeaturedImageFailed] = useState(false);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Detalle de envío — SurEconomics",
-      description: "Estado de su propuesta.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.envio.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.envio.meta.descripcion"),
+    noindex: true,
+  });
 
   const loadSubmission = useCallback(async () => {
     if (!id || !isEmailVerified) return;
@@ -103,12 +105,12 @@ export const CuentaEnvioDetail = () => {
     return (
       <div className="se-reader-dash__page">
         <div className="se-reader-card se-reader-card--narrow">
-          <h1 className="se-reader-page-title">Envío</h1>
+          <h1 className="se-reader-page-title">{t("cuenta.envio.titulo")}</h1>
           <p className="se-reader-page-lead">
-            Verifique su correo.{" "}
-            <Link to="/cuenta/verificar-email" className="se-link">
-              Verificar
-            </Link>
+            {t("cuenta.comun.verifiqueSuCorreo")}{" "}
+            <Enlace to="/cuenta/verificar-email" className="se-link">
+              {t("cuenta.comun.verificar")}
+            </Enlace>
           </p>
         </div>
       </div>
@@ -118,7 +120,7 @@ export const CuentaEnvioDetail = () => {
   if (state.status === "loading" || state.status === "idle") {
     return (
       <div className="se-reader-dash__page se-reader-dash__page--center">
-        <LoadingState title="Cargando envío…" />
+        <LoadingState title={t("cuenta.comun.cargandoEnvio")} />
       </div>
     );
   }
@@ -126,11 +128,11 @@ export const CuentaEnvioDetail = () => {
   if (state.status === "error" || !state.submission) {
     return (
       <div className="se-reader-dash__page se-reader-dash__page--center">
-        <ErrorState title="No pudimos cargar el envío" error={state.error} />
+        <ErrorState title={t("cuenta.comun.noPudimosCargarEnvio")} error={state.error} />
         <p style={{ marginTop: "1rem", textAlign: "center" }}>
-          <Link to="/cuenta/envios" className="se-link">
-            Volver a envíos
-          </Link>
+          <Enlace to="/cuenta/envios" className="se-link">
+            {t("cuenta.envio.volverAEnvios")}
+          </Enlace>
         </p>
       </div>
     );
@@ -145,9 +147,9 @@ export const CuentaEnvioDetail = () => {
   return (
     <div className="se-reader-dash__page">
       <p className="se-reader-page-lead" style={{ marginTop: 0 }}>
-        <Link to="/cuenta/envios" className="se-link se-reader-backlink">
-          ← Mis envíos
-        </Link>
+        <Enlace to="/cuenta/envios" className="se-link se-reader-backlink">
+          ← {t("cuenta.envio.misEnvios")}
+        </Enlace>
       </p>
       {flash ? (
         <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
@@ -159,14 +161,14 @@ export const CuentaEnvioDetail = () => {
           <div className="se-submission-detail__title-row">
             <h1 className="se-reader-article__title">{s.title}</h1>
             {canEdit && id ? (
-              <Link
+              <Enlace
                 to={`/cuenta/envios/${encodeURIComponent(id)}/editar`}
                 className="se-btn se-btn--secondary se-submission-detail__edit"
-                aria-label="Editar envío"
+                aria-label={t("cuenta.envio.editarEnvio")}
               >
                 <PencilIcon />
-                <span>Editar</span>
-              </Link>
+                <span>{t("cuenta.envio.editar")}</span>
+              </Enlace>
             ) : null}
           </div>
           <p className="se-reader-article__meta">
@@ -187,9 +189,9 @@ export const CuentaEnvioDetail = () => {
               />
             </div>
             <div className="se-submission-detail__media-caption">
-              <span>Imagen destacada</span>
+              <span>{t("cuenta.envio.imagenDestacada")}</span>
               <a href={s.featuredImageUrl} className="se-link" rel="noopener noreferrer" target="_blank">
-                Abrir original
+                {t("cuenta.envio.abrirOriginal")}
               </a>
             </div>
           </div>
@@ -197,9 +199,9 @@ export const CuentaEnvioDetail = () => {
 
         {hasImageUrl && featuredImageFailed ? (
           <p className="se-submission-detail__media-fallback" role="alert">
-            No se pudo cargar la vista previa.{" "}
+            {t("cuenta.envio.sinVistaPrevia")}{" "}
             <a href={s.featuredImageUrl} className="se-link" rel="noopener noreferrer" target="_blank">
-              Abrir URL
+              {t("cuenta.envio.abrirUrl")}
             </a>
           </p>
         ) : null}
@@ -208,59 +210,59 @@ export const CuentaEnvioDetail = () => {
           <div className="se-submission-detail__media-placeholder">
             {canEdit ? (
               <>
-                Sin imagen destacada.{" "}
-                <Link to={id ? `/cuenta/envios/${encodeURIComponent(id)}/editar` : "#"} className="se-link">
-                  Añadir en editar
-                </Link>
+                {t("cuenta.envio.sinImagen")}{" "}
+                <Enlace to={id ? `/cuenta/envios/${encodeURIComponent(id)}/editar` : "#"} className="se-link">
+                  {t("cuenta.envio.anadirEnEditar")}
+                </Enlace>
               </>
             ) : (
-              "Sin imagen destacada."
+              t("cuenta.envio.sinImagen")
             )}
           </div>
         ) : null}
 
         <section className="se-submission-detail__section" aria-labelledby="submission-excerpt-label">
           <span id="submission-excerpt-label" className="se-submission-detail__section-label">
-            Resumen
+            {t("cuenta.envio.resumen")}
           </span>
           {s.excerpt && String(s.excerpt).trim() ? (
             <p className="se-reader-article__excerpt" style={{ marginTop: 0 }}>
               {s.excerpt}
             </p>
           ) : (
-            <p className="se-submission-detail__empty">No añadió resumen.</p>
+            <p className="se-submission-detail__empty">{t("cuenta.envio.sinResumen")}</p>
           )}
         </section>
 
         <section className="se-submission-detail__section" aria-labelledby="submission-content-label">
           <span id="submission-content-label" className="se-submission-detail__section-label">
-            Contenido
+            {t("cuenta.envio.contenido")}
           </span>
           {s.content && String(s.content).trim() ? (
             <div className="se-reader-article__body se-text-body">{s.content}</div>
           ) : (
-            <p className="se-submission-detail__empty">No hay contenido en el cuerpo del envío.</p>
+            <p className="se-submission-detail__empty">{t("cuenta.envio.sinContenido")}</p>
           )}
         </section>
       </article>
 
       <section
         className="se-reader-card se-submission-detail__notes"
-        aria-label="Notas del equipo editorial"
+        aria-label={t("cuenta.envio.notasTitulo")}
       >
-        <h2 className="se-submission-detail__notes-title">Notas del equipo editorial</h2>
+        <h2 className="se-submission-detail__notes-title">{t("cuenta.envio.notasTitulo")}</h2>
         {!(notesState.status === "success" && notesState.items.length > 0) ? (
           <p className="se-submission-detail__notes-lead">
-            Cuando el equipo deje comentarios sobre su propuesta, aparecerán aquí.
+            {t("cuenta.envio.notasLead")}
           </p>
         ) : null}
 
         {notesState.status === "loading" || notesState.status === "idle" ? (
-          <LoadingState title="Cargando notas…" />
+          <LoadingState title={t("cuenta.envio.cargandoNotas")} />
         ) : null}
 
         {notesState.status === "error" ? (
-          <ErrorState title="No pudimos cargar las notas" error={notesState.error} onRetry={loadNotes} />
+          <ErrorState title={t("cuenta.envio.noPudimosCargarNotas")} error={notesState.error} onRetry={loadNotes} />
         ) : null}
 
         {notesState.status === "success" ? (
@@ -269,7 +271,7 @@ export const CuentaEnvioDetail = () => {
               {notesState.items.map((n) => (
                 <div key={n.id ?? `${n.created_at ?? ""}-${n.note ?? ""}`} className="se-submission-detail__note-item">
                   <p className="se-meta" style={{ marginTop: 0 }}>
-                    {n.admin_user_name ? String(n.admin_user_name) : "Equipo editorial"}
+                    {n.admin_user_name ? String(n.admin_user_name) : t("cuenta.envio.equipoEditorial")}
                     {n.updated_at || n.created_at ? (
                       <span> · {formatSubmissionDate(String(n.updated_at ?? n.created_at))}</span>
                     ) : null}
@@ -281,7 +283,7 @@ export const CuentaEnvioDetail = () => {
               ))}
             </div>
           ) : (
-            <p className="se-text-body se-submission-detail__notes-empty">Todavía no hay notas.</p>
+            <p className="se-text-body se-submission-detail__notes-empty">{t("cuenta.envio.sinNotas")}</p>
           )
         ) : null}
 

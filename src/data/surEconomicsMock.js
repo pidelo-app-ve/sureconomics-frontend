@@ -313,33 +313,8 @@ export const TEAM = {
  */
 export const claveDeFoto = (miembro) => miembro?.fotoId ?? miembro?.id ?? "";
 
-export const INSTITUTIONAL = {
-  /**
-   * Las tres líneas de la cabecera, tal como las mandó el cliente en su documento.
-   *
-   * Viven aquí como tres líneas sueltas -- qué es, quiénes lo hacen y desde dónde --
-   * porque así vienen del documento del cliente y así se leen en esta cabecera:
-   * unirlas en prosa alargaría la primera pantalla sin decir nada más.
-   *
-   * `BRAND.description` dice lo mismo, en prosa corrida, para el pie de página, la
-   * portada y los metadatos del sitio -- el cliente pidió (09/2026) que esos tres
-   * sitios dijeran lo mismo que esta cabecera. Si una cambia, la otra tiene que
-   * cambiar con ella.
-   */
-  intro: [
-    "Plataforma editorial de economía, mercados e inversión en América Latina",
-    "Grupo intergeneracional de profesionales",
-    "Miami, Caracas, Bogotá, Asunción, Buenos Aires",
-  ],
-  // Reemplaza a "Somos un grupo intergeneracional de profesionales con presencia
-  // en Miami, Caracas...", que decía quiénes somos y no para qué estamos. Eso no
-  // se pierde: las ciudades y el grupo intergeneracional suben a `intro`, que es
-  // su sitio, y aquí queda el propósito de verdad.
-  purpose:
-    "Construir una plataforma sólida para informar, analizar y comprender la realidad económica y financiera de América Latina.",
-  // El diagrama de cuatro pasos ("Objetivos") se quito de la pagina a pedido del
-  // cliente (15/09/2026); vivia en `flow` y ya no se usa en ningun sitio.
-};
+// Los textos institucionales (la entradilla de «Quiénes somos» y el propósito) viven en
+// `src/i18n/{es,en}/paginas.json`, bajo `paginas.quienesSomos`: así existen en los dos idiomas.
 
 export const CONTACT = {
   // El correo propio del sitio (a pedido del cliente, 15/09/2026): lo que antes
@@ -394,43 +369,15 @@ export const SOCIAL = [
   },
 ];
 
+/* Los servicios de consultoría. Aquí solo el identificador: título y descripción están en
+   `src/i18n/{es,en}/paginas.json`, bajo `paginas.consultoria.servicio.<id>`. */
 export const SERVICES = [
-  {
-    id: "invest-market-research",
-    title: "Investigaciones de mercado",
-    description:
-      "Estudios con enfoque regional que transforman datos en lectura ejecutiva para decisiones de inversión y expansión.",
-  },
-  {
-    id: "global-sector-econ",
-    title: "Estudios económicos globales y sectoriales",
-    description:
-      "Análisis comparados de variables macro y micro, con síntesis ejecutiva y recomendaciones por horizonte.",
-  },
-  {
-    id: "financial-evaluations",
-    title: "Evaluaciones financieras",
-    description:
-      "Evaluaciones orientadas al riesgo y a la estructura financiera para proyectos e instrumentos en Latinoamérica.",
-  },
-  {
-    id: "political-reports",
-    title: "Informes políticos",
-    description:
-      "Lecturas institucionales de escenarios, marcos regulatorios y riesgos geopolíticos con claridad operativa.",
-  },
-  {
-    id: "asset-valuation",
-    title: "Valuación de activos",
-    description:
-      "Acompañamiento en metodología de valuación y entrega de criterios para negociación y toma de decisiones.",
-  },
-  {
-    id: "investment-banking",
-    title: "Asesoría y acompañamiento en banca de inversión",
-    description:
-      "Soporte analítico para rondas, estructuras y estrategia de inversión, con acompañamiento conceptual y ejecutivo.",
-  },
+  { id: "invest-market-research" },
+  { id: "global-sector-econ" },
+  { id: "financial-evaluations" },
+  { id: "political-reports" },
+  { id: "asset-valuation" },
+  { id: "investment-banking" },
 ];
 
 export const REPORTS = [
@@ -463,16 +410,6 @@ export const REPORTS = [
   },
 ];
 
-export const SUBSCRIPTION = {
-  benefits: [
-    "Investigaciones extensas en economía, finanzas y aspectos políticos de diferentes países y bloques latinoamericanos.",
-    "Boletín semanal, cada lunes, sobre economía, finanzas y política en la región latinoamericana.",
-    "Oportunidades de inversión directa en Latinoamérica.",
-    "Conexión con potenciales inversores interesados en América Latina.",
-    "Cursos en economía y finanzas con orientación práctica.",
-  ],
-  priceLabel: "Precio próximamente",
-  paymentMethodsLabel: "Métodos de pago disponibles próximamente",
-  ctaLabel: "Suscribirme",
-};
+// Lo que decía la página de suscripción (beneficios, precio, pago) está en
+// `src/i18n/{es,en}/boletin.json`, bajo `boletin.suscripcion`.
 

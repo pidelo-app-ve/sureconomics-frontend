@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 const getInitials = (name) => {
   const parts = String(name ?? "")
@@ -12,6 +13,7 @@ const getInitials = (name) => {
 };
 
 export const TeamMemberCard = ({ member, foto }) => {
+  const { t } = useIdioma();
   const initials = getInitials(member?.name);
 
   const hasExternalCv = Boolean(member?.cvUrl && member.cvUrl !== "#");
@@ -59,9 +61,9 @@ export const TeamMemberCard = ({ member, foto }) => {
             <a
               href={`mailto:${member.email}`}
               className="se-link se-member-card__link"
-              aria-label={`Enviar correo a ${member.name}`}
+              aria-label={t("paginas.quienesSomos.enviarCorreoA", { nombre: member.name })}
             >
-              Correo
+              {t("paginas.quienesSomos.correo")}
             </a>
           )}
           {hasExternalCv && (
@@ -71,7 +73,7 @@ export const TeamMemberCard = ({ member, foto }) => {
               rel="noreferrer"
               className="se-link se-member-card__link"
             >
-              CV / Perfil
+              {t("paginas.quienesSomos.cvPerfil")}
             </a>
           )}
           {/* El último de la fila: el correo es la vía de contacto que ofrece la casa,
@@ -88,7 +90,7 @@ export const TeamMemberCard = ({ member, foto }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="se-link se-member-card__link"
-              aria-label={`Perfil de ${member.name} en LinkedIn`}
+              aria-label={t("paginas.quienesSomos.perfilLinkedin", { nombre: member.name })}
             >
               LinkedIn
             </a>

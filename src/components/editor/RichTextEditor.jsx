@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { LinkDialog } from "./LinkDialog";
 
 const ToolbarButton = ({ label, title, isActive, onClick, disabled }) => (
@@ -36,6 +37,7 @@ ToolbarButton.propTypes = {
  * @param {{ value: string, onChange: (html: string) => void, placeholder?: string, disabled?: boolean }} props
  */
 export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
+  const { t } = useIdioma();
   // Tiptap only re-renders this component on content changes (`onUpdate`);
   // clicking a toolbar button toggles a mark/selection without necessarily
   // changing content, so without this the button highlight goes stale until
@@ -56,11 +58,11 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
    * peor: se lleva por delante el cursor y el historial de deshacer de quien escribe.
    */
   const textoDelMarcador = useRef(placeholder);
-  textoDelMarcador.current = placeholder || "Escriba el contenido…";
+  textoDelMarcador.current = placeholder || t("cuenta.editor.marcador");
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit, // i18n:ignorar
       Link.configure({ openOnClick: false, autolink: true }),
       Placeholder.configure({ placeholder: () => textoDelMarcador.current }),
     ],
@@ -114,74 +116,74 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
 
   return (
     <div className="se-richtext">
-      <div className="se-richtext__toolbar" role="toolbar" aria-label="Formato de texto">
+      <div className="se-richtext__toolbar" role="toolbar" aria-label={t("cuenta.editor.barra")}>
         <ToolbarButton
           label={<strong>B</strong>}
-          title="Negrita"
+          title={t("cuenta.editor.negrita")}
           isActive={editor.isActive("bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}
         />
         <ToolbarButton
           label={<em>I</em>}
-          title="Cursiva"
+          title={t("cuenta.editor.cursiva")}
           isActive={editor.isActive("italic")}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         />
         <ToolbarButton
           label={<s>S</s>}
-          title="Tachado"
+          title={t("cuenta.editor.tachado")}
           isActive={editor.isActive("strike")}
           onClick={() => editor.chain().focus().toggleStrike().run()}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
           label="H2"
-          title="Título"
+          title={t("cuenta.editor.titulo")}
           isActive={editor.isActive("heading", { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         />
         <ToolbarButton
           label="H3"
-          title="Subtítulo"
+          title={t("cuenta.editor.subtitulo")}
           isActive={editor.isActive("heading", { level: 3 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
-          label="• Lista"
-          title="Lista con viñetas"
+          label={t("cuenta.editor.listaVinetasEtiqueta")}
+          title={t("cuenta.editor.listaVinetas")}
           isActive={editor.isActive("bulletList")}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         />
         <ToolbarButton
-          label="1. Lista"
-          title="Lista numerada"
+          label={t("cuenta.editor.listaNumeradaEtiqueta")}
+          title={t("cuenta.editor.listaNumerada")}
           isActive={editor.isActive("orderedList")}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         />
         <ToolbarButton
           label="❝❞"
-          title="Cita"
+          title={t("cuenta.editor.cita")}
           isActive={editor.isActive("blockquote")}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
-          label="Link"
-          title="Insertar/editar enlace"
+          label={t("cuenta.editor.enlaceEtiqueta")}
+          title={t("cuenta.editor.enlace")}
           isActive={editor.isActive("link")}
           onClick={() => setLinkDialogOpen(true)}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
           label="↺"
-          title="Deshacer"
+          title={t("cuenta.editor.deshacer")}
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
         />
         <ToolbarButton
           label="↻"
-          title="Rehacer"
+          title={t("cuenta.editor.rehacer")}
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
         />

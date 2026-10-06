@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { BRAND } from "../../brand/publicBrandLogos";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * La firma de una pieza, como la define el brandbook.
@@ -67,6 +68,7 @@ const IconoPersona = () => (
 );
 
 export const PieceByline = ({ autor, autorFoto, fecha, unidad, esEditorial }) => {
+  const { t } = useIdioma();
   // Una foto que no carga dejaría el hueco vacío y la firma descuadrada. Al fallar se
   // cae a la silueta, que es justamente el estado previsto para "no hay retrato".
   //
@@ -82,7 +84,7 @@ export const PieceByline = ({ autor, autorFoto, fecha, unidad, esEditorial }) =>
   // firma a propósito -- así se decidió cuando la firma dejó de salir de la cuenta.
   if (!autor && !fecha && !unidad) return null;
 
-  const nombre = esEditorial ? "Redacción SurEconomics" : autor;
+  const nombre = esEditorial ? t("piezas.firma.redaccion") : autor;
   const laCasa = esEditorial || (nombre ? ES_LA_CASA.test(nombre) : false);
 
   // El retrato es de personas. Sobre la casa va el isotipo y nada más.
@@ -117,10 +119,10 @@ export const PieceByline = ({ autor, autorFoto, fecha, unidad, esEditorial }) =>
 
       {nombre ? (
         <div className="se-firma__quien">
-          <span className="se-firma__por">Por</span>
+          <span className="se-firma__por">{t("piezas.firma.por")}</span>
           <span className="se-firma__nombre">{nombre}</span>
           {unidad ? (
-            <span className="se-firma__rol">Investigación de {unidad}</span>
+            <span className="se-firma__rol">{t("piezas.firma.investigacionDe", { unidad })}</span>
           ) : null}
         </div>
       ) : null}

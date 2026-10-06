@@ -16,8 +16,8 @@ import PropTypes from "prop-types";
  *
  * ## `alt` vacío a propósito
  *
- * El nombre va escrito al lado, siempre. Un `alt="Foto de Ana Lectora"` junto a un texto
- * que ya dice «Ana Lectora» hace que un lector de pantalla lo anuncie dos veces.
+ * El nombre va escrito al lado, siempre. Un `alt` que diga «Foto de Ana Lectora» junto a
+ * un texto que ya dice «Ana Lectora» hace que un lector de pantalla lo anuncie dos veces.
  */
 export const AvatarDelLector = ({ perfil, tamano = "md" }) => {
   const iniciales =

@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
@@ -15,29 +16,32 @@ import { listaDePiezas } from "./piezaShape";
  * card's own footer, which carries the unit: a report is credited to a desk of the
  * group rather than to a person, and that is the one thing its card must say.
  */
-export const ReportGrid = ({ items }) => (
+export const ReportGrid = ({ items }) => {
+  const { t } = useIdioma();
+  return (
   <div className="se-docgrid">
     {items.map((r) => (
       <article key={r.id} className="se-doccard">
-        <Link to={rutaDePieza(r)} className="se-doccard__media" aria-label={r.titulo}>
+        <Enlace to={rutaDePieza(r)} className="se-doccard__media" aria-label={r.titulo}>
           <CardMedia pieza={r} />
-        </Link>
+        </Enlace>
         <div className="se-doccard__body">
-          <span className="se-doccard__kicker">Informe · requiere registro</span>
+          <span className="se-doccard__kicker">{t("portada.informes.gorro")}</span>
           <h3 className="se-doccard__title">
-            <Link to={rutaDePieza(r)}>{r.titulo}</Link>
+            <Enlace to={rutaDePieza(r)}>{r.titulo}</Enlace>
           </h3>
           <p className="se-doccard__summary">{r.resumen}</p>
           <div className="se-doccard__foot">
             <span className="se-tagpill">{temaPrincipal(r)}</span>
             <span className="se-tagpill">{geoPrincipal(r)}</span>
-            <span className="se-doccard__unit">Investigación de {r.unidad}</span>
+            <span className="se-doccard__unit">{t("portada.informes.investigacionDe", { unidad: r.unidad })}</span>
           </div>
         </div>
       </article>
     ))}
   </div>
-);
+  );
+};
 
 ReportGrid.propTypes = {
   items: listaDePiezas({

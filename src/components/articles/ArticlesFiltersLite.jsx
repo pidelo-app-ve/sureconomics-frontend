@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 const normalizeTaxonomyItems = (items) => {
   const cleaned = (items ?? [])
@@ -234,59 +235,60 @@ export const ArticlesFiltersLite = ({
   tags,
   onReset,
 }) => {
+  const { t } = useIdioma();
   const categoryOptions = useMemo(() => normalizeTaxonomyItems(categories), [categories]);
   const tagOptions = useMemo(() => normalizeTaxonomyItems(tags), [tags]);
 
   return (
-    <aside className="se-filters" aria-label="Filtros de artículos">
+    <aside className="se-filters" aria-label={t("listados.filtros.rotulo")}>
       <div className="se-filters__panel" role="region">
         <div className="se-filters__header">
-          <h2 className="se-heading-section se-heading-section--small">Filtros</h2>
+          <h2 className="se-heading-section se-heading-section--small">{t("listados.filtros.titulo")}</h2>
           <button type="button" className="se-link se-filters__reset" onClick={onReset}>
-            Limpiar
+            {t("comun.limpiar")}
           </button>
         </div>
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="article-search">
-            Buscar
+            {t("comun.buscar")}
           </label>
           <input
             id="article-search"
             className="se-filters__control"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Buscar por título o resumen…"
+            placeholder={t("listados.filtros.buscarPlaceholder")}
           />
         </div>
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-category">
-            Categoría
+            {t("listados.filtros.categoria")}
           </label>
           <FilterSelect
             id="filter-category"
-            ariaLabel="Categoría"
+            ariaLabel={t("listados.filtros.categoria")}
             value={category}
             onChange={onCategoryChange}
             options={categoryOptions.map((c) => ({ value: c.value, label: c.label }))}
-            placeholderLabel="Seleccionar categoría"
-            emptyLabel="Todas"
+            placeholderLabel={t("listados.filtros.seleccionarCategoria")}
+            emptyLabel={t("comun.todas")}
           />
         </div>
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-tag">
-            Etiqueta
+            {t("listados.filtros.etiqueta")}
           </label>
           <FilterSelect
             id="filter-tag"
-            ariaLabel="Etiqueta"
+            ariaLabel={t("listados.filtros.etiqueta")}
             value={tag}
             onChange={onTagChange}
-            options={tagOptions.map((t) => ({ value: t.value, label: t.label }))}
-            placeholderLabel="Seleccionar etiqueta"
-            emptyLabel="Todos"
+            options={tagOptions.map((item) => ({ value: item.value, label: item.label }))}
+            placeholderLabel={t("listados.filtros.seleccionarEtiqueta")}
+            emptyLabel={t("comun.todos")}
           />
         </div>
       </div>

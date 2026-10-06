@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { applyPageMeta } from "../lib/seo";
+import { Enlace } from "../components/Enlace";
 import { BRAND } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
 
@@ -17,40 +17,31 @@ const EL_ANALISTA = "/el-analista";
  * compartido tiene que ver dónde está y tener a un toque las noticias.
  */
 export const Pausa = () => {
-  useEffect(() => {
-    applyPageMeta({
-      title: `Un minuto de pausa: la guacamaya va a su casa — ${BRAND.name}`,
-      description:
-        "Un juego de un minuto sobre Caracas al atardecer. Cada día, un vuelo nuevo y el mismo para todos: esquive papagayos y zamuros, recoja mangos y llegue a casa.",
-    });
-  }, []);
+  const { t } = useIdioma();
+  useMetaPagina({
+    title: t("juegos.pausa.meta.titulo", { marca: BRAND.name }),
+    description: t("juegos.pausa.meta.descripcion"),
+  });
 
   return (
     <main className="se-blog">
       <section className="se-section se-pausa">
         <div className="se-container se-pausa__caja">
           <header className="se-pausa__cabeza">
-            <p className="se-pausa__kicker">Un minuto de pausa</p>
-            <h1 className="se-pausa__titulo">Entre lectura y lectura, un vuelo</h1>
-            <p className="se-pausa__entrada">
-              Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su
-              resultado y vuelva a la lectura.
-            </p>
+            <p className="se-pausa__kicker">{t("juegos.pausa.kicker")}</p>
+            <h1 className="se-pausa__titulo">{t("juegos.pausa.titulo")}</h1>
+            <p className="se-pausa__entrada">{t("juegos.pausa.entrada")}</p>
           </header>
           <Guacamaya patrocinio={<PatrocinioDelJuego />} />
 
           <section className="se-analista" aria-labelledby="analista-titulo">
-            <p className="se-analista__kicker">Para cuando tenga más de un minuto</p>
+            <p className="se-analista__kicker">{t("juegos.pausa.analista.kicker")}</p>
             <h2 id="analista-titulo" className="se-analista__titulo">El Analista</h2>
-            <p className="se-analista__texto">
-              Un simulador de carrera e inversión: treinta años, un año por turno, con
-              decisiones que pesan, noticias que sacuden el mercado, una cartera que reparte
-              usted y un temario de finanzas que sube con su carrera.
-            </p>
-            <Link className="se-analista__boton" to={EL_ANALISTA}>
-              Jugar El Analista
+            <p className="se-analista__texto">{t("juegos.pausa.analista.texto")}</p>
+            <Enlace className="se-analista__boton" to={EL_ANALISTA}>
+              {t("nav.jugarAnalista")}
               <span className="se-analista__fuera" aria-hidden="true">→</span>
-            </Link>
+            </Enlace>
           </section>
         </div>
       </section>

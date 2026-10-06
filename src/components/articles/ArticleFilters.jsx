@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 export const ArticleFilters = ({
   query,
@@ -22,32 +23,33 @@ export const ArticleFilters = ({
   sectors,
   onReset,
 }) => {
+  const { t } = useIdioma();
   return (
-    <aside className="se-filters" aria-label="Filtros de artículos">
+    <aside className="se-filters" aria-label={t("listados.filtros.rotulo")}>
       <div className="se-filters__panel" role="region">
         <div className="se-filters__header">
-          <h2 className="se-heading-section se-heading-section--small">Filtros</h2>
+          <h2 className="se-heading-section se-heading-section--small">{t("listados.filtros.titulo")}</h2>
           <button type="button" className="se-link se-filters__reset" onClick={onReset}>
-            Limpiar
+            {t("comun.limpiar")}
           </button>
         </div>
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="article-search">
-            Buscar
+            {t("comun.buscar")}
           </label>
           <input
             id="article-search"
             className="se-filters__control"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Buscar por título o resumen…"
+            placeholder={t("listados.filtros.buscarPlaceholder")}
           />
         </div>
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-content-type">
-            Tipo de contenido
+            {t("listados.filtros.tipoContenido")}
           </label>
           <select
             id="filter-content-type"
@@ -55,7 +57,7 @@ export const ArticleFilters = ({
             value={contentType}
             onChange={(e) => onContentTypeChange(e.target.value)}
           >
-            <option value="">Todos</option>
+            <option value="">{t("comun.todos")}</option>
             {contentTypes.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -66,7 +68,7 @@ export const ArticleFilters = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-main-theme">
-            Tema principal
+            {t("listados.filtros.temaPrincipal")}
           </label>
           <select
             id="filter-main-theme"
@@ -74,7 +76,7 @@ export const ArticleFilters = ({
             value={mainTheme}
             onChange={(e) => onMainThemeChange(e.target.value)}
           >
-            <option value="">Todos</option>
+            <option value="">{t("comun.todos")}</option>
             {mainThemes.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -85,7 +87,7 @@ export const ArticleFilters = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-region-geo">
-            Región / geografía
+            {t("listados.filtros.regionGeo")}
           </label>
           <select
             id="filter-region-geo"
@@ -93,7 +95,7 @@ export const ArticleFilters = ({
             value={regionGeo}
             onChange={(e) => onRegionGeoChange(e.target.value)}
           >
-            <option value="">Todas</option>
+            <option value="">{t("comun.todas")}</option>
             {regionGeos.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -104,7 +106,7 @@ export const ArticleFilters = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-sector">
-            Sector
+            {t("listados.filtros.sector")}
           </label>
           <select
             id="filter-sector"
@@ -112,7 +114,7 @@ export const ArticleFilters = ({
             value={sector}
             onChange={(e) => onSectorChange(e.target.value)}
           >
-            <option value="">Todos</option>
+            <option value="">{t("comun.todos")}</option>
             {sectors.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -123,7 +125,7 @@ export const ArticleFilters = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-date-from">
-            Fecha (desde)
+            {t("listados.filtros.fechaDesde")}
           </label>
           <input
             id="filter-date-from"
@@ -136,7 +138,7 @@ export const ArticleFilters = ({
 
         <div className="se-filters__group">
           <label className="se-filters__label" htmlFor="filter-author">
-            Por Autor
+            {t("listados.filtros.porAutor")}
           </label>
           <select
             id="filter-author"
@@ -144,7 +146,7 @@ export const ArticleFilters = ({
             value={author}
             onChange={(e) => onAuthorChange(e.target.value)}
           >
-            <option value="">Todos</option>
+            <option value="">{t("comun.todos")}</option>
             {authors.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
@@ -179,4 +181,3 @@ ArticleFilters.propTypes = {
   sectors: PropTypes.arrayOf(PropTypes.string).isRequired,
   onReset: PropTypes.func.isRequired,
 };
-

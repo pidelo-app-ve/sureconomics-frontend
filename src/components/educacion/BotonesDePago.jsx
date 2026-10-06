@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { abrirPago, precioLegible } from "../../services/educacionService";
 
 /**
@@ -17,12 +18,11 @@ import { abrirPago, precioLegible } from "../../services/educacionService";
  * motivo -- cada uno necesita una frase distinta, no un "no puedes" generico.
  */
 
-const NOMBRE = {
-  stripe: "Tarjeta",
-  mercadopago: "Mercado Pago",
-};
+/** Las pasarelas con nombre propio en pantalla (`educacion.pago.pasarelas.<id>`); otra cualquiera sale con su id. */
+const PASARELAS = ["stripe", "mercadopago"];
 
 export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
+  const { t } = useIdioma();
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const [ocupado, setOcupado] = useState("");
   const [error, setError] = useState("");
@@ -32,16 +32,14 @@ export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
   if (!isAuthenticated) {
     return (
       <div className="se-edu__pago">
-        <p className="se-edu__pago-texto">
-          La compra queda atada a su cuenta. Entre antes de pagar.
-        </p>
+        <p className="se-edu__pago-texto">{t("educacion.pago.entreAntes")}</p>
         <div className="se-edu__pago-acciones">
-          <Link to="/cuenta/entrar" className="se-btn">
-            Iniciar sesión
-          </Link>
-          <Link to="/cuenta/registro" className="se-btn se-btn--secondary">
-            Crear una cuenta
-          </Link>
+          <Enlace to="/cuenta/entrar" className="se-btn">
+            {t("educacion.comun.iniciarSesion")}
+          </Enlace>
+          <Enlace to="/cuenta/registro" className="se-btn se-btn--secondary">
+            {t("educacion.comun.crearUnaCuenta")}
+          </Enlace>
         </div>
       </div>
     );
@@ -50,14 +48,11 @@ export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
   if (!isEmailVerified) {
     return (
       <div className="se-edu__pago">
-        <p className="se-edu__pago-texto">
-          El correo tiene que estar confirmado antes de pagar: la compra queda atada a
-          esta cuenta.
-        </p>
+        <p className="se-edu__pago-texto">{t("educacion.pago.correoConfirmado")}</p>
         <div className="se-edu__pago-acciones">
-          <Link to="/cuenta/verificar-email" className="se-btn">
-            Verificar mi correo
-          </Link>
+          <Enlace to="/cuenta/verificar-email" className="se-btn">
+            {t("educacion.comun.verificarMiCorreo")}
+          </Enlace>
         </div>
       </div>
     );
@@ -77,12 +72,12 @@ export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
         window.location.assign(datos.url);
         return;
       }
-      setError("La pasarela no devolvió una dirección de pago.");
+      setError(t("educacion.pago.sinDireccion"));
     } catch (err) {
       setError(
         err?.status === 503
-          ? "El cobro todavía no está disponible. Inténtelo más tarde."
-          : err?.message || "No se pudo abrir el pago.",
+          ? t("educacion.pago.noDisponible")
+          : err?.message || t("educacion.pago.noSePudoAbrir"),
       );
     } finally {
       setOcupado("");
@@ -94,11 +89,8 @@ export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
     // a ningún sitio.
     return (
       <div className="se-edu__pago">
-        <p className="se-edu__pago-titulo">Módulo completo por {precio}</p>
-        <p className="se-edu__pago-texto">
-          El cobro en línea se activa en los próximos días. Escríbanos si quiere el
-          acceso ahora.
-        </p>
+        <p className="se-edu__pago-titulo">{t("educacion.pago.moduloCompletoPor", { precio })}</p>
+        <p className="se-edu__pago-texto">{t("educacion.pago.cobroPronto")}</p>
       </div>
     );
   }
@@ -115,8 +107,12 @@ export const BotonesDePago = ({ modulo, pasarelas, onComprado }) => {
             disabled={Boolean(ocupado)}
           >
             {ocupado === proveedor
-              ? "Abriendo…"
-              : `Pagar con ${NOMBRE[proveedor] ?? proveedor}`}
+              ? t("educacion.pago.abriendo")
+              : t("educacion.pago.pagarCon", {
+                  pasarela: PASARELAS.includes(proveedor)
+                    ? t(`educacion.pago.pasarelas.${proveedor}`)
+                    : proveedor,
+                })}
           </button>
         ))}
       </div>

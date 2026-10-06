@@ -1,7 +1,9 @@
+import PropTypes from "prop-types";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { formatearFecha } from "../../i18n/motor";
 import { temaPrincipal } from "../../lib/contentFilter";
-import { formatDateEs } from "../../lib/date";
 import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { piezaShape } from "./piezaShape";
@@ -29,6 +31,7 @@ const ANCHOS = [600, 900, 1200, 1600];
 const SIZES = "(max-width: 859px) 100vw, 44vw";
 
 export const EditorialDelDia = ({ pieza }) => {
+  const { t } = useIdioma();
   const [fallo, setFallo] = useState(false);
   if (!pieza) return null;
 
@@ -43,9 +46,9 @@ export const EditorialDelDia = ({ pieza }) => {
   const fondo = hayFoto ? null : fondoDeTema(temaPrincipal(pieza));
 
   return (
-    <section className="se-section se-eddia" aria-label="Editorial del día">
+    <section className="se-section se-eddia" aria-label={t("portada.editorialDelDia.titulo")}>
       <div className="se-container">
-        <Link to={rutaDePieza(pieza)} className="se-eddia__card">
+        <Enlace to={rutaDePieza(pieza)} className="se-eddia__card">
           <div className="se-eddia__media">
             {hayFoto ? (
               <img
@@ -67,22 +70,24 @@ export const EditorialDelDia = ({ pieza }) => {
             )}
           </div>
           <div className="se-eddia__body">
-            <span className="se-eddia__kicker">Editorial del día</span>
+            <span className="se-eddia__kicker">{t("portada.editorialDelDia.titulo")}</span>
             <h2 className="se-eddia__title">{pieza.titulo}</h2>
             {entradilla ? <p className="se-eddia__lead">{entradilla}</p> : null}
+            {/* La fecha larga sale del ISO, en el idioma del documento; si la pieza no
+                lo trae, queda la corta que ya viene formateada. */}
             {pieza.fecha ? (
-              <time className="se-eddia__fecha" dateTime={pieza.fecha}>
-                {formatDateEs(pieza.fecha)}
+              <time className="se-eddia__fecha" dateTime={pieza.fechaIso ?? pieza.fecha}>
+                {formatearFecha(pieza.fechaIso, "larga") || pieza.fecha}
               </time>
             ) : null}
-            <span className="se-eddia__cta">Leer la posición del medio →</span>
+            <span className="se-eddia__cta">{t("portada.editorialDelDia.leer")}</span>
           </div>
-        </Link>
+        </Enlace>
       </div>
     </section>
   );
 };
 
-EditorialDelDia.propTypes = { pieza: piezaShape() };
+EditorialDelDia.propTypes = { pieza: piezaShape({ fechaIso: PropTypes.string }) };
 
 EditorialDelDia.defaultProps = { pieza: null };

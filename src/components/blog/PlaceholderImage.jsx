@@ -1,13 +1,14 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
-const PLACEHOLDER_LABELS = {
-  chart: "Gráfico",
-  building: "Mercados",
-  growth: "Crecimiento",
-};
+/** Las variantes con rótulo propio en el diccionario (`portada.relleno.*`). */
+const VARIANTES = ["chart", "building", "growth"];
 
 export const PlaceholderImage = ({ variant = "chart", className = "", hero = false }) => {
-  const label = PLACEHOLDER_LABELS[variant] ?? "Artículo";
+  const { t } = useIdioma();
+  const label = VARIANTES.includes(variant)
+    ? t(`portada.relleno.${variant}`)
+    : t("portada.relleno.articulo");
   const classes = [
     "se-placeholder",
     hero ? "se-placeholder--hero" : "",

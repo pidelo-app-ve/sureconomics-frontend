@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { tActual } from "../../i18n/motor";
 import { useMemo } from "react";
 
 import { Envoltorio } from "./EspacioPublicitario";
@@ -48,7 +49,7 @@ export const PatrocinioCompacto = ({ hueco, tono = "claro", className }) => {
       {/* El relleno de la casa no patrocina nada: se dice lo que es, igual que la
           etiqueta de `EspacioPublicitario`. */}
       <span className="se-patrocinio__etiqueta">
-        {hueco.es_casa ? "Espacio disponible" : "Patrocinado por"}
+        {hueco.es_casa ? tActual("publicidad.espacioDisponible") : tActual("publicidad.patrocinadoPor")}
       </span>
       <Envoltorio hueco={hueco} className="se-patrocinio__marca">
         {hueco.logo ? (

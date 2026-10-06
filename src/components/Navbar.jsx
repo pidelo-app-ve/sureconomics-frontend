@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Enlace } from "./Enlace";
+import { sinPrefijo } from "../i18n/motor";
 import PropTypes from "prop-types";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { HoraCaracas } from "./HoraCaracas";
-import useI18n from "../i18n/useI18n";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
@@ -63,7 +65,7 @@ const isAlPuntoActive = (pathname) => pathname.startsWith("/audiovisual");
  * solo, sin la luz, no dice a dónde lleva.
  */
 const AlPuntoLink = ({ active, label, hint, onClick, className = "" }) => (
-  <Link
+  <Enlace
     to="/audiovisual"
     className={`se-btn se-btn--secondary se-header__alpunto${
       active ? " se-header__alpunto--active" : ""
@@ -74,7 +76,7 @@ const AlPuntoLink = ({ active, label, hint, onClick, className = "" }) => (
   >
     <span className="se-header__alpunto-punto" aria-hidden="true" />
     {label}
-  </Link>
+  </Enlace>
 );
 
 AlPuntoLink.propTypes = {
@@ -108,24 +110,55 @@ const IconoAnalista = () => (
  * es la mitad del botón. El nombre del juego aparece debajo al pasar el ratón o con el
  * foco. En el cajón del teléfono va a lo ancho y con el nombre entero.
  */
-const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => (
-  <Link
+const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => {
+  const { t } = useIdioma();
+  return (
+  <Enlace
     to={EL_ANALISTA}
     className={`se-btn se-btn--secondary se-header__analista${
       conTexto ? " se-header__analista--texto" : ""
     }${className ? ` ${className}` : ""}`}
-    aria-label="El Analista: el juego de carrera e inversión"
+    aria-label={t("nav.analistaHint")}
     onClick={onClick}
   >
     <IconoAnalista />
-    <span className="se-header__analista-texto">{conTexto ? "Jugar El Analista" : "Jugar"}</span>
+    <span className="se-header__analista-texto">{conTexto ? t("nav.jugarAnalista") : t("nav.jugar")}</span>
     {conTexto ? null : (
       <span className="se-header__analista-globo" aria-hidden="true">
-        El Analista · simulador de carrera e inversión
+        {t("nav.analistaGlobo")}
       </span>
     )}
-  </Link>
-);
+  </Enlace>
+  );
+};
+
+/**
+ * El conmutador de idioma: un enlace a la misma página en el otro idioma. Es un `Link`
+ * de React Router a secas y no un `Enlace`, porque el destino ya viene con su prefijo.
+ * En la barra se lee la abreviatura («EN» / «ES»); en el cajón, el nombre entero del
+ * idioma de destino en ese idioma, que es lo que entiende quien no lee el actual.
+ */
+const CambioDeIdioma = ({ className = "", onClick }) => {
+  const { otroIdioma, nombreDelOtroIdioma, rutaEnOtroIdioma, t } = useIdioma();
+  return (
+    <Link
+      to={rutaEnOtroIdioma}
+      className={`se-header__idioma${className ? ` ${className}` : ""}`}
+      hrefLang={otroIdioma}
+      lang={otroIdioma}
+      aria-label={t("idioma.cambiarA", { idioma: nombreDelOtroIdioma })}
+      onClick={onClick}
+    >
+      <span className="se-header__idioma-corto" aria-hidden="true">{t("idioma.otraAbreviatura")}</span>
+      <span className="se-header__idioma-largo">{nombreDelOtroIdioma}</span>
+    </Link>
+  );
+};
+
+CambioDeIdioma.propTypes = {
+  className: PropTypes.string,
+  onClick: PropTypes.func,
+};
 
 AnalistaLink.propTypes = {
   conTexto: PropTypes.bool,
@@ -137,7 +170,9 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { t } = useI18n();
+  // Las comprobaciones de «página activa» comparan con rutas sin idioma.
+  const pathname = sinPrefijo(location.pathname);
+  const { t } = useIdioma();
   const { isAuthenticated, logout } = useUserAuth();
   const botonRef = useRef(null);
   const panelRef = useRef(null);
@@ -150,11 +185,11 @@ export const Navbar = () => {
   const navLinkClass = useCallback(
     (to) =>
       `se-header__nav-link${
-        isNavItemActive(location.pathname, location.search, to)
+        isNavItemActive(pathname, location.search, to)
           ? " se-header__nav-link--active"
           : ""
       }`,
-    [location.pathname, location.search]
+    [pathname, location.search]
   );
 
   const handleLogout = async () => {
@@ -278,10 +313,10 @@ export const Navbar = () => {
       role="banner"
     >
       <div className="se-container se-header__inner">
-        <Link
+        <Enlace
           to="/"
           className="se-header__brand"
-          aria-label="SurEconomics - Inicio"
+          aria-label={t("nav.marcaInicio")}
           onClick={closeMenu}
         >
           <picture>
@@ -296,27 +331,27 @@ export const Navbar = () => {
               decoding="async"
             />
           </picture>
-        </Link>
+        </Enlace>
 
         {/* Desktop nav — visible only from 992px up */}
         <nav
           className="se-header__nav se-header__nav--desktop"
-          aria-label="Navegación principal"
+          aria-label={t("nav.navegacionPrincipal")}
         >
           <ul className="se-header__nav-list">
             {mainNavItems.map((item) => (
               <li key={item.id}>
-                <Link
+                <Enlace
                   to={item.to}
                   className={navLinkClass(item.to)}
                   aria-current={
-                    isNavItemActive(location.pathname, location.search, item.to)
+                    isNavItemActive(pathname, location.search, item.to)
                       ? "page"
                       : undefined
                   }
                 >
                   {t(item.labelKey)}
-                </Link>
+                </Enlace>
               </li>
             ))}
           </ul>
@@ -328,25 +363,25 @@ export const Navbar = () => {
               contenido. */}
           <AnalistaLink />
           <AlPuntoLink
-            active={isAlPuntoActive(location.pathname)}
+            active={isAlPuntoActive(pathname)}
             label={t("nav.alPunto")}
             hint={t("nav.alPuntoHint")}
           />
           {isAuthenticated ? (
-            <nav className="se-header__user-nav" aria-label="Cuenta de lector">
-              <Link
+            <nav className="se-header__user-nav" aria-label={t("nav.cuentaLector")}>
+              <Enlace
                 to="/cuenta"
                 className={`se-btn se-btn--secondary se-header__dash-btn${
-                  isReaderDashboardActive(location.pathname)
+                  isReaderDashboardActive(pathname)
                     ? " se-header__dash-btn--active"
                     : ""
                 }`}
                 aria-current={
-                  isReaderDashboardActive(location.pathname) ? "page" : undefined
+                  isReaderDashboardActive(pathname) ? "page" : undefined
                 }
               >
                 {t("nav.dashboard")}
-              </Link>
+              </Enlace>
               {/* «Salir» y no «Cerrar sesión» en escritorio: medido, los dos botones
                   largos dejaban el nav 36 px corto incluso a 1920 px, y «Anúnciate»
                   salía partido siempre que había sesión. El menú móvil sí usa la
@@ -365,17 +400,21 @@ export const Navbar = () => {
               role="group"
               aria-label={t("nav.readerAuth")}
             >
-              <Link
+              <Enlace
                 to="/cuenta/entrar"
                 className="se-btn se-btn--secondary"
               >
                 {t("nav.entrar")}
-              </Link>
-              <Link to="/cuenta/registro" className="se-btn">
+              </Enlace>
+              <Enlace to="/cuenta/registro" className="se-btn">
                 {t("nav.registrar")}
-              </Link>
+              </Enlace>
             </div>
           )}
+          {/* Dentro del grupo de botones y no suelto en la fila: así comparte su hueco
+              pequeño (0,375 rem) y no el de 24 px entre bloques, que a 1440 empujaba el
+              reloj a una segunda línea. */}
+          <CambioDeIdioma className="se-header__idioma--barra" />
         </div>
 
         <HoraCaracas className="se-hora--header" />
@@ -387,7 +426,7 @@ export const Navbar = () => {
           onClick={handleToggleMenu}
           aria-expanded={isMenuOpen}
           aria-controls={MENU_ID}
-          aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-label={isMenuOpen ? t("nav.cerrarMenu") : t("nav.abrirMenu")}
         >
           <span className="se-header__burger-line" aria-hidden="true" />
           <span className="se-header__burger-line" aria-hidden="true" />
@@ -405,14 +444,14 @@ export const Navbar = () => {
             onKeyDown={(e) => e.key === "Enter" && closeMenu()}
             role="button"
             tabIndex={0}
-            aria-label="Cerrar menú"
+            aria-label={t("nav.cerrarMenu")}
           />
           <div
             ref={panelRef}
             className="se-header__menu-panel"
             role="dialog"
             aria-modal="true"
-            aria-label="Menú"
+            aria-label={t("nav.menu")}
           >
             <div className="se-header__menu-header">
               {/* La marca arriba, como en el carril del panel de administración:
@@ -430,12 +469,12 @@ export const Navbar = () => {
                 type="button"
                 className="se-header__menu-close"
                 onClick={closeMenu}
-                aria-label="Cerrar menú"
+                aria-label={t("nav.cerrarMenu")}
               >
                 <span aria-hidden="true">×</span>
               </button>
             </div>
-            <nav className="se-header__nav" aria-label="Navegación principal">
+            <nav className="se-header__nav" aria-label={t("nav.navegacionPrincipal")}>
               <ul className="se-header__nav-list">
                 {mainNavItems.map((item, index) => (
                   <li
@@ -443,27 +482,28 @@ export const Navbar = () => {
                     className="se-header__nav-item"
                     style={{ transitionDelay: `${index * 40}ms` }}
                   >
-                    <Link
+                    <Enlace
                       to={item.to}
                       className={navLinkClass(item.to)}
                       onClick={closeMenu}
                       aria-current={
-                        isNavItemActive(location.pathname, location.search, item.to)
+                        isNavItemActive(pathname, location.search, item.to)
                           ? "page"
                           : undefined
                       }
                     >
                       {t(item.labelKey)}
-                    </Link>
+                    </Enlace>
                   </li>
                 ))}
               </ul>
             </nav>
             <HoraCaracas className="se-hora--cajon" />
+            <CambioDeIdioma className="se-header__idioma--cajon" onClick={closeMenu} />
 
             <div className="se-header__actions se-header__actions--mobile">
               <AlPuntoLink
-                active={isAlPuntoActive(location.pathname)}
+                active={isAlPuntoActive(pathname)}
                 label={t("nav.alPunto")}
                 hint={t("nav.alPuntoHint")}
                 onClick={closeMenu}
@@ -473,18 +513,18 @@ export const Navbar = () => {
               {isAuthenticated ? (
                 <nav
                   className="se-header__user-nav se-header__user-nav--stack"
-                  aria-label="Cuenta de lector"
+                  aria-label={t("nav.cuentaLector")}
                 >
-                  <Link
+                  <Enlace
                     to="/cuenta"
                     className="se-btn se-btn--secondary se-header__dash-btn"
                     onClick={closeMenu}
                     aria-current={
-                      isReaderDashboardActive(location.pathname) ? "page" : undefined
+                      isReaderDashboardActive(pathname) ? "page" : undefined
                     }
                   >
                     {t("nav.dashboard")}
-                  </Link>
+                  </Enlace>
                   <button
                     type="button"
                     className="se-btn se-btn--secondary se-header__dash-btn"
@@ -499,20 +539,20 @@ export const Navbar = () => {
                   role="group"
                   aria-label={t("nav.readerAuth")}
                 >
-                  <Link
+                  <Enlace
                     to="/cuenta/registro"
                     className="se-btn se-header__cta"
                     onClick={closeMenu}
                   >
                     {t("nav.registrar")}
-                  </Link>
-                  <Link
+                  </Enlace>
+                  <Enlace
                     to="/cuenta/entrar"
                     className="se-btn se-btn--secondary se-header__cta"
                     onClick={closeMenu}
                   >
                     {t("nav.entrar")}
-                  </Link>
+                  </Enlace>
                 </div>
               )}
             </div>

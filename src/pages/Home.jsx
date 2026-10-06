@@ -1,32 +1,19 @@
-import { Fragment, useEffect } from "react";
+import { Fragment } from "react";
 import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
-import { applyPageMeta } from "../lib/seo";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
-import { TarjetaPausa } from "../components/home/TarjetaPausa";
-import {
-  ArticleCardGrid,
-  ContentExplorer,
-  EditorialDelDia,
-  EditorialList,
-  FormatSection,
-  InterviewGrid,
-  NewsList,
-  PodcastGrid,
-  ReportGrid,
-} from "../components/home";
-import { FORMATO_META, rutaDeFormato } from "../lib/pieza";
+import { InvitacionPausa } from "../components/home/TarjetaPausa";
+import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
+import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { ESPACIOS } from "../services/publicidadService";
-import {
-  ESPACIOS_DE_SITIO,
-  FilaDeAnuncio,
-  useEspacios,
-} from "../components/publicidad";
+import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
 
 /**
  * Homepage.
@@ -92,6 +79,7 @@ const LAYOUTS = {
 };
 
 export const Home = () => {
+  const { t, lang } = useIdioma();
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error } = usePieces();
 
@@ -123,12 +111,10 @@ export const Home = () => {
   const editorialDelDia =
     pieces.find((p) => p.formatoApi === "editorial" && !enApertura.has(p.id)) ?? null;
 
-  useEffect(() => {
-    applyPageMeta({
-      title: `${BRAND.name} — Economía, mercados e inversión`,
-      description: BRAND.description,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("portada.meta.titulo", { marca: BRAND.name }),
+    description: t("marca.descripcion"),
+  });
 
   const blocks = Object.keys(FORMATO_META)
     .map((formatoApi) => {
@@ -157,9 +143,11 @@ export const Home = () => {
     })
     .filter((b) => b.items.length > 0);
 
+  // El nombre que la redacción puso en el panel manda en español; en inglés sale el
+  // del diccionario, porque el panel sólo guarda el nombre en español.
   const nombrePlural = (formatoApi) =>
-    taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural ??
-    FORMATO_META[formatoApi].plural;
+    (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
+    nombreDeFormato(formatoApi);
 
   // Los huecos de la portada, declarados de una vez: el sorteo necesita ver la
   // pagina entera para no repetir anunciante entre el banner y la tarjeta.
@@ -177,16 +165,11 @@ export const Home = () => {
   // Las vistas cuyo contexto SI depende del contenido -- una pieza y sus temas, un
   // listado y su filtro -- siguen esperando, porque ahi pedir pronto seria pedir con
   // el contexto equivocado.
+  //
+  // El bloque del boletin (`ESPACIOS.BOLETIN`) lo pinta esta misma vista, asi que su
+  // hueco se pide aqui: es la pagina la que declara, no el componente.
   useEspacios({
-    espacios: [
-      ...ESPACIOS_DE_SITIO,
-      ESPACIOS.PORTADA_BANNER,
-      ESPACIOS.PORTADA_NATIVO,
-      ESPACIOS.PORTADA_NATIVO_ARTICULOS,
-      // El bloque del boletin lo pinta esta misma vista, asi que su hueco se pide
-      // aqui: es la pagina la que declara, no el componente.
-      ESPACIOS.BOLETIN,
-    ],
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
     contexto: { seccion: "portada" },
   });
 
@@ -207,15 +190,12 @@ export const Home = () => {
       {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
           hero y con el el unico `h1`; una portada sin encabezado deja a los
           buscadores y a los lectores de pantalla sin saber que pagina es esta. */}
-      <h1 className="se-sr-only">
-        {BRAND.name} — análisis y perspectiva sobre economía, mercados e inversión en
-        América Latina
-      </h1>
+      <h1 className="se-sr-only">{t("portada.inicio.encabezado", { marca: BRAND.name })}</h1>
 
       {cargando ? (
         <section className="se-section se-portada-cargando" aria-busy="true">
           <div className="se-container">
-            <LoadingState title="Cargando la portada…" />
+            <LoadingState title={t("portada.inicio.cargando")} />
           </div>
         </section>
       ) : null}
@@ -223,7 +203,7 @@ export const Home = () => {
       {status === "error" ? (
         <section className="se-section">
           <div className="se-container">
-            <ErrorState title="No se pudo cargar el contenido" error={error} />
+            <ErrorState title={t("portada.inicio.noSePudoCargar")} error={error} />
           </div>
         </section>
       ) : null}
@@ -234,12 +214,15 @@ export const Home = () => {
       {!cargando && status === "success" && taxonomy.ready && pieces.length ? (
         <section
           className="se-section se-explorer-section se-explorer-section--primera"
-          aria-label="Explorar contenido"
+          aria-label={t("portada.inicio.explorarContenido")}
         >
           <div className="se-container">
+            {/* `nombreTraducido` y no `name`: las piezas ya traen sus temas traducidos
+                (`piezaFromApi`), y las opciones tienen que decir lo mismo que ellas
+                para que las cuentas casen. */}
             <ContentExplorer
               pieces={pieces}
-              temasDisponibles={taxonomy.topics.map((t) => t.name)}
+              temasDisponibles={taxonomy.topics.map((tema) => nombreTraducido(tema))}
               geoTop={taxonomy.geoTop}
               continentes={taxonomy.continentes}
               regiones={taxonomy.regiones}
@@ -250,7 +233,7 @@ export const Home = () => {
               onChange={setSelection}
               onQueryChange={setQuery}
               total={results.length}
-              scopeLabel="en todo el sitio"
+              scopeLabel={t("portada.inicio.enTodoElSitio")}
             />
           </div>
         </section>
@@ -260,8 +243,8 @@ export const Home = () => {
         <section className="se-section">
           <div className="se-container">
             <EmptyState
-              title="Todavía no hay nada publicado"
-              description="Cuando la redacción publique la primera pieza, aparecerá aquí."
+              title={t("portada.inicio.nadaPublicado")}
+              description={t("portada.inicio.nadaPublicadoTexto")}
             />
           </div>
         </section>
@@ -271,9 +254,20 @@ export const Home = () => {
         <section className="se-section">
           <div className="se-container">
             <EmptyState
-              title="Sin resultados"
-              description="Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda."
+              title={t("comun.sinResultados")}
+              description={t("portada.inicio.sinResultadosTexto")}
             />
+          </div>
+        </section>
+      ) : null}
+
+      {/* El juego, justo bajo el buscador: una franja baja, no una tarjeta, para que
+          la portada siga abriendo con el filtro y las noticias. Solo sin filtro: quien
+          busca algo concreto no vino a jugar. */}
+      {!cargando && status === "success" && pieces.length && !isFiltered ? (
+        <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
+          <div className="se-container">
+            <InvitacionPausa enPortada />
           </div>
         </section>
       ) : null}
@@ -293,7 +287,7 @@ export const Home = () => {
           <FormatSection
             title={nombrePlural(formatoApi)}
             to={rutaDeFormato(formatoApi)}
-            linkLabel={isFiltered ? `Ver los ${total}` : "Ver todas"}
+            linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
           >
             {LAYOUTS[formatoApi](items)}
           </FormatSection>
@@ -303,10 +297,6 @@ export const Home = () => {
               pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
           {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
-          {/* Un minuto de pausa, entre las noticias y lo que sigue: después de lo
-              urgente, antes de lo largo. Solo sin filtro: quien busca algo concreto
-              no vino a jugar. */}
-          {formatoApi === "noticia" && !isFiltered ? <TarjetaPausa /> : null}
           {i === 1 ? (
             <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
           ) : null}

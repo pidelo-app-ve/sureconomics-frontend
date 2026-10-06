@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /** Small modal to set/remove a link, styled like the rest of the admin panel instead of a native browser prompt. */
 export const LinkDialog = ({ open, initialUrl, onSave, onRemove, onClose }) => {
+  const { t } = useIdioma();
   const [url, setUrl] = useState(initialUrl || "");
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
     setUrl(initialUrl || "");
-    const t = window.setTimeout(() => inputRef.current?.focus(), 0);
-    return () => window.clearTimeout(t);
+    const temporizador = window.setTimeout(() => inputRef.current?.focus(), 0);
+    return () => window.clearTimeout(temporizador);
   }, [open, initialUrl]);
 
   useEffect(() => {
@@ -40,20 +42,21 @@ export const LinkDialog = ({ open, initialUrl, onSave, onRemove, onClose }) => {
         className="se-adm-dialog__backdrop"
         role="button"
         tabIndex={0}
-        aria-label="Cerrar"
+        aria-label={t("comun.cerrar")}
         onClick={onClose}
         onKeyDown={(e) => e.key === "Enter" && onClose()}
       />
-      <div className="se-adm-dialog__surface" role="dialog" aria-modal="true" aria-label="Insertar enlace">
+      <div className="se-adm-dialog__surface" role="dialog" aria-modal="true" aria-label={t("cuenta.enlace.insertar")}>
         <header className="se-adm-dialog__header">
-          <h2 className="se-adm-dialog__title">Enlace</h2>
-          <button type="button" className="se-adm-dialog__x" onClick={onClose} aria-label="Cerrar">
+          <h2 className="se-adm-dialog__title">{t("cuenta.enlace.titulo")}</h2>
+          <button type="button" className="se-adm-dialog__x" onClick={onClose} aria-label={t("comun.cerrar")}>
             ×
           </button>
         </header>
         <form onSubmit={handleSubmit}>
           <div className="se-adm-dialog__body">
             <label className="se-form-field" htmlFor="richtext-link-url">
+              {/* Una sigla: igual en los dos idiomas. i18n:ignorar */}
               <span className="se-form-label">URL</span>
               <input
                 ref={inputRef}
@@ -68,15 +71,15 @@ export const LinkDialog = ({ open, initialUrl, onSave, onRemove, onClose }) => {
           </div>
           <footer className="se-adm-dialog__actions">
             <button type="button" className="se-btn se-btn--secondary" onClick={onClose}>
-              Cancelar
+              {t("comun.cancelar")}
             </button>
             {initialUrl ? (
               <button type="button" className="se-btn se-btn--secondary" onClick={onRemove}>
-                Quitar enlace
+                {t("cuenta.enlace.quitar")}
               </button>
             ) : null}
             <button type="submit" className="se-btn">
-              Guardar
+              {t("comun.guardar")}
             </button>
           </footer>
         </form>

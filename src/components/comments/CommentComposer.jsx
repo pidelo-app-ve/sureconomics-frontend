@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * La caja para escribir un comentario, y lo que se pinta cuando todavía no se puede.
@@ -23,6 +24,7 @@ export const CommentComposer = ({
   volverA,
   onSubmitComment,
 }) => {
+  const { t } = useIdioma();
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
@@ -32,19 +34,16 @@ export const CommentComposer = ({
     return (
       <section className="se-gate" aria-labelledby="comment-gate-title">
         <h3 id="comment-gate-title" className="se-gate__title">
-          Participe en la conversación
+          {t("piezas.comentarios.participe")}
         </h3>
-        <p className="se-gate__lead">
-          Cree una cuenta gratuita para comentar esta y cualquier otra pieza, guardar lo
-          que quiera leer después y descargar los informes.
-        </p>
+        <p className="se-gate__lead">{t("piezas.comentarios.participeTexto")}</p>
         <div className="se-gate__actions">
-          <Link to="/cuenta/registro" className="se-gate__submit" state={{ from: volverA }}>
-            Crear una cuenta
-          </Link>
-          <Link to="/cuenta/entrar" className="se-link" state={{ from: volverA }}>
-            Ya tengo cuenta
-          </Link>
+          <Enlace to="/cuenta/registro" className="se-gate__submit" state={{ from: volverA }}>
+            {t("piezas.acceso.crearCuenta")}
+          </Enlace>
+          <Enlace to="/cuenta/entrar" className="se-link" state={{ from: volverA }}>
+            {t("piezas.acceso.yaTengoCuenta")}
+          </Enlace>
         </div>
       </section>
     );
@@ -54,16 +53,13 @@ export const CommentComposer = ({
     return (
       <section className="se-gate" aria-labelledby="comment-gate-title">
         <h3 id="comment-gate-title" className="se-gate__title">
-          Falta confirmar su correo
+          {t("piezas.comentarios.faltaConfirmar")}
         </h3>
-        <p className="se-gate__lead">
-          Es el último paso para poder comentar. Le llegó un código al correo con el que
-          se registró.
-        </p>
+        <p className="se-gate__lead">{t("piezas.comentarios.faltaConfirmarTexto")}</p>
         <div className="se-gate__actions">
-          <Link to="/cuenta/verificar-email" className="se-gate__submit">
-            Verificar mi correo
-          </Link>
+          <Enlace to="/cuenta/verificar-email" className="se-gate__submit">
+            {t("piezas.acceso.verificarCorreo")}
+          </Enlace>
         </div>
       </section>
     );
@@ -75,22 +71,22 @@ export const CommentComposer = ({
     setMessage("");
     const trimmed = text.trim();
     if (!trimmed) {
-      setError("Escriba un comentario.");
+      setError(t("piezas.comentarios.escribaUno"));
       return;
     }
     setPending(true);
     try {
       await onSubmitComment(trimmed);
       setText("");
-      setMessage("Comentario enviado. Aparecerá cuando lo apruebe la moderación.");
+      setMessage(t("piezas.comentarios.enviado"));
     } catch (err) {
       if (err?.status === 429) {
-        setError("Está comentando muy rápido. Espere un momento e inténtelo de nuevo.");
+        setError(t("piezas.comentarios.muyRapido"));
       } else if (err?.status === 404) {
         // La sección se cerró desde el panel mientras esta página estaba abierta.
-        setError("Esta sección ya no admite comentarios.");
+        setError(t("piezas.comentarios.seccionCerrada"));
       } else {
-        setError(err instanceof Error ? err.message : "No se pudo enviar el comentario.");
+        setError(err instanceof Error ? err.message : t("piezas.comentarios.noEnviado"));
       }
     } finally {
       setPending(false);
@@ -110,7 +106,7 @@ export const CommentComposer = ({
         </p>
       ) : null}
       <label className="se-form-field" htmlFor="comment-body">
-        <span className="se-form-label">Su comentario</span>
+        <span className="se-form-label">{t("piezas.comentarios.suComentario")}</span>
         <textarea
           id="comment-body"
           name="content"
@@ -128,7 +124,7 @@ export const CommentComposer = ({
         />
       </label>
       <button type="submit" className="se-btn se-btn--secondary" disabled={pending}>
-        {pending ? "Enviando…" : "Publicar comentario"}
+        {pending ? t("piezas.comentarios.enviando") : t("piezas.comentarios.publicar")}
       </button>
     </form>
   );

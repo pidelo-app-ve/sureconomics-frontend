@@ -1,3 +1,5 @@
+import { tActual } from "../i18n/motor";
+
 const asString = (value) => (typeof value === "string" ? value : value == null ? "" : String(value));
 
 const asNumber = (value) => {
@@ -192,8 +194,16 @@ export const normalizeComment = (raw) => {
   return {
     id: asString(raw.id ?? raw._id ?? raw.uuid ?? ""),
     content: asString(raw.content ?? raw.body ?? raw.text ?? ""),
+    // Sin nombre, «Lector» en el idioma del documento.
     author: asString(
-      pickFirstNonEmpty(raw.author?.name, raw.author_name, raw.authorName, raw.author, raw.user?.name, "Lector")
+      pickFirstNonEmpty(
+        raw.author?.name,
+        raw.author_name,
+        raw.authorName,
+        raw.author,
+        raw.user?.name,
+        tActual("piezas.comentarios.lectorAnonimo")
+      )
     ),
     status: asString(raw.status ?? raw.state ?? ""),
     createdAt: asString(

@@ -7,10 +7,13 @@
         "dev": "vite",
         "start": "vite",
         "build": "vite build",
-        "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+        "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0 && node scripts/i18n-comprobar.mjs",
         "preview": "vite preview",
         "test:og": "node api/pieza.test.mjs",
         "test:sitemap": "node api/sitemap.test.mjs",
+        "test:i18n": "node src/i18n/motor.test.mjs",
+        "test:guacamaya": "node src/juegos/guacamaya/motor.test.mjs",
+        "i18n": "node scripts/i18n-comprobar.mjs",
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },
     "dependencies": {

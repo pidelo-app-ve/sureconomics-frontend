@@ -1,9 +1,11 @@
 import { PostCard } from "./PostCard";
 import PropTypes from "prop-types";
 import { useRef } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const FeaturedPosts = ({ posts = [] }) => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -15,7 +17,7 @@ export const FeaturedPosts = ({ posts = [] }) => {
     >
       <div className="se-container">
         <h2 id="featured-title" className="se-heading-section">
-          Destacados
+          {t("portada.blog.destacados")}
         </h2>
         <div className="se-featured__grid">
           {posts.map((post) => (

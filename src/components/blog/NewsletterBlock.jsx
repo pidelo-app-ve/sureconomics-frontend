@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { marcarSuscrito } from "../../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../../services/newsletterService";
@@ -31,6 +32,7 @@ import { EspacioPublicitario } from "../publicidad";
  */
 
 export const NewsletterBlock = () => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -57,17 +59,17 @@ export const NewsletterBlock = () => {
       setEmail("");
       setEstado({
         status: "success",
-        mensaje: "Listo. El próximo lunes le llega a ese correo.",
+        mensaje: t("portada.boletin.ok"),
       });
     } catch (err) {
       setEstado({
         status: "error",
         mensaje:
           err?.status === 422
-            ? "Ese correo no parece completo. Revíselo y vuelva a probar."
+            ? t("portada.boletin.correoIncompleto")
             : err?.status === 429
-              ? "Demasiados intentos seguidos. Espere un momento."
-              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+              ? t("portada.boletin.demasiadosIntentos")
+              : t("portada.boletin.fallo"),
       });
     }
   };
@@ -83,18 +85,14 @@ export const NewsletterBlock = () => {
           <div className="se-newsletter__grid">
             <div className="se-newsletter__copy">
               <span className="se-newsletter__kicker">
-                Boletín semanal · los lunes por la mañana
+                {t("portada.boletin.kicker")}
               </span>
 
               <h2 id="newsletter-title" className="se-newsletter__title">
-                Entorno en Viñetas
+                {t("portada.boletin.titulo")}
               </h2>
 
-              <p className="se-newsletter__text">
-                El entorno económico de la semana, contado en viñetas: lo que movió los
-                mercados, lo que viene y lo que conviene mirar. Le llega al correo cada
-                lunes por la mañana, antes de que la semana empiece a moverse.
-              </p>
+              <p className="se-newsletter__text">{t("portada.boletin.texto")}</p>
 
               <form
                 className="se-newsletter__form"
@@ -103,7 +101,7 @@ export const NewsletterBlock = () => {
                 noValidate
               >
                 <label htmlFor="newsletter-email" className="se-newsletter__label">
-                  Su correo
+                  {t("portada.boletin.suCorreo")}
                 </label>
 
                 <div className="se-newsletter__field">
@@ -113,7 +111,7 @@ export const NewsletterBlock = () => {
                     inputMode="email"
                     autoComplete="email"
                     className="se-newsletter__input"
-                    placeholder="nombre@correo.com"
+                    placeholder={t("portada.boletin.placeholder")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={enviando}
@@ -138,7 +136,7 @@ export const NewsletterBlock = () => {
                   />
 
                   <button type="submit" className="se-newsletter__btn" disabled={enviando}>
-                    {enviando ? "Enviando…" : "Únase al boletín"}
+                    {enviando ? t("portada.boletin.enviando") : t("portada.boletin.unase")}
                   </button>
                 </div>
 

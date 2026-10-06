@@ -1,0 +1,327 @@
+{
+  "paginas": {
+    "cookies": {
+      "aviso": {
+        "region": "Cookie notice",
+        "titulo": "We measure how many people read us",
+        "cuerpo": "With your permission we use four first-party cookies to know how many people read us, whether they come back and what actually gets read. They don't carry your name, aren't shared with anyone and don't follow you off this site.",
+        "enlace": "What each one stores",
+        "rechazar": "Decline",
+        "aceptar": "Accept"
+      },
+      "meta": {
+        "titulo": "Cookie policy — {marca}",
+        "descripcion": "What each of SurEconomics' four first-party cookies stores, for how long, and how to withdraw your permission in one click."
+      },
+      "kicker": "Legal notice",
+      "titulo": "Cookie policy",
+      "entrada": "{marca} measures how many people read it with four first-party cookies, and nothing else: no third-party company measures your reading or receives a profile of you. This page explains what each cookie stores, for how long, and how to withdraw your permission in one click.",
+      "actualizacion": "Last updated: {fecha}",
+      "revision": "This page is under review before going live: the notice does not appear on the site yet and the buttons below do nothing for now. It is published here so the legal team can read the full text before permission starts being requested.",
+      "tabla": {
+        "cookie_consent": {
+          "tipo": "First-party · strictly necessary",
+          "finalidad": "Remembers whether you accepted or declined audience measurement, so we don't ask again on every page. It is the only one set even if you say no: without it, your refusal would be forgotten when you change pages.",
+          "duracion": "6 months",
+          "base": "No consent required"
+        },
+        "user_id": {
+          "tipo": "First-party · analytics",
+          "finalidad": "A random identifier that tells one browser from another, so we know how many different people read us and how many come back. It is generated at random on your device; it does not come from your account, your email or any data you have given us.",
+          "duracion": "2 years",
+          "base": "Requires your consent"
+        },
+        "session_id": {
+          "tipo": "First-party · analytics",
+          "finalidad": "A random identifier for the current visit, to count how many people are reading at a given moment and how many pages each visit sees.",
+          "duracion": "Session: deleted when you close the browser and, before that, renewed after 30 minutes of inactivity",
+          "base": "Requires your consent"
+        },
+        "last_activity": {
+          "tipo": "First-party · analytics",
+          "finalidad": "A timestamp of your last activity. It serves two purposes: closing the visit after 30 minutes of inactivity, and calculating how long a piece was actually visible on your screen.",
+          "duracion": "Session",
+          "base": "Requires your consent"
+        },
+        "exit_page": {
+          "tipo": "First-party · analytics",
+          "finalidad": "The last address you saw within this site, to know where reading is abandoned and improve those pages.",
+          "duracion": "Session",
+          "base": "Requires your consent"
+        }
+      },
+      "noSeGuarda": {
+        "l1": "Your IP address. It is not recorded, whether complete or truncated.",
+        "l2": "Your name, your email address or any data from your account, if you have one.",
+        "l3": "What you type into the site search: the address is stored without anything after the question mark.",
+        "l4": "Your browser, operating system, language or screen size.",
+        "l5": "No special categories of data: health, ideology, religion, union membership, ethnic origin, sex life or sexual orientation, nor biometric or genetic data."
+      },
+      "estado": {
+        "noPuesta": "not set",
+        "acepto": "You accepted audience measurement.",
+        "guardadoAhora": "This is exactly what is stored in your browser right now:",
+        "enRevisionRetirar": "Under review: it cannot be withdrawn for now.",
+        "enRevisionAceptar": "Under review: it cannot be accepted for now.",
+        "borrando": "Deleting…",
+        "retirar": "Withdraw consent and delete my data",
+        "alPulsar": "When you click, those cookies are deleted from your browser and everything associated with that identifier is removed from the server. No email to write, no reply to wait for.",
+        "rechazo": "You declined audience measurement.",
+        "sinResponder": "You haven't answered the notice yet.",
+        "borrados": "Your measurement data has been deleted. ",
+        "ningunaCookie": "There are no analytics cookies in your browser. The only one you have from this site is {codigo}, which stores this very decision.",
+        "aceptar": "Accept audience measurement"
+      },
+      "situacion": "Your situation right now",
+      "queSon": "What they are and why we use them",
+      "queSon1": "A cookie is a tiny file this site stores in your browser and can read again later. All of ours are {propias}: they are set by the domain you are visiting, not by a third party, and no other site can read them.",
+      "queSon1Propias": "first-party",
+      "queSon2": "We use them for a single purpose: {medir}. To know how many people read us, how many come back, which pieces actually get read and which ones are abandoned halfway. It is the information a newsroom uses to decide what to cover and in what format. It is not used to profile anyone, it does not feed advertising, and no automated decision is made about you.",
+      "queSon2Medir": "measuring our audience",
+      "tablaTitulo": "Cookie table",
+      "tablaCaption": "Cookies set by {marca}, with their type, purpose and duration",
+      "colNombre": "Name",
+      "colTipo": "Domain and type",
+      "colFinalidad": "Purpose",
+      "colDuracion": "Duration",
+      "colBase": "Basis",
+      "notaSesion": "«Session» means the cookie disappears when you close the browser. {codigo} also renews itself if 30 minutes pass without any activity, so a forgotten tab doesn't count as an endless visit.",
+      "permiso": "How we ask for your permission",
+      "permiso1": "The first time you visit you will see a bar at the bottom of the screen with this text:",
+      "permiso2": "Four things about that notice we want you to know, because they are what make it valid:",
+      "valido1": "{fuerte} Not the identifier, not the timestamp, nothing else. Entering the site and reading does not count as accepting.",
+      "valido1Fuerte": "Nothing is set before you answer.",
+      "valido2": "{fuerte} one click, on a button of the same size and the same color as the other.",
+      "valido2Fuerte": "Declining costs exactly the same as accepting:",
+      "valido3": "{fuerte} Closing it without answering can't be read as a yes, so it simply can't be closed without answering. It doesn't stop you from reading while you decide, either.",
+      "valido3Fuerte": "There is no X to close the notice.",
+      "valido4": "{fuerte} Permission given once does not last forever.",
+      "valido4Fuerte": "We will ask you again in six months.",
+      "datos": "What the data is, exactly",
+      "datos1": "We would rather be precise than reassuring: {fuerte}. The difference matters. Anonymous data makes it impossible to recognize anyone again; the identifier we store does make it possible to recognize {enfasis} when it returns, and that is why it is still personal data under Venezuela's Personal Data Protection Law —and, for those reading from the European Union or Brazil, under the GDPR and the LGPD too—, even though it doesn't carry your name. Any site that tells you its analytics are «fully anonymous» while setting a two-year identifier is telling you something that isn't true.",
+      "datos1Fuerte": "this data is not anonymous, it is pseudonymous",
+      "datos1Enfasis": "the same browser",
+      "datos2": "That said, this is everything that identifier can ever tell about you:",
+      "cuenta1": "That the same browser has returned to this site several times over two years.",
+      "cuenta2": "Which pages of this site it saw on each visit, and in what order.",
+      "cuenta3": "How many seconds each piece was visible on your screen.",
+      "cuenta4": "On which page you stopped reading.",
+      "noGuardamos": "And this is what we never store, under any circumstances:",
+      "datos3": "Nor is the identifier matched with your account if you have one on this site. They are two separate systems on purpose: whoever reads the audience numbers cannot know what a named person read, because that link doesn't exist anywhere.",
+      "datos4": "One more thing is worth saying, because it also happens if you decline. When you answer the notice —one way or the other— we add one to a daily counter of «accepted» or «declined». That counter carries no identifier, no cookie, no IP address and no record of the page you were on: it is one number per day, and it tells us what share of readers accept measurement. It is the only thing a «no» sends to our server, and there is no way to know that one was you.",
+      "conservacion": "How long we keep it",
+      "conservacion1": "{fuerte} It is the period that lets us compare a month with the same month of the previous year, and not a day more. After that, records are deleted automatically; it isn't a goodwill promise, it is a scheduled task that runs on its own.",
+      "conservacion1Fuerte": "Fourteen months.",
+      "conservacion2": "The data is kept on our own servers rented from hosting providers in the European Union and the United States, and it is not transferred, sold or shared with third parties for any purpose. There is no external analytics tool on this site.",
+      "derechos": "Your rights",
+      "derechos1": "You can {fuerte}, and withdrawing it has to be as easy as giving it: the button is further up on this very page. When you click it, the cookies are deleted from your browser and all records associated with your identifier are removed from the server. Measurement stops at that moment.",
+      "derechos1Fuerte": "withdraw your consent whenever you want",
+      "derechos2": "You have the rights of access, rectification, cancellation and objection (ARCO rights) recognized by article 28 of the Constitution of the Bolivarian Republic of Venezuela and the Personal Data Protection Law. If you read us from the European Union or Brazil, you also have the rights to restriction and portability recognized by Regulation (EU) 2016/679 (GDPR) and Lei 13.709/2018 (LGPD), under whichever rule applies to you.",
+      "derechos3": "There is an honest detail worth explaining: since we don't store your name or email alongside this data, {fuerte} — we have no way of knowing which identifier is yours, and asking you for personal data to find out would mean collecting more information than we set out to avoid. That is why these rights are exercised where they actually work: through the button on this page, which acts on the identifier your browser has in front of it.",
+      "derechos3Fuerte": "we cannot locate «your» records if you write to us",
+      "derechos4": "You can also delete cookies from your browser settings, or browse in a private window. If you decline measurement, the site works exactly the same: no content depends on your accepting.",
+      "derechos5": "For any question about this notice you can write to {correo}. If you believe we have not addressed your request, you can file a complaint with Venezuela's National Superintendency for Data Protection or, if you read us from another country, with the supervisory authority that applies to you — in Spain, the Agencia Española de Protección de Datos; in Brazil, the ANPD.",
+      "pie": "Would you rather read how we handle the rest of your data? Write to us at {correo} or go back to the {portada}.",
+      "piePortada": "front page"
+    },
+    "contacto": {
+      "meta": {
+        "titulo": "Contact — {marca}",
+        "descripcion": "Write to the SurEconomics newsroom: inquiries, partnerships, advertising and research or advisory projects."
+      },
+      "titulo": "Contact",
+      "claim": "Institutional contact for inquiries, partnerships and research or advisory projects.",
+      "campos": {
+        "nombre": "Name",
+        "correo": "Email address",
+        "asunto": "Subject",
+        "mensaje": "Message"
+      },
+      "errores": {
+        "nombre": "Enter your name.",
+        "correo": "Enter your email address.",
+        "asunto": "Tell us what it's about.",
+        "mensaje": "Write your message.",
+        "correoIncompleto": "That email address looks incomplete.",
+        "mensajeCorto": "Tell us a bit more.",
+        "revise": "Check the highlighted fields.",
+        "demasiadas": "Too many requests. Try again in a few minutes.",
+        "fallo": "The message couldn't be sent. Try again or email us directly."
+      },
+      "gracias": "Thank you for writing. We'll get back to you shortly.",
+      "enviado": "Sent.",
+      "enviando": "Sending…",
+      "enviar": "Send",
+      "enviarFormulario": "Send the form",
+      "directoTitulo": "Email us directly",
+      "directoTexto": "If you'd rather use your own email, this is the outlet's address.",
+      "otrosCaminos": "Other paths",
+      "vienePorAlgo": "Here for something specific?",
+      "anunciarse": "Advertise",
+      "anunciarseTexto": "Formats, site placements and specs.",
+      "consultoria": "Advisory",
+      "consultoriaTexto": "Research and advisory on commission."
+    },
+    "consultoria": {
+      "meta": {
+        "titulo": "Advisory — {marca}",
+        "descripcion": "Research and institutional support for decisions in economics, finance and political scenarios."
+      },
+      "kicker": "Advisory",
+      "titulo": "Decisions with judgment, structure and signal",
+      "lead": "Research and institutional support for decisions in economics, finance and political scenarios.",
+      "entregables": "Deliverables",
+      "chip1": "Executive read",
+      "chip2": "Models + scenarios",
+      "chip3": "Institutional report",
+      "contactoRegion": "Advisory contact",
+      "contacto": "Contact",
+      "emailsDireccion": "Editorial leadership emails:",
+      "irAContacto": "Go to Contact",
+      "contactar": "Get in touch",
+      "servicios": "Services",
+      "serviciosTexto": "We design deliverables with an executive structure to support investment, valuation and financial evaluation. Our approach connects the macro read with operational implications.",
+      "metodologia": "Methodology",
+      "metodologiaTexto": "We turn data and qualitative signals into actionable deliverables: framework, scenarios, risks, next steps.",
+      "serviciosRegion": "Advisory services",
+      "servicioMeta": "Deliverable · Confidential · Executive-ready",
+      "solicitar": "Request a conversation",
+      "solicitarCon": "Request a conversation: {servicio}",
+      "servicio": {
+        "invest-market-research": {
+          "titulo": "Market research",
+          "descripcion": "Regionally focused studies that turn data into an executive read for investment and expansion decisions."
+        },
+        "global-sector-econ": {
+          "titulo": "Global and sector economic studies",
+          "descripcion": "Comparative analysis of macro and micro variables, with an executive summary and recommendations by horizon."
+        },
+        "financial-evaluations": {
+          "titulo": "Financial evaluations",
+          "descripcion": "Risk- and structure-oriented evaluations for projects and instruments in Latin America."
+        },
+        "political-reports": {
+          "titulo": "Political reports",
+          "descripcion": "Institutional readings of scenarios, regulatory frameworks and geopolitical risks, with operational clarity."
+        },
+        "asset-valuation": {
+          "titulo": "Asset valuation",
+          "descripcion": "Support on valuation methodology and criteria for negotiation and decision-making."
+        },
+        "investment-banking": {
+          "titulo": "Investment banking advisory and support",
+          "descripcion": "Analytical support for rounds, structures and investment strategy, with conceptual and executive guidance."
+        }
+      }
+    },
+    "anunciate": {
+      "meta": {
+        "titulo": "Advertise here — {marca}",
+        "descripcion": "SurEconomics ad formats: clear, measurable and non-intrusive. Eight ways to reach the people making economic decisions in Latin America."
+      },
+      "kicker": "Advertise here",
+      "titulo": "Reach the people making economic decisions in the region",
+      "lead": "Clear, measurable formats with no forced interruptions: designed to accompany the content, not compete with it. No third-party code, no reader tracking.",
+      "solicitar": "Request information",
+      "formatos": "Formats",
+      "formatosSub": "Eight ways to appear on {marca}, each with its own place and purpose.",
+      "disponible": "Available",
+      "proximamente": "Coming soon",
+      "consultar": "Ask about this format →",
+      "asunto": "Advertising — format {letra} ({nombre})",
+      "asuntoGeneral": "Advertising",
+      "especificaciones": "Specifications",
+      "especificacionesSub": "Quick reference by format.",
+      "colFormato": "Format",
+      "colUbicacion": "Placement",
+      "colRotacion": "Rotation",
+      "colMedicion": "Measurement",
+      "nota": "Impressions are counted on the server when the ad is served, and clicks through our own redirect. There are no third-party pixels or external tags: the figures come from our system and can be audited.",
+      "hablemos": "Let's talk",
+      "hablemosSub": "Tell us which format interests you. The commercial team replies within one business day.",
+      "escribirComercial": "Write to the commercial team",
+      "formato": {
+        "A": {
+          "nombre": "Native card",
+          "texto": "Sits within listings and inside article bodies, on the same grid as an editorial piece and always labeled as advertising.",
+          "ubicacion": "Listings and article bodies",
+          "rotacion": "Rotation among active campaigns",
+          "medicion": "Impressions and clicks per placement"
+        },
+        "B": {
+          "nombre": "Banner",
+          "texto": "A featured slot within the front-page flow, after two blocks of content. It is never the first thing the reader sees.",
+          "ubicacion": "Front page, within the flow",
+          "rotacion": "By campaign weight",
+          "medicion": "Impressions and clicks"
+        },
+        "C": {
+          "nombre": "Topic or country sponsorship",
+          "texto": "Your brand tied to a specific topic or country, at the top of the filtered listing. Maximum relevance: the reader has already said it interests them.",
+          "ubicacion": "Top of the filtered listing",
+          "rotacion": "Exclusive per period",
+          "medicion": "Impressions per session"
+        },
+        "D": {
+          "nombre": "Newsletter sponsorship",
+          "texto": "A fixed presence in «Entorno en Viñetas», reaching an audience that has already shown recurring interest.",
+          "ubicacion": "Entorno en Viñetas",
+          "rotacion": "Exclusive per issue",
+          "medicion": "Email opens and clicks"
+        },
+        "E": {
+          "nombre": "Pre-roll mention",
+          "texto": "At the start of an interview or an episode. It becomes available when we publish the first content in this format."
+        },
+        "H": {
+          "nombre": "Bottom sticky bar",
+          "texto": "A thin, dismissible strip at the bottom of the screen. High visibility without blocking reading, with a close button always visible.",
+          "ubicacion": "Every page, dismissible",
+          "rotacion": "Rotation",
+          "medicion": "Impressions, clicks and dismissals"
+        },
+        "I": {
+          "nombre": "Side rail",
+          "texto": "On article pages, next to the body text and below the related pieces.",
+          "ubicacion": "Article pages",
+          "rotacion": "Rotation",
+          "medicion": "Impressions and clicks"
+        }
+      }
+    },
+    "quienesSomos": {
+      "meta": {
+        "titulo": "About us — {marca}",
+        "descripcion": "An editorial platform on economics, markets and investing in Latin America. An intergenerational group of professionals based in Miami, Caracas, Bogotá, Asunción and Buenos Aires."
+      },
+      "kicker": "About us",
+      "intro1": "An editorial platform on economics, markets and investing in Latin America",
+      "intro2": "An intergenerational group of professionals",
+      "intro3": "Miami, Caracas, Bogotá, Asunción, Buenos Aires",
+      "proposito": "Purpose",
+      "propositoTexto": "To build a solid platform for reporting on, analyzing and understanding the economic and financial reality of Latin America.",
+      "equipo": "Team",
+      "equipoLead": "The editorial and operating structure behind SurEconomics.",
+      "abrirSeccion": "Open section {seccion}",
+      "integrantes": {
+        "one": "{n} member",
+        "other": "{n} members"
+      },
+      "secciones": {
+        "junta": "Board of Directors",
+        "directorGeneral": "General Director",
+        "editorEnJefe": "Editor-in-Chief",
+        "comiteEditorial": "Editorial Committee",
+        "equipo": "Team",
+        "colaboradores": "Contributors"
+      },
+      "correo": "Email",
+      "enviarCorreoA": "Email {nombre}",
+      "cvPerfil": "CV / Profile",
+      "perfilLinkedin": "{nombre}'s LinkedIn profile",
+      "aliadosRegion": "Partners and allies",
+      "aliados": "Institutional partners",
+      "aliadosTexto": "A network of brands connected to the research, investment and advisory ecosystem."
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { subirMiFoto } from "../../services/userMeService";
 import { RecorteDeAvatar } from "../admin/RecorteDeAvatar";
 import { AvatarDelLector } from "./AvatarDelLector";
@@ -28,6 +29,7 @@ const TIPOS = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const TOPE = 5 * 1024 * 1024;
 
 export const RetratoDelLector = () => {
+  const { t } = useIdioma();
   const { profile, loadProfile } = useUserAuth();
   const entrada = useRef(null);
   const [estado, setEstado] = useState({ subiendo: false, error: "" });
@@ -42,13 +44,13 @@ export const RetratoDelLector = () => {
     if (!file) return;
 
     if (!TIPOS.includes(file.type)) {
-      setEstado({ subiendo: false, error: "Tiene que ser una imagen JPG, PNG o WebP." });
+      setEstado({ subiendo: false, error: t("cuenta.retrato.tipoNoValido") });
       return;
     }
     if (file.size > TOPE) {
       setEstado({
         subiendo: false,
-        error: `Esa imagen pesa ${Math.round(file.size / 1048576)} MB y el tope son 5.`,
+        error: t("cuenta.retrato.pesaDemasiado", { mb: Math.round(file.size / 1048576) }),
       });
       return;
     }
@@ -75,23 +77,22 @@ export const RetratoDelLector = () => {
         subiendo: false,
         error:
           err?.status === 429
-            ? "Ha cambiado la foto varias veces seguidas. Espere un rato."
-            : err?.message || "No se pudo subir la imagen.",
+            ? t("cuenta.retrato.demasiadosCambios")
+            : err?.message || t("cuenta.retrato.fallo"),
       });
     }
   };
 
   return (
-    <section className="se-retrato" aria-label="Su foto">
+    <section className="se-retrato" aria-label={t("cuenta.retrato.suFoto")}>
       <AvatarDelLector perfil={profile} tamano="lg" />
 
       <div className="se-retrato__copy">
         <h2 className="se-retrato__titulo">
-          {profile?.photoUrl ? "Su foto" : "Suba su foto"}
+          {profile?.photoUrl ? t("cuenta.retrato.suFoto") : t("cuenta.retrato.subaSuFoto")}
         </h2>
         <p className="se-retrato__texto">
-          Es la que firma la pieza si la redacción le publica un envío. Sin ella, su
-          artículo sale sin cara.
+          {t("cuenta.retrato.texto")}
         </p>
 
         <div className="se-retrato__acciones">
@@ -102,10 +103,10 @@ export const RetratoDelLector = () => {
             disabled={estado.subiendo}
           >
             {estado.subiendo
-              ? "Subiendo…"
+              ? t("cuenta.retrato.subiendo")
               : profile?.photoUrl
-                ? "Cambiar la foto"
-                : "Elegir y encuadrar"}
+                ? t("cuenta.retrato.cambiar")
+                : t("cuenta.retrato.elegir")}
           </button>
           <input
             ref={entrada}
@@ -113,7 +114,7 @@ export const RetratoDelLector = () => {
             accept={TIPOS.join(",")}
             onChange={elegir}
             className="se-retrato__entrada"
-            aria-label="Elegir una imagen para su perfil"
+            aria-label={t("cuenta.retrato.elegirImagen")}
           />
         </div>
 
@@ -122,14 +123,14 @@ export const RetratoDelLector = () => {
             {estado.error}
           </p>
         ) : (
-          <p className="se-retrato__pista">JPG, PNG o WebP · hasta 5 MB</p>
+          <p className="se-retrato__pista">{t("cuenta.retrato.pista")}</p>
         )}
       </div>
 
       {recortando ? (
         <RecorteDeAvatar
           archivo={recortando}
-          nombre={profile?.firstName || "su foto"}
+          nombre={profile?.firstName || t("cuenta.retrato.suFotoMinuscula")}
           onCancelar={() => setRecortando(null)}
           onListo={subirRecorte}
         />

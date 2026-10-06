@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { tActual } from "../../i18n/motor";
 
 import { enlaceDeClic } from "../../services/publicidadService";
 import { useCiclo, useHueco } from "./ProveedorDePublicidad";
@@ -27,7 +28,7 @@ import { useRotacion } from "./useRotacion";
 
 const Etiqueta = ({ anunciante, esCasa }) => (
   <span className={`se-ad__etiqueta${esCasa ? " se-ad__etiqueta--casa" : ""}`}>
-    {esCasa ? "Espacio disponible" : "Publicidad"}
+    {esCasa ? tActual("publicidad.espacioDisponible") : tActual("publicidad.etiqueta")}
     {anunciante ? <span className="se-ad__marca"> · {anunciante}</span> : null}
   </span>
 );
@@ -166,7 +167,7 @@ const TarjetaNativa = ({ hueco, variante }) => {
           <p className="se-ad__titular">{hueco.titular_corto || hueco.titular}</p>
           {hueco.pie ? <p className="se-ad__pie">{hueco.pie}</p> : null}
           <span className="se-ad__cta">
-            {hueco.es_casa ? "Ver tarifas →" : "Conocer más →"}
+            {hueco.es_casa ? tActual("publicidad.verTarifas") : tActual("publicidad.conocerMasFlecha")}
           </span>
         </div>
       </Envoltorio>
@@ -209,7 +210,7 @@ const Rail = ({ hueco }) => (
     </div>
     <Etiqueta anunciante={hueco.anunciante} esCasa={hueco.es_casa} />
     <p className="se-ad__titular">{hueco.titular_corto || hueco.titular}</p>
-    <span className="se-ad__cta">Conocer más →</span>
+    <span className="se-ad__cta">{tActual("publicidad.conocerMasFlecha")}</span>
   </Envoltorio>
 );
 
@@ -225,7 +226,7 @@ Rail.propTypes = { hueco: PropTypes.object.isRequired };
 const Cintillo = ({ hueco }) => (
   <Envoltorio hueco={hueco} className="se-ad se-ad--cintillo">
     <span className="se-ad__cintillo-tag">
-      {hueco.es_casa ? "Espacio disponible" : "Cifras presentadas por"}
+      {hueco.es_casa ? tActual("publicidad.espacioDisponible") : tActual("publicidad.cifrasPor")}
     </span>
     <span className="se-ad__cintillo-marca">{hueco.anunciante}</span>
   </Envoltorio>

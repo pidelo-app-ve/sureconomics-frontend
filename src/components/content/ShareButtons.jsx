@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useCallback, useMemo, useState } from "react";
 import { IconInstagram, IconWhatsApp, IconX } from "../icons/social";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 const getAbsoluteUrl = (url) => {
   if (!url) return "";
@@ -68,6 +69,7 @@ const copyToClipboardApi = async (text) => {
 };
 
 export const ShareButtons = ({ url, title = "", className = "" }) => {
+  const { t } = useIdioma();
   const [toast, setToast] = useState("");
   const absoluteUrl = useMemo(() => getAbsoluteUrl(url), [url]);
 
@@ -137,15 +139,13 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
     if (!copiado) copiado = await copyToClipboardApi(absoluteUrl);
 
     if (!copiado) {
-      showToast("No se pudo copiar el link. Cópielo de la barra de dirección.");
+      showToast(t("piezas.compartir.noCopiado"));
       return;
     }
     showToast(
-      enTelefono
-        ? "Link copiado. Péguelo en su historia o mensaje."
-        : "Link copiado. Abra Instagram y péguelo."
+      enTelefono ? t("piezas.compartir.copiadoTelefono") : t("piezas.compartir.copiadoEscritorio")
     );
-  }, [absoluteUrl, title, showToast]);
+  }, [absoluteUrl, title, showToast, t]);
 
   const handlePopup = useCallback((href) => {
     if (!href) return;
@@ -157,12 +157,12 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
   return (
     // `group` para que "Compartir" se oiga al entrar en los botones: sin papel, el
     // `aria-label` de un `div` no lo lee ningun lector de pantalla.
-    <div className={`se-share ${className}`.trim()} role="group" aria-label="Compartir">
+    <div className={`se-share ${className}`.trim()} role="group" aria-label={t("comun.compartir")}>
       <button
         type="button"
         className="se-share__btn se-share__btn--ig"
         onClick={handleInstagram}
-        aria-label="Compartir en Instagram"
+        aria-label={t("piezas.compartir.instagram")}
       >
         <span className="se-share__ico" aria-hidden="true">
           <IconInstagram className="se-share__svg" />
@@ -174,7 +174,7 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
         type="button"
         className="se-share__btn se-share__btn--wa"
         onClick={() => handlePopup(whatsappHref)}
-        aria-label="Compartir por WhatsApp"
+        aria-label={t("piezas.compartir.whatsapp")}
       >
         <span className="se-share__ico" aria-hidden="true">
           <IconWhatsApp className="se-share__svg" />
@@ -186,7 +186,7 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
         type="button"
         className="se-share__btn se-share__btn--x"
         onClick={() => handlePopup(xHref)}
-        aria-label="Compartir en X"
+        aria-label={t("piezas.compartir.x")}
       >
         <span className="se-share__ico" aria-hidden="true">
           <IconX className="se-share__svg" />

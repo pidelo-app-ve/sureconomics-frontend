@@ -1,0 +1,82 @@
+{
+  "boletin": {
+    "suscripcion": {
+      "meta": {
+        "titulo": "Suscripción — {marca}",
+        "descripcion": "Suscripción a SurEconomics: investigaciones, reportes y boletines con lectura ejecutiva para América Latina."
+      },
+      "titulo": "Suscripción",
+      "claim": "Acceso a investigaciones, reportes y boletines con lectura ejecutiva para América Latina.",
+      "beneficios": "Beneficios de la suscripción",
+      "beneficio1": "Investigaciones extensas en economía, finanzas y aspectos políticos de diferentes países y bloques latinoamericanos.",
+      "beneficio2": "Boletín semanal, cada lunes, sobre economía, finanzas y política en la región latinoamericana.",
+      "beneficio3": "Oportunidades de inversión directa en Latinoamérica.",
+      "beneficio4": "Conexión con potenciales inversores interesados en América Latina.",
+      "beneficio5": "Cursos en economía y finanzas con orientación práctica.",
+      "verInformes": "Ver informes y reportes",
+      "planPremium": "Plan premium",
+      "precio": "Precio",
+      "precioValor": "Precio próximamente",
+      "pago": "Pago",
+      "pagoValor": "Métodos de pago disponibles próximamente",
+      "cta": "Suscribirme",
+      "ctaDemo": "CTA de suscripción (demo)",
+      "demo": "Esta pantalla es una demo institucional. En la siguiente fase se conectará el flujo de pago.",
+      "explorar": "Explorar la plataforma"
+    },
+    "baja": {
+      "meta": {
+        "titulo": "Darse de baja del boletín — {marca}"
+      },
+      "titulo": "Boletín de SurEconomics",
+      "procesando": "Procesando la baja…",
+      "hecho": "Hecho. {correo} ya no recibirá el boletín.",
+      "eseCorreo": "Ese correo",
+      "sinQuerer": "Si fue sin querer, puede volver a suscribirse desde el pie de cualquier página.",
+      "sinToken": "Este enlace está incompleto. Use el enlace de baja que viene al final del boletín, o escríbanos y lo hacemos nosotros.",
+      "tokenMalo": "Ese enlace de baja no es válido. Puede que sea de un correo muy antiguo. Si sigue recibiendo el boletín, escríbanos y lo quitamos a mano.",
+      "error": "No se pudo procesar la baja ahora mismo. Vuelva a intentarlo en un rato, o escríbanos.",
+      "irPortada": "Ir a la portada",
+      "escribirnos": "Escribirnos"
+    },
+    "entorno": {
+      "meta": {
+        "titulo": "Entorno en Viñetas — {marca}",
+        "descripcion": "El boletín semanal de SurEconomics: el entorno económico de la semana, contado en viñetas. Gratis, cada lunes."
+      },
+      "irAlSitio": "SurEconomics, ir al sitio",
+      "kicker": "Boletín semanal · los lunes a las 9:00",
+      "texto": "El entorno económico de la semana, contado en viñetas: lo que movió los mercados, lo que viene y lo que conviene mirar. Gratis, en su correo.",
+      "listoTitulo": "Listo, ya está suscrito.",
+      "listoTexto": "El próximo lunes le llega a su correo.",
+      "verSitio": "Ver SurEconomics",
+      "suCorreo": "Su correo",
+      "placeholder": "nombre@correo.com",
+      "enviando": "Enviando…",
+      "suscribirme": "Suscribirme",
+      "noGracias": "No, gracias — ir a SurEconomics",
+      "letra": "Sin spam. Se da de baja con un clic desde cualquier boletín.",
+      "escribaCorreo": "Escriba su correo para suscribirse."
+    },
+    "invitacion": {
+      "kicker": "Boletín semanal · los lunes por la mañana",
+      "texto": "El entorno económico de la semana, contado en viñetas. Le llega cada lunes, antes de que la semana empiece a moverse.",
+      "suCorreo": "Su correo",
+      "placeholder": "nombre@correo.com",
+      "unirse": "Únase al boletín",
+      "enviando": "Enviando…",
+      "ahoraNo": "Ahora no",
+      "ok": "Listo. El primer número le llega el lunes.",
+      "exitoTitulo": "Ya está dentro",
+      "exitoTexto": "El primer número de {boletin} le llega el lunes por la mañana{correo}.",
+      "exitoA": "a",
+      "exitoNota": "Si no lo ve, búsquelo en «Promociones» o en el correo no deseado."
+    },
+    "nombre": "Entorno en Viñetas",
+    "errores": {
+      "correoIncompleto": "Ese correo no parece completo. Revíselo y vuelva a probar.",
+      "demasiados": "Demasiados intentos seguidos. Espere un momento.",
+      "fallo": "No se pudo completar la suscripción. Inténtelo de nuevo."
+    }
+  }
+}

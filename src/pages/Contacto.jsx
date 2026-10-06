@@ -1,8 +1,10 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BRAND, CONTACT } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Enlace } from "../components/Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { contactService } from "../services/contactService";
 import { useClaveIdempotente } from "../hooks/useClaveIdempotente";
 
@@ -84,14 +86,12 @@ const ID_DE_CAMPO = {
 export const Contacto = () => {
   const [searchParams] = useSearchParams();
   const prefilledSubject = searchParams.get("asunto") || "";
+  const { t } = useIdioma();
 
-  useEffect(() => {
-    applyPageMeta({
-      title: `Contacto — ${BRAND.name}`,
-      description:
-        "Escriba a la redacción de SurEconomics: consultas, alianzas, publicidad y proyectos de investigación o asesoría.",
-    });
-  }, []);
+  useMetaPagina({
+    title: t("paginas.contacto.meta.titulo", { marca: BRAND.name }),
+    description: t("paginas.contacto.meta.descripcion"),
+  });
 
   const [form, setForm] = useState({
     name: "",
@@ -115,19 +115,19 @@ export const Contacto = () => {
     const v = String(valor ?? "").trim();
     if (!v) {
       return {
-        name: "Escriba su nombre.",
-        email: "Escriba su correo.",
-        subject: "Diga de qué se trata.",
-        message: "Escriba su mensaje.",
+        name: t("paginas.contacto.errores.nombre"),
+        email: t("paginas.contacto.errores.correo"),
+        subject: t("paginas.contacto.errores.asunto"),
+        message: t("paginas.contacto.errores.mensaje"),
       }[key];
     }
     // Comprobación mínima a propósito: la buena la hace el servidor, y una expresión
     // estricta aquí rechaza direcciones válidas raras y deja pasar las inventadas
     // igual. Lo que se quiere atajar es la errata, no validar el correo.
     if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
-      return "Ese correo no parece completo.";
+      return t("paginas.contacto.errores.correoIncompleto");
     }
-    if (key === "message" && v.length < 10) return "Cuéntenos un poco más.";
+    if (key === "message" && v.length < 10) return t("paginas.contacto.errores.mensajeCorto");
     return null;
   };
 
@@ -150,7 +150,7 @@ export const Contacto = () => {
     setTocado(todos);
     const primero = Object.keys(form).find((k) => revisar(k, form[k]));
     if (primero) {
-      setSubmitState({ status: "error", message: "Revise los campos marcados." });
+      setSubmitState({ status: "error", message: t("paginas.contacto.errores.revise") });
       // El foco al primer campo que falla: el aviso general dice que algo falla, y el
       // campo dice cual. Sin esto quien usa teclado tenia que buscarlo.
       document.getElementById(ID_DE_CAMPO[primero])?.focus();
@@ -159,7 +159,7 @@ export const Contacto = () => {
     setSubmitState({ status: "loading", message: "" });
     try {
       await contactService.submitContactMessage(form, { idempotencyKey: clave() });
-      setSubmitState({ status: "success", message: "Gracias por escribirnos. Le responderemos a la brevedad." });
+      setSubmitState({ status: "success", message: t("paginas.contacto.gracias") });
       setForm({ name: "", email: "", subject: "", message: "" });
       setTocado({});
       // Cuajó: lo que venga después es un mensaje nuevo, no un reintento.
@@ -168,9 +168,7 @@ export const Contacto = () => {
       const tooMany = err?.status === 429;
       setSubmitState({
         status: "error",
-        message: tooMany
-          ? "Demasiadas solicitudes. Intente de nuevo en unos minutos."
-          : "No se pudo enviar el mensaje. Intente de nuevo o escríbanos directamente por email.",
+        message: tooMany ? t("paginas.contacto.errores.demasiadas") : t("paginas.contacto.errores.fallo"),
       });
     }
   };
@@ -180,10 +178,8 @@ export const Contacto = () => {
       <section className="se-hero se-hero--institutional se-contact__hero">
         <div className="se-container">
           <div className="se-institutional-hero">
-            <h1 className="se-heading-hero">Contacto</h1>
-            <p className="se-text-lead se-hero__claim">
-              Contacto institucional para consultas, alianzas y proyectos de investigación/asesoría.
-            </p>
+            <h1 className="se-heading-hero">{t("paginas.contacto.titulo")}</h1>
+            <p className="se-text-lead se-hero__claim">{t("paginas.contacto.claim")}</p>
           </div>
         </div>
       </section>
@@ -209,11 +205,11 @@ export const Contacto = () => {
                 <div id="contact-submit-status" className="se-contact__status" role="status">
                   {submitState.status === "success" ? (
                     <div className="se-contact__banner">
-                      <strong>Enviado.</strong> {submitState.message}
+                      <strong>{t("paginas.contacto.enviado")}</strong> {submitState.message}
                     </div>
                   ) : submitState.status === "loading" ? (
                     <div className="se-contact__banner se-contact__banner--loading">
-                      Enviando…
+                      {t("paginas.contacto.enviando")}
                     </div>
                   ) : submitState.status === "error" ? (
                     <div className="se-contact__banner se-contact__banner--error">
@@ -228,7 +224,7 @@ export const Contacto = () => {
                 <div className="se-form-grid">
                   <Campo
                     id="contacto-nombre"
-                    etiqueta="Nombre"
+                    etiqueta={t("paginas.contacto.campos.nombre")}
                     valor={form.name}
                     error={errores.name}
                     onChange={handleChange("name")}
@@ -238,7 +234,7 @@ export const Contacto = () => {
                   />
                   <Campo
                     id="contacto-correo"
-                    etiqueta="Correo electrónico"
+                    etiqueta={t("paginas.contacto.campos.correo")}
                     tipo="email"
                     valor={form.email}
                     error={errores.email}
@@ -250,7 +246,7 @@ export const Contacto = () => {
                 </div>
                 <Campo
                   id="contacto-asunto"
-                  etiqueta="Asunto"
+                  etiqueta={t("paginas.contacto.campos.asunto")}
                   valor={form.subject}
                   error={errores.subject}
                   onChange={handleChange("subject")}
@@ -259,7 +255,7 @@ export const Contacto = () => {
                 />
                 <Campo
                   id="contacto-mensaje"
-                  etiqueta="Mensaje"
+                  etiqueta={t("paginas.contacto.campos.mensaje")}
                   multilinea
                   valor={form.message}
                   error={errores.message}
@@ -267,9 +263,9 @@ export const Contacto = () => {
                   onBlur={alSalir("message")}
                   bloqueado={submitState.status === "loading"}
                 />
-                <button type="submit" className="se-btn" aria-label="Enviar formulario" disabled={submitState.status === "loading"}
+                <button type="submit" className="se-btn" aria-label={t("paginas.contacto.enviarFormulario")} disabled={submitState.status === "loading"}
                 >
-                  {submitState.status === "loading" ? "Enviando…" : "Enviar"}
+                  {submitState.status === "loading" ? t("paginas.contacto.enviando") : t("paginas.contacto.enviar")}
                 </button>
               </form>
 
@@ -278,11 +274,9 @@ export const Contacto = () => {
             <aside className="se-contact__aside">
               <section className="se-contact__tarjeta" aria-labelledby="contacto-directo">
                 <h2 id="contacto-directo" className="se-contact__tarjeta-titulo">
-                  Escríbanos directamente
+                  {t("paginas.contacto.directoTitulo")}
                 </h2>
-                <p className="se-contact__tarjeta-texto">
-                  Si prefiere su propio correo, esta es la dirección del medio.
-                </p>
+                <p className="se-contact__tarjeta-texto">{t("paginas.contacto.directoTexto")}</p>
                 <a href={`mailto:${CONTACT.primaryEmail}`} className="se-contact__correo">
                   {CONTACT.primaryEmail}
                 </a>
@@ -291,20 +285,16 @@ export const Contacto = () => {
               {/* Los dos destinos que la gente busca desde aquí. Antes vivían sueltos
                   bajo el formulario, donde nadie los veía: quien llega a Contacto sin
                   saber a quién escribir suele venir por una de las dos cosas. */}
-              <nav className="se-contact__tarjeta" aria-label="Otros caminos">
-                <h2 className="se-contact__tarjeta-titulo">¿Viene por algo concreto?</h2>
-                <Link to="/anunciate" className="se-contact__camino">
-                  <span className="se-contact__camino-titulo">Anunciarse</span>
-                  <span className="se-contact__camino-texto">
-                    Formatos, espacios del sitio y medidas.
-                  </span>
-                </Link>
-                <Link to="/consultoria" className="se-contact__camino">
-                  <span className="se-contact__camino-titulo">Consultoría</span>
-                  <span className="se-contact__camino-texto">
-                    Investigación y asesoría por encargo.
-                  </span>
-                </Link>
+              <nav className="se-contact__tarjeta" aria-label={t("paginas.contacto.otrosCaminos")}>
+                <h2 className="se-contact__tarjeta-titulo">{t("paginas.contacto.vienePorAlgo")}</h2>
+                <Enlace to="/anunciate" className="se-contact__camino">
+                  <span className="se-contact__camino-titulo">{t("paginas.contacto.anunciarse")}</span>
+                  <span className="se-contact__camino-texto">{t("paginas.contacto.anunciarseTexto")}</span>
+                </Enlace>
+                <Enlace to="/consultoria" className="se-contact__camino">
+                  <span className="se-contact__camino-titulo">{t("paginas.contacto.consultoria")}</span>
+                  <span className="se-contact__camino-texto">{t("paginas.contacto.consultoriaTexto")}</span>
+                </Enlace>
               </nav>
             </aside>
           </div>

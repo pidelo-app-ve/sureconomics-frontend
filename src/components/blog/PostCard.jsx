@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { formatearFecha } from "../../i18n/motor";
 import { fondoDeTema } from "../../lib/tarjeta";
-import { formatDateEs } from "../../lib/date";
 import { ShareButtons } from "../content/ShareButtons";
 
 export const PostCard = ({
@@ -15,12 +16,13 @@ export const PostCard = ({
   imageUrl,
   variant = "default",
 }) => {
+  const { t } = useIdioma();
   const isHero = variant === "hero";
   const url = `/articulo/${slug}`;
 
   return (
     <article className={`se-card se-card--${variant}`} aria-labelledby={`title-${slug}`}>
-      <Link to={url} className="se-card__media-link">
+      <Enlace to={url} className="se-card__media-link">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -31,8 +33,8 @@ export const PostCard = ({
           />
         ) : (
           /* The grey line drawing this used to render is what the front page was
-             showing for a piece with no photograph, and it read as a broken image.
-             A colour field from the topic instead -- and nothing written on it,
+             showing for a piece with no photograph, and it read as a broken image. A
+             colour field from the topic instead -- and nothing written on it,
              because this card prints the topic directly underneath, and the first
              version of this said "Agro y Alimentos" twice in a row. */
           <div
@@ -41,26 +43,26 @@ export const PostCard = ({
             aria-hidden="true"
           />
         )}
-      </Link>
+      </Enlace>
       <div className="se-card__body">
         <span className="se-meta se-meta--category">{category}</span>
         <h2 className="se-heading-card" id={`title-${slug}`}>
-          <Link to={url}>{title}</Link>
+          <Enlace to={url}>{title}</Enlace>
         </h2>
         {excerpt && (
           <p className="se-card__excerpt se-text-body">{excerpt}</p>
         )}
         <div className="se-card__meta">
-          <time dateTime={date}>{formatDateEs(date)}</time>
+          <time dateTime={date}>{formatearFecha(date, "larga") || date}</time>
           {readTime && <span className="se-card__read-time">{readTime}</span>}
-          {author && <span className="se-card__author">Por {author}</span>}
+          {author && <span className="se-card__author">{t("portada.tarjeta.por", { autor: author })}</span>}
         </div>
         <div className="se-card__share">
           <ShareButtons url={url} title={title} />
         </div>
-        <Link to={url} className="se-link se-card__cta">
-          Leer más
-        </Link>
+        <Enlace to={url} className="se-link se-card__cta">
+          {t("comun.leerMas")}
+        </Enlace>
       </div>
     </article>
   );

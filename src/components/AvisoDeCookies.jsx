@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Enlace } from "./Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import {
   MEDICION_HABILITADA,
   aceptado,
@@ -52,6 +54,7 @@ import {
 export const AvisoDeCookies = () => {
   const [decision, setDecision] = useState(() => consentimiento());
   const { pathname } = useLocation();
+  const { t } = useIdioma();
 
   // Un si dicho en una visita anterior enciende la medicion sin volver a preguntar.
   useEffect(() => {
@@ -115,18 +118,16 @@ export const AvisoDeCookies = () => {
       // `region` y no `dialog`: un dialogo se lleva el foco y atrapa el teclado, y esto
       // no debe interrumpir la lectura. Se anuncia, y quien quiera llega tabulando.
       role="region"
-      aria-label="Aviso de cookies"
+      aria-label={t("paginas.cookies.aviso.region")}
     >
       <div className="se-cookies__caja">
         <div className="se-cookies__texto">
-          <p className="se-cookies__titulo">Medimos cuánta gente nos lee</p>
+          <p className="se-cookies__titulo">{t("paginas.cookies.aviso.titulo")}</p>
           <p className="se-cookies__cuerpo">
-            Con su permiso usamos cuatro cookies propias para saber cuántas personas nos
-            leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten
-            con nadie y no le siguen fuera de este sitio.{" "}
-            <Link to="/cookies" className="se-cookies__enlace">
-              Qué guarda cada una
-            </Link>
+            {t("paginas.cookies.aviso.cuerpo")}{" "}
+            <Enlace to="/cookies" className="se-cookies__enlace">
+              {t("paginas.cookies.aviso.enlace")}
+            </Enlace>
             .
           </p>
         </div>
@@ -140,14 +141,14 @@ export const AvisoDeCookies = () => {
             className="se-cookies__btn se-cookies__btn--no"
             onClick={() => responder("no")}
           >
-            Rechazar
+            {t("paginas.cookies.aviso.rechazar")}
           </button>
           <button
             type="button"
             className="se-cookies__btn se-cookies__btn--si"
             onClick={() => responder("si")}
           >
-            Aceptar
+            {t("paginas.cookies.aviso.aceptar")}
           </button>
         </div>
       </div>

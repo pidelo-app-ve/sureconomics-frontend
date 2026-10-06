@@ -1,9 +1,11 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { AvatarDelLector } from "../../components/cuenta/AvatarDelLector";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 
 /**
@@ -58,38 +60,35 @@ const Marca = ({ estado }) => {
 Marca.propTypes = { estado: PropTypes.oneOf(["bien", "falta"]).isRequired };
 
 /** Lo que se puede hacer con una cuenta. Fijo: es la guía, no un estado. */
-const QUE_SE_PUEDE = [
+const queSePuede = (t) => [
   {
-    titulo: "Guardar artículos",
-    texto:
-      "El marcador de cualquier pieza la guarda aquí para leerla después, desde cualquier dispositivo.",
+    titulo: t("cuenta.inicio.usos.guardarTitulo"),
+    texto: t("cuenta.inicio.usos.guardarTexto"),
     a: "/cuenta/marcadores",
-    enlace: "Ver mis marcadores",
+    enlace: t("cuenta.inicio.usos.guardarEnlace"),
   },
   {
-    titulo: "Comentar",
-    texto:
-      "Los comentarios se publican con su nombre y pasan por revisión antes de aparecer. Se comenta desde la propia pieza.",
+    titulo: t("cuenta.inicio.usos.comentarTitulo"),
+    texto: t("cuenta.inicio.usos.comentarTexto"),
     a: "/articulos",
-    enlace: "Ir a los artículos",
+    enlace: t("cuenta.inicio.usos.comentarEnlace"),
   },
   {
-    titulo: "Proponer una pieza",
-    texto:
-      "Puede mandar un artículo o una noticia a la redacción. Si la aceptan, se publica con su nombre y su foto.",
+    titulo: t("cuenta.inicio.usos.proponerTitulo"),
+    texto: t("cuenta.inicio.usos.proponerTexto"),
     a: "/cuenta/envios",
-    enlace: "Ver mis envíos",
+    enlace: t("cuenta.inicio.usos.proponerEnlace"),
   },
   {
-    titulo: "Comprar módulos de Educación",
-    texto:
-      "Cada módulo se compra una vez y el acceso no caduca. La primera clase de cada uno se lee sin pagar.",
+    titulo: t("cuenta.inicio.usos.comprarTitulo"),
+    texto: t("cuenta.inicio.usos.comprarTexto"),
     a: "/educacion",
-    enlace: "Ver el catálogo",
+    enlace: t("cuenta.inicio.usos.comprarEnlace"),
   },
 ];
 
 export const CuentaDashboardHome = () => {
+  const { t } = useIdioma();
   const { profile, profileStatus, isEmailVerified } = useUserAuth();
   const [cifras, setCifras] = useState({
     estado: "cargando",
@@ -98,13 +97,11 @@ export const CuentaDashboardHome = () => {
     modulos: null,
   });
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Mi espacio — SurEconomics",
-      description: "Su cuenta de lector.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.inicio.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.inicio.meta.descripcion"),
+    noindex: true,
+  });
 
   useEffect(() => {
     if (!isEmailVerified) return undefined;
@@ -134,7 +131,7 @@ export const CuentaDashboardHome = () => {
   if (profileStatus === "loading" || profileStatus === "idle") {
     return (
       <div className="se-cuenta__pagina">
-        <p className="se-cuenta__aviso">Cargando su cuenta…</p>
+        <p className="se-cuenta__aviso">{t("cuenta.inicio.cargando")}</p>
       </div>
     );
   }
@@ -143,15 +140,13 @@ export const CuentaDashboardHome = () => {
     return (
       <div className="se-cuenta__pagina">
         <div className="se-cuenta__vacio">
-          <h1>Confirme su correo</h1>
+          <h1>{t("cuenta.inicio.confirmeTitulo")}</h1>
           <p>
-            Le enviamos un código a <strong>{profile?.email}</strong>. Hasta
-            confirmarlo no se pueden guardar artículos, comentar ni abrir las clases —
-            es lo que evita que alguien cree cuentas con correos ajenos.
+            {t("cuenta.inicio.confirmeTexto", { correo: <strong>{profile?.email}</strong> })}
           </p>
-          <Link to="/cuenta/verificar-email" className="se-btn" state={{ email: profile?.email }}>
-            Escribir el código
-          </Link>
+          <Enlace to="/cuenta/verificar-email" className="se-btn" state={{ email: profile?.email }}>
+            {t("cuenta.inicio.escribirCodigo")}
+          </Enlace>
         </div>
       </div>
     );
@@ -160,30 +155,30 @@ export const CuentaDashboardHome = () => {
   const nombre =
     [profile?.firstName, profile?.lastName].filter(Boolean).join(" ").trim() ||
     profile?.email?.split("@")[0] ||
-    "Lector";
+    t("cuenta.inicio.lector");
 
   const opcionales = ["age", "sex", "country", "city", "occupation", "phoneNumber"];
   const sinRellenar = opcionales.filter((c) => !String(profile?.[c] ?? "").trim()).length;
 
   const puntos = [
-    { estado: "bien", texto: "Correo confirmado" },
+    { estado: "bien", texto: t("cuenta.inicio.correoConfirmado") },
     profile?.photoUrl
-      ? { estado: "bien", texto: "Tiene foto de perfil" }
+      ? { estado: "bien", texto: t("cuenta.inicio.tieneFoto") }
       : {
           estado: "falta",
-          texto: "Sin foto de perfil",
-          detalle: "Hace falta para firmar lo que le publiquen.",
+          texto: t("cuenta.inicio.sinFoto"),
+          detalle: t("cuenta.inicio.sinFotoDetalle"),
           a: "/cuenta/perfil",
-          enlace: "Subirla",
+          enlace: t("cuenta.inicio.subirla"),
         },
     sinRellenar === 0
-      ? { estado: "bien", texto: "Perfil completo" }
+      ? { estado: "bien", texto: t("cuenta.inicio.perfilCompleto") }
       : {
           estado: "falta",
-          texto: `Perfil a medias · ${sinRellenar} de 6 datos sin rellenar`,
-          detalle: "Todos son opcionales; la redacción los usa para localizarle.",
+          texto: t("cuenta.inicio.perfilAMedias", { n: sinRellenar }),
+          detalle: t("cuenta.inicio.perfilAMediasDetalle"),
           a: "/cuenta/perfil",
-          enlace: "Completar",
+          enlace: t("cuenta.inicio.completar"),
         },
   ];
 
@@ -194,13 +189,13 @@ export const CuentaDashboardHome = () => {
       <header className="se-cuenta__cabecera se-cuenta__cabecera--con-cara">
         <AvatarDelLector perfil={profile} tamano="md" />
         <div>
-          <p className="se-cuenta__kicker">Su espacio</p>
-          <h1 className="se-cuenta__titulo">Hola, {nombre}</h1>
+          <p className="se-cuenta__kicker">{t("cuenta.panel.suEspacio")}</p>
+          <h1 className="se-cuenta__titulo">{t("cuenta.inicio.hola", { nombre })}</h1>
         </div>
       </header>
 
-      <section className="se-guia" aria-label="Estado de su cuenta">
-        <h2 className="se-cuenta__h2">Su cuenta</h2>
+      <section className="se-guia" aria-label={t("cuenta.inicio.estadoDeSuCuenta")}>
+        <h2 className="se-cuenta__h2">{t("cuenta.inicio.suCuenta")}</h2>
         <ul className="se-guia__lista">
           {puntos.map((p) => (
             <li key={p.texto} className={`se-guia__punto se-guia__punto--${p.estado}`}>
@@ -210,50 +205,50 @@ export const CuentaDashboardHome = () => {
                 {p.detalle ? <small>{p.detalle}</small> : null}
               </span>
               {p.a ? (
-                <Link to={p.a} className="se-guia__accion">
+                <Enlace to={p.a} className="se-guia__accion">
                   {p.enlace} →
-                </Link>
+                </Enlace>
               ) : null}
             </li>
           ))}
         </ul>
       </section>
 
-      <section className="se-resumen" aria-label="Lo que tiene">
-        <Link to="/cuenta/lo-mio" className="se-resumen__ficha">
+      <section className="se-resumen" aria-label={t("cuenta.inicio.loQueTiene")}>
+        <Enlace to="/cuenta/lo-mio" className="se-resumen__ficha">
           <span className="se-resumen__n">
             {cifras.modulos == null ? "—" : cifras.modulos}
           </span>
           <span className="se-resumen__t">
-            {cifras.modulos === 1 ? "módulo comprado" : "módulos comprados"}
+            {t("cuenta.inicio.modulosComprados", { n: cifras.modulos ?? 0 })}
           </span>
-        </Link>
-        <Link to="/cuenta/marcadores" className="se-resumen__ficha">
+        </Enlace>
+        <Enlace to="/cuenta/marcadores" className="se-resumen__ficha">
           <span className="se-resumen__n">
             {cifras.marcadores == null ? "—" : cifras.marcadores}
           </span>
           <span className="se-resumen__t">
-            {cifras.marcadores === 1 ? "artículo guardado" : "artículos guardados"}
+            {t("cuenta.inicio.articulosGuardados", { n: cifras.marcadores ?? 0 })}
           </span>
-        </Link>
-        <Link to="/cuenta/envios" className="se-resumen__ficha">
+        </Enlace>
+        <Enlace to="/cuenta/envios" className="se-resumen__ficha">
           <span className="se-resumen__n">
             {cifras.envios == null ? "—" : cifras.envios}
           </span>
           <span className="se-resumen__t">
-            {cifras.envios === 1 ? "propuesta enviada" : "propuestas enviadas"}
+            {t("cuenta.inicio.propuestasEnviadas", { n: cifras.envios ?? 0 })}
           </span>
-        </Link>
+        </Enlace>
       </section>
 
-      <section className="se-guia" aria-label="Qué puede hacer">
-        <h2 className="se-cuenta__h2">Qué puede hacer aquí</h2>
+      <section className="se-guia" aria-label={t("cuenta.inicio.quePuedeHacer")}>
+        <h2 className="se-cuenta__h2">{t("cuenta.inicio.quePuedeHacerAqui")}</h2>
         <ul className="se-guia__usos">
-          {QUE_SE_PUEDE.map((u) => (
+          {queSePuede(t).map((u) => (
             <li key={u.titulo} className="se-guia__uso">
               <h3>{u.titulo}</h3>
               <p>{u.texto}</p>
-              <Link to={u.a}>{u.enlace} →</Link>
+              <Enlace to={u.a}>{u.enlace} →</Enlace>
             </li>
           ))}
         </ul>

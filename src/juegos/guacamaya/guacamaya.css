@@ -55,6 +55,7 @@
 
 .se-guaca--portada .se-guaca__hud,
 .se-guaca--fin .se-guaca__hud,
+.se-guaca--vuelos .se-guaca__hud,
 .se-guaca--tienda .se-guaca__hud {
   opacity: 0;
 }
@@ -353,6 +354,7 @@
 
 .se-guaca--jugando .se-guaca__pie,
 .se-guaca--pausa .se-guaca__pie,
+.se-guaca--vuelos .se-guaca__pie,
 .se-guaca--tienda .se-guaca__pie {
   opacity: 0;
   visibility: hidden;
@@ -532,6 +534,222 @@
   outline-offset: 2px;
 }
 
+/* —— Los vuelos: estrellas, el mapa y el aviso de cada despegue —— */
+.se-guaca__solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.se-guaca__estrellas {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.se-guaca__estrella {
+  width: 16px;
+  height: 16px;
+  fill: rgba(255, 244, 220, 0.2);
+}
+
+.se-guaca__estrella--llena {
+  fill: var(--guaca-mango);
+}
+
+.se-guaca__estrellas--fin {
+  gap: 6px;
+  margin: 2px 0 -2px;
+}
+
+.se-guaca__estrellas--fin .se-guaca__estrella {
+  width: 34px;
+  height: 34px;
+}
+
+/* Las estrellas ganadas entran de una en una. */
+.se-guaca__estrellas--fin .se-guaca__estrella--llena {
+  animation: se-guaca-estrella 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.se-guaca__estrellas--fin .se-guaca__estrella:nth-child(2) { animation-delay: 160ms; }
+.se-guaca__estrellas--fin .se-guaca__estrella:nth-child(3) { animation-delay: 320ms; }
+
+@keyframes se-guaca-estrella {
+  from { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  to { opacity: 1; transform: none; }
+}
+
+.se-guaca__vuelos-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.se-guaca__vuelos-boton .se-guaca__estrella {
+  width: 13px;
+  height: 13px;
+}
+
+.se-guaca__ayuda--estrellas {
+  max-width: 34em;
+  margin-bottom: 2px;
+}
+
+.se-guaca__mapa {
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+
+.se-guaca__vuelo {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 14px 7px 8px;
+  border: 1px solid rgba(255, 244, 220, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 244, 220, 0.05);
+  color: var(--guaca-crema);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-guaca__vuelo:not(:disabled):hover {
+    background: rgba(255, 244, 220, 0.11);
+    transform: translateY(-1px);
+  }
+}
+
+.se-guaca__vuelo:focus-visible {
+  outline: 2px solid var(--guaca-crema);
+  outline-offset: 2px;
+}
+
+.se-guaca__vuelo--elegido {
+  border-color: var(--guaca-mango);
+  background: rgba(255, 201, 40, 0.1);
+}
+
+.se-guaca__vuelo--cerrado {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.se-guaca__vuelo--jefe .se-guaca__vuelo-num {
+  background: #e2483d;
+  color: #fff;
+}
+
+.se-guaca__vuelo-num {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--guaca-mango);
+  color: var(--guaca-tinta);
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-guaca__vuelo--cerrado .se-guaca__vuelo-num {
+  background: rgba(255, 244, 220, 0.16);
+  color: var(--guaca-crema);
+}
+
+.se-guaca__candado {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.se-guaca__vuelo-texto {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.se-guaca__vuelo-texto strong {
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.se-guaca__vuelo-texto strong em {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e2483d;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.se-guaca__vuelo-texto span {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(255, 244, 220, 0.74);
+}
+
+.se-guaca__vuelo-estrellas .se-guaca__estrella {
+  width: 15px;
+  height: 15px;
+}
+
+/* El aviso de lo que trae este vuelo: aparece al despegar y se apaga solo. */
+.se-guaca__intro {
+  position: absolute;
+  inset: 34% 14px auto;
+  z-index: 3;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 14px;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: calc(100% - 28px);
+  border-radius: 12px;
+  background: rgba(29, 22, 48, 0.72);
+  text-align: center;
+  pointer-events: none;
+  animation: se-guaca-intro 3.2s ease-out both;
+}
+
+.se-guaca__intro strong {
+  font-size: 0.875rem;
+  color: var(--guaca-mango);
+}
+
+.se-guaca__intro span {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+@keyframes se-guaca-intro {
+  0% { opacity: 0; transform: translateY(-6px); }
+  10%, 78% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
 @media (max-width: 520px) {
   .se-guaca {
     border-radius: 14px;
@@ -547,8 +765,13 @@
     animation: se-guaca-velo 160ms ease-out both;
   }
   .se-guaca__boton,
-  .se-guaca__corazon {
+  .se-guaca__corazon,
+  .se-guaca__vuelo {
     transition: none;
+  }
+  .se-guaca__estrellas--fin .se-guaca__estrella--llena,
+  .se-guaca__intro {
+    animation: none;
   }
 }
 

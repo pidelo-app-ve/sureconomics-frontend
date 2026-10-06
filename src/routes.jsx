@@ -1,3 +1,6 @@
+// Antes que nada: `createBrowserRouter` arranca la primera navegación al evaluarse, y
+// el `loader` de `/en` necesita saber ya cómo descargar el diccionario inglés.
+import "./i18n/diccionarios";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
@@ -25,6 +28,8 @@ import { CuentaEntrar } from "./pages/cuenta/CuentaEntrar";
 import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
 import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
+import { ProveedorIdioma } from "./i18n/ProveedorIdioma";
+import { cargarIdioma } from "./i18n/motor";
 
 /**
  * Una página que se descarga al entrar en ella, no con el resto del sitio.
@@ -37,15 +42,21 @@ import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
  */
 const pagina = (cargar, nombre) => async () => ({ Component: (await cargar())[nombre] });
 
-export const router = createBrowserRouter([
+
+/**
+ * Las rutas públicas, con caminos relativos: se montan dos veces, en `/` (español) y en
+ * `/en` (inglés), bajo un `ProveedorIdioma` cada una. Así una página existe en los dos
+ * idiomas sin escribirla dos veces, y el idioma vive en la dirección, que es lo que
+ * Google indexa. Ver `i18n/motor.js`.
+ */
+const rutasPublicas = () => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
-    { path: "/entorno", element: <Entorno />, errorElement: <NotFound /> },
+    { path: "entorno", element: <Entorno />, errorElement: <NotFound /> },
     // El Analista, a pantalla completa y fuera de `Layout`: el juego abre pantallas
     // fijas que taparían la cabecera. Ver `pages/ElAnalista.jsx`.
-    { path: "/el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
+    { path: "el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
     {
-        path: "/",
         element: <Layout />,
         errorElement: <NotFound />,
         children: [
@@ -101,7 +112,7 @@ export const router = createBrowserRouter([
         ],
     },
     {
-        path: "/cuenta",
+        path: "cuenta",
         lazy: pagina(() => import("./pages/cuenta/CuentaDashboardLayout"), "CuentaDashboardLayout"),
         children: [
             { index: true, lazy: pagina(() => import("./pages/cuenta/CuentaDashboardHome"), "CuentaDashboardHome") },
@@ -113,6 +124,22 @@ export const router = createBrowserRouter([
             { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar") },
             { path: "envios/:id", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioDetail"), "CuentaEnvioDetail") },
         ],
+    },
+];
+
+export const router = createBrowserRouter([
+    { path: "/", element: <ProveedorIdioma lang="es" />, errorElement: <NotFound />, children: rutasPublicas() },
+    {
+        path: "/en",
+        element: <ProveedorIdioma lang="en" />,
+        errorElement: <NotFound />,
+        // El diccionario en inglés se descarga antes de pintar: ni parpadeo ni textos
+        // a medias. Es un archivo pequeño y se cachea; las visitas siguientes no esperan.
+        loader: async () => {
+            await cargarIdioma("en");
+            return null;
+        },
+        children: rutasPublicas(),
     },
     {
         path: "/admin/login",

@@ -7,6 +7,10 @@
  * Igual que el récord (`registro.js`), vive solo en este navegador, sin cuenta y sin
  * nada que viaje al servidor, y todo acceso va en try/catch: con el almacenamiento
  * bloqueado se juega igual, solo que con la guacamaya de siempre.
+ *
+ * El nombre y la nota de cada plumaje no están aquí: viven en los diccionarios
+ * (`juegos.guacamaya.plumajes.<id>.nombre` y `.nota`) y la tienda los lee con `t()`.
+ * Aquí quedan el `id`, el precio, los colores y los accesorios, que no tienen idioma.
  */
 
 const CLAVE = "se_pausa_guacamaya_plumajes";
@@ -33,38 +37,30 @@ const con = (cambios) => ({ ...AZUL, ...cambios });
  * rayos de las tormentas.
  */
 export const PLUMAJES = [
-  { id: "azul", nombre: "Guacamaya azul y amarilla", nota: "La de siempre. Viene de fábrica.", precio: 0, c: AZUL },
+  { id: "azul", precio: 0, c: AZUL },
   {
     id: "roja",
-    nombre: "Guacamaya roja",
-    nota: "Roja entera, con el ala amarilla y las puntas azules.",
     precio: 20,
     extra: "roja",
     c: con({ cuerpo: "#d92b2f", barriga: "#c42127", cabeza: "#d92b2f", frente: "#d92b2f", ala: "#ffc21a", alaBajo: "#2257c9", cola: "#c41f24", colaB: "#2257c9", pico: "#efe6d6" }),
   },
   {
     id: "turpial",
-    nombre: "Turpial",
-    nota: "El ave nacional, de visita por Caracas.",
     precio: 25,
     extra: "turpial",
     c: con({ cuerpo: "#ff8a1c", barriga: "#ffa63a", cabeza: "#141414", frente: "#141414", cara: "#141414", pico: "#9aa0a8", ala: "#141414", alaBajo: "#f2f2f2", cola: "#141414", colaB: "#141414" }),
   },
-  { id: "pelotera", nombre: "Guacamaya pelotera", nota: "Gorra y pelota, sin camiseta de nadie.", precio: 30, extra: "pelotera", c: AZUL },
-  { id: "roques", nombre: "Guacamaya de Los Roques", nota: "Lentes de sol y flotador. Ya viene la temporada.", precio: 35, extra: "roques", c: AZUL },
-  { id: "tricolor", nombre: "Guacamaya tricolor", nota: "Con la gorra amarilla, azul y roja, y sus ocho estrellas.", precio: 40, extra: "tricolor", c: AZUL },
+  { id: "pelotera", precio: 30, extra: "pelotera", c: AZUL },
+  { id: "roques", precio: 35, extra: "roques", c: AZUL },
+  { id: "tricolor", precio: 40, extra: "tricolor", c: AZUL },
   {
     id: "liqui",
-    nombre: "Guacamaya en liquiliqui",
-    nota: "De gala, con botones dorados y sombrero llanero.",
     precio: 45,
     extra: "liqui",
     c: con({ cuerpo: "#f4efe2", barriga: "#ebe4d2", cabeza: "#2a7de1", ala: "#e2dac6", alaBajo: "#2a7de1", cola: "#2a7de1", colaB: "#ffc93c" }),
   },
   {
     id: "catatumbo",
-    nombre: "Guacamaya del Catatumbo",
-    nota: "Azul eléctrico. Con ella, los rayos de las tormentas cambian de color.",
     precio: 60,
     extra: "brillo",
     rastro: ["#9fe8ff", "#ffe14d"],
@@ -73,38 +69,30 @@ export const PLUMAJES = [
   },
   {
     id: "toro",
-    nombre: "Guacamaya toro",
-    nota: "Alcista. Cuernos, argolla y plumas en verde.",
     precio: 70,
     extra: "toro",
     c: con({ cuerpo: "#1f9d55", barriga: "#b8f0c8", cabeza: "#1f9d55", frente: "#b8f0c8", cara: "#f2fbf4", ala: "#167a41", alaBajo: "#0d5a2e", cola: "#167a41", colaB: "#b8f0c8" }),
   },
   {
     id: "oso",
-    nombre: "Guacamaya oso",
-    nota: "Bajista. Para los días rojos de la bolsa.",
     precio: 70,
     extra: "oso",
     c: con({ cuerpo: "#7a4a2a", barriga: "#c99c6c", cabeza: "#7a4a2a", frente: "#7a4a2a", cara: "#efdcc4", ala: "#5a341c", alaBajo: "#3b2010", cola: "#5a341c", colaB: "#c99c6c" }),
   },
   {
     id: "dolar",
-    nombre: "Guacamaya verde dólar",
-    nota: "Vuela con un fajo de billetes en las patas.",
     precio: 80,
     extra: "dolar",
     c: con({ cuerpo: "#2e8b57", barriga: "#cfe8c9", cabeza: "#2e8b57", frente: "#cfe8c9", cara: "#f3faf1", ala: "#1f6b42", alaBajo: "#0f4a2a", cola: "#1f6b42", colaB: "#cfe8c9" }),
   },
   {
     id: "dorada",
-    nombre: "Guacamaya dorada",
-    nota: "Deja un rastro de brillo por todo el Ávila.",
     precio: 100,
     extra: "brillo",
     rastro: ["#fff3b0", "#ffd23f"],
     c: con({ cuerpo: "#e8b923", barriga: "#fff0a8", cabeza: "#e8b923", frente: "#fff3c4", cara: "#fffaf0", ala: "#c9931a", alaBajo: "#8a5e0c", cola: "#d19c18", colaB: "#fff0a8" }),
   },
-  { id: "zamuro", nombre: "El zamuro arrepentido", nota: "Juegas de zamuro. Los otros zamuros igual te chocan.", precio: 150, extra: "zamuro", c: AZUL },
+  { id: "zamuro", precio: 150, extra: "zamuro", c: AZUL },
 ];
 
 export const PLUMAJE_BASE = PLUMAJES[0];

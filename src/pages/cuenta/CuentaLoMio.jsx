@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { applyPageMeta } from "../../lib/seo";
+import { Enlace } from "../../components/Enlace";
+import { BRAND } from "../../data/surEconomicsMock";
+import { formatearFecha, formatearNumero, idiomaActual } from "../../i18n/motor";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { getMisCompras } from "../../services/userMeService";
 import { duracionLegible, nivelLegible } from "../../services/educacionService";
 
@@ -32,35 +35,28 @@ import { duracionLegible, nivelLegible } from "../../services/educacionService";
 const dinero = (centavos, moneda) => {
   const valor = (Number(centavos) || 0) / 100;
   try {
-    return new Intl.NumberFormat("es", {
+    return formatearNumero(valor, idiomaActual(), {
       style: "currency",
       currency: moneda || "USD",
       minimumFractionDigits: Number.isInteger(valor) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(valor);
+    });
   } catch {
     return `${valor} ${moneda || ""}`.trim();
   }
 };
 
-const fechaLegible = (iso) => {
-  try {
-    return new Intl.DateTimeFormat("es", { dateStyle: "long" }).format(new Date(iso));
-  } catch {
-    return "";
-  }
-};
+const fechaLegible = (iso) => formatearFecha(iso, "larga");
 
 export const CuentaLoMio = () => {
+  const { t } = useIdioma();
   const [estado, setEstado] = useState({ cargando: true, error: "", datos: null });
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Lo mío — SurEconomics",
-      description: "Los módulos que ha comprado.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.loMio.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.loMio.meta.descripcion"),
+    noindex: true,
+  });
 
   useEffect(() => {
     let vivo = true;
@@ -70,7 +66,7 @@ export const CuentaLoMio = () => {
         vivo &&
         setEstado({
           cargando: false,
-          error: "No se pudo cargar lo que ha comprado. Inténtelo de nuevo.",
+          error: "fallo",
           datos: null,
         }),
       );
@@ -85,16 +81,16 @@ export const CuentaLoMio = () => {
   return (
     <div className="se-cuenta__pagina">
       <header className="se-cuenta__cabecera">
-        <h1 className="se-cuenta__titulo">Lo mío</h1>
+        <h1 className="se-cuenta__titulo">{t("cuenta.loMio.titulo")}</h1>
         <p className="se-cuenta__lead">
-          Los módulos de Educación que ha comprado. El acceso no caduca: son suyos.
+          {t("cuenta.loMio.lead")}
         </p>
       </header>
 
-      {estado.cargando ? <p className="se-cuenta__aviso">Cargando…</p> : null}
+      {estado.cargando ? <p className="se-cuenta__aviso">{t("comun.cargando")}</p> : null}
       {estado.error ? (
         <p className="se-cuenta__error" role="alert">
-          {estado.error}
+          {t("cuenta.loMio.fallo")}
         </p>
       ) : null}
 
@@ -103,24 +99,22 @@ export const CuentaLoMio = () => {
            salida es un callejón: quien llega buscando algo que compró y no lo ve, lo
            único que necesita es saber si es que no ha comprado nada. */
         <div className="se-cuenta__vacio">
-          <h2>Todavía no ha comprado ningún módulo</h2>
+          <h2>{t("cuenta.loMio.vacioTitulo")}</h2>
           <p>
-            Cuando compre uno aparecerá aquí, con su recibo, y podrá abrirlo desde este
-            mismo sitio. Cada módulo tiene una primera clase abierta que se lee sin
-            pagar.
+            {t("cuenta.loMio.vacioTexto")}
           </p>
-          <Link to="/educacion" className="se-btn">
-            Ver los módulos
-          </Link>
+          <Enlace to="/educacion" className="se-btn">
+            {t("cuenta.loMio.verModulos")}
+          </Enlace>
         </div>
       ) : null}
 
       {d?.modulos?.length ? (
         <>
           <h2 className="se-cuenta__h2">
-            {d.modulos.length === 1 ? "Su módulo" : `Sus ${d.modulos.length} módulos`}
+            {t("cuenta.loMio.susModulos", { n: d.modulos.length })}
             <span className="se-cuenta__pendiente">
-              {dinero(d.gastadoCentavos, d.moneda)} en total
+              {t("cuenta.loMio.enTotal", { importe: dinero(d.gastadoCentavos, d.moneda) })}
             </span>
           </h2>
 
@@ -140,7 +134,7 @@ export const CuentaLoMio = () => {
 
                   <div className="se-mio__copy">
                     <p className="se-mio__kicker">
-                      {nivel ? `Nivel ${nivel.toLowerCase()}` : "Módulo"}
+                      {nivel ? t("cuenta.loMio.nivel", { nivel: nivel.toLowerCase() }) : t("cuenta.loMio.modulo")}
                       {duracion ? ` · ${duracion}` : ""}
                     </p>
                     <h3 className="se-mio__titulo">{m.titulo}</h3>
@@ -149,7 +143,7 @@ export const CuentaLoMio = () => {
                     <p className="se-mio__recibo">
                       {dinero(m.recibo.importe_centavos, m.recibo.moneda)} ·{" "}
                       {fechaLegible(m.recibo.fecha)}
-                      <span className="se-mio__ref">Ref. {m.recibo.referencia}</span>
+                      <span className="se-mio__ref">{t("cuenta.loMio.ref", { referencia: m.recibo.referencia })}</span>
                     </p>
                   </div>
 
@@ -158,22 +152,21 @@ export const CuentaLoMio = () => {
                         puede retirar de debajo de quien pagó. Pero el enlace a la clase
                         no serviría, así que se dice en vez de llevar a un 404. */}
                     {m.publicado && m.empezar_por ? (
-                      <Link
+                      <Enlace
                         to={`/educacion/${m.slug}/${m.empezar_por}`}
                         className="se-btn"
                       >
-                        Abrir
-                      </Link>
+                        {t("cuenta.loMio.abrir")}
+                      </Enlace>
                     ) : (
                       <span className="se-mio__pausa">
-                        Fuera del catálogo ahora mismo. Sigue siendo suyo; escríbanos si
-                        lo necesita.
+                        {t("cuenta.loMio.fueraDelCatalogo")}
                       </span>
                     )}
                     {m.publicado ? (
-                      <Link to={`/educacion/${m.slug}`} className="se-mio__temario">
-                        Ver el temario →
-                      </Link>
+                      <Enlace to={`/educacion/${m.slug}`} className="se-mio__temario">
+                        {t("cuenta.loMio.verTemario")} →
+                      </Enlace>
                     ) : null}
                   </div>
                 </li>
@@ -185,7 +178,7 @@ export const CuentaLoMio = () => {
 
       {d?.pendientes?.length ? (
         <>
-          <h2 className="se-cuenta__h2 se-cuenta__h2--separado">Pagos a medias</h2>
+          <h2 className="se-cuenta__h2 se-cuenta__h2--separado">{t("cuenta.loMio.pagosAMedias")}</h2>
           <ul className="se-mio__pendientes">
             {d.pendientes.map((p) => (
               <li key={p.referencia}>
@@ -195,9 +188,7 @@ export const CuentaLoMio = () => {
                   {fechaLegible(p.fecha)}
                 </span>
                 <small>
-                  El pago se abrió y todavía no nos ha llegado la confirmación. Si ya
-                  pagó, suele tardar unos minutos; si no llegó a pagar, puede volver a
-                  intentarlo desde el módulo. No se le cobrará dos veces.
+                  {t("cuenta.loMio.pendienteTexto")}
                 </small>
               </li>
             ))}

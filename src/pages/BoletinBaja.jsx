@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { unsubscribeFromNewsletter } from "../services/newsletterService";
-import { applyPageMeta } from "../lib/seo";
+import { BRAND } from "../data/surEconomicsMock";
+import { Enlace } from "../components/Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 
 /**
  * Darse de baja del boletín.
@@ -27,9 +30,8 @@ export const BoletinBaja = () => {
   const [params] = useSearchParams();
 
   // Una página personal (lleva el token de quien se da de baja): fuera de los buscadores.
-  useEffect(() => {
-    applyPageMeta({ title: "Darse de baja del boletín — SurEconomics", noindex: true });
-  }, []);
+  const { t } = useIdioma();
+  useMetaPagina({ title: t("boletin.baja.meta.titulo", { marca: BRAND.name }), noindex: true });
   const token = params.get("token") || "";
   const [estado, setEstado] = useState({ status: token ? "loading" : "sin-token", email: "" });
 
@@ -70,54 +72,45 @@ export const BoletinBaja = () => {
       <div className="se-container se-section">
         <div className="se-gate" aria-labelledby="baja-title">
           <h1 id="baja-title" className="se-gate__title">
-            Boletín de SurEconomics
+            {t("boletin.baja.titulo")}
           </h1>
 
           {estado.status === "loading" ? (
-            <p className="se-gate__lead">Procesando la baja…</p>
+            <p className="se-gate__lead">{t("boletin.baja.procesando")}</p>
           ) : null}
 
           {estado.status === "ok" ? (
             <>
               <p className="se-gate__lead">
-                Hecho. {estado.email ? <strong>{estado.email}</strong> : "Ese correo"} ya no
-                recibirá el boletín.
+                {t("boletin.baja.hecho", {
+                  correo: estado.email ? <strong>{estado.email}</strong> : t("boletin.baja.eseCorreo"),
+                })}
               </p>
-              <p className="se-admin-meta-hint">
-                Si fue sin querer, puede volver a suscribirse desde el pie de cualquier
-                página.
-              </p>
+              <p className="se-admin-meta-hint">{t("boletin.baja.sinQuerer")}</p>
             </>
           ) : null}
 
           {estado.status === "sin-token" ? (
-            <p className="se-gate__lead">
-              Este enlace está incompleto. Use el enlace de baja que viene al final del
-              boletín, o escríbanos y lo hacemos nosotros.
-            </p>
+            <p className="se-gate__lead">{t("boletin.baja.sinToken")}</p>
           ) : null}
 
           {estado.status === "token-malo" ? (
-            <p className="se-gate__lead">
-              Ese enlace de baja no es válido. Puede que sea de un correo muy antiguo. Si
-              sigue recibiendo el boletín, escríbanos y lo quitamos a mano.
-            </p>
+            <p className="se-gate__lead">{t("boletin.baja.tokenMalo")}</p>
           ) : null}
 
           {estado.status === "error" ? (
             <p className="se-gate__error" role="alert">
-              No se pudo procesar la baja ahora mismo. Vuelva a intentarlo en un rato, o
-              escríbanos.
+              {t("boletin.baja.error")}
             </p>
           ) : null}
 
           <div className="se-gate__actions">
-            <Link to="/" className="se-gate__submit">
-              Ir a la portada
-            </Link>
-            <Link to="/contacto" className="se-link">
-              Escribirnos
-            </Link>
+            <Enlace to="/" className="se-gate__submit">
+              {t("boletin.baja.irPortada")}
+            </Enlace>
+            <Enlace to="/contacto" className="se-link">
+              {t("boletin.baja.escribirnos")}
+            </Enlace>
           </div>
         </div>
       </div>

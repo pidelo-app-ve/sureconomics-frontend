@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { idiomaActual, tActual } from "../i18n/motor";
 import { getFormats, getPlaces, getTopics } from "../services/publicContentService";
 
 /**
@@ -9,20 +10,25 @@ import { getFormats, getPlaces, getTopics } from "../services/publicContentServi
  * same three lists and none of them changes while a reader is browsing. The cache
  * is a promise rather than a result, so two components mounting at the same moment
  * make one request between them instead of three each.
+ *
+ * Una promesa **por idioma**: `getPlaces` arma el árbol con los nombres del idioma del
+ * documento (`nombreTraducido`), y cambiar de idioma es una navegación dentro de la
+ * misma pestaña, así que lo cargado en español no sirve en `/en` ni al revés.
  */
 
-const EMPTY = {
+/** Lo que hay mientras no llega nada. La raíz del árbol, en el idioma del documento. */
+const vacio = () => ({
   formats: [],
   topics: [],
-  geoTop: "Mundo",
+  geoTop: tActual("piezas.geo.mundo"),
   continentes: [],
   regiones: {},
   ancestros: {},
   slugPorNombre: {},
   conteoPorNombre: {},
-};
+});
 
-let cache = null;
+let cache = {};
 
 const load = async () => {
   const [formats, topics, places] = await Promise.all([
@@ -35,24 +41,25 @@ const load = async () => {
 
 /** Drop the cache. Only used by tests and by a hard reload of reference data. */
 export const resetTaxonomyCache = () => {
-  cache = null;
+  cache = {};
 };
 
 export const useTaxonomy = () => {
-  const [state, setState] = useState({ status: "loading", data: EMPTY, error: null });
+  const [state, setState] = useState(() => ({ status: "loading", data: vacio(), error: null }));
 
   useEffect(() => {
     let alive = true;
-    cache = cache ?? load();
-    cache
+    const lang = idiomaActual();
+    cache[lang] = cache[lang] ?? load();
+    cache[lang]
       .then((data) => {
         if (alive) setState({ status: "success", data, error: null });
       })
       .catch((error) => {
         // A failed reference load must not be cached: the next mount should try
         // again rather than inherit a permanent empty taxonomy.
-        cache = null;
-        if (alive) setState({ status: "error", data: EMPTY, error });
+        delete cache[lang];
+        if (alive) setState({ status: "error", data: vacio(), error });
       });
     return () => {
       alive = false;

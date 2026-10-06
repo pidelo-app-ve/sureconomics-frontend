@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Enlace } from "../components/Enlace";
 import { PanelDeCompra } from "../components/educacion/PanelDeCompra";
 import { IconCandado, IconLlave, IconoDeTipo, IconReloj } from "../components/icons/educacion";
+import { BRAND } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import {
   duracionLegible,
   getCatalogo,
@@ -28,16 +32,30 @@ import {
  * el titulo como enlace discreto al lado. Es al reves de lo que conviene: la clase
  * gratuita es la prueba del producto, y lo que hay que ofrecer no es una etiqueta sino
  * un boton que la abra. Quien la lee entera es quien compra.
+ *
+ * ## Solo en español
+ *
+ * La interfaz habla los dos idiomas, pero el modulo (titulo, resumen, temario) existe
+ * solo en español. En `/en` la pagina sale con `noindex`, el canonico apunta al español
+ * y se avisa arriba del contenido (`idioma.soloEnEspanol`).
  */
 
-/** Como se llama cada tipo de leccion en el temario. */
-const TIPOS = { video: "Video", texto: "Lectura", audio: "Audio", pdf: "Documento" };
+/** Los tipos de leccion con nombre propio en el temario (`educacion.tipoDeLeccion.<tipo>`); otro cualquiera sale con su id. */
+const TIPOS = ["video", "texto", "audio", "pdf"];
 
 export const EducacionModulo = () => {
+  const { t, lang } = useIdioma();
   const { slug } = useParams();
   const [modulo, setModulo] = useState(null);
   const [pasarelas, setPasarelas] = useState([]);
+  // `error`: "" | "no-existe" | "fallo". La frase se elige al pintar, en el idioma de la página.
   const [estado, setEstado] = useState({ cargando: true, error: "" });
+
+  useMetaPagina({
+    title: modulo ? t("educacion.modulo.meta.titulo", { titulo: modulo.titulo, marca: BRAND.name }) : undefined,
+    description: modulo?.resumen || undefined,
+    soloEspanol: true,
+  });
 
   const cargar = useCallback(async () => {
     setEstado({ cargando: true, error: "" });
@@ -47,13 +65,7 @@ export const EducacionModulo = () => {
       setEstado({ cargando: false, error: "" });
     } catch (err) {
       setModulo(null);
-      setEstado({
-        cargando: false,
-        error:
-          err?.status === 404
-            ? "Este módulo no existe o todavía no está publicado."
-            : "No se pudo cargar el módulo.",
-      });
+      setEstado({ cargando: false, error: err?.status === 404 ? "no-existe" : "fallo" });
     }
   }, [slug]);
 
@@ -78,7 +90,7 @@ export const EducacionModulo = () => {
       <main className="se-blog se-edu" role="main">
         <section className="se-section">
           <div className="se-container">
-            <p className="se-edu__aviso">Cargando…</p>
+            <p className="se-edu__aviso">{t("comun.cargando")}</p>
           </div>
         </section>
       </main>
@@ -91,11 +103,13 @@ export const EducacionModulo = () => {
         <section className="se-section">
           <div className="se-container">
             <p className="se-edu__aviso" role="alert">
-              {estado.error}
+              {estado.error === "no-existe"
+                ? t("educacion.modulo.noExiste")
+                : t("educacion.modulo.noSePudoCargar")}
             </p>
-            <Link to="/educacion" className="se-link">
-              Volver a Educación
-            </Link>
+            <Enlace to="/educacion" className="se-link">
+              {t("educacion.comun.volverAEducacion")}
+            </Enlace>
           </div>
         </section>
       </main>
@@ -110,10 +124,12 @@ export const EducacionModulo = () => {
     <main className="se-blog se-edu" role="main">
       <section className="se-section">
         <div className="se-container">
-          <nav className="se-edu__migas" aria-label="Ruta">
-            <Link to="/educacion" className="se-link">
-              Educación
-            </Link>
+          {lang === "en" ? <p className="se-solo-espanol">{t("idioma.soloEnEspanol")}</p> : null}
+
+          <nav className="se-edu__migas" aria-label={t("educacion.comun.ruta")}>
+            <Enlace to="/educacion" className="se-link">
+              {t("nav.educacion")}
+            </Enlace>
           </nav>
 
           <div className="se-modulo-detalle">
@@ -123,7 +139,9 @@ export const EducacionModulo = () => {
                 larga queda después de la decisión. */}
             <div className="se-modulo-detalle__cabecera">
               <p className="se-modulo-detalle__kicker">
-                {nivel ? `Nivel ${nivel.toLowerCase()}` : "Módulo"}
+                {nivel
+                  ? t("educacion.modulo.nivel", { nivel: nivel.toLowerCase() })
+                  : t("educacion.comun.modulo")}
                 {duracion ? ` · ${duracion}` : ""}
               </p>
               <h1 className="se-modulo-detalle__titulo">{modulo.titulo}</h1>
@@ -135,18 +153,18 @@ export const EducacionModulo = () => {
                   que más conviene a las dos partes -- quien duda la prueba sin pagar, y
                   la casa enseña el producto en vez de describirlo. */}
               {claseDePrueba && !modulo.comprado ? (
-                <Link
+                <Enlace
                   to={`/educacion/${modulo.slug}/${claseDePrueba.slug}`}
                   className="se-btn se-btn--secondary se-modulo-detalle__prueba"
                 >
                   <IconLlave className="se-modulo-detalle__prueba-icono" />
-                  Leer la clase abierta
-                </Link>
+                  {t("educacion.modulo.leerClaseAbierta")}
+                </Enlace>
               ) : null}
             </div>
 
             <div className="se-modulo-detalle__temario">
-              <h2 className="se-edu__h2 se-modulo-detalle__h2">Temario</h2>
+              <h2 className="se-edu__h2 se-modulo-detalle__h2">{t("educacion.modulo.temario")}</h2>
               <ol className="se-temario">
                 {modulo.temario.map((leccion) => {
                   const minutos = duracionLegible(leccion.duracion_minutos);
@@ -159,7 +177,9 @@ export const EducacionModulo = () => {
                         <span className="se-temario__titulo">{leccion.titulo}</span>
                         <span className="se-temario__meta">
                           <IconoDeTipo tipo={leccion.tipo} className="se-temario__icono" />
-                          {TIPOS[leccion.tipo] ?? leccion.tipo}
+                          {TIPOS.includes(leccion.tipo)
+                            ? t(`educacion.tipoDeLeccion.${leccion.tipo}`)
+                            : leccion.tipo}
                           {minutos ? (
                             <>
                               <span className="se-temario__punto" aria-hidden="true">
@@ -185,14 +205,16 @@ export const EducacionModulo = () => {
                       <span className="se-temario__estado">
                         {leccion.libre && !modulo.comprado && !modulo.gratuito ? (
                           <span className="se-temario__sello se-temario__sello--libre">
-                            {leccion.abierta ? "Abrir gratis" : "Gratis, con cuenta"}
+                            {leccion.abierta
+                              ? t("educacion.modulo.abrirGratis")
+                              : t("educacion.modulo.gratisConCuenta")}
                           </span>
                         ) : leccion.abierta ? (
-                          <span className="se-temario__sello">Abrir</span>
+                          <span className="se-temario__sello">{t("educacion.modulo.abrir")}</span>
                         ) : (
                           <span className="se-temario__sello se-temario__sello--cerrado">
                             <IconCandado className="se-temario__icono" />
-                            Con el módulo
+                            {t("educacion.modulo.conElModulo")}
                           </span>
                         )}
                       </span>
@@ -217,12 +239,12 @@ export const EducacionModulo = () => {
                       }`}
                     >
                       {sePuedeEntrar ? (
-                        <Link
+                        <Enlace
                           to={`/educacion/${modulo.slug}/${leccion.slug}`}
                           className="se-temario__enlace"
                         >
                           {contenido}
-                        </Link>
+                        </Enlace>
                       ) : (
                         <span className="se-temario__enlace">{contenido}</span>
                       )}

@@ -99,6 +99,7 @@ export const AdminTopicsList = () => {
                         <tr>
                             <th scope="col">Orden</th>
                             <th scope="col">Nombre</th>
+                            <th scope="col">En inglés</th>
                             <th scope="col">Slug</th>
                             <th scope="col">Piezas publicadas</th>
                             <th scope="col">En los filtros</th>
@@ -108,6 +109,7 @@ export const AdminTopicsList = () => {
                         {state.items.map((row, index) => {
                             const busy = busyId === row.id;
                             const value = draft[row.id] ?? row.name;
+                            const valueEn = draft[`en-${row.id}`] ?? row.name_en ?? "";
                             return (
                                 <tr key={row.id} style={row.is_active ? undefined : { opacity: 0.55 }}>
                                     <td className="se-admin-table__actions">
@@ -154,6 +156,28 @@ export const AdminTopicsList = () => {
                                             />
                                         ) : (
                                             row.name
+                                        )}
+                                    </td>
+                                    <td>
+                                        {/* El nombre que ve quien lee el sitio en inglés. Vacío, sale
+                                            el español: por eso aquí se puede dejar en blanco. */}
+                                        {canCurate ? (
+                                            <input
+                                                className="se-form-control"
+                                                value={valueEn}
+                                                placeholder={row.name}
+                                                onChange={(e) =>
+                                                    setDraft((prev) => ({ ...prev, [`en-${row.id}`]: e.target.value }))
+                                                }
+                                                onBlur={() => {
+                                                    const next = (draft[`en-${row.id}`] ?? "").trim();
+                                                    if (!(`en-${row.id}` in draft) || next === (row.name_en ?? "")) return;
+                                                    apply(row.id, { name_en: next }, next ? `«${next}» guardado.` : `«${row.name}» vuelve a salir en español también en inglés.`);
+                                                }}
+                                                aria-label={`Nombre en inglés de ${row.name}`}
+                                            />
+                                        ) : (
+                                            row.name_en || <span style={{ opacity: 0.55 }}>—</span>
                                         )}
                                     </td>
                                     <td>

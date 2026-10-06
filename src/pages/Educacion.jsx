@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { getCatalogo } from "../services/educacionService";
 import { TarjetaDeModulo } from "../components/educacion/TarjetaDeModulo";
 import { IconEscudo, IconLlave, IconVisto } from "../components/icons/educacion";
+import { BRAND } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 
 /**
  * Educacion: el catalogo de modulos.
@@ -31,64 +34,38 @@ import { IconEscudo, IconLlave, IconVisto } from "../components/icons/educacion"
  * calcula el servidor con la misma regla que luego aplica al servir la leccion, asi que
  * no puede prometer una clase gratis que despues conteste 403 -- que es exactamente lo
  * que pasaria si el texto estuviera escrito a mano en el panel.
+ *
+ * Los textos viven en `i18n/{es,en}/educacion.json`, apartado `educacion.catalogo`: el
+ * catalogo existe en los dos idiomas (los modulos en si, solo en español).
  */
 
-/** Las tres promesas de la cabecera. Son verdad comprobable, no adjetivos. */
+/** Las tres promesas de la cabecera. Son verdad comprobable, no adjetivos. El texto de cada una está en `educacion.catalogo.promesas.<clave>`. */
 const PROMESAS = [
-  {
-    Icono: IconLlave,
-    titulo: "La primera clase, abierta",
-    texto:
-      "Se lee entera antes de pagar nada. Basta con una cuenta y el correo verificado.",
-  },
-  {
-    Icono: IconEscudo,
-    titulo: "Un pago y ya",
-    texto: "No hay suscripción ni renovación automática. El módulo se compra y se queda.",
-  },
-  {
-    Icono: IconVisto,
-    titulo: "Sin caducidad",
-    texto: "Una vez comprado, el acceso no vence. Las clases nuevas del módulo entran solas.",
-  },
+  { Icono: IconLlave, clave: "claseAbierta" },
+  { Icono: IconEscudo, clave: "unPago" },
+  { Icono: IconVisto, clave: "sinCaducidad" },
 ];
 
-/** Las dudas que frenan una compra, contestadas antes de que haya que preguntarlas. */
-const DUDAS = [
-  {
-    p: "¿Necesito saber de economía para empezar?",
-    r: "No. Cada módulo indica su nivel, y los de nivel inicial parten de cero: se explica el término antes de usarlo.",
-  },
-  {
-    p: "¿Puedo ver algo antes de pagar?",
-    r: "Sí. La primera clase de cada módulo está abierta y es una clase completa, no un adelanto ni un índice.",
-  },
-  {
-    p: "¿Cómo se paga?",
-    r: "Con tarjeta a través de Stripe, o por Mercado Pago donde esté disponible. El cobro es único: no queda nada domiciliado.",
-  },
-  {
-    p: "¿Dónde quedan los módulos que compre?",
-    r: "En su cuenta. Entrando con el mismo correo los tiene disponibles desde cualquier dispositivo, sin límite de tiempo.",
-  },
-];
+/** Las dudas que frenan una compra, contestadas antes de que haya que preguntarlas (`educacion.catalogo.dudas.<clave>.p` y `.r`). */
+const DUDAS = ["nivel", "verAntes", "pago", "donde"];
 
 export const Educacion = () => {
-  const [estado, setEstado] = useState({ cargando: true, error: "", modulos: [] });
+  const { t } = useIdioma();
+  const [estado, setEstado] = useState({ cargando: true, error: false, modulos: [] });
+
+  useMetaPagina({
+    title: t("educacion.catalogo.meta.titulo", { marca: BRAND.name }),
+    description: t("educacion.catalogo.claim"),
+  });
 
   useEffect(() => {
     let vivo = true;
     getCatalogo()
       .then((datos) => {
-        if (vivo) setEstado({ cargando: false, error: "", modulos: datos.modulos });
+        if (vivo) setEstado({ cargando: false, error: false, modulos: datos.modulos });
       })
       .catch(() => {
-        if (vivo)
-          setEstado({
-            cargando: false,
-            error: "No se pudo cargar el catalogo. Inténtelo de nuevo.",
-            modulos: [],
-          });
+        if (vivo) setEstado({ cargando: false, error: true, modulos: [] });
       });
     return () => {
       vivo = false;
@@ -104,23 +81,17 @@ export const Educacion = () => {
           el catálogo entero por debajo del pliegue. */}
       <section className="se-edu__portada">
         <div className="se-container">
-          <p className="se-edu__portada-kicker">Educación</p>
-          <h1 className="se-edu__portada-titulo">
-            Entienda la economía que ya está leyendo
-          </h1>
-          <p className="se-edu__portada-claim">
-            Módulos cortos, escritos por la misma redacción que firma los informes. Cada
-            uno arranca con una clase abierta para que sepa qué está comprando antes de
-            comprarlo.
-          </p>
+          <p className="se-edu__portada-kicker">{t("educacion.catalogo.kicker")}</p>
+          <h1 className="se-edu__portada-titulo">{t("educacion.catalogo.titulo")}</h1>
+          <p className="se-edu__portada-claim">{t("educacion.catalogo.claim")}</p>
 
           <ul className="se-edu__promesas">
-            {PROMESAS.map(({ Icono, titulo, texto }) => (
-              <li key={titulo} className="se-edu__promesa">
+            {PROMESAS.map(({ Icono, clave }) => (
+              <li key={clave} className="se-edu__promesa">
                 <Icono className="se-edu__promesa-icono" />
                 <span>
-                  <strong>{titulo}</strong>
-                  {texto}
+                  <strong>{t(`educacion.catalogo.promesas.${clave}.titulo`)}</strong>
+                  {t(`educacion.catalogo.promesas.${clave}.texto`)}
                 </span>
               </li>
             ))}
@@ -130,26 +101,22 @@ export const Educacion = () => {
 
       <section className="se-section">
         <div className="se-container">
-          {estado.cargando ? <p className="se-edu__aviso">Cargando…</p> : null}
+          {estado.cargando ? <p className="se-edu__aviso">{t("comun.cargando")}</p> : null}
 
           {estado.error ? (
             <p className="se-edu__aviso" role="alert">
-              {estado.error}
+              {t("educacion.catalogo.errorCatalogo")}
             </p>
           ) : null}
 
           {!estado.cargando && !estado.error && !hayModulos ? (
-            <p className="se-edu__aviso">
-              Todavía no hay módulos publicados. Están en camino.
-            </p>
+            <p className="se-edu__aviso">{t("educacion.catalogo.sinModulos")}</p>
           ) : null}
 
           {hayModulos ? (
             <>
               <h2 className="se-edu__h2">
-                {estado.modulos.length === 1
-                  ? "Un módulo disponible"
-                  : `${estado.modulos.length} módulos disponibles`}
+                {t("educacion.catalogo.disponibles", { n: estado.modulos.length })}
               </h2>
               <ul className="se-edu__grid">
                 {estado.modulos.map((modulo) => (
@@ -170,37 +137,37 @@ export const Educacion = () => {
       {hayModulos ? (
         <section className="se-section se-edu__banda">
           <div className="se-container">
-            <h2 className="se-edu__h2">Cómo funciona</h2>
+            <h2 className="se-edu__h2">{t("educacion.catalogo.comoFunciona")}</h2>
             <ol className="se-edu__pasos">
               <li className="se-edu__paso">
                 <span className="se-edu__paso-num">1</span>
                 <span className="se-edu__paso-copy">
-                  <strong>Abra la primera clase</strong>
-                  Es gratuita y completa. Solo pide una cuenta con el correo verificado.
+                  <strong>{t("educacion.catalogo.pasos.abrir.titulo")}</strong>
+                  {t("educacion.catalogo.pasos.abrir.texto")}
                 </span>
               </li>
               <li className="se-edu__paso">
                 <span className="se-edu__paso-num">2</span>
                 <span className="se-edu__paso-copy">
-                  <strong>Compre el módulo si le sirve</strong>
-                  Un solo pago con tarjeta o Mercado Pago. Se desbloquea entero al instante.
+                  <strong>{t("educacion.catalogo.pasos.comprar.titulo")}</strong>
+                  {t("educacion.catalogo.pasos.comprar.texto")}
                 </span>
               </li>
               <li className="se-edu__paso">
                 <span className="se-edu__paso-num">3</span>
                 <span className="se-edu__paso-copy">
-                  <strong>Vaya a su ritmo</strong>
-                  El acceso no caduca y queda guardado en su cuenta.
+                  <strong>{t("educacion.catalogo.pasos.ritmo.titulo")}</strong>
+                  {t("educacion.catalogo.pasos.ritmo.texto")}
                 </span>
               </li>
             </ol>
 
-            <h2 className="se-edu__h2 se-edu__h2--separado">Antes de comprar</h2>
+            <h2 className="se-edu__h2 se-edu__h2--separado">{t("educacion.catalogo.antesDeComprar")}</h2>
             <dl className="se-edu__dudas">
-              {DUDAS.map(({ p, r }) => (
-                <div key={p} className="se-edu__duda">
-                  <dt>{p}</dt>
-                  <dd>{r}</dd>
+              {DUDAS.map((clave) => (
+                <div key={clave} className="se-edu__duda">
+                  <dt>{t(`educacion.catalogo.dudas.${clave}.p`)}</dt>
+                  <dd>{t(`educacion.catalogo.dudas.${clave}.r`)}</dd>
                 </div>
               ))}
             </dl>

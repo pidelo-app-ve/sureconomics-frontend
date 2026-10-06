@@ -1,0 +1,194 @@
+{
+  "educacion": {
+    "comun": {
+      "gratis": "Free",
+      "modulo": "Module",
+      "lecciones": { "one": "{n} lesson", "other": "{n} lessons" },
+      "iniciarSesion": "Sign in",
+      "crearUnaCuenta": "Create an account",
+      "verificarMiCorreo": "Verify my email",
+      "volverAEducacion": "Back to Education",
+      "ruta": "Breadcrumb",
+      "nivel": "{nivel} level"
+    },
+    "niveles": {
+      "inicial": "Beginner",
+      "intermedio": "Intermediate",
+      "avanzado": "Advanced"
+    },
+    "tipoDeLeccion": {
+      "video": "Video",
+      "texto": "Reading",
+      "audio": "Audio",
+      "pdf": "Document"
+    },
+    "tipos": {
+      "video": { "one": "{n} video", "other": "{n} videos" },
+      "texto": { "one": "{n} reading", "other": "{n} readings" },
+      "audio": { "one": "{n} audio lesson", "other": "{n} audio lessons" },
+      "pdf": { "one": "{n} document", "other": "{n} documents" }
+    },
+    "duracion": {
+      "minutos": "{n} min",
+      "horas": "{n} h",
+      "horasYMinutos": "{h} h {m} min"
+    },
+    "catalogo": {
+      "meta": {
+        "titulo": "Education — {marca}"
+      },
+      "kicker": "Education",
+      "titulo": "Understand the economy you're already reading about",
+      "claim": "Short modules, written by the same newsroom that signs our reports. Each one opens with a free lesson, so you know what you're buying before you buy it.",
+      "promesas": {
+        "claseAbierta": {
+          "titulo": "The first lesson is open",
+          "texto": "Read it in full before paying anything. All it takes is an account with a verified email."
+        },
+        "unPago": {
+          "titulo": "One payment, and that's it",
+          "texto": "No subscription, no automatic renewal. You buy the module and it's yours to keep."
+        },
+        "sinCaducidad": {
+          "titulo": "No expiration",
+          "texto": "Once purchased, your access never expires. New lessons added to the module are included automatically."
+        }
+      },
+      "errorCatalogo": "We couldn't load the catalog. Please try again.",
+      "sinModulos": "No modules have been published yet. They're on their way.",
+      "disponibles": { "one": "One module available", "other": "{n} modules available" },
+      "comoFunciona": "How it works",
+      "pasos": {
+        "abrir": {
+          "titulo": "Open the first lesson",
+          "texto": "It's free and complete. All it asks for is an account with a verified email."
+        },
+        "comprar": {
+          "titulo": "Buy the module if it works for you",
+          "texto": "A single payment by card or Mercado Pago. The whole module unlocks instantly."
+        },
+        "ritmo": {
+          "titulo": "Go at your own pace",
+          "texto": "Your access never expires and stays saved in your account."
+        }
+      },
+      "antesDeComprar": "Before you buy",
+      "dudas": {
+        "nivel": {
+          "p": "Do I need to know economics to get started?",
+          "r": "No. Each module states its level, and beginner modules start from zero: every term is explained before it's used."
+        },
+        "verAntes": {
+          "p": "Can I see something before paying?",
+          "r": "Yes. The first lesson of every module is open, and it's a complete lesson, not a preview or a table of contents."
+        },
+        "pago": {
+          "p": "How do I pay?",
+          "r": "By card through Stripe, or with Mercado Pago where available. It's a one-time charge: nothing is set up as a recurring payment."
+        },
+        "donde": {
+          "p": "Where do the modules I buy live?",
+          "r": "In your account. Sign in with the same email and they're available from any device, with no time limit."
+        }
+      }
+    },
+    "tarjeta": {
+      "cortesia": "Complimentary",
+      "soloCuentaVerificada": "Only requires a verified account",
+      "clasesGratis": { "one": "First lesson free", "other": "{n} free lessons" }
+    },
+    "panel": {
+      "comprarEsteModulo": "Buy this module",
+      "yaEsSuyo": "Already yours",
+      "pagoUnico": "One-time payment · Access never expires",
+      "deContenido": "{duracion} of content",
+      "clasesEnVideo": { "one": "{n} video lesson", "other": "{n} video lessons" },
+      "documentosDescargables": { "one": "{n} downloadable document", "other": "{n} downloadable documents" },
+      "abiertasSinPagar": { "one": "The first one, open for free", "other": "{n} open for free" },
+      "tieneTodas": "You have all {n} lessons available. Start whenever you like.",
+      "yaPuedeEmpezar": "You're all set: open the first lesson in the syllabus.",
+      "cortesia": "This module is complimentary. All it takes is an account with a verified email.",
+      "desbloquea": { "one": "Unlocks {n} more lesson.", "other": "Unlocks {n} more lessons." }
+    },
+    "pago": {
+      "pasarelas": {
+        "stripe": "Card",
+        "mercadopago": "Mercado Pago"
+      },
+      "entreAntes": "Your purchase is tied to your account. Sign in before paying.",
+      "correoConfirmado": "Your email must be verified before paying: the purchase is tied to this account.",
+      "sinDireccion": "The payment provider didn't return a checkout address.",
+      "noDisponible": "Payments aren't available yet. Please try again later.",
+      "noSePudoAbrir": "We couldn't open the checkout.",
+      "moduloCompletoPor": "Full module for {precio}",
+      "cobroPronto": "Online payments will be enabled in the coming days. Write to us if you'd like access now.",
+      "abriendo": "Opening…",
+      "pagarCon": "Pay with {pasarela}"
+    },
+    "modulo": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "noExiste": "This module doesn't exist or hasn't been published yet.",
+      "noSePudoCargar": "We couldn't load the module.",
+      "nivel": "{nivel} level",
+      "leerClaseAbierta": "Read the open lesson",
+      "temario": "Syllabus",
+      "abrirGratis": "Open for free",
+      "gratisConCuenta": "Free, with an account",
+      "abrir": "Open",
+      "conElModulo": "With the module"
+    },
+    "leccion": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "videoNoCargado": "The video hasn't been uploaded yet.",
+      "audioNoCargado": "The audio hasn't been uploaded yet.",
+      "documentoNoCargado": "The document hasn't been uploaded yet.",
+      "noSePudoDescargar": "The download failed.",
+      "descargando": "Downloading…",
+      "descargarDocumento": "Download the document",
+      "paginas": { "one": "{n} page", "other": "{n} pages" },
+      "noSePudoCargarAudio": "We couldn't load the audio.",
+      "escucharLaClase": "Listen to the lesson",
+      "posicion": "Lesson {n}",
+      "posicionDeTotal": "Lesson {n} of {total}",
+      "sigueEn": "Continues in {modulo}",
+      "siguienteQuedan": {
+        "one": "Next up is “{titulo}”. {n} lesson left to unlock.",
+        "other": "Next up is “{titulo}”. {n} lessons left to unlock."
+      },
+      "navegacionEntreLecciones": "Lesson navigation",
+      "muro": {
+        "noSePudoCargar": "We couldn't load the lesson. Please try again.",
+        "paraQuienTieneCuenta": "This lesson is for readers with an account",
+        "primeraGratuita": "The first lesson of every module is free, but we ask for a verified account to open it.",
+        "vieneConElModulo": "This lesson comes with the module",
+        "sigueLeyendo": "Keep reading {modulo} right where you left off: the rest of the syllabus unlocks when you buy it."
+      }
+    },
+    "pagoVuelta": {
+      "noEncontramos": "We couldn't find that purchase in your account.",
+      "noSePudoConsultar": "We couldn't check the payment status.",
+      "confirmando": {
+        "titulo": "Confirming your payment…",
+        "texto": "One moment: we're waiting for the payment provider to confirm. Please don't close this page."
+      },
+      "pagado": {
+        "titulo": "Done, the module is yours",
+        "texto": "Your access is active and never expires. Start whenever you like.",
+        "irAlModulo": "Go to the module"
+      },
+      "tardando": {
+        "titulo": "Your payment is on its way",
+        "texto": "The payment provider hasn't confirmed yet. It's usually a matter of minutes; access opens automatically as soon as it arrives, with nothing for you to do.",
+        "volverAlModulo": "Back to the module"
+      },
+      "fallo": {
+        "titulo": "We couldn't track that payment",
+        "sinReferencia": "You came back without the payment reference. If you already paid, access opens automatically once the provider confirms."
+      }
+    }
+  }
+}

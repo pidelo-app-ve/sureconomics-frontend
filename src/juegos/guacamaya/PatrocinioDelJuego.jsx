@@ -1,4 +1,5 @@
 import { PatrocinioCompacto, useEspacios, useHueco } from "../../components/publicidad";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { ESPACIOS } from "../../services/publicidadService";
 
 /**
@@ -16,13 +17,14 @@ import { ESPACIOS } from "../../services/publicidadService";
  * la final por separado, cada partida contaría dos impresiones del mismo patrocinador.
  */
 export const PatrocinioDelJuego = () => {
+  const { t } = useIdioma();
   useEspacios({ espacios: [ESPACIOS.PAUSA_PATROCINIO], contexto: { seccion: "pausa" } });
   const hueco = useHueco(ESPACIOS.PAUSA_PATROCINIO);
 
   if (hueco && !hueco.es_casa) return <PatrocinioCompacto hueco={hueco} tono="oscuro" />;
   return (
     <p className="se-guaca__patrocinio">
-      Patrocinado por <strong>SurEconomics</strong>
+      {t("juegos.guacamaya.patrocinadoPor", { marca: <strong>SurEconomics</strong> })}
     </p>
   );
 };

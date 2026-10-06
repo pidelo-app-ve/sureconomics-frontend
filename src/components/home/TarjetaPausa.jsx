@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { formatearNumero } from "../../i18n/motor";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { resumen } from "../../juegos/guacamaya/registro";
 import "./tarjetaPausa.css";
 
@@ -76,26 +78,29 @@ const PaisajeSvg = ({ className, idCielo }) => (
 );
 PaisajeSvg.propTypes = { className: PropTypes.string.isRequired, idCielo: PropTypes.string.isRequired };
 
-/** Lo que el juego recuerda de quien ya jugó, dicho en una línea. */
-const lineaDeMemoria = (m) => {
+/** Lo que el juego recuerda de quien ya jugó, dicho en una línea (en el idioma de la página). */
+const lineaDeMemoria = (t, m) => {
   if (!m) return null;
   if (m.mejorHoy) {
-    return `Su mejor de hoy: ${m.mejorHoy} pts${m.racha > 1 ? ` · racha de ${m.racha} días` : ""}.`;
+    return m.racha > 1
+      ? t("juegos.tarjetaPausa.memoria.mejorHoyConRacha", { n: formatearNumero(m.mejorHoy), racha: m.racha })
+      : t("juegos.tarjetaPausa.memoria.mejorHoy", { n: formatearNumero(m.mejorHoy) });
   }
-  if (m.racha > 0) return `No rompa su racha de ${m.racha} ${m.racha === 1 ? "día" : "días"}.`;
+  if (m.racha > 0) return t("juegos.tarjetaPausa.memoria.noRompa", { n: m.racha });
   return null;
 };
 
 export const TarjetaPausa = () => {
+  const { t } = useIdioma();
   // La memoria vive en el navegador: se lee después de montar.
   const [memoria, setMemoria] = useState(null);
   useEffect(() => setMemoria(resumen()), []);
-  const linea = lineaDeMemoria(memoria);
+  const linea = lineaDeMemoria(t, memoria);
 
   return (
     <section className="se-section se-pausa-tarjeta" aria-labelledby="pausa-tarjeta-titulo">
       <div className="se-container">
-        <Link to="/pausa" className="se-pausa-tarjeta__enlace">
+        <Enlace to="/pausa" className="se-pausa-tarjeta__enlace">
           <div className="se-pausa-tarjeta__escena" aria-hidden="true">
             <PaisajeSvg className="se-pausa-tarjeta__paisaje" idCielo="pausa-cielo-tarjeta" />
             <span className="se-pausa-tarjeta__vuelo">
@@ -103,43 +108,50 @@ export const TarjetaPausa = () => {
             </span>
           </div>
           <div className="se-pausa-tarjeta__cuerpo">
-            <p className="se-pausa-tarjeta__kicker">Un minuto de pausa</p>
+            <p className="se-pausa-tarjeta__kicker">{t("juegos.tarjetaPausa.kicker")}</p>
             <h2 id="pausa-tarjeta-titulo" className="se-pausa-tarjeta__titulo">
-              La guacamaya va a su casa
+              {t("juegos.tarjetaPausa.titulo")}
             </h2>
-            <p className="se-pausa-tarjeta__texto">
-              El reto de hoy: llévela a casa antes de que oscurezca. Un minuto, con un dedo.
-            </p>
-            <span className="se-pausa-tarjeta__boton">Jugar el reto de hoy</span>
+            <p className="se-pausa-tarjeta__texto">{t("juegos.tarjetaPausa.texto")}</p>
+            <span className="se-pausa-tarjeta__boton">{t("juegos.tarjetaPausa.jugar")}</span>
             {linea ? <p className="se-pausa-tarjeta__memoria">{linea}</p> : null}
           </div>
-        </Link>
+        </Enlace>
       </div>
     </section>
   );
 };
 
 /**
- * El banner del final de las piezas: premia a quien leyó entero.
+ * El banner del final de las piezas (premia a quien leyó entero) y, con `enPortada`, la
+ * franja bajo el buscador de la portada.
  *
  * La misma escena que la tarjeta de la portada, en horizontal y más baja: el paisaje a
  * la izquierda con la guacamaya batiendo las alas, y a la derecha la invitación y un
  * botón. Todo el banner es el enlace, así que en el teléfono se toca en cualquier sitio.
  */
-export const InvitacionPausa = () => (
-  <Link to="/pausa" className="se-pausa-banner">
-    <span className="se-pausa-banner__escena" aria-hidden="true">
-      <PaisajeSvg className="se-pausa-banner__paisaje" idCielo="pausa-cielo-banner" />
-      <span className="se-pausa-banner__vuelo">
-        <GuacamayaSvg className="se-pausa-ave" />
+export const InvitacionPausa = ({ enPortada }) => {
+  const { t } = useIdioma();
+  return (
+    <Enlace to="/pausa" className="se-pausa-banner">
+      <span className="se-pausa-banner__escena" aria-hidden="true">
+        <PaisajeSvg className="se-pausa-banner__paisaje" idCielo={enPortada ? "pausa-cielo-franja" : "pausa-cielo-banner"} />
+        <span className="se-pausa-banner__vuelo">
+          <GuacamayaSvg className="se-pausa-ave" />
+        </span>
       </span>
-    </span>
-    <span className="se-pausa-banner__cuerpo">
-      <span className="se-pausa-banner__kicker">¿Terminó de leer? Un minuto de pausa</span>
-      <span className="se-pausa-banner__titulo">Lleve la guacamaya a casa antes de que oscurezca</span>
-      <span className="se-pausa-banner__boton">Jugar el reto de hoy</span>
-    </span>
-  </Link>
-);
+      <span className="se-pausa-banner__cuerpo">
+        {/* En la portada nadie ha leído todavía: el rótulo de «¿terminó de leer?» no cabe. */}
+        <span className="se-pausa-banner__kicker">
+          {enPortada ? t("juegos.tarjetaPausa.kicker") : t("juegos.tarjetaPausa.banner.kicker")}
+        </span>
+        <span className="se-pausa-banner__titulo">{t("juegos.tarjetaPausa.banner.titulo")}</span>
+        <span className="se-pausa-banner__boton">{t("juegos.tarjetaPausa.jugar")}</span>
+      </span>
+    </Enlace>
+  );
+};
+InvitacionPausa.propTypes = { enPortada: PropTypes.bool };
+InvitacionPausa.defaultProps = { enPortada: false };
 
 export default TarjetaPausa;

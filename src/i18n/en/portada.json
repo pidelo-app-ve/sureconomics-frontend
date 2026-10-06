@@ -1,0 +1,120 @@
+{
+  "portada": {
+    "meta": {
+      "titulo": "{marca} — Economics, markets and investing"
+    },
+    "inicio": {
+      "encabezado": "{marca} — analysis and perspective on economics, markets and investing in Latin America",
+      "cargando": "Loading the front page…",
+      "noSePudoCargar": "The content could not be loaded",
+      "explorarContenido": "Explore content",
+      "enTodoElSitio": "across the whole site",
+      "nadaPublicado": "Nothing has been published yet",
+      "nadaPublicadoTexto": "When the newsroom publishes its first piece, it will appear here.",
+      "sinResultadosTexto": "No pieces match these filters. Remove one to widen the search.",
+      "verLos": "See all {n}"
+    },
+    "apertura": {
+      "apertura": "Lead story",
+      "loMasReciente": "Latest",
+      "otrasNoticias": "Other recent news"
+    },
+    "explorador": {
+      "buscarEn": "Search {alcance}",
+      "tema": "Topic",
+      "temas": "Topics",
+      "sinTemas": "No topic has content for this selection.",
+      "donde": "Where",
+      "lugares": "Places",
+      "todo": "All",
+      "elegidos": "{n} selected",
+      "resultados": {
+        "one": "{numero} result",
+        "other": "{numero} results"
+      },
+      "quitar": "Remove {valor}"
+    },
+    "tarjeta": {
+      "por": "By {autor}",
+      "educativo": "Educational"
+    },
+    "editorial": {
+      "gorro": "Editorial · {tema}"
+    },
+    "editorialDelDia": {
+      "titulo": "Today's editorial",
+      "leer": "Read where we stand →"
+    },
+    "informes": {
+      "gorro": "Report · registration required",
+      "investigacionDe": "Research by {unidad}"
+    },
+    "alPunto": {
+      "episodio": "Episode"
+    },
+    "paginador": {
+      "cuenta": "{rango} of {total} {unidad}",
+      "irALaPagina": "Go to page {n}"
+    },
+    "cinta": {
+      "cifrasDeMercado": "Market figures",
+      "indicesMundiales": "World indices (TradingView)",
+      "oro": "Gold",
+      "cierreDel": "Close of {fecha}"
+    },
+    "titulares": {
+      "titulo": "Headlines",
+      "controles": "Headline controls",
+      "anterior": "Previous headline",
+      "siguiente": "Next headline",
+      "cargando": "Loading headlines…",
+      "cargandoTexto": "Fetching the news digest from the server.",
+      "error": "We couldn't load the headlines",
+      "vacio": "No headlines have been published yet.",
+      "carril": "Headlines (scroll horizontally)",
+      "titularNDeM": "Headline {n} of {total}"
+    },
+    "hero": {
+      "destacado": "Lead feature",
+      "claim": "Analysis and perspective on economics, markets and investing across the region.",
+      "explorarArticulos": "Explore articles",
+      "accesoPremium": "Premium access"
+    },
+    "boletin": {
+      "kicker": "Weekly newsletter · Monday mornings",
+      "titulo": "Entorno en Viñetas",
+      "texto": "The week's economic landscape, told in vignettes: what moved the markets, what's ahead and what deserves a closer look. It lands in your inbox every Monday morning, before the week starts moving.",
+      "suCorreo": "Your email",
+      "placeholder": "name@email.com",
+      "enviando": "Sending…",
+      "unase": "Join the newsletter",
+      "ok": "Done. It will reach that address next Monday.",
+      "correoIncompleto": "That email address looks incomplete. Check it and try again.",
+      "demasiadosIntentos": "Too many attempts in a row. Please wait a moment.",
+      "fallo": "We couldn't complete your subscription. Please try again."
+    },
+    "blog": {
+      "ultimas": "Latest posts",
+      "destacados": "Featured",
+      "tambien": "You may also like"
+    },
+    "relleno": {
+      "chart": "Chart",
+      "building": "Markets",
+      "growth": "Growth",
+      "articulo": "Article"
+    },
+    "redes": {
+      "titulo": "On social media",
+      "publicacionesEn": "Posts on {red}. Use the arrow keys to scroll.",
+      "verVideo": "Watch the TikTok video: {texto}",
+      "publicacionEn": "Post on {red}: {texto}",
+      "videoDeTikTok": "TikTok video: {texto}",
+      "noSePudoAbrir": "This video couldn't be opened here.",
+      "verEnTikTok": "Watch on TikTok",
+      "hoy": "today",
+      "ayer": "yesterday",
+      "haceDias": "{n} days ago"
+    }
+  }
+}

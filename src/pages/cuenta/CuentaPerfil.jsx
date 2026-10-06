@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { RetratoDelLector } from "../../components/cuenta/RetratoDelLector";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { actualizarMiPerfil } from "../../services/userAuthService";
 
 /**
@@ -28,11 +30,11 @@ import { actualizarMiPerfil } from "../../services/userAuthService";
  * aquí porque aquí ya hay un motivo: quien va a firmar algo entiende para qué sirven.
  */
 
-const SEXOS = [
-  { valor: "", etiqueta: "Prefiero no decirlo" },
-  { valor: "female", etiqueta: "Femenino" },
-  { valor: "male", etiqueta: "Masculino" },
-  { valor: "other", etiqueta: "Otro" },
+const sexos = (t) => [
+  { valor: "", etiqueta: t("cuenta.perfil.prefieroNoDecirlo") },
+  { valor: "female", etiqueta: t("cuenta.perfil.femenino") },
+  { valor: "male", etiqueta: t("cuenta.perfil.masculino") },
+  { valor: "other", etiqueta: t("cuenta.perfil.otro") },
 ];
 
 const vacio = {
@@ -47,18 +49,17 @@ const vacio = {
 };
 
 export const CuentaPerfil = () => {
+  const { t } = useIdioma();
   const { profile, loadProfile } = useUserAuth();
   const [campos, setCampos] = useState(vacio);
   const [tocados, setTocados] = useState({});
   const [estado, setEstado] = useState({ guardando: false, error: "", guardado: false });
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Mi perfil — SurEconomics",
-      description: "Sus datos de lector.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.perfil.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.perfil.meta.descripcion"),
+    noindex: true,
+  });
 
   // Cuando llega el perfil del servidor, el formulario se rellena con él. Sin esto el
   // formulario nace vacío y guardar borraría lo que ya había.
@@ -76,14 +77,14 @@ export const CuentaPerfil = () => {
     });
   }, [profile]);
 
+  const edad = Number(campos.age);
   const errores = {
-    firstName: campos.firstName.trim() ? "" : "El nombre no puede quedar vacío.",
-    lastName: campos.lastName.trim() ? "" : "El apellido no puede quedar vacío.",
+    firstName: campos.firstName.trim() ? "" : t("cuenta.perfil.nombreVacio"),
+    lastName: campos.lastName.trim() ? "" : t("cuenta.perfil.apellidoVacio"),
     age:
-      !String(campos.age).trim() ||
-      (Number(campos.age) >= 13 && Number(campos.age) <= 120)
+      !String(campos.age).trim() || (13 <= edad && edad <= 120)
         ? ""
-        : "Una edad entre 13 y 120.",
+        : t("cuenta.perfil.edadRango"),
   };
   const valido = Object.values(errores).every((e) => !e);
 
@@ -128,7 +129,7 @@ export const CuentaPerfil = () => {
       setEstado({
         guardando: false,
         guardado: false,
-        error: err?.message || "No se pudieron guardar los cambios.",
+        error: err?.message || t("cuenta.perfil.fallo"),
       });
     }
   };
@@ -136,10 +137,9 @@ export const CuentaPerfil = () => {
   return (
     <div className="se-cuenta__pagina">
       <header className="se-cuenta__cabecera">
-        <h1 className="se-cuenta__titulo">Mi perfil</h1>
+        <h1 className="se-cuenta__titulo">{t("cuenta.perfil.titulo")}</h1>
         <p className="se-cuenta__lead">
-          Su nombre firma los comentarios y las piezas que le publiquen. El resto es
-          opcional y sólo lo ve la redacción.
+          {t("cuenta.perfil.lead")}
         </p>
       </header>
 
@@ -147,10 +147,10 @@ export const CuentaPerfil = () => {
 
       <form className="se-cuenta__form" onSubmit={guardar} noValidate>
         <h2 className="se-cuenta__h2">
-          Sus datos
+          {t("cuenta.perfil.susDatos")}
           {faltan ? (
             <span className="se-cuenta__pendiente">
-              {faltan} sin rellenar · opcionales
+              {t("cuenta.perfil.sinRellenar", { n: faltan })}
             </span>
           ) : null}
         </h2>
@@ -158,7 +158,7 @@ export const CuentaPerfil = () => {
         <div className="se-cuenta__fila">
           <CampoDeTexto
             id="p-nombre"
-            etiqueta="Nombre"
+            etiqueta={t("cuenta.comun.nombre")}
             valor={campos.firstName}
             onCambio={cambiar("firstName")}
             onSalir={marcar("firstName")}
@@ -167,7 +167,7 @@ export const CuentaPerfil = () => {
           />
           <CampoDeTexto
             id="p-apellido"
-            etiqueta="Apellido"
+            etiqueta={t("cuenta.comun.apellido")}
             valor={campos.lastName}
             onCambio={cambiar("lastName")}
             onSalir={marcar("lastName")}
@@ -178,17 +178,17 @@ export const CuentaPerfil = () => {
 
         <CampoDeTexto
           id="p-correo"
-          etiqueta="Correo electrónico"
+          etiqueta={t("cuenta.comun.correo")}
           valor={profile?.email ?? ""}
           onCambio={() => {}}
           deshabilitado
-          ayuda="El correo identifica la cuenta. Para cambiarlo, escríbanos."
+          ayuda={t("cuenta.perfil.ayudaCorreo")}
         />
 
         <div className="se-cuenta__fila">
           <CampoDeTexto
             id="p-edad"
-            etiqueta="Edad"
+            etiqueta={t("cuenta.perfil.edad")}
             valor={String(campos.age ?? "")}
             onCambio={cambiar("age")}
             onSalir={marcar("age")}
@@ -199,8 +199,8 @@ export const CuentaPerfil = () => {
 
           <div className="se-campo">
             <label className="se-campo__etiqueta" htmlFor="p-sexo">
-              Sexo
-              <span className="se-campo__opcional">opcional</span>
+              {t("cuenta.perfil.sexo")}
+              <span className="se-campo__opcional">{t("cuenta.comun.opcional")}</span>
             </label>
             <div className="se-campo__caja">
               {/* Sin nada preseleccionado: el registro traía «Femenino» puesto, y eso
@@ -212,7 +212,7 @@ export const CuentaPerfil = () => {
                 value={campos.sex}
                 onChange={(e) => cambiar("sex")(e.target.value)}
               >
-                {SEXOS.map((s) => (
+                {sexos(t).map((s) => (
                   <option key={s.valor} value={s.valor}>
                     {s.etiqueta}
                   </option>
@@ -225,7 +225,7 @@ export const CuentaPerfil = () => {
         <div className="se-cuenta__fila">
           <CampoDeTexto
             id="p-pais"
-            etiqueta="País"
+            etiqueta={t("cuenta.perfil.pais")}
             valor={campos.country}
             onCambio={cambiar("country")}
             autoComplete="country-name"
@@ -233,7 +233,7 @@ export const CuentaPerfil = () => {
           />
           <CampoDeTexto
             id="p-ciudad"
-            etiqueta="Ciudad"
+            etiqueta={t("cuenta.perfil.ciudad")}
             valor={campos.city}
             onCambio={cambiar("city")}
             autoComplete="address-level2"
@@ -244,21 +244,21 @@ export const CuentaPerfil = () => {
         <div className="se-cuenta__fila">
           <CampoDeTexto
             id="p-ocupacion"
-            etiqueta="Ocupación"
+            etiqueta={t("cuenta.perfil.ocupacion")}
             valor={campos.occupation}
             onCambio={cambiar("occupation")}
             opcional
-            ayuda="Sale bajo su firma si le publican una pieza."
+            ayuda={t("cuenta.perfil.ayudaOcupacion")}
           />
           <CampoDeTexto
             id="p-telefono"
-            etiqueta="Teléfono"
+            etiqueta={t("cuenta.perfil.telefono")}
             valor={campos.phoneNumber}
             onCambio={cambiar("phoneNumber")}
             autoComplete="tel"
             inputMode="tel"
             opcional
-            ayuda="Sólo para que la redacción le localice si acepta su envío."
+            ayuda={t("cuenta.perfil.ayudaTelefono")}
           />
         </div>
 
@@ -270,11 +270,11 @@ export const CuentaPerfil = () => {
 
         <div className="se-cuenta__acciones">
           <button type="submit" className="se-btn" disabled={estado.guardando}>
-            {estado.guardando ? "Guardando…" : "Guardar cambios"}
+            {estado.guardando ? t("cuenta.comun.guardando") : t("cuenta.comun.guardarCambios")}
           </button>
           {estado.guardado ? (
             <span className="se-guardado" role="status">
-              Guardado ✓
+              {t("cuenta.perfil.guardado")}
             </span>
           ) : null}
         </div>

@@ -1,0 +1,128 @@
+{
+  "piezas": {
+    "pieza": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "ubicacion": "You are here",
+      "masContenido": "More to read"
+    },
+    "noEncontrada": {
+      "meta": {
+        "titulo": "Piece not found — {marca}"
+      },
+      "titulo": "We couldn't find this piece",
+      "texto": "The link may be broken, or the content is no longer published.",
+      "volver": "Back to the front page"
+    },
+    "redireccion": {
+      "buscando": "Looking for the piece…"
+    },
+    "paginaNoEncontrada": {
+      "meta": {
+        "titulo": "Page not found — {marca}",
+        "descripcion": "The page you're looking for doesn't exist or has moved."
+      },
+      "titulo": "Page not found",
+      "texto": "The URL may be misspelled, or the content is no longer available.",
+      "explorarArticulos": "Browse articles",
+      "pausaRotulo": "A minute's pause",
+      "pausaTexto": "While you're here, take a minute:"
+    },
+    "cuerpo": {
+      "editorialDe": "SurEconomics editorial",
+      "conversacionCon": "A conversation with {quien}."
+    },
+    "fuentes": {
+      "titulo": {
+        "one": "Source",
+        "other": "Sources"
+      }
+    },
+    "video": {
+      "sinCargar": "The video for this interview hasn't been uploaded yet.",
+      "titulo": "Interview video",
+      "tituloConNombre": "Video: {titulo}",
+      "ver": "Watch the video"
+    },
+    "audio": {
+      "sinCargar": "The audio for this podcast hasn't been uploaded yet.",
+      "titulo": "Podcast audio",
+      "tituloConNombre": "Audio: {titulo}"
+    },
+    "informe": {
+      "titulo": "Download the full report",
+      "paginas": {
+        "one": "{n} page.",
+        "other": "{n} pages."
+      },
+      "descargaLibre": "Free download: no account or sign-up required.",
+      "soloRegistrados": "Reports are for registered readers. Create an account or sign in to download this one and all the others.",
+      "confirmarCorreo": "Your email still needs to be confirmed. It's the last step before you can download.",
+      "descargaGratuita": "Free download for registered readers.",
+      "descargar": "Download the report",
+      "preparando": "Preparing…",
+      "sinArchivo": "This report doesn't have a file uploaded yet.",
+      "errorDescarga": "We couldn't retrieve the document. Please try again."
+    },
+    "acceso": {
+      "iniciarSesion": "Sign in",
+      "crearCuenta": "Create an account",
+      "yaTengoCuenta": "I already have an account",
+      "verificarCorreo": "Verify my email"
+    },
+    "firma": {
+      "redaccion": "SurEconomics Newsroom",
+      "por": "By",
+      "investigacionDe": "Research by {unidad}"
+    },
+    "etiquetas": {
+      "seguirLeyendo": "Keep reading about",
+      "incluyeTodo": "Includes all of {nombre}"
+    },
+    "relacionadas": {
+      "titulo": "You may also be interested in"
+    },
+    "comentarios": {
+      "titulo": "Comments",
+      "tituloConTotal": "Comments ({n})",
+      "cargando": "Loading comments…",
+      "vacio": "No comments yet. Be the first to join in.",
+      "enRevisionPropio": "Your comment is under review. It will appear here once moderation approves it.",
+      "enRevision": "Comment under review.",
+      "lectorAnonimo": "Reader",
+      "participe": "Join the conversation",
+      "participeTexto": "Create a free account to comment on this and any other piece, save what you want to read later, and download reports.",
+      "faltaConfirmar": "Your email still needs to be confirmed",
+      "faltaConfirmarTexto": "It's the last step before you can comment. A code was sent to the email address you signed up with.",
+      "escribaUno": "Write a comment.",
+      "enviado": "Comment sent. It will appear once moderation approves it.",
+      "muyRapido": "You're commenting too quickly. Wait a moment and try again.",
+      "seccionCerrada": "This section no longer accepts comments.",
+      "noEnviado": "We couldn't send your comment.",
+      "suComentario": "Your comment",
+      "enviando": "Sending…",
+      "publicar": "Post comment"
+    },
+    "compartir": {
+      "instagram": "Share on Instagram",
+      "whatsapp": "Share on WhatsApp",
+      "x": "Share on X",
+      "noCopiado": "We couldn't copy the link. Copy it from the address bar.",
+      "copiadoTelefono": "Link copied. Paste it into your story or message.",
+      "copiadoEscritorio": "Link copied. Open Instagram and paste it."
+    },
+    "marcador": {
+      "guardar": "Save",
+      "guardado": "Saved",
+      "entreParaGuardar": "Sign in to save this piece",
+      "quitar": "Remove from my bookmarks",
+      "guardarParaDespues": "Save for later",
+      "error": "We couldn't save it. Please try again."
+    },
+    "geo": {
+      "mundo": "World",
+      "americas": "The Americas"
+    }
+  }
+}

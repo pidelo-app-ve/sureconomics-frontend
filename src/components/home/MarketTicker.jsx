@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { formatearFecha } from "../../i18n/motor";
 import { getMarketTicker } from "../../services/marketTickerService";
 
 /**
@@ -85,8 +87,11 @@ const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
  * cifras no se pueden reutilizar en ningun otro sitio del sitio.
  *
  * Su atribucion es obligatoria por sus condiciones de uso. No se quita.
+ *
+ * Son funciones y no listas porque el oro es el unico nombre que cambia de idioma
+ * («Oro» / «Gold»); los demas son nombres propios y van igual en los dos.
  */
-const SIMBOLOS_ESCRITORIO = [
+const SIMBOLOS_ESCRITORIO = (oro) => [
   { proName: "BMFBOVESPA:IBOV", title: "Bovespa" },
   { proName: "INDEX:MXX", title: "IPC México" },
   { proName: "BCBA:IMV", title: "Merval" },
@@ -97,15 +102,15 @@ const SIMBOLOS_ESCRITORIO = [
   { proName: "BME:IBC", title: "IBEX 35" },
   { proName: "FOREXCOM:JPXJPY", title: "Nikkei 225" },
   { proName: "FX:EURUSD", title: "EUR/USD" },
-  { proName: "OANDA:XAUUSD", title: "Oro" },
+  { proName: "OANDA:XAUUSD", title: oro },
   { proName: "TVC:UKOIL", title: "Brent" },
   { proName: "BITSTAMP:BTCUSD", title: "BTC/USD" },
 ];
 
 /** En el telefono: petroleo, oro, la bolsa de referencia, el bitcoin y el euro. */
-const SIMBOLOS_MOVIL = [
+const SIMBOLOS_MOVIL = (oro) => [
   { proName: "TVC:UKOIL", title: "Brent" },
-  { proName: "OANDA:XAUUSD", title: "Oro" },
+  { proName: "OANDA:XAUUSD", title: oro },
   { proName: "FOREXCOM:SPXUSD", title: "S&P 500" },
   { proName: "BITSTAMP:BTCUSD", title: "BTC/USD" },
   { proName: "FX:EURUSD", title: "EUR/USD" },
@@ -114,10 +119,13 @@ const SIMBOLOS_MOVIL = [
 /** El mismo corte que usa el componente original: por debajo, los dos se apilan. */
 const CORTE_MOVIL = "(max-width: 860px)";
 
-/** El nombre con el que se anuncia el marco de TradingView. */
-const TITULO_DEL_MARCO = "Índices mundiales (TradingView)";
-
 const CintaMundial = () => {
+  const { t, lang } = useIdioma();
+  // Textos resueltos fuera del efecto: son cadenas, asi que solo cambian con el
+  // idioma y el widget no se vuelve a pedir en cada navegacion.
+  const oro = t("portada.cinta.oro");
+  /** El nombre con el que se anuncia el marco de TradingView. */
+  const tituloDelMarco = t("portada.cinta.indicesMundiales");
   const caja = useRef(null);
   const [estrecho, setEstrecho] = useState(() => {
     try {
@@ -164,7 +172,7 @@ const CintaMundial = () => {
       "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
     // La configuracion va como TEXTO dentro del script, que es como lo pide TradingView.
     script.text = JSON.stringify({
-      symbols: estrecho ? SIMBOLOS_MOVIL : SIMBOLOS_ESCRITORIO,
+      symbols: estrecho ? SIMBOLOS_MOVIL(oro) : SIMBOLOS_ESCRITORIO(oro),
       showSymbolLogo: true,
       isTransparent: true,
       // `compact` y no `adaptive`: en adaptive TradingView pinta dos lineas por simbolo
@@ -174,7 +182,8 @@ const CintaMundial = () => {
       // cabecera. Medido antes de cambiarlo: iframe 72 px en una caja de 46.
       displayMode: "compact",
       colorTheme: "dark",
-      locale: "es",
+      // El idioma del documento: TradingView acepta "es" y "en" tal cual.
+      locale: lang,
     });
     contenedor.appendChild(script);
     destino.appendChild(contenedor);
@@ -187,8 +196,8 @@ const CintaMundial = () => {
     const domar = () => {
       destino.querySelectorAll("iframe").forEach((marco) => {
         if (marco.getAttribute("tabindex") !== "-1") marco.setAttribute("tabindex", "-1");
-        if (marco.getAttribute("title") !== TITULO_DEL_MARCO) {
-          marco.setAttribute("title", TITULO_DEL_MARCO);
+        if (marco.getAttribute("title") !== tituloDelMarco) {
+          marco.setAttribute("title", tituloDelMarco);
         }
       });
     };
@@ -211,7 +220,7 @@ const CintaMundial = () => {
       vigia?.disconnect();
       destino.innerHTML = "";
     };
-  }, [estrecho]);
+  }, [estrecho, lang, oro, tituloDelMarco]);
 
   return (
     <div className="se-ticker__mundo">
@@ -233,6 +242,7 @@ const CintaMundial = () => {
 };
 
 export const MarketTicker = () => {
+  const { t } = useIdioma();
   const [ticker, setTicker] = useState(null);
   const [cargando, setCargando] = useState(true);
 
@@ -318,7 +328,7 @@ export const MarketTicker = () => {
   return (
     // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
     // papel no lo lee ningun lector de pantalla.
-    <div className="se-ticker" role="region" aria-label="Cifras de mercado">
+    <div className="se-ticker" role="region" aria-label={t("portada.cinta.cifrasDeMercado")}>
       {hayCifras ? (
         <div className="se-ticker__casa">
           <div className="se-ticker__viewport">
@@ -345,7 +355,9 @@ export const MarketTicker = () => {
                 className="se-ticker__stamp"
                 title={
                   ticker.effectiveDate
-                    ? `Cierre del ${ticker.effectiveDate}`
+                    ? t("portada.cinta.cierreDel", {
+                        fecha: formatearFecha(ticker.effectiveDate, "larga") || ticker.effectiveDate,
+                      })
                     : undefined
                 }
               >

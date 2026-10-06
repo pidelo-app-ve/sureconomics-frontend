@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * Qué tan buena es la contraseña que se está escribiendo.
@@ -18,12 +19,13 @@ import PropTypes from "prop-types";
  * acepta, no la que recordará.
  */
 
+/** `clave` es el tramo final de `cuenta.fuerza.*`, donde vive el nombre de cada nivel. */
 const NIVELES = [
-  { hasta: 1, texto: "Muy corta", clase: "se-fuerza--mala" },
-  { hasta: 2, texto: "Débil", clase: "se-fuerza--floja" },
-  { hasta: 3, texto: "Aceptable", clase: "se-fuerza--media" },
-  { hasta: 4, texto: "Buena", clase: "se-fuerza--buena" },
-  { hasta: 5, texto: "Muy buena", clase: "se-fuerza--buena" },
+  { hasta: 1, clave: "muyCorta", clase: "se-fuerza--mala" },
+  { hasta: 2, clave: "debil", clase: "se-fuerza--floja" },
+  { hasta: 3, clave: "aceptable", clase: "se-fuerza--media" },
+  { hasta: 4, clave: "buena", clase: "se-fuerza--buena" },
+  { hasta: 5, clave: "muyBuena", clase: "se-fuerza--buena" },
 ];
 
 const medir = (clave) => {
@@ -40,10 +42,11 @@ const medir = (clave) => {
 };
 
 export const FuerzaDeClave = ({ clave }) => {
+  const { t } = useIdioma();
   if (!clave) return null;
 
   const puntos = medir(clave);
-  const nivel = NIVELES.find((n) => puntos <= n.hasta) ?? NIVELES[NIVELES.length - 1];
+  const nivel = NIVELES.find((n) => n.hasta >= puntos) ?? NIVELES[NIVELES.length - 1];
 
   return (
     <div className={`se-fuerza ${nivel.clase}`}>
@@ -53,9 +56,9 @@ export const FuerzaDeClave = ({ clave }) => {
       {/* `polite` y no `assertive`: informa mientras se teclea y no debe interrumpir
           lo que se está escribiendo. */}
       <span className="se-fuerza__texto" aria-live="polite">
-        {nivel.texto}
+        {t(`cuenta.fuerza.${nivel.clave}`)}
         {puntos <= 2 ? (
-          <small> · Una frase de varias palabras es más segura y más fácil de recordar.</small>
+          <small> · {t("cuenta.fuerza.consejo")}</small>
         ) : null}
       </span>
     </div>

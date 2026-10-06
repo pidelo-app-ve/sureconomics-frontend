@@ -1,0 +1,128 @@
+{
+  "piezas": {
+    "pieza": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "ubicacion": "Ubicación",
+      "masContenido": "Más contenido"
+    },
+    "noEncontrada": {
+      "meta": {
+        "titulo": "Pieza no encontrada — {marca}"
+      },
+      "titulo": "No encontramos esta pieza",
+      "texto": "El enlace puede estar roto o el contenido ya no está publicado.",
+      "volver": "Volver a la portada"
+    },
+    "redireccion": {
+      "buscando": "Buscando la pieza…"
+    },
+    "paginaNoEncontrada": {
+      "meta": {
+        "titulo": "Página no encontrada — {marca}",
+        "descripcion": "La página que busca no existe o fue movida."
+      },
+      "titulo": "Página no encontrada",
+      "texto": "La URL puede estar mal escrita o el contenido ya no está disponible.",
+      "explorarArticulos": "Explorar artículos",
+      "pausaRotulo": "Un minuto de pausa",
+      "pausaTexto": "Ya que está aquí, un minuto de pausa:"
+    },
+    "cuerpo": {
+      "editorialDe": "Editorial de SurEconomics",
+      "conversacionCon": "Conversación con {quien}."
+    },
+    "fuentes": {
+      "titulo": {
+        "one": "Fuente",
+        "other": "Fuentes"
+      }
+    },
+    "video": {
+      "sinCargar": "El video de esta entrevista todavía no está cargado.",
+      "titulo": "Video de la entrevista",
+      "tituloConNombre": "Video: {titulo}",
+      "ver": "Ver el video"
+    },
+    "audio": {
+      "sinCargar": "El audio de este podcast todavía no está cargado.",
+      "titulo": "Audio del podcast",
+      "tituloConNombre": "Audio: {titulo}"
+    },
+    "informe": {
+      "titulo": "Descargue el informe completo",
+      "paginas": {
+        "one": "{n} página.",
+        "other": "{n} páginas."
+      },
+      "descargaLibre": "Descarga libre: no hace falta cuenta ni registro.",
+      "soloRegistrados": "Los informes son para lectores registrados. Cree una cuenta o inicie sesión y podrá descargar este y los demás.",
+      "confirmarCorreo": "Falta confirmar su correo. Es el último paso para poder descargar.",
+      "descargaGratuita": "Descarga gratuita para lectores registrados.",
+      "descargar": "Descargar el informe",
+      "preparando": "Preparando…",
+      "sinArchivo": "Este informe todavía no tiene archivo cargado.",
+      "errorDescarga": "No se pudo obtener el documento. Inténtelo de nuevo."
+    },
+    "acceso": {
+      "iniciarSesion": "Iniciar sesión",
+      "crearCuenta": "Crear una cuenta",
+      "yaTengoCuenta": "Ya tengo cuenta",
+      "verificarCorreo": "Verificar mi correo"
+    },
+    "firma": {
+      "redaccion": "Redacción SurEconomics",
+      "por": "Por",
+      "investigacionDe": "Investigación de {unidad}"
+    },
+    "etiquetas": {
+      "seguirLeyendo": "Seguir leyendo sobre",
+      "incluyeTodo": "Incluye todo {nombre}"
+    },
+    "relacionadas": {
+      "titulo": "También te puede interesar"
+    },
+    "comentarios": {
+      "titulo": "Comentarios",
+      "tituloConTotal": "Comentarios ({n})",
+      "cargando": "Cargando comentarios…",
+      "vacio": "Aún no hay comentarios. Sea el primero en participar.",
+      "enRevisionPropio": "Su comentario está en revisión. Aparecerá aquí en cuanto lo apruebe la moderación.",
+      "enRevision": "Comentario en revisión.",
+      "lectorAnonimo": "Lector",
+      "participe": "Participe en la conversación",
+      "participeTexto": "Cree una cuenta gratuita para comentar esta y cualquier otra pieza, guardar lo que quiera leer después y descargar los informes.",
+      "faltaConfirmar": "Falta confirmar su correo",
+      "faltaConfirmarTexto": "Es el último paso para poder comentar. Le llegó un código al correo con el que se registró.",
+      "escribaUno": "Escriba un comentario.",
+      "enviado": "Comentario enviado. Aparecerá cuando lo apruebe la moderación.",
+      "muyRapido": "Está comentando muy rápido. Espere un momento e inténtelo de nuevo.",
+      "seccionCerrada": "Esta sección ya no admite comentarios.",
+      "noEnviado": "No se pudo enviar el comentario.",
+      "suComentario": "Su comentario",
+      "enviando": "Enviando…",
+      "publicar": "Publicar comentario"
+    },
+    "compartir": {
+      "instagram": "Compartir en Instagram",
+      "whatsapp": "Compartir por WhatsApp",
+      "x": "Compartir en X",
+      "noCopiado": "No se pudo copiar el link. Cópielo de la barra de dirección.",
+      "copiadoTelefono": "Link copiado. Péguelo en su historia o mensaje.",
+      "copiadoEscritorio": "Link copiado. Abra Instagram y péguelo."
+    },
+    "marcador": {
+      "guardar": "Guardar",
+      "guardado": "Guardado",
+      "entreParaGuardar": "Entre para guardar esta pieza",
+      "quitar": "Quitar de mis marcadores",
+      "guardarParaDespues": "Guardar para después",
+      "error": "No se pudo guardar. Inténtelo de nuevo."
+    },
+    "geo": {
+      "mundo": "Mundo",
+      "americas": "Las Américas"
+    }
+  }
+}

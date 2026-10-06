@@ -1,3 +1,4 @@
+import { tActual } from "../i18n/motor";
 import { ApiError } from "../services/apiClient";
 import { clearUserAuth, persistUserAuth, readUserAuth } from "./userAuthStorage";
 
@@ -204,8 +205,10 @@ export const userRequest = async (path, options = {}) => {
       token: readUserAuth().accessToken,
     });
 
+  // Estos dos mensajes sí llegan a la pantalla (los pintan los estados de error de la
+  // cuenta), así que van en el idioma del documento.
   if (!readUserAuth().accessToken) {
-    throw new ApiError("Debe iniciar sesión", { status: 401 });
+    throw new ApiError(tActual("cuenta.api.debeIniciarSesion"), { status: 401 });
   }
 
   let { res, payload } = await fetchWithStoredAccess();
@@ -217,7 +220,7 @@ export const userRequest = async (path, options = {}) => {
     } catch {
       clearUserAuth();
       dispatchUserAuthSync();
-      throw new ApiError("Sesión expirada", { status: 401 });
+      throw new ApiError(tActual("cuenta.api.sesionExpirada"), { status: 401 });
     }
   }
 
@@ -276,7 +279,7 @@ export const descargarArchivoDeUsuario = async (
   // contesta 200 sin sesión. Por omisión se exige, que es lo que quiere todo lo demás:
   // cortar aquí ahorra un viaje que iba a volver 401.
   if (exigirSesion && !readUserAuth().accessToken) {
-    throw new ApiError("Debe iniciar sesión", { status: 401 });
+    throw new ApiError(tActual("cuenta.api.debeIniciarSesion"), { status: 401 });
   }
 
   let res = await pedir();

@@ -1,11 +1,14 @@
 import PropTypes from "prop-types";
-import { formatDateEs } from "../../lib/date";
+import { formatearFecha } from "../../i18n/motor";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 export const CommentList = ({ comments, textoVacio }) => {
+  const { t } = useIdioma();
+
   if (!comments?.length) {
     return (
       <p className="se-text-body se-comments__empty" role="status">
-        {textoVacio}
+        {textoVacio === undefined ? t("piezas.comentarios.vacio") : textoVacio}
       </p>
     );
   }
@@ -17,12 +20,12 @@ export const CommentList = ({ comments, textoVacio }) => {
           <div className="se-comments__author">{c.author}</div>
           {c.createdAt ? (
             <time className="se-meta" dateTime={c.createdAt}>
-              {formatDateEs(c.createdAt)}
+              {formatearFecha(c.createdAt, "larga")}
             </time>
           ) : null}
           <p className="se-comments__body">{c.content}</p>
           {c.status && String(c.status).toLowerCase().includes("pend") ? (
-            <p className="se-comments__pending">Comentario en revisión.</p>
+            <p className="se-comments__pending">{t("piezas.comentarios.enRevision")}</p>
           ) : null}
         </li>
       ))}
@@ -47,11 +50,7 @@ CommentList.propTypes = {
    * "usted acaba de comentar y está en revisión" son la misma lista vacía y necesitan
    * decir cosas distintas. Con el texto fijo, quien acababa de enviar su comentario
    * leía "sea el primero en participar" justo encima del acuse de que ya lo había
-   * hecho.
+   * hecho. Sin valor, sale el texto del diccionario en el idioma de la página.
    */
   textoVacio: PropTypes.string,
-};
-
-CommentList.defaultProps = {
-  textoVacio: "Aún no hay comentarios. Sea el primero en participar.",
 };

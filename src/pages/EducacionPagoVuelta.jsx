@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { Enlace } from "../components/Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import { getEstadoDePago } from "../services/educacionService";
 
 /**
@@ -24,8 +26,10 @@ const INTENTOS = 10;
 const ESPERA_MS = 3000;
 
 export const EducacionPagoVuelta = () => {
+  const { t } = useIdioma();
   const [params] = useSearchParams();
   const referencia = params.get("ref") || "";
+  // `error`: "" | "no-encontrada" | "fallo". La frase se elige al pintar, en el idioma de la página.
   const [estado, setEstado] = useState({ fase: "consultando", compra: null, error: "" });
   const intentos = useRef(0);
 
@@ -59,10 +63,7 @@ export const EducacionPagoVuelta = () => {
         setEstado({
           fase: "error",
           compra: null,
-          error:
-            err?.status === 404
-              ? "No encontramos esa compra en su cuenta."
-              : "No se pudo consultar el pago.",
+          error: err?.status === 404 ? "no-encontrada" : "fallo",
         });
       }
     };
@@ -76,55 +77,50 @@ export const EducacionPagoVuelta = () => {
 
   const alModulo = estado.compra?.modulo ? `/educacion/${estado.compra.modulo}` : "/educacion";
 
+  let mensajeDeError = t("educacion.pagoVuelta.fallo.sinReferencia");
+  if (estado.error === "no-encontrada") mensajeDeError = t("educacion.pagoVuelta.noEncontramos");
+  else if (estado.error === "fallo") mensajeDeError = t("educacion.pagoVuelta.noSePudoConsultar");
+
   return (
     <main className="se-blog se-edu" role="main">
       <section className="se-section">
         <div className="se-container se-edu__vuelta">
           {estado.fase === "consultando" ? (
             <>
-              <h1 className="se-edu__titulo">Confirmando su pago…</h1>
-              <p className="se-text-body">
-                Un momento: estamos esperando la confirmación de la pasarela. No cierre
-                esta página.
-              </p>
+              <h1 className="se-edu__titulo">{t("educacion.pagoVuelta.confirmando.titulo")}</h1>
+              <p className="se-text-body">{t("educacion.pagoVuelta.confirmando.texto")}</p>
             </>
           ) : null}
 
           {estado.fase === "pagado" ? (
             <>
-              <h1 className="se-edu__titulo">Listo, el módulo es suyo</h1>
-              <p className="se-text-body">
-                El acceso ya está activo y no caduca. Puede empezar cuando quiera.
-              </p>
-              <Link to={alModulo} className="se-btn">
-                Ir al módulo
-              </Link>
+              <h1 className="se-edu__titulo">{t("educacion.pagoVuelta.pagado.titulo")}</h1>
+              <p className="se-text-body">{t("educacion.pagoVuelta.pagado.texto")}</p>
+              <Enlace to={alModulo} className="se-btn">
+                {t("educacion.pagoVuelta.pagado.irAlModulo")}
+              </Enlace>
             </>
           ) : null}
 
           {estado.fase === "tardando" ? (
             <>
-              <h1 className="se-edu__titulo">El pago está en camino</h1>
-              <p className="se-text-body">
-                La pasarela todavía no nos ha confirmado. Suele ser cuestión de minutos;
-                el acceso se abre solo en cuanto llegue, sin que tenga que hacer nada.
-              </p>
-              <Link to={alModulo} className="se-btn se-btn--secondary">
-                Volver al módulo
-              </Link>
+              <h1 className="se-edu__titulo">{t("educacion.pagoVuelta.tardando.titulo")}</h1>
+              <p className="se-text-body">{t("educacion.pagoVuelta.tardando.texto")}</p>
+              <Enlace to={alModulo} className="se-btn se-btn--secondary">
+                {t("educacion.pagoVuelta.tardando.volverAlModulo")}
+              </Enlace>
             </>
           ) : null}
 
           {estado.fase === "sin-referencia" || estado.fase === "error" ? (
             <>
-              <h1 className="se-edu__titulo">No pudimos seguirle la pista a ese pago</h1>
+              <h1 className="se-edu__titulo">{t("educacion.pagoVuelta.fallo.titulo")}</h1>
               <p className="se-text-body" role="alert">
-                {estado.error ||
-                  "Volvió sin la referencia del pago. Si ya pagó, el acceso se abre solo en cuanto la pasarela confirme."}
+                {mensajeDeError}
               </p>
-              <Link to="/educacion" className="se-btn se-btn--secondary">
-                Volver a Educación
-              </Link>
+              <Enlace to="/educacion" className="se-btn se-btn--secondary">
+                {t("educacion.comun.volverAEducacion")}
+              </Enlace>
             </>
           ) : null}
         </div>

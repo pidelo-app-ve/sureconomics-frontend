@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal } from "../../lib/contentFilter";
-import { FORMATO_META, rutaDePieza } from "../../lib/pieza";
+import { FORMATO_META, nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 
 /**
@@ -25,15 +25,15 @@ export const EducativoGrid = ({ items }) => (
   <div className="se-artgrid">
     {items.map((p) => (
       <article key={p.id} className="se-artcard">
-        <Link to={rutaDePieza(p)} className="se-artcard__media" aria-label={p.titulo}>
+        <Enlace to={rutaDePieza(p)} className="se-artcard__media" aria-label={p.titulo}>
           <CardMedia pieza={p} />
-        </Link>
+        </Enlace>
         <div className="se-artcard__body">
           <span className="se-meta se-meta--category">
-            {FORMATO_META[p.formatoApi]?.plural ?? p.formato}
+            {FORMATO_META[p.formatoApi] ? nombreDeFormato(p.formatoApi) : p.formato}
           </span>
           <h3 className="se-artcard__title">
-            <Link to={rutaDePieza(p)}>{p.titulo}</Link>
+            <Enlace to={rutaDePieza(p)}>{p.titulo}</Enlace>
           </h3>
           {p.resumen ? <p className="se-artcard__summary">{p.resumen}</p> : null}
           <div className="se-artcard__foot">

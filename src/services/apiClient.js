@@ -1,3 +1,5 @@
+import { tActual } from "../i18n/motor";
+
 const normalizeBaseUrl = (raw) => {
   const base = typeof raw === "string" ? raw.trim() : "";
   return base.replace(/\/$/, "");
@@ -99,11 +101,13 @@ export const createApiClient = ({
     });
 
     const payload = await safeJson(res);
+    // El mensaje de respaldo puede acabar en pantalla (los estados de error lo pintan),
+    // así que sale en el idioma del documento.
     if (!res.ok) {
       const message =
         (payload && (payload.message || payload.error?.message)) ||
         res.statusText ||
-        "Error en la solicitud";
+        tActual("cuenta.api.errorSolicitud");
       throw new ApiError(String(message), {
         status: res.status,
         code: payload?.error?.code,
@@ -113,8 +117,8 @@ export const createApiClient = ({
     }
 
     if (payload && payload.success === false) {
-      const err = payload.error ?? { message: "Error en la solicitud" };
-      throw new ApiError(typeof err.message === "string" ? err.message : "Error en la solicitud", {
+      const err = payload.error ?? { message: tActual("cuenta.api.errorSolicitud") };
+      throw new ApiError(typeof err.message === "string" ? err.message : tActual("cuenta.api.errorSolicitud"), {
         status: res.status,
         code: err.code,
         details: err.details ?? payload,

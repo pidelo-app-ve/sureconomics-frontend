@@ -262,3 +262,40 @@
     transition: none;
   }
 }
+
+/* La franja bajo el buscador de la portada: poco aire, para no empujar las noticias. */
+.se-section.se-pausa-franja {
+  padding-top: var(--se-space-sm, 0.75rem);
+  padding-bottom: 0;
+}
+
+.se-pausa-franja .se-pausa-banner {
+  margin-top: 0;
+}
+
+/* En el teléfono la franja de la portada va en dos columnas, no apilada: poco alto. */
+@media (max-width: 560px) {
+  .se-pausa-franja .se-pausa-banner {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+  .se-pausa-franja .se-pausa-banner__escena {
+    min-height: 0;
+  }
+  .se-pausa-franja .se-pausa-banner__vuelo {
+    left: 14%;
+    top: 30%;
+    width: 60px;
+  }
+  .se-pausa-franja .se-pausa-banner__cuerpo {
+    gap: 5px;
+    padding: 12px 14px 14px;
+  }
+  .se-pausa-franja .se-pausa-banner__titulo {
+    font-size: 1.02rem;
+  }
+  .se-pausa-franja .se-pausa-banner__boton {
+    min-height: 36px;
+    padding: 0 16px;
+    font-size: 0.8125rem;
+  }
+}

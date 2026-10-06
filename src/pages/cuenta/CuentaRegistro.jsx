@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { Enlace, Redirigir, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
 import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
 
 /**
@@ -47,7 +50,8 @@ const IDS = {
 const ID_ERROR = "reg-error";
 
 export const CuentaRegistro = () => {
-  const navigate = useNavigate();
+  const { t } = useIdioma();
+  const navigate = useNavegar();
   // Quien llegó desde algo concreto (anotar su carrera en El Analista) vuelve ahí.
   const volver = leerVolver(useLocation());
   const { isAuthenticated, isEmailVerified, register, profile, profileStatus } = useUserAuth();
@@ -75,30 +79,28 @@ export const CuentaRegistro = () => {
     document.getElementById(enfocar.id)?.focus();
   }, [enfocar]);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Crear una cuenta — SurEconomics",
-      description: "Cree una cuenta de lector.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.registro.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.registro.meta.descripcion"),
+    noindex: true,
+  });
 
   const errores = {
-    firstName: campos.firstName.trim() ? "" : "Escriba su nombre.",
-    lastName: campos.lastName.trim() ? "" : "Escriba su apellido.",
+    firstName: campos.firstName.trim() ? "" : t("cuenta.registro.escribaNombre"),
+    lastName: campos.lastName.trim() ? "" : t("cuenta.registro.escribaApellido"),
     email: !campos.email.trim()
-      ? "Escriba su correo."
+      ? t("cuenta.comun.escribaCorreo")
       : pareceCorreo(campos.email)
         ? ""
-        : "Ese correo no parece completo. Revise que lleve @ y dominio.",
-    password: campos.password.length >= 8 ? "" : "Al menos ocho caracteres.",
+        : t("cuenta.comun.correoIncompleto"),
+    password: campos.password.length >= 8 ? "" : t("cuenta.registro.alMenosOcho"),
   };
   const valido = Object.values(errores).every((e) => !e);
 
   if (isAuthenticated && perfilListo && !isEmailVerified) {
-    return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email, volver }} />;
+    return <Redirigir to="/cuenta/verificar-email" replace state={{ email: profile?.email, volver }} />;
   }
-  if (isAuthenticated && isEmailVerified) return <Navigate to={volver ?? "/cuenta"} replace />;
+  if (isAuthenticated && isEmailVerified) return <Redirigir to={volver ?? "/cuenta"} replace />;
 
   const cambiar = (campo) => (valor) => setCampos((c) => ({ ...c, [campo]: valor }));
   const marcar = (campo) => () => setTocados((t) => ({ ...t, [campo]: true }));
@@ -136,16 +138,14 @@ export const CuentaRegistro = () => {
     } catch (err) {
       const estado = err?.status;
       if (estado === 409) {
-        setErrorGeneral(
-          "Ese correo ya tiene cuenta. Si es la suya, entre en vez de registrarse.",
-        );
+        setErrorGeneral(t("cuenta.registro.correoYaTieneCuenta"));
       } else if (estado === 429) {
-        setErrorGeneral("Demasiados intentos. Espere unos minutos.");
+        setErrorGeneral(t("cuenta.registro.demasiadosIntentos"));
       } else if (estado === 422 || err?.code === "validation_error") {
         // El mensaje del servidor llega en ingles ("Validation failed."): no se enseña.
-        setErrorGeneral("Revise los datos: alguno no tiene el formato esperado.");
+        setErrorGeneral(t("cuenta.registro.reviseDatos"));
       } else {
-        setErrorGeneral("No se pudo crear la cuenta. Inténtelo de nuevo.");
+        setErrorGeneral(t("cuenta.registro.fallo"));
       }
       setEnfocar({ id: ID_ERROR });
     } finally {
@@ -156,19 +156,17 @@ export const CuentaRegistro = () => {
   return (
     <main className="se-blog se-entrada" role="main">
       <div className="se-entrada__caja">
-        <p className="se-entrada__kicker">Crear una cuenta</p>
-        <h1 className="se-entrada__titulo">Su espacio en SurEconomics</h1>
+        <p className="se-entrada__kicker">{t("cuenta.registro.kicker")}</p>
+        <h1 className="se-entrada__titulo">{t("cuenta.registro.titulo")}</h1>
         <p className="se-entrada__lead">
-          Guarde artículos para después, proponga piezas a la redacción y acceda a los
-          módulos de Educación que compre. Le enviaremos un código para confirmar el
-          correo.
+          {t("cuenta.registro.lead")}
         </p>
 
         <form className="se-entrada__form" onSubmit={enviar} noValidate>
           <div className="se-entrada__fila">
             <CampoDeTexto
               id={IDS.firstName}
-              etiqueta="Nombre"
+              etiqueta={t("cuenta.comun.nombre")}
               valor={campos.firstName}
               onCambio={cambiar("firstName")}
               onSalir={marcar("firstName")}
@@ -177,7 +175,7 @@ export const CuentaRegistro = () => {
             />
             <CampoDeTexto
               id={IDS.lastName}
-              etiqueta="Apellido"
+              etiqueta={t("cuenta.comun.apellido")}
               valor={campos.lastName}
               onCambio={cambiar("lastName")}
               onSalir={marcar("lastName")}
@@ -188,19 +186,19 @@ export const CuentaRegistro = () => {
 
           <CampoDeTexto
             id={IDS.email}
-            etiqueta="Correo electrónico"
+            etiqueta={t("cuenta.comun.correo")}
             tipo="email"
             valor={campos.email}
             onCambio={cambiar("email")}
             onSalir={marcar("email")}
             error={tocados.email ? errores.email : ""}
             autoComplete="email"
-            ayuda="Ahí llega el código para confirmar la cuenta."
+            ayuda={t("cuenta.registro.ayudaCorreo")}
           />
 
           <CampoDeTexto
             id={IDS.password}
-            etiqueta="Contraseña"
+            etiqueta={t("cuenta.comun.contrasena")}
             tipo="password"
             valor={campos.password}
             onCambio={cambiar("password")}
@@ -224,14 +222,13 @@ export const CuentaRegistro = () => {
             className="se-btn se-entrada__enviar"
             aria-disabled={enviando ? "true" : undefined}
           >
-            {enviando ? "Creando su cuenta…" : "Crear mi cuenta"}
+            {enviando ? t("cuenta.registro.creando") : t("cuenta.registro.crear")}
           </button>
 
           {/* Lo que falta se dice aquí y no después: quien va a firmar un artículo
               tiene que saber que hará falta más de lo que se pide ahora. */}
           <p className="se-entrada__nota">
-            Después podrá completar su perfil y subir una foto — hace falta para firmar
-            lo que publique.
+            {t("cuenta.registro.nota")}
           </p>
         </form>
 
@@ -240,7 +237,9 @@ export const CuentaRegistro = () => {
         <BotonDeGoogle texto="signup_with" onEntrado={() => navigate(volver ?? "/cuenta", { replace: true })} />
 
         <p className="se-entrada__pie">
-          ¿Ya tiene cuenta? <Link to={conVolver("/cuenta/entrar", volver)}>Entrar</Link>
+          {t("cuenta.registro.yaTieneCuenta", {
+            enlace: <Enlace to={conVolver("/cuenta/entrar", volver)}>{t("cuenta.registro.entrar")}</Enlace>,
+          })}
         </p>
       </div>
     </main>

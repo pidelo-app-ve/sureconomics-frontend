@@ -11,8 +11,17 @@
  * would drift apart while both looked right.
  */
 
+import { tActual } from "../i18n/motor";
+
+/**
+ * La raíz del árbol mientras no ha llegado: «Mundo» / "World", en el idioma del
+ * documento. Una función y no una constante porque el idioma se fija después de que
+ * este módulo se importe.
+ */
+const geoTopPorDefecto = () => tActual("piezas.geo.mundo");
+
 /** The tree, in the shape `useTaxonomy` hands back. */
-const EMPTY_TREE = { geoTop: "Mundo", regiones: {}, ancestros: {} };
+const EMPTY_TREE = { regiones: {}, ancestros: {} };
 
 /**
  * A place's ancestors, nearest first.
@@ -38,7 +47,7 @@ const arriba = (tree, nombre) => tree?.ancestros?.[nombre] ?? [];
  * @returns {Set<string>}
  */
 export const expandGeo = (geos, tree = EMPTY_TREE) => {
-  const { geoTop = EMPTY_TREE.geoTop } = tree;
+  const { geoTop = geoTopPorDefecto() } = tree;
   // The root belongs to every piece: filtering by it means "no restriction".
   const out = new Set([geoTop]);
   (geos ?? []).forEach((geo) => {
@@ -65,7 +74,7 @@ export const expandGeo = (geos, tree = EMPTY_TREE) => {
  * @returns {Array<{ nombre: string, propio: boolean }>}
  */
 export const conAncestros = (geos, tree = EMPTY_TREE) => {
-  const { geoTop = EMPTY_TREE.geoTop } = tree;
+  const { geoTop = geoTopPorDefecto() } = tree;
   const propios = (geos ?? []).filter(Boolean);
   if (!propios.length) return [];
 
@@ -99,7 +108,7 @@ export const temaPrincipal = (piece) => piece?.temas?.[0] ?? null;
  * A piece with no country is regional or continental, and reads as the root —
  * plenty of news is exactly that: a Fed decision belongs to no single country.
  */
-export const geoPrincipal = (piece, geoTop = EMPTY_TREE.geoTop) =>
+export const geoPrincipal = (piece, geoTop = geoTopPorDefecto()) =>
   piece?.geos?.[0] ?? geoTop;
 
 /**

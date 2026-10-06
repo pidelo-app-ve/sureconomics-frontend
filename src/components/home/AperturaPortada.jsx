@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { CardMedia } from "./CardMedia";
@@ -77,6 +78,7 @@ const CAMPOS = {
 };
 
 export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
+  const { t } = useIdioma();
   if (!principal) return null;
   const lugar = geoPrincipal(principal);
   return (
@@ -86,11 +88,11 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
             semana, y el encabezado oculto tiene que decir la verdad al lector de
             pantalla. */}
         <h2 id="apertura-titulo" className="se-sr-only">
-          {fijada ? "Apertura" : "Lo más reciente"}
+          {fijada ? t("portada.apertura.apertura") : t("portada.apertura.loMasReciente")}
         </h2>
         <div className={`se-apertura__rejilla${secundarias.length ? "" : " se-apertura__rejilla--sola"}`}>
           <article className="se-apertura__principal">
-            <Link
+            <Enlace
               to={rutaDePieza(principal)}
               className="se-apertura__media"
               aria-hidden="true"
@@ -105,7 +107,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                 etiqueta={temaPrincipal(principal)}
                 sizes="(max-width: 899px) 92vw, 56vw"
               />
-            </Link>
+            </Enlace>
             <div className="se-apertura__cuerpo">
               <span className="se-apertura__meta">
                 {lugar}
@@ -113,7 +115,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                 {principal.fecha}
               </span>
               <h3 className="se-apertura__titulo">
-                <Link to={rutaDePieza(principal)}>{principal.titulo}</Link>
+                <Enlace to={rutaDePieza(principal)}>{principal.titulo}</Enlace>
               </h3>
               {principal.resumen ? (
                 <p className="se-apertura__resumen">{principal.resumen}</p>
@@ -122,7 +124,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
           </article>
 
           {secundarias.length ? (
-            <ol className="se-apertura__columna" aria-label="Otras noticias recientes">
+            <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
               {secundarias.map((n) => (
                 <li key={n.id} className="se-apertura__item">
                   <span className="se-apertura__meta">
@@ -130,9 +132,9 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                     {n.fecha ? <span aria-hidden="true"> · </span> : null}
                     {n.fecha}
                   </span>
-                  <Link className="se-apertura__enlace" to={rutaDePieza(n)}>
+                  <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
                     {n.titulo}
-                  </Link>
+                  </Enlace>
                 </li>
               ))}
             </ol>

@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
 
 export const CuentaMarcadores = () => {
+  const { t } = useIdioma();
   const { isEmailVerified } = useUserAuth();
   const [state, setState] = useState({ status: "idle", data: null, error: null });
 
@@ -20,13 +23,11 @@ export const CuentaMarcadores = () => {
     }
   }, []);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Marcadores — SurEconomics",
-      description: "Artículos guardados.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.marcadores.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.marcadores.meta.descripcion"),
+    noindex: true,
+  });
 
   useEffect(() => {
     if (!isEmailVerified) return;
@@ -37,12 +38,12 @@ export const CuentaMarcadores = () => {
     return (
       <div className="se-reader-dash__page">
         <div className="se-reader-card se-reader-card--narrow">
-          <h1 className="se-reader-page-title">Marcadores</h1>
+          <h1 className="se-reader-page-title">{t("cuenta.marcadores.titulo")}</h1>
           <p className="se-reader-page-lead">
-            Verifique su correo para ver sus marcadores.{" "}
-            <Link to="/cuenta/verificar-email" className="se-link">
-              Verificar
-            </Link>
+            {t("cuenta.marcadores.verifique")}{" "}
+            <Enlace to="/cuenta/verificar-email" className="se-link">
+              {t("cuenta.comun.verificar")}
+            </Enlace>
           </p>
         </div>
       </div>
@@ -52,7 +53,7 @@ export const CuentaMarcadores = () => {
   if (state.status === "loading" || state.status === "idle") {
     return (
       <div className="se-reader-dash__page se-reader-dash__page--center">
-        <LoadingState title="Cargando marcadores…" />
+        <LoadingState title={t("cuenta.marcadores.cargando")} />
       </div>
     );
   }
@@ -60,7 +61,7 @@ export const CuentaMarcadores = () => {
   if (state.status === "error") {
     return (
       <div className="se-reader-dash__page se-reader-dash__page--center">
-        <ErrorState title="No pudimos cargar los marcadores" error={state.error} onRetry={() => handleLoad(1)} />
+        <ErrorState title={t("cuenta.marcadores.noPudimosCargar")} error={state.error} onRetry={() => handleLoad(1)} />
       </div>
     );
   }
@@ -70,23 +71,23 @@ export const CuentaMarcadores = () => {
   return (
     <div className="se-reader-dash__page">
       <header className="se-reader-page-head">
-        <h1 className="se-reader-page-title">Marcadores</h1>
-        <p className="se-reader-page-lead">Artículos que ha guardado para volver a ellos.</p>
+        <h1 className="se-reader-page-title">{t("cuenta.marcadores.titulo")}</h1>
+        <p className="se-reader-page-lead">{t("cuenta.marcadores.lead")}</p>
       </header>
 
       {items.length === 0 ? (
         <div className="se-reader-empty se-reader-card">
-          <p className="se-reader-empty__title">Aún no hay marcadores</p>
-          <p className="se-reader-empty__text">Explore artículos y pulse guardar cuando le interese uno.</p>
-          <Link to="/articulos" className="se-btn se-btn--secondary">
-            Ver artículos
-          </Link>
+          <p className="se-reader-empty__title">{t("cuenta.marcadores.vacioTitulo")}</p>
+          <p className="se-reader-empty__text">{t("cuenta.marcadores.vacioTexto")}</p>
+          <Enlace to="/articulos" className="se-btn se-btn--secondary">
+            {t("cuenta.marcadores.verArticulos")}
+          </Enlace>
         </div>
       ) : (
         <ul className="se-reader-marks">
           {items.map((post) => (
             <li key={post.id || post.slug} className="se-reader-marks__item">
-              <Link to={`/articulo/${encodeURIComponent(post.slug)}`} className="se-reader-marks__link">
+              <Enlace to={`/articulo/${encodeURIComponent(post.slug)}`} className="se-reader-marks__link">
                 <span className="se-reader-marks__accent" aria-hidden="true" />
                 <span className="se-reader-marks__body">
                   <span className="se-reader-marks__title">{post.title || post.slug}</span>
@@ -97,7 +98,7 @@ export const CuentaMarcadores = () => {
                 <span className="se-reader-marks__arrow" aria-hidden="true">
                   →
                 </span>
-              </Link>
+              </Enlace>
             </li>
           ))}
         </ul>

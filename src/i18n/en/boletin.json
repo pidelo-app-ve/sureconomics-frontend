@@ -1,0 +1,82 @@
+{
+  "boletin": {
+    "suscripcion": {
+      "meta": {
+        "titulo": "Subscription — {marca}",
+        "descripcion": "Subscribe to SurEconomics: research, reports and newsletters with an executive read on Latin America."
+      },
+      "titulo": "Subscription",
+      "claim": "Access to research, reports and newsletters with an executive read on Latin America.",
+      "beneficios": "Subscription benefits",
+      "beneficio1": "In-depth research on the economics, finance and politics of different Latin American countries and blocs.",
+      "beneficio2": "A weekly newsletter, every Monday, on economics, finance and politics across the region.",
+      "beneficio3": "Direct investment opportunities in Latin America.",
+      "beneficio4": "Connections with potential investors interested in Latin America.",
+      "beneficio5": "Practical courses in economics and finance.",
+      "verInformes": "See reports & research",
+      "planPremium": "Premium plan",
+      "precio": "Price",
+      "precioValor": "Price coming soon",
+      "pago": "Payment",
+      "pagoValor": "Payment methods coming soon",
+      "cta": "Subscribe",
+      "ctaDemo": "Subscription CTA (demo)",
+      "demo": "This screen is an institutional demo. The payment flow will be connected in the next phase.",
+      "explorar": "Explore the platform"
+    },
+    "baja": {
+      "meta": {
+        "titulo": "Unsubscribe from the newsletter — {marca}"
+      },
+      "titulo": "SurEconomics newsletter",
+      "procesando": "Processing your request…",
+      "hecho": "Done. {correo} will no longer receive the newsletter.",
+      "eseCorreo": "That address",
+      "sinQuerer": "If this was a mistake, you can subscribe again from the footer of any page.",
+      "sinToken": "This link is incomplete. Use the unsubscribe link at the end of the newsletter, or write to us and we'll take care of it.",
+      "tokenMalo": "That unsubscribe link isn't valid. It may come from a very old email. If you're still receiving the newsletter, write to us and we'll remove you manually.",
+      "error": "We couldn't process your request right now. Try again in a while, or write to us.",
+      "irPortada": "Go to the front page",
+      "escribirnos": "Write to us"
+    },
+    "entorno": {
+      "meta": {
+        "titulo": "Entorno en Viñetas — {marca}",
+        "descripcion": "SurEconomics' weekly newsletter: the week's economic landscape, told in vignettes. Free, every Monday."
+      },
+      "irAlSitio": "SurEconomics, go to the site",
+      "kicker": "Weekly newsletter · Mondays at 9:00",
+      "texto": "The week's economic landscape, told in vignettes: what moved the markets, what's coming and what's worth watching. Free, in your inbox.",
+      "listoTitulo": "Done, you're subscribed.",
+      "listoTexto": "It arrives in your inbox next Monday.",
+      "verSitio": "Go to SurEconomics",
+      "suCorreo": "Your email",
+      "placeholder": "name@email.com",
+      "enviando": "Sending…",
+      "suscribirme": "Subscribe",
+      "noGracias": "No, thanks — go to SurEconomics",
+      "letra": "No spam. Unsubscribe with one click from any issue.",
+      "escribaCorreo": "Enter your email to subscribe."
+    },
+    "invitacion": {
+      "kicker": "Weekly newsletter · Monday mornings",
+      "texto": "The week's economic landscape, told in vignettes. It arrives every Monday, before the week starts moving.",
+      "suCorreo": "Your email",
+      "placeholder": "name@email.com",
+      "unirse": "Join the newsletter",
+      "enviando": "Sending…",
+      "ahoraNo": "Not now",
+      "ok": "Done. The first issue arrives on Monday.",
+      "exitoTitulo": "You're in",
+      "exitoTexto": "The first issue of {boletin} arrives Monday morning{correo}.",
+      "exitoA": "at",
+      "exitoNota": "If you don't see it, check «Promotions» or your spam folder."
+    },
+    "nombre": "Entorno en Viñetas",
+    "errores": {
+      "correoIncompleto": "That email address looks incomplete. Check it and try again.",
+      "demasiados": "Too many attempts in a row. Wait a moment.",
+      "fallo": "We couldn't complete your subscription. Please try again."
+    }
+  }
+}

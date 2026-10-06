@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { conAncestros } from "../../lib/contentFilter";
 import { useTaxonomy } from "../../hooks/useTaxonomy";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * The piece's own topic and place tags, as links into the explorer.
@@ -19,33 +20,34 @@ import { useTaxonomy } from "../../hooks/useTaxonomy";
  * would be the same fact twice and would spend the piece's limited tag slots.
  */
 export const PieceTags = ({ temas, geos }) => {
+  const { t } = useIdioma();
   const { geoTop, ancestros } = useTaxonomy();
   const lugares = conAncestros(geos, { geoTop, ancestros });
 
   return (
     <div className="se-piece__tags">
-      <span className="se-piece__tags-label">Seguir leyendo sobre</span>
+      <span className="se-piece__tags-label">{t("piezas.etiquetas.seguirLeyendo")}</span>
       <div className="se-piece__tags-list">
         {temas.map((tema) => (
-          <Link
+          <Enlace
             key={`t-${tema}`}
             to={`/explorar?tema=${encodeURIComponent(tema)}`}
             className="se-piece__tag"
           >
             {tema}
-          </Link>
+          </Enlace>
         ))}
         {lugares.map(({ nombre, propio }) => (
-          <Link
+          <Enlace
             key={`g-${nombre}`}
             to={`/explorar?donde=${encodeURIComponent(nombre)}`}
             className={`se-piece__tag se-piece__tag--geo${
               propio ? "" : " se-piece__tag--heredado"
             }`}
-            title={propio ? undefined : `Incluye todo ${nombre}`}
+            title={propio ? undefined : t("piezas.etiquetas.incluyeTodo", { nombre })}
           >
             {nombre}
-          </Link>
+          </Enlace>
         ))}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 /**
  * La hora de Caracas, en directo.
@@ -16,6 +17,7 @@ import PropTypes from "prop-types";
 const ZONA = "America/Caracas";
 
 export const HoraCaracas = ({ className = "" }) => {
+  const { t } = useIdioma();
   const formato = useMemo(
     () =>
       new Intl.DateTimeFormat("es-VE", {
@@ -72,8 +74,8 @@ export const HoraCaracas = ({ className = "" }) => {
   return (
     // `title` porque en el escritorio estrecho el rotulo se esconde para dejarle
     // ancho a la navegacion, y una hora sin decir de donde es no dice nada.
-    <div className={`se-hora ${className}`.trim()} title="Hora de Caracas, Venezuela">
-      <span className="se-hora__lugar">Caracas</span>
+    <div className={`se-hora ${className}`.trim()} title={t("nav.horaCaracas")}>
+      <span className="se-hora__lugar">{t("nav.caracas")}</span>
       {/* Sin `role="timer"`: hay lectores de pantalla que lo tratan como región
           viva y leerían la hora en voz alta cada segundo. */}
       <time className="se-hora__valor" dateTime={`${hora.hm}:${hora.ss}`}>

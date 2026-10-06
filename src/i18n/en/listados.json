@@ -1,0 +1,106 @@
+{
+  "listados": {
+    "listado": {
+      "alcance": "in {ambito}",
+      "errorSeccion": "We couldn't load this section",
+      "sinResultadosSeccion": "Nothing in this section matches the filters. Remove one to widen the search.",
+      "seccionVacia": "When the newsroom publishes in this section, it will appear here.",
+      "soloRecientes": "Showing the most recent pieces in this section."
+    },
+    "formato": {
+      "meta": {
+        "titulo": "{formato} — {marca}",
+        "descripcion": "{formato} from {marca}."
+      },
+      "cargando": "Loading {titulo}…",
+      "todasLasPiezas": "Everything in {titulo}",
+      "vacioTitulo": "No {titulo} yet"
+    },
+    "informes": {
+      "meta": {
+        "titulo": "Reports — {marca}",
+        "descripcion": "Reports and research from {marca}."
+      }
+    },
+    "explorar": {
+      "meta": {
+        "titulo": "{titulo} — {marca}",
+        "descripcion": "{marca} coverage of {titulo}."
+      },
+      "kicker": "Explore",
+      "todoElContenido": "All content",
+      "union": " and ",
+      "enLugar": "in {lugares}",
+      "conteo": {
+        "one": "{n} piece, grouped by format.",
+        "other": "{n} pieces, grouped by format."
+      },
+      "alcance": "across the whole site",
+      "errorCarga": "We couldn't load the content",
+      "buscando": "Searching…",
+      "vacioTitulo": "Nothing published yet",
+      "sinResultadosTexto": "No piece matches the filters. Remove one to widen the search.",
+      "vacioTexto": "When the newsroom publishes its first piece, it will appear here.",
+      "verLasN": "See all {n}",
+      "verSeccion": "See the whole section"
+    },
+    "alPunto": {
+      "meta": {
+        "titulo": "Al punto — {marca}",
+        "descripcion": "{marca}'s video interviews and podcast episodes, all in one place."
+      },
+      "kicker": "Interviews and podcast",
+      "queVer": "What to watch",
+      "cargando": "Loading interviews and podcast…",
+      "loUltimo": "Latest",
+      "verTodosEpisodios": "See all episodes",
+      "resultados": "Results",
+      "esoEsTodo": "For now, that's everything published.",
+      "vistas": {
+        "todo": {
+          "etiqueta": "All",
+          "lateral": "Latest episodes",
+          "lista": "Everything published",
+          "unidad": "pieces",
+          "vacio": "No interviews or podcast episodes yet"
+        },
+        "entrevistas": {
+          "etiqueta": "Interviews",
+          "lateral": "More interviews",
+          "lista": "All interviews",
+          "unidad": "interviews",
+          "vacio": "No interviews yet"
+        },
+        "podcast": {
+          "etiqueta": "Podcast",
+          "lateral": "More episodes",
+          "lista": "All episodes",
+          "unidad": "episodes",
+          "vacio": "No episodes yet"
+        }
+      }
+    },
+    "estados": {
+      "vacioTitulo": "No results",
+      "vacioTexto": "There's no content to show yet.",
+      "errorTitulo": "Error",
+      "errorGenerico": "Something went wrong while loading the data.",
+      "demasiadasSolicitudes": "Too many requests in a short time. Wait a few minutes and try again."
+    },
+    "filtros": {
+      "rotulo": "Article filters",
+      "titulo": "Filters",
+      "buscarPlaceholder": "Search by title or summary…",
+      "tipoContenido": "Content type",
+      "temaPrincipal": "Main topic",
+      "regionGeo": "Region / geography",
+      "sector": "Sector",
+      "fechaDesde": "Date (from)",
+      "porAutor": "By author",
+      "categoria": "Category",
+      "seleccionarCategoria": "Select a category",
+      "etiqueta": "Tag",
+      "seleccionarEtiqueta": "Select a tag"
+    }
+  }
+}

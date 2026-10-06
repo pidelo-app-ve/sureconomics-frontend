@@ -1,0 +1,106 @@
+{
+  "listados": {
+    "listado": {
+      "alcance": "en {ambito}",
+      "errorSeccion": "No se pudo cargar esta sección",
+      "sinResultadosSeccion": "Ningún contenido de esta sección coincide con los filtros. Quite alguno para ampliar la búsqueda.",
+      "seccionVacia": "Cuando la redacción publique en esta sección, aparecerá aquí.",
+      "soloRecientes": "Se están mostrando las piezas más recientes de esta sección."
+    },
+    "formato": {
+      "meta": {
+        "titulo": "{formato} — {marca}",
+        "descripcion": "{formato} de {marca}."
+      },
+      "cargando": "Cargando {titulo}…",
+      "todasLasPiezas": "Todas las piezas de {titulo}",
+      "vacioTitulo": "Todavía no hay {titulo}"
+    },
+    "informes": {
+      "meta": {
+        "titulo": "Informes — {marca}",
+        "descripcion": "Informes y reportes de {marca}."
+      }
+    },
+    "explorar": {
+      "meta": {
+        "titulo": "{titulo} — {marca}",
+        "descripcion": "Contenido de {marca} sobre {titulo}."
+      },
+      "kicker": "Explorar",
+      "todoElContenido": "Todo el contenido",
+      "union": " y ",
+      "enLugar": "en {lugares}",
+      "conteo": {
+        "one": "{n} pieza, agrupadas por formato.",
+        "other": "{n} piezas, agrupadas por formato."
+      },
+      "alcance": "en todo el sitio",
+      "errorCarga": "No se pudo cargar el contenido",
+      "buscando": "Buscando…",
+      "vacioTitulo": "Todavía no hay nada publicado",
+      "sinResultadosTexto": "Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda.",
+      "vacioTexto": "Cuando la redacción publique la primera pieza, aparecerá aquí.",
+      "verLasN": "Ver las {n}",
+      "verSeccion": "Ver toda la sección"
+    },
+    "alPunto": {
+      "meta": {
+        "titulo": "Al punto — {marca}",
+        "descripcion": "Las entrevistas en video y los episodios del podcast de {marca}, en un solo lugar."
+      },
+      "kicker": "Entrevistas y podcast",
+      "queVer": "Qué ver",
+      "cargando": "Cargando entrevistas y podcast…",
+      "loUltimo": "Lo último",
+      "verTodosEpisodios": "Ver todos los episodios",
+      "resultados": "Resultados",
+      "esoEsTodo": "Por ahora, esto es todo lo publicado.",
+      "vistas": {
+        "todo": {
+          "etiqueta": "Todo",
+          "lateral": "Últimos episodios",
+          "lista": "Todo lo publicado",
+          "unidad": "piezas",
+          "vacio": "Todavía no hay entrevistas ni podcast"
+        },
+        "entrevistas": {
+          "etiqueta": "Entrevistas",
+          "lateral": "Más entrevistas",
+          "lista": "Todas las entrevistas",
+          "unidad": "entrevistas",
+          "vacio": "Todavía no hay entrevistas"
+        },
+        "podcast": {
+          "etiqueta": "Podcast",
+          "lateral": "Más episodios",
+          "lista": "Todos los episodios",
+          "unidad": "episodios",
+          "vacio": "Todavía no hay episodios"
+        }
+      }
+    },
+    "estados": {
+      "vacioTitulo": "No hay resultados",
+      "vacioTexto": "Todavía no hay contenido para mostrar.",
+      "errorTitulo": "Error",
+      "errorGenerico": "Ocurrió un error al cargar los datos.",
+      "demasiadasSolicitudes": "Demasiadas solicitudes en poco tiempo. Espere unos minutos e inténtelo de nuevo."
+    },
+    "filtros": {
+      "rotulo": "Filtros de artículos",
+      "titulo": "Filtros",
+      "buscarPlaceholder": "Buscar por título o resumen…",
+      "tipoContenido": "Tipo de contenido",
+      "temaPrincipal": "Tema principal",
+      "regionGeo": "Región / geografía",
+      "sector": "Sector",
+      "fechaDesde": "Fecha (desde)",
+      "porAutor": "Por Autor",
+      "categoria": "Categoría",
+      "seleccionarCategoria": "Seleccionar categoría",
+      "etiqueta": "Etiqueta",
+      "seleccionarEtiqueta": "Seleccionar etiqueta"
+    }
+  }
+}

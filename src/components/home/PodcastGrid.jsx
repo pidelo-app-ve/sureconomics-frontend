@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { rutaDePieza } from "../../lib/pieza";
+import { nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 
 /**
@@ -17,15 +17,15 @@ export const PodcastGrid = ({ items }) => (
   <div className="se-artgrid">
     {items.map((p) => (
       <article key={p.id} className="se-artcard">
-        <Link to={rutaDePieza(p)} className="se-artcard__media" aria-label={p.titulo}>
+        <Enlace to={rutaDePieza(p)} className="se-artcard__media" aria-label={p.titulo}>
           <CardMedia pieza={p} />
-        </Link>
+        </Enlace>
         <div className="se-artcard__body">
           <span className="se-meta se-meta--category">
-            Podcast{p.duracion ? ` · ${p.duracion}` : ""}
+            {nombreDeFormato("podcast")}{p.duracion ? ` · ${p.duracion}` : ""}
           </span>
           <h3 className="se-artcard__title">
-            <Link to={rutaDePieza(p)}>{p.titulo}</Link>
+            <Enlace to={rutaDePieza(p)}>{p.titulo}</Enlace>
           </h3>
           {p.resumen ? <p className="se-artcard__summary">{p.resumen}</p> : null}
           <div className="se-artcard__foot">

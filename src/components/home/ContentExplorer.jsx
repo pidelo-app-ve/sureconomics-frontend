@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { countForOption } from "../../lib/contentFilter";
 
 /**
@@ -30,6 +31,7 @@ export const ContentExplorer = ({
   total,
   scopeLabel,
 }) => {
+  const { t } = useIdioma();
   const [open, setOpen] = useState(null);
   const rootRef = useRef(null);
   // Los dos botones que abren, para devolverles el foco al cerrar con Escape.
@@ -108,7 +110,7 @@ export const ContentExplorer = ({
   const label = (set, empty) => {
     const arr = [...set];
     if (!arr.length) return empty;
-    return arr.length === 1 ? arr[0] : `${arr.length} elegidos`;
+    return arr.length === 1 ? arr[0] : t("portada.explorador.elegidos", { n: arr.length });
   };
 
   const active = [
@@ -125,7 +127,9 @@ export const ContentExplorer = ({
   // El alcance va dentro del campo y no en un rotulo aparte: "Filtros / en todo el
   // sitio" nombraba lo que los propios controles ya dicen, y dejaba la busqueda --
   // lo que la gente viene a usar -- de segunda. Si no hay alcance, "Buscar" a secas.
-  const rotulo = (scopeLabel ?? "").trim() ? `Buscar ${scopeLabel.trim()}` : "Buscar";
+  const rotulo = (scopeLabel ?? "").trim()
+    ? t("portada.explorador.buscarEn", { alcance: scopeLabel.trim() })
+    : t("comun.buscar");
 
   return (
     <div className="se-explorer" ref={rootRef}>
@@ -167,7 +171,7 @@ export const ContentExplorer = ({
             onClick={() => setOpen(open === "tema" ? null : "tema")}
             aria-expanded={open === "tema"}
           >
-            <span>{label(temas, "Tema")}</span>
+            <span>{label(temas, t("portada.explorador.tema"))}</span>
             <span className="se-explorer__caret" aria-hidden="true">
               ▾
             </span>
@@ -180,7 +184,7 @@ export const ContentExplorer = ({
               id="explorer-panel-tema"
               className="se-explorer__panel"
               role="group"
-              aria-label="Temas"
+              aria-label={t("portada.explorador.temas")}
               onKeyDown={alTeclearEnPanel}
             >
               {topicOptions.length ? (
@@ -197,7 +201,7 @@ export const ContentExplorer = ({
                   </button>
                 ))
               ) : (
-                <p className="se-explorer__none">Ningún tema con contenido para esta selección.</p>
+                <p className="se-explorer__none">{t("portada.explorador.sinTemas")}</p>
               )}
             </div>
           ) : null}
@@ -214,7 +218,7 @@ export const ContentExplorer = ({
             onClick={() => setOpen(open === "geo" ? null : "geo")}
             aria-expanded={open === "geo"}
           >
-            <span>{label(geos, "Dónde")}</span>
+            <span>{label(geos, t("portada.explorador.donde"))}</span>
             <span className="se-explorer__caret" aria-hidden="true">
               ▾
             </span>
@@ -224,7 +228,7 @@ export const ContentExplorer = ({
               id="explorer-panel-geo"
               className="se-explorer__panel"
               role="group"
-              aria-label="Lugares"
+              aria-label={t("portada.explorador.lugares")}
               onKeyDown={alTeclearEnPanel}
             >
               <button
@@ -233,7 +237,7 @@ export const ContentExplorer = ({
                 className={`se-explorer__opt${geos.has(geoTop) ? " se-explorer__opt--on" : ""}`}
                 onClick={() => toggle("geo", geoTop)}
               >
-                <span>Todo</span>
+                <span>{t("portada.explorador.todo")}</span>
                 <span className="se-explorer__n">{count("geo", geoTop)}</span>
               </button>
 
@@ -302,12 +306,12 @@ export const ContentExplorer = ({
         </div>
 
         <span className="se-explorer__total" aria-live="polite">
-          <strong>{total}</strong> resultado{total === 1 ? "" : "s"}
+          {t("portada.explorador.resultados", { n: total, numero: <strong>{total}</strong> })}
         </span>
 
         {hasSelection ? (
           <button type="button" className="se-explorer__clear" onClick={clearAll}>
-            Limpiar
+            {t("comun.limpiar")}
           </button>
         ) : null}
       </div>
@@ -320,7 +324,7 @@ export const ContentExplorer = ({
               key={`${axis}-${value}`}
               className="se-explorer__chip"
               onClick={() => toggle(axis, value)}
-              aria-label={`Quitar ${value}`}
+              aria-label={t("portada.explorador.quitar", { valor: value })}
             >
               {value}
               <span aria-hidden="true">×</span>

@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Enlace, useNavegar } from "../components/Enlace";
 import { useUserAuth } from "../context/UserAuthContext";
 import { AvisoDeCookies } from "../components/AvisoDeCookies";
+import { BRAND } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { nuevaClave } from "../lib/idempotencia";
-import { applyPageMeta } from "../lib/seo";
 import { conVolver } from "../lib/volver";
 import { anotarCarrera, obtenerRegistro } from "../services/analistaService";
 import {
@@ -30,6 +32,9 @@ import "../juegos/el-analista/el-analista-pagina.css";
  * decisión. Lo que sí trae del `Layout` es el aviso de cookies: quien llega directo al
  * juego también tiene que poder decidir, y es el mismo componente el que enciende la
  * medición y cuenta la visita.
+ *
+ * Lo nuestro (barra, aviso, notas) habla los dos idiomas desde `juegos.analista.*`; el
+ * juego en sí sigue en español, que es como lo entrega su equipo.
  */
 
 const ElAnalistaJuego = lazy(() => import("../juegos/el-analista/el-analista.jsx"));
@@ -37,17 +42,21 @@ const ElAnalistaJuego = lazy(() => import("../juegos/el-analista/el-analista.jsx
 const RUTA = "/el-analista";
 const VERSION = origen.commit.slice(0, 7);
 
-const Cargando = () => (
-  <div className="se-analista-pagina__cargando" role="status">
-    Abriendo El Analista…
-  </div>
-);
+const Cargando = () => {
+  const { t } = useIdioma();
+  return (
+    <div className="se-analista-pagina__cargando" role="status">
+      {t("juegos.analista.abriendo")}
+    </div>
+  );
+};
 
 /**
  * El aviso de que hace falta cuenta. Lo pide el juego al anotar sin sesión (o sin el
  * correo confirmado) y espera la respuesta: «Ahora no» le devuelve `sin-sesion`.
  */
 const AvisoDeCuenta = ({ tipo, onEntrar, onRegistrar, onConfirmar, onCerrar }) => {
+  const { t } = useIdioma();
   const primero = useRef(null);
   useEffect(() => {
     primero.current?.focus();
@@ -60,32 +69,34 @@ const AvisoDeCuenta = ({ tipo, onEntrar, onRegistrar, onConfirmar, onCerrar }) =
   return (
     <div className="se-analista-aviso" role="dialog" aria-modal="true" aria-labelledby="analista-aviso-titulo">
       <div className="se-analista-aviso__caja">
-        <p className="se-analista-aviso__kicker">El ranking de El Analista</p>
+        <p className="se-analista-aviso__kicker">{t("juegos.analista.aviso.kicker")}</p>
         <h2 id="analista-aviso-titulo" className="se-analista-aviso__titulo">
-          {sinConfirmar ? "Confirme su correo para sumar al ranking" : "Para sumar al ranking, entre con su cuenta"}
+          {sinConfirmar
+            ? t("juegos.analista.aviso.tituloSinConfirmar")
+            : t("juegos.analista.aviso.tituloSinSesion")}
         </h2>
         <p className="se-analista-aviso__texto">
           {sinConfirmar
-            ? "Le enviamos un código al registrarse. Su carrera queda guardada y se anota sola en cuanto lo confirme."
-            : "Puede seguir jugando sin cuenta, pero al ranking solo suman las carreras de lectores con cuenta. Su carrera queda guardada y se anota sola cuando entre."}
+            ? t("juegos.analista.aviso.textoSinConfirmar")
+            : t("juegos.analista.aviso.textoSinSesion")}
         </p>
         <div className="se-analista-aviso__acciones">
           {sinConfirmar ? (
             <button ref={primero} type="button" className="se-btn" onClick={onConfirmar}>
-              Confirmar mi correo
+              {t("juegos.analista.aviso.confirmarMiCorreo")}
             </button>
           ) : (
             <>
               <button ref={primero} type="button" className="se-btn" onClick={onEntrar}>
-                Entrar
+                {t("juegos.analista.aviso.entrar")}
               </button>
               <button type="button" className="se-btn se-btn--secondary" onClick={onRegistrar}>
-                Crear cuenta
+                {t("juegos.analista.aviso.crearCuenta")}
               </button>
             </>
           )}
           <button type="button" className="se-analista-aviso__luego" onClick={onCerrar}>
-            Ahora no
+            {t("juegos.analista.aviso.ahoraNo")}
           </button>
         </div>
       </div>
@@ -102,9 +113,12 @@ AvisoDeCuenta.propTypes = {
 };
 
 export const ElAnalistaPagina = () => {
-  const navigate = useNavigate();
+  const { t } = useIdioma();
+  const navegar = useNavegar();
   const { isAuthenticated, isEmailVerified, profile, profileStatus } = useUserAuth();
   const [listo, setListo] = useState(false);
+  // La nota de arriba guarda la clave de su texto ("anotada" | "fallo" | "confirme"):
+  // se traduce al pintar, en el idioma de la página.
   const [nota, setNota] = useState(null);
   const [aviso, setAviso] = useState(null);
   const respuestaDelAviso = useRef(null);
@@ -115,13 +129,10 @@ export const ElAnalistaPagina = () => {
   // Con sesión, hasta que llegue el perfil no se sabe si el correo está confirmado.
   const perfilListo = !isAuthenticated || ["success", "unverified", "error"].includes(profileStatus);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "El Analista — SurEconomics",
-      description:
-        "Un simulador de carrera e inversión: treinta años, un año por turno, decisiones que pesan y una cartera que reparte usted. Con cuenta, su carrera suma al ranking.",
-    });
-  }, []);
+  useMetaPagina({
+    title: t("juegos.analista.meta.titulo", { marca: BRAND.name }),
+    description: t("juegos.analista.meta.descripcion"),
+  });
 
   const pedirCuenta = useCallback(
     (tipo, entrada, clave) => {
@@ -143,7 +154,7 @@ export const ElAnalistaPagina = () => {
       try {
         const r = await anotarCarrera(entrada, clave, VERSION);
         actualizarRegistro(r?.registro);
-        setNota("Su carrera quedó anotada en el ranking.");
+        setNota("anotada");
         return null;
       } catch (err) {
         if (err?.status === 401) return pedirCuenta("sin-sesion", entrada, clave);
@@ -171,13 +182,13 @@ export const ElAnalistaPagina = () => {
           const r = await anotarCarrera(pendiente.entrada, pendiente.clave, VERSION);
           registro = r?.registro ?? null;
           borrarPendiente();
-          setNota("Su carrera quedó anotada en el ranking.");
+          setNota("anotada");
         } catch (err) {
           if (err?.status !== 401 && err?.code !== "email_not_verified") borrarPendiente();
-          setNota("No se pudo anotar su carrera. Termine otra y vuelva a intentarlo.");
+          setNota("fallo");
         }
       } else if (pendiente && sesion.current.isAuthenticated) {
-        setNota("Confirme su correo y su carrera se anotará sola.");
+        setNota("confirme");
       }
       if (!registro) {
         try {
@@ -205,44 +216,44 @@ export const ElAnalistaPagina = () => {
     // La promesa del juego se queda sin respuesta: la página se va.
     respuestaDelAviso.current = null;
     setAviso(null);
-    navigate(destino, estado ? { state: estado } : undefined);
+    navegar(destino, estado ? { state: estado } : undefined);
   };
 
   let cuenta;
   if (!isAuthenticated) {
     cuenta = (
-      <Link className="se-analista-pagina__cuenta" to={conVolver("/cuenta/entrar", RUTA)}>
-        Entre para sumar al ranking
-      </Link>
+      <Enlace className="se-analista-pagina__cuenta" to={conVolver("/cuenta/entrar", RUTA)}>
+        {t("juegos.analista.barra.entreParaSumar")}
+      </Enlace>
     );
   } else if (perfilListo && !isEmailVerified) {
     cuenta = (
-      <Link
+      <Enlace
         className="se-analista-pagina__cuenta"
         to="/cuenta/verificar-email"
         state={{ email: profile?.email, volver: RUTA }}
       >
-        Confirme su correo para sumar
-      </Link>
+        {t("juegos.analista.barra.confirmeParaSumar")}
+      </Enlace>
     );
   } else {
-    cuenta = <span className="se-analista-pagina__estado">Sus carreras suman al ranking</span>;
+    cuenta = <span className="se-analista-pagina__estado">{t("juegos.analista.barra.suman")}</span>;
   }
 
   return (
     <div className="se-analista-pagina">
       <header className="se-analista-pagina__barra">
-        <Link to="/" className="se-analista-pagina__volver">
+        <Enlace to="/" className="se-analista-pagina__volver">
           <span aria-hidden="true">←</span> SurEconomics
-        </Link>
+        </Enlace>
         <span className="se-analista-pagina__nombre">El Analista</span>
         {cuenta}
       </header>
 
       {nota ? (
         <div className="se-analista-pagina__nota" role="status">
-          <span>{nota}</span>
-          <button type="button" onClick={() => setNota(null)} aria-label="Cerrar aviso">
+          <span>{t(`juegos.analista.nota.${nota}`)}</span>
+          <button type="button" onClick={() => setNota(null)} aria-label={t("juegos.analista.cerrarAviso")}>
             ×
           </button>
         </div>

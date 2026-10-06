@@ -1,0 +1,194 @@
+{
+  "educacion": {
+    "comun": {
+      "gratis": "Gratis",
+      "modulo": "Módulo",
+      "lecciones": { "one": "{n} lección", "other": "{n} lecciones" },
+      "iniciarSesion": "Iniciar sesión",
+      "crearUnaCuenta": "Crear una cuenta",
+      "verificarMiCorreo": "Verificar mi correo",
+      "volverAEducacion": "Volver a Educación",
+      "ruta": "Ruta",
+      "nivel": "nivel {nivel}"
+    },
+    "niveles": {
+      "inicial": "Inicial",
+      "intermedio": "Intermedio",
+      "avanzado": "Avanzado"
+    },
+    "tipoDeLeccion": {
+      "video": "Video",
+      "texto": "Lectura",
+      "audio": "Audio",
+      "pdf": "Documento"
+    },
+    "tipos": {
+      "video": { "one": "{n} video", "other": "{n} videos" },
+      "texto": { "one": "{n} lectura", "other": "{n} lecturas" },
+      "audio": { "one": "{n} audio", "other": "{n} audios" },
+      "pdf": { "one": "{n} documento", "other": "{n} documentos" }
+    },
+    "duracion": {
+      "minutos": "{n} min",
+      "horas": "{n} h",
+      "horasYMinutos": "{h} h {m} min"
+    },
+    "catalogo": {
+      "meta": {
+        "titulo": "Educación — {marca}"
+      },
+      "kicker": "Educación",
+      "titulo": "Entienda la economía que ya está leyendo",
+      "claim": "Módulos cortos, escritos por la misma redacción que firma los informes. Cada uno arranca con una clase abierta para que sepa qué está comprando antes de comprarlo.",
+      "promesas": {
+        "claseAbierta": {
+          "titulo": "La primera clase, abierta",
+          "texto": "Se lee entera antes de pagar nada. Basta con una cuenta y el correo verificado."
+        },
+        "unPago": {
+          "titulo": "Un pago y ya",
+          "texto": "No hay suscripción ni renovación automática. El módulo se compra y se queda."
+        },
+        "sinCaducidad": {
+          "titulo": "Sin caducidad",
+          "texto": "Una vez comprado, el acceso no vence. Las clases nuevas del módulo entran solas."
+        }
+      },
+      "errorCatalogo": "No se pudo cargar el catalogo. Inténtelo de nuevo.",
+      "sinModulos": "Todavía no hay módulos publicados. Están en camino.",
+      "disponibles": { "one": "Un módulo disponible", "other": "{n} módulos disponibles" },
+      "comoFunciona": "Cómo funciona",
+      "pasos": {
+        "abrir": {
+          "titulo": "Abra la primera clase",
+          "texto": "Es gratuita y completa. Solo pide una cuenta con el correo verificado."
+        },
+        "comprar": {
+          "titulo": "Compre el módulo si le sirve",
+          "texto": "Un solo pago con tarjeta o Mercado Pago. Se desbloquea entero al instante."
+        },
+        "ritmo": {
+          "titulo": "Vaya a su ritmo",
+          "texto": "El acceso no caduca y queda guardado en su cuenta."
+        }
+      },
+      "antesDeComprar": "Antes de comprar",
+      "dudas": {
+        "nivel": {
+          "p": "¿Necesito saber de economía para empezar?",
+          "r": "No. Cada módulo indica su nivel, y los de nivel inicial parten de cero: se explica el término antes de usarlo."
+        },
+        "verAntes": {
+          "p": "¿Puedo ver algo antes de pagar?",
+          "r": "Sí. La primera clase de cada módulo está abierta y es una clase completa, no un adelanto ni un índice."
+        },
+        "pago": {
+          "p": "¿Cómo se paga?",
+          "r": "Con tarjeta a través de Stripe, o por Mercado Pago donde esté disponible. El cobro es único: no queda nada domiciliado."
+        },
+        "donde": {
+          "p": "¿Dónde quedan los módulos que compre?",
+          "r": "En su cuenta. Entrando con el mismo correo los tiene disponibles desde cualquier dispositivo, sin límite de tiempo."
+        }
+      }
+    },
+    "tarjeta": {
+      "cortesia": "Cortesía",
+      "soloCuentaVerificada": "Solo pide cuenta verificada",
+      "clasesGratis": { "one": "Primera clase gratis", "other": "{n} clases gratis" }
+    },
+    "panel": {
+      "comprarEsteModulo": "Comprar este módulo",
+      "yaEsSuyo": "Ya es suyo",
+      "pagoUnico": "Pago único · El acceso no caduca",
+      "deContenido": "{duracion} de contenido",
+      "clasesEnVideo": { "one": "{n} clase en video", "other": "{n} clases en video" },
+      "documentosDescargables": { "one": "{n} documento descargable", "other": "{n} documentos descargables" },
+      "abiertasSinPagar": { "one": "La primera, abierta sin pagar", "other": "{n} abiertas sin pagar" },
+      "tieneTodas": "Tiene las {n} lecciones disponibles. Empiece cuando quiera.",
+      "yaPuedeEmpezar": "Ya puede empezar: abra la primera clase del temario.",
+      "cortesia": "Este módulo es de cortesía. Solo hace falta una cuenta con el correo verificado.",
+      "desbloquea": { "one": "Desbloquea {n} lección más.", "other": "Desbloquea {n} lecciones más." }
+    },
+    "pago": {
+      "pasarelas": {
+        "stripe": "Tarjeta",
+        "mercadopago": "Mercado Pago"
+      },
+      "entreAntes": "La compra queda atada a su cuenta. Entre antes de pagar.",
+      "correoConfirmado": "El correo tiene que estar confirmado antes de pagar: la compra queda atada a esta cuenta.",
+      "sinDireccion": "La pasarela no devolvió una dirección de pago.",
+      "noDisponible": "El cobro todavía no está disponible. Inténtelo más tarde.",
+      "noSePudoAbrir": "No se pudo abrir el pago.",
+      "moduloCompletoPor": "Módulo completo por {precio}",
+      "cobroPronto": "El cobro en línea se activa en los próximos días. Escríbanos si quiere el acceso ahora.",
+      "abriendo": "Abriendo…",
+      "pagarCon": "Pagar con {pasarela}"
+    },
+    "modulo": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "noExiste": "Este módulo no existe o todavía no está publicado.",
+      "noSePudoCargar": "No se pudo cargar el módulo.",
+      "nivel": "Nivel {nivel}",
+      "leerClaseAbierta": "Leer la clase abierta",
+      "temario": "Temario",
+      "abrirGratis": "Abrir gratis",
+      "gratisConCuenta": "Gratis, con cuenta",
+      "abrir": "Abrir",
+      "conElModulo": "Con el módulo"
+    },
+    "leccion": {
+      "meta": {
+        "titulo": "{titulo} — {marca}"
+      },
+      "videoNoCargado": "El video todavía no está cargado.",
+      "audioNoCargado": "El audio todavía no está cargado.",
+      "documentoNoCargado": "El documento todavía no está cargado.",
+      "noSePudoDescargar": "No se pudo descargar.",
+      "descargando": "Descargando…",
+      "descargarDocumento": "Descargar el documento",
+      "paginas": { "one": "{n} página", "other": "{n} páginas" },
+      "noSePudoCargarAudio": "No se pudo cargar el audio.",
+      "escucharLaClase": "Escuchar la clase",
+      "posicion": "Lección {n}",
+      "posicionDeTotal": "Lección {n} de {total}",
+      "sigueEn": "Sigue en {modulo}",
+      "siguienteQuedan": {
+        "one": "La siguiente es «{titulo}». Quedan {n} lección por abrir.",
+        "other": "La siguiente es «{titulo}». Quedan {n} lecciones por abrir."
+      },
+      "navegacionEntreLecciones": "Navegación entre lecciones",
+      "muro": {
+        "noSePudoCargar": "No se pudo cargar la lección. Inténtelo de nuevo.",
+        "paraQuienTieneCuenta": "Esta lección es para quien tiene cuenta",
+        "primeraGratuita": "La primera lección de cada módulo es gratuita, pero pedimos una cuenta verificada para abrirla.",
+        "vieneConElModulo": "Esta lección viene con el módulo",
+        "sigueLeyendo": "Sigue leyendo {modulo} desde donde lo dejaste: el resto del temario se desbloquea al comprarlo."
+      }
+    },
+    "pagoVuelta": {
+      "noEncontramos": "No encontramos esa compra en su cuenta.",
+      "noSePudoConsultar": "No se pudo consultar el pago.",
+      "confirmando": {
+        "titulo": "Confirmando su pago…",
+        "texto": "Un momento: estamos esperando la confirmación de la pasarela. No cierre esta página."
+      },
+      "pagado": {
+        "titulo": "Listo, el módulo es suyo",
+        "texto": "El acceso ya está activo y no caduca. Puede empezar cuando quiera.",
+        "irAlModulo": "Ir al módulo"
+      },
+      "tardando": {
+        "titulo": "El pago está en camino",
+        "texto": "La pasarela todavía no nos ha confirmado. Suele ser cuestión de minutos; el acceso se abre solo en cuanto llegue, sin que tenga que hacer nada.",
+        "volverAlModulo": "Volver al módulo"
+      },
+      "fallo": {
+        "titulo": "No pudimos seguirle la pista a ese pago",
+        "sinReferencia": "Volvió sin la referencia del pago. Si ya pagó, el acceso se abre solo en cuanto la pasarela confirme."
+      }
+    }
+  }
+}

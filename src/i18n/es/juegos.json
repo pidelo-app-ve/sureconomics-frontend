@@ -1,0 +1,215 @@
+{
+  "juegos": {
+    "guacamaya": {
+      "titulo": "Vuela, guacamaya",
+      "escenario": "Vuela, guacamaya. Toque o pulse la barra espaciadora para aletear.",
+      "patrocinadoPor": "Patrocinado por {marca}",
+      "mangos": { "one": "{n} mango", "other": "{n} mangos" },
+      "vidas": { "one": "{n} vida", "other": "{n} vidas" },
+      "segundos": { "one": "{n} segundo", "other": "{n} segundos" },
+      "plumajesConSaldo": "{n} · Plumajes",
+      "hud": {
+        "quedanSegundos": { "one": "Queda {n} segundo", "other": "Quedan {n} segundos" },
+        "segundosCorto": "{n}s",
+        "pausar": "Pausar",
+        "intro": "Vuelo {n} · {nombre}"
+      },
+      "portada": {
+        "volar": "Volar",
+        "ayuda": "Toque la pantalla o pulse la barra espaciadora para aletear.",
+        "reto": "Reto del {fecha}: el mismo vuelo para todos, hoy.",
+        "mejorHoy": "Su mejor de hoy: {n} pts.",
+        "racha": { "one": "Racha: {n} día.", "other": "Racha: {n} días." },
+        "vuelo": "Vuelo {n} · {nombre}",
+        "vuelos": "Elegir vuelo",
+        "jefe": "Jefe"
+      },
+      "pausa": {
+        "titulo": "En pausa",
+        "texto": "La guacamaya espera en el aire. Toque la pantalla para seguir.",
+        "seguir": "Seguir volando",
+        "reiniciar": "Empezar de nuevo"
+      },
+      "fin": {
+        "kickerLlego": "Justo antes de que oscureciera",
+        "kickerNoLlego": "La tarde se le complicó",
+        "llego": "¡Llegó a casa!",
+        "casi": "¡Uy, casi llega!",
+        "pts": "pts",
+        "recogioYLlego": "Recogió {mangos} y llegó con {vidas}.",
+        "recogioYFalto": "Recogió {mangos}. Le faltaron {segundos} para llegar.",
+        "guardo": "Guardó {n} en casa: ya tiene {total} para plumajes.",
+        "perdidos": {
+          "one": "El mango de este vuelo se perdió: solo se guardan los que llegan a casa.",
+          "other": "Los {n} mangos de este vuelo se perdieron: solo se guardan los que llegan a casa."
+        },
+        "nuevoRecord": "¡Nuevo récord!",
+        "racha": { "one": "Racha: {n} día seguido.", "other": "Racha: {n} días seguidos." },
+        "dolar": "Mientras volaba, el dólar oficial del BCV estaba en {valor}.",
+        "verNoticias": "Ver las noticias de hoy",
+        "volarOtraVez": "Volar otra vez",
+        "copiado": "Copiado: péguelo donde quiera",
+        "compartir": "Compartir resultado",
+        "kickerJefe": "La loma del chopo",
+        "llegoJefe": "¡El muchacho se quedó sin piedras!",
+        "casiJefe": "Esta vez ganó el tirachinas",
+        "estrellas": "{n} de 3 estrellas",
+        "estrellasNuevas": { "one": "+{n} estrella nueva", "other": "+{n} estrellas nuevas" },
+        "abrio": "Abrió el vuelo {n}: {nombre}.",
+        "completo": "Ya voló los siete vuelos.",
+        "siguiente": "Siguiente vuelo",
+        "vuelos": "Vuelos"
+      },
+      "compartir": {
+        "llego": "Llevé a la guacamaya a casa",
+        "casi": "Mi guacamaya casi llega a casa",
+        "texto": "{logro} en el vuelo {destino}, con {mangos}: {puntos} pts en el reto del {fecha}. ¿Lo superas?"
+      },
+      "tienda": {
+        "kicker": "Tienda del chaguaramo",
+        "titulo": "Plumajes",
+        "saldo": { "one": "Tiene {cifra} mango guardado", "other": "Tiene {cifra} mangos guardados" },
+        "puesto": "Puesto",
+        "ponermelo": "Ponérmelo",
+        "toqueParaPagar": "Toque otra vez para pagar {n}",
+        "leFaltan": "Le faltan {n}",
+        "comprar": "Comprar",
+        "suyo": "Suyo",
+        "volver": "Volver"
+      },
+      "plumajes": {
+        "azul": { "nombre": "Guacamaya azul y amarilla", "nota": "La de siempre. Viene de fábrica." },
+        "roja": { "nombre": "Guacamaya roja", "nota": "Roja entera, con el ala amarilla y las puntas azules." },
+        "turpial": { "nombre": "Turpial", "nota": "El ave nacional, de visita por Caracas." },
+        "pelotera": { "nombre": "Guacamaya pelotera", "nota": "Gorra y pelota, sin camiseta de nadie." },
+        "roques": { "nombre": "Guacamaya de Los Roques", "nota": "Lentes de sol y flotador. Ya viene la temporada." },
+        "tricolor": { "nombre": "Guacamaya tricolor", "nota": "Con la gorra amarilla, azul y roja, y sus ocho estrellas." },
+        "liqui": { "nombre": "Guacamaya en liquiliqui", "nota": "De gala, con botones dorados y sombrero llanero." },
+        "catatumbo": { "nombre": "Guacamaya del Catatumbo", "nota": "Azul eléctrico. Con ella, los rayos de las tormentas cambian de color." },
+        "toro": { "nombre": "Guacamaya toro", "nota": "Alcista. Cuernos, argolla y plumas en verde." },
+        "oso": { "nombre": "Guacamaya oso", "nota": "Bajista. Para los días rojos de la bolsa." },
+        "dolar": { "nombre": "Guacamaya verde dólar", "nota": "Vuela con un fajo de billetes en las patas." },
+        "dorada": { "nombre": "Guacamaya dorada", "nota": "Deja un rastro de brillo por todo el Ávila." },
+        "zamuro": { "nombre": "El zamuro arrepentido", "nota": "Juegas de zamuro. Los otros zamuros igual te chocan." }
+      },
+      "vuelos": {
+        "kicker": "Siete vuelos",
+        "titulo": "Elija su vuelo",
+        "estrellas": "Cada vuelo da hasta tres estrellas: llegar a casa, llegar sin un solo golpe y recoger seis de cada diez mangos.",
+        "bloqueado": "Llegue a casa en el vuelo {n} para abrirlo.",
+        "numero": "Vuelo {n}",
+        "estrellasDe": "{n} de 3 estrellas",
+        "jefe": "Jefe",
+        "volver": "Volver"
+      },
+      "niveles": {
+        "caracas": {
+          "nombre": "Caracas",
+          "destino": "a Caracas",
+          "corto": "El Ávila al atardecer",
+          "texto": "Cae la tarde frente al Ávila. Esquive papagayos, zamuros y tormentas, recoja mangos y llegue a casa antes de que oscurezca.",
+          "aviso": "Papagayos, zamuros y tormentas. Con calma."
+        },
+        "barquisimeto": {
+          "nombre": "Barquisimeto",
+          "destino": "a Barquisimeto",
+          "corto": "El valle y la Catedral",
+          "texto": "El crepúsculo del valle, con la Catedral al fondo. Ahora hay palomas: vienen en bandada, en uve, y se cierran.",
+          "aviso": "Palomas en bandada: pase por encima o por debajo."
+        },
+        "margarita": {
+          "nombre": "Margarita",
+          "destino": "a Margarita",
+          "corto": "Mar, brisa y enjambres",
+          "texto": "La brisa de la costa trae abejas en enjambre y ráfagas que empujan a la guacamaya. Antes de soplar, se ven las rayas del viento.",
+          "aviso": "Ráfagas: las rayas del viento avisan antes de empujar."
+        },
+        "zulia": {
+          "nombre": "El Zulia",
+          "destino": "al Zulia",
+          "corto": "El Lago y el relámpago",
+          "texto": "El lago de Maracaibo, con sus torres y su cielo de tormenta. Los grillos saltan desde la calle y las torres petroleras se alzan muy alto.",
+          "aviso": "Grillos que saltan y torres petroleras."
+        },
+        "laguaira": {
+          "nombre": "La Guaira",
+          "destino": "a La Guaira",
+          "corto": "El puerto y la pista",
+          "texto": "Sobre el puerto de La Guaira cruzan aviones, rápidos. Un triángulo amarillo en el borde de la pantalla avisa a qué altura vienen.",
+          "aviso": "Aviones: mire el triángulo amarillo del borde."
+        },
+        "canaima": {
+          "nombre": "Canaima",
+          "destino": "a Canaima",
+          "corto": "Tepuyes entre la niebla",
+          "texto": "Los tepuyes de Canaima, entre la niebla. Hay que pasar entre rocas y lo que viene se ve tarde: la altura se decide a ojo.",
+          "aviso": "Rocas y niebla: lo lejano se ve tarde."
+        },
+        "loma": {
+          "nombre": "La loma del chopo",
+          "destino": "a la loma del chopo",
+          "corto": "El muchacho del tirachinas",
+          "texto": "En lo alto de la loma, un muchacho con tirachinas quiere bajar a la guacamaya a pedradas. Antes de cada tiro levanta el brazo y se ve hacia dónde apunta.",
+          "aviso": "Jefe: la línea punteada marca hacia dónde va la piedra."
+        }
+      }
+    },
+    "pausa": {
+      "meta": {
+        "titulo": "Un minuto de pausa: Vuela, guacamaya — {marca}",
+        "descripcion": "Un juego de un minuto con siete vuelos sobre Venezuela, de Caracas a Canaima y un jefe que tira piedras. Cada día, el mismo vuelo para todos."
+      },
+      "kicker": "Un minuto de pausa",
+      "titulo": "Entre lectura y lectura, un vuelo",
+      "entrada": "Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su resultado y vuelva a la lectura.",
+      "analista": {
+        "kicker": "Para cuando tenga más de un minuto",
+        "texto": "Un simulador de carrera e inversión: treinta años, un año por turno, con decisiones que pesan, noticias que sacuden el mercado, una cartera que reparte usted y un temario de finanzas que sube con su carrera."
+      }
+    },
+    "tarjetaPausa": {
+      "kicker": "Un minuto de pausa",
+      "titulo": "Vuela, guacamaya",
+      "texto": "Siete vuelos de un minuto sobre Venezuela y un reto nuevo cada día. Con un dedo.",
+      "jugar": "Jugar el reto de hoy",
+      "memoria": {
+        "mejorHoy": "Su mejor de hoy: {n} pts.",
+        "mejorHoyConRacha": "Su mejor de hoy: {n} pts · racha de {racha} días.",
+        "noRompa": { "one": "No rompa su racha de {n} día.", "other": "No rompa su racha de {n} días." }
+      },
+      "banner": {
+        "kicker": "¿Terminó de leer? Un minuto de pausa",
+        "titulo": "Lleve la guacamaya a casa antes de que oscurezca"
+      }
+    },
+    "analista": {
+      "meta": {
+        "titulo": "El Analista — {marca}",
+        "descripcion": "Un simulador de carrera e inversión: treinta años, un año por turno, decisiones que pesan y una cartera que reparte usted. Con cuenta, su carrera suma al ranking."
+      },
+      "abriendo": "Abriendo El Analista…",
+      "cerrarAviso": "Cerrar aviso",
+      "aviso": {
+        "kicker": "El ranking de El Analista",
+        "tituloSinConfirmar": "Confirme su correo para sumar al ranking",
+        "tituloSinSesion": "Para sumar al ranking, entre con su cuenta",
+        "textoSinConfirmar": "Le enviamos un código al registrarse. Su carrera queda guardada y se anota sola en cuanto lo confirme.",
+        "textoSinSesion": "Puede seguir jugando sin cuenta, pero al ranking solo suman las carreras de lectores con cuenta. Su carrera queda guardada y se anota sola cuando entre.",
+        "confirmarMiCorreo": "Confirmar mi correo",
+        "entrar": "Entrar",
+        "crearCuenta": "Crear cuenta",
+        "ahoraNo": "Ahora no"
+      },
+      "nota": {
+        "anotada": "Su carrera quedó anotada en el ranking.",
+        "fallo": "No se pudo anotar su carrera. Termine otra y vuelva a intentarlo.",
+        "confirme": "Confirme su correo y su carrera se anotará sola."
+      },
+      "barra": {
+        "entreParaSumar": "Entre para sumar al ranking",
+        "confirmeParaSumar": "Confirme su correo para sumar",
+        "suman": "Sus carreras suman al ranking"
+      }
+    }
+  }
+}

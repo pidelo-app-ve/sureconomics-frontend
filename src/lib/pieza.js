@@ -8,7 +8,15 @@
  * views stay readable in the language the newsroom uses.
  */
 
-/** Display metadata per format slug. Copy that the API owns is read from it instead. */
+import { formatearFecha, idiomaActual, tActual } from "../i18n/motor";
+
+/**
+ * Display metadata per format slug. Copy that the API owns is read from it instead.
+ *
+ * `plural` es el nombre en español y sirve de clave estable (varias vistas lo usan
+ * para reconocer el formato de una pieza). Lo que se **enseña** sale de
+ * `nombreDeFormato()`, que lo traduce al idioma del documento.
+ */
 export const FORMATO_META = {
   noticia: {
     slug: "noticias",
@@ -36,33 +44,28 @@ export const FORMATO_POR_RUTA = Object.fromEntries(
 /** The display plurals, in the order the site presents them. */
 export const FORMATOS = Object.values(FORMATO_META).map((m) => m.plural);
 
+/** El nombre de un formato en el idioma del documento: «Noticias» / «News». */
+export const nombreDeFormato = (formatoApi, { singular = false } = {}) =>
+  // Una sola plantilla que empieza por `formatos.`: así `npm run i18n` reconoce el
+  // prefijo dinámico y no da por huérfanas las claves `formatos.*`.
+  FORMATO_META[formatoApi]
+    ? tActual(`formatos.${singular ? "singular." : ""}${formatoApi}`)
+    : formatoApi ?? "";
+
+/**
+ * El nombre de un tema o un lugar en el idioma del documento. La redacción puede
+ * escribir el inglés en el panel (`name_en`); si no lo hizo, sale el español.
+ */
+export const nombreTraducido = (fila) =>
+  (idiomaActual() === "en" && fila?.name_en) || fila?.name || "";
+
 /** Display plural → API slug. */
 export const FORMATO_API = Object.fromEntries(
   Object.entries(FORMATO_META).map(([apiSlug, meta]) => [meta.plural, apiSlug])
 );
 
-const MESES = [
-  "ene",
-  "feb",
-  "mar",
-  "abr",
-  "may",
-  "jun",
-  "jul",
-  "ago",
-  "sep",
-  "oct",
-  "nov",
-  "dic",
-];
-
-/** `2026-08-01T12:00:00Z` → `1 ago 2026`, the form the cards print. */
-export const fechaCorta = (iso) => {
-  if (!iso) return "";
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return `${date.getDate()} ${MESES[date.getMonth()]} ${date.getFullYear()}`;
-};
+/** `2026-08-01T12:00:00Z` → `1 ago 2026` / `Aug 1, 2026`, the form the cards print. */
+export const fechaCorta = (iso) => formatearFecha(iso, "corta");
 
 /**
  * HTML -> texto llano.
@@ -225,7 +228,9 @@ export const enlaceParaCompartir = (ruta, version) =>
 
 export const rutaDePieza = (pieza) => {
   if (!pieza) return "/";
-  const meta = Object.values(FORMATO_META).find((m) => m.plural === pieza.formato);
+  const meta =
+    FORMATO_META[pieza.formatoApi] ??
+    Object.values(FORMATO_META).find((m) => m.plural === pieza.formato);
   return meta ? `/${meta.slug}/${pieza.slug}` : "/";
 };
 
@@ -247,7 +252,8 @@ export const rutaDeFormato = (formatoApi) => {
 /** The tag a card shows: the first, which the backend stores as the principal one. */
 export const temaPrincipal = (pieza) => pieza?.temas?.[0] ?? null;
 
-export const geoPrincipal = (pieza, geoTop = "Las Américas") =>
+/** El lugar que enseña una tarjeta; sin país, «Las Américas» en el idioma del documento. */
+export const geoPrincipal = (pieza, geoTop = tActual("piezas.geo.americas")) =>
   pieza?.geos?.[0] ?? geoTop;
 
 /** Un ISO de la API -> `Date`, o nulo si no hay nada o no se puede leer. */
@@ -270,7 +276,9 @@ export const piezaFromApi = (row) => {
   return {
     id: String(row.id),
     slug: String(row.slug ?? ""),
+    // En español (la clave estable que las vistas comparan); lo que se enseña es `formatoNombre`.
     formato: meta?.plural ?? row.content_format?.name_plural ?? row.format ?? "",
+    formatoNombre: meta ? nombreDeFormato(row.format) : row.content_format?.name_plural ?? row.format ?? "",
     formatoApi: row.format ?? "",
     titulo: String(row.title ?? ""),
     // Two forms on purpose: the cards want text, the reading view wants the markup
@@ -281,8 +289,8 @@ export const piezaFromApi = (row) => {
     entrada: row.format === "editorial" ? textoLlano(row.excerpt) : "",
     entradaHtml: row.format === "editorial" ? row.excerpt || "" : "",
     cuerpo: row.content || "",
-    temas: (row.topics ?? []).map((t) => t.name),
-    geos: (row.places ?? []).map((p) => p.name),
+    temas: (row.topics ?? []).map(nombreTraducido),
+    geos: (row.places ?? []).map(nombreTraducido),
     // The slugs of the principal tags. The names are what a reader sees; the slugs
     // are what the API filters by, and carrying both saves a lookup table in every
     // view that links out to `/explorar`.

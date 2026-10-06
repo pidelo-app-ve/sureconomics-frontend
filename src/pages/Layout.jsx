@@ -8,6 +8,7 @@ import { AvisoDeCookies } from "../components/AvisoDeCookies"
 import { InvitacionAlBoletin } from "../components/InvitacionAlBoletin"
 import { BarraPublicitaria, ProveedorDePublicidad } from "../components/publicidad"
 import { AvisoDeRuta } from "../components/AvisoDeRuta"
+import { useIdioma } from "../i18n/ProveedorIdioma"
 
 /** El envoltorio del contenido: destino del enlace de salto y del foco al cambiar de ruta. */
 const CONTENIDO_ID = "contenido"
@@ -24,6 +25,7 @@ const saltarAlContenido = (e) => {
 
 // Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
 export const Layout = () => {
+    const { t } = useIdioma()
     return (
         <ScrollToTop>
             {/* El proveedor envuelve todo porque hay huecos por encima y por debajo del
@@ -38,7 +40,7 @@ export const Layout = () => {
                 {/* Lo primero que se tabula, antes que la cinta y la cabecera: sin el,
                     llegar al articulo con teclado pasa por todo el menu en cada pagina. */}
                 <a className="se-saltar" href={`#${CONTENIDO_ID}`} onClick={saltarAlContenido}>
-                    Saltar al contenido
+                    {t("nav.saltarAlContenido")}
                 </a>
                 {/* Above every view, not just the homepage: the closing figures are
                     ambient context for the whole site. It renders nothing at all when

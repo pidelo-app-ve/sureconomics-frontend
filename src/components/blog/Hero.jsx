@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { PostCard } from "./PostCard";
 import { BRAND } from "../../data/surEconomicsMock";
 // Con alias: `BRAND` ya está tomado arriba por los datos del sitio.
@@ -6,9 +7,10 @@ import { BRAND as MARCA } from "../../brand/publicBrandLogos";
 import PropTypes from "prop-types";
 
 export const Hero = ({ featuredPost }) => {
-  const heroClaim = "Análisis y perspectiva sobre economía, mercados e inversión en la región.";
+  const { t } = useIdioma();
+  const heroClaim = t("portada.hero.claim");
   return (
-    <section className="se-hero" aria-label="Destacado principal">
+    <section className="se-hero" aria-label={t("portada.hero.destacado")}>
       <div className="se-hero__charts" aria-hidden="true">
         <svg
           className="se-hero__charts-svg"
@@ -96,14 +98,14 @@ export const Hero = ({ featuredPost }) => {
             <img src={MARCA.lockup} alt={BRAND.name} width="900" height="117" />
           </h1>
           <p className="se-text-lead se-hero__claim">{heroClaim}</p>
-          <p className="se-text-body se-hero__description">{BRAND.description}</p>
+          <p className="se-text-body se-hero__description">{t("marca.descripcion")}</p>
           <div className="se-hero__actions">
-            <Link to="/articulos" className="se-btn">
-              Explorar artículos
-            </Link>
-            <Link to="/suscribirse" className="se-btn se-btn--secondary">
-              Acceso premium
-            </Link>
+            <Enlace to="/articulos" className="se-btn">
+              {t("portada.hero.explorarArticulos")}
+            </Enlace>
+            <Enlace to="/suscribirse" className="se-btn se-btn--secondary">
+              {t("portada.hero.accesoPremium")}
+            </Enlace>
           </div>
         </div>
         <div className="se-hero__featured">

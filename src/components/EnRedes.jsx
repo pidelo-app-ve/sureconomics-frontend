@@ -1,6 +1,8 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { SOCIAL } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { formatearFecha } from "../i18n/motor";
 import { getRedes } from "../services/publicContentService";
 import { IconReproducir } from "./icons/social";
 
@@ -81,7 +83,7 @@ const PARAMETROS_DEL_REPRODUCTOR = new URLSearchParams({
  * *widget* de TikTok -- un `<script>` que se mete en la página, que ya se probó y se
  * descartó para X, y que contradice lo que `Cookies.jsx` le promete al lector --, se
  * construye directamente la dirección de su reproductor oficial para insertar
- * (`tiktok.com/player/v1/<id>`). El contenido ajeno queda encerrado en su `<iframe>`;
+ * (`tiktok.com/player/v1/<id>`). El contenido ajeno queda encerrado en su `iframe`;
  * nada de TikTok corre en esta página.
  *
  * **`player/v1` y no `embed/v2`.** El de antes cargaba la tarjeta entera de TikTok --
@@ -98,6 +100,7 @@ const PARAMETROS_DEL_REPRODUCTOR = new URLSearchParams({
  * El enlace real a TikTok sigue debajo: si el marco no carga, queda una salida.
  */
 const VideoTikTok = ({ pieza, onCerrar }) => {
+  const { t } = useIdioma();
   const id = idDeVideoTikTok(pieza.enlace);
   const superficie = useRef(null);
   const activoAntes = useRef(null);
@@ -154,7 +157,7 @@ const VideoTikTok = ({ pieza, onCerrar }) => {
         className="se-redes-video__fondo"
         role="button"
         tabIndex={0}
-        aria-label="Cerrar"
+        aria-label={t("comun.cerrar")}
         onClick={onCerrar}
         onKeyDown={(e) => e.key === "Enter" && onCerrar()}
       />
@@ -166,7 +169,7 @@ const VideoTikTok = ({ pieza, onCerrar }) => {
         ref={superficie}
         tabIndex={-1}
       >
-        <button type="button" className="se-redes-video__cerrar" onClick={onCerrar} aria-label="Cerrar">
+        <button type="button" className="se-redes-video__cerrar" onClick={onCerrar} aria-label={t("comun.cerrar")}>
           ×
         </button>
         <div className="se-redes-video__marco">
@@ -174,18 +177,18 @@ const VideoTikTok = ({ pieza, onCerrar }) => {
             <iframe
               className="se-redes-video__frame"
               src={`https://www.tiktok.com/player/v1/${id}?${PARAMETROS_DEL_REPRODUCTOR}`}
-              title={`Video de TikTok: ${(pieza.texto || "").slice(0, 90)}`}
+              title={t("portada.redes.videoDeTikTok", { texto: (pieza.texto || "").slice(0, 90) })}
               allow="autoplay; encrypted-media; fullscreen; clipboard-write"
               allowFullScreen
             />
           ) : (
-            <p className="se-redes-video__nota">No se pudo abrir este video aquí.</p>
+            <p className="se-redes-video__nota">{t("portada.redes.noSePudoAbrir")}</p>
           )}
         </div>
         <p id={tituloId} className="se-redes-video__pie">
           {pieza.texto}{" "}
           <a href={pieza.enlace} target="_blank" rel="noreferrer noopener">
-            Ver en TikTok<span aria-hidden="true"> ↗</span>
+            {t("portada.redes.verEnTikTok")}<span aria-hidden="true"> ↗</span>
           </a>
         </p>
       </div>
@@ -201,16 +204,16 @@ VideoTikTok.propTypes = {
   onCerrar: PropTypes.func.isRequired,
 };
 
-/** Fecha relativa y corta: lo que cabe en una tarjeta. */
-const fechaCorta = (iso) => {
+/** Fecha relativa y corta: lo que cabe en una tarjeta. `t` es el del idioma de la página. */
+const fechaRelativa = (iso, t) => {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
   const dias = Math.round((Date.now() - d) / 86400000);
-  if (dias <= 0) return "hoy";
-  if (dias === 1) return "ayer";
-  if (dias < 7) return `hace ${dias} días`;
-  return d.toLocaleDateString("es", { day: "numeric", month: "short" });
+  if (dias <= 0) return t("portada.redes.hoy");
+  if (dias === 1) return t("portada.redes.ayer");
+  if (dias < 7) return t("portada.redes.haceDias", { n: dias });
+  return formatearFecha(d, "diaMes");
 };
 
 /** El escalonado de la entrada: 55 ms entre tarjetas, con techo. */
@@ -220,6 +223,7 @@ const retardo = (i) => `${Math.min(i, 6) * 55}ms`;
  * Una fila: rótulo, pista y línea de progreso. Toda la interacción vive aquí.
  */
 const Fila = ({ red, piezas, onAbrirVideo }) => {
+  const { t } = useIdioma();
   const cuenta = CUENTA[red];
   const fila = useRef(null);
   const pista = useRef(null);
@@ -329,7 +333,7 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
         className={`se-redes__pista${arrastrando ? " se-redes__pista--arrastrando" : ""}`}
         role="list"
         tabIndex={0}
-        aria-label={`Publicaciones en ${NOMBRE[red]}. Use las flechas para desplazarse.`}
+        aria-label={t("portada.redes.publicacionesEn", { red: NOMBRE[red] })}
         onPointerDown={alBajar}
         onPointerMove={alMover}
         onPointerUp={alSoltar}
@@ -352,8 +356,8 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
               draggable="false"
               aria-label={
                 esVideo
-                  ? `Ver el video de TikTok: ${(p.texto || "").slice(0, 90)}`
-                  : `Publicación en ${NOMBRE[red]}: ${(p.texto || "").slice(0, 90)}`
+                  ? t("portada.redes.verVideo", { texto: (p.texto || "").slice(0, 90) })
+                  : t("portada.redes.publicacionEn", { red: NOMBRE[red], texto: (p.texto || "").slice(0, 90) })
               }
               onClick={
                 esVideo
@@ -389,7 +393,7 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
               draggable="false"
             >
               <p>{p.texto}</p>
-              <span className="se-redes__fecha">{fechaCorta(p.fecha)}</span>
+              <span className="se-redes__fecha">{fechaRelativa(p.fecha, t)}</span>
             </a>
           )}
           </div>
@@ -421,6 +425,7 @@ Fila.propTypes = {
 };
 
 export const EnRedes = () => {
+  const { t } = useIdioma();
   const bloque = useRef(null);
   const [datos, setDatos] = useState(null);
   const [dentro, setDentro] = useState(false);
@@ -474,7 +479,7 @@ export const EnRedes = () => {
         aria-labelledby="se-redes-rotulo"
       >
         <div className="se-container">
-          <h2 className="se-redes__rotulo" id="se-redes-rotulo">En redes</h2>
+          <h2 className="se-redes__rotulo" id="se-redes-rotulo">{t("portada.redes.titulo")}</h2>
           {instagram.length ? <Fila red="instagram" piezas={instagram} /> : null}
           {x.length ? <Fila red="x" piezas={x} /> : null}
           {tiktok.length ? (

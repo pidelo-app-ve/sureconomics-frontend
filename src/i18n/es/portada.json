@@ -1,0 +1,120 @@
+{
+  "portada": {
+    "meta": {
+      "titulo": "{marca} — Economía, mercados e inversión"
+    },
+    "inicio": {
+      "encabezado": "{marca} — análisis y perspectiva sobre economía, mercados e inversión en América Latina",
+      "cargando": "Cargando la portada…",
+      "noSePudoCargar": "No se pudo cargar el contenido",
+      "explorarContenido": "Explorar contenido",
+      "enTodoElSitio": "en todo el sitio",
+      "nadaPublicado": "Todavía no hay nada publicado",
+      "nadaPublicadoTexto": "Cuando la redacción publique la primera pieza, aparecerá aquí.",
+      "sinResultadosTexto": "Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda.",
+      "verLos": "Ver los {n}"
+    },
+    "apertura": {
+      "apertura": "Apertura",
+      "loMasReciente": "Lo más reciente",
+      "otrasNoticias": "Otras noticias recientes"
+    },
+    "explorador": {
+      "buscarEn": "Buscar {alcance}",
+      "tema": "Tema",
+      "temas": "Temas",
+      "sinTemas": "Ningún tema con contenido para esta selección.",
+      "donde": "Dónde",
+      "lugares": "Lugares",
+      "todo": "Todo",
+      "elegidos": "{n} elegidos",
+      "resultados": {
+        "one": "{numero} resultado",
+        "other": "{numero} resultados"
+      },
+      "quitar": "Quitar {valor}"
+    },
+    "tarjeta": {
+      "por": "Por {autor}",
+      "educativo": "Educativo"
+    },
+    "editorial": {
+      "gorro": "Editorial · {tema}"
+    },
+    "editorialDelDia": {
+      "titulo": "Editorial del día",
+      "leer": "Leer la posición del medio →"
+    },
+    "informes": {
+      "gorro": "Informe · requiere registro",
+      "investigacionDe": "Investigación de {unidad}"
+    },
+    "alPunto": {
+      "episodio": "Episodio"
+    },
+    "paginador": {
+      "cuenta": "{rango} de {total} {unidad}",
+      "irALaPagina": "Ir a la página {n}"
+    },
+    "cinta": {
+      "cifrasDeMercado": "Cifras de mercado",
+      "indicesMundiales": "Índices mundiales (TradingView)",
+      "oro": "Oro",
+      "cierreDel": "Cierre del {fecha}"
+    },
+    "titulares": {
+      "titulo": "Titulares",
+      "controles": "Controles de titulares",
+      "anterior": "Anterior titular",
+      "siguiente": "Siguiente titular",
+      "cargando": "Cargando titulares…",
+      "cargandoTexto": "Obteniendo resumen de noticias desde el servidor.",
+      "error": "No pudimos cargar los titulares",
+      "vacio": "No hay titulares publicados por el momento.",
+      "carril": "Titulares (desplazamiento horizontal)",
+      "titularNDeM": "Titular {n} de {total}"
+    },
+    "hero": {
+      "destacado": "Destacado principal",
+      "claim": "Análisis y perspectiva sobre economía, mercados e inversión en la región.",
+      "explorarArticulos": "Explorar artículos",
+      "accesoPremium": "Acceso premium"
+    },
+    "boletin": {
+      "kicker": "Boletín semanal · los lunes por la mañana",
+      "titulo": "Entorno en Viñetas",
+      "texto": "El entorno económico de la semana, contado en viñetas: lo que movió los mercados, lo que viene y lo que conviene mirar. Le llega al correo cada lunes por la mañana, antes de que la semana empiece a moverse.",
+      "suCorreo": "Su correo",
+      "placeholder": "nombre@correo.com",
+      "enviando": "Enviando…",
+      "unase": "Únase al boletín",
+      "ok": "Listo. El próximo lunes le llega a ese correo.",
+      "correoIncompleto": "Ese correo no parece completo. Revíselo y vuelva a probar.",
+      "demasiadosIntentos": "Demasiados intentos seguidos. Espere un momento.",
+      "fallo": "No se pudo completar la suscripción. Inténtelo de nuevo."
+    },
+    "blog": {
+      "ultimas": "Últimas publicaciones",
+      "destacados": "Destacados",
+      "tambien": "También te puede interesar"
+    },
+    "relleno": {
+      "chart": "Gráfico",
+      "building": "Mercados",
+      "growth": "Crecimiento",
+      "articulo": "Artículo"
+    },
+    "redes": {
+      "titulo": "En redes",
+      "publicacionesEn": "Publicaciones en {red}. Use las flechas para desplazarse.",
+      "verVideo": "Ver el video de TikTok: {texto}",
+      "publicacionEn": "Publicación en {red}: {texto}",
+      "videoDeTikTok": "Video de TikTok: {texto}",
+      "noSePudoAbrir": "No se pudo abrir este video aquí.",
+      "verEnTikTok": "Ver en TikTok",
+      "hoy": "hoy",
+      "ayer": "ayer",
+      "haceDias": "hace {n} días"
+    }
+  }
+}

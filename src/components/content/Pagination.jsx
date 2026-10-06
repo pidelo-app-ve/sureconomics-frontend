@@ -1,12 +1,14 @@
 import PropTypes from "prop-types";
 import { PAGE_GAP, buildPageRange, clampPage } from "../../lib/pageRange";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * `compacta`: solo «Anterior» y «Siguiente», pequeños y sin aire, para ponerla encima de
  * una lista además de debajo (en el panel, con 20 filas largas, la de abajo no se ve sin
  * bajar hasta el final). El número de página lo dice el texto que la acompaña.
  */
-export const Pagination = ({ page, totalPages, onPageChange, compacta = false, etiqueta = "Paginación" }) => {
+export const Pagination = ({ page, totalPages, onPageChange, compacta = false, etiqueta }) => {
+  const { t } = useIdioma();
   if (!totalPages || totalPages <= 1) return null;
 
   const safePage = clampPage(page || 1, totalPages);
@@ -19,7 +21,7 @@ export const Pagination = ({ page, totalPages, onPageChange, compacta = false, e
   };
 
   return (
-    <nav className={compacta ? undefined : "se-container"} aria-label={etiqueta}>
+    <nav className={compacta ? undefined : "se-container"} aria-label={etiqueta === undefined ? t("comun.paginacion") : etiqueta}>
       <div
         style={{
           display: "flex",
@@ -35,9 +37,9 @@ export const Pagination = ({ page, totalPages, onPageChange, compacta = false, e
           className={`se-btn se-btn--secondary${compacta ? " se-btn--small" : ""}`}
           onClick={() => handleGo(safePage - 1)}
           disabled={safePage <= 1}
-          aria-label="Página anterior"
+          aria-label={t("comun.paginaAnterior")}
         >
-          Anterior
+          {t("comun.anterior")}
         </button>
 
         {compacta ? null : (
@@ -54,7 +56,7 @@ export const Pagination = ({ page, totalPages, onPageChange, compacta = false, e
                   className={p === safePage ? "se-btn" : "se-btn se-btn--secondary"}
                   onClick={() => handleGo(p)}
                   aria-current={p === safePage ? "page" : undefined}
-                  aria-label={`Ir a página ${p}`}
+                  aria-label={t("comun.irAPagina", { n: p })}
                 >
                   {p}
                 </button>
@@ -68,9 +70,9 @@ export const Pagination = ({ page, totalPages, onPageChange, compacta = false, e
           className={`se-btn se-btn--secondary${compacta ? " se-btn--small" : ""}`}
           onClick={() => handleGo(safePage + 1)}
           disabled={safePage >= totalPages}
-          aria-label="Página siguiente"
+          aria-label={t("comun.paginaSiguiente")}
         >
-          Siguiente
+          {t("comun.siguiente")}
         </button>
       </div>
     </nav>
@@ -84,4 +86,3 @@ Pagination.propTypes = {
   compacta: PropTypes.bool,
   etiqueta: PropTypes.string,
 };
-

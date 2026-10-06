@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRef } from "react";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
@@ -79,6 +80,7 @@ Pasada.propTypes = {
 Pasada.defaultProps = { oculta: false };
 
 export const PartnersLogoCloud = ({ partners }) => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -86,14 +88,12 @@ export const PartnersLogoCloud = ({ partners }) => {
     <section
       ref={sectionRef}
       className="se-partners se-reveal"
-      aria-label="Partners y aliados"
+      aria-label={t("paginas.quienesSomos.aliadosRegion")}
     >
       <div className="se-container">
         <div className="se-partners__head">
-          <h2 className="se-heading-section">Aliados institucionales</h2>
-          <p className="se-text-body">
-            Una red de marcas asociadas al ecosistema de investigación, inversión y asesoría.
-          </p>
+          <h2 className="se-heading-section">{t("paginas.quienesSomos.aliados")}</h2>
+          <p className="se-text-body">{t("paginas.quienesSomos.aliadosTexto")}</p>
         </div>
       </div>
 

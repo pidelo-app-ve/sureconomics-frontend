@@ -97,11 +97,33 @@ export const urlDe = (pieza) => {
   return seccion && pieza?.slug ? `${SITIO}/${seccion}/${pieza.slug}` : null;
 };
 
-/** El mapa completo: páginas fijas y cada pieza con su última edición. */
+/** La misma página fija en inglés: `/` → `/en`, `/informes` → `/en/informes`. */
+export const enIngles = (ruta) => {
+  const [camino, consulta = ""] = ruta.split(/(?=\?)/);
+  return (camino === "/" ? "/en" : `/en${camino}`) + consulta;
+};
+
+/**
+ * Una página fija, con sus dos idiomas enlazados (`xhtml:link hreflang`): así Google sabe
+ * que `/en/informes` es la versión en inglés de `/informes` y no una página duplicada.
+ * Las piezas no llevan versión en inglés todavía, así que van sin alternativas.
+ */
+const filaBilingue = (ruta) => {
+  const es = `${SITIO}${ruta}`;
+  const en = `${SITIO}${enIngles(ruta)}`;
+  const alternativas =
+    `<xhtml:link rel="alternate" hreflang="es" href="${xml(es)}"/>` +
+    `<xhtml:link rel="alternate" hreflang="en" href="${xml(en)}"/>` +
+    `<xhtml:link rel="alternate" hreflang="x-default" href="${xml(es)}"/>`;
+  return [
+    `  <url><loc>${xml(es)}</loc>${alternativas}</url>`,
+    `  <url><loc>${xml(en)}</loc>${alternativas}</url>`,
+  ];
+};
+
+/** El mapa completo: páginas fijas en los dos idiomas y cada pieza con su última edición. */
 export const mapaCompleto = (piezas) => {
-  const filas = PAGINAS_FIJAS.map(
-    (ruta) => `  <url><loc>${xml(`${SITIO}${ruta}`)}</loc></url>`
-  );
+  const filas = PAGINAS_FIJAS.flatMap(filaBilingue);
   for (const p of piezas) {
     const loc = urlDe(p);
     if (!loc) continue;
@@ -112,7 +134,7 @@ export const mapaCompleto = (piezas) => {
   }
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ...filas,
     "</urlset>",
   ].join("\n");

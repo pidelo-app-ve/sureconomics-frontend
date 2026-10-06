@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useId, useState } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * Un campo de formulario de la cuenta: etiqueta, ayuda, error y, si es clave, el ojo.
@@ -38,6 +39,7 @@ export const CampoDeTexto = ({
   inputMode,
   maxLength,
 }) => {
+  const { t } = useIdioma();
   const generado = useId();
   const idCampo = id || generado;
   const idAyuda = `${idCampo}-ayuda`;
@@ -55,7 +57,7 @@ export const CampoDeTexto = ({
     <div className={`se-campo${error ? " se-campo--mal" : ""}`}>
       <label className="se-campo__etiqueta" htmlFor={idCampo}>
         {etiqueta}
-        {opcional ? <span className="se-campo__opcional">opcional</span> : null}
+        {opcional ? <span className="se-campo__opcional">{t("cuenta.comun.opcional")}</span> : null}
       </label>
 
       <div className="se-campo__caja">
@@ -82,9 +84,9 @@ export const CampoDeTexto = ({
             aria-pressed={visible}
             // El texto cambia con el estado: "Mostrar" con la clave ya visible es
             // justo lo contrario de lo que el botón hace.
-            aria-label={visible ? "Ocultar la contraseña" : "Mostrar la contraseña"}
+            aria-label={visible ? t("cuenta.campo.ocultarContrasena") : t("cuenta.campo.mostrarContrasena")}
           >
-            {visible ? "Ocultar" : "Ver"}
+            {visible ? t("cuenta.campo.ocultar") : t("cuenta.campo.ver")}
           </button>
         ) : null}
       </div>

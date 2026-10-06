@@ -6,7 +6,8 @@ import './styles/accesibilidad.css'
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration test
 import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
-import { LanguageProvider } from "./i18n/LanguageProvider";
+// Registra el diccionario en español y deja preparado el inglés. Ver `i18n/motor.js`.
+import "./i18n/diccionarios";
 import { AuthProvider } from "./context/AuthContext";
 import { UserAuthProvider } from "./context/UserAuthContext";
 import { ProveedorDeMarcadores } from "./context/MarcadoresContext";
@@ -15,7 +16,6 @@ const Main = () => {
     return (
         <React.StrictMode>  
             {/* Provide global state to all components */}
-            <LanguageProvider>
               <StoreProvider> 
                   <AuthProvider>
                     <UserAuthProvider>
@@ -25,7 +25,6 @@ const Main = () => {
                     </UserAuthProvider>
                   </AuthProvider>
               </StoreProvider>
-            </LanguageProvider>
         </React.StrictMode>
     );
 }

@@ -1,7 +1,7 @@
 /**
  * Los mapas del sitio, con la API simulada. `node api/sitemap.test.mjs`, o `npm run test:sitemap`.
  */
-import handler, { mapaCompleto, mapaDeNoticias, urlDe } from "./sitemap.js";
+import handler, { enIngles, mapaCompleto, mapaDeNoticias, urlDe } from "./sitemap.js";
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -40,6 +40,10 @@ check("lleva la portada", completo.includes("<loc>https://www.sureconomics.com/<
 check("ni cuenta ni panel", !completo.includes("/cuenta") && !completo.includes("/admin"));
 check("con su última edición", completo.includes("<lastmod>"));
 check("las consultas escapadas", completo.includes("/articulos?formato=noticias"));
+check("cada página fija también en inglés", completo.includes("<loc>https://www.sureconomics.com/en</loc>") && completo.includes("<loc>https://www.sureconomics.com/en/informes</loc>"));
+check("con sus dos idiomas enlazados", completo.includes('hreflang="en" href="https://www.sureconomics.com/en/informes"') && completo.includes('hreflang="x-default" href="https://www.sureconomics.com/informes"'));
+check("las piezas sin versión en inglés", !completo.includes("/en/noticias/pieza-1"));
+check("enIngles", enIngles("/") === "/en" && enIngles("/articulos?formato=noticias") === "/en/articulos?formato=noticias");
 
 // 3. El de noticias: solo 48 horas, y escapado.
 const noticias = mapaDeNoticias(piezas, AHORA);

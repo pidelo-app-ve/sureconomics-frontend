@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CommentComposer } from "../comments/CommentComposer";
 import { CommentList } from "../comments/CommentList";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { contentService } from "../../services/contentService";
 import { postComment } from "../../services/userMeService";
@@ -30,6 +31,7 @@ import { postComment } from "../../services/userMeService";
 const POR_PAGINA = 50;
 
 export const PieceComments = ({ pieza }) => {
+  const { t } = useIdioma();
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const { clave, renovar } = useClaveIdempotente();
   const [estado, setEstado] = useState({ status: "loading", items: [] });
@@ -82,21 +84,17 @@ export const PieceComments = ({ pieza }) => {
   return (
     <section className="se-comments" aria-labelledby="comments-title">
       <h2 id="comments-title" className="se-heading-section se-heading-section--small">
-        {total ? `Comentarios (${total})` : "Comentarios"}
+        {total ? t("piezas.comentarios.tituloConTotal", { n: total }) : t("piezas.comentarios.titulo")}
       </h2>
 
       {estado.status === "loading" ? (
         <p className="se-text-body se-comments__empty" role="status">
-          Cargando comentarios…
+          {t("piezas.comentarios.cargando")}
         </p>
       ) : (
         <CommentList
           comments={estado.items}
-          textoVacio={
-            enviado
-              ? "Su comentario está en revisión. Aparecerá aquí en cuanto lo apruebe la moderación."
-              : undefined
-          }
+          textoVacio={enviado ? t("piezas.comentarios.enRevisionPropio") : undefined}
         />
       )}
 

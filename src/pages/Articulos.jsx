@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
+import { Redirigir } from "../components/Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import {
   ArticleCardGrid,
@@ -14,7 +16,7 @@ import {
   PodcastGrid,
   ReportGrid,
 } from "../components/home";
-import { FORMATO_META, FORMATO_POR_RUTA } from "../lib/pieza";
+import { FORMATO_META, FORMATO_POR_RUTA, nombreDeFormato, nombreTraducido } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePagedList } from "../hooks/usePagedList";
 import { usePieces } from "../hooks/usePieces";
@@ -58,6 +60,7 @@ const LAYOUTS = {
  * silently followed the reader into Editorial.
  */
 export const FormatListing = ({ formatoApi }) => {
+  const { t, lang } = useIdioma();
   const meta = FORMATO_META[formatoApi];
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error, truncated } = usePieces({ format: formatoApi });
@@ -103,8 +106,11 @@ export const FormatListing = ({ formatoApi }) => {
     [setQuery, resetPage]
   );
 
-  const formato = taxonomy.formats.find((f) => f.slug === formatoApi);
-  const titulo = formato?.name_plural ?? meta.plural;
+  // En español manda el nombre que la redacción puso en el panel (`name_plural`); en
+  // inglés, el del diccionario, que es el único que existe en ese idioma.
+  const titulo =
+    (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
+    nombreDeFormato(formatoApi);
   // Only announced when the wait is long enough to be worth announcing.
   const cargando = useDelayedFlag(status === "loading");
 
@@ -127,10 +133,12 @@ export const FormatListing = ({ formatoApi }) => {
 
       <div className="se-container">
         {status === "error" ? (
-          <ErrorState title="No se pudo cargar esta sección" error={error} />
+          <ErrorState title={t("listados.listado.errorSeccion")} error={error} />
         ) : null}
 
-        {cargando ? <LoadingState title={`Cargando ${titulo.toLowerCase()}…`} /> : null}
+        {cargando ? (
+          <LoadingState title={t("listados.formato.cargando", { titulo: titulo.toLowerCase() })} />
+        ) : null}
 
         {status === "success" ? (
           <>
@@ -139,7 +147,9 @@ export const FormatListing = ({ formatoApi }) => {
             {taxonomy.ready && pieces.length ? (
               <ContentExplorer
                 pieces={pieces}
-                temasDisponibles={taxonomy.topics.map((t) => t.name)}
+                // `nombreTraducido` y no `name`: las piezas ya traen sus temas en el
+                // idioma de la página, y las opciones tienen que casar con ellos.
+                temasDisponibles={taxonomy.topics.map((tema) => nombreTraducido(tema))}
                 geoTop={taxonomy.geoTop}
                 continentes={taxonomy.continentes}
                 regiones={taxonomy.regiones}
@@ -150,7 +160,7 @@ export const FormatListing = ({ formatoApi }) => {
                 onChange={handleSelection}
                 onQueryChange={handleQuery}
                 total={results.length}
-                scopeLabel={`en ${titulo}`}
+                scopeLabel={t("listados.listado.alcance", { ambito: titulo })}
               />
             ) : null}
 
@@ -162,16 +172,22 @@ export const FormatListing = ({ formatoApi }) => {
 
             <div className="se-listing" ref={listingRef}>
               {/* El nivel que faltaba entre el h1 y los h3 de las tarjetas. */}
-              <h2 className="se-sr-only">Todas las piezas de {titulo.toLowerCase()}</h2>
+              <h2 className="se-sr-only">
+                {t("listados.formato.todasLasPiezas", { titulo: titulo.toLowerCase() })}
+              </h2>
               {visible.length ? (
                 LAYOUTS[formatoApi](visible)
               ) : (
                 <EmptyState
-                  title={isFiltered ? "Sin resultados" : `Todavía no hay ${titulo.toLowerCase()}`}
+                  title={
+                    isFiltered
+                      ? t("comun.sinResultados")
+                      : t("listados.formato.vacioTitulo", { titulo: titulo.toLowerCase() })
+                  }
                   description={
                     isFiltered
-                      ? "Ningún contenido de esta sección coincide con los filtros. Quite alguno para ampliar la búsqueda."
-                      : "Cuando la redacción publique en esta sección, aparecerá aquí."
+                      ? t("listados.listado.sinResultadosSeccion")
+                      : t("listados.listado.seccionVacia")
                   }
                 />
               )}
@@ -185,9 +201,7 @@ export const FormatListing = ({ formatoApi }) => {
             <EspacioPublicitario espacio={ESPACIOS.LISTADO_NATIVO} variante="lista" />
 
             {truncated ? (
-              <p className="se-text-body se-listing__note">
-                Se están mostrando las piezas más recientes de esta sección.
-              </p>
+              <p className="se-text-body se-listing__note">{t("listados.listado.soloRecientes")}</p>
             ) : null}
 
             <ListingPagination
@@ -211,6 +225,7 @@ FormatListing.propTypes = {
 };
 
 export const Articulos = () => {
+  const { t } = useIdioma();
   const [searchParams] = useSearchParams();
 
   const formato = searchParams.get("formato") ?? "";
@@ -218,23 +233,26 @@ export const Articulos = () => {
   // An unknown slug falls back to Artículos rather than rendering an error — a
   // stale link should still land the reader somewhere useful.
   const formatoApi = FORMATO_POR_RUTA[formato] ?? "articulo";
-  const meta = FORMATO_META[formatoApi];
-
-  useEffect(() => {
-    // Los dos formatos que se van a «Al punto» no ponen título: lo pone su página.
-    if (formato === "podcast" || formato === "entrevistas") return;
-    applyPageMeta({
-      title: `${meta.plural} — ${BRAND.name}`,
-      description: `${meta.plural} de ${BRAND.name}.`,
-    });
-  }, [meta, formato]);
 
   // Entrevistas y podcast ya no se listan aquí sino juntos en «Al punto». Los enlaces
   // viejos -- el menú de antes, las piezas compartidas, los buscadores -- siguen
   // llegando a esta dirección, así que se reenvían a la vista que corresponde.
-  if (formato === "podcast" || formato === "entrevistas") {
+  const reenvia = formato === "podcast" || formato === "entrevistas";
+
+  // Los dos formatos que se van a «Al punto» no ponen título: lo pone su página.
+  const nombre = nombreDeFormato(formatoApi);
+  useMetaPagina(
+    reenvia
+      ? {}
+      : {
+          title: t("listados.formato.meta.titulo", { formato: nombre, marca: BRAND.name }),
+          description: t("listados.formato.meta.descripcion", { formato: nombre, marca: BRAND.name }),
+        }
+  );
+
+  if (reenvia) {
     return (
-      <Navigate
+      <Redirigir
         to={`/audiovisual${formato === "podcast" ? "?ver=podcast" : "?ver=entrevistas"}`}
         replace
       />

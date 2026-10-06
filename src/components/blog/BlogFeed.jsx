@@ -1,9 +1,11 @@
 import { PostCard } from "./PostCard";
 import PropTypes from "prop-types";
 import { useRef } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
 export const BlogFeed = ({ posts = [] }) => {
+  const { t } = useIdioma();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -11,7 +13,7 @@ export const BlogFeed = ({ posts = [] }) => {
     <section ref={sectionRef} className="se-feed se-section se-reveal se-reveal--stagger" aria-labelledby="feed-title">
       <div className="se-container">
         <h2 id="feed-title" className="se-heading-section">
-          Últimas publicaciones
+          {t("portada.blog.ultimas")}
         </h2>
         <ul className="se-feed__list">
           {posts.map((post) => (

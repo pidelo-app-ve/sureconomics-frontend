@@ -1,5 +1,6 @@
 import { createApiClient } from "./apiClient";
-import { piezaFromApi, piezasFromApi } from "../lib/pieza";
+import { tActual } from "../i18n/motor";
+import { nombreTraducido, piezaFromApi, piezasFromApi } from "../lib/pieza";
 
 /**
  * What the public site reads.
@@ -99,23 +100,26 @@ export const getPlaces = async () => {
 
   const walk = (node, arriba) => {
     if (!node?.name) return;
-    slugPorNombre[node.name] = node.slug;
-    conteoPorNombre[node.name] = node.post_count ?? 0;
-    ancestros[node.name] = arriba;
-    if (node.level === "continent") continentes.push(node.name);
+    // El nombre en el idioma del documento: el mismo que llevan `pieza.geos`, para que
+    // en `/en` los filtros casen con las piezas igual que en español.
+    const nombre = nombreTraducido(node);
+    slugPorNombre[nombre] = node.slug;
+    conteoPorNombre[nombre] = node.post_count ?? 0;
+    ancestros[nombre] = arriba;
+    if (node.level === "continent") continentes.push(nombre);
 
     const hijos = node.children ?? [];
     // A group is a node whose children are leaves: the five regions, and any
     // continent holding a country with no region in between.
     const hojas = hijos.filter((h) => !(h.children ?? []).length);
-    if (hojas.length) regiones[node.name] = hojas.map((h) => h.name);
+    if (hojas.length) regiones[nombre] = hojas.map((h) => nombreTraducido(h));
 
-    hijos.forEach((h) => walk(h, [node.name, ...arriba]));
+    hijos.forEach((h) => walk(h, [nombre, ...arriba]));
   };
   if (root) walk(root, []);
 
   return {
-    geoTop: root?.name ?? "Mundo",
+    geoTop: nombreTraducido(root) || tActual("piezas.geo.mundo"),
     continentes,
     regiones,
     ancestros,

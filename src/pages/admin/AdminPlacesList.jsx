@@ -37,7 +37,9 @@ export const AdminPlacesList = () => {
     const isAdmin = role === "admin";
     const [state, setState] = useState({ status: "idle", rows: [], error: null });
     const [busyId, setBusyId] = useState(null);
-    const [newCountry, setNewCountry] = useState({ name: "", iso2: "", parent_id: "" });
+    const [newCountry, setNewCountry] = useState({ name: "", name_en: "", iso2: "", parent_id: "" });
+    // El nombre en inglés de cada fila mientras se escribe; se guarda al salir del campo.
+    const [draftEn, setDraftEn] = useState({});
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const { toastSuccess, toastError } = useAdminToast();
 
@@ -67,6 +69,27 @@ export const AdminPlacesList = () => {
         () => filas.filter((f) => f.level === "region" || f.level === "continent"),
         [filas]
     );
+
+    const guardarNombreEn = async (row) => {
+        if (!(row.id in draftEn)) return;
+        const next = draftEn[row.id].trim();
+        if (next === (row.name_en ?? "")) return;
+        setBusyId(row.id);
+        try {
+            await patchAdminPlace(row.id, { name_en: next });
+            setDraftEn((prev) => {
+                const copia = { ...prev };
+                delete copia[row.id];
+                return copia;
+            });
+            await load();
+            toastSuccess(next ? `«${next}» guardado.` : `«${row.name}» sale en español también en inglés.`, "Lugares");
+        } catch (err) {
+            toastError(adminErrorMessage(err, "No se pudo guardar el nombre en inglés."), "Lugares");
+        } finally {
+            setBusyId(null);
+        }
+    };
 
     const toggleActive = async (row) => {
         setBusyId(row.id);
@@ -110,10 +133,11 @@ export const AdminPlacesList = () => {
         try {
             await createAdminPlace({
                 name,
+                name_en: newCountry.name_en.trim() || undefined,
                 iso2: newCountry.iso2.trim() || undefined,
                 parent_id: Number(newCountry.parent_id),
             });
-            setNewCountry({ name: "", iso2: "", parent_id: "" });
+            setNewCountry({ name: "", name_en: "", iso2: "", parent_id: "" });
             await load();
             toastSuccess(`«${name}» añadido.`, "Lugares");
         } catch (err) {
@@ -135,6 +159,22 @@ export const AdminPlacesList = () => {
                 <td style={{ paddingLeft: `${depth * 1.5}rem` }}>
                     {row.name}
                     {row.iso2 ? <span style={{ opacity: 0.6 }}> · {row.iso2}</span> : null}
+                </td>
+                <td>
+                    {/* Lo que ve quien lee el sitio en inglés. Vacío, sale el español, así que
+                        «Venezuela» no hace falta escribirlo dos veces. */}
+                    {canCurate ? (
+                        <input
+                            className="se-form-control"
+                            value={draftEn[row.id] ?? row.name_en ?? ""}
+                            placeholder={row.name}
+                            onChange={(e) => setDraftEn((prev) => ({ ...prev, [row.id]: e.target.value }))}
+                            onBlur={() => guardarNombreEn(row)}
+                            aria-label={`Nombre en inglés de ${row.name}`}
+                        />
+                    ) : (
+                        row.name_en || <span style={{ opacity: 0.55 }}>—</span>
+                    )}
                 </td>
                 <td>{NIVEL[row.level] ?? row.level}</td>
                 <td>
@@ -191,6 +231,7 @@ export const AdminPlacesList = () => {
                     <thead>
                         <tr>
                             <th scope="col">Lugar</th>
+                            <th scope="col">En inglés</th>
                             <th scope="col">Nivel</th>
                             <th scope="col">Slug</th>
                             <th scope="col">Piezas publicadas</th>
@@ -219,6 +260,14 @@ export const AdminPlacesList = () => {
                                 className="se-form-control"
                                 value={newCountry.name}
                                 onChange={(e) => setNewCountry((p) => ({ ...p, name: e.target.value }))}
+                            />
+                        </label>
+                        <label className="se-admin-filters__field">
+                            <span className="se-form-label">En inglés (opcional)</span>
+                            <input
+                                className="se-form-control"
+                                value={newCountry.name_en}
+                                onChange={(e) => setNewCountry((p) => ({ ...p, name_en: e.target.value }))}
                             />
                         </label>
                         <label className="se-admin-filters__field">

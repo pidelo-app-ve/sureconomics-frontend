@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { BotonesDePago } from "./BotonesDePago";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import {
   IconDocumento,
   IconLlave,
@@ -38,6 +39,7 @@ import {
  * pagar. No hay ninguna línea escrita a mano que pueda dejar de ser verdad.
  */
 export const PanelDeCompra = ({ modulo, pasarelas, onComprado }) => {
+  const { t } = useIdioma();
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const duracion = duracionLegible(modulo.duracion_minutos);
   const nivel = nivelLegible(modulo.nivel);
@@ -48,58 +50,58 @@ export const PanelDeCompra = ({ modulo, pasarelas, onComprado }) => {
   const yaEsSuyo = modulo.comprado || modulo.gratuito;
 
   return (
-    <aside className="se-compra" aria-label="Comprar este módulo">
+    <aside className="se-compra" aria-label={t("educacion.panel.comprarEsteModulo")}>
       <p className="se-compra__precio">
         {modulo.gratuito ? (
-          "Gratis"
+          t("educacion.comun.gratis")
         ) : modulo.comprado ? (
           <span className="se-compra__suyo">
             <IconVisto className="se-compra__icono" />
-            Ya es suyo
+            {t("educacion.panel.yaEsSuyo")}
           </span>
         ) : (
           precioLegible(modulo.precio_centavos, modulo.moneda)
         )}
       </p>
       {!yaEsSuyo ? (
-        <p className="se-compra__nota">Pago único · El acceso no caduca</p>
+        <p className="se-compra__nota">{t("educacion.panel.pagoUnico")}</p>
       ) : null}
 
       <ul className="se-compra__incluye">
         <li>
           <IconTexto className="se-compra__icono" />
-          {modulo.lecciones} {modulo.lecciones === 1 ? "lección" : "lecciones"}
-          {nivel ? ` · nivel ${nivel.toLowerCase()}` : ""}
+          {t("educacion.comun.lecciones", { n: modulo.lecciones ?? 0 })}
+          {nivel ? ` · ${t("educacion.comun.nivel", { nivel: nivel.toLowerCase() })}` : ""}
         </li>
         {duracion ? (
           <li>
             <IconReloj className="se-compra__icono" />
-            {duracion} de contenido
+            {t("educacion.panel.deContenido", { duracion })}
           </li>
         ) : null}
         {tipos.video ? (
           <li>
             <IconVideo className="se-compra__icono" />
-            {tipos.video} {tipos.video === 1 ? "clase en video" : "clases en video"}
+            {t("educacion.panel.clasesEnVideo", { n: tipos.video })}
           </li>
         ) : null}
         {tipos.pdf ? (
           <li>
             <IconDocumento className="se-compra__icono" />
-            {tipos.pdf} {tipos.pdf === 1 ? "documento descargable" : "documentos descargables"}
+            {t("educacion.panel.documentosDescargables", { n: tipos.pdf })}
           </li>
         ) : null}
         {libres > 0 && !modulo.gratuito ? (
           <li className="se-compra__libre">
             <IconLlave className="se-compra__icono" />
-            {libres === 1 ? "La primera, abierta" : `${libres} abiertas`} sin pagar
+            {t("educacion.panel.abiertasSinPagar", { n: libres })}
           </li>
         ) : null}
       </ul>
 
       {modulo.comprado ? (
         <p className="se-compra__texto">
-          Tiene las {modulo.lecciones} lecciones disponibles. Empiece cuando quiera.
+          {t("educacion.panel.tieneTodas", { n: modulo.lecciones })}
         </p>
       ) : modulo.gratuito ? (
         // El modulo de cortesia pide cuenta verificada, no dinero. Ofrecerle "crear
@@ -107,23 +109,18 @@ export const PanelDeCompra = ({ modulo, pasarelas, onComprado }) => {
         // hizo -- y le deja dudando de si de verdad tiene acceso.
         <div className="se-compra__acciones">
           {isAuthenticated && isEmailVerified ? (
-            <p className="se-compra__texto">
-              Ya puede empezar: abra la primera clase del temario.
-            </p>
+            <p className="se-compra__texto">{t("educacion.panel.yaPuedeEmpezar")}</p>
           ) : (
             <>
-              <p className="se-compra__texto">
-                Este módulo es de cortesía. Solo hace falta una cuenta con el correo
-                verificado.
-              </p>
+              <p className="se-compra__texto">{t("educacion.panel.cortesia")}</p>
               {isAuthenticated ? (
-                <Link to="/cuenta/verificar-email" className="se-btn">
-                  Verificar mi correo
-                </Link>
+                <Enlace to="/cuenta/verificar-email" className="se-btn">
+                  {t("educacion.comun.verificarMiCorreo")}
+                </Enlace>
               ) : (
-                <Link to="/cuenta/registro" className="se-btn">
-                  Crear una cuenta
-                </Link>
+                <Enlace to="/cuenta/registro" className="se-btn">
+                  {t("educacion.comun.crearUnaCuenta")}
+                </Enlace>
               )}
             </>
           )}
@@ -137,7 +134,7 @@ export const PanelDeCompra = ({ modulo, pasarelas, onComprado }) => {
           />
           {cerradas > 0 ? (
             <p className="se-compra__pie">
-              Desbloquea {cerradas} {cerradas === 1 ? "lección" : "lecciones"} más.
+              {t("educacion.panel.desbloquea", { n: cerradas })}
             </p>
           ) : null}
         </>

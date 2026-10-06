@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
+import { Enlace, Redirigir } from "../components/Enlace";
+import { sinPrefijo } from "../i18n/motor";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
@@ -35,23 +38,24 @@ import {
  * and five near-identical pages would drift apart on the first change.
  */
 
-const NoEncontrada = () => (
-  <main className="se-blog se-articles" role="main">
-    <section className="se-section">
-      <div className="se-container">
-        <div className="se-piece">
-          <h1 className="se-piece__title">No encontramos esta pieza</h1>
-          <p className="se-piece__lead">
-            El enlace puede estar roto o el contenido ya no está publicado.
-          </p>
-          <Link to="/" className="se-piece__back">
-            Volver a la portada
-          </Link>
+const NoEncontrada = () => {
+  const { t } = useIdioma();
+  return (
+    <main className="se-blog se-articles" role="main">
+      <section className="se-section">
+        <div className="se-container">
+          <div className="se-piece">
+            <h1 className="se-piece__title">{t("piezas.noEncontrada.titulo")}</h1>
+            <p className="se-piece__lead">{t("piezas.noEncontrada.texto")}</p>
+            <Enlace to="/" className="se-piece__back">
+              {t("piezas.noEncontrada.volver")}
+            </Enlace>
+          </div>
         </div>
-      </div>
-    </section>
-  </main>
-);
+      </section>
+    </main>
+  );
+};
 
 /**
  * La pieza que ya vino dentro del HTML, si es esta.
@@ -76,6 +80,7 @@ const tomarPiezaDelHtml = (slug) => {
 export const Pieza = () => {
   const { slug } = useParams();
   const { pathname } = useLocation();
+  const { t, lang } = useIdioma();
   const { geoTop } = useTaxonomy();
   const [state, setState] = useState(() => {
     const pieza = tomarPiezaDelHtml(slug);
@@ -128,23 +133,24 @@ export const Pieza = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  // Una dirección que no lleva a ninguna pieza no debe quedar en los buscadores.
-  useEffect(() => {
-    if (state.status === "missing") {
-      applyPageMeta({ title: `Pieza no encontrada — ${BRAND.name}`, noindex: true });
-    }
-  }, [state.status]);
-
   const pieza = state.pieza;
   const cargando = useDelayedFlag(state.status === "loading");
 
-  useEffect(() => {
-    if (!pieza) return;
-    applyPageMeta({
-      title: `${pieza.titulo} — ${BRAND.name}`,
-      description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
-    });
-  }, [pieza]);
+  // El título, la descripción y las señales para Google, en su idioma. El texto de las
+  // piezas solo existe en español (`soloEspanol`): en `/en` la página sale con `noindex`
+  // y el canónico apuntando al español. Y una dirección que no lleva a ninguna pieza
+  // no debe quedar en los buscadores.
+  useMetaPagina(
+    state.status === "missing"
+      ? { title: t("piezas.noEncontrada.meta.titulo", { marca: BRAND.name }), noindex: true }
+      : pieza
+        ? {
+            title: t("piezas.pieza.meta.titulo", { titulo: pieza.titulo, marca: BRAND.name }),
+            description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
+            soloEspanol: true,
+          }
+        : { soloEspanol: true }
+  );
 
   // La barra de direcciones también lleva la versión: quien copia el enlace de ahí para
   // pegarlo en X comparte el mismo que el botón. `replaceState` y no `navigate`: sólo
@@ -153,7 +159,7 @@ export const Pieza = () => {
   useEffect(() => {
     if (!pieza?.version) return;
     const actual = new URL(window.location.href);
-    if (actual.pathname !== rutaDePieza(pieza)) return;
+    if (sinPrefijo(actual.pathname) !== rutaDePieza(pieza)) return;
     if (actual.searchParams.get("v") === pieza.version) return;
     actual.searchParams.set("v", pieza.version);
     window.history.replaceState(
@@ -188,7 +194,7 @@ export const Pieza = () => {
     return (
       <main className="se-blog se-articles" role="main">
         <section className="se-section">
-          <div className="se-container">{cargando ? <LoadingState title="Cargando…" /> : null}</div>
+          <div className="se-container">{cargando ? <LoadingState title={t("comun.cargando")} /> : null}</div>
         </section>
       </main>
     );
@@ -199,7 +205,7 @@ export const Pieza = () => {
   // The format lives in the URL, so a hand-edited path can disagree with the
   // piece. Send it to the canonical address rather than serving a lie.
   const canonica = rutaDePieza(pieza);
-  if (pathname !== canonica) return <Navigate to={canonica} replace />;
+  if (sinPrefijo(pathname) !== canonica) return <Redirigir to={canonica} replace />;
 
   const lugar = pieza.geos?.[0] ?? geoTop;
   const tema = temaPrincipal(pieza);
@@ -209,21 +215,21 @@ export const Pieza = () => {
   // La entrevista no lleva portada en la cabecera: su portada es el video. Y sin
   // fotografía tampoco: la cabecera de dos columnas dejaba la de la derecha vacía y el
   // titular encajonado en la mitad del ancho.
-  const conPortada = pieza.formato !== "Entrevistas" && Boolean(pieza.imagenUrl);
+  const conPortada = pieza.formatoApi !== "entrevista" && Boolean(pieza.imagenUrl);
 
   return (
     <main className="se-blog se-articles" role="main">
       <section className="se-section">
         <div className="se-container">
           <article className="se-piece">
-            <nav className="se-piece__crumbs" aria-label="Ubicación">
-              <Link to="/">Inicio</Link>
+            <nav className="se-piece__crumbs" aria-label={t("piezas.pieza.ubicacion")}>
+              <Enlace to="/">{t("nav.inicio")}</Enlace>
               <span aria-hidden="true"> › </span>
-              <Link to={rutaDeFormato(pieza.formatoApi)}>{pieza.formato}</Link>
+              <Enlace to={rutaDeFormato(pieza.formatoApi)}>{pieza.formatoNombre}</Enlace>
               {lugar ? (
                 <>
                   <span aria-hidden="true"> › </span>
-                  <Link to={`/explorar?donde=${encodeURIComponent(lugar)}`}>{lugar}</Link>
+                  <Enlace to={`/explorar?donde=${encodeURIComponent(lugar)}`}>{lugar}</Enlace>
                 </>
               ) : null}
             </nav>
@@ -237,7 +243,7 @@ export const Pieza = () => {
             <header className={`se-piece__head${conPortada ? " se-piece__head--media" : ""}`}>
               <div className="se-piece__head-text">
                 <p className="se-piece__kicker">
-                  {pieza.formato}
+                  {pieza.formatoNombre}
                   {tema ? ` · ${tema}` : ""}
                 </p>
                 <h1 className="se-piece__title">{pieza.titulo}</h1>
@@ -262,7 +268,7 @@ export const Pieza = () => {
                 autorFoto={pieza.autorFoto}
                 fecha={pieza.fecha}
                 unidad={pieza.unidad}
-                esEditorial={pieza.formato === "Editorial"}
+                esEditorial={pieza.formatoApi === "editorial"}
               />
               <div className="se-piece__acciones">
                 {/* Guardar, al lado de compartir: las dos son «qué hago con esto
@@ -283,6 +289,11 @@ export const Pieza = () => {
                 entera cansa, y el brandbook lo maqueta así. */}
             <div className="se-piece__cols">
               <div className="se-piece__main">
+                {/* El texto de las piezas solo existe en español. En `/en` se dice,
+                    discreto y antes del cuerpo, para que nadie lo tome por un fallo. */}
+                {lang === "en" ? (
+                  <p className="se-pieza__solo-espanol">{t("idioma.soloEnEspanol")}</p>
+                ) : null}
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
                 {/* Para quien llegó al final: un minuto de pausa antes de lo siguiente. */}
@@ -311,7 +322,7 @@ export const Pieza = () => {
                 ) : null}
               </div>
 
-              <aside className="se-piece__aside" aria-label="Más contenido">
+              <aside className="se-piece__aside" aria-label={t("piezas.pieza.masContenido")}>
                 {/* El rail va **encima** de «También te puede interesar», como en la
                     maqueta: es la primera cosa que ve quien levanta la vista del texto,
                     y es el sitio que se vende. Si no hay campaña que encaje no pinta

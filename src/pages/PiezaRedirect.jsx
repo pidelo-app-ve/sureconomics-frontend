@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { Enlace, Redirigir } from "../components/Enlace";
 import { LoadingState } from "../components/content";
 import { rutaDePieza } from "../lib/pieza";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import { getPiece } from "../services/publicContentService";
 
 /**
@@ -20,6 +22,7 @@ import { getPiece } from "../services/publicContentService";
  */
 export const PiezaRedirect = () => {
   const { slug } = useParams();
+  const { t } = useIdioma();
   const [state, setState] = useState({ status: "loading", destino: null });
   const cargando = useDelayedFlag(state.status === "loading");
 
@@ -46,7 +49,7 @@ export const PiezaRedirect = () => {
       <main className="se-blog se-articles" role="main">
         <section className="se-section">
           <div className="se-container">
-            {cargando ? <LoadingState title="Buscando la pieza…" /> : null}
+            {cargando ? <LoadingState title={t("piezas.redireccion.buscando")} /> : null}
           </div>
         </section>
       </main>
@@ -55,20 +58,18 @@ export const PiezaRedirect = () => {
 
   // `replace` so the old address does not sit in the reader's history behind the
   // new one, where the back button would bounce them straight through it again.
-  if (state.destino) return <Navigate to={state.destino} replace />;
+  if (state.destino) return <Redirigir to={state.destino} replace />;
 
   return (
     <main className="se-blog se-articles" role="main">
       <section className="se-section">
         <div className="se-container">
           <div className="se-piece">
-            <h1 className="se-piece__title">No encontramos esta pieza</h1>
-            <p className="se-piece__lead">
-              El enlace puede estar roto o el contenido ya no está publicado.
-            </p>
-            <Link to="/" className="se-piece__back">
-              Volver a la portada
-            </Link>
+            <h1 className="se-piece__title">{t("piezas.noEncontrada.titulo")}</h1>
+            <p className="se-piece__lead">{t("piezas.noEncontrada.texto")}</p>
+            <Enlace to="/" className="se-piece__back">
+              {t("piezas.noEncontrada.volver")}
+            </Enlace>
           </div>
         </div>
       </section>

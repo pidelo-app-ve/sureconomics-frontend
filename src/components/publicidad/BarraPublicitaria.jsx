@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { tActual } from "../../i18n/motor";
 
 import { EVENTO_CONSENTIMIENTO, avisoPendiente } from "../../lib/analitica";
 import { ESPACIOS, enlaceDeClic } from "../../services/publicidadService";
@@ -90,7 +91,7 @@ export const BarraPublicitaria = () => {
   const destino = enlaceDeClic(hueco.enlace);
 
   return (
-    <aside ref={contenedor} className="se-ad-barra" aria-label="Publicidad">
+    <aside ref={contenedor} className="se-ad-barra" aria-label={tActual("publicidad.etiqueta")}>
       {hueco.imagen ? (
         <span className="se-ad-barra__chip">
           <img src={hueco.imagen} alt={hueco.alt || hueco.anunciante || ""} loading="lazy" />
@@ -99,7 +100,7 @@ export const BarraPublicitaria = () => {
 
       <p className="se-ad-barra__texto">
         <span className="se-ad-barra__etiqueta">
-          {hueco.es_casa ? "Espacio disponible" : "Publicidad"}
+          {hueco.es_casa ? tActual("publicidad.espacioDisponible") : tActual("publicidad.etiqueta")}
         </span>
         <b className="se-ad-barra__marca">{hueco.anunciante}</b>
         <span className="se-ad-barra__titular">
@@ -114,7 +115,7 @@ export const BarraPublicitaria = () => {
           target="_blank"
           rel="sponsored noopener noreferrer"
         >
-          Conocer más
+          {tActual("publicidad.conocerMas")}
         </a>
       ) : null}
 
@@ -122,7 +123,7 @@ export const BarraPublicitaria = () => {
         type="button"
         className="se-ad-barra__cerrar"
         onClick={cerrar}
-        aria-label="Cerrar la publicidad"
+        aria-label={tActual("publicidad.cerrar")}
       >
         ✕
       </button>

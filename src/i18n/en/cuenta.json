@@ -1,0 +1,393 @@
+{
+  "cuenta": {
+    "comun": {
+      "correo": "Email address",
+      "contrasena": "Password",
+      "nombre": "First name",
+      "apellido": "Last name",
+      "escribaCorreo": "Enter your email address.",
+      "correoIncompleto": "That email address looks incomplete. Check that it has an @ and a domain.",
+      "verificar": "Verify",
+      "verifiqueSuCorreo": "Verify your email.",
+      "verifiqueParaEnviar": "Verify your email to submit proposals.",
+      "guardando": "Saving…",
+      "guardarCambios": "Save changes",
+      "enviando": "Sending…",
+      "demasiadasSolicitudes": "Too many requests. Wait a few minutes and try again.",
+      "cargandoEnvio": "Loading submission…",
+      "noPudimosCargarEnvio": "We couldn't load the submission",
+      "volverAlEnvio": "Back to the submission",
+      "opcional": "optional"
+    },
+    "entrar": {
+      "meta": {
+        "titulo": "Sign in — {marca}",
+        "descripcion": "Access for readers and the editorial team."
+      },
+      "escribaContrasena": "Enter your password.",
+      "correoNoValido": "That email address doesn't look valid.",
+      "reviseDatos": "Check your details and try again.",
+      "credenciales": "The email or password is incorrect.",
+      "demasiadosIntentos": "Too many attempts in a row. Wait a few minutes and try again.",
+      "cuentaDesactivada": "This account has been deactivated. Contact us if you think this is a mistake.",
+      "sinConexion": "Couldn't connect. Check your connection and try again.",
+      "fallo": "Couldn't sign in. Please try again in a moment.",
+      "kicker": "Sign in",
+      "titulo": "Your SurEconomics account",
+      "lead": "Your saved articles, your submissions and any modules you've purchased.",
+      "entrando": "Signing in…",
+      "entrar": "Sign in",
+      "sinCuenta": "Don't have an account? {enlace}",
+      "crearUna": "Create one"
+    },
+    "registro": {
+      "meta": {
+        "titulo": "Create an account — {marca}",
+        "descripcion": "Create a reader account."
+      },
+      "escribaNombre": "Enter your first name.",
+      "escribaApellido": "Enter your last name.",
+      "alMenosOcho": "At least eight characters.",
+      "correoYaTieneCuenta": "That email already has an account. If it's yours, sign in instead.",
+      "demasiadosIntentos": "Too many attempts. Wait a few minutes.",
+      "reviseDatos": "Check your details: one of them isn't in the expected format.",
+      "fallo": "Couldn't create the account. Please try again.",
+      "kicker": "Create an account",
+      "titulo": "Your space at SurEconomics",
+      "lead": "Save articles for later, pitch pieces to the newsroom and access the Education modules you purchase. We'll send you a code to confirm your email.",
+      "ayudaCorreo": "This is where the code to confirm your account will arrive.",
+      "creando": "Creating your account…",
+      "crear": "Create my account",
+      "nota": "Afterward you can complete your profile and upload a photo — you'll need one to sign what you publish.",
+      "yaTieneCuenta": "Already have an account? {enlace}",
+      "entrar": "Sign in"
+    },
+    "verificar": {
+      "meta": {
+        "titulo": "Verify email — {marca}",
+        "descripcion": "Email verification."
+      },
+      "verificadoRedirigiendo": "Email verified. Redirecting…",
+      "verificado": "Email verified.",
+      "codigoInvalido": "Invalid or expired code.",
+      "titulo": "Verify email",
+      "subtitulo": "Enter the code we sent to your email. If you don't see the message, check your spam folder.",
+      "trasVerificar": "Once verified, you can {enlace}.",
+      "entrar": "sign in",
+      "codigo": "Verification code",
+      "verificando": "Verifying…",
+      "verificar": "Verify",
+      "solicitarNuevo": "Request a new code"
+    },
+    "solicitarCodigo": {
+      "meta": {
+        "titulo": "Request a code — {marca}",
+        "descripcion": "Resend the verification code."
+      },
+      "enviado": "If the email address is valid, we'll send you a new code.",
+      "fallo": "Couldn't send the code.",
+      "titulo": "Request a code",
+      "subtitulo": "We'll resend a verification code. We don't confirm whether the email exists (privacy).",
+      "entrar": "Sign in",
+      "enviarCodigo": "Send code",
+      "volverAVerificacion": "Back to verification"
+    },
+    "panel": {
+      "inicio": "{marca} — home",
+      "lector": "Reader",
+      "areaDeLector": "Reader area",
+      "miPerfil": "My profile",
+      "loMio": "My purchases",
+      "sesionActiva": "Signed in",
+      "cerrarMenuLateral": "Close side menu",
+      "abrirMenuLateral": "Open side menu",
+      "suEspacio": "Your space",
+      "volverAlSitio": "Back to the site"
+    },
+    "inicio": {
+      "meta": {
+        "titulo": "My space — {marca}",
+        "descripcion": "Your reader account."
+      },
+      "cargando": "Loading your account…",
+      "confirmeTitulo": "Confirm your email",
+      "confirmeTexto": "We sent a code to {correo}. Until you confirm it, you can't save articles, comment or open lessons — it's what keeps anyone from creating accounts with other people's email addresses.",
+      "escribirCodigo": "Enter the code",
+      "lector": "Reader",
+      "correoConfirmado": "Email confirmed",
+      "tieneFoto": "Profile photo added",
+      "sinFoto": "No profile photo",
+      "sinFotoDetalle": "You'll need one to sign anything we publish of yours.",
+      "subirla": "Upload one",
+      "perfilCompleto": "Profile complete",
+      "perfilAMedias": "Profile incomplete · {n} of 6 details left blank",
+      "perfilAMediasDetalle": "All of them are optional; the newsroom uses them to reach you.",
+      "completar": "Complete it",
+      "hola": "Hello, {nombre}",
+      "estadoDeSuCuenta": "Your account status",
+      "suCuenta": "Your account",
+      "loQueTiene": "What you have",
+      "modulosComprados": {
+        "one": "module purchased",
+        "other": "modules purchased"
+      },
+      "articulosGuardados": {
+        "one": "article saved",
+        "other": "articles saved"
+      },
+      "propuestasEnviadas": {
+        "one": "proposal submitted",
+        "other": "proposals submitted"
+      },
+      "quePuedeHacer": "What you can do",
+      "quePuedeHacerAqui": "What you can do here",
+      "usos": {
+        "guardarTitulo": "Save articles",
+        "guardarTexto": "The bookmark on any piece saves it here to read later, from any device.",
+        "guardarEnlace": "See my bookmarks",
+        "comentarTitulo": "Comment",
+        "comentarTexto": "Comments are published under your name and are reviewed before they appear. You comment from the piece itself.",
+        "comentarEnlace": "Go to the articles",
+        "proponerTitulo": "Pitch a piece",
+        "proponerTexto": "You can send an article or a news item to the newsroom. If it's accepted, it's published with your name and photo.",
+        "proponerEnlace": "See my submissions",
+        "comprarTitulo": "Buy Education modules",
+        "comprarTexto": "Each module is a one-time purchase and access never expires. The first lesson of each one is free to read.",
+        "comprarEnlace": "Browse the catalog"
+      }
+    },
+    "perfil": {
+      "meta": {
+        "titulo": "My profile — {marca}",
+        "descripcion": "Your reader details."
+      },
+      "prefieroNoDecirlo": "Prefer not to say",
+      "femenino": "Female",
+      "masculino": "Male",
+      "otro": "Other",
+      "nombreVacio": "First name can't be empty.",
+      "apellidoVacio": "Last name can't be empty.",
+      "edadRango": "An age between 13 and 120.",
+      "fallo": "Couldn't save your changes.",
+      "titulo": "My profile",
+      "lead": "Your name signs your comments and any pieces we publish of yours. Everything else is optional and only the newsroom sees it.",
+      "susDatos": "Your details",
+      "sinRellenar": "{n} left blank · optional",
+      "ayudaCorreo": "Your email identifies the account. To change it, contact us.",
+      "edad": "Age",
+      "sexo": "Sex",
+      "pais": "Country",
+      "ciudad": "City",
+      "ocupacion": "Occupation",
+      "telefono": "Phone",
+      "ayudaOcupacion": "Appears under your byline if we publish a piece of yours.",
+      "ayudaTelefono": "Only so the newsroom can reach you if your submission is accepted.",
+      "guardado": "Saved ✓"
+    },
+    "retrato": {
+      "tipoNoValido": "It has to be a JPG, PNG or WebP image.",
+      "pesaDemasiado": "That image is {mb} MB and the limit is 5.",
+      "demasiadosCambios": "You've changed your photo several times in a row. Wait a while.",
+      "fallo": "Couldn't upload the image.",
+      "suFoto": "Your photo",
+      "subaSuFoto": "Upload your photo",
+      "texto": "It's the one that signs the piece if the newsroom publishes a submission of yours. Without it, your article runs without a face.",
+      "subiendo": "Uploading…",
+      "cambiar": "Change photo",
+      "elegir": "Choose and crop",
+      "elegirImagen": "Choose an image for your profile",
+      "pista": "JPG, PNG or WebP · up to 5 MB",
+      "suFotoMinuscula": "your photo"
+    },
+    "marcadores": {
+      "meta": {
+        "titulo": "Bookmarks — {marca}",
+        "descripcion": "Saved articles."
+      },
+      "titulo": "Bookmarks",
+      "verifique": "Verify your email to see your bookmarks.",
+      "cargando": "Loading bookmarks…",
+      "noPudimosCargar": "We couldn't load your bookmarks",
+      "lead": "Articles you've saved to come back to.",
+      "vacioTitulo": "No bookmarks yet",
+      "vacioTexto": "Browse the articles and tap save when one interests you.",
+      "verArticulos": "Browse articles"
+    },
+    "envios": {
+      "meta": {
+        "titulo": "My submissions — {marca}",
+        "descripcion": "Editorial proposals submitted."
+      },
+      "titulo": "My submissions",
+      "cargando": "Loading submissions…",
+      "noPudimosCargar": "We couldn't load your submissions",
+      "lead": "Editorial proposals and their status.",
+      "nuevo": "New submission",
+      "vacioTitulo": "No submissions yet",
+      "vacioTexto": "Share an idea or a draft with the editorial team.",
+      "crearPrimero": "Create your first submission",
+      "sinTitulo": "Submission {id}"
+    },
+    "envio": {
+      "meta": {
+        "titulo": "Submission details — {marca}",
+        "descripcion": "Status of your proposal."
+      },
+      "titulo": "Submission",
+      "volverAEnvios": "Back to submissions",
+      "misEnvios": "My submissions",
+      "editarEnvio": "Edit submission",
+      "editar": "Edit",
+      "imagenDestacada": "Featured image",
+      "abrirOriginal": "Open original",
+      "sinVistaPrevia": "Couldn't load the preview.",
+      "abrirUrl": "Open URL",
+      "sinImagen": "No featured image.",
+      "anadirEnEditar": "Add one in edit",
+      "resumen": "Summary",
+      "sinResumen": "No summary was added.",
+      "contenido": "Content",
+      "sinContenido": "The body of the submission is empty.",
+      "notasTitulo": "Notes from the editorial team",
+      "notasLead": "When the team leaves comments on your proposal, they'll appear here.",
+      "cargandoNotas": "Loading notes…",
+      "noPudimosCargarNotas": "We couldn't load the notes",
+      "equipoEditorial": "Editorial team",
+      "sinNotas": "No notes yet."
+    },
+    "envioEditar": {
+      "meta": {
+        "titulo": "Edit submission — {marca}",
+        "descripcion": "Edit an editorial proposal."
+      },
+      "noEncontrado": "Not found.",
+      "actualizado": "Submission updated.",
+      "yaNoEditable": "This submission can no longer be edited because its status changed.",
+      "fallo": "Couldn't update the submission.",
+      "titulo": "Edit submission"
+    },
+    "envioNuevo": {
+      "meta": {
+        "titulo": "New submission — {marca}",
+        "descripcion": "Submit an editorial proposal."
+      },
+      "creado": "Submission created. It's now awaiting review.",
+      "fallo": "Couldn't create the submission.",
+      "titulo": "New submission",
+      "volverALaLista": "Back to the list",
+      "enviarARevision": "Submit for review"
+    },
+    "formularioEnvio": {
+      "articulo": "Article",
+      "articuloPista": "Signed analysis, with its regional context.",
+      "noticia": "News item",
+      "noticiaPista": "A recent event, with the source cited.",
+      "queEnvia": "What you're submitting",
+      "titulo": "Title",
+      "resumen": "Summary",
+      "resumenMarcador": "Two or three lines summarizing what you're submitting…",
+      "contenido": "Content",
+      "imagenDestacada": "Featured image URL"
+    },
+    "estadoEnvio": {
+      "submitted": "Submitted",
+      "pending": "Pending",
+      "under_review": "Under review",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "loMio": {
+      "meta": {
+        "titulo": "My purchases — {marca}",
+        "descripcion": "The modules you've purchased."
+      },
+      "fallo": "Couldn't load your purchases. Please try again.",
+      "titulo": "My purchases",
+      "lead": "The Education modules you've purchased. Access never expires: they're yours.",
+      "vacioTitulo": "You haven't purchased any modules yet",
+      "vacioTexto": "When you buy one it will appear here, with its receipt, and you'll be able to open it from right here. Every module has an open first lesson you can read for free.",
+      "verModulos": "Browse the modules",
+      "susModulos": {
+        "one": "Your module",
+        "other": "Your {n} modules"
+      },
+      "enTotal": "{importe} in total",
+      "nivel": "{nivel} level",
+      "modulo": "Module",
+      "ref": "Ref. {referencia}",
+      "abrir": "Open",
+      "fueraDelCatalogo": "Out of the catalog right now. It's still yours; contact us if you need it.",
+      "verTemario": "See the syllabus",
+      "pagosAMedias": "Incomplete payments",
+      "pendienteTexto": "The payment was started and we haven't received confirmation yet. If you already paid, it usually takes a few minutes; if you didn't get to pay, you can try again from the module. You won't be charged twice."
+    },
+    "campo": {
+      "ocultarContrasena": "Hide password",
+      "mostrarContrasena": "Show password",
+      "ocultar": "Hide",
+      "ver": "Show"
+    },
+    "fuerza": {
+      "muyCorta": "Too short",
+      "debil": "Weak",
+      "aceptable": "Fair",
+      "buena": "Good",
+      "muyBuena": "Very good",
+      "consejo": "A phrase of several words is both safer and easier to remember."
+    },
+    "google": {
+      "o": "or",
+      "entrando": "Signing in…",
+      "noConfirma": "Google doesn't confirm that this email is yours. Sign in with your password.",
+      "fallo": "Couldn't sign in with Google. Please try again."
+    },
+    "editor": {
+      "marcador": "Write the content…",
+      "barra": "Text formatting",
+      "negrita": "Bold",
+      "cursiva": "Italic",
+      "tachado": "Strikethrough",
+      "titulo": "Heading",
+      "subtitulo": "Subheading",
+      "listaVinetas": "Bulleted list",
+      "listaVinetasEtiqueta": "• List",
+      "listaNumerada": "Numbered list",
+      "listaNumeradaEtiqueta": "1. List",
+      "cita": "Quote",
+      "enlace": "Insert/edit link",
+      "enlaceEtiqueta": "Link",
+      "deshacer": "Undo",
+      "rehacer": "Redo"
+    },
+    "enlace": {
+      "insertar": "Insert link",
+      "titulo": "Link",
+      "quitar": "Remove link"
+    },
+    "imagen": {
+      "sinArchivo": "No file was selected.",
+      "vacio": "The file is empty.",
+      "pesaDemasiado": "The image is {tamano} and the maximum is {maximo}.",
+      "formatoNoAdmitido": "Unsupported format. Use JPG, PNG, WebP, GIF or AVIF.",
+      "sinUrl": "The upload didn't return a URL.",
+      "subidaOk": "“{nombre}” uploaded successfully{tamano}. Save the form to apply it.",
+      "fallo": "Couldn't upload the image.",
+      "origen": "{etiqueta}: source",
+      "pegarUrl": "Paste URL",
+      "subir": "Upload image",
+      "elegirArchivoPara": "{etiqueta}: choose a file to upload",
+      "subiendo": "Uploading the image to Cloudinary…",
+      "arrastre": "Drag an image here, or",
+      "elegirArchivo": "Choose file",
+      "pista": "JPG, PNG, WebP, GIF or AVIF · up to {maximo}",
+      "vistaPreviaFallo": "Couldn't load this image. Check that the link is public and points directly to an image file (ending in .jpg, .png, .webp, etc.), not to a web page.",
+      "vistaPreviaOk": "Preview loaded successfully.",
+      "quitar": "Remove image"
+    },
+    "api": {
+      "debeIniciarSesion": "You need to sign in",
+      "sesionExpirada": "Your session expired",
+      "errorSolicitud": "Request error"
+    }
+  }
+}

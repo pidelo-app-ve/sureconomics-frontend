@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
@@ -13,7 +13,7 @@ export const InterviewGrid = ({ items }) => (
       <article key={v.id} className="se-vidcard">
         {/* El color del tema, como las demás tarjetas. Era un gris pálido fijo, así
             que las entrevistas eran lo único del sitio sin color propio. */}
-        <Link
+        <Enlace
           to={rutaDePieza(v)}
           className="se-vidcard__thumb"
           aria-label={v.titulo}
@@ -24,11 +24,11 @@ export const InterviewGrid = ({ items }) => (
           {/* Aquí y no en `CardMedia`: esta rejilla es la única que no dibuja su
               imagen a través de ese componente. */}
           <SelloEducativo pieza={v} />
-        </Link>
+        </Enlace>
         <div className="se-vidcard__body">
           <span className="se-meta se-meta--category">{temaPrincipal(v)}</span>
           <h3 className="se-vidcard__title">
-            <Link to={rutaDePieza(v)}>{v.titulo}</Link>
+            <Enlace to={rutaDePieza(v)}>{v.titulo}</Enlace>
           </h3>
           <div className="se-vidcard__foot">
             <span className="se-tagpill">{geoPrincipal(v)}</span>

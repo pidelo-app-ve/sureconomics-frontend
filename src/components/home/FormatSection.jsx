@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 
 /**
  * Shared chrome for the five format blocks on the homepage.
@@ -13,9 +13,9 @@ export const FormatSection = ({ title, to, linkLabel, children }) => (
     <div className="se-container">
       <div className="se-format__head">
         <h2 className="se-heading-section se-format__title">{title}</h2>
-        <Link to={to} className="se-format__more">
+        <Enlace to={to} className="se-format__more">
           {linkLabel}
-        </Link>
+        </Enlace>
       </div>
       {children}
     </div>

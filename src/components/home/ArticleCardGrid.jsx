@@ -1,17 +1,16 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
-import {
-  EspacioPublicitario,
-  useHayAnuncio,
-} from "../publicidad";
+import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
 export const ArticleCardGrid = ({ items, espacioDeAnuncio }) => {
+  const { t } = useIdioma();
   // Se pregunta **antes** de montar la rejilla: el anuncio le quita el sitio a
   // una pieza, así que si no hay campaña que encaje la rejilla tiene que saberlo
   // para no descontarla igual y quedarse corta.
@@ -26,20 +25,20 @@ export const ArticleCardGrid = ({ items, espacioDeAnuncio }) => {
     {conAnuncio(
       items.map((a) => (
         <article key={a.id} className="se-artcard">
-          <Link to={rutaDePieza(a)} className="se-artcard__media" aria-label={a.titulo}>
+          <Enlace to={rutaDePieza(a)} className="se-artcard__media" aria-label={a.titulo}>
             <CardMedia pieza={a} />
-          </Link>
+          </Enlace>
           <div className="se-artcard__body">
             <span className="se-meta se-meta--category">{temaPrincipal(a)}</span>
             <h3 className="se-artcard__title">
-              <Link to={rutaDePieza(a)}>{a.titulo}</Link>
+              <Enlace to={rutaDePieza(a)}>{a.titulo}</Enlace>
             </h3>
             {a.resumen ? <p className="se-artcard__summary">{a.resumen}</p> : null}
             <div className="se-artcard__foot">
               <span className="se-tagpill">{geoPrincipal(a)}</span>
               <span className="se-artcard__by">
                 {a.fecha}
-                {a.autor ? ` · Por ${a.autor}` : ""}
+                {a.autor ? ` · ${t("portada.tarjeta.por", { autor: a.autor })}` : ""}
               </span>
             </div>
           </div>

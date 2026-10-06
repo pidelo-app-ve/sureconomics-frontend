@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import {
   ArticleCardGrid,
@@ -13,7 +14,7 @@ import {
   PodcastGrid,
   ReportGrid,
 } from "../components/home";
-import { FORMATO_META, rutaDeFormato } from "../lib/pieza";
+import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { applyFilter } from "../lib/contentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -40,6 +41,7 @@ const LAYOUTS = {
 };
 
 export const Explorar = () => {
+  const { t, lang } = useIdioma();
   const [searchParams, setSearchParams] = useSearchParams();
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error } = usePieces();
@@ -82,25 +84,26 @@ export const Explorar = () => {
 
   // "Energía y Minería · en Venezuela".
   const titulo = useMemo(() => {
+    const union = t("listados.explorar.union");
     const partes = [];
-    if (temas.size) partes.push([...temas].join(" y "));
-    if (geos.size) partes.push(`en ${[...geos].join(" y ")}`);
-    return partes.length ? partes.join(" · ") : "Todo el contenido";
-  }, [temas, geos]);
+    if (temas.size) partes.push([...temas].join(union));
+    if (geos.size) partes.push(t("listados.explorar.enLugar", { lugares: [...geos].join(union) }));
+    return partes.length ? partes.join(" · ") : t("listados.explorar.todoElContenido");
+  }, [temas, geos, t]);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: `${titulo} — ${BRAND.name}`,
-      description: `Contenido de ${BRAND.name} sobre ${titulo.toLowerCase()}.`,
-    });
-  }, [titulo]);
+  useMetaPagina({
+    title: t("listados.explorar.meta.titulo", { titulo, marca: BRAND.name }),
+    description: t("listados.explorar.meta.descripcion", { marca: BRAND.name, titulo: titulo.toLowerCase() }),
+  });
 
   const isFiltered = temas.size > 0 || geos.size > 0 || query.trim().length > 0;
   const cargando = useDelayedFlag(status === "loading");
 
+  // En español manda el nombre que la redacción puso en el panel; en inglés, el del
+  // diccionario, que es el único que existe en ese idioma.
   const nombrePlural = (formatoApi) =>
-    taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural ??
-    FORMATO_META[formatoApi].plural;
+    (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
+    nombreDeFormato(formatoApi);
 
   const grupos = Object.keys(FORMATO_META)
     .map((formatoApi) => {
@@ -117,12 +120,11 @@ export const Explorar = () => {
       <section className="se-section se-articles__hero" aria-label={titulo}>
         <div className="se-container">
           <div className="se-articles__head">
-            <p className="se-articles__kicker">Explorar</p>
+            <p className="se-articles__kicker">{t("listados.explorar.kicker")}</p>
             <h1 className="se-articles__title">{titulo}</h1>
             {status === "success" ? (
               <p className="se-text-body se-articles__lead">
-                {results.length} {results.length === 1 ? "pieza" : "piezas"}, agrupadas por
-                formato.
+                {t("listados.explorar.conteo", { n: results.length })}
               </p>
             ) : null}
           </div>
@@ -132,7 +134,9 @@ export const Explorar = () => {
           <div className="se-container">
             <ContentExplorer
               pieces={pieces}
-              temasDisponibles={taxonomy.topics.map((t) => t.name)}
+              // `nombreTraducido` y no `name`: las piezas ya traen sus temas en el
+              // idioma de la página, y las opciones tienen que casar con ellos.
+              temasDisponibles={taxonomy.topics.map((tema) => nombreTraducido(tema))}
               geoTop={taxonomy.geoTop}
               continentes={taxonomy.continentes}
               regiones={taxonomy.regiones}
@@ -143,7 +147,7 @@ export const Explorar = () => {
               onChange={handleSelection}
               onQueryChange={handleQuery}
               total={results.length}
-              scopeLabel="en todo el sitio"
+              scopeLabel={t("listados.explorar.alcance")}
             />
           </div>
         ) : null}
@@ -152,7 +156,7 @@ export const Explorar = () => {
       {status === "error" ? (
         <section className="se-section">
           <div className="se-container">
-            <ErrorState title="No se pudo cargar el contenido" error={error} />
+            <ErrorState title={t("listados.explorar.errorCarga")} error={error} />
           </div>
         </section>
       ) : null}
@@ -160,7 +164,7 @@ export const Explorar = () => {
       {cargando ? (
         <section className="se-section">
           <div className="se-container">
-            <LoadingState title="Buscando…" />
+            <LoadingState title={t("listados.explorar.buscando")} />
           </div>
         </section>
       ) : null}
@@ -169,11 +173,11 @@ export const Explorar = () => {
         <section className="se-section">
           <div className="se-container">
             <EmptyState
-              title={isFiltered ? "Sin resultados" : "Todavía no hay nada publicado"}
+              title={isFiltered ? t("comun.sinResultados") : t("listados.explorar.vacioTitulo")}
               description={
                 isFiltered
-                  ? "Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda."
-                  : "Cuando la redacción publique la primera pieza, aparecerá aquí."
+                  ? t("listados.explorar.sinResultadosTexto")
+                  : t("listados.explorar.vacioTexto")
               }
             />
           </div>
@@ -185,7 +189,11 @@ export const Explorar = () => {
           key={formatoApi}
           title={`${nombrePlural(formatoApi)} (${total})`}
           to={rutaDeFormato(formatoApi)}
-          linkLabel={total > items.length ? `Ver las ${total}` : "Ver toda la sección"}
+          linkLabel={
+            total > items.length
+              ? t("listados.explorar.verLasN", { n: total })
+              : t("listados.explorar.verSeccion")
+          }
         >
           {LAYOUTS[formatoApi](items)}
         </FormatSection>

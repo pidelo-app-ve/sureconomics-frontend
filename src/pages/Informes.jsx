@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { BRAND } from "../data/surEconomicsMock";
-import { applyPageMeta } from "../lib/seo";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { FormatListing } from "./Articulos";
 
 /**
@@ -15,12 +15,11 @@ import { FormatListing } from "./Articulos";
  * public and complete, and only the file asks for registration.
  */
 export const Informes = () => {
-  useEffect(() => {
-    applyPageMeta({
-      title: `Informes — ${BRAND.name}`,
-      description: `Informes y reportes de ${BRAND.name}.`,
-    });
-  }, []);
+  const { t } = useIdioma();
+  useMetaPagina({
+    title: t("listados.informes.meta.titulo", { marca: BRAND.name }),
+    description: t("listados.informes.meta.descripcion", { marca: BRAND.name }),
+  });
 
   return (
     <main className="se-blog se-articles" role="main">

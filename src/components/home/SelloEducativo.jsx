@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /**
  * El sello de contenido educativo, en la esquina de la tarjeta.
@@ -14,8 +15,10 @@ import PropTypes from "prop-types";
  * Devuelve nulo cuando la pieza no es educativa, para que quien lo pinte no tenga que
  * repetir la condición en cada rejilla.
  */
-export const SelloEducativo = ({ pieza }) =>
-  pieza?.educativo ? <span className="se-sello-edu">Educativo</span> : null;
+export const SelloEducativo = ({ pieza }) => {
+  const { t } = useIdioma();
+  return pieza?.educativo ? <span className="se-sello-edu">{t("portada.tarjeta.educativo")}</span> : null;
+};
 
 SelloEducativo.propTypes = {
   pieza: PropTypes.shape({ educativo: PropTypes.bool }),

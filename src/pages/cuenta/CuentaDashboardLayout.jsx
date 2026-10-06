@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { Enlace, EnlaceNav } from "../../components/Enlace";
 import { RequireUserAuth } from "../../components/cuenta/RequireUserAuth";
 import { useUserAuth } from "../../context/UserAuthContext";
+import { BRAND } from "../../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 const IconGrid = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -63,14 +66,15 @@ const IconCompras = () => (
 );
 
 const RAIL_NAV = [
-  { to: "/cuenta", end: true, label: "Inicio", icon: IconGrid },
-  { to: "/cuenta/perfil", label: "Mi perfil", icon: IconUser },
-  { to: "/cuenta/lo-mio", label: "Lo mío", icon: IconCompras },
-  { to: "/cuenta/marcadores", label: "Marcadores", icon: IconBookmark },
-  { to: "/cuenta/envios", label: "Envíos", icon: IconSend },
+  { to: "/cuenta", end: true, labelKey: "nav.inicio", icon: IconGrid },
+  { to: "/cuenta/perfil", labelKey: "cuenta.panel.miPerfil", icon: IconUser },
+  { to: "/cuenta/lo-mio", labelKey: "cuenta.panel.loMio", icon: IconCompras },
+  { to: "/cuenta/marcadores", labelKey: "nav.marcadores", icon: IconBookmark },
+  { to: "/cuenta/envios", labelKey: "nav.envios", icon: IconSend },
 ];
 
 const DashboardShell = () => {
+  const { t } = useIdioma();
   const { profile, logout } = useUserAuth();
   const location = useLocation();
   const [railOpen, setRailOpen] = useState(false);
@@ -105,7 +109,7 @@ const DashboardShell = () => {
         <button
           type="button"
           className="se-reader-dash__scrim"
-          aria-label="Cerrar menú"
+          aria-label={t("nav.cerrarMenu")}
           onClick={handleCloseRail}
         />
       ) : null}
@@ -115,7 +119,7 @@ const DashboardShell = () => {
         className={`se-reader-dash__rail${railOpen ? " se-reader-dash__rail--open" : ""}`}
       >
         <div className="se-reader-dash__rail-brand">
-          <Link to="/" className="se-reader-dash__rail-logo" onClick={handleCloseRail}>
+          <Enlace to="/" className="se-reader-dash__rail-logo" onClick={handleCloseRail}>
             {/* Solo el wordmark: ya lleva el isotipo dentro. Se pintaban los dos, uno
                 encima del otro, y el nombre de la marca quedaba ilegible. */}
             <img
@@ -126,14 +130,14 @@ const DashboardShell = () => {
               height={48}
               decoding="async"
             />
-            <span className="se-sr-only">SurEconomics — inicio</span>
-          </Link>
-          <span className="se-reader-dash__rail-tag">Lector</span>
+            <span className="se-sr-only">{t("cuenta.panel.inicio", { marca: BRAND.name })}</span>
+          </Enlace>
+          <span className="se-reader-dash__rail-tag">{t("cuenta.panel.lector")}</span>
         </div>
 
-        <nav className="se-reader-dash__nav" aria-label="Área de lector">
-          {RAIL_NAV.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
+        <nav className="se-reader-dash__nav" aria-label={t("cuenta.panel.areaDeLector")}>
+          {RAIL_NAV.map(({ to, labelKey, icon: Icon, end }) => (
+            <EnlaceNav
               key={to}
               to={to}
               end={Boolean(end)}
@@ -143,17 +147,17 @@ const DashboardShell = () => {
               <span className="se-reader-dash__nav-ico" aria-hidden="true">
                 <Icon />
               </span>
-              <span>{label}</span>
-            </NavLink>
+              <span>{t(labelKey)}</span>
+            </EnlaceNav>
           ))}
         </nav>
 
         <div className="se-reader-dash__rail-footer">
           <p className="se-reader-dash__rail-email" title={profile?.email ?? ""}>
-            {profile?.email || "Sesión activa"}
+            {profile?.email || t("cuenta.panel.sesionActiva")}
           </p>
           <button type="button" className="se-reader-dash__logout" onClick={handleLogout}>
-            Cerrar sesión
+            {t("nav.cerrarSesion")}
           </button>
         </div>
       </aside>
@@ -166,17 +170,17 @@ const DashboardShell = () => {
             onClick={() => setRailOpen((o) => !o)}
             aria-expanded={railOpen}
             aria-controls="reader-dash-rail"
-            aria-label={railOpen ? "Cerrar menú lateral" : "Abrir menú lateral"}
+            aria-label={railOpen ? t("cuenta.panel.cerrarMenuLateral") : t("cuenta.panel.abrirMenuLateral")}
           >
             <span />
             <span />
             <span />
           </button>
-          <Link
+          <Enlace
             to="/"
             className="se-reader-dash__topbar-home"
             onClick={handleCloseRail}
-            aria-label="SurEconomics — inicio"
+            aria-label={t("cuenta.panel.inicio", { marca: BRAND.name })}
           >
             <img
               className="se-reader-dash__topbar-home-img"
@@ -186,16 +190,16 @@ const DashboardShell = () => {
               height={28}
               decoding="async"
             />
-          </Link>
+          </Enlace>
           <div className="se-reader-dash__topbar-meta">
-            <span className="se-reader-dash__topbar-title">Su espacio</span>
+            <span className="se-reader-dash__topbar-title">{t("cuenta.panel.suEspacio")}</span>
             {profile?.email ? (
               <span className="se-reader-dash__topbar-sub">{profile.email}</span>
             ) : null}
           </div>
-          <Link to="/" className="se-reader-dash__topbar-site" onClick={handleCloseRail}>
-            Volver al sitio
-          </Link>
+          <Enlace to="/" className="se-reader-dash__topbar-site" onClick={handleCloseRail}>
+            {t("cuenta.panel.volverAlSitio")}
+          </Enlace>
         </header>
 
         <main className="se-reader-dash__main" id="reader-dashboard-main">

@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
 import { IconLlave, IconReloj, IconTexto } from "../icons/educacion";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import {
   duracionLegible,
   mezclaLegible,
@@ -30,13 +31,14 @@ import {
  * vistazo entre tarjetas porque todas lo tienen a la misma altura.
  */
 export const TarjetaDeModulo = ({ modulo }) => {
+  const { t } = useIdioma();
   const duracion = duracionLegible(modulo.duracion_minutos);
   const mezcla = mezclaLegible(modulo.tipos);
   const nivel = nivelLegible(modulo.nivel);
   const libres = modulo.lecciones_libres || 0;
 
   return (
-    <Link
+    <Enlace
       to={`/educacion/${modulo.slug}`}
       className={`se-modulo${modulo.gratuito ? " se-modulo--cortesia" : ""}`}
     >
@@ -48,11 +50,11 @@ export const TarjetaDeModulo = ({ modulo }) => {
 
       <span className="se-modulo__cabeza">
         <span className="se-modulo__etiqueta">
-          {modulo.gratuito ? "Cortesía" : nivel || "Módulo"}
+          {modulo.gratuito ? t("educacion.tarjeta.cortesia") : nivel || t("educacion.comun.modulo")}
         </span>
         <span className="se-modulo__precio">
           {modulo.gratuito
-            ? "Gratis"
+            ? t("educacion.comun.gratis")
             : precioLegible(modulo.precio_centavos, modulo.moneda)}
         </span>
       </span>
@@ -69,7 +71,7 @@ export const TarjetaDeModulo = ({ modulo }) => {
           medir alguna lección, y escribir ahí un "por determinar" sería ruido. */}
       <span className="se-modulo__datos">
         <span className="se-modulo__dato">
-          {modulo.lecciones} {modulo.lecciones === 1 ? "lección" : "lecciones"}
+          {t("educacion.comun.lecciones", { n: modulo.lecciones ?? 0 })}
         </span>
         {duracion ? (
           <span className="se-modulo__dato">
@@ -95,15 +97,15 @@ export const TarjetaDeModulo = ({ modulo }) => {
       {modulo.gratuito ? (
         <span className="se-modulo__gancho">
           <IconLlave className="se-modulo__icono" />
-          Solo pide cuenta verificada
+          {t("educacion.tarjeta.soloCuentaVerificada")}
         </span>
       ) : libres > 0 ? (
         <span className="se-modulo__gancho">
           <IconLlave className="se-modulo__icono" />
-          {libres === 1 ? "Primera clase gratis" : `${libres} clases gratis`}
+          {t("educacion.tarjeta.clasesGratis", { n: libres })}
         </span>
       ) : null}
-    </Link>
+    </Enlace>
   );
 };
 

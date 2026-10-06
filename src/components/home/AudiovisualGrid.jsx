@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
+import { FORMATO_META, imagenAncho, imagenSrcSet, nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas, piezaShape } from "./piezaShape";
@@ -31,8 +32,9 @@ const SIZES = {
 /** Ancho de la derivada que se pide cuando no hay `srcset` que ofrecer. */
 const ANCHO_BASE = { rejilla: 800, hero: 1400 };
 
-/** Lo que dice el chip. La API habla en singular y en inglés; el chip, en el idioma del lector. */
-const ETIQUETA = { entrevista: "Entrevista", podcast: "Podcast" };
+/** Lo que dice el chip: el formato en singular y en el idioma del lector («Entrevista» / «Interview»). */
+const etiquetaDe = (pieza) =>
+  FORMATO_META[pieza.formatoApi] ? nombreDeFormato(pieza.formatoApi, { singular: true }) : pieza.formato;
 
 /** Los campos que estas tarjetas leen además de los comunes a toda pieza. */
 const CAMPOS = {
@@ -63,7 +65,7 @@ const Miniatura = ({ pieza, variante }) => {
   const arriba = variante !== "rejilla";
 
   return (
-    <Link
+    <Enlace
       to={rutaDePieza(pieza)}
       className="se-alpunto__thumb"
       aria-label={pieza.titulo}
@@ -86,13 +88,13 @@ const Miniatura = ({ pieza, variante }) => {
           las demás rejillas, y aquí la fila lo vuelve estático para que no se monte
           sobre el chip. */}
       <span className="se-alpunto__chips">
-        <span className="se-alpunto__chip">{ETIQUETA[pieza.formatoApi] ?? pieza.formato}</span>
+        <span className="se-alpunto__chip">{etiquetaDe(pieza)}</span>
         <SelloEducativo pieza={pieza} />
       </span>
 
       {esVideo ? <span className="se-vidcard__play se-alpunto__play" aria-hidden="true" /> : null}
       {pieza.duracion ? <span className="se-vidcard__dur">{pieza.duracion}</span> : null}
-    </Link>
+    </Enlace>
   );
 };
 
@@ -109,13 +111,14 @@ Miniatura.propTypes = {
  * que es. El resumen sólo sale en el hero, donde hay sitio para leerlo.
  */
 export const TarjetaAlPunto = ({ pieza, variante }) => {
+  const { t } = useIdioma();
   const esEntrevista = pieza.formatoApi === "entrevista";
   const enHero = variante !== "rejilla";
 
   let kicker;
-  if (esEntrevista) kicker = temaPrincipal(pieza) ?? "Entrevista";
-  else if (enHero) kicker = `Podcast${pieza.duracion ? ` · ${pieza.duracion}` : ""}`;
-  else kicker = "Episodio";
+  if (esEntrevista) kicker = temaPrincipal(pieza) ?? nombreDeFormato("entrevista", { singular: true });
+  else if (enHero) kicker = `${nombreDeFormato("podcast")}${pieza.duracion ? ` · ${pieza.duracion}` : ""}`;
+  else kicker = t("portada.alPunto.episodio");
 
   return (
     <article className={`se-alpunto__card se-alpunto__card--${variante}`}>
@@ -123,7 +126,7 @@ export const TarjetaAlPunto = ({ pieza, variante }) => {
       <div className="se-alpunto__body">
         <span className="se-meta se-meta--category">{kicker}</span>
         <h3 className="se-alpunto__title">
-          <Link to={rutaDePieza(pieza)}>{pieza.titulo}</Link>
+          <Enlace to={rutaDePieza(pieza)}>{pieza.titulo}</Enlace>
         </h3>
         {esEntrevista && pieza.entrevistado ? (
           <p className="se-alpunto__who">
@@ -167,23 +170,23 @@ const ColumnaLateral = ({ piezas, titulo, enlace }) => (
       {piezas.map((p) => (
         <li key={p.id} className="se-alpunto__lateral-item">
           <span className="se-alpunto__lateral-meta">
-            {ETIQUETA[p.formatoApi] ?? p.formato}
+            {etiquetaDe(p)}
             {p.fecha ? ` · ${p.fecha}` : ""}
             {p.duracion ? ` · ${p.duracion}` : ""}
           </span>
-          <Link className="se-alpunto__lateral-enlace" to={rutaDePieza(p)}>
+          <Enlace className="se-alpunto__lateral-enlace" to={rutaDePieza(p)}>
             {p.titulo}
-          </Link>
+          </Enlace>
         </li>
       ))}
     </ol>
     {/* Al pie y empujado abajo: con pocos episodios la caja iguala la altura del
         video, y el hueco lo ocupa la salida natural de esta lista. */}
     {enlace ? (
-      <Link className="se-alpunto__lateral-todos" to={enlace.to}>
+      <Enlace className="se-alpunto__lateral-todos" to={enlace.to}>
         {enlace.texto}
         <span aria-hidden="true"> →</span>
-      </Link>
+      </Enlace>
     ) : null}
   </aside>
 );

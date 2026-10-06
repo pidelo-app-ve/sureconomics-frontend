@@ -1,4 +1,6 @@
-import { BRAND, INSTITUTIONAL, TEAM, claveDeFoto } from "../data/surEconomicsMock";
+import { BRAND, TEAM, claveDeFoto } from "../data/surEconomicsMock";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getFotosDelEquipo } from "../services/publicContentService";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
@@ -59,6 +61,7 @@ const useFotosDelEquipo = () => {
 };
 
 const TeamSection = ({ title, members, initiallyOpen, fotos }) => {
+  const { t } = useIdioma();
   const hasMembers = Boolean(members?.length);
   const [open, setOpen] = useState(Boolean(initiallyOpen));
   useEffect(() => {
@@ -73,10 +76,10 @@ const TeamSection = ({ title, members, initiallyOpen, fotos }) => {
       open={open}
       onToggle={(e) => setOpen(Boolean(e.currentTarget.open))}
     >
-      <summary className="se-about__acc-summary" aria-label={`Abrir sección ${title}`}>
+      <summary className="se-about__acc-summary" aria-label={t("paginas.quienesSomos.abrirSeccion", { seccion: title })}>
         <span className="se-about__acc-title">{title}</span>
         <span className="se-about__acc-right">
-          <span className="se-about__acc-meta" aria-label={`${members.length} integrantes`}>
+          <span className="se-about__acc-meta" aria-label={t("paginas.quienesSomos.integrantes", { n: members.length })}>
             {members.length}
           </span>
           <span className="se-about__acc-chevron" aria-hidden="true" />
@@ -102,8 +105,13 @@ TeamSection.propTypes = {
 };
 
 export const QuienesSomos = () => {
+  const { t } = useIdioma();
   const initiallyOpen = useInitialAccordionOpen();
   const fotos = useFotosDelEquipo();
+  useMetaPagina({
+    title: t("paginas.quienesSomos.meta.titulo", { marca: BRAND.name }),
+    description: t("paginas.quienesSomos.meta.descripcion"),
+  });
 
   return (
     <main className="se-blog se-about" role="main">
@@ -111,7 +119,7 @@ export const QuienesSomos = () => {
         <div className="se-container">
           <div className="se-about__hero-grid">
             <div className="se-about__hero-copy">
-              <p className="se-about__kicker">Quiénes somos</p>
+              <p className="se-about__kicker">{t("paginas.quienesSomos.kicker")}</p>
               <h1 className="se-about__title">
                 <BrandWordmark />
               </h1>
@@ -120,11 +128,11 @@ export const QuienesSomos = () => {
                   quiénes lo hacen y desde dónde. Antes aquí se repetía el texto
                   del pie de página, que es el mismo párrafo largo que el lector
                   ya se encuentra al final de cada página. */}
-              <p className="se-about__tagline">{INSTITUTIONAL.intro[0]}</p>
+              <p className="se-about__tagline">{t("paginas.quienesSomos.intro1")}</p>
               <div className="se-about__intro">
-                {INSTITUTIONAL.intro.slice(1).map((linea) => (
-                  <p key={linea} className="se-about__intro-line">
-                    {linea}
+                {["intro2", "intro3"].map((clave) => (
+                  <p key={clave} className="se-about__intro-line">
+                    {t(`paginas.quienesSomos.${clave}`)}
                   </p>
                 ))}
               </div>
@@ -139,9 +147,9 @@ export const QuienesSomos = () => {
       <section className="se-section se-about__bands">
         <div className="se-container">
           <article className="se-about__band se-about__band--alt">
-            <h2 className="se-about__band-title">Propósito</h2>
+            <h2 className="se-about__band-title">{t("paginas.quienesSomos.proposito")}</h2>
             <p className="se-text-body se-about__band-text se-about__band-text--lead">
-              {INSTITUTIONAL.purpose}
+              {t("paginas.quienesSomos.propositoTexto")}
             </p>
           </article>
         </div>
@@ -150,10 +158,8 @@ export const QuienesSomos = () => {
       <section className="se-section se-about__team">
         <div className="se-container">
           <header className="se-about__team-head">
-            <h2 className="se-heading-section se-about__team-title">Equipo</h2>
-            <p className="se-text-body se-about__team-lead">
-              La estructura editorial y operativa detrás de SurEconomics.
-            </p>
+            <h2 className="se-heading-section se-about__team-title">{t("paginas.quienesSomos.equipo")}</h2>
+            <p className="se-text-body se-about__team-lead">{t("paginas.quienesSomos.equipoLead")}</p>
           </header>
 
           <div className="se-about__acc-list">
@@ -165,37 +171,37 @@ export const QuienesSomos = () => {
                 documento lo tiene: cada bloque es un cargo o un comite, no una
                 casilla exclusiva. */}
             <TeamSection
-              title="Junta Directiva"
+              title={t("paginas.quienesSomos.secciones.junta")}
               members={TEAM.board}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Director General"
+              title={t("paginas.quienesSomos.secciones.directorGeneral")}
               members={TEAM.directorGeneral}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Editor en Jefe"
+              title={t("paginas.quienesSomos.secciones.editorEnJefe")}
               members={TEAM.editorEnJefe}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Comité Editorial"
+              title={t("paginas.quienesSomos.secciones.comiteEditorial")}
               members={TEAM.editorialCommittee}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Equipo"
+              title={t("paginas.quienesSomos.secciones.equipo")}
               members={TEAM.team}
               initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
-              title="Colaboradores"
+              title={t("paginas.quienesSomos.secciones.colaboradores")}
               members={TEAM.collaborators}
               initiallyOpen={initiallyOpen}
               fotos={fotos}

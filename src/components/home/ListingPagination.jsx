@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { PAGE_GAP, buildPageRange, clampPage } from "../../lib/pageRange";
 
 /**
@@ -20,6 +21,7 @@ export const ListingPagination = ({
   unit,
   onPageChange,
 }) => {
+  const { t } = useIdioma();
   if (totalPages <= 1) return null;
 
   const current = clampPage(page, totalPages);
@@ -31,12 +33,17 @@ export const ListingPagination = ({
   };
 
   return (
-    <nav className="se-pager" aria-label="Paginación">
+    <nav className="se-pager" aria-label={t("comun.paginacion")}>
       <p className="se-pager__count">
-        <strong>
-          {from}–{to}
-        </strong>{" "}
-        de <strong>{total}</strong> {unit}
+        {t("portada.paginador.cuenta", {
+          rango: (
+            <strong>
+              {from}–{to}
+            </strong>
+          ),
+          total: <strong>{total}</strong>,
+          unidad: unit,
+        })}
       </p>
 
       <div className="se-pager__controls">
@@ -46,7 +53,7 @@ export const ListingPagination = ({
           onClick={() => go(current - 1)}
           disabled={current <= 1}
         >
-          Anterior
+          {t("comun.anterior")}
         </button>
 
         {pages.map((p, index) =>
@@ -66,7 +73,7 @@ export const ListingPagination = ({
               className={`se-pager__btn${p === current ? " se-pager__btn--on" : ""}`}
               onClick={() => go(p)}
               aria-current={p === current ? "page" : undefined}
-              aria-label={`Ir a la página ${p}`}
+              aria-label={t("portada.paginador.irALaPagina", { n: p })}
             >
               {p}
             </button>
@@ -79,7 +86,7 @@ export const ListingPagination = ({
           onClick={() => go(current + 1)}
           disabled={current >= totalPages}
         >
-          Siguiente
+          {t("comun.siguiente")}
         </button>
       </div>
     </nav>

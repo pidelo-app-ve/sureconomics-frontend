@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
@@ -13,19 +14,21 @@ import { listaDePiezas } from "./piezaShape";
  * the house's position from a signed article at a glance, without the reader
  * having to notice the absence of an author line.
  */
-export const EditorialList = ({ items }) => (
+export const EditorialList = ({ items }) => {
+  const { t } = useIdioma();
+  return (
   <div className="se-artgrid">
     {items.map((e) => (
       <article key={e.id} className="se-artcard se-artcard--editorial">
-        <Link to={rutaDePieza(e)} className="se-artcard__media" aria-label={e.titulo}>
+        <Enlace to={rutaDePieza(e)} className="se-artcard__media" aria-label={e.titulo}>
           <CardMedia pieza={e} />
-        </Link>
+        </Enlace>
         <div className="se-artcard__body">
           <span className="se-meta se-meta--category">
-            Editorial · {temaPrincipal(e) ?? geoPrincipal(e)}
+            {t("portada.editorial.gorro", { tema: temaPrincipal(e) ?? geoPrincipal(e) })}
           </span>
           <h3 className="se-artcard__title">
-            <Link to={rutaDePieza(e)}>{e.titulo}</Link>
+            <Enlace to={rutaDePieza(e)}>{e.titulo}</Enlace>
           </h3>
           {e.entrada ? <p className="se-artcard__summary">{e.entrada}</p> : null}
           <div className="se-artcard__foot">
@@ -36,7 +39,8 @@ export const EditorialList = ({ items }) => (
       </article>
     ))}
   </div>
-);
+  );
+};
 
 EditorialList.propTypes = {
   items: listaDePiezas({

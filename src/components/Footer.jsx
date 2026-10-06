@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
+import { Enlace } from "./Enlace";
 import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
 import { IconInstagram, IconTikTok, IconX } from "./icons/social";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
-import useI18n from "../i18n/useI18n";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useState } from "react";
 import { subscribeToNewsletter } from "../services/newsletterService";
 import { marcarSuscrito } from "../lib/invitacionBoletin";
@@ -16,7 +16,7 @@ const ICONO_RED = {
 };
 
 export const Footer = () => {
-  const { t } = useI18n();
+  const { t } = useIdioma();
   const [newsletterEmail, setNewsletterEmail] = useState("");
   // El campo trampa: invisible para una persona, irresistible para un rastreador.
   const [newsletterTrampa, setNewsletterTrampa] = useState("");
@@ -50,17 +50,17 @@ export const Footer = () => {
       setNewsletterEmail("");
       setNewsletterState({
         status: "success",
-        message: "Listo. Le llegará el próximo boletín a ese correo.",
+        message: t("pie.suscritoOk"),
       });
     } catch (err) {
       setNewsletterState({
         status: "error",
         message:
           err?.status === 422
-            ? "Revise el correo: parece que tiene algo raro."
+            ? t("pie.correoRaro")
             : err?.status === 429
-              ? "Demasiados intentos. Espere un momento y vuelva a probar."
-              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+              ? t("pie.demasiadosIntentos")
+              : t("pie.fallo"),
       });
     }
   };
@@ -81,18 +81,18 @@ export const Footer = () => {
               />
               <span className="se-sr-only">{BRAND.name}</span>
             </h2>
-            <p className="se-footer__tagline">{BRAND.tagline}</p>
-            <p className="se-footer__description">{BRAND.description}</p>
+            <p className="se-footer__tagline">{t("marca.lema")}</p>
+            <p className="se-footer__description">{t("marca.descripcion")}</p>
           </div>
 
-          <nav className="se-footer__nav" aria-label="Enlaces del sitio">
-            <div className="se-footer__contact-title">Navegación</div>
+          <nav className="se-footer__nav" aria-label={t("pie.enlacesDelSitio")}>
+            <div className="se-footer__contact-title">{t("pie.navegacion")}</div>
             <ul className="se-footer__nav-list">
               {PRIMARY_NAV.map((item) => (
                 <li key={item.id}>
-                  <Link to={item.to} className="se-footer__link">
+                  <Enlace to={item.to} className="se-footer__link">
                     {t(item.labelKey)}
-                  </Link>
+                  </Enlace>
                 </li>
               ))}
             </ul>
@@ -108,30 +108,28 @@ export const Footer = () => {
           </div>
 
           <div className="se-footer__newsletter">
-            <div className="se-footer__contact-title">Boletín</div>
-            <p className="se-footer__newsletter-text">
-              Reciba un resumen ejecutivo con señales y contexto. Cada lunes por la mañana.
-            </p>
+            <div className="se-footer__contact-title">{t("pie.boletin")}</div>
+            <p className="se-footer__newsletter-text">{t("pie.boletinTexto")}</p>
             {/* El nombre va en el formulario, que si lo anuncia: con nombre es una
                 region de formulario y se puede saltar a ella. */}
             <form
               className="se-footer__newsletter-form"
               onSubmit={handleNewsletterSubmit}
-              aria-label="Suscripción al boletín"
+              aria-label={t("pie.boletinFormulario")}
             >
               <label className="se-sr-only" htmlFor="footer-newsletter-email">
-                Correo electrónico
+                {t("pie.correo")}
               </label>
               <input
                 id="footer-newsletter-email"
                 type="email"
                 className="se-footer__newsletter-input"
-                placeholder="Su correo"
+                placeholder={t("pie.suCorreo")}
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
                 disabled={newsletterState.status === "loading"}
                 required
-                aria-label="Correo electrónico para newsletter"
+                aria-label={t("pie.correoParaBoletin")}
               />
               {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
                   rellenara sin querer, su suscripción se descartaría. */}
@@ -149,9 +147,9 @@ export const Footer = () => {
                 type="submit"
                 className="se-footer__newsletter-btn"
                 disabled={newsletterState.status === "loading"}
-                aria-label="Suscribirme al boletín"
+                aria-label={t("pie.suscribirmeAlBoletin")}
               >
-                {newsletterState.status === "loading" ? "Enviando…" : "Suscribirme"}
+                {newsletterState.status === "loading" ? t("pie.enviando") : t("pie.suscribirme")}
               </button>
             </form>
             <div className="se-footer__newsletter-status" aria-live="polite">
@@ -170,26 +168,26 @@ export const Footer = () => {
         <hr className="se-divider se-footer__divider" />
         <div className="se-footer__bottom">
           <p className="se-footer__copy">
-            © {new Date().getFullYear()} {BRAND.name}. Todos los derechos reservados.
+            © {new Date().getFullYear()} {BRAND.name}. {t("pie.derechos")}
             {" · "}
             {/* El aviso de cookies tiene que estar alcanzable desde cualquier pagina:
                 es donde vive el boton de retirar el consentimiento, y la ley pide que
                 retirarlo sea tan facil como haberlo dado. */}
-            <Link to="/cookies" className="se-footer__legal">
-              Política de cookies
-            </Link>
+            <Enlace to="/cookies" className="se-footer__legal">
+              {t("pie.politicaCookies")}
+            </Enlace>
             {" · "}
             {/* La puerta de entrada comercial. Va en el pie y no en el menu
                 principal a proposito: quien viene a leer no tiene por que
                 tropezarse con ella, y quien viene a comprar espacio la busca. */}
-            <Link to="/anunciate" className="se-footer__legal">
-              Anúnciate aquí
-            </Link>
+            <Enlace to="/anunciate" className="se-footer__legal">
+              {t("pie.anunciateAqui")}
+            </Enlace>
           </p>
 
           <div className="se-footer__social">
             <span className="se-footer__social-title" id="se-footer-redes">
-              Síguenos en
+              {t("pie.siguenos")}
             </span>
             <ul className="se-footer__social-list" aria-labelledby="se-footer-redes">
               {SOCIAL.map(({ id, label, handle, url }) => {

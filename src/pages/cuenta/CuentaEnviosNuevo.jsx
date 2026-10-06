@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Enlace, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 import { SubmissionForm } from "../../components/submissions/SubmissionForm";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 
 export const CuentaEnviosNuevo = () => {
-  const navigate = useNavigate();
+  const { t } = useIdioma();
+  const navigate = useNavegar();
   const { isEmailVerified } = useUserAuth();
   const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
   const [errorMessage, setErrorMessage] = useState("");
@@ -16,13 +19,11 @@ export const CuentaEnviosNuevo = () => {
   // y la persona vuelve a pulsar, no acaba con dos propuestas iguales a revisión.
   const { clave } = useClaveIdempotente();
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Nuevo envío — SurEconomics",
-      description: "Enviar propuesta editorial.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.envioNuevo.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.envioNuevo.meta.descripcion"),
+    noindex: true,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,7 +44,7 @@ export const CuentaEnviosNuevo = () => {
         created?.id ??
         created?.submission_id ??
         (created && typeof created === "object" && created.data && created.data.id);
-      const flashState = { flash: "Envío creado correctamente. Quedó a la espera de revisión." };
+      const flashState = { flash: t("cuenta.envioNuevo.creado") };
       if (id) {
         navigate(`/cuenta/envios/${encodeURIComponent(id)}`, { replace: true, state: flashState });
         return;
@@ -51,9 +52,9 @@ export const CuentaEnviosNuevo = () => {
       navigate("/cuenta/envios", { replace: true, state: flashState });
     } catch (err) {
       if (err?.status === 429) {
-        setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
+        setErrorMessage(t("cuenta.comun.demasiadasSolicitudes"));
       } else {
-        setErrorMessage(err instanceof Error ? err.message : "No se pudo crear el envío.");
+        setErrorMessage(err instanceof Error ? err.message : t("cuenta.envioNuevo.fallo"));
       }
     } finally {
       setIsSubmitting(false);
@@ -64,12 +65,12 @@ export const CuentaEnviosNuevo = () => {
     return (
       <div className="se-reader-dash__page">
         <div className="se-reader-card se-reader-card--narrow">
-          <h1 className="se-reader-page-title">Nuevo envío</h1>
+          <h1 className="se-reader-page-title">{t("cuenta.envioNuevo.titulo")}</h1>
           <p className="se-reader-page-lead">
-            Verifique su correo para enviar propuestas.{" "}
-            <Link to="/cuenta/verificar-email" className="se-link">
-              Verificar
-            </Link>
+            {t("cuenta.comun.verifiqueParaEnviar")}{" "}
+            <Enlace to="/cuenta/verificar-email" className="se-link">
+              {t("cuenta.comun.verificar")}
+            </Enlace>
           </p>
         </div>
       </div>
@@ -78,13 +79,13 @@ export const CuentaEnviosNuevo = () => {
 
   return (
     <SubmissionForm
-      title="Nuevo envío"
+      title={t("cuenta.envioNuevo.titulo")}
       backHref="/cuenta/envios"
-      backLabel="Volver a la lista"
+      backLabel={t("cuenta.envioNuevo.volverALaLista")}
       values={values}
       onChange={setValues}
       onSubmit={handleSubmit}
-      submitLabel="Enviar a revisión"
+      submitLabel={t("cuenta.envioNuevo.enviarARevision")}
       isSubmitting={isSubmitting}
       errorMessage={errorMessage}
     />

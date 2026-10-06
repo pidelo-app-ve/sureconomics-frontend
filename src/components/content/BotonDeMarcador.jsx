@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavegar } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { useMarcadores } from "../../context/MarcadoresContext";
 
@@ -38,7 +39,8 @@ const IconoMarcador = ({ lleno }) => (
 IconoMarcador.propTypes = { lleno: PropTypes.bool };
 
 export const BotonDeMarcador = ({ postId, className }) => {
-  const navigate = useNavigate();
+  const { t } = useIdioma();
+  const navigate = useNavegar();
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const { tiene, alternar } = useMarcadores();
   const [ocupado, setOcupado] = useState(false);
@@ -65,7 +67,7 @@ export const BotonDeMarcador = ({ postId, className }) => {
     try {
       await alternar(postId);
     } catch {
-      setError("No se pudo guardar. Inténtelo de nuevo.");
+      setError(t("piezas.marcador.error"));
     } finally {
       setOcupado(false);
     }
@@ -83,14 +85,16 @@ export const BotonDeMarcador = ({ postId, className }) => {
         aria-pressed={puede ? guardado : undefined}
         title={
           !isAuthenticated
-            ? "Entre para guardar esta pieza"
+            ? t("piezas.marcador.entreParaGuardar")
             : guardado
-              ? "Quitar de mis marcadores"
-              : "Guardar para después"
+              ? t("piezas.marcador.quitar")
+              : t("piezas.marcador.guardarParaDespues")
         }
       >
         <IconoMarcador lleno={puede && guardado} />
-        <span className="se-marcar__texto">{guardado ? "Guardado" : "Guardar"}</span>
+        <span className="se-marcar__texto">
+          {guardado ? t("piezas.marcador.guardado") : t("piezas.marcador.guardar")}
+        </span>
       </button>
       {error ? (
         <span className="se-marcar__error" role="alert">

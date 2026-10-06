@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { applyPageMeta } from "../lib/seo";
+import { useState } from "react";
+import { BRAND } from "../data/surEconomicsMock";
+import { Enlace } from "../components/Enlace";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../i18n/useMetaPagina";
 import { marcarSuscrito } from "../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../services/newsletterService";
 
@@ -20,14 +22,12 @@ export const Entorno = () => {
   const [email, setEmail] = useState("");
   const [trampa, setTrampa] = useState("");
   const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
+  const { t } = useIdioma();
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Entorno en Viñetas — SurEconomics",
-      description:
-        "El boletín semanal de SurEconomics: el entorno económico de la semana, contado en viñetas. Gratis, cada lunes.",
-    });
-  }, []);
+  useMetaPagina({
+    title: t("boletin.entorno.meta.titulo", { marca: BRAND.name }),
+    description: t("boletin.entorno.meta.descripcion"),
+  });
 
   const enviando = estado.status === "loading";
   const hayError = estado.status === "error";
@@ -38,7 +38,7 @@ export const Entorno = () => {
     if (enviando) return;
     const correo = email.trim();
     if (!correo) {
-      setEstado({ status: "error", mensaje: "Escriba su correo para suscribirse." });
+      setEstado({ status: "error", mensaje: t("boletin.entorno.escribaCorreo") });
       return;
     }
     setEstado({ status: "loading", mensaje: "" });
@@ -53,10 +53,10 @@ export const Entorno = () => {
         status: "error",
         mensaje:
           err?.status === 422
-            ? "Ese correo no parece completo. Revíselo y vuelva a probar."
+            ? t("boletin.errores.correoIncompleto")
             : err?.status === 429
-              ? "Demasiados intentos seguidos. Espere un momento."
-              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+              ? t("boletin.errores.demasiados")
+              : t("boletin.errores.fallo"),
       });
     }
   };
@@ -64,29 +64,26 @@ export const Entorno = () => {
   return (
     <main className="se-entorno" role="main">
       <div className="se-entorno__caja">
-        <Link to="/" className="se-entorno__marca" aria-label="SurEconomics, ir al sitio">
+        <Enlace to="/" className="se-entorno__marca" aria-label={t("boletin.entorno.irAlSitio")}>
           <img src="/brand/v2/lockup-verde.png" alt="SurEconomics" width="900" height="117" />
-        </Link>
+        </Enlace>
 
-        <p className="se-entorno__kicker">Boletín semanal · los lunes a las 9:00</p>
-        <h1 className="se-entorno__titulo">Entorno en Viñetas</h1>
-        <p className="se-entorno__texto">
-          El entorno económico de la semana, contado en viñetas: lo que movió los mercados,
-          lo que viene y lo que conviene mirar. Gratis, en su correo.
-        </p>
+        <p className="se-entorno__kicker">{t("boletin.entorno.kicker")}</p>
+        <h1 className="se-entorno__titulo">{t("boletin.nombre")}</h1>
+        <p className="se-entorno__texto">{t("boletin.entorno.texto")}</p>
 
         {listo ? (
           <div className="se-entorno__listo" role="status">
-            <p className="se-entorno__listo-titulo">Listo, ya está suscrito.</p>
-            <p className="se-entorno__listo-texto">El próximo lunes le llega a su correo.</p>
-            <Link to="/" className="se-entorno__boton se-entorno__boton--secundario">
-              Ver SurEconomics
-            </Link>
+            <p className="se-entorno__listo-titulo">{t("boletin.entorno.listoTitulo")}</p>
+            <p className="se-entorno__listo-texto">{t("boletin.entorno.listoTexto")}</p>
+            <Enlace to="/" className="se-entorno__boton se-entorno__boton--secundario">
+              {t("boletin.entorno.verSitio")}
+            </Enlace>
           </div>
         ) : (
           <form className="se-entorno__form" onSubmit={enviar} aria-busy={enviando} noValidate>
             <label htmlFor="entorno-email" className="se-entorno__label">
-              Su correo
+              {t("boletin.entorno.suCorreo")}
             </label>
             <input
               id="entorno-email"
@@ -96,7 +93,7 @@ export const Entorno = () => {
               autoCapitalize="off"
               spellCheck={false}
               className="se-entorno__input"
-              placeholder="nombre@correo.com"
+              placeholder={t("boletin.entorno.placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={enviando}
@@ -121,20 +118,18 @@ export const Entorno = () => {
               </p>
             ) : null}
             <button type="submit" className="se-entorno__boton" disabled={enviando}>
-              {enviando ? "Enviando…" : "Suscribirme"}
+              {enviando ? t("boletin.entorno.enviando") : t("boletin.entorno.suscribirme")}
             </button>
           </form>
         )}
 
         {!listo ? (
-          <Link to="/" className="se-entorno__no">
-            No, gracias — ir a SurEconomics <span aria-hidden="true">›</span>
-          </Link>
+          <Enlace to="/" className="se-entorno__no">
+            {t("boletin.entorno.noGracias")} <span aria-hidden="true">›</span>
+          </Enlace>
         ) : null}
 
-        <p className="se-entorno__letra">
-          Sin spam. Se da de baja con un clic desde cualquier boletín.
-        </p>
+        <p className="se-entorno__letra">{t("boletin.entorno.letra")}</p>
       </div>
     </main>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { ACCEPTED_IMAGE_MIME, MAX_IMAGE_BYTES } from "../../services/adminUploadsService";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
@@ -13,16 +14,17 @@ const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
  * browser's `File.type` (taken from the OS) can't be trusted for.
  *
  * @param {File} file
+ * @param {(clave: string, vars?: object) => string} t
  * @returns {string} error message, or "" when the file looks acceptable
  */
-const localFileProblem = (file) => {
-  if (!file) return "No se seleccionó ningún archivo.";
-  if (file.size === 0) return "El archivo está vacío.";
+const localFileProblem = (file, t) => {
+  if (!file) return t("cuenta.imagen.sinArchivo");
+  if (file.size === 0) return t("cuenta.imagen.vacio");
   if (file.size > MAX_IMAGE_BYTES) {
-    return `La imagen pesa ${formatMb(file.size)} y el máximo es ${formatMb(MAX_IMAGE_BYTES)}.`;
+    return t("cuenta.imagen.pesaDemasiado", { tamano: formatMb(file.size), maximo: formatMb(MAX_IMAGE_BYTES) });
   }
   if (file.type && !ACCEPTED_MIME_SET.has(file.type)) {
-    return "Formato no admitido. Use JPG, PNG, WebP, GIF o AVIF.";
+    return t("cuenta.imagen.formatoNoAdmitido");
   }
   return "";
 };
@@ -41,12 +43,14 @@ const localFileProblem = (file) => {
  *   label: string,
  *   value?: string,
  *   onChange: (url: string) => void,
- *   onUpload?: (file: File) => Promise<{ url: string, bytes?: number, width?: number, height?: number }>,
+ *   onUpload?: (file: File) =>
+ *     Promise<{ url: string, bytes?: number, width?: number, height?: number }>,
  *   required?: boolean,
  *   disabled?: boolean,
  * }} props
  */
 export const ImageField = ({ id, label, value, onChange, onUpload, required, disabled }) => {
+  const { t } = useIdioma();
   const [previewStatus, setPreviewStatus] = useState("idle");
   const [mode, setMode] = useState("url");
   const [uploadState, setUploadState] = useState({ status: "idle", error: "", info: "" });
@@ -68,7 +72,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
   const busy = disabled || isUploading;
 
   const runUpload = async (file) => {
-    const problem = localFileProblem(file);
+    const problem = localFileProblem(file, t);
     if (problem) {
       setUploadState({ status: "error", error: problem, info: "" });
       return;
@@ -78,7 +82,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
     try {
       const result = await onUpload(file);
       const url = typeof result === "string" ? result : result?.url;
-      if (!url) throw new Error("La subida no devolvió una URL.");
+      if (!url) throw new Error(t("cuenta.imagen.sinUrl"));
       // The component can unmount mid-upload (navigating away right after
       // picking a file); writing state then would warn and leak.
       if (!isMountedRef.current) return;
@@ -90,13 +94,13 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
         error: "",
         // The image is in Cloudinary but the post still holds the old URL until
         // the form is submitted; say so, or this reads as "done".
-        info: `«${file.name}» se subió correctamente${size}. Guarde el formulario para aplicarla.`,
+        info: t("cuenta.imagen.subidaOk", { nombre: file.name, tamano: size }),
       });
     } catch (err) {
       if (!isMountedRef.current) return;
       setUploadState({
         status: "error",
-        error: adminErrorMessage(err, "No se pudo subir la imagen."),
+        error: adminErrorMessage(err, t("cuenta.imagen.fallo")),
         info: "",
       });
     }
@@ -140,7 +144,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
       )}
 
       {canUpload ? (
-        <div className="se-image-field__modes" role="group" aria-label={`${label}: origen`}>
+        <div className="se-image-field__modes" role="group" aria-label={t("cuenta.imagen.origen", { etiqueta: label })}>
           <button
             type="button"
             className={`se-image-field__mode${mode === "url" ? " se-image-field__mode--active" : ""}`}
@@ -148,7 +152,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
             onClick={() => switchMode("url")}
             disabled={isUploading}
           >
-            Pegar URL
+            {t("cuenta.imagen.pegarUrl")}
           </button>
           <button
             type="button"
@@ -157,7 +161,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
             onClick={() => switchMode("upload")}
             disabled={isUploading}
           >
-            Subir imagen
+            {t("cuenta.imagen.subir")}
           </button>
         </div>
       ) : null}
@@ -195,12 +199,12 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
             type="file"
             className="se-sr-only"
             accept={ACCEPTED_IMAGE_MIME}
-            aria-label={`${label}: elegir archivo para subir`}
+            aria-label={t("cuenta.imagen.elegirArchivoPara", { etiqueta: label })}
             onChange={handleFileInputChange}
             disabled={busy}
           />
           <p className="se-image-field__drop-text">
-            {isUploading ? "Subiendo la imagen a Cloudinary…" : "Arrastre una imagen aquí, o"}
+            {isUploading ? t("cuenta.imagen.subiendo") : t("cuenta.imagen.arrastre")}
           </p>
           {!isUploading ? (
             <button
@@ -209,13 +213,13 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
               onClick={() => fileInputRef.current?.click()}
               disabled={busy}
             >
-              Elegir archivo
+              {t("cuenta.imagen.elegirArchivo")}
             </button>
           ) : (
             <span className="se-image-field__spinner" aria-hidden="true" />
           )}
           <p className="se-image-field__drop-hint">
-            JPG, PNG, WebP, GIF o AVIF · hasta {formatMb(MAX_IMAGE_BYTES)}
+            {t("cuenta.imagen.pista", { maximo: formatMb(MAX_IMAGE_BYTES) })}
           </p>
         </div>
       )}
@@ -242,12 +246,11 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
           />
           {previewStatus === "error" ? (
             <p className="se-image-preview__hint se-image-preview__hint--error">
-              No se pudo cargar esta imagen. Verifique que el enlace sea público y apunte directo a un
-              archivo de imagen (termina en .jpg, .png, .webp, etc.), no a una página web.
+              {t("cuenta.imagen.vistaPreviaFallo")}
             </p>
           ) : null}
           {previewStatus === "ok" ? (
-            <p className="se-image-preview__hint">Vista previa cargada correctamente.</p>
+            <p className="se-image-preview__hint">{t("cuenta.imagen.vistaPreviaOk")}</p>
           ) : null}
           <div className="se-image-field__current">
             <span className="se-image-field__url" title={trimmed}>
@@ -260,7 +263,7 @@ export const ImageField = ({ id, label, value, onChange, onUpload, required, dis
                 onClick={handleClear}
                 disabled={busy}
               >
-                Quitar imagen
+                {t("cuenta.imagen.quitar")}
               </button>
             ) : null}
           </div>

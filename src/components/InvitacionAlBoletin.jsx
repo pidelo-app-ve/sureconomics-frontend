@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 import { EVENTO_CONSENTIMIENTO, consentimiento } from "../lib/analitica";
 import {
   ESPERA_MS,
@@ -66,6 +67,7 @@ const medirLectura = () =>
 
 export const InvitacionAlBoletin = () => {
   const { pathname } = useLocation();
+  const { t } = useIdioma();
   const [abierta, setAbierta] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -244,16 +246,16 @@ export const InvitacionAlBoletin = () => {
       marcarSuscrito();
       setCorreoSuscrito(correo);
       setEmail("");
-      setEstado({ status: "success", mensaje: "Listo. El primer número le llega el lunes." });
+      setEstado({ status: "success", mensaje: t("boletin.invitacion.ok") });
     } catch (err) {
       setEstado({
         status: "error",
         mensaje:
           err?.status === 422
-            ? "Ese correo no parece completo. Revíselo y vuelva a probar."
+            ? t("boletin.errores.correoIncompleto")
             : err?.status === 429
-              ? "Demasiados intentos seguidos. Espere un momento."
-              : "No se pudo completar la suscripción. Inténtelo de nuevo.",
+              ? t("boletin.errores.demasiados")
+              : t("boletin.errores.fallo"),
       });
     }
   };
@@ -274,7 +276,7 @@ export const InvitacionAlBoletin = () => {
           type="button"
           className="se-invitacion__cerrar"
           onClick={cerrar}
-          aria-label="Cerrar"
+          aria-label={t("comun.cerrar")}
         >
           <span aria-hidden="true">✕</span>
         </button>
@@ -293,20 +295,23 @@ export const InvitacionAlBoletin = () => {
               </svg>
             </span>
             <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
-              Ya está dentro
+              {t("boletin.invitacion.exitoTitulo")}
             </h2>
             <p className="se-invitacion__texto se-invitacion__texto--exito">
-              El primer número de <strong>Entorno en Viñetas</strong> le llega el lunes por
-              la mañana{correoSuscrito ? (
-                <>
-                  {" "}a <span className="se-invitacion__correo">{correoSuscrito}</span>
-                </>
-              ) : null}
-              .
+              {t("boletin.invitacion.exitoTexto", {
+                boletin: <strong>{t("boletin.nombre")}</strong>,
+                correo: correoSuscrito ? (
+                  <>
+                    {" "}
+                    {t("boletin.invitacion.exitoA")}{" "}
+                    <span className="se-invitacion__correo">{correoSuscrito}</span>
+                  </>
+                ) : (
+                  ""
+                ),
+              })}
             </p>
-            <p className="se-invitacion__nota">
-              Si no lo ve, búsquelo en «Promociones» o en el correo no deseado.
-            </p>
+            <p className="se-invitacion__nota">{t("boletin.invitacion.exitoNota")}</p>
             <span
               className="se-invitacion__cuenta"
               aria-hidden="true"
@@ -315,13 +320,12 @@ export const InvitacionAlBoletin = () => {
           </div>
         ) : (
           <>
-            <p className="se-invitacion__kicker">Boletín semanal · los lunes por la mañana</p>
+            <p className="se-invitacion__kicker">{t("boletin.invitacion.kicker")}</p>
             <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
-              Entorno en Viñetas
+              {t("boletin.nombre")}
             </h2>
             <p className="se-invitacion__texto" id="invitacion-boletin-texto">
-              El entorno económico de la semana, contado en viñetas. Le llega cada lunes,
-              antes de que la semana empiece a moverse.
+              {t("boletin.invitacion.texto")}
             </p>
 
             <form
@@ -332,7 +336,7 @@ export const InvitacionAlBoletin = () => {
               noValidate
             >
               <label htmlFor="invitacion-boletin-email" className="se-invitacion__label">
-                Su correo
+                {t("boletin.invitacion.suCorreo")}
               </label>
               <input
                 ref={campoRef}
@@ -341,7 +345,7 @@ export const InvitacionAlBoletin = () => {
                 inputMode="email"
                 autoComplete="email"
                 className="se-invitacion__input"
-                placeholder="nombre@correo.com"
+                placeholder={t("boletin.invitacion.placeholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={enviando}
@@ -370,10 +374,10 @@ export const InvitacionAlBoletin = () => {
 
               <div className="se-invitacion__acciones">
                 <button type="submit" className="se-invitacion__btn" disabled={enviando}>
-                  {enviando ? "Enviando…" : "Únase al boletín"}
+                  {enviando ? t("boletin.invitacion.enviando") : t("boletin.invitacion.unirse")}
                 </button>
                 <button type="button" className="se-invitacion__luego" onClick={cerrar}>
-                  Ahora no
+                  {t("boletin.invitacion.ahoraNo")}
                 </button>
               </div>
             </form>

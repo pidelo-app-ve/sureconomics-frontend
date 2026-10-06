@@ -1,4 +1,5 @@
 import { ApiError } from "./apiClient";
+import { formatearNumero, idiomaActual, tActual } from "../i18n/motor";
 import {
   descargarArchivoDeUsuario,
   userOptionalAuthRequest,
@@ -116,18 +117,24 @@ export const getAudioDeLeccion = (moduloSlug, leccionSlug) =>
     { comoBlob: true },
   );
 
-/** Precio legible: 2000 centavos + "USD" -> "US$ 20". */
+/*
+ * Lo legible (precio, duracion, nivel, mezcla) sale en el idioma del documento: estas
+ * funciones corren fuera de React, asi que usan `tActual` e `idiomaActual()` del motor,
+ * que `ProveedorIdioma` fija antes de pintar. Los textos viven en `educacion.*`.
+ */
+
+/** Precio legible: 2000 centavos + "USD" -> "US$ 20" (en ingles, "$20"). */
 export const precioLegible = (centavos, moneda) => {
   const valor = (Number(centavos) || 0) / 100;
   try {
-    return new Intl.NumberFormat("es", {
+    return formatearNumero(valor, idiomaActual(), {
       style: "currency",
       currency: moneda || "USD",
       // Sin decimales cuando el precio es redondo: "US$ 20" se lee mejor que
       // "US$ 20,00" en una tarjeta de catalogo.
       minimumFractionDigits: Number.isInteger(valor) ? 0 : 2,
       maximumFractionDigits: 2,
-    }).format(valor);
+    });
   } catch {
     // Una moneda que `Intl` no conozca no puede dejar la tarjeta sin precio.
     return `${valor} ${moneda || ""}`.trim();
@@ -146,26 +153,19 @@ export const duracionLegible = (minutos) => {
   if (!Number.isFinite(total) || total <= 0) return "";
   const horas = Math.floor(total / 60);
   const resto = total % 60;
-  if (!horas) return `${resto} min`;
-  return resto ? `${horas} h ${resto} min` : `${horas} h`;
+  if (!horas) return tActual("educacion.duracion.minutos", { n: resto });
+  return resto
+    ? tActual("educacion.duracion.horasYMinutos", { h: horas, m: resto })
+    : tActual("educacion.duracion.horas", { n: horas });
 };
 
-/** Como se llama cada nivel en pantalla. El servidor los guarda en minusculas. */
-export const NIVELES = {
-  inicial: "Inicial",
-  intermedio: "Intermedio",
-  avanzado: "Avanzado",
-};
+/** Los niveles que el servidor conoce (los guarda en minusculas). Su nombre en pantalla esta en `educacion.niveles.<nivel>`. */
+export const NIVELES = ["inicial", "intermedio", "avanzado"];
 
-export const nivelLegible = (nivel) => NIVELES[nivel] ?? "";
+export const nivelLegible = (nivel) => (NIVELES.includes(nivel) ? tActual(`educacion.niveles.${nivel}`) : "");
 
-/** Como se llama cada tipo de leccion, en singular y en plural. */
-const TIPOS = {
-  video: ["video", "videos"],
-  texto: ["lectura", "lecturas"],
-  audio: ["audio", "audios"],
-  pdf: ["documento", "documentos"],
-};
+/** Los tipos de leccion con nombre propio (`educacion.tipos.<tipo>`, con singular y plural). */
+const TIPOS = ["video", "texto", "audio", "pdf"];
 
 /**
  * La mezcla de formatos de un modulo: {video: 2, texto: 1} -> "2 videos · 1 lectura".
@@ -179,9 +179,6 @@ export const mezclaLegible = (tipos) => {
   return Object.entries(tipos)
     .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1])
-    .map(([tipo, n]) => {
-      const nombres = TIPOS[tipo] ?? [tipo, tipo];
-      return `${n} ${n === 1 ? nombres[0] : nombres[1]}`;
-    })
+    .map(([tipo, n]) => (TIPOS.includes(tipo) ? tActual(`educacion.tipos.${tipo}`, { n }) : `${n} ${tipo}`))
     .join(" · ");
 };

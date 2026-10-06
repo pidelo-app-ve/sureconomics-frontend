@@ -1,11 +1,15 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Enlace, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { applyPageMeta } from "../../lib/seo";
+import { BRAND } from "../../data/surEconomicsMock";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
 
 export const CuentaVerificarEmail = () => {
-  const navigate = useNavigate();
+  const { t } = useIdioma();
+  const navigate = useNavegar();
   const location = useLocation();
   const { isAuthenticated, verifyEmail } = useUserAuth();
   const [email, setEmail] = useState(location.state?.email ?? "");
@@ -16,13 +20,11 @@ export const CuentaVerificarEmail = () => {
   const [infoMessage, setInfoMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    applyPageMeta({
-      title: "Verificar correo — SurEconomics",
-      description: "Verificación de correo electrónico.",
-      noindex: true,
-    });
-  }, []);
+  useMetaPagina({
+    title: t("cuenta.verificar.meta.titulo", { marca: BRAND.name }),
+    description: t("cuenta.verificar.meta.descripcion"),
+    noindex: true,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,17 +34,17 @@ export const CuentaVerificarEmail = () => {
     try {
       const result = await verifyEmail({ email, code });
       if (result.authenticated) {
-        setInfoMessage("Correo verificado. Redirigiendo…");
+        setInfoMessage(t("cuenta.verificar.verificadoRedirigiendo"));
         navigate(volver ?? "/cuenta", { replace: true });
         return;
       }
-      setInfoMessage("Correo verificado.");
+      setInfoMessage(t("cuenta.verificar.verificado"));
       navigate(conVolver("/cuenta/entrar", volver), { replace: true, state: { email, verified: true } });
     } catch (err) {
       if (err?.status === 429) {
-        setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
+        setErrorMessage(t("cuenta.comun.demasiadasSolicitudes"));
       } else {
-        setErrorMessage(err instanceof Error ? err.message : "Código inválido o expirado.");
+        setErrorMessage(err instanceof Error ? err.message : t("cuenta.verificar.codigoInvalido"));
       }
     } finally {
       setIsSubmitting(false);
@@ -54,19 +56,21 @@ export const CuentaVerificarEmail = () => {
       <div className="se-admin-login__shell">
         <div className="se-container se-container--narrow">
           <header className="se-admin-login__header">
-            <h1 className="se-heading-section">Verificar correo</h1>
+            <h1 className="se-heading-section">{t("cuenta.verificar.titulo")}</h1>
             <p className="se-text-small se-admin-login__subtitle">
-              Introduzca el código que enviamos a su correo. Si no ve el mensaje, revise la carpeta de spam.
+              {t("cuenta.verificar.subtitulo")}
             </p>
           </header>
 
           {!isAuthenticated ? (
             <p className="se-text-body">
-              Tras verificar, puede{" "}
-              <Link to="/cuenta/entrar" className="se-link">
-                entrar
-              </Link>
-              .
+              {t("cuenta.verificar.trasVerificar", {
+                enlace: (
+                  <Enlace to="/cuenta/entrar" className="se-link">
+                    {t("cuenta.verificar.entrar")}
+                  </Enlace>
+                ),
+              })}
             </p>
           ) : null}
 
@@ -83,7 +87,7 @@ export const CuentaVerificarEmail = () => {
             ) : null}
 
             <label className="se-form-field" htmlFor="verify-email">
-              <span className="se-form-label">Correo electrónico</span>
+              <span className="se-form-label">{t("cuenta.comun.correo")}</span>
               <input
                 id="verify-email"
                 type="email"
@@ -102,7 +106,7 @@ export const CuentaVerificarEmail = () => {
             </label>
 
             <label className="se-form-field" htmlFor="verify-code">
-              <span className="se-form-label">Código de verificación</span>
+              <span className="se-form-label">{t("cuenta.verificar.codigo")}</span>
               <input
                 id="verify-code"
                 type="text"
@@ -120,14 +124,14 @@ export const CuentaVerificarEmail = () => {
             </label>
 
             <button type="submit" className="se-btn" disabled={isSubmitting}>
-              {isSubmitting ? "Verificando…" : "Verificar"}
+              {isSubmitting ? t("cuenta.verificar.verificando") : t("cuenta.verificar.verificar")}
             </button>
           </form>
 
           <p className="se-text-body" style={{ marginTop: "1.25rem" }}>
-            <Link to="/cuenta/solicitar-codigo" className="se-link" state={{ email }}>
-              Solicitar un nuevo código
-            </Link>
+            <Enlace to="/cuenta/solicitar-codigo" className="se-link" state={{ email }}>
+              {t("cuenta.verificar.solicitarNuevo")}
+            </Enlace>
           </p>
         </div>
       </div>

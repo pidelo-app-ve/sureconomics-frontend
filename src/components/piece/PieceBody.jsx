@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Enlace } from "../Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { PlaceholderImage } from "../blog";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
@@ -56,11 +57,12 @@ OpinionBlock.propTypes = { titulo: PropTypes.string.isRequired };
  * plural over a single line reads like something is missing.
  */
 const Fuentes = ({ fuentes }) => {
+  const { t } = useIdioma();
   const filas = (fuentes ?? []).filter((f) => f?.nombre);
   if (!filas.length) return null;
   return (
     <div className="se-sources">
-      <p className="se-sources__k">{filas.length === 1 ? "Fuente" : "Fuentes"}</p>
+      <p className="se-sources__k">{t("piezas.fuentes.titulo", { n: filas.length })}</p>
       <ul className="se-sources__list">
         {filas.map((fuente, index) => (
           <li key={`${fuente.nombre}-${index}`}>
@@ -127,15 +129,14 @@ const embedDe = (url) => {
  * engine can read.
  */
 const VideoStage = ({ url, duracion, titulo }) => {
+  const { t } = useIdioma();
   const embed = embedDe(url);
 
   if (!embed) {
     return (
       <div className="se-videostage">
         <span className="se-videostage__play" aria-hidden="true" />
-        <p className="se-videostage__note">
-          El video de esta entrevista todavía no está cargado.
-        </p>
+        <p className="se-videostage__note">{t("piezas.video.sinCargar")}</p>
       </div>
     );
   }
@@ -146,7 +147,7 @@ const VideoStage = ({ url, duracion, titulo }) => {
         <iframe
           className="se-videostage__frame"
           src={embed.src}
-          title={titulo ? `Video: ${titulo}` : "Video de la entrevista"}
+          title={titulo ? t("piezas.video.tituloConNombre", { titulo }) : t("piezas.video.titulo")}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           loading="lazy"
@@ -170,7 +171,7 @@ const VideoStage = ({ url, duracion, titulo }) => {
       <span className="se-videostage__play" aria-hidden="true" />
       <p className="se-videostage__note">
         <a href={embed.src} target="_blank" rel="noreferrer noopener">
-          Ver el video
+          {t("piezas.video.ver")}
           <span aria-hidden="true"> ↗</span>
         </a>
         {duracion ? ` · ${duracion}` : ""}
@@ -194,12 +195,11 @@ VideoStage.propTypes = {
  * que decidir aquí.
  */
 const AudioStage = ({ url, duracion, titulo }) => {
+  const { t } = useIdioma();
   if (!url) {
     return (
       <div className="se-audiostage">
-        <p className="se-audiostage__note">
-          El audio de este podcast todavía no está cargado.
-        </p>
+        <p className="se-audiostage__note">{t("piezas.audio.sinCargar")}</p>
       </div>
     );
   }
@@ -211,7 +211,7 @@ const AudioStage = ({ url, duracion, titulo }) => {
         src={url}
         controls
         preload="metadata"
-        aria-label={titulo ? `Audio: ${titulo}` : "Audio del podcast"}
+        aria-label={titulo ? t("piezas.audio.tituloConNombre", { titulo }) : t("piezas.audio.titulo")}
       />
       {duracion ? <p className="se-audiostage__note">{duracion}</p> : null}
     </div>
@@ -243,6 +243,7 @@ AudioStage.propTypes = {
  * y una petición fallida en la consola de cada lector.
  */
 const DownloadGate = ({ pieza }) => {
+  const { t } = useIdioma();
   const { isAuthenticated, isEmailVerified } = useUserAuth();
   const [state, setState] = useState({ status: "idle", error: "" });
 
@@ -253,7 +254,7 @@ const DownloadGate = ({ pieza }) => {
     try {
       const doc = await fetchPieceDocument(pieza.slug);
       if (!doc?.url) {
-        setState({ status: "error", error: "Este informe todavía no tiene archivo cargado." });
+        setState({ status: "error", error: t("piezas.informe.sinArchivo") });
         return;
       }
       // Dos caminos según dónde viva el archivo, y quien llama no tiene que saberlo:
@@ -274,8 +275,8 @@ const DownloadGate = ({ pieza }) => {
         status: "error",
         error:
           err?.status === 404
-            ? "Este informe todavía no tiene archivo cargado."
-            : "No se pudo obtener el documento. Inténtelo de nuevo.",
+            ? t("piezas.informe.sinArchivo")
+            : t("piezas.informe.errorDescarga"),
       });
     }
   };
@@ -288,57 +289,50 @@ const DownloadGate = ({ pieza }) => {
         onClick={handleDownload}
         disabled={state.status === "loading"}
       >
-        {state.status === "loading" ? "Preparando…" : "Descargar el informe"}
+        {state.status === "loading" ? t("piezas.informe.preparando") : t("piezas.informe.descargar")}
       </button>
     </div>
   );
 
-  const paginas = pieza.paginas ? `${pieza.paginas} páginas. ` : "";
+  // «12 páginas. » delante de la frase, cuando se sabe cuántas son.
+  const paginas = pieza.paginas ? t("piezas.informe.paginas", { n: pieza.paginas }) : "";
+  const conPaginas = (texto) => (paginas ? `${paginas} ${texto}` : texto);
 
   return (
     <section className="se-gate" aria-labelledby="gate-title">
       <h2 id="gate-title" className="se-gate__title">
-        Descargue el informe completo
+        {t("piezas.informe.titulo")}
       </h2>
 
       {abierto ? (
         <>
-          <p className="se-gate__lead">
-            {paginas}Descarga libre: no hace falta cuenta ni registro.
-          </p>
+          <p className="se-gate__lead">{conPaginas(t("piezas.informe.descargaLibre"))}</p>
           {boton}
         </>
       ) : !isAuthenticated ? (
         <>
-          <p className="se-gate__lead">
-            Los informes son para lectores registrados. Cree una cuenta o inicie sesión
-            y podrá descargar este y los demás.
-          </p>
+          <p className="se-gate__lead">{t("piezas.informe.soloRegistrados")}</p>
           <div className="se-gate__actions">
-            <Link to="/cuenta/entrar" className="se-gate__submit">
-              Iniciar sesión
-            </Link>
-            <Link to="/cuenta/registro" className="se-link">
-              Crear una cuenta
-            </Link>
+            <Enlace to="/cuenta/entrar" className="se-gate__submit">
+              {t("piezas.acceso.iniciarSesion")}
+            </Enlace>
+            <Enlace to="/cuenta/registro" className="se-link">
+              {t("piezas.acceso.crearCuenta")}
+            </Enlace>
           </div>
         </>
       ) : !isEmailVerified ? (
         <>
-          <p className="se-gate__lead">
-            Falta confirmar su correo. Es el último paso para poder descargar.
-          </p>
+          <p className="se-gate__lead">{t("piezas.informe.confirmarCorreo")}</p>
           <div className="se-gate__actions">
-            <Link to="/cuenta/verificar-email" className="se-gate__submit">
-              Verificar mi correo
-            </Link>
+            <Enlace to="/cuenta/verificar-email" className="se-gate__submit">
+              {t("piezas.acceso.verificarCorreo")}
+            </Enlace>
           </div>
         </>
       ) : (
         <>
-          <p className="se-gate__lead">
-            {paginas}Descarga gratuita para lectores registrados.
-          </p>
+          <p className="se-gate__lead">{conPaginas(t("piezas.informe.descargaGratuita"))}</p>
           {boton}
         </>
       )}
@@ -413,6 +407,7 @@ Media.propTypes = { pieza: piezaShape().isRequired, conMarcador: PropTypes.bool 
  * where it was doing real work.
  */
 export const PieceBody = ({ pieza, enCabecera }) => {
+  const { t } = useIdioma();
   // La fotografía y la entradilla suben a la cabecera, junto al titular, que es
   // donde el brandbook las pone. `enCabecera` existe para que el cuerpo deje de
   // dibujarlas sin que cada rama tenga que enterarse dos veces.
@@ -423,7 +418,8 @@ export const PieceBody = ({ pieza, enCabecera }) => {
     ) : null;
   Entradilla.propTypes = { html: PropTypes.string };
 
-  if (pieza.formato === "Noticias") {
+  // Se compara por `formatoApi`, la clave estable, y no por el nombre, que se traduce.
+  if (pieza.formatoApi === "noticia") {
     return (
       <>
         <Portada pieza={pieza} />
@@ -436,15 +432,16 @@ export const PieceBody = ({ pieza, enCabecera }) => {
   // Entrevistas print no image: the video is the piece, and a photo above it
   // would compete with it. The image an interview carries does its work on the
   // listing card, which is why the field is still offered for the format.
-  if (pieza.formato === "Entrevistas") {
+  if (pieza.formatoApi === "entrevista") {
+    // «Nombre, cargo» cuando hay cargo; solo el nombre si no.
+    const quien = pieza.entrevistadoCargo
+      ? `${pieza.entrevistado}, ${pieza.entrevistadoCargo}`
+      : pieza.entrevistado;
     return (
       <>
         <VideoStage url={pieza.videoUrl} duracion={pieza.duracion} titulo={pieza.titulo} />
         {pieza.entrevistado ? (
-          <p className="se-piece__lead">
-            Conversación con {pieza.entrevistado}
-            {pieza.entrevistadoCargo ? `, ${pieza.entrevistadoCargo}` : ""}.
-          </p>
+          <p className="se-piece__lead">{t("piezas.cuerpo.conversacionCon", { quien })}</p>
         ) : null}
         <Cuerpo html={pieza.cuerpo} />
       </>
@@ -453,7 +450,7 @@ export const PieceBody = ({ pieza, enCabecera }) => {
 
   // Podcast: el audio es la pieza, igual que el video lo es en una entrevista. Sin
   // imagen encima por la misma razón -- competiría con lo que de verdad importa.
-  if (pieza.formato === "Podcast") {
+  if (pieza.formatoApi === "podcast") {
     return (
       <>
         <AudioStage url={pieza.audioUrl} duracion={pieza.duracion} titulo={pieza.titulo} />
@@ -462,7 +459,7 @@ export const PieceBody = ({ pieza, enCabecera }) => {
     );
   }
 
-  if (pieza.formato === "Informes") {
+  if (pieza.formatoApi === "informe") {
     return (
       <>
         <Portada pieza={pieza} />
@@ -473,11 +470,11 @@ export const PieceBody = ({ pieza, enCabecera }) => {
     );
   }
 
-  if (pieza.formato === "Editorial") {
+  if (pieza.formatoApi === "editorial") {
     return (
       <>
         <Portada pieza={pieza} />
-        <OpinionBlock titulo="Editorial de SurEconomics" />
+        <OpinionBlock titulo={t("piezas.cuerpo.editorialDe")} />
         <Entradilla html={pieza.entradaHtml} />
         <Cuerpo html={pieza.cuerpo} />
       </>

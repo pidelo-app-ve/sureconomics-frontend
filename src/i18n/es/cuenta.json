@@ -1,0 +1,393 @@
+{
+  "cuenta": {
+    "comun": {
+      "correo": "Correo electrónico",
+      "contrasena": "Contraseña",
+      "nombre": "Nombre",
+      "apellido": "Apellido",
+      "escribaCorreo": "Escriba su correo.",
+      "correoIncompleto": "Ese correo no parece completo. Revise que lleve @ y dominio.",
+      "verificar": "Verificar",
+      "verifiqueSuCorreo": "Verifique su correo.",
+      "verifiqueParaEnviar": "Verifique su correo para enviar propuestas.",
+      "guardando": "Guardando…",
+      "guardarCambios": "Guardar cambios",
+      "enviando": "Enviando…",
+      "demasiadasSolicitudes": "Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.",
+      "cargandoEnvio": "Cargando envío…",
+      "noPudimosCargarEnvio": "No pudimos cargar el envío",
+      "volverAlEnvio": "Volver al envío",
+      "opcional": "opcional"
+    },
+    "entrar": {
+      "meta": {
+        "titulo": "Entrar — {marca}",
+        "descripcion": "Acceso para lectores y equipo editorial."
+      },
+      "escribaContrasena": "Escriba su contraseña.",
+      "correoNoValido": "Ese correo no parece válido.",
+      "reviseDatos": "Revise los datos e inténtelo de nuevo.",
+      "credenciales": "El correo o la contraseña no son correctos.",
+      "demasiadosIntentos": "Demasiados intentos seguidos. Espere unos minutos y vuelva a probar.",
+      "cuentaDesactivada": "Esta cuenta está desactivada. Escríbanos si cree que es un error.",
+      "sinConexion": "No se pudo conectar. Revise su conexión e inténtelo de nuevo.",
+      "fallo": "No se pudo iniciar sesión. Inténtelo de nuevo en un momento.",
+      "kicker": "Entrar",
+      "titulo": "Su cuenta de SurEconomics",
+      "lead": "Sus artículos guardados, sus envíos y los módulos que haya comprado.",
+      "entrando": "Entrando…",
+      "entrar": "Entrar",
+      "sinCuenta": "¿No tiene cuenta? {enlace}",
+      "crearUna": "Crear una"
+    },
+    "registro": {
+      "meta": {
+        "titulo": "Crear una cuenta — {marca}",
+        "descripcion": "Cree una cuenta de lector."
+      },
+      "escribaNombre": "Escriba su nombre.",
+      "escribaApellido": "Escriba su apellido.",
+      "alMenosOcho": "Al menos ocho caracteres.",
+      "correoYaTieneCuenta": "Ese correo ya tiene cuenta. Si es la suya, entre en vez de registrarse.",
+      "demasiadosIntentos": "Demasiados intentos. Espere unos minutos.",
+      "reviseDatos": "Revise los datos: alguno no tiene el formato esperado.",
+      "fallo": "No se pudo crear la cuenta. Inténtelo de nuevo.",
+      "kicker": "Crear una cuenta",
+      "titulo": "Su espacio en SurEconomics",
+      "lead": "Guarde artículos para después, proponga piezas a la redacción y acceda a los módulos de Educación que compre. Le enviaremos un código para confirmar el correo.",
+      "ayudaCorreo": "Ahí llega el código para confirmar la cuenta.",
+      "creando": "Creando su cuenta…",
+      "crear": "Crear mi cuenta",
+      "nota": "Después podrá completar su perfil y subir una foto — hace falta para firmar lo que publique.",
+      "yaTieneCuenta": "¿Ya tiene cuenta? {enlace}",
+      "entrar": "Entrar"
+    },
+    "verificar": {
+      "meta": {
+        "titulo": "Verificar correo — {marca}",
+        "descripcion": "Verificación de correo electrónico."
+      },
+      "verificadoRedirigiendo": "Correo verificado. Redirigiendo…",
+      "verificado": "Correo verificado.",
+      "codigoInvalido": "Código inválido o expirado.",
+      "titulo": "Verificar correo",
+      "subtitulo": "Introduzca el código que enviamos a su correo. Si no ve el mensaje, revise la carpeta de spam.",
+      "trasVerificar": "Tras verificar, puede {enlace}.",
+      "entrar": "entrar",
+      "codigo": "Código de verificación",
+      "verificando": "Verificando…",
+      "verificar": "Verificar",
+      "solicitarNuevo": "Solicitar un nuevo código"
+    },
+    "solicitarCodigo": {
+      "meta": {
+        "titulo": "Solicitar código — {marca}",
+        "descripcion": "Reenvío del código de verificación."
+      },
+      "enviado": "Si el correo es válido, le enviaremos un nuevo código.",
+      "fallo": "No se pudo enviar el código.",
+      "titulo": "Solicitar código",
+      "subtitulo": "Reenviamos un código de verificación. No confirmamos si el correo existe (privacidad).",
+      "entrar": "Entrar",
+      "enviarCodigo": "Enviar código",
+      "volverAVerificacion": "Volver a verificación"
+    },
+    "panel": {
+      "inicio": "{marca} — inicio",
+      "lector": "Lector",
+      "areaDeLector": "Área de lector",
+      "miPerfil": "Mi perfil",
+      "loMio": "Lo mío",
+      "sesionActiva": "Sesión activa",
+      "cerrarMenuLateral": "Cerrar menú lateral",
+      "abrirMenuLateral": "Abrir menú lateral",
+      "suEspacio": "Su espacio",
+      "volverAlSitio": "Volver al sitio"
+    },
+    "inicio": {
+      "meta": {
+        "titulo": "Mi espacio — {marca}",
+        "descripcion": "Su cuenta de lector."
+      },
+      "cargando": "Cargando su cuenta…",
+      "confirmeTitulo": "Confirme su correo",
+      "confirmeTexto": "Le enviamos un código a {correo}. Hasta confirmarlo no se pueden guardar artículos, comentar ni abrir las clases — es lo que evita que alguien cree cuentas con correos ajenos.",
+      "escribirCodigo": "Escribir el código",
+      "lector": "Lector",
+      "correoConfirmado": "Correo confirmado",
+      "tieneFoto": "Tiene foto de perfil",
+      "sinFoto": "Sin foto de perfil",
+      "sinFotoDetalle": "Hace falta para firmar lo que le publiquen.",
+      "subirla": "Subirla",
+      "perfilCompleto": "Perfil completo",
+      "perfilAMedias": "Perfil a medias · {n} de 6 datos sin rellenar",
+      "perfilAMediasDetalle": "Todos son opcionales; la redacción los usa para localizarle.",
+      "completar": "Completar",
+      "hola": "Hola, {nombre}",
+      "estadoDeSuCuenta": "Estado de su cuenta",
+      "suCuenta": "Su cuenta",
+      "loQueTiene": "Lo que tiene",
+      "modulosComprados": {
+        "one": "módulo comprado",
+        "other": "módulos comprados"
+      },
+      "articulosGuardados": {
+        "one": "artículo guardado",
+        "other": "artículos guardados"
+      },
+      "propuestasEnviadas": {
+        "one": "propuesta enviada",
+        "other": "propuestas enviadas"
+      },
+      "quePuedeHacer": "Qué puede hacer",
+      "quePuedeHacerAqui": "Qué puede hacer aquí",
+      "usos": {
+        "guardarTitulo": "Guardar artículos",
+        "guardarTexto": "El marcador de cualquier pieza la guarda aquí para leerla después, desde cualquier dispositivo.",
+        "guardarEnlace": "Ver mis marcadores",
+        "comentarTitulo": "Comentar",
+        "comentarTexto": "Los comentarios se publican con su nombre y pasan por revisión antes de aparecer. Se comenta desde la propia pieza.",
+        "comentarEnlace": "Ir a los artículos",
+        "proponerTitulo": "Proponer una pieza",
+        "proponerTexto": "Puede mandar un artículo o una noticia a la redacción. Si la aceptan, se publica con su nombre y su foto.",
+        "proponerEnlace": "Ver mis envíos",
+        "comprarTitulo": "Comprar módulos de Educación",
+        "comprarTexto": "Cada módulo se compra una vez y el acceso no caduca. La primera clase de cada uno se lee sin pagar.",
+        "comprarEnlace": "Ver el catálogo"
+      }
+    },
+    "perfil": {
+      "meta": {
+        "titulo": "Mi perfil — {marca}",
+        "descripcion": "Sus datos de lector."
+      },
+      "prefieroNoDecirlo": "Prefiero no decirlo",
+      "femenino": "Femenino",
+      "masculino": "Masculino",
+      "otro": "Otro",
+      "nombreVacio": "El nombre no puede quedar vacío.",
+      "apellidoVacio": "El apellido no puede quedar vacío.",
+      "edadRango": "Una edad entre 13 y 120.",
+      "fallo": "No se pudieron guardar los cambios.",
+      "titulo": "Mi perfil",
+      "lead": "Su nombre firma los comentarios y las piezas que le publiquen. El resto es opcional y sólo lo ve la redacción.",
+      "susDatos": "Sus datos",
+      "sinRellenar": "{n} sin rellenar · opcionales",
+      "ayudaCorreo": "El correo identifica la cuenta. Para cambiarlo, escríbanos.",
+      "edad": "Edad",
+      "sexo": "Sexo",
+      "pais": "País",
+      "ciudad": "Ciudad",
+      "ocupacion": "Ocupación",
+      "telefono": "Teléfono",
+      "ayudaOcupacion": "Sale bajo su firma si le publican una pieza.",
+      "ayudaTelefono": "Sólo para que la redacción le localice si acepta su envío.",
+      "guardado": "Guardado ✓"
+    },
+    "retrato": {
+      "tipoNoValido": "Tiene que ser una imagen JPG, PNG o WebP.",
+      "pesaDemasiado": "Esa imagen pesa {mb} MB y el tope son 5.",
+      "demasiadosCambios": "Ha cambiado la foto varias veces seguidas. Espere un rato.",
+      "fallo": "No se pudo subir la imagen.",
+      "suFoto": "Su foto",
+      "subaSuFoto": "Suba su foto",
+      "texto": "Es la que firma la pieza si la redacción le publica un envío. Sin ella, su artículo sale sin cara.",
+      "subiendo": "Subiendo…",
+      "cambiar": "Cambiar la foto",
+      "elegir": "Elegir y encuadrar",
+      "elegirImagen": "Elegir una imagen para su perfil",
+      "pista": "JPG, PNG o WebP · hasta 5 MB",
+      "suFotoMinuscula": "su foto"
+    },
+    "marcadores": {
+      "meta": {
+        "titulo": "Marcadores — {marca}",
+        "descripcion": "Artículos guardados."
+      },
+      "titulo": "Marcadores",
+      "verifique": "Verifique su correo para ver sus marcadores.",
+      "cargando": "Cargando marcadores…",
+      "noPudimosCargar": "No pudimos cargar los marcadores",
+      "lead": "Artículos que ha guardado para volver a ellos.",
+      "vacioTitulo": "Aún no hay marcadores",
+      "vacioTexto": "Explore artículos y pulse guardar cuando le interese uno.",
+      "verArticulos": "Ver artículos"
+    },
+    "envios": {
+      "meta": {
+        "titulo": "Mis envíos — {marca}",
+        "descripcion": "Propuestas editoriales enviadas."
+      },
+      "titulo": "Mis envíos",
+      "cargando": "Cargando envíos…",
+      "noPudimosCargar": "No pudimos cargar los envíos",
+      "lead": "Propuestas editoriales y su estado.",
+      "nuevo": "Nuevo envío",
+      "vacioTitulo": "Sin envíos todavía",
+      "vacioTexto": "Comparta una idea o borrador con el equipo editorial.",
+      "crearPrimero": "Crear primer envío",
+      "sinTitulo": "Envío {id}"
+    },
+    "envio": {
+      "meta": {
+        "titulo": "Detalle de envío — {marca}",
+        "descripcion": "Estado de su propuesta."
+      },
+      "titulo": "Envío",
+      "volverAEnvios": "Volver a envíos",
+      "misEnvios": "Mis envíos",
+      "editarEnvio": "Editar envío",
+      "editar": "Editar",
+      "imagenDestacada": "Imagen destacada",
+      "abrirOriginal": "Abrir original",
+      "sinVistaPrevia": "No se pudo cargar la vista previa.",
+      "abrirUrl": "Abrir URL",
+      "sinImagen": "Sin imagen destacada.",
+      "anadirEnEditar": "Añadir en editar",
+      "resumen": "Resumen",
+      "sinResumen": "No añadió resumen.",
+      "contenido": "Contenido",
+      "sinContenido": "No hay contenido en el cuerpo del envío.",
+      "notasTitulo": "Notas del equipo editorial",
+      "notasLead": "Cuando el equipo deje comentarios sobre su propuesta, aparecerán aquí.",
+      "cargandoNotas": "Cargando notas…",
+      "noPudimosCargarNotas": "No pudimos cargar las notas",
+      "equipoEditorial": "Equipo editorial",
+      "sinNotas": "Todavía no hay notas."
+    },
+    "envioEditar": {
+      "meta": {
+        "titulo": "Editar envío — {marca}",
+        "descripcion": "Editar propuesta editorial."
+      },
+      "noEncontrado": "No encontrado.",
+      "actualizado": "Envío actualizado correctamente.",
+      "yaNoEditable": "Este envío ya no se puede editar porque cambió de estado.",
+      "fallo": "No se pudo actualizar el envío.",
+      "titulo": "Editar envío"
+    },
+    "envioNuevo": {
+      "meta": {
+        "titulo": "Nuevo envío — {marca}",
+        "descripcion": "Enviar propuesta editorial."
+      },
+      "creado": "Envío creado correctamente. Quedó a la espera de revisión.",
+      "fallo": "No se pudo crear el envío.",
+      "titulo": "Nuevo envío",
+      "volverALaLista": "Volver a la lista",
+      "enviarARevision": "Enviar a revisión"
+    },
+    "formularioEnvio": {
+      "articulo": "Artículo",
+      "articuloPista": "Análisis firmado, con su contexto regional.",
+      "noticia": "Noticia",
+      "noticiaPista": "Un hecho reciente, con la fuente citada.",
+      "queEnvia": "Qué está enviando",
+      "titulo": "Título",
+      "resumen": "Resumen",
+      "resumenMarcador": "Dos o tres líneas que resuman lo que envía…",
+      "contenido": "Contenido",
+      "imagenDestacada": "URL de imagen destacada"
+    },
+    "estadoEnvio": {
+      "submitted": "Enviado",
+      "pending": "Pendiente",
+      "under_review": "En revisión",
+      "accepted": "Aceptado",
+      "rejected": "Rechazado"
+    },
+    "loMio": {
+      "meta": {
+        "titulo": "Lo mío — {marca}",
+        "descripcion": "Los módulos que ha comprado."
+      },
+      "fallo": "No se pudo cargar lo que ha comprado. Inténtelo de nuevo.",
+      "titulo": "Lo mío",
+      "lead": "Los módulos de Educación que ha comprado. El acceso no caduca: son suyos.",
+      "vacioTitulo": "Todavía no ha comprado ningún módulo",
+      "vacioTexto": "Cuando compre uno aparecerá aquí, con su recibo, y podrá abrirlo desde este mismo sitio. Cada módulo tiene una primera clase abierta que se lee sin pagar.",
+      "verModulos": "Ver los módulos",
+      "susModulos": {
+        "one": "Su módulo",
+        "other": "Sus {n} módulos"
+      },
+      "enTotal": "{importe} en total",
+      "nivel": "Nivel {nivel}",
+      "modulo": "Módulo",
+      "ref": "Ref. {referencia}",
+      "abrir": "Abrir",
+      "fueraDelCatalogo": "Fuera del catálogo ahora mismo. Sigue siendo suyo; escríbanos si lo necesita.",
+      "verTemario": "Ver el temario",
+      "pagosAMedias": "Pagos a medias",
+      "pendienteTexto": "El pago se abrió y todavía no nos ha llegado la confirmación. Si ya pagó, suele tardar unos minutos; si no llegó a pagar, puede volver a intentarlo desde el módulo. No se le cobrará dos veces."
+    },
+    "campo": {
+      "ocultarContrasena": "Ocultar la contraseña",
+      "mostrarContrasena": "Mostrar la contraseña",
+      "ocultar": "Ocultar",
+      "ver": "Ver"
+    },
+    "fuerza": {
+      "muyCorta": "Muy corta",
+      "debil": "Débil",
+      "aceptable": "Aceptable",
+      "buena": "Buena",
+      "muyBuena": "Muy buena",
+      "consejo": "Una frase de varias palabras es más segura y más fácil de recordar."
+    },
+    "google": {
+      "o": "o",
+      "entrando": "Entrando…",
+      "noConfirma": "Google no confirma que ese correo sea suyo. Entre con su contraseña.",
+      "fallo": "No se pudo entrar con Google. Inténtelo de nuevo."
+    },
+    "editor": {
+      "marcador": "Escriba el contenido…",
+      "barra": "Formato de texto",
+      "negrita": "Negrita",
+      "cursiva": "Cursiva",
+      "tachado": "Tachado",
+      "titulo": "Título",
+      "subtitulo": "Subtítulo",
+      "listaVinetas": "Lista con viñetas",
+      "listaVinetasEtiqueta": "• Lista",
+      "listaNumerada": "Lista numerada",
+      "listaNumeradaEtiqueta": "1. Lista",
+      "cita": "Cita",
+      "enlace": "Insertar/editar enlace",
+      "enlaceEtiqueta": "Link",
+      "deshacer": "Deshacer",
+      "rehacer": "Rehacer"
+    },
+    "enlace": {
+      "insertar": "Insertar enlace",
+      "titulo": "Enlace",
+      "quitar": "Quitar enlace"
+    },
+    "imagen": {
+      "sinArchivo": "No se seleccionó ningún archivo.",
+      "vacio": "El archivo está vacío.",
+      "pesaDemasiado": "La imagen pesa {tamano} y el máximo es {maximo}.",
+      "formatoNoAdmitido": "Formato no admitido. Use JPG, PNG, WebP, GIF o AVIF.",
+      "sinUrl": "La subida no devolvió una URL.",
+      "subidaOk": "«{nombre}» se subió correctamente{tamano}. Guarde el formulario para aplicarla.",
+      "fallo": "No se pudo subir la imagen.",
+      "origen": "{etiqueta}: origen",
+      "pegarUrl": "Pegar URL",
+      "subir": "Subir imagen",
+      "elegirArchivoPara": "{etiqueta}: elegir archivo para subir",
+      "subiendo": "Subiendo la imagen a Cloudinary…",
+      "arrastre": "Arrastre una imagen aquí, o",
+      "elegirArchivo": "Elegir archivo",
+      "pista": "JPG, PNG, WebP, GIF o AVIF · hasta {maximo}",
+      "vistaPreviaFallo": "No se pudo cargar esta imagen. Verifique que el enlace sea público y apunte directo a un archivo de imagen (termina en .jpg, .png, .webp, etc.), no a una página web.",
+      "vistaPreviaOk": "Vista previa cargada correctamente.",
+      "quitar": "Quitar imagen"
+    },
+    "api": {
+      "debeIniciarSesion": "Debe iniciar sesión",
+      "sesionExpirada": "Sesión expirada",
+      "errorSolicitud": "Error en la solicitud"
+    }
+  }
+}

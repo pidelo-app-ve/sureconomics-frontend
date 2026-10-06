@@ -7,7 +7,9 @@ module.exports = {
       'plugin:react/jsx-runtime',
       'plugin:react-hooks/recommended',
     ],
-    ignorePatterns: ['dist', '.eslintrc.cjs'],
+    // El Analista se trae tal cual de su repo y no se edita aquí: ver
+    // scripts/traer-el-analista.mjs. Lintearlo solo invitaría a «arreglarlo».
+    ignorePatterns: ['dist', '.eslintrc.cjs', 'src/juegos/el-analista/el-analista.jsx'],
     parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     settings: { react: { version: '18.2' } },
     plugins: ['react-refresh'],
@@ -26,7 +28,7 @@ module.exports = {
     // navegador y falso donde viven. Se declara el entorno en vez de silenciar la regla.
     overrides: [
       {
-        files: ['vite.config.js', 'api/**/*.js', '**/*.test.mjs'],
+        files: ['vite.config.js', 'api/**/*.js', '**/*.test.mjs', 'scripts/**/*.mjs'],
         env: { node: true, browser: false },
       },
     ],

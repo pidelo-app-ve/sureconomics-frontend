@@ -86,10 +86,11 @@ AlPuntoLink.propTypes = {
 };
 
 /**
- * El Analista: el juego largo de la casa. Por ahora vive en su propio sitio y se abre
- * en otra pestaña; está previsto servirlo dentro, en `/el-analista/`.
+ * El Analista: el juego largo de la casa, dentro del sitio. Se abre en la misma pestaña:
+ * la sesión del lector vive en `sessionStorage`, que es de cada pestaña, y en una nueva
+ * llegaría sin cuenta y su carrera no sumaría al ranking.
  */
-const EL_ANALISTA = "https://el-analista-delta.vercel.app/";
+const EL_ANALISTA = "/el-analista";
 
 /** Una gráfica que se dibuja subiendo y termina en un punto: una carrera que despega. */
 const IconoAnalista = () => (
@@ -108,14 +109,12 @@ const IconoAnalista = () => (
  * foco. En el cajón del teléfono va a lo ancho y con el nombre entero.
  */
 const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => (
-  <a
-    href={EL_ANALISTA}
-    target="_blank"
-    rel="noopener noreferrer"
+  <Link
+    to={EL_ANALISTA}
     className={`se-btn se-btn--secondary se-header__analista${
       conTexto ? " se-header__analista--texto" : ""
     }${className ? ` ${className}` : ""}`}
-    aria-label="El Analista: el juego de carrera e inversión (se abre en otra pestaña)"
+    aria-label="El Analista: el juego de carrera e inversión"
     onClick={onClick}
   >
     <IconoAnalista />
@@ -125,7 +124,7 @@ const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => (
         El Analista · simulador de carrera e inversión
       </span>
     )}
-  </a>
+  </Link>
 );
 
 AnalistaLink.propTypes = {

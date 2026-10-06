@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { applyPageMeta } from "../../lib/seo";
+import { conVolver, leerVolver } from "../../lib/volver";
 
 export const CuentaVerificarEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, verifyEmail } = useUserAuth();
   const [email, setEmail] = useState(location.state?.email ?? "");
+  // Quien venía de algo concreto (anotar su carrera en El Analista) vuelve ahí.
+  const volver = leerVolver(location);
   const [code, setCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
@@ -30,11 +33,11 @@ export const CuentaVerificarEmail = () => {
       const result = await verifyEmail({ email, code });
       if (result.authenticated) {
         setInfoMessage("Correo verificado. Redirigiendo…");
-        navigate("/cuenta", { replace: true });
+        navigate(volver ?? "/cuenta", { replace: true });
         return;
       }
       setInfoMessage("Correo verificado.");
-      navigate("/cuenta/entrar", { replace: true, state: { email, verified: true } });
+      navigate(conVolver("/cuenta/entrar", volver), { replace: true, state: { email, verified: true } });
     } catch (err) {
       if (err?.status === 429) {
         setErrorMessage("Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");

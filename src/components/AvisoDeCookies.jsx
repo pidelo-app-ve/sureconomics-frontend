@@ -52,7 +52,6 @@ import {
 export const AvisoDeCookies = () => {
   const [decision, setDecision] = useState(() => consentimiento());
   const { pathname } = useLocation();
-  const primera = useRef(true);
 
   // Un si dicho en una visita anterior enciende la medicion sin volver a preguntar.
   useEffect(() => {
@@ -61,11 +60,10 @@ export const AvisoDeCookies = () => {
 
   useEffect(() => {
     if (!MEDICION_HABILITADA) return;
-    // La primera ruta ya la cuenta `arrancar`; contarla otra vez la duplicaria.
-    if (primera.current) {
-      primera.current = false;
-      return;
-    }
+    // La primera ruta ya la cuenta `arrancar`, y `registrarVista` no repite la ruta en
+    // la que ya esta. Antes aqui se saltaba la primera a mano, y eso perdia la vista de
+    // quien volvia al sitio desde una pagina fuera del `Layout` (El Analista, /entorno):
+    // el `Layout` se montaba de nuevo y su primera ruta no se contaba.
     registrarVista(pathname);
   }, [pathname]);
 

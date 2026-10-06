@@ -1,17 +1,12 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { applyPageMeta } from "../lib/seo";
 import { BRAND } from "../data/surEconomicsMock";
 import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
 
-/**
- * El Analista: el juego largo de la casa, que vive en su propio sitio.
- *
- * Por ahora se abre en otra pestaña. Está previsto servirlo dentro del sitio, en
- * `/el-analista/`, con la cuenta del lector guardando su carrera; mientras eso no
- * exista, esta es la dirección de su despliegue.
- */
-const EL_ANALISTA = "https://el-analista-delta.vercel.app/";
+/** El Analista, dentro del sitio y en la misma pestaña: ver `pages/ElAnalista.jsx`. */
+const EL_ANALISTA = "/el-analista";
 
 /**
  * `/pausa`: un minuto de juego entre lecturas.
@@ -52,16 +47,10 @@ export const Pausa = () => {
               decisiones que pesan, noticias que sacuden el mercado, una cartera que reparte
               usted y un temario de finanzas que sube con su carrera.
             </p>
-            <a
-              className="se-analista__boton"
-              href={EL_ANALISTA}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link className="se-analista__boton" to={EL_ANALISTA}>
               Jugar El Analista
-              <span className="se-analista__fuera" aria-hidden="true">↗</span>
-              <span className="se-sr-only"> (se abre en otra pestaña)</span>
-            </a>
+              <span className="se-analista__fuera" aria-hidden="true">→</span>
+            </Link>
           </section>
         </div>
       </section>

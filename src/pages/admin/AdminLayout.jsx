@@ -171,6 +171,9 @@ const AdminShell = () => {
                 <NavLink to="/admin/comments" className={linkClass} end onClick={closeMenu}>
                   Comentarios
                 </NavLink>
+                <NavLink to="/admin/analista" className={linkClass} end onClick={closeMenu}>
+                  Ranking de El Analista
+                </NavLink>
                 <NavLink to="/admin/submissions" className={linkClass} end onClick={closeMenu}>
                   Envíos
                 </NavLink>

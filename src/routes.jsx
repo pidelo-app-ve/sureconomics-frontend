@@ -41,6 +41,9 @@ export const router = createBrowserRouter([
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
     { path: "/entorno", element: <Entorno />, errorElement: <NotFound /> },
+    // El Analista, a pantalla completa y fuera de `Layout`: el juego abre pantallas
+    // fijas que taparían la cabecera. Ver `pages/ElAnalista.jsx`.
+    { path: "/el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
     {
         path: "/",
         element: <Layout />,
@@ -146,6 +149,7 @@ export const router = createBrowserRouter([
                     { path: "publicidad", lazy: pagina(() => import("./pages/admin/AdminPublicidad"), "AdminPublicidad") },
                     { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
+                    { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.

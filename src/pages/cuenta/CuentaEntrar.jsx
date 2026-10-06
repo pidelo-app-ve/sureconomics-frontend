@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
+import { conVolver, leerVolver } from "../../lib/volver";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
 import { loginUnified } from "../../lib/unifiedAuth";
@@ -68,7 +69,10 @@ const ID_ERROR = "cuenta-entrar-error";
 export const CuentaEntrar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isEmailVerified, loadProfile, profile } = useUserAuth();
+  const { isAuthenticated, isEmailVerified, loadProfile, profile, profileStatus } = useUserAuth();
+  // Con sesión, hasta que llega el perfil no se sabe si el correo está confirmado. Sin
+  // esperarlo, un lector ya confirmado que abría esta página acababa en «verificar correo».
+  const perfilListo = !["idle", "loading"].includes(profileStatus);
   const { isAuthenticated: isAdminAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,12 +100,12 @@ export const CuentaEntrar = () => {
     return <Navigate to="/admin/posts" replace />;
   }
 
-  if (isAuthenticated && !isEmailVerified) {
-    return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email }} />;
+  if (isAuthenticated && perfilListo && !isEmailVerified) {
+    return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email, volver: leerVolver(location) }} />;
   }
 
   if (isAuthenticated && isEmailVerified) {
-    const to = location.state?.from && typeof location.state.from === "string" ? location.state.from : "/";
+    const to = leerVolver(location) ?? "/";
     return <Navigate to={to} replace />;
   }
 
@@ -152,10 +156,10 @@ export const CuentaEntrar = () => {
         /* handled by the isEmailVerified redirect above on next render */
       }
       if (freshProfile?.isEmailVerified) {
-        const to = location.state?.from && typeof location.state.from === "string" ? location.state.from : "/";
+        const to = leerVolver(location) ?? "/";
         navigate(to, { replace: true });
       } else {
-        navigate("/cuenta/verificar-email", { replace: true, state: { email } });
+        navigate("/cuenta/verificar-email", { replace: true, state: { email, volver: leerVolver(location) } });
       }
     } catch (err) {
       const { general, campos } = traducirError(err);
@@ -224,16 +228,12 @@ export const CuentaEntrar = () => {
         <BotonDeGoogle
           texto="signin_with"
           onEntrado={() => {
-            const to =
-              location.state?.from && typeof location.state.from === "string"
-                ? location.state.from
-                : "/";
-            navigate(to, { replace: true });
+            navigate(leerVolver(location) ?? "/", { replace: true });
           }}
         />
 
         <p className="se-entrada__pie">
-          ¿No tiene cuenta? <Link to="/cuenta/registro">Crear una</Link>
+          ¿No tiene cuenta? <Link to={conVolver("/cuenta/registro", leerVolver(location))}>Crear una</Link>
         </p>
       </div>
     </main>

@@ -1,138 +1,137 @@
-# El Analista dentro de SurEconomics — lo que falta
+# El Analista dentro de SurEconomics
 
-Octubre de 2026. Estado y plan para terminar de montar el juego en `sureconomics.com/el-analista/`.
-
----
-
-## Dónde estamos
-
-- El juego vive en su propio repo (`juega-el-analista/el-analista`) y su propio Vercel:
-  <https://el-analista-delta.vercel.app/>. Lo edita Alessandro desde su rama.
-- En SurEconomics hay un botón **«Jugar»** en la cabecera, junto a «Al punto», y una
-  tarjeta en `/pausa`. Hoy abren esa dirección **en otra pestaña**
-  (`EL_ANALISTA` en `src/components/Navbar.jsx` y en `src/pages/Pausa.jsx`).
-- Del lado del juego (revisado el 5-oct-2026):
-  - Existe `window.__pedir(ruta, opciones)`, que llama a nuestra API con la URL de
-    `VITE_API_URL`. **El juego todavía no la usa.**
-  - **`VITE_API_URL` está mal en su Vercel:** vale
-    `https://sureconomics-backend.onrender.com/api`, y en `/api` el backend da 404. Debe
-    ser `https://sureconomics-backend.onrender.com`, sin `/api`.
-  - El registro de carreras usa tres enganches del documento: `window.__REGISTRO` (la
-    lista, leída al pintar), `window.__puedeAnotar()` y `window.__anotarCarrera(entrada)`.
-    Hoy los define el «puente» del artifact, que en Vercel no puede publicar: el botón
-    «Anotar» dice que el registro no está disponible.
-  - La partida se guarda solo en el navegador (`localStorage`, clave `el-analista-partida`).
-  - El trabajador sin conexión (`sw.js`) se registra con ruta relativa y usa «primero la
-    red» para la página. Servido bajo `/el-analista/` queda acotado a esa carpeta y no
-    toca el resto del sitio.
-- En nuestro backend **no hay nada todavía** de `/analista/*`.
+Octubre de 2026. Cómo está montado el juego en `sureconomics.com/el-analista`, cómo se trae
+cada versión nueva y qué queda pendiente.
 
 ---
 
-## Cómo queda montado
+## La idea
 
+El juego lo hace el equipo de Alessandro en su propio repo
+(<https://github.com/juega-el-analista/el-analista>). **Nosotros no lo editamos: traemos su
+`main` tal cual** y lo envolvemos. Es una página más del sitio, sin otro Vercel, rewrite ni
+CORS, y comparte con el resto la sesión del lector, las cookies y la analítica.
+
+- **Se juega sin cuenta.**
+- **Solo suma al ranking con cuenta y el correo confirmado.** Un ranking abierto se llena de
+  nombres inventados.
+
+---
+
+## Las piezas
+
+| Dónde | Qué es |
+|---|---|
+| `src/juegos/el-analista/el-analista.jsx` | El juego, **traído, no se edita**. Un solo componente React (`export default function ElAnalista`), unas 40 000 líneas. |
+| `src/juegos/el-analista/origen.json` | De qué commit de su repo vino. |
+| `scripts/traer-el-analista.mjs` | El comando que lo trae: `npm run traer-analista`. |
+| `src/juegos/el-analista/puente.js` | Los tres enganches que el juego lee de `window`, y la carrera pendiente. |
+| `src/pages/ElAnalista.jsx` | La página `/el-analista`: barra, aviso de cuenta y montaje del juego. |
+| `src/pages/admin/AdminAnalista.jsx` | Panel → Editorial → **Ranking de El Analista**: ocultar o volver a mostrar carreras. |
+| Backend `app/routes/analista.py`, `app/services/analista_service.py` | El ranking y la partida. |
+| Backend `app/routes/admin/analista.py` | La moderación. |
+
+El juego queda fuera del linter (`eslint.cjs`) a propósito: «arreglarlo» aquí haría chocar la
+próxima vez que se traiga.
+
+**Peso.** El juego va en su propio paquete: 1 MB, unos 325 KB comprimido. Solo se descarga al
+entrar en `/el-analista`; la portada no lleva nada de él.
+
+**Pantalla completa.** La página va fuera del `Layout` (sin cabecera, pie ni invitación al
+boletín). El juego abre pantallas `position: fixed` que taparían la cabecera. Del `Layout` solo
+trae el **aviso de cookies**: quien llega directo al juego también decide. Con permiso, el juego
+se mide como cualquier página: visita, tiempo jugando y salida.
+
+---
+
+## Traer una versión nueva
+
+Cuando el equipo del juego une algo en su `main`:
+
+```bash
+npm run traer-analista        # clona su main por HTTPS (el repo es público)
+npm run build
+npm run dev                   # probar localhost:3000/el-analista
+git add src/juegos/el-analista && git commit -m "El Analista: trae <commit> de main"
 ```
-www.sureconomics.com/el-analista/          -> api/el-analista.js (nuestra función)
-                                               busca el HTML del juego, le mete el registro
-                                               y nuestro puente, y lo devuelve
-www.sureconomics.com/el-analista/<archivo> -> https://el-analista-delta.vercel.app/<archivo>
-```
 
-Al servirse desde nuestro dominio, el juego comparte con el sitio:
+- Con `-- --desde ../../analista/el-analista` se trae desde un clon local; tiene que estar
+  guardado en un commit.
+- Con `-- --ref otra-rama` se trae otra rama. Lo normal es `main`.
 
-- **Las cookies**: el consentimiento (`cookie_consent`) y las de medición.
-- **El `localStorage`**.
-- **La sesión del lector, solo en la misma pestaña.** Vive en `sessionStorage`
-  (`sureconomics_user_access_token`, `…_refresh_token`, `…_access_expires_at`), que es de
-  cada pestaña. Por eso el botón «Jugar» tiene que abrir el juego **en la misma pestaña**.
-  Con `target=_blank` y `noopener` el lector llega sin sesión.
-
-CORS no hace falta tocarlo: el juego llama a Render desde `https://www.sureconomics.com`,
-que ya está permitido.
+**El comando para y no escribe nada** si el juego deja de traer el componente o alguno de los
+tres enganches. Eso se habla con ellos antes de publicar.
 
 ---
 
-## Lo que hacemos nosotros
+## El contrato con el juego
 
-### Backend (`sureconomics-backend`)
+Lo que nuestro envoltorio necesita de su código, y que no deben cambiar sin avisar:
 
-1. **Modelos y migración.**
-   - `analista_carreras`: `id`, `user_id`, `nombre` (n, ≤24), `carrera` (c, ≤24),
-     `edad` (e, 20–99), `patrimonio` (p), `medallas` (m, 0–12), `nota` (v, ≤60),
-     `version_juego`, `idempotency_key` (única por cuenta), `oculta`, `created_at`.
-   - `analista_partidas`: `user_id` (PK), `sobre` (texto ≤ 256 KB), `version` (entero, sube
-     en cada guardado), `updated_at`.
-2. **Rutas** (blueprint `analista`):
-
-   | Ruta | Quién | Qué hace |
-   |---|---|---|
-   | `GET /analista/registro?tope=20` | Público | La mejor carrera de cada cuenta, sin las ocultas. Se cachea 60 s. |
-   | `POST /analista/carreras` | Lector verificado (`user_required(require_verified=True)`) | Valida campos, exige la cabecera `Idempotency-Key`: el mismo envío dos veces no duplica. |
-   | `GET /analista/mis-carreras` | Lector | Sus carreras. |
-   | `GET /analista/partida` | Lector | `{sobre, version, updated_at}` o 404. |
-   | `PUT /analista/partida` | Lector | `{sobre, version_base}`. Si la del servidor es más nueva, responde 409 `partida_mas_nueva` con la del servidor. |
-   | `DELETE /analista/partida` | Lector | Borra la partida. |
-
-3. **Moderación:** `GET /admin/analista/carreras` y `PATCH …/<id>` (`oculta`), más una
-   página sencilla en el panel con la lista y el botón «Ocultar».
-4. **Pruebas** con pytest: validación, idempotencia, lector sin verificar (403
-   `email_not_verified`), 409 de la partida, ocultas fuera del registro.
-
-### Frontend (`sureconomics-frontend`)
-
-5. **`vercel.json`**, antes de la regla general `/(.*)`:
-   - `/el-analista` redirige a `/el-analista/`.
-   - `/el-analista/` va a `/api/el-analista`.
-   - `/el-analista/:path*` va a `https://el-analista-delta.vercel.app/:path*`.
-6. **`api/el-analista.js`**:
-   - pide el HTML del juego y el registro a la API;
-   - inyecta, justo antes de `<script id="motor-react">`, un script que define
-     `__REGISTRO` (con el registro ya dentro), `__puedeAnotar` y `__anotarCarrera`
-     usando la sesión del lector, refrescando el token si ha caducado
-     (`POST /user-auth/refresh`);
-   - cachea el HTML 60 s en el borde;
-   - si la API cae, sirve el juego con el registro vacío: el juego tiene que poder jugarse
-     siempre.
-
-   Lector **sin cuenta** que pulsa «Anotar»: la carrera queda guardada como pendiente y el
-   lector va a `/cuenta/entrar?volver=/el-analista/`. Al volver, el puente la anota sola,
-   con la misma `Idempotency-Key`.
-
-   Si aceptó las cookies, el puente registra la visita en nuestra analítica.
-
-   Pruebas como `api/pieza.test.mjs`.
-7. **`?volver=`** en `/cuenta/entrar` y `/cuenta/registro`. Solo rutas internas que empiecen
-   por `/` y no por `//`, para que no sirva para mandar a otra web.
-8. **Botón «Jugar» y tarjeta de `/pausa`** → `/el-analista/` en la misma pestaña.
-9. Para probar en local: un enganche de desarrollo en `vite.config` que sirva
-   `/el-analista/` con la misma función, en `localhost:3000/el-analista/`.
+1. **`export default function ElAnalista()`** en `src/el-analista.jsx`, sin más dependencias que
+   React 18.
+2. **`window.__REGISTRO`**: la lista del ranking, leída al pintar. Cada fila es
+   `{ n, c, e, p, m, v }`: nombre, cargo, edad de retiro, patrimonio en USD, medallas y
+   veredicto.
+3. **`window.__puedeAnotar()`**: una promesa de booleano.
+4. **`window.__anotarCarrera(entrada)`**: una promesa que resuelve `null` si se anotó, o un
+   motivo si no:
+   - `"sin-sesion"`: el lector eligió «Ahora no» en nuestro aviso de cuenta.
+   - `"fallo"`: cualquier otro error.
+5. **Lo que guarda en el navegador**: `el-analista-partida`, `el-analista-arbol`, etc. Ahora
+   viven en el dominio del sitio; si cambian de nombre, los jugadores pierden su partida.
 
 ---
 
-## Lo que hace Alessandro (en su repo)
+## El flujo del ranking
 
-1. Corregir `VITE_API_URL` en Vercel: `https://sureconomics-backend.onrender.com`, sin
-   `/api`.
-2. No mover de sitio los tres enganches (`__REGISTRO`, `__puedeAnotar`, `__anotarCarrera`)
-   ni el `<script id="motor-react">`: nuestro puente se cuelga de ellos.
-3. Cambiar los textos de `BotonAnotar` que ya no aplican:
-   - «Anotada. La página se recarga para todo el mundo con tu carrera dentro.» →
-     algo como «Anotada en el registro de SurEconomics.»
-   - «El registro compartido no está disponible en esta vista…» → solo para cuando la
-     API cae.
-4. Si `__anotarCarrera` resuelve `"sin-sesion"`, no mostrar error: el puente ya se lleva
-   al lector a entrar.
-5. **Partida en la nube**, para seguir en otro dispositivo: al arrancar,
-   `GET /analista/partida` y, si es más nueva que la local, ofrecer retomarla. Al guardar,
-   `PUT /analista/partida` con `version_base`, y ante un 409 preguntar cuál quedarse.
-   Las condiciones completas están en el artifact del contrato.
+- **Lector con cuenta y correo confirmado:** «Anotar» manda la carrera
+  (`POST /analista/carreras`, con clave de idempotencia). El ranking nuevo vuelve en la misma
+  respuesta y la barra dice «Sus carreras suman al ranking».
+- **Sin cuenta:** «Anotar» abre nuestro aviso «Para sumar al ranking, entre con su cuenta».
+  La carrera queda guardada en el navegador con su clave.
+  - Al entrar o registrarse (`/cuenta/entrar?volver=/el-analista`) el lector vuelve al juego y
+    la carrera se anota sola.
+  - Reintentar con la misma clave no la cuenta dos veces.
+- **Con cuenta sin confirmar:** el mismo aviso, pero lleva a confirmar el correo; al confirmar,
+  vuelve y se anota.
+- **Una carrera pendiente caduca a las 24 horas.**
+- **El ranking muestra la mejor carrera de cada cuenta.** Si la redacción oculta una, sale la
+  siguiente mejor de esa cuenta.
+
+### API
+
+| Ruta | Quién | Qué |
+|---|---|---|
+| `GET /analista/registro?tope=20` | Público | Ranking: la mejor carrera visible de cada cuenta (100 como mucho). |
+| `POST /analista/carreras` | Lector con correo confirmado; `Idempotency-Key` obligatoria | Anota y devuelve `{ carrera, registro }`. |
+| `GET /analista/mis-carreras` | Lector | Sus carreras. |
+| `GET / PUT / DELETE /analista/partida` | Lector | La partida en la nube: `sobre` de 256 KB como mucho, `version_base`, y 409 `partida_mas_nueva` con la del servidor. |
+| `GET /admin/analista/carreras` | Publicador, admin | Lista paginada; filtros `oculta` y `q`. |
+| `PATCH /admin/analista/carreras/<id>` | Publicador, admin | `{ "oculta": true }` |
 
 ---
 
-## Orden para cerrarlo
+## Pendiente
 
-1. Backend (1–4) → probar en local → subir a Render.
-2. Frontend (5–9) → probar en `localhost:3000/el-analista/` → subir a Vercel.
-3. Comprobar en producción: jugar sin cuenta, anotar → entrar → vuelve y queda anotada;
-   jugar con cuenta; ocultar una carrera desde el panel.
-4. Alessandro: puntos 1–4 en cuanto pueda; el 5 cuando le toque.
+**Del lado del juego (Alessandro):**
+1. Cuando `__anotarCarrera` resuelve `"sin-sesion"`, no enseñar «No se pudo anotar…».
+   Algo como «Para sumar al ranking necesitas una cuenta».
+2. Cambiar «Anotada. La página se recarga para todo el mundo con tu carrera dentro.» por
+   algo como «Anotada en el ranking de SurEconomics».
+3. **Partida en la nube**, para seguir en otro dispositivo. El backend ya está listo.
+   - Al arrancar, `GET /analista/partida`.
+   - Al guardar, `PUT` con `version_base`.
+   - Ante un 409, preguntar con cuál quedarse.
+
+   Hace falta un cuarto enganche para hablar con nuestra API desde el juego, con la sesión;
+   por ejemplo `window.__nube = { leer, guardar, borrar }`, que pondríamos nosotros en
+   `puente.js`. Se acuerda con ellos antes.
+4. Hay claves duplicadas dentro de objetos de su código (`clave:true` dos veces, en las
+   escenas 9010, 9012…). No rompe nada, pero el compilador avisa.
+
+**Del nuestro, más adelante:**
+- Una acción en su repo que, al unir algo en `main`, nos abra sola un pull request con el
+  juego traído.
+- Su despliegue en Vercel ya no hace falta para SurEconomics; si lo quieren para probar, es
+  cosa suya.

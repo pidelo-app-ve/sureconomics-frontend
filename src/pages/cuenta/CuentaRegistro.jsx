@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
 import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
 import { applyPageMeta } from "../../lib/seo";
+import { conVolver, leerVolver } from "../../lib/volver";
 
 /**
  * Crear una cuenta. Cuatro campos.
@@ -47,7 +48,12 @@ const ID_ERROR = "reg-error";
 
 export const CuentaRegistro = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isEmailVerified, register, profile } = useUserAuth();
+  // Quien llegó desde algo concreto (anotar su carrera en El Analista) vuelve ahí.
+  const volver = leerVolver(useLocation());
+  const { isAuthenticated, isEmailVerified, register, profile, profileStatus } = useUserAuth();
+  // Con sesión, hasta que llega el perfil no se sabe si el correo está confirmado. Sin
+  // esperarlo, un lector ya confirmado que abría esta página acababa en «verificar correo».
+  const perfilListo = !["idle", "loading"].includes(profileStatus);
 
   const [campos, setCampos] = useState({
     firstName: "",
@@ -89,10 +95,10 @@ export const CuentaRegistro = () => {
   };
   const valido = Object.values(errores).every((e) => !e);
 
-  if (isAuthenticated && !isEmailVerified) {
-    return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email }} />;
+  if (isAuthenticated && perfilListo && !isEmailVerified) {
+    return <Navigate to="/cuenta/verificar-email" replace state={{ email: profile?.email, volver }} />;
   }
-  if (isAuthenticated && isEmailVerified) return <Navigate to="/cuenta" replace />;
+  if (isAuthenticated && isEmailVerified) return <Navigate to={volver ?? "/cuenta"} replace />;
 
   const cambiar = (campo) => (valor) => setCampos((c) => ({ ...c, [campo]: valor }));
   const marcar = (campo) => () => setTocados((t) => ({ ...t, [campo]: true }));
@@ -120,12 +126,12 @@ export const CuentaRegistro = () => {
         password: campos.password,
       });
       if (nuevo?.isEmailVerified) {
-        navigate("/cuenta", { replace: true });
+        navigate(volver ?? "/cuenta", { replace: true });
         return;
       }
       navigate("/cuenta/verificar-email", {
         replace: true,
-        state: { email: campos.email.trim() },
+        state: { email: campos.email.trim(), volver },
       });
     } catch (err) {
       const estado = err?.status;
@@ -231,10 +237,10 @@ export const CuentaRegistro = () => {
 
         {/* Quien se registra con Google no pasa por la pantalla del código: Google ya
             confirmó el correo, y volver a pedírselo sería repetir lo que acaba de hacer. */}
-        <BotonDeGoogle texto="signup_with" onEntrado={() => navigate("/cuenta", { replace: true })} />
+        <BotonDeGoogle texto="signup_with" onEntrado={() => navigate(volver ?? "/cuenta", { replace: true })} />
 
         <p className="se-entrada__pie">
-          ¿Ya tiene cuenta? <Link to="/cuenta/entrar">Entrar</Link>
+          ¿Ya tiene cuenta? <Link to={conVolver("/cuenta/entrar", volver)}>Entrar</Link>
         </p>
       </div>
     </main>

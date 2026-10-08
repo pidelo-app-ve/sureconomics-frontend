@@ -5,6 +5,7 @@ import { marcarSuscrito } from "../../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../../services/newsletterService";
 import { ESPACIOS } from "../../services/publicidadService";
 import { EspacioPublicitario } from "../publicidad";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**
  * El bloque del boletín en la portada: «Entorno en Viñetas».
@@ -33,6 +34,8 @@ import { EspacioPublicitario } from "../publicidad";
 
 export const NewsletterBlock = () => {
   const { t } = useIdioma();
+  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
+  const humano = useVerificacionHumana();
   const sectionRef = useRef(null);
   useRevealOnScroll(sectionRef);
 
@@ -53,7 +56,10 @@ export const NewsletterBlock = () => {
 
     setEstado({ status: "loading", mensaje: "" });
     try {
-      await subscribeToNewsletter(correo, { source: "home", honeypot: trampa });
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await subscribeToNewsletter(correo, { turnstile, source: "home", honeypot: trampa });
+      humano.reiniciar();
       // Quien ya está en la lista no tiene que ver la invitación flotante.
       marcarSuscrito();
       setEmail("");
@@ -62,10 +68,13 @@ export const NewsletterBlock = () => {
         mensaje: t("portada.boletin.ok"),
       });
     } catch (err) {
+      humano.reiniciar();
       setEstado({
         status: "error",
         mensaje:
-          err?.status === 422
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : err?.status === 422
             ? t("portada.boletin.correoIncompleto")
             : err?.status === 429
               ? t("portada.boletin.demasiadosIntentos")
@@ -95,6 +104,7 @@ export const NewsletterBlock = () => {
               <p className="se-newsletter__text">{t("portada.boletin.texto")}</p>
 
               <form
+                onFocus={humano.activar}
                 className="se-newsletter__form"
                 onSubmit={handleSubmit}
                 aria-busy={enviando}
@@ -147,6 +157,7 @@ export const NewsletterBlock = () => {
                     {estado.mensaje}
                   </p>
                 ) : null}
+                {humano.control}
               </form>
 
               {/* El acierto, aparte del formulario porque el formulario ya cumplió.

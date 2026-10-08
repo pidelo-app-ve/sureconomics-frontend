@@ -28,11 +28,11 @@ const ensureClient = (client) => {
  * porque el contrato del formulario lo incluye y así el servidor no tiene que adivinar
  * si el cliente lo soporta.
  */
-export const subscribeToNewsletter = async (email, { source, honeypot = "", client } = {}) => {
+export const subscribeToNewsletter = async (email, { source, honeypot = "", turnstile = "", client } = {}) => {
   const c = ensureClient(client);
   return c.request("/newsletter", {
     method: "POST",
-    json: { email, source, website: honeypot },
+    json: { email, source, website: honeypot, turnstile },
   });
 };
 

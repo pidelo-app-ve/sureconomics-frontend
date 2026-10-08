@@ -79,6 +79,7 @@
     }
   },
   "comun": {
+    "antiBots": { "noPaso": "No pudimos comprobar que no es un robot. Recargue la página y vuelva a intentarlo." },
     "leerMas": "Leer más",
     "volverInicio": "Volver al inicio",
     "cargando": "Cargando…",

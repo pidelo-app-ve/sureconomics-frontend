@@ -5,6 +5,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { marcarSuscrito } from "../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../services/newsletterService";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 
 /**
  * `/entorno`: la puerta de entrada al boletín desde el perfil de Instagram.
@@ -23,6 +24,8 @@ export const Entorno = () => {
   const [trampa, setTrampa] = useState("");
   const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
   const { t } = useIdioma();
+  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
+  const humano = useVerificacionHumana();
 
   useMetaPagina({
     title: t("boletin.entorno.meta.titulo", { marca: BRAND.name }),
@@ -43,16 +46,22 @@ export const Entorno = () => {
     }
     setEstado({ status: "loading", mensaje: "" });
     try {
-      await subscribeToNewsletter(correo, { source: "instagram", honeypot: trampa });
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await subscribeToNewsletter(correo, { turnstile, source: "instagram", honeypot: trampa });
+      humano.reiniciar();
       // Quien ya está en la lista no tiene que ver la invitación flotante del sitio.
       marcarSuscrito();
       setEmail("");
       setEstado({ status: "success", mensaje: "" });
     } catch (err) {
+      humano.reiniciar();
       setEstado({
         status: "error",
         mensaje:
-          err?.status === 422
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : err?.status === 422
             ? t("boletin.errores.correoIncompleto")
             : err?.status === 429
               ? t("boletin.errores.demasiados")
@@ -81,7 +90,7 @@ export const Entorno = () => {
             </Enlace>
           </div>
         ) : (
-          <form className="se-entorno__form" onSubmit={enviar} aria-busy={enviando} noValidate>
+          <form onFocus={humano.activar} className="se-entorno__form" onSubmit={enviar} aria-busy={enviando} noValidate>
             <label htmlFor="entorno-email" className="se-entorno__label">
               {t("boletin.entorno.suCorreo")}
             </label>
@@ -120,6 +129,7 @@ export const Entorno = () => {
             <button type="submit" className="se-entorno__boton" disabled={enviando}>
               {enviando ? t("boletin.entorno.enviando") : t("boletin.entorno.suscribirme")}
             </button>
+            {humano.control}
           </form>
         )}
 

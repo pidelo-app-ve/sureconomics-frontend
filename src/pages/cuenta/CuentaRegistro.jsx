@@ -9,6 +9,7 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**
  * Crear una cuenta. Cuatro campos.
@@ -70,6 +71,10 @@ export const CuentaRegistro = () => {
   const [tocados, setTocados] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
   const [enviando, setEnviando] = useState(false);
+  // Contra los robots que usan el registro para mandar correos de verificación a
+  // quien no los pidió: una trampa que solo rellena un robot, y Cloudflare Turnstile.
+  const [trampa, setTrampa] = useState("");
+  const humano = useVerificacionHumana();
   // Tras un intento fallido el foco va a lo que hay que arreglar. Objeto nuevo en cada
   // intento, para que repetir el mismo fallo vuelva a llevarlo alli.
   const [enfocar, setEnfocar] = useState(null);
@@ -121,7 +126,11 @@ export const CuentaRegistro = () => {
 
     setEnviando(true);
     try {
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
       const { profile: nuevo } = await register({
+        website: trampa,
+        turnstile,
         firstName: campos.firstName.trim(),
         lastName: campos.lastName.trim(),
         email: campos.email.trim(),
@@ -136,8 +145,11 @@ export const CuentaRegistro = () => {
         state: { email: campos.email.trim(), volver },
       });
     } catch (err) {
+      humano.reiniciar();
       const estado = err?.status;
-      if (estado === 409) {
+      if (err?.code === NO_PARECE_PERSONA) {
+        setErrorGeneral(t("comun.antiBots.noPaso"));
+      } else if (estado === 409) {
         setErrorGeneral(t("cuenta.registro.correoYaTieneCuenta"));
       } else if (estado === 429) {
         setErrorGeneral(t("cuenta.registro.demasiadosIntentos"));
@@ -162,7 +174,7 @@ export const CuentaRegistro = () => {
           {t("cuenta.registro.lead")}
         </p>
 
-        <form className="se-entrada__form" onSubmit={enviar} noValidate>
+        <form className="se-entrada__form" onSubmit={enviar} onFocus={humano.activar} noValidate>
           <div className="se-entrada__fila">
             <CampoDeTexto
               id={IDS.firstName}
@@ -207,6 +219,19 @@ export const CuentaRegistro = () => {
             autoComplete="new-password"
           />
           <FuerzaDeClave clave={campos.password} />
+
+          {/* La trampa: fuera de la vista, del tabulador y de los lectores de pantalla. */}
+          <input
+            type="text"
+            name="website"
+            className="se-sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            autoComplete="off"
+            value={trampa}
+            onChange={(e) => setTrampa(e.target.value)}
+          />
+          {humano.control}
 
           {/* Sin `role="alert"`: el foco llega aqui al aparecer, y eso ya lo hace leer. */}
           {errorGeneral ? (

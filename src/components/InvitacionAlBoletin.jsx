@@ -14,6 +14,7 @@ import {
   yaSuscrito,
 } from "../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../services/newsletterService";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 
 /**
  * La invitación al boletín: una ventana en medio de la pantalla, sobre una capa oscura,
@@ -68,6 +69,8 @@ const medirLectura = () =>
 export const InvitacionAlBoletin = () => {
   const { pathname } = useLocation();
   const { t } = useIdioma();
+  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
+  const humano = useVerificacionHumana();
   const [abierta, setAbierta] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -242,16 +245,22 @@ export const InvitacionAlBoletin = () => {
 
     setEstado({ status: "loading", mensaje: "" });
     try {
-      await subscribeToNewsletter(correo, { source: "invitacion", honeypot: trampa });
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await subscribeToNewsletter(correo, { turnstile, source: "invitacion", honeypot: trampa });
+      humano.reiniciar();
       marcarSuscrito();
       setCorreoSuscrito(correo);
       setEmail("");
       setEstado({ status: "success", mensaje: t("boletin.invitacion.ok") });
     } catch (err) {
+      humano.reiniciar();
       setEstado({
         status: "error",
         mensaje:
-          err?.status === 422
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : err?.status === 422
             ? t("boletin.errores.correoIncompleto")
             : err?.status === 429
               ? t("boletin.errores.demasiados")
@@ -329,6 +338,7 @@ export const InvitacionAlBoletin = () => {
             </p>
 
             <form
+              onFocus={humano.activar}
               className="se-invitacion__form"
               onSubmit={enviar}
               aria-busy={enviando}
@@ -380,6 +390,7 @@ export const InvitacionAlBoletin = () => {
                   {t("boletin.invitacion.ahoraNo")}
                 </button>
               </div>
+              {humano.control}
             </form>
           </>
         )}

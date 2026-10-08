@@ -67,7 +67,7 @@ const userFromRegisterPayload = (data) => {
  * }} payload
  */
 export const registerUser = async (payload) => {
-  const { email, password, firstName, lastName } = payload;
+  const { email, password, firstName, lastName, website = "", turnstile = "" } = payload;
 
   // Cuatro campos. Los otros seis -- edad, sexo, pais, ciudad, ocupacion y telefono --
   // eran obligatorios en el esquema del servidor y por eso el formulario no se podia
@@ -79,6 +79,9 @@ export const registerUser = async (payload) => {
     password,
     first_name: String(firstName ?? "").trim(),
     last_name: String(lastName ?? "").trim(),
+    // Contra los robots: la trampa y el token de Turnstile (`hooks/useVerificacionHumana`).
+    website,
+    turnstile,
   };
 
   const data = await userPublicRequest("/user-auth/register", {

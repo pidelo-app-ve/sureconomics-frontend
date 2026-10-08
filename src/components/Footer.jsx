@@ -6,6 +6,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useState } from "react";
 import { subscribeToNewsletter } from "../services/newsletterService";
 import { marcarSuscrito } from "../lib/invitacionBoletin";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 
 /** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
  *  salga un hueco con el nombre suelto rompiendo la fila. */
@@ -17,6 +18,8 @@ const ICONO_RED = {
 
 export const Footer = () => {
   const { t } = useIdioma();
+  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
+  const humano = useVerificacionHumana();
   const [newsletterEmail, setNewsletterEmail] = useState("");
   // El campo trampa: invisible para una persona, irresistible para un rastreador.
   const [newsletterTrampa, setNewsletterTrampa] = useState("");
@@ -41,10 +44,13 @@ export const Footer = () => {
     if (!email) return;
     setNewsletterState({ status: "loading", message: "" });
     try {
-      await subscribeToNewsletter(email, {
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await subscribeToNewsletter(email, { turnstile,
         source: "footer",
         honeypot: newsletterTrampa,
       });
+      humano.reiniciar();
       // Quien ya está en la lista no tiene que ver la invitación flotante.
       marcarSuscrito();
       setNewsletterEmail("");
@@ -53,10 +59,13 @@ export const Footer = () => {
         message: t("pie.suscritoOk"),
       });
     } catch (err) {
+      humano.reiniciar();
       setNewsletterState({
         status: "error",
         message:
-          err?.status === 422
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : err?.status === 422
             ? t("pie.correoRaro")
             : err?.status === 429
               ? t("pie.demasiadosIntentos")
@@ -113,6 +122,7 @@ export const Footer = () => {
             {/* El nombre va en el formulario, que si lo anuncia: con nombre es una
                 region de formulario y se puede saltar a ella. */}
             <form
+              onFocus={humano.activar}
               className="se-footer__newsletter-form"
               onSubmit={handleNewsletterSubmit}
               aria-label={t("pie.boletinFormulario")}
@@ -151,6 +161,7 @@ export const Footer = () => {
               >
                 {newsletterState.status === "loading" ? t("pie.enviando") : t("pie.suscribirme")}
               </button>
+              {humano.control}
             </form>
             <div className="se-footer__newsletter-status" aria-live="polite">
               {newsletterState.status === "success" ? (

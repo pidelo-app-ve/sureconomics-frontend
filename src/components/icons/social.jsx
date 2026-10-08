@@ -33,6 +33,24 @@ export const IconX = (props) => (
   </svg>
 );
 
+export const IconFacebook = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      fill="currentColor"
+      d="M13.5 21.9v-7.4H16l.4-3h-2.9V9.6c0-.86.25-1.45 1.48-1.45h1.57V5.48A20.7 20.7 0 0 0 14.27 5.4c-2.27 0-3.82 1.39-3.82 3.93v2.17H7.9v3h2.55v7.4a10 10 0 1 1 3.05 0Z"
+    />
+  </svg>
+);
+
+export const IconTelegram = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      fill="currentColor"
+      d="M21.6 4.2 18.4 19.3c-.24 1.06-.87 1.32-1.76.82l-4.86-3.58-2.35 2.26c-.26.26-.48.48-.98.48l.35-4.95 9.01-8.14c.39-.35-.09-.54-.6-.2L6.07 13 1.28 11.5c-1.04-.33-1.06-1.04.22-1.54L20.2 2.76c.87-.32 1.63.2 1.4 1.44Z"
+    />
+  </svg>
+);
+
 export const IconTikTok = (props) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
     <path

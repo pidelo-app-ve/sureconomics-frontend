@@ -2,63 +2,70 @@
   "juegos": {
     "guacamaya": {
       "titulo": "Vuela, guacamaya",
-      "escenario": "Vuela, guacamaya. Toque o pulse la barra espaciadora para aletear.",
+      "escenario": "Vuela, guacamaya. Toca o pulsa la barra espaciadora para aletear.",
       "patrocinadoPor": "Patrocinado por {marca}",
       "mangos": { "one": "{n} mango", "other": "{n} mangos" },
       "vidas": { "one": "{n} vida", "other": "{n} vidas" },
       "segundos": { "one": "{n} segundo", "other": "{n} segundos" },
+      "otrasRedes": "o compártelo en",
       "plumajesConSaldo": "{n} · Plumajes",
       "hud": {
         "quedanSegundos": { "one": "Queda {n} segundo", "other": "Quedan {n} segundos" },
         "segundosCorto": "{n}s",
         "pausar": "Pausar",
-        "intro": "Vuelo {n} · {nombre}"
+        "intro": "Vuelo {n} · {nombre}",
+        "destino": "El chaguaramo, donde vive la guacamaya"
       },
       "portada": {
         "volar": "Volar",
-        "ayuda": "Toque la pantalla o pulse la barra espaciadora para aletear.",
+        "ayuda": "Toca la pantalla o pulsa la barra espaciadora para aletear.",
         "reto": "Reto del {fecha}: el mismo vuelo para todos, hoy.",
-        "mejorHoy": "Su mejor de hoy: {n} pts.",
+        "mejorHoy": "Tu mejor de hoy: {n} pts.",
         "racha": { "one": "Racha: {n} día.", "other": "Racha: {n} días." },
         "vuelo": "Vuelo {n} · {nombre}",
         "vuelos": "Elegir vuelo",
-        "jefe": "Jefe"
+        "jefe": "Jefe",
+        "whatsapp": {
+          "invitacion": "Invita a tus amigos a volar y comparte tu mejor resultado por WhatsApp.",
+          "boton": "Invitar por WhatsApp",
+          "mensaje": "¿Me ganas? Vuela, guacamaya: un minuto sobre Venezuela.",
+          "mensajeRecord": "Mi mejor resultado en Vuela, guacamaya: {puntos} pts en el vuelo {destino}. ¿Me ganas?"
+        }
       },
       "pausa": {
         "titulo": "En pausa",
-        "texto": "La guacamaya espera en el aire. Toque la pantalla para seguir.",
+        "texto": "La guacamaya espera en el aire. Toca la pantalla para seguir.",
         "seguir": "Seguir volando",
         "reiniciar": "Empezar de nuevo"
       },
       "fin": {
         "kickerLlego": "Justo antes de que oscureciera",
-        "kickerNoLlego": "La tarde se le complicó",
-        "llego": "¡Llegó a casa!",
-        "casi": "¡Uy, casi llega!",
+        "kickerNoLlego": "La tarde se te complicó",
+        "llego": "¡Llegaste a casa!",
+        "casi": "¡Uy, casi llegas!",
         "pts": "pts",
-        "recogioYLlego": "Recogió {mangos} y llegó con {vidas}.",
-        "recogioYFalto": "Recogió {mangos}. Le faltaron {segundos} para llegar.",
-        "guardo": "Guardó {n} en casa: ya tiene {total} para plumajes.",
+        "recogioYLlego": "Recogiste {mangos} y llegaste con {vidas}.",
+        "recogioYFalto": "Recogiste {mangos}. Te faltaron {segundos} para llegar.",
+        "guardo": "Guardaste {n} en casa: ya tienes {total} para plumajes.",
         "perdidos": {
           "one": "El mango de este vuelo se perdió: solo se guardan los que llegan a casa.",
           "other": "Los {n} mangos de este vuelo se perdieron: solo se guardan los que llegan a casa."
         },
         "nuevoRecord": "¡Nuevo récord!",
         "racha": { "one": "Racha: {n} día seguido.", "other": "Racha: {n} días seguidos." },
-        "dolar": "Mientras volaba, el dólar oficial del BCV estaba en {valor}.",
+        "dolar": "Mientras volabas, el dólar oficial del BCV estaba en {valor}.",
         "verNoticias": "Ver las noticias de hoy",
         "volarOtraVez": "Volar otra vez",
-        "copiado": "Copiado: péguelo donde quiera",
-        "compartir": "Compartir resultado",
         "kickerJefe": "La loma del chopo",
         "llegoJefe": "¡El muchacho se quedó sin piedras!",
         "casiJefe": "Esta vez ganó el tirachinas",
         "estrellas": "{n} de 3 estrellas",
         "estrellasNuevas": { "one": "+{n} estrella nueva", "other": "+{n} estrellas nuevas" },
-        "abrio": "Abrió el vuelo {n}: {nombre}.",
-        "completo": "Ya voló los siete vuelos.",
+        "abrio": "Abriste el vuelo {n}: {nombre}.",
+        "completo": "Ya volaste todos los vuelos.",
         "siguiente": "Siguiente vuelo",
-        "vuelos": "Vuelos"
+        "vuelos": "Vuelos",
+        "whatsapp": "Compartir por WhatsApp"
       },
       "compartir": {
         "llego": "Llevé a la guacamaya a casa",
@@ -68,35 +75,35 @@
       "tienda": {
         "kicker": "Tienda del chaguaramo",
         "titulo": "Plumajes",
-        "saldo": { "one": "Tiene {cifra} mango guardado", "other": "Tiene {cifra} mangos guardados" },
+        "saldo": { "one": "Tienes {cifra} mango guardado", "other": "Tienes {cifra} mangos guardados" },
         "puesto": "Puesto",
         "ponermelo": "Ponérmelo",
-        "toqueParaPagar": "Toque otra vez para pagar {n}",
-        "leFaltan": "Le faltan {n}",
+        "toqueParaPagar": "Toca otra vez para pagar {n}",
+        "leFaltan": "Te faltan {n}",
         "comprar": "Comprar",
-        "suyo": "Suyo",
+        "suyo": "Tuyo",
         "volver": "Volver"
       },
       "plumajes": {
-        "azul": { "nombre": "Guacamaya azul y amarilla", "nota": "La de siempre. Viene de fábrica." },
-        "roja": { "nombre": "Guacamaya roja", "nota": "Roja entera, con el ala amarilla y las puntas azules." },
+        "azul": { "nombre": "Guacamaya Clásica", "nota": "La de siempre, azul y amarilla. Viene de fábrica." },
+        "roja": { "nombre": "GuacaLeón", "nota": "Roja entera y con melena, como los Leones del Caracas." },
         "turpial": { "nombre": "Turpial", "nota": "El ave nacional, de visita por Caracas." },
-        "pelotera": { "nombre": "Guacamaya pelotera", "nota": "Gorra y pelota, sin camiseta de nadie." },
-        "roques": { "nombre": "Guacamaya de Los Roques", "nota": "Lentes de sol y flotador. Ya viene la temporada." },
-        "tricolor": { "nombre": "Guacamaya tricolor", "nota": "Con la gorra amarilla, azul y roja, y sus ocho estrellas." },
-        "liqui": { "nombre": "Guacamaya en liquiliqui", "nota": "De gala, con botones dorados y sombrero llanero." },
-        "catatumbo": { "nombre": "Guacamaya del Catatumbo", "nota": "Azul eléctrico. Con ella, los rayos de las tormentas cambian de color." },
-        "toro": { "nombre": "Guacamaya toro", "nota": "Alcista. Cuernos, argolla y plumas en verde." },
-        "oso": { "nombre": "Guacamaya oso", "nota": "Bajista. Para los días rojos de la bolsa." },
-        "dolar": { "nombre": "Guacamaya verde dólar", "nota": "Vuela con un fajo de billetes en las patas." },
-        "dorada": { "nombre": "Guacamaya dorada", "nota": "Deja un rastro de brillo por todo el Ávila." },
-        "zamuro": { "nombre": "El zamuro arrepentido", "nota": "Juegas de zamuro. Los otros zamuros igual te chocan." }
+        "pelotera": { "nombre": "GuacaTiburón", "nota": "Con aleta, como los Tiburones de La Guaira." },
+        "roques": { "nombre": "GuacaPlayera", "nota": "Lentes de sol y flotador. Ya viene la temporada." },
+        "tricolor": { "nombre": "GuacaCafetalera", "nota": "Sombrero de paja y su ramita de café, recién bajada del cafetal." },
+        "liqui": { "nombre": "GuacaLlanera", "nota": "En liquiliqui, con botones dorados y sombrero llanero." },
+        "catatumbo": { "nombre": "Guacarayo", "nota": "Azul eléctrico. Con ella, los rayos de las tormentas cambian de color." },
+        "toro": { "nombre": "Guacatoro", "nota": "Alcista. Cuernos, argolla y plumas en verde." },
+        "oso": { "nombre": "GuacaChigüire", "nota": "Hocico chato y orejitas: el roedor más grande del llano, con alas." },
+        "dolar": { "nombre": "GuacaDólar", "nota": "Vuela con un fajo de billetes en las patas." },
+        "dorada": { "nombre": "GuaCatira", "nota": "Dorada de pies a cabeza. Deja un rastro de brillo por todo el Ávila." },
+        "zamuro": { "nombre": "Guacazombie", "nota": "Cosida, verdosa y con un ojo en X. Vuela igual de bien." }
       },
       "vuelos": {
-        "kicker": "Siete vuelos",
-        "titulo": "Elija su vuelo",
+        "kicker": "{n} vuelos",
+        "titulo": "Elige tu vuelo",
         "estrellas": "Cada vuelo da hasta tres estrellas: llegar a casa, llegar sin un solo golpe y recoger seis de cada diez mangos.",
-        "bloqueado": "Llegue a casa en el vuelo {n} para abrirlo.",
+        "bloqueado": "Llega a casa en el vuelo {n} para abrirlo.",
         "numero": "Vuelo {n}",
         "estrellasDe": "{n} de 3 estrellas",
         "jefe": "Jefe",
@@ -115,7 +122,7 @@
           "destino": "a Barquisimeto",
           "corto": "El valle y la Catedral",
           "texto": "El crepúsculo del valle, con la Catedral al fondo. Ahora hay palomas: vienen en bandada, en uve, y se cierran.",
-          "aviso": "Palomas en bandada: pase por encima o por debajo."
+          "aviso": "Palomas en bandada: pasa por encima o por debajo."
         },
         "margarita": {
           "nombre": "Margarita",
@@ -136,7 +143,7 @@
           "destino": "a La Guaira",
           "corto": "El puerto y la pista",
           "texto": "Sobre el puerto de La Guaira cruzan aviones, rápidos. Un triángulo amarillo en el borde de la pantalla avisa a qué altura vienen.",
-          "aviso": "Aviones: mire el triángulo amarillo del borde."
+          "aviso": "Aviones: mira el triángulo amarillo del borde."
         },
         "canaima": {
           "nombre": "Canaima",
@@ -151,6 +158,27 @@
           "corto": "El muchacho del tirachinas",
           "texto": "En lo alto de la loma, un muchacho con tirachinas quiere bajar a la guacamaya a pedradas. Antes de cada tiro levanta el brazo y se ve hacia dónde apunta.",
           "aviso": "Jefe: la línea punteada marca hacia dónde va la piedra."
+        },
+        "coro": {
+          "nombre": "Médanos de Coro",
+          "destino": "a los Médanos de Coro",
+          "corto": "Arena, cardones y viento",
+          "texto": "Montañas de arena hasta donde alcanza la vista. Aquí manda el viento: ráfagas fuertes y seguidas, y remolinos de arena que se levantan del suelo.",
+          "aviso": "Viento: mira las rayas antes de que empuje."
+        },
+        "merida": {
+          "nombre": "Mérida",
+          "destino": "a Mérida",
+          "corto": "Nieve, páramo y teleférico",
+          "texto": "La Sierra Nevada y el páramo, con sus frailejones. Cuando nieva, la guacamaya se carga de nieve: pesa más y cada aleteo sube menos. Cuidado con las cabinas del teleférico y con el cóndor.",
+          "aviso": "Nieve: cuando cae, aletea más seguido."
+        },
+        "barinas": {
+          "nombre": "Barinas",
+          "destino": "a Barinas",
+          "corto": "El sol del llano",
+          "texto": "El llano abierto, con chigüires, vacas y caballos. El sol calienta el aire: hay corrientes que te levantan de golpe, muchas veces hacia una bandada de garzas.",
+          "aviso": "Corrientes de aire caliente: entra bajo."
         }
       }
     },

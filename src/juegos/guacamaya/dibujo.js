@@ -69,9 +69,38 @@ const accesoriosDetras = (ctx, extra) => {
     }
     ctx.fillStyle = "#e8c34a";
     ctx.fillRect(1.5, 8, 2.6, 10);
-  } else if (extra === "oso") {
-    for (const ox of [6, 15]) circulo(ctx, "#5a341c", ox, -13, 3.8);
-    for (const ox of [6, 15]) circulo(ctx, "#e0a3a0", ox, -13, 1.8);
+  } else if (extra === "chiguire") {
+    // Orejitas de chigüire: pequeñas, redondas y altas, no las de oso.
+    for (const ox of [7, 14]) elipse(ctx, "#5c3a24", ox, -13.5, 2.4, 2.8);
+    for (const ox of [7, 14]) elipse(ctx, "#b98463", ox, -13.2, 1.1, 1.5);
+  } else if (extra === "leon") {
+    // La melena de los Leones: un halo de mechones alrededor de la cabeza.
+    // Dos coronas de mechones: la de fuera más oscura, la de dentro dorada.
+    for (const [r, n, color, rx, ry] of [
+      [12.5, 16, "#a85c18", 5.2, 3.1],
+      [10, 14, "#e09a2c", 4.6, 2.8],
+    ]) {
+      for (let i = 0; i < n; i += 1) {
+        const an = (i / n) * TAU + (r > 11 ? 0 : 0.22);
+        elipse(ctx, color, 10.5 + Math.cos(an) * r * 0.78, -5.5 + Math.sin(an) * r * 0.78, rx, ry, an);
+      }
+    }
+  } else if (extra === "tiburon") {
+    // La aleta dorsal de los Tiburones, sobre la espalda.
+    ctx.fillStyle = "#5d6f82";
+    ctx.beginPath();
+    ctx.moveTo(-6, -7);
+    ctx.quadraticCurveTo(-2, -20, 5, -22);
+    ctx.quadraticCurveTo(3, -14, 5, -7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.25)";
+    ctx.beginPath();
+    ctx.moveTo(-3, -8);
+    ctx.quadraticCurveTo(0, -17, 4.6, -20.5);
+    ctx.quadraticCurveTo(0.5, -15, 0.5, -8);
+    ctx.closePath();
+    ctx.fill();
   } else if (extra === "toro") {
     ctx.strokeStyle = "#f3e6c4";
     ctx.lineWidth = 2.6;
@@ -84,22 +113,6 @@ const accesoriosDetras = (ctx, extra) => {
     ctx.stroke();
     ctx.lineCap = "butt";
   }
-};
-
-/** Una gorra sobre la cabeza: la copa recortada al casco, con sus franjas, y la visera. */
-const gorra = (ctx, franjas, visera, adorno) => {
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(11, -8.5, 8.6, Math.PI, 0);
-  ctx.closePath();
-  ctx.clip();
-  for (const [color, y, alto] of franjas) {
-    ctx.fillStyle = color;
-    ctx.fillRect(1, y, 22, alto);
-  }
-  adorno?.();
-  ctx.restore();
-  elipse(ctx, visera, 19, -8.6, 6.3, 1.5, 0.08);
 };
 
 /** Lo que va encima: flotador, pelota, botones, lentes, gorras y sombrero. */
@@ -122,25 +135,68 @@ const accesoriosDelante = (ctx, extra) => {
     ctx.lineTo(5, -8);
     ctx.stroke();
     elipse(ctx, "rgba(255,255,255,0.7)", 13.6, -7.8, 1.2, 0.6, -0.4);
-  } else if (extra === "pelotera") {
-    circulo(ctx, "#fbf8f0", 5, 11.5, 3.4);
-    ctx.strokeStyle = "#d6282b";
-    ctx.lineWidth = 0.7;
+  } else if (extra === "cafetalera") {
+    // El sombrero de paja del cafetal: ala ancha, copa baja, cinta verde y una rama de
+    // café con sus granos rojos.
+    elipse(ctx, "#cfa560", 11, -12.6, 12.5, 2.4);
+    ctx.fillStyle = "#e0b872";
     ctx.beginPath();
-    ctx.arc(2.6, 11.5, 2.4, -0.9, 0.9);
-    ctx.stroke();
+    ctx.moveTo(4.5, -12.8);
+    ctx.quadraticCurveTo(5, -20, 11, -20.5);
+    ctx.quadraticCurveTo(17, -20, 17.5, -12.8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#2f6b3a";
+    ctx.fillRect(4.8, -15.2, 12.4, 1.8);
+    elipse(ctx, "#3f8a4a", 14.6, -16.4, 2.4, 1.1, -0.5);
+    circulo(ctx, "#c8292c", 12.2, -15.6, 1);
+    circulo(ctx, "#a81f24", 13.6, -15, 0.9);
+    ctx.strokeStyle = "rgba(120,80,30,0.35)";
+    ctx.lineWidth = 0.5;
+    for (let x = 6; x < 17; x += 2.2) {
+      ctx.beginPath();
+      ctx.moveTo(x, -19.5);
+      ctx.lineTo(x + 0.6, -15.4);
+      ctx.stroke();
+    }
+  } else if (extra === "chiguire") {
+    // El hocico chato del chigüire, sobre el pico, con sus dos fosas y bigotes.
+    elipse(ctx, "#6e4630", 19.6, -4.6, 5.6, 4.4);
+    elipse(ctx, "#8a5a3c", 19, -5.4, 4.2, 2.8);
+    circulo(ctx, "#2a1a10", 22.6, -6, 0.75);
+    circulo(ctx, "#2a1a10", 22.2, -3.8, 0.75);
+    ctx.strokeStyle = "rgba(30,18,10,0.6)";
+    ctx.lineWidth = 0.45;
+    for (const dy of [-1.2, 0, 1.2]) {
+      ctx.beginPath();
+      ctx.moveTo(21, -4.8 + dy);
+      ctx.lineTo(26, -5.6 + dy * 1.8);
+      ctx.stroke();
+    }
+  } else if (extra === "zombie") {
+    // Costuras: una cicatriz cosida en el pecho y otra en la cabeza.
+    ctx.strokeStyle = "#2b2f24";
+    ctx.lineWidth = 0.9;
+    ctx.lineCap = "round";
     ctx.beginPath();
-    ctx.arc(7.4, 11.5, 2.4, Math.PI - 0.9, Math.PI + 0.9);
+    ctx.moveTo(-1, 2);
+    ctx.lineTo(9, 6);
+    ctx.moveTo(6, -12);
+    ctx.lineTo(13, -9.5);
+    for (let k = 0; k <= 4; k += 1) {
+      const x = -1 + k * 2.5;
+      const y = 2 + k;
+      ctx.moveTo(x - 0.6, y - 1.6);
+      ctx.lineTo(x + 0.6, y + 1.6);
+    }
+    for (let k = 0; k <= 2; k += 1) {
+      const x = 6.8 + k * 2.6;
+      const y = -11.7 + k * 0.9;
+      ctx.moveTo(x - 0.5, y - 1.4);
+      ctx.lineTo(x + 0.5, y + 1.4);
+    }
     ctx.stroke();
-    gorra(ctx, [["#f4f1ea", -18, 10], ["#1b2a4a", -10.6, 2]], "#14203a");
-    circulo(ctx, "#1b2a4a", 11, -17, 1.1);
-  } else if (extra === "tricolor") {
-    gorra(ctx, [["#ffcc00", -18, 4.4], ["#0b3fa8", -13.6, 2.6], ["#d21f2a", -11, 2.6]], "#d21f2a", () => {
-      for (let i = 0; i < 8; i += 1) {
-        const an = Math.PI * (1.12 + i * 0.11);
-        circulo(ctx, "#fff", 11 + Math.cos(an) * 6.8, -6.2 + Math.sin(an) * 6.8, 0.55);
-      }
-    });
+    ctx.lineCap = "butt";
   } else if (extra === "liqui") {
     for (const [bx, by] of [[8, -3], [9, 0.5], [9.5, 4], [9, 7.5]]) circulo(ctx, "#d9b44a", bx, by, 1);
     // El sombrero llanero.
@@ -163,34 +219,6 @@ const accesoriosDelante = (ctx, extra) => {
   }
 };
 
-/** El zamuro arrepentido: el plumaje que cambia el ave entera. */
-const dibujarZamuroJugador = (ctx, fase) => {
-  const w = Math.sin(fase);
-  ctx.scale(-1, 1);
-  ctx.fillStyle = "#17141c";
-  ctx.beginPath();
-  ctx.moveTo(-4, -2);
-  ctx.quadraticCurveTo(-10, -14 - w * 10, -30, -8 - w * 16);
-  ctx.lineTo(-24, -2 - w * 8);
-  ctx.lineTo(-30, 0 - w * 10);
-  ctx.quadraticCurveTo(-12, 4, -4, 4);
-  ctx.moveTo(4, -2);
-  ctx.quadraticCurveTo(10, -14 - w * 10, 28, -10 - w * 16);
-  ctx.lineTo(22, -3 - w * 8);
-  ctx.lineTo(26, -1 - w * 10);
-  ctx.quadraticCurveTo(12, 4, 4, 4);
-  ctx.fill();
-  elipse(ctx, "#1f1b24", 0, 1, 13, 7);
-  circulo(ctx, "#4a4550", -13, -1, 4.5);
-  ctx.fillStyle = "#cfc6b8";
-  ctx.beginPath();
-  ctx.moveTo(-17, -2);
-  ctx.lineTo(-23, 0);
-  ctx.lineTo(-17, 1.5);
-  ctx.fill();
-  circulo(ctx, "#ff6a3d", -14, -2, 1);
-};
-
 /**
  * La guacamaya, con el plumaje que lleve puesto. Mira a la derecha; `angulo` la inclina
  * según sube o cae, `fase` mueve el ala.
@@ -202,12 +230,6 @@ export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1, plumaje = PL
   ctx.globalAlpha = alfa;
   ctx.translate(x, y);
   ctx.rotate(angulo);
-
-  if (extra === "zamuro") {
-    enEspacioDeAccesorios(ctx, () => dibujarZamuroJugador(ctx, fase));
-    ctx.restore();
-    return;
-  }
 
   enEspacioDeAccesorios(ctx, () => accesoriosDetras(ctx, extra));
 
@@ -244,6 +266,18 @@ export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1, plumaje = PL
     elipse(ctx, "#3c7be0", 16.5, -6, 3.8, 3);
     circulo(ctx, "#ffd27a", 16.5, -6, 1.8);
     circulo(ctx, "#111", 16.7, -6, 1);
+  } else if (extra === "zombie") {
+    // El ojo en X.
+    ctx.strokeStyle = "#1c1c18";
+    ctx.lineWidth = 1.1;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(15, -7.6);
+    ctx.lineTo(18, -4.6);
+    ctx.moveTo(18, -7.6);
+    ctx.lineTo(15, -4.6);
+    ctx.stroke();
+    ctx.lineCap = "butt";
   } else {
     circulo(ctx, "#111", 16.5, -6, 1.7);
   }
@@ -254,7 +288,7 @@ export const dibujarGuacamaya = (ctx, x, y, angulo, fase, alfa = 1, plumaje = PL
   ctx.quadraticCurveTo(24, -2, 20, -1);
   ctx.closePath();
   ctx.fill();
-  if (extra === "roja") {
+  if (extra === "leon") {
     // El pico claro de la roja, con la punta oscura.
     ctx.fillStyle = "#1c1c1c";
     ctx.beginPath();
@@ -348,6 +382,39 @@ const dibujarViento = (ctx, p, ancho, ahora) => {
 };
 
 /**
+ * La nieve de Mérida: unos copos de aviso y, cuando nieva de verdad, muchos, que caen
+ * en diagonal, con un velo blanco. Mientras nieva la guacamaya pesa más: se le ve la
+ * nieve encima (ver `nieveEncima`).
+ */
+const dibujarNieve = (ctx, p, ancho, ahora) => {
+  const n = p.nieve;
+  if (!n || (n.fase !== "aviso" && n.fase !== "activa")) return;
+  const fuerte = n.fase === "activa";
+  if (fuerte) {
+    ctx.fillStyle = "rgba(240,246,255,0.12)";
+    ctx.fillRect(0, 0, ancho, SUELO);
+  }
+  const cuantos = fuerte ? Math.ceil(ancho / 6) : Math.ceil(ancho / 30);
+  for (let k = 0; k < cuantos; k += 1) {
+    const caida = 50 + (k % 5) * 16;
+    const y = (k * 53.7 + ahora * caida) % SUELO;
+    const x = (((k * 97.3 - ahora * (30 + (k % 3) * 18) + y * 0.35) % (ancho + 20)) + ancho + 20) % (ancho + 20) - 10;
+    const r = 1 + (k % 3) * 0.7;
+    circulo(ctx, `rgba(255,255,255,${fuerte ? 0.85 : 0.6})`, x, y, r);
+  }
+};
+
+/** La nieve sobre la guacamaya mientras nieva: un manto en la espalda y la cabeza. */
+const nieveEncima = (ctx, x, y, angulo) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angulo);
+  elipse(ctx, "rgba(255,255,255,0.92)", -2, -10, 10, 3.4, -0.1);
+  elipse(ctx, "rgba(255,255,255,0.92)", 12, -13, 5, 2.4, 0.1);
+  ctx.restore();
+};
+
+/**
  * Dibuja el estado `p` del motor. `ahora` es el reloj real (para titilar luces y batir
  * alas aunque el juego esté en la portada); `reducido` quita los destellos y la estela;
  * `plumaje` es el que lleva puesto la guacamaya.
@@ -381,12 +448,15 @@ export const dibujar = (ctx, p, escena, ahora, { reducido = false, plumaje = PLU
   // El sol, que baja hacia el horizonte.
   const sx = ancho * 0.7;
   const sy = ALTO * 0.24 + (SUELO - 120 - ALTO * 0.24) * Math.pow(prog, 1.1);
-  const halo = ctx.createRadialGradient(sx, sy, 10, sx, sy, 120);
-  halo.addColorStop(0, "rgba(255,236,170,0.55)");
+  // En el llano el sol es más grande y quema más: más halo.
+  const radioSol = esc.solGrande ? 48 : 32;
+  const radioHalo = esc.solGrande ? 190 : 120;
+  const halo = ctx.createRadialGradient(sx, sy, 10, sx, sy, radioHalo);
+  halo.addColorStop(0, `rgba(255,236,170,${esc.solGrande ? 0.75 : 0.55})`);
   halo.addColorStop(1, "rgba(255,236,170,0)");
   ctx.fillStyle = halo;
-  ctx.fillRect(sx - 120, sy - 120, 240, 240);
-  circulo(ctx, tramo(esc.sol, prog), sx, sy, 32);
+  ctx.fillRect(sx - radioHalo, sy - radioHalo, radioHalo * 2, radioHalo * 2);
+  circulo(ctx, tramo(esc.sol, prog), sx, sy, radioSol);
 
   // El paisaje de este vuelo.
   esc.fondo(ctx, p, escena, prog, ahora, opciones);
@@ -458,9 +528,11 @@ export const dibujar = (ctx, p, escena, ahora, { reducido = false, plumaje = PLU
   ctx.globalAlpha = 1;
 
   dibujarGuacamaya(ctx, gx, p.y, angulo, fase, parpadeo, plumaje);
+  if (p.nieve?.fase === "activa") nieveEncima(ctx, gx, p.y, angulo);
 
   // El viento, por encima de todo menos de los números.
   if (!reducido) dibujarViento(ctx, p, ancho, ahora);
+  dibujarNieve(ctx, p, ancho, reducido ? 0 : ahora);
 
   // Los efectos: el «+10» de cada mango, que sube y se apaga.
   escena.efectos = escena.efectos.filter((e) => ahora - e.desde < 0.8);

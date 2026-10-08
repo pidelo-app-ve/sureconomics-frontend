@@ -153,7 +153,7 @@ const dibujarGrua = (ctx, o, prog, ahora) => {
   if (Math.sin(ahora * 4 + o.ventanas) > 0) circulo(ctx, "#ff4a3d", mastil, y - 12, 3);
 };
 
-const ESTILOS = { edificio: dibujarBloque, palmera: dibujarPalmera, torre: dibujarTorre, grua: dibujarGrua };
+
 
 /* —— Lo que vuela ————————————————————————————————————————————————————— */
 
@@ -470,6 +470,278 @@ const dibujarRoca = (ctx, o, prog) => {
   }
 };
 
+/* —— Los obstáculos de Coro, Mérida y Barinas ———————————————————————————— */
+
+/** El cardón de los médanos: un tronco grueso con costillas y brazos que suben. */
+const dibujarCardon = (ctx, o, prog) => {
+  const cx = o.x + o.w / 2;
+  const y = SUELO - o.h;
+  const verde = tramo(["#4f8a3e", "#457a3a", "#2c4a34", "#101c16"], prog);
+  const costilla = "rgba(20,40,20,0.3)";
+  const tronco = o.w * 0.5;
+  const columna = (x, y0, y1, ancho) => {
+    ctx.fillStyle = verde;
+    ctx.beginPath();
+    ctx.moveTo(x - ancho / 2, y1);
+    ctx.lineTo(x - ancho / 2, y0 + ancho / 2);
+    ctx.arc(x, y0 + ancho / 2, ancho / 2, Math.PI, 0);
+    ctx.lineTo(x + ancho / 2, y1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = costilla;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (const f of [-0.22, 0, 0.22]) {
+      ctx.moveTo(x + ancho * f, y0 + ancho * 0.4);
+      ctx.lineTo(x + ancho * f, y1);
+    }
+    ctx.stroke();
+  };
+  // Los brazos: un codo horizontal y la subida.
+  const brazo = (lado, altura, largo) => {
+    const bx = cx + lado * o.w * 0.42;
+    const by = SUELO - altura;
+    ctx.fillStyle = verde;
+    ctx.fillRect(Math.min(cx, bx), by - tronco * 0.35, Math.abs(bx - cx), tronco * 0.7);
+    columna(bx, by - largo, by + tronco * 0.3, tronco * 0.7);
+  };
+  brazo(1, o.h * 0.45, o.h * 0.28);
+  if (o.ventanas % 3) brazo(-1, o.h * 0.6, o.h * 0.22);
+  columna(cx, y, SUELO, tronco);
+};
+
+/** Una torre del teleférico: dos patas que se juntan, travesaños y el brazo con poleas. */
+const dibujarPilon = (ctx, o, prog) => {
+  const y = SUELO - o.h;
+  const cx = o.x + o.w / 2;
+  const metal = tramo(["#8a8c9a", "#767888", "#44465c", "#1a1a28"], prog);
+  ctx.strokeStyle = metal;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(o.x, SUELO);
+  ctx.lineTo(cx - 3, y + 8);
+  ctx.moveTo(o.x + o.w, SUELO);
+  ctx.lineTo(cx + 3, y + 8);
+  ctx.stroke();
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  const tramos = Math.max(3, Math.floor(o.h / 40));
+  for (let k = 0; k < tramos; k += 1) {
+    const f0 = k / tramos;
+    const f1 = (k + 1) / tramos;
+    const a0 = (o.w / 2) * (1 - f0 * 0.9);
+    const a1 = (o.w / 2) * (1 - f1 * 0.9);
+    ctx.moveTo(cx - a0, SUELO - o.h * f0);
+    ctx.lineTo(cx + a1, SUELO - o.h * f1);
+    ctx.moveTo(cx + a0, SUELO - o.h * f0);
+    ctx.lineTo(cx - a1, SUELO - o.h * f1);
+  }
+  ctx.stroke();
+  // El brazo de arriba, a rayas rojas y blancas, con sus dos poleas.
+  const brazoW = o.w * 1.5;
+  ctx.fillStyle = "#f4f1ea";
+  ctx.fillRect(cx - brazoW / 2, y, brazoW, 7);
+  ctx.fillStyle = "#d9423a";
+  for (let k = 0; k < 4; k += 1) ctx.fillRect(cx - brazoW / 2 + (k * brazoW) / 4, y, brazoW / 8, 7);
+  circulo(ctx, metal, cx - brazoW / 2 + 4, y - 3, 4);
+  circulo(ctx, metal, cx + brazoW / 2 - 4, y - 3, 4);
+};
+
+/** El remolino de arena: un embudo que sale del suelo, gira y suelta granos. */
+const dibujarRemolino = (ctx, o, ahora) => {
+  const f = forma(o).rect;
+  const base = SUELO;
+  const cima = f.y;
+  const cx = f.x + f.w / 2;
+  const capas = 9;
+  for (let k = 0; k < capas; k += 1) {
+    const t = k / (capas - 1); // 0 abajo, 1 arriba
+    const y = base - (base - cima) * t;
+    const ancho = 10 + t * t * 46;
+    const desvio = Math.sin(o.fase * 3 + t * 4) * (4 + t * 10);
+    // Más oscuro que la arena de detrás: es un obstáculo y se tiene que ver.
+    ctx.fillStyle = `rgba(150,98,52,${0.72 - t * 0.3})`;
+    ctx.beginPath();
+    ctx.ellipse(cx + desvio, y, ancho, 6 + t * 5, 0, 0, TAU);
+    ctx.fill();
+  }
+  // Las líneas del giro.
+  ctx.strokeStyle = "rgba(92,56,26,0.7)";
+  ctx.lineWidth = 1.6;
+  for (let k = 0; k < 3; k += 1) {
+    ctx.beginPath();
+    for (let t = 0; t <= 1.001; t += 0.1) {
+      const y = base - (base - cima) * t;
+      const ancho = 10 + t * t * 46;
+      ctx.lineTo(cx + Math.sin(o.fase * 6 + t * 9 + k * 2.1) * ancho * 0.9, y);
+    }
+    ctx.stroke();
+  }
+  // Granos que salen despedidos.
+  ctx.fillStyle = "rgba(110,70,34,0.85)";
+  for (let k = 0; k < 8; k += 1) {
+    const a = ahora * 4 + k * 0.8 + o.fase;
+    const t = (k / 8 + ahora * 0.3) % 1;
+    ctx.fillRect(cx + Math.cos(a) * (14 + t * 50), base - (base - cima) * t, 2, 2);
+  }
+};
+
+/** La cabina del teleférico, colgada de su cable, con ventanas y el techo rojo. */
+const dibujarCabina = (ctx, o, prog) => {
+  const r = forma(o).rect;
+  const cx = r.x + r.w / 2;
+  const enganche = r.y - 16;
+  // El cable: un tramo inclinado que pasa por el enganche. No choca: es parte del dibujo.
+  ctx.strokeStyle = tramo(["#3a3a4a", "#34344a", "#22223a", "#0c0c18"], prog);
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(cx - 260, enganche + 52);
+  ctx.lineTo(cx + 260, enganche - 52);
+  ctx.stroke();
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(cx, enganche);
+  ctx.lineTo(cx, r.y);
+  ctx.stroke();
+  circulo(ctx, "#3a3a4a", cx, enganche, 3.2);
+  // La cabina.
+  ctx.fillStyle = tramo(["#d9423a", "#c03a3a", "#6a2a40", "#2a1426"], prog);
+  ctx.beginPath();
+  ctx.moveTo(r.x + 3, r.y);
+  ctx.lineTo(r.x + r.w - 3, r.y);
+  ctx.lineTo(r.x + r.w, r.y + 6);
+  ctx.lineTo(r.x + r.w, r.y + r.h - 3);
+  ctx.quadraticCurveTo(r.x + r.w, r.y + r.h, r.x + r.w - 3, r.y + r.h);
+  ctx.lineTo(r.x + 3, r.y + r.h);
+  ctx.quadraticCurveTo(r.x, r.y + r.h, r.x, r.y + r.h - 3);
+  ctx.lineTo(r.x, r.y + 6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = tramo(["#cfe6f5", "#b9d4e8", "#5a6a8a", "#1e2440"], prog);
+  for (let k = 0; k < 3; k += 1) ctx.fillRect(r.x + 4 + k * 12.5, r.y + 8, 9, 10);
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillRect(r.x, r.y + r.h - 9, r.w, 3);
+};
+
+/** El cóndor de los Andes: negro, collar blanco y las alas abiertas con los dedos. */
+const dibujarCondor = (ctx, o) => {
+  const { x, y } = forma(o).circulo;
+  const ala = Math.sin(o.fase * 2.2) * 6;
+  ctx.fillStyle = "#15131a";
+  for (const lado of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(x - 4, y - 2);
+    ctx.quadraticCurveTo(x + lado * 0 - 6, y - 16 - ala, x - 2 + lado * 34, y - 10 - ala);
+    // Las plumas de la punta, abiertas como dedos.
+    for (let d = 0; d < 4; d += 1) {
+      ctx.lineTo(x + lado * (34 - d * 3), y - 10 - ala + d * 3 + 3);
+      ctx.lineTo(x + lado * (31 - d * 3), y - 8 - ala + d * 3);
+    }
+    ctx.quadraticCurveTo(x + lado * 12, y + 2, x + 4, y + 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  elipse(ctx, "#15131a", x, y, 14, 7);
+  // El collar blanco y la cabeza roja, sin plumas.
+  elipse(ctx, "#f2efe8", x - 11, y - 2, 4, 3.4);
+  circulo(ctx, "#b84a3a", x - 16, y - 3, 3.2);
+  ctx.fillStyle = "#e8d6a0";
+  ctx.beginPath();
+  ctx.moveTo(x - 18.5, y - 3.5);
+  ctx.lineTo(x - 22, y - 2);
+  ctx.lineTo(x - 18.5, y - 1.5);
+  ctx.fill();
+  // El blanco del ala.
+  ctx.fillStyle = "rgba(240,236,228,0.8)";
+  ctx.fillRect(x - 2, y - 9 - ala * 0.6, 12, 2);
+};
+
+/** La garza blanca del llano: cuello en ese, pico amarillo y patas largas detrás. */
+const dibujarGarza = (ctx, o) => {
+  const { x, y } = forma(o).circulo;
+  const ala = Math.sin(o.fase * 6);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = "#2a2a28";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(8, 2);
+  ctx.lineTo(24, 4);
+  ctx.moveTo(8, 3);
+  ctx.lineTo(23, 6);
+  ctx.stroke();
+  // Ala de atrás, cuerpo, ala de delante.
+  ctx.fillStyle = "#dfe4ea";
+  ctx.beginPath();
+  ctx.moveTo(2, -1);
+  ctx.quadraticCurveTo(8, -12 - ala * 9, 18, -9 - ala * 10);
+  ctx.quadraticCurveTo(10, -2, 3, 2);
+  ctx.fill();
+  elipse(ctx, "#f8f9fb", 2, 0, 10, 5);
+  ctx.strokeStyle = "#f8f9fb";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-6, -1);
+  ctx.quadraticCurveTo(-12, -4, -10, -9);
+  ctx.quadraticCurveTo(-9, -13, -14, -13);
+  ctx.stroke();
+  ctx.lineCap = "butt";
+  ctx.fillStyle = "#f0c020";
+  ctx.beginPath();
+  ctx.moveTo(-16, -14.5);
+  ctx.lineTo(-25, -13);
+  ctx.lineTo(-16, -11.8);
+  ctx.fill();
+  circulo(ctx, "#111", -14.6, -13.6, 0.8);
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(-1, -1);
+  ctx.quadraticCurveTo(4, -14 - ala * 11, 14, -12 - ala * 13);
+  ctx.quadraticCurveTo(7, -3, 0, 2);
+  ctx.fill();
+  ctx.restore();
+};
+
+/**
+ * La térmica: una columna de aire caliente que sube. No se choca con ella, así que tiene
+ * que verse bien: un velo cálido de arriba abajo y ondas que suben, con flechitas.
+ */
+const dibujarTermica = (ctx, o, ahora) => {
+  const x0 = o.x - o.w / 2;
+  const g = ctx.createLinearGradient(x0, 0, x0 + o.w, 0);
+  g.addColorStop(0, "rgba(255,200,120,0)");
+  g.addColorStop(0.5, "rgba(255,200,120,0.18)");
+  g.addColorStop(1, "rgba(255,200,120,0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(x0, 0, o.w, SUELO);
+  ctx.strokeStyle = "rgba(255,244,214,0.55)";
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = "round";
+  for (let k = 0; k < 5; k += 1) {
+    const cx = x0 + o.w * (0.18 + k * 0.16);
+    const fase = (ahora * 0.9 + k * 0.37) % 1;
+    for (let r = 0; r < 3; r += 1) {
+      const y = SUELO - ((fase + r / 3) % 1) * (SUELO - 40);
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, y + 6);
+      ctx.lineTo(cx, y);
+      ctx.lineTo(cx + 6, y + 6);
+      ctx.stroke();
+    }
+  }
+  ctx.lineCap = "butt";
+};
+
+const ESTILOS = {
+  edificio: dibujarBloque,
+  palmera: dibujarPalmera,
+  torre: dibujarTorre,
+  grua: dibujarGrua,
+  cardon: dibujarCardon,
+  pilon: dibujarPilon,
+};
+
 /* —— Lo que se ve de un obstáculo cualquiera ————————————————————————————— */
 
 /**
@@ -503,6 +775,21 @@ export const dibujarObstaculo = (ctx, o, c) => {
       break;
     case "roca":
       dibujarRoca(ctx, o, c.prog);
+      break;
+    case "remolino":
+      dibujarRemolino(ctx, o, c.ahora);
+      break;
+    case "cabina":
+      dibujarCabina(ctx, o, c.prog);
+      break;
+    case "condor":
+      dibujarCondor(ctx, o);
+      break;
+    case "garza":
+      dibujarGarza(ctx, o);
+      break;
+    case "termica":
+      dibujarTermica(ctx, o, c.ahora);
       break;
     default:
       dibujarTormenta(ctx, o, !c.reducido, c.plumaje?.rayo);

@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
 import { useCallback, useMemo, useState } from "react";
-import { IconInstagram, IconWhatsApp, IconX } from "../icons/social";
+import { IconFacebook, IconInstagram, IconTelegram, IconWhatsApp, IconX } from "../icons/social";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+
+/** Las redes que enseñan las piezas: las de siempre, en su orden. */
+const REDES_DE_SIEMPRE = ["instagram", "whatsapp", "x"];
 
 const getAbsoluteUrl = (url) => {
   if (!url) return "";
@@ -68,7 +71,7 @@ const copyToClipboardApi = async (text) => {
   }
 };
 
-export const ShareButtons = ({ url, title = "", className = "" }) => {
+export const ShareButtons = ({ url, title = "", className = "", redes = REDES_DE_SIEMPRE }) => {
   const { t } = useIdioma();
   const [toast, setToast] = useState("");
   const absoluteUrl = useMemo(() => getAbsoluteUrl(url), [url]);
@@ -81,6 +84,13 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
 
   const xHref = useMemo(() => {
     const base = `https://twitter.com/intent/tweet?url=${encodedUrl}`;
+    return title ? `${base}&text=${encodedText}` : base;
+  }, [encodedUrl, encodedText, title]);
+
+  // Facebook solo lee el enlace (el texto lo pone quien comparte); Telegram, los dos.
+  const facebookHref = useMemo(() => `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, [encodedUrl]);
+  const telegramHref = useMemo(() => {
+    const base = `https://t.me/share/url?url=${encodedUrl}`;
     return title ? `${base}&text=${encodedText}` : base;
   }, [encodedUrl, encodedText, title]);
 
@@ -158,6 +168,7 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
     // `group` para que "Compartir" se oiga al entrar en los botones: sin papel, el
     // `aria-label` de un `div` no lo lee ningun lector de pantalla.
     <div className={`se-share ${className}`.trim()} role="group" aria-label={t("comun.compartir")}>
+      {redes.includes("instagram") ? (
       <button
         type="button"
         className="se-share__btn se-share__btn--ig"
@@ -169,7 +180,9 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
         </span>
         <span className="se-sr-only">Instagram</span>
       </button>
+      ) : null}
 
+      {redes.includes("whatsapp") ? (
       <button
         type="button"
         className="se-share__btn se-share__btn--wa"
@@ -181,7 +194,9 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
         </span>
         <span className="se-sr-only">WhatsApp</span>
       </button>
+      ) : null}
 
+      {redes.includes("x") ? (
       <button
         type="button"
         className="se-share__btn se-share__btn--x"
@@ -193,6 +208,35 @@ export const ShareButtons = ({ url, title = "", className = "" }) => {
         </span>
         <span className="se-sr-only">X</span>
       </button>
+      ) : null}
+
+      {redes.includes("facebook") ? (
+        <button
+          type="button"
+          className="se-share__btn se-share__btn--fb"
+          onClick={() => handlePopup(facebookHref)}
+          aria-label={t("piezas.compartir.facebook")}
+        >
+          <span className="se-share__ico" aria-hidden="true">
+            <IconFacebook className="se-share__svg" />
+          </span>
+          <span className="se-sr-only">Facebook</span>
+        </button>
+      ) : null}
+
+      {redes.includes("telegram") ? (
+        <button
+          type="button"
+          className="se-share__btn se-share__btn--tg"
+          onClick={() => handlePopup(telegramHref)}
+          aria-label={t("piezas.compartir.telegram")}
+        >
+          <span className="se-share__ico" aria-hidden="true">
+            <IconTelegram className="se-share__svg" />
+          </span>
+          <span className="se-sr-only">Telegram</span>
+        </button>
+      ) : null}
 
       {toast ? (
         <div className="se-share__toast" role="status" aria-live="polite">
@@ -207,4 +251,6 @@ ShareButtons.propTypes = {
   url: PropTypes.string.isRequired,
   title: PropTypes.string,
   className: PropTypes.string,
+  /** Qué redes se ofrecen, en el orden de la fila. Las piezas usan las de siempre. */
+  redes: PropTypes.arrayOf(PropTypes.oneOf(["instagram", "whatsapp", "x", "facebook", "telegram"])),
 };

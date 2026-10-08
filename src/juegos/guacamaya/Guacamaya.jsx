@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Enlace } from "../../components/Enlace";
+import { ShareButtons } from "../../components/content/ShareButtons";
 import { formatearFecha, formatearNumero } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { SITIO } from "../../lib/seo";
@@ -23,7 +24,7 @@ import {
 import { NIVELES, nivelDe, siguienteDe } from "./niveles";
 import { crearEscena, dibujar, dibujarGuacamaya, efecto } from "./dibujo";
 import { PLUMAJES, comprar, guardarMangos, leerTienda, plumajePorId, ponerse } from "./plumajes";
-import { apuntar, progreso, resumen, vueloParaSeguir } from "./registro";
+import { apuntar, mejorResultado, progreso, resumen, vueloParaSeguir } from "./registro";
 import "./guacamaya.css";
 
 /**
@@ -80,6 +81,39 @@ const Candado = () => (
   </svg>
 );
 
+/** El chaguaramo: la palma real donde anidan las guacamayas de Caracas. Es el destino. */
+const Chaguaramo = ({ titulo }) => (
+  <svg viewBox="0 0 24 24" className="se-guaca__casa" focusable="false" role="img" aria-label={titulo}>
+    <title>{titulo}</title>
+    <path d="M11.2 23c.3-4.6.4-8.6.2-12.6h1.3c.3 4 .3 8 .1 12.6z" />
+    <path d="M12 10.6c-1.3-2.3-3.6-3.6-6.6-3.4 2.3.4 4 1.6 5.1 3.6zM12 10.6c1.3-2.3 3.6-3.6 6.6-3.4-2.3.4-4 1.6-5.1 3.6zM12 10.2C10.7 7.4 8.5 5.2 5 4.8c3 1.1 5 3 6.2 5.7zM12 10.2c1.3-2.8 3.5-5 7-5.4-3 1.1-5 3-6.2 5.7zM12 9.8c-.4-2.8-1.5-5.2-3.6-6.8 1.7 2 2.6 4.3 2.9 6.9zM12 9.8c.4-2.8 1.5-5.2 3.6-6.8-1.7 2-2.6 4.3-2.9 6.9zM12 10.6c-2.2-.7-4.8-.2-7 2 2.3-1.2 4.6-1.6 6.7-1.1zM12 10.6c2.2-.7 4.8-.2 7 2-2.3-1.2-4.6-1.6-6.7-1.1z" />
+  </svg>
+);
+Chaguaramo.propTypes = { titulo: PropTypes.string.isRequired };
+
+/** El logo de WhatsApp: el globo y el teléfono, en blanco sobre el verde del botón. */
+const IconoWhatsApp = () => (
+  <svg viewBox="0 0 24 24" className="se-guaca__icono-whatsapp" aria-hidden="true" focusable="false">
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinejoin="round"
+      d="M12 2.8a9.2 9.2 0 0 0-7.9 13.9L2.9 21.1l4.5-1.2A9.2 9.2 0 1 0 12 2.8z"
+    />
+    <path
+      fill="currentColor"
+      d="M8.6 7.2c.2-.4.5-.4.8-.4h.6c.2 0 .4.1.5.4l.8 1.9c.1.2 0 .5-.1.6l-.6.7c-.1.2-.2.4 0 .6.6 1.1 1.5 2 2.6 2.6.2.1.4.1.6 0l.7-.6c.2-.2.4-.2.6-.1l1.9.8c.3.1.4.3.4.5v.6c0 .3 0 .6-.4.8-.6.4-1.4.6-2.2.4-2.6-.6-4.9-2.9-5.5-5.5-.2-.8 0-1.6.4-2.2z"
+    />
+  </svg>
+);
+
+/** Las redes de la fila de compartir, además de WhatsApp (que va en su botón grande). */
+const REDES_DEL_JUEGO = ["facebook", "x", "telegram", "instagram"];
+
+/** Un enlace que abre WhatsApp con el mensaje ya escrito (en el teléfono, la app). */
+const enlaceWhatsApp = (texto) => `https://wa.me/?text=${encodeURIComponent(texto)}`;
+
 const IconoMango = () => (
   <svg viewBox="0 0 24 24" className="se-guaca__icono-mango" aria-hidden="true" focusable="false">
     <ellipse cx="12" cy="13.5" rx="7" ry="8.5" transform="rotate(20 12 13.5)" fill="#ffb21f" />
@@ -130,7 +164,6 @@ export const Guacamaya = ({ patrocinio }) => {
   const [fase, setFase] = useState("portada");
   const [hud, setHud] = useState(hudRef.current);
   const [fin, setFin] = useState(null);
-  const [copiado, setCopiado] = useState(false);
   const [dolar, setDolar] = useState(null);
   const [dia] = useState(() => diaDeCaracas());
   // El vuelo elegido: al entrar, donde toca seguir (el último que no se ha logrado).
@@ -286,7 +319,6 @@ export const Guacamaya = ({ patrocinio }) => {
     setHud(hudRef.current);
     barraRef.current?.style.setProperty("--prog", "0");
     setFin(null);
-    setCopiado(false);
     cambiarFase("jugando");
     aletear(partidaRef.current);
     // El foco al escenario: desde ahí la barra espaciadora aletea sin desplazar la página.
@@ -356,32 +388,34 @@ export const Guacamaya = ({ patrocinio }) => {
     }
   };
 
-  const compartir = async () => {
-    if (!fin) return;
-    // La dirección que se comparte es la de `/pausa` en el idioma en que se jugó.
-    const direccion = `${SITIO}${ruta("/pausa")}`;
-    const texto = t("juegos.guacamaya.compartir.texto", {
-      logro: fin.llego ? t("juegos.guacamaya.compartir.llego") : t("juegos.guacamaya.compartir.casi"),
-      destino: t(`juegos.guacamaya.niveles.${nivelDe(fin.nivel).clave}.destino`),
-      mangos: t("juegos.guacamaya.mangos", { n: fin.mangos }),
-      puntos: formatearNumero(fin.puntos),
-      fecha: formatearFecha(dia, "diaMes"),
-    });
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: t("juegos.guacamaya.titulo"), text: texto, url: direccion });
-        return;
-      } catch (err) {
-        if (err?.name === "AbortError") return;
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(`${texto} ${direccion}`);
-      setCopiado(true);
-    } catch {
-      window.open(`https://wa.me/?text=${encodeURIComponent(`${texto} ${direccion}`)}`, "_blank", "noopener");
-    }
+  // Lo que se comparte por WhatsApp. La dirección es la de `/pausa` en el idioma en que se
+  // juega: quien la abre cae en el juego, con el sitio alrededor.
+  const direccion = `${SITIO}${ruta("/pausa")}`;
+
+  /** El resultado de este vuelo, en una frase (sin la dirección). */
+  const fraseDelResultado = () =>
+    fin
+      ? t("juegos.guacamaya.compartir.texto", {
+          logro: fin.llego ? t("juegos.guacamaya.compartir.llego") : t("juegos.guacamaya.compartir.casi"),
+          destino: t(`juegos.guacamaya.niveles.${nivelDe(fin.nivel).clave}.destino`),
+          mangos: t("juegos.guacamaya.mangos", { n: fin.mangos }),
+          puntos: formatearNumero(fin.puntos),
+          fecha: formatearFecha(dia, "diaMes"),
+        })
+      : "";
+  const textoDelResultado = () => `${fraseDelResultado()} ${direccion}`.trim();
+
+  /** La invitación de la portada: con el mejor resultado de quien ya jugó, si lo hay. */
+  const fraseDeInvitacion = () => {
+    const mejor = mejorResultado();
+    return mejor
+      ? t("juegos.guacamaya.portada.whatsapp.mensajeRecord", {
+          puntos: formatearNumero(mejor.record),
+          destino: t(`juegos.guacamaya.niveles.${mejor.clave}.destino`),
+        })
+      : t("juegos.guacamaya.portada.whatsapp.mensaje");
   };
+  const textoDeInvitacion = () => `${fraseDeInvitacion()} ${direccion}`;
 
   const lineaPatrocinio = patrocinio ?? (
     <p className="se-guaca__patrocinio">
@@ -442,9 +476,7 @@ export const Guacamaya = ({ patrocinio }) => {
           <div className="se-guaca__camino" ref={barraRef} aria-hidden="true">
             <span className="se-guaca__camino-relleno" />
             <span className="se-guaca__camino-ave" />
-            <svg viewBox="0 0 24 24" className="se-guaca__casa" aria-hidden="true" focusable="false">
-              <path d="M3 11.5 12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-            </svg>
+            <Chaguaramo titulo={t("juegos.guacamaya.hud.destino")} />
           </div>
           <span className="se-guaca__mangos" aria-label={t("juegos.guacamaya.mangos", { n: hud.mangos })}>
             <IconoMango />
@@ -494,6 +526,23 @@ export const Guacamaya = ({ patrocinio }) => {
             </div>
             <p className="se-guaca__ayuda">{t("juegos.guacamaya.portada.ayuda")}</p>
             <p className="se-guaca__reto">{frasesDelReto.join(" ")}</p>
+            {/* Invitar a otros: es lo que hace que un juego de un minuto llegue lejos. */}
+            <div className="se-guaca__invitar">
+              <p className="se-guaca__invitar-texto">{t("juegos.guacamaya.portada.whatsapp.invitacion")}</p>
+              <a
+                className="se-guaca__whatsapp"
+                href={enlaceWhatsApp(textoDeInvitacion())}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconoWhatsApp />
+                {t("juegos.guacamaya.portada.whatsapp.boton")}
+              </a>
+              <div className="se-guaca__redes">
+                <span className="se-guaca__redes-texto">{t("juegos.guacamaya.otrasRedes")}</span>
+                <ShareButtons url={direccion} title={fraseDeInvitacion()} redes={REDES_DEL_JUEGO} />
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
@@ -511,7 +560,7 @@ export const Guacamaya = ({ patrocinio }) => {
       {fase === "vuelos" ? (
         <div className="se-guaca__pantalla se-guaca__pantalla--tienda">
           <div className="se-guaca__tienda">
-            <p className="se-guaca__kicker">{t("juegos.guacamaya.vuelos.kicker")}</p>
+            <p className="se-guaca__kicker">{t("juegos.guacamaya.vuelos.kicker", { n: NIVELES.length })}</p>
             <h2 className="se-guaca__titulo se-guaca__titulo--chico">{t("juegos.guacamaya.vuelos.titulo")}</h2>
             <p className="se-guaca__ayuda se-guaca__ayuda--estrellas">{t("juegos.guacamaya.vuelos.estrellas")}</p>
             <ol className="se-guaca__mapa">
@@ -628,9 +677,19 @@ export const Guacamaya = ({ patrocinio }) => {
                 <IconoMango />
                 {t("juegos.guacamaya.plumajesConSaldo", { n: tienda.mangos })}
               </button>
-              <button type="button" className="se-guaca__secundario" onClick={compartir}>
-                {copiado ? t("juegos.guacamaya.fin.copiado") : t("juegos.guacamaya.fin.compartir")}
-              </button>
+              <a
+                className="se-guaca__whatsapp"
+                href={enlaceWhatsApp(textoDelResultado())}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <IconoWhatsApp />
+                {t("juegos.guacamaya.fin.whatsapp")}
+              </a>
+              <div className="se-guaca__redes">
+                <span className="se-guaca__redes-texto">{t("juegos.guacamaya.otrasRedes")}</span>
+                <ShareButtons url={direccion} title={fraseDelResultado()} redes={REDES_DEL_JUEGO} />
+              </div>
             </div>
           </div>
         </div>

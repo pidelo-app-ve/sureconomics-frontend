@@ -15,8 +15,14 @@
  *
  * Cada vuelo estrena **una cosa**, que es lo que se aprende en él: las palomas en
  * Barquisimeto, las abejas y las ráfagas en Margarita, los grillos y las torres en el
- * Zulia, los aviones en La Guaira, las rocas y la niebla en Canaima. El último, el de la
- * loma, no tiene obstáculos: tiene un jefe que tira piedras.
+ * Zulia, los aviones en La Guaira. El sexto, el de la loma, no tiene obstáculos: tiene
+ * un jefe que tira piedras. Después, el viento y los remolinos de los médanos de Coro,
+ * la nieve y el teleférico de Mérida, y el sol y las térmicas del llano de Barinas.
+ * Canaima, con rocas y niebla, cierra el juego y es el más difícil.
+ *
+ * **El número de un vuelo puede cambiar** (en octubre de 2026 la loma pasó del 7 al 6 y
+ * Canaima al último): lo que no cambia es su `clave`, y por eso el progreso guardado va
+ * por clave y no por número (`registro.js`).
  *
  * Los nombres y las frases que se leen no están aquí sino en `i18n/<idioma>/juegos.json`
  * (`juegos.guacamaya.niveles.<clave>`).
@@ -28,6 +34,10 @@ const ESTILOS = {
   palmera: { estilo: "palmera", w: [30, 42], h: [120, 230] },
   torre: { estilo: "torre", w: [38, 54], h: [130, 300] },
   grua: { estilo: "grua", w: [60, 90], h: [130, 290] },
+  // Los médanos de Coro: cardones, altos y flacos.
+  cardon: { estilo: "cardon", w: [26, 40], h: [130, 260] },
+  // Mérida: las torres del teleférico.
+  pilon: { estilo: "pilon", w: [36, 52], h: [150, 300] },
 };
 
 export const NIVELES = [
@@ -115,10 +125,77 @@ export const NIVELES = [
   },
   {
     id: 6,
+    clave: "loma",
+    escenario: "loma",
+    // El mundo pasa despacio: aquí no hay nada que esquivar salvo lo que viene de la loma.
+    vel: [150, 185],
+    hueco: [260, 220],
+    mangos: 0.75,
+    jefe: true,
+    pool: [],
+  },
+  {
+    id: 7,
+    clave: "coro",
+    escenario: "coro",
+    vel: [278, 352],
+    hueco: [252, 176],
+    mangos: 0.52,
+    edificio: ESTILOS.cardon,
+    // Lo que estrena: el viento. Ráfagas más seguidas, más largas y más fuertes que las de
+    // Margarita, y remolinos de arena que salen del suelo.
+    rafagas: { cada: [2.4, 3.8], aviso: 0.7, dura: 3, sube: -0.95, hunde: 2.5 },
+    pool: [
+      ["edificio", 0.22, 0],
+      ["remolino", 0.38, 0],
+      ["zamuro", 0.14, 0],
+      ["papagayo", 0.12, 0],
+      ["paloma", 0.14, 0],
+    ],
+  },
+  {
+    id: 8,
+    clave: "merida",
+    escenario: "merida",
+    vel: [258, 330],
+    hueco: [278, 195],
+    mangos: 0.52,
+    edificio: ESTILOS.pilon,
+    // Lo que estrena: la nieve. Cuando nieva, la guacamaya pesa más y cada aleteo sube
+    // menos. Y las cabinas del teleférico, que vienen de frente.
+    nevadas: { cada: [5, 8], aviso: 1.1, dura: 4, peso: 1.3, aleteo: 0.86 },
+    pool: [
+      ["edificio", 0.26, 0],
+      ["cabina", 0.3, 0],
+      ["condor", 0.22, 0],
+      ["paloma", 0.1, 0.2],
+      ["tormenta", 0.12, 0.35],
+    ],
+  },
+  {
+    id: 9,
+    clave: "barinas",
+    escenario: "barinas",
+    vel: [278, 350],
+    hueco: [250, 176],
+    mangos: 0.55,
+    edificio: ESTILOS.palmera,
+    // Lo que estrena: el sol del llano. Corrientes de aire caliente que levantan de golpe,
+    // muchas veces hacia una bandada de garzas.
+    pool: [
+      ["edificio", 0.24, 0],
+      ["termica", 0.32, 0],
+      ["garza", 0.22, 0],
+      ["zamuro", 0.12, 0],
+      ["grillo", 0.1, 0],
+    ],
+  },
+  {
+    id: 10,
     clave: "canaima",
     escenario: "canaima",
-    vel: [270, 345],
-    hueco: [270, 185],
+    vel: [276, 352],
+    hueco: [262, 180],
     mangos: 0.52,
     niebla: true,
     /** El paso entre dos rocas, al empezar y al terminar. Siempre cabe: ver `crearGrupo`. */
@@ -130,17 +207,6 @@ export const NIVELES = [
       ["tormenta", 0.16, 0.3],
       ["avion", 0.12, 0.4],
     ],
-  },
-  {
-    id: 7,
-    clave: "loma",
-    escenario: "loma",
-    // El mundo pasa despacio: aquí no hay nada que esquivar salvo lo que viene de la loma.
-    vel: [150, 185],
-    hueco: [260, 220],
-    mangos: 0.75,
-    jefe: true,
-    pool: [],
   },
 ];
 

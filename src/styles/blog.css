@@ -2247,6 +2247,22 @@
   color: #111827;
 }
 
+.se-share__btn--fb {
+  color: #1877f2;
+}
+
+.se-share__btn--fb:hover {
+  background: rgba(24, 119, 242, 0.08);
+}
+
+.se-share__btn--tg {
+  color: #229ed9;
+}
+
+.se-share__btn--tg:hover {
+  background: rgba(34, 158, 217, 0.08);
+}
+
 .se-share__btn--x:hover {
   background: rgba(17, 24, 39, 0.06);
 }
@@ -22486,4 +22502,19 @@ html {
   .se-figura-ed__giro {
     animation-duration: 2.4s;
   }
+}
+
+
+/* —— Cloudflare Turnstile ——
+   El control casi siempre es invisible (solo aparece si Cloudflare necesita que la
+   persona marque algo). Vacío no ocupa sitio; cuando aparece, va en su propia línea y
+   no se mete entre el campo y el botón de un formulario en fila. */
+.se-verificacion-humana:empty {
+  display: none;
+}
+
+.se-verificacion-humana {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 0.6rem;
 }

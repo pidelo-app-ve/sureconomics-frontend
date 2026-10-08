@@ -4,8 +4,9 @@
  * Todos cuentan la misma tarde -- el reloj del juego es el reloj del cielo: a los 0
  * segundos hay sol alto y a los 60 es de noche --, pero cada uno con su paisaje y su
  * suelo: la Cota Mil en Caracas, la Catedral en Barquisimeto, el mar en Margarita, el
- * Lago y sus torres en el Zulia, el puerto y la pista en La Guaira, los tepuyes en
- * Canaima y la loma del chopo.
+ * Lago y sus torres en el Zulia, el puerto y la pista en La Guaira, la loma del chopo,
+ * los médanos de Coro, la Sierra Nevada y el páramo de Mérida, el llano de Barinas y los
+ * tepuyes de Canaima.
  *
  * Cada escenario es un objeto con:
  * - `cielo`: dos degradados de cuatro colores (de la tarde a la noche), arriba y abajo;
@@ -620,4 +621,361 @@ const loma = {
   },
 };
 
-export const ESCENARIOS = { caracas, barquisimeto, margarita, zulia, laguaira, canaima, loma };
+/* —— Los médanos de Coro ——————————————————————————————————————————————— */
+
+const ARENA_LEJOS = ["#f0c98a", "#e2a46c", "#9a6a6e", "#3a2c48"];
+const ARENA_MEDIO = ["#e8b673", "#d48f5a", "#8a5a5e", "#2e2440"];
+const ARENA_CERCA = ["#f3c98b", "#e09c62", "#9c6660", "#352a44"];
+const SOMBRA_DUNA = ["#c98f55", "#b06e48", "#6c4652", "#1e1a30"];
+const CARDON_FONDO = ["#5e7a46", "#4e6440", "#33403c", "#141a1c"];
+
+/** Una duna: una cresta suave, con la cara de sombra del lado del viento. */
+const duna = (ctx, ancho, desplaz, base, amp, semilla, luz, sombra) => {
+  const y = (x) => base - amp * (0.6 + 0.4 * Math.sin((x + desplaz) * 0.0045 + semilla)) * Math.abs(Math.sin((x + desplaz) * 0.0021 + semilla * 1.7));
+  ctx.fillStyle = luz;
+  ctx.beginPath();
+  ctx.moveTo(0, SUELO);
+  for (let x = 0; x <= ancho + 8; x += 8) ctx.lineTo(x, y(x));
+  ctx.lineTo(ancho, SUELO);
+  ctx.closePath();
+  ctx.fill();
+  // La sombra: una banda bajo la cresta, más oscura, como cae la luz de la tarde.
+  ctx.fillStyle = sombra;
+  ctx.beginPath();
+  ctx.moveTo(0, SUELO);
+  for (let x = 0; x <= ancho + 8; x += 8) ctx.lineTo(x, y(x) + 10 + amp * 0.12);
+  ctx.lineTo(ancho, SUELO);
+  ctx.closePath();
+  ctx.globalAlpha = 0.35;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+};
+
+/** Un cardón de silueta: tronco y uno o dos brazos que suben. */
+const cardonDeFondo = (ctx, x, base, alto, color, i) => {
+  ctx.strokeStyle = color;
+  ctx.lineCap = "round";
+  ctx.lineWidth = Math.max(3, alto * 0.11);
+  ctx.beginPath();
+  ctx.moveTo(x, base);
+  ctx.lineTo(x, base - alto);
+  const brazo = (lado, y0, largo) => {
+    ctx.moveTo(x, base - y0);
+    ctx.lineTo(x + lado * alto * 0.22, base - y0);
+    ctx.lineTo(x + lado * alto * 0.22, base - y0 - largo);
+  };
+  brazo(1, alto * 0.45, alto * 0.3);
+  if (ruido(i + 3) > 0.4) brazo(-1, alto * 0.6, alto * 0.22);
+  ctx.stroke();
+  ctx.lineCap = "butt";
+};
+
+/** Una cabra en el médano: cuerpo, patas, cuernos. Pequeña y de silueta. */
+const cabra = (ctx, x, y, color, ahora, i) => {
+  ctx.fillStyle = color;
+  elipse(ctx, color, x, y - 6, 7, 4);
+  circulo(ctx, color, x + 7, y - 9, 2.6);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  const paso = Math.sin(ahora * 3 + i) * 1.2;
+  for (const dx of [-4, -1.5, 2.5, 5]) {
+    ctx.moveTo(x + dx, y - 3);
+    ctx.lineTo(x + dx + (dx > 0 ? paso : -paso), y + 1);
+  }
+  ctx.moveTo(x + 7.5, y - 11);
+  ctx.quadraticCurveTo(x + 6, y - 15, x + 3.5, y - 14);
+  ctx.stroke();
+};
+
+const coro = {
+  cielo: {
+    arriba: ["#5fb3e8", "#e8a25a", "#8a4a6a", "#1d1a3a"],
+    abajo: ["#fbe7b0", "#ffc27a", "#d6826a", "#3a2a52"],
+  },
+  sol: ["#fffbe0", "#ffe08a", "#ffa255", "#ff7a3a"],
+  estrellas: 1,
+  fondo(ctx, p, escena, prog, ahora, { reducido }) {
+    const { ancho } = escena;
+    // La sierra de San Luis, lejos y pálida.
+    dibujarSierra(ctx, ancho, p.recorrido * 0.03, SUELO - 200, 34, 2.6, tramo(["#c9a7b4", "#b08a9e", "#5c4a6e", "#24203e"], prog));
+    // Los médanos, en tres capas.
+    duna(ctx, ancho, p.recorrido * 0.06, SUELO - 120, 90, 1.1, tramo(ARENA_LEJOS, prog), tramo(SOMBRA_DUNA, prog));
+    duna(ctx, ancho, p.recorrido * 0.14, SUELO - 70, 70, 3.7, tramo(ARENA_MEDIO, prog), tramo(SOMBRA_DUNA, prog));
+    // Cardones y cabras sobre la capa del medio.
+    teselas(ancho, p.recorrido * 0.14, 300, (x, i) => {
+      if (ruido(i) > 0.35) cardonDeFondo(ctx, x + 60 + ruido(i + 1) * 120, SUELO - 40, 46 + ruido(i + 2) * 40, tramo(CARDON_FONDO, prog), i);
+      if (ruido(i + 9) > 0.7) cabra(ctx, x + 200, SUELO - 44, tramo(["#6e4a36", "#5a3c2e", "#3a2a34", "#16121c"], prog), ahora, i);
+    });
+    duna(ctx, ancho, p.recorrido * 0.3, SUELO - 22, 44, 5.2, tramo(ARENA_CERCA, prog), tramo(SOMBRA_DUNA, prog));
+    // La arena que vuela: rayitas bajas que corren, siempre (es Coro).
+    if (!reducido) {
+      ctx.fillStyle = "rgba(255,236,200,0.35)";
+      const n = Math.ceil(ancho / 70);
+      for (let k = 0; k < n; k += 1) {
+        const x = ancho - ((ahora * 260 + k * 97) % (ancho + 120));
+        const y = SUELO - 30 - ((k * 53) % 140);
+        ctx.fillRect(x, y, 26 + (k % 3) * 10, 1.6);
+      }
+    }
+  },
+  suelo(ctx, p, escena, prog) {
+    const { ancho } = escena;
+    ctx.fillStyle = tramo(["#eab878", "#d8965e", "#8e5e5c", "#2a2238"], prog);
+    ctx.fillRect(0, SUELO, ancho, ALTO - SUELO);
+    // Las ondas que el viento dibuja en la arena.
+    ctx.strokeStyle = tramo(["#c98f55", "#b06e48", "#6c4652", "#1a1628"], prog);
+    ctx.lineWidth = 1.4;
+    for (let fila = 0; fila < 4; fila += 1) {
+      const y0 = SUELO + 10 + fila * 12;
+      const off = (p.recorrido * (1 + fila * 0.15)) % 40;
+      ctx.beginPath();
+      for (let x = -off; x < ancho + 40; x += 40) {
+        ctx.moveTo(x, y0);
+        ctx.quadraticCurveTo(x + 10, y0 - 4, x + 20, y0);
+      }
+      ctx.stroke();
+    }
+  },
+};
+
+/* —— Mérida ———————————————————————————————————————————————————————————— */
+
+const ROCA_LEJOS = ["#8a8fb8", "#7a7aa8", "#4a4a7a", "#1e2044"];
+const ROCA_MEDIO = ["#6a7a8a", "#5e687e", "#3c4462", "#161a34"];
+const PARAMO = ["#8a9a5a", "#768650", "#3e4a40", "#141c1c"];
+const NIEVE = ["#ffffff", "#fbe8e0", "#c8c4e0", "#6a6e98"];
+
+/** Una cordillera de picos: triángulos irregulares con su capa de nieve arriba. */
+const picos = (ctx, ancho, desplaz, base, alto, semilla, color, nieve) => {
+  teselas(ancho, desplaz, 260, (x, i) => {
+    const r = ruido(i * 1.7 + semilla);
+    const h = alto * (0.65 + r * 0.45);
+    const w = 260 + ruido(i + semilla) * 120;
+    const cx = x + w * 0.45;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x - 60, base);
+    ctx.lineTo(cx - w * 0.12, base - h * 0.72);
+    ctx.lineTo(cx, base - h);
+    ctx.lineTo(cx + w * 0.16, base - h * 0.66);
+    ctx.lineTo(x + w + 60, base);
+    ctx.closePath();
+    ctx.fill();
+    // La nieve: la punta, con un borde mordido.
+    ctx.fillStyle = nieve;
+    ctx.beginPath();
+    ctx.moveTo(cx - w * 0.08, base - h * 0.8);
+    ctx.lineTo(cx, base - h);
+    ctx.lineTo(cx + w * 0.1, base - h * 0.78);
+    ctx.lineTo(cx + w * 0.05, base - h * 0.82);
+    ctx.lineTo(cx + w * 0.01, base - h * 0.76);
+    ctx.lineTo(cx - w * 0.04, base - h * 0.83);
+    ctx.closePath();
+    ctx.fill();
+  });
+};
+
+/** Un frailejón: tallo peludo, roseta de hojas plateadas y sus flores amarillas. */
+const frailejon = (ctx, x, base, alto, prog, i) => {
+  ctx.fillStyle = tramo(["#7a6a4a", "#665a44", "#3e3a3a", "#18161c"], prog);
+  ctx.fillRect(x - 3, base - alto, 6, alto);
+  const hoja = tramo(["#c9d4b0", "#b0b89a", "#6a7266", "#262c2c"], prog);
+  for (let k = -3; k <= 3; k += 1) {
+    elipse(ctx, hoja, x + k * 2.6, base - alto - 2 + Math.abs(k) * 1.2, 2.6, 8, k * 0.32);
+  }
+  if (ruido(i + 4) > 0.4) {
+    circulo(ctx, tramo(["#ffd23f", "#f0b83a", "#8a6a3a", "#2a2220"], prog), x + 5, base - alto - 12, 2.2);
+    circulo(ctx, tramo(["#ffd23f", "#f0b83a", "#8a6a3a", "#2a2220"], prog), x - 4, base - alto - 14, 1.8);
+  }
+};
+
+const merida = {
+  cielo: {
+    arriba: ["#78b2e6", "#e39a7a", "#5a4a8a", "#141a3a"],
+    abajo: ["#e8f2fa", "#f7c9a8", "#b88aa8", "#2e3260"],
+  },
+  sol: ["#ffffff", "#fff1c8", "#ffb27a", "#ff8a5a"],
+  estrellas: 1,
+  fondo(ctx, p, escena, prog, ahora) {
+    const { ancho } = escena;
+    // La Sierra Nevada: dos filas de picos con nieve.
+    picos(ctx, ancho, p.recorrido * 0.03, SUELO - 70, 300, 1.3, tramo(ROCA_LEJOS, prog), tramo(NIEVE, prog));
+    picos(ctx, ancho, p.recorrido * 0.07, SUELO - 50, 210, 4.2, tramo(ROCA_MEDIO, prog), tramo(NIEVE, prog));
+    // El teleférico al fondo: torres, el cable y cabinas que suben y bajan.
+    const metal = tramo(["#5a5a6a", "#4a4a5e", "#2e2e44", "#14141e"], prog);
+    teselas(ancho, p.recorrido * 0.11, 900, (x) => {
+      const torres = [
+        [x + 120, SUELO - 120],
+        [x + 520, SUELO - 220],
+        [x + 900, SUELO - 300],
+      ];
+      ctx.strokeStyle = metal;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (const [tx, ty] of torres) {
+        ctx.moveTo(tx - 7, ty + 70);
+        ctx.lineTo(tx, ty);
+        ctx.lineTo(tx + 7, ty + 70);
+        ctx.moveTo(tx - 12, ty);
+        ctx.lineTo(tx + 12, ty);
+      }
+      ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(torres[0][0], torres[0][1]);
+      for (const [tx, ty] of torres.slice(1)) ctx.lineTo(tx, ty);
+      ctx.stroke();
+      // Dos cabinas que se mueven por el cable.
+      for (const desfase of [0.25, 0.7]) {
+        const k = (ahora * 0.04 + desfase) % 1;
+        const tramoCable = k < 0.5 ? 0 : 1;
+        const f = (k % 0.5) * 2;
+        const [ax, ay] = torres[tramoCable];
+        const [bx, by] = torres[tramoCable + 1];
+        const cx = ax + (bx - ax) * f;
+        const cy = ay + (by - ay) * f;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx, cy + 7);
+        ctx.stroke();
+        ctx.fillStyle = tramo(["#d9423a", "#c03a3a", "#6a2a40", "#2a1426"], prog);
+        ctx.fillRect(cx - 5, cy + 7, 10, 8);
+      }
+    });
+    // El páramo: lomas de hierba dorada.
+    dibujarSierra(ctx, ancho, p.recorrido * 0.16, SUELO - 40, 26, 2.2, tramo(PARAMO, prog));
+    teselas(ancho, p.recorrido * 0.16, 140, (x, i) => {
+      if (ruido(i) > 0.45) frailejon(ctx, x + 40, SUELO - 22 + ruido(i + 2) * 8, 16 + ruido(i + 1) * 12, prog, i);
+    });
+  },
+  suelo(ctx, p, escena, prog) {
+    const { ancho } = escena;
+    ctx.fillStyle = tramo(["#7a8a52", "#66764a", "#36423a", "#121a1a"], prog);
+    ctx.fillRect(0, SUELO, ancho, ALTO - SUELO);
+    // Manchas de nieve y frailejones en primer plano.
+    teselas(ancho, p.recorrido * 1.0, 160, (x, i) => {
+      elipse(ctx, tramo(NIEVE, prog), x + 50 + ruido(i) * 60, SUELO + 18 + ruido(i + 1) * 20, 24 + ruido(i + 2) * 20, 4);
+    });
+    teselas(ancho, p.recorrido * 1.0, 110, (x, i) => {
+      if (ruido(i + 7) > 0.5) frailejon(ctx, x + 30, SUELO + 8, 18 + ruido(i) * 10, prog, i);
+    });
+  },
+};
+
+/* —— El llano de Barinas ———————————————————————————————————————————————— */
+
+const LLANO_LEJOS = ["#9ab86a", "#86a05a", "#4a5e44", "#18221c"];
+const LLANO_CERCA = ["#7aa84a", "#6a9442", "#3a5236", "#121c16"];
+const MATA = ["#3f6a32", "#355a2e", "#20362a", "#0a1410"];
+
+/** Una vaca o un caballo de silueta, paciendo. */
+const animal = (ctx, x, y, color, tipo) => {
+  ctx.fillStyle = color;
+  if (tipo === "vaca") {
+    ctx.fillRect(x - 10, y - 12, 20, 9);
+    ctx.fillRect(x + 8, y - 11, 6, 5);
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillRect(x - 5, y - 11, 6, 4);
+    ctx.fillStyle = color;
+  } else {
+    ctx.fillRect(x - 10, y - 13, 19, 7);
+    ctx.beginPath();
+    ctx.moveTo(x + 8, y - 13);
+    ctx.lineTo(x + 14, y - 22);
+    ctx.lineTo(x + 17, y - 19);
+    ctx.lineTo(x + 11, y - 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+  for (const dx of [-8, -4, 4, 7]) ctx.fillRect(x + dx, y - 4, 1.8, 6);
+};
+
+/** Un chigüire: redondo, sin cola, el hocico chato. */
+const chiguire = (ctx, x, y, color) => {
+  elipse(ctx, color, x, y - 5, 8, 5);
+  elipse(ctx, color, x + 7, y - 7, 4, 3.2);
+  ctx.fillStyle = color;
+  ctx.fillRect(x - 5, y - 2, 2, 3);
+  ctx.fillRect(x + 3, y - 2, 2, 3);
+};
+
+const barinas = {
+  cielo: {
+    arriba: ["#4aa0e0", "#f0a050", "#a04a5a", "#2a1a3a"],
+    abajo: ["#fff3c4", "#ffd08a", "#e08a6a", "#4a2a4a"],
+  },
+  sol: ["#ffffff", "#fff4b0", "#ffb05a", "#ff7a3a"],
+  // El sol del llano: más grande y con más halo que en ninguna otra parte.
+  solGrande: true,
+  estrellas: 1,
+  fondo(ctx, p, escena, prog, ahora, { reducido }) {
+    const { ancho } = escena;
+    // El horizonte plano del llano, con las matas de monte a lo lejos.
+    const horizonte = SUELO - 70;
+    ctx.fillStyle = tramo(LLANO_LEJOS, prog);
+    ctx.fillRect(0, horizonte, ancho, SUELO - horizonte);
+    teselas(ancho, p.recorrido * 0.05, 420, (x, i) => {
+      const r = 26 + ruido(i) * 22;
+      for (let k = 0; k < 4; k += 1) circulo(ctx, tramo(MATA, prog), x + 80 + k * r * 0.8, horizonte + 4 - ruido(i + k) * 10, r * (0.6 + ruido(i + k + 3) * 0.4));
+    });
+    // Morichales: palmas llaneras en grupo.
+    teselas(ancho, p.recorrido * 0.12, 360, (x, i) => {
+      if (ruido(i + 1) < 0.3) return;
+      for (let k = 0; k < 3; k += 1) {
+        palmera(ctx, x + 60 + k * 26, horizonte + 22, 62 + ruido(i + k) * 30, tramo(["#3a5a32", "#304c2c", "#1c3024", "#0a140e"], prog));
+      }
+    });
+    // El calor que ondula sobre el horizonte.
+    if (!reducido) {
+      ctx.strokeStyle = `rgba(255,240,200,${0.18 * (1 - prog)})`;
+      ctx.lineWidth = 1.2;
+      for (let k = 0; k < 3; k += 1) {
+        const y = horizonte - 6 - k * 5;
+        ctx.beginPath();
+        for (let x = 0; x <= ancho; x += 12) ctx.lineTo(x, y + Math.sin(x * 0.05 + ahora * 3 + k) * 1.4);
+        ctx.stroke();
+      }
+    }
+    // El pasto cercano y los animales del hato.
+    ctx.fillStyle = tramo(LLANO_CERCA, prog);
+    ctx.fillRect(0, SUELO - 34, ancho, 34);
+    const silueta = tramo(["#4a3a2a", "#3e3226", "#262024", "#0e0c12"], prog);
+    teselas(ancho, p.recorrido * 0.35, 420, (x, i) => {
+      const r = ruido(i + 5);
+      if (r < 0.3) animal(ctx, x + 120, SUELO - 14, silueta, "vaca");
+      else if (r < 0.55) animal(ctx, x + 260, SUELO - 14, silueta, "caballo");
+      if (ruido(i + 8) > 0.5) {
+        chiguire(ctx, x + 340, SUELO - 10, tramo(["#8a5a3c", "#7a4e36", "#3e2c2a", "#14100e"], prog));
+        chiguire(ctx, x + 360, SUELO - 8, tramo(["#7a4e36", "#6a4430", "#362628", "#100c0c"], prog));
+      }
+    });
+  },
+  suelo(ctx, p, escena, prog, ahora) {
+    const { ancho } = escena;
+    ctx.fillStyle = tramo(["#6a9a3e", "#5a8638", "#324a30", "#101a12"], prog);
+    ctx.fillRect(0, SUELO, ancho, ALTO - SUELO);
+    // La charca del llano, donde se bañan los chigüires.
+    teselas(ancho, p.recorrido * 1.0, 520, (x, i) => {
+      if (ruido(i) < 0.5) return;
+      elipse(ctx, tramo(["#6ab0d8", "#5a96c0", "#33506e", "#101a2c"], prog), x + 200, SUELO + 26, 70, 9);
+      chiguire(ctx, x + 175, SUELO + 22, tramo(["#8a5a3c", "#7a4e36", "#3e2c2a", "#14100e"], prog));
+    });
+    // Las matas de pasto, que pasan.
+    ctx.strokeStyle = tramo(["#4a7a2e", "#3e6a2a", "#243c24", "#0a140c"], prog);
+    ctx.lineWidth = 1.6;
+    teselas(ancho, p.recorrido * 1.0, 30, (x, i) => {
+      const h = 6 + ruido(i) * 8;
+      const y = SUELO + 8 + ruido(i + 2) * 30;
+      const meneo = Math.sin(ahora * 2 + i) * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - 3 + meneo, y - h);
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 3 + meneo, y - h);
+      ctx.stroke();
+    });
+  },
+};
+
+export const ESCENARIOS = { caracas, barquisimeto, margarita, zulia, laguaira, canaima, loma, coro, merida, barinas };

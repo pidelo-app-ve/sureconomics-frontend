@@ -5,12 +5,13 @@
  * se puede afirmar lo que importa de un juego que se comparte -- que el vuelo de hoy es
  * el mismo para todos, que nunca aparece una pared imposible y que dura un minuto.
  *
- * ## Los siete vuelos
+ * ## Los vuelos
  *
  * Todo lo que distingue un nivel de otro está en `niveles.js` como datos: velocidad,
  * huecos, qué obstáculos salen y cuándo, ráfagas, niebla. Este archivo solo sabe
- * crearlos y moverlos. El último vuelo no tiene obstáculos: tiene un jefe en una loma
- * que tira piedras (`actualizarJefe`).
+ * crearlos y moverlos. El de la loma no tiene obstáculos: tiene un jefe que tira piedras
+ * (`actualizarJefe`). El clima -- ráfagas, nieve, térmicas -- cambia la gravedad
+ * (`gravedadEn`) y la nieve, además, el aleteo (`impulsoDeAleteo`).
  *
  * ## El reto del día
  *
@@ -146,6 +147,8 @@ export const crearPartida = ({ ancho, semilla, nivel = 1 }) => {
     llego: false,
     // Las corrientes de aire: `null` en los vuelos que no las tienen.
     rafaga: n.rafagas ? { fase: "espera", resta: entre(clima, 4, 7), signo: 1 } : null,
+    // La nieve de Mérida: igual que el viento, con calma, aviso y nevada.
+    nieve: n.nevadas ? { fase: "espera", resta: entre(clima, 3, 5) } : null,
     // Las rocas encadenan sus pasos: cada uno parte de dónde quedó el anterior.
     centroRoca: null,
     piedras: [],
@@ -158,9 +161,13 @@ export const xDeLaGuacamaya = (p) => p.ancho * 0.28;
 
 export const aletear = (p) => {
   if (p.terminada) return;
-  p.vy = ALETEO;
+  p.vy = impulsoDeAleteo(p);
   p.aleteo = 0.22;
 };
+
+/** El empujón de un aleteo ahora mismo: con las alas cargadas de nieve, menos. */
+export const impulsoDeAleteo = (p) =>
+  p.nieve?.fase === "activa" && p.t < DURACION - SIN_NOVEDADES ? ALETEO * p.nivel.nevadas.aleteo : ALETEO;
 
 /** Cambia el ancho visible (girar el teléfono, redimensionar) sin reiniciar el vuelo. */
 export const cambiarAncho = (p, ancho) => {
@@ -297,6 +304,51 @@ const crearGrupo = (p, prog) => {
       mangoX: w / 2,
     };
   }
+  if (tipo === "remolino") {
+    // Un remolino de arena de los médanos: una columna que sale del suelo y se mece.
+    // Nunca tan alto que no deje pasar por encima.
+    const alto = Math.min(entre(rng, 170, 270) + prog * 40, SUELO - PASO_MINIMO);
+    const remolino = { tipo, x, alto, fase: rng() * 6, extra: entre(rng, 15, 45) };
+    // Muchas veces con un zamuro encima: hay que pasar entre los dos, con el viento
+    // empujando. El hueco nunca baja de lo que deja pasar una roca de Canaima.
+    if (rng() < 0.8) {
+      const techo = SUELO - alto;
+      const y = Math.max(70, techo - entre(rng, 160, 195));
+      return { obs: [remolino, { tipo: "zamuro", x: x + 10, y, fase: rng() * 6, extra: remolino.extra }], largo: 0 };
+    }
+    return { obs: [remolino], largo: 0 };
+  }
+  if (tipo === "cabina") {
+    // Una cabina del teleférico, colgada de su cable, que viene de frente.
+    return { obs: [{ tipo, x, y: entre(rng, 130, SUELO - 210), fase: rng() * 6, extra: entre(rng, 40, 80) }], largo: 0 };
+  }
+  if (tipo === "condor") {
+    // El cóndor del páramo: grande, planea despacio y sube y baja mucho.
+    return { obs: [{ tipo, x, y: entre(rng, 120, SUELO - 220), fase: rng() * 6, extra: entre(rng, 20, 55) }], largo: 0 };
+  }
+  if (tipo === "garza") {
+    // Una bandada de garzas, en uve, como las palomas pero más altas y más anchas.
+    const y0 = entre(rng, 110, SUELO - 220);
+    const obs = [
+      [0, 0],
+      [42, -28],
+      [42, 28],
+    ].map(([dx, dy]) => ({ tipo, x: x + dx, y: y0 + dy, fase: rng() * 6 }));
+    return { obs, largo: 42 };
+  }
+  if (tipo === "termica") {
+    // Una corriente de aire caliente del llano: no se choca con ella, pero levanta de
+    // golpe. Casi siempre trae garzas arriba: la trampa es subir hacia ellas.
+    // Con fuerza bajo cero sube aunque no se aletee: hay que entrar bajo.
+    const termica = { tipo, x: x + 110, w: 200, fuerza: -1.1, fase: rng() * 6 };
+    const obs = [termica];
+    if (rng() < 0.7) {
+      // Las garzas, a la salida de la corriente: quien sube sin mirar, sale entre ellas.
+      const y0 = entre(rng, 130, 300);
+      obs.push(...[[200, 0], [240, -26], [240, 26]].map(([dx, dy]) => ({ tipo: "garza", x: x + dx, y: y0 + dy, fase: rng() * 6 })));
+    }
+    return { obs, largo: 240 };
+  }
   return { obs: [{ tipo: "tormenta", x: x + 40, y: entre(rng, 70, 240), w: 132, h: 64, fase: rng() * 6 }], largo: 0 };
 };
 
@@ -334,6 +386,16 @@ export const forma = (o) => {
       return { circulo: { x: o.x, y: SUELO - 12 - Math.abs(Math.sin(o.fase * o.ritmo)) * o.alto, r: 11 } };
     case "avion":
       return o.espera > 0 ? null : { rect: { x: o.x - 50, y: o.y - 10, w: 100, h: 20 } };
+    case "remolino":
+      return { rect: { x: o.x - 17 + Math.sin(o.fase * 2.2) * 6, y: SUELO - o.alto, w: 34, h: o.alto } };
+    case "cabina":
+      return { rect: { x: o.x - 21, y: o.y - 14 + Math.sin(o.fase * 1.4) * 5, w: 42, h: 34 } };
+    case "condor":
+      return { circulo: { x: o.x, y: o.y + Math.sin(o.fase * 1.3) * 34, r: 16 } };
+    case "garza":
+      return { circulo: { x: o.x, y: o.y + Math.sin(o.fase * 3.6) * 8, r: 11 } };
+    case "termica":
+      return null; // no se choca: empuja (ver `gravedadEn`)
     default: // tormenta: un rectángulo algo menor que la nube dibujada
       return { rect: { x: o.x - o.w / 2 + 22, y: o.y - o.h / 2 + 14, w: o.w - 44, h: o.h - 26 } };
   }
@@ -358,12 +420,12 @@ export const choca = (p, o) => {
 
 /**
  * Las ráfagas: un tiempo de calma, un aviso (en el que se ve el viento pero todavía no
- * empuja) y la corriente, que sube o baja a la guacamaya. Devuelve cuánto vale la
- * gravedad ahora: negativa es una corriente que levanta; mayor que uno, una que hunde.
+ * empuja) y la corriente, que sube o baja a la guacamaya. Cuánto empuja lo dice
+ * `gravedadEn`.
  */
 const pasoDelViento = (p, dt) => {
   const r = p.rafaga;
-  if (!r) return 1;
+  if (!r) return;
   const cfg = p.nivel.rafagas;
   r.resta -= dt;
   if (r.resta <= 0) {
@@ -379,8 +441,49 @@ const pasoDelViento = (p, dt) => {
       r.resta = entre(p.clima, cfg.cada[0], cfg.cada[1]);
     }
   }
-  if (r.fase !== "activa" || p.t >= DURACION - SIN_NOVEDADES) return 1;
-  return r.signo < 0 ? -0.35 : 1.6;
+};
+
+/** La nieve: calma, aviso (caen los primeros copos) y nevada, que carga las alas. */
+const pasoDeLaNieve = (p, dt) => {
+  const n = p.nieve;
+  if (!n) return;
+  const cfg = p.nivel.nevadas;
+  n.resta -= dt;
+  if (n.resta > 0) return;
+  if (n.fase === "espera") {
+    n.fase = "aviso";
+    n.resta = cfg.aviso;
+  } else if (n.fase === "aviso") {
+    n.fase = "activa";
+    n.resta = cfg.dura;
+  } else {
+    n.fase = "espera";
+    n.resta = entre(p.clima, cfg.cada[0], cfg.cada[1]);
+  }
+};
+
+/**
+ * Cuánto vale la gravedad para quien vuela en `x`: 1 es la normal; negativa, una
+ * corriente que levanta; mayor que uno, algo que hunde. Suma las ráfagas (con la fuerza
+ * de cada vuelo: en los médanos soplan más), la nieve (pesa) y las térmicas del llano
+ * (levantan a quien pasa por encima). `obstaculos` se puede cambiar para mirar el futuro.
+ */
+export const gravedadEn = (p, x, obstaculos = p.obstaculos) => {
+  if (p.t >= DURACION - SIN_NOVEDADES) return 1;
+  let f = 1;
+  const r = p.rafaga;
+  if (r?.fase === "activa") {
+    const cfg = p.nivel.rafagas;
+    f = r.signo < 0 ? cfg.sube ?? -0.35 : cfg.hunde ?? 1.6;
+  }
+  if (p.nieve?.fase === "activa" && f > 0) f *= p.nivel.nevadas.peso;
+  for (const o of obstaculos) {
+    if (o.tipo === "termica" && x >= o.x - o.w / 2 && x <= o.x + o.w / 2) {
+      f = Math.min(f, o.fuerza);
+      break;
+    }
+  }
+  return f;
 };
 
 /* —— El jefe de la loma ———————————————————————————————————————————————— */
@@ -494,8 +597,10 @@ export const avanzar = (p, dt) => {
   const vel = velocidad(n, prog);
   p.recorrido += vel * dt;
 
-  // La guacamaya: gravedad (que el viento cambia), aleteo y techo. El techo no hace daño: frena.
-  const factor = pasoDelViento(p, dt);
+  // La guacamaya: gravedad (que el clima cambia), aleteo y techo. El techo no hace daño: frena.
+  pasoDelViento(p, dt);
+  pasoDeLaNieve(p, dt);
+  const factor = gravedadEn(p, xDeLaGuacamaya(p));
   p.vy = Math.min(CAIDA_MAX, p.vy + GRAVEDAD * factor * dt);
   if (factor < 0) p.vy = Math.max(ASCENSO_MAX, p.vy);
   p.y += p.vy * dt;

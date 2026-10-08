@@ -23,11 +23,14 @@ import {
   crearPartida,
   estrellasDe,
   forma,
+  gravedadEn,
+  impulsoDeAleteo,
   semillaDelDia,
   semillaDe,
   xDeLaGuacamaya,
 } from "./motor.js";
 import { NIVELES } from "./niveles.js";
+import { migrar } from "./registro.js";
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -60,11 +63,6 @@ const PLANES = (() => {
   return planes;
 })();
 
-const factorViento = (p) => {
-  const r = p.rafaga;
-  if (!r || r.fase !== "activa") return 1;
-  return r.signo < 0 ? -0.35 : 1.6;
-};
 
 /** Cómo estará `o` dentro de `tau` segundos, mirando solo lo que el motor hace con él. */
 const futuro = (o, tau, vel) => {
@@ -104,7 +102,13 @@ const decidir = (p, vision) => {
     }
     sombras.push(lista);
   }
-  const g = 1500 * factorViento(p);
+  // La gravedad de cada paso: el clima de ahora, con las térmicas donde estarán entonces.
+  const termicas = vistos.filter((o) => o.tipo === "termica");
+  const gravedades = [];
+  for (let k = 0; k <= PASOS; k += 1) {
+    gravedades.push(gravedadEn(p, gx, termicas.map((o) => futuro(o, k * PASO, vel))));
+  }
+  const impulso = impulsoDeAleteo(p);
   // Hacia dónde conviene estar si nada apremia: hacia el mango más cercano que se alcance.
   const mango = p.mangosEnVuelo.filter((m) => m.x > gx && m.x < gx + vision * 0.7).sort((a, b) => a.x - b.x)[0];
   const comodo = mango ? mango.y : ALTO * 0.45;
@@ -119,11 +123,11 @@ const decidir = (p, vision) => {
       const tau = k * PASO;
       // Un paso de la guacamaya: los aleteos del plan caen en el paso que les toca.
       while (pendientes.length && pendientes[0] <= tau - PASO + 1e-9) {
-        vy = -430;
+        vy = impulso;
         pendientes.shift();
       }
-      vy = Math.min(620, vy + g * PASO);
-      if (factorViento(p) < 0) vy = Math.max(-420, vy);
+      vy = Math.min(620, vy + 1500 * gravedades[k] * PASO);
+      if (gravedades[k] < 0) vy = Math.max(-420, vy);
       y += vy * PASO;
       if (y < RADIO) y = RADIO;
       if (p.invulnerable > tau) continue;
@@ -204,7 +208,7 @@ check("el primer vuelo conserva la semilla de siempre", semillaDelDia("2026-10-0
   let peor = Infinity;
   let peorEdificio = Infinity;
   for (let s = 1; s <= 40; s += 1) {
-    const p = crearPartida({ ancho: ANCHO, semilla: s, nivel: 6 });
+    const p = crearPartida({ ancho: ANCHO, semilla: s, nivel: NIVELES.find((n) => n.clave === "canaima").id });
     const q = crearPartida({ ancho: ANCHO, semilla: s, nivel: 1 });
     for (let t = 0; t < DURACION * 60; t += 1) {
       avanzar(p, DT);
@@ -238,7 +242,7 @@ check("el primer vuelo conserva la semilla de siempre", semillaDelDia("2026-10-0
 
 // El jefe: tira piedras, avisa antes y no tira en el último tramo.
 {
-  const p = crearPartida({ ancho: ANCHO, semilla: 3, nivel: 7 });
+  const p = crearPartida({ ancho: ANCHO, semilla: 3, nivel: NIVELES.find((n) => n.clave === "loma").id });
   let avisos = 0;
   let enCarga = false;
   let ultima = 0;
@@ -290,22 +294,52 @@ for (const n of NIVELES) {
   );
 }
 
-// Las bandas. El piloto es mejor que cualquier persona, así que el sexto y el jefe se piden
-// difíciles incluso para él.
-const BANDAS = [
-  [0.8, 1.0],
-  [0.8, 1.0],
-  [0.65, 0.95],
-  [0.5, 0.9],
-  [0.35, 0.85],
-  [0.12, 0.55],
-  [0.3, 0.8],
-];
+// Las bandas, por lugar y no por número (el número de un vuelo puede cambiar). El piloto
+// es mejor que cualquier persona, así que Canaima y el jefe se piden difíciles incluso
+// para él.
+const BANDAS = {
+  caracas: [0.8, 1.0],
+  barquisimeto: [0.8, 1.0],
+  margarita: [0.65, 0.95],
+  zulia: [0.5, 0.9],
+  laguaira: [0.35, 0.85],
+  loma: [0.3, 0.8],
+  // Coro: el piloto ve el viento antes que nadie y lo compensa perfecto; una persona
+  // no. Por eso para él es más fácil de lo que se siente al jugarlo.
+  coro: [0.4, 0.98],
+  merida: [0.22, 0.72],
+  barinas: [0.2, 0.7],
+  canaima: [0.12, 0.55],
+};
+const tasaDe = {};
 NIVELES.forEach((n, i) => {
-  const [min, max] = BANDAS[i];
+  tasaDe[n.clave] = tasas[i];
+  const banda = BANDAS[n.clave];
+  check(`vuelo ${n.id} (${n.clave}): tiene banda de dificultad`, Boolean(banda));
+  if (!banda) return;
+  const [min, max] = banda;
   check(`vuelo ${n.id} (${n.clave}): el piloto llega entre el ${Math.round(min * 100)} % y el ${Math.round(max * 100)} % de las veces`, tasas[i] >= min && tasas[i] <= max, Math.round(tasas[i] * 100));
 });
-check("la escalera sube: Canaima es más difícil que Caracas y que La Guaira", tasas[5] < tasas[0] && tasas[5] < tasas[4]);
+check(
+  "la escalera sube: Canaima es más difícil que Caracas y que La Guaira",
+  tasaDe.canaima < tasaDe.caracas && tasaDe.canaima < tasaDe.laguaira
+);
+// Contra el promedio y no uno a uno: con doce vuelos por nivel la tasa de cada uno se
+// mueve bastante, y una comparación uno a uno fallaría por azar.
+check(
+  "Canaima es más difícil que los tres vuelos anteriores (Coro, Mérida y Barinas) en promedio",
+  tasaDe.canaima < (tasaDe.coro + tasaDe.merida + tasaDe.barinas) / 3
+);
+check("Canaima cierra el juego", NIVELES[NIVELES.length - 1].clave === "canaima");
+
+/* —— 3. El progreso guardado con números se convierte a claves ————————————————— */
+
+const viejo = { dia: "2026-10-01", racha: 2, record: 300, ultimo: 6, niveles: { 1: { record: 300, estrellas: 3, llego: true }, 6: { record: 120, estrellas: 1, llego: true }, 7: { record: 90, estrellas: 0, llego: false } } };
+const nuevo = migrar(viejo);
+check("migrar: el 6 de antes era Canaima", nuevo.vuelos.canaima?.record === 120);
+check("migrar: el 7 de antes era la loma", nuevo.vuelos.loma?.record === 90);
+check("migrar: el último vuelo pasa a clave", nuevo.ultimo === "canaima");
+check("migrar: lo ya convertido no se toca", migrar(nuevo) === nuevo);
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

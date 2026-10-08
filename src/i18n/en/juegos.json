@@ -7,12 +7,14 @@
       "mangos": { "one": "{n} mango", "other": "{n} mangoes" },
       "vidas": { "one": "{n} life", "other": "{n} lives" },
       "segundos": { "one": "{n} second", "other": "{n} seconds" },
+      "otrasRedes": "or share it on",
       "plumajesConSaldo": "{n} · Plumages",
       "hud": {
         "quedanSegundos": { "one": "{n} second left", "other": "{n} seconds left" },
         "segundosCorto": "{n}s",
         "pausar": "Pause",
-        "intro": "Flight {n} · {nombre}"
+        "intro": "Flight {n} · {nombre}",
+        "destino": "The chaguaramo palm, where the macaw lives"
       },
       "portada": {
         "volar": "Fly",
@@ -22,7 +24,13 @@
         "racha": { "one": "Streak: {n} day.", "other": "Streak: {n} days." },
         "vuelo": "Flight {n} · {nombre}",
         "vuelos": "Pick a flight",
-        "jefe": "Boss"
+        "jefe": "Boss",
+        "whatsapp": {
+          "invitacion": "Invite your friends to fly and share your best score on WhatsApp.",
+          "boton": "Invite on WhatsApp",
+          "mensaje": "Can you beat me? Fly, macaw: one minute over Venezuela.",
+          "mensajeRecord": "My best score in Fly, macaw: {puntos} pts on the flight {destino}. Can you beat me?"
+        }
       },
       "pausa": {
         "titulo": "Paused",
@@ -48,17 +56,16 @@
         "dolar": "While you were flying, the BCV official dollar rate stood at {valor}.",
         "verNoticias": "See today's news",
         "volarOtraVez": "Fly again",
-        "copiado": "Copied: paste it anywhere",
-        "compartir": "Share result",
         "kickerJefe": "Chopo Hill",
         "llegoJefe": "The kid ran out of stones!",
         "casiJefe": "The slingshot won this time",
         "estrellas": "{n} of 3 stars",
         "estrellasNuevas": { "one": "+{n} new star", "other": "+{n} new stars" },
         "abrio": "You unlocked flight {n}: {nombre}.",
-        "completo": "You've flown all seven flights.",
+        "completo": "You've flown every flight.",
         "siguiente": "Next flight",
-        "vuelos": "Flights"
+        "vuelos": "Flights",
+        "whatsapp": "Share on WhatsApp"
       },
       "compartir": {
         "llego": "I got the macaw home",
@@ -78,22 +85,22 @@
         "volver": "Back"
       },
       "plumajes": {
-        "azul": { "nombre": "Blue-and-yellow macaw", "nota": "The classic. Comes standard." },
-        "roja": { "nombre": "Scarlet macaw", "nota": "Red all over, with a yellow wing and blue tips." },
-        "turpial": { "nombre": "Turpial", "nota": "The national bird, visiting Caracas." },
-        "pelotera": { "nombre": "Ballplayer macaw", "nota": "Cap and ball, no team jersey." },
-        "roques": { "nombre": "Los Roques macaw", "nota": "Sunglasses and a float ring. Beach season is coming." },
-        "tricolor": { "nombre": "Tricolor macaw", "nota": "With the yellow, blue and red cap and its eight stars." },
-        "liqui": { "nombre": "Macaw in liquiliqui", "nota": "Dressed to the nines, with gold buttons and a llanero hat." },
-        "catatumbo": { "nombre": "Catatumbo macaw", "nota": "Electric blue. With it, the storm lightning changes color." },
-        "toro": { "nombre": "Bull macaw", "nota": "Bullish. Horns, nose ring and green feathers." },
-        "oso": { "nombre": "Bear macaw", "nota": "Bearish. For red days on the market." },
-        "dolar": { "nombre": "Dollar-green macaw", "nota": "Flies with a wad of bills in its claws." },
-        "dorada": { "nombre": "Golden macaw", "nota": "Leaves a trail of sparkle all across the Ávila." },
-        "zamuro": { "nombre": "The repentant vulture", "nota": "You play as a vulture. The other vultures still hit you." }
+        "azul": { "nombre": "Guacamaya Clásica", "nota": "The original, blue and yellow. Comes standard." },
+        "roja": { "nombre": "GuacaLeón", "nota": "All red, with a mane, like the Leones del Caracas." },
+        "turpial": { "nombre": "Turpial", "nota": "Venezuela's national bird, visiting Caracas." },
+        "pelotera": { "nombre": "GuacaTiburón", "nota": "With a dorsal fin, like the Tiburones de La Guaira." },
+        "roques": { "nombre": "GuacaPlayera", "nota": "Sunglasses and a float. Beach season is coming." },
+        "tricolor": { "nombre": "GuacaCafetalera", "nota": "Straw hat and a sprig of coffee, fresh from the plantation." },
+        "liqui": { "nombre": "GuacaLlanera", "nota": "In a liquiliqui, with gold buttons and a plainsman's hat." },
+        "catatumbo": { "nombre": "Guacarayo", "nota": "Electric blue. With it, the storm lightning changes color." },
+        "toro": { "nombre": "Guacatoro", "nota": "Bullish. Horns, nose ring and green feathers." },
+        "oso": { "nombre": "GuacaChigüire", "nota": "Blunt snout and little ears: the plains' biggest rodent, with wings." },
+        "dolar": { "nombre": "GuacaDólar", "nota": "Flies with a wad of bills in its claws." },
+        "dorada": { "nombre": "GuaCatira", "nota": "Golden from head to toe. Leaves a trail of sparkle all over the Ávila." },
+        "zamuro": { "nombre": "Guacazombie", "nota": "Stitched up, greenish and with an X for an eye. Flies just as well." }
       },
       "vuelos": {
-        "kicker": "Seven flights",
+        "kicker": "{n} flights",
         "titulo": "Pick your flight",
         "estrellas": "Every flight gives up to three stars: get home, get home without a single hit and grab six out of ten mangoes.",
         "bloqueado": "Get home on flight {n} to unlock it.",
@@ -151,6 +158,27 @@
           "corto": "The kid with the slingshot",
           "texto": "On top of the hill, a kid with a slingshot wants to knock the macaw down with stones. He raises his arm before every shot and you can see where he's aiming.",
           "aviso": "Boss: the dotted line shows where the stone is going."
+        },
+        "coro": {
+          "nombre": "Médanos de Coro",
+          "destino": "to the Médanos de Coro",
+          "corto": "Sand, cacti and wind",
+          "texto": "Sand mountains as far as the eye can see. The wind rules here: strong, frequent gusts and sand devils rising from the ground.",
+          "aviso": "Wind: watch the streaks before it pushes."
+        },
+        "merida": {
+          "nombre": "Mérida",
+          "destino": "to Mérida",
+          "corto": "Snow, páramo and cable car",
+          "texto": "The Sierra Nevada and the páramo, with its frailejones. When it snows, the macaw gets weighed down: it falls faster and each flap lifts less. Watch out for the cable cars and the condor.",
+          "aviso": "Snow: when it falls, flap more often."
+        },
+        "barinas": {
+          "nombre": "Barinas",
+          "destino": "to Barinas",
+          "corto": "The plains sun",
+          "texto": "The open plains, with capybaras, cows and horses. The sun heats the air: thermals lift you suddenly, often right into a flock of herons.",
+          "aviso": "Hot-air thermals: go in low."
         }
       }
     },

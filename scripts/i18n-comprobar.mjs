@@ -111,7 +111,7 @@ if (!usoMal) ok(`claves usadas: ${usadas.size} directas, ${prefijosDinamicos.siz
 /* —— 3. Restos en español ————————————————————————————————————————————— */
 
 const PALABRAS = /[a-záéíóúñüA-ZÁÉÍÓÚÑÜ]{3,}/;
-const PERMITIDOS = new Set(["SurEconomics", "Sur", "Economics", "Al punto", "El Analista", "Instagram", "TikTok", "LinkedIn", "WhatsApp", "USD", "BCV", "IBC", "TradingView", "Spotify", "YouTube", "pts", "Bs", "BTC", "EUR", "Google", "Caracas"]);
+const PERMITIDOS = new Set(["SurEconomics", "Sur", "Economics", "Al punto", "El Analista", "Instagram", "TikTok", "LinkedIn", "WhatsApp", "Facebook", "Telegram", "USD", "BCV", "IBC", "TradingView", "Spotify", "YouTube", "pts", "Bs", "BTC", "EUR", "Google", "Caracas"]);
 const esTextoHumano = (texto) => {
   const limpio = texto.replace(/\{[^}]*\}/g, " ").replace(/&[a-z]+;/g, " ").trim();
   if (!PALABRAS.test(limpio)) return false;

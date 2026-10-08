@@ -1,0 +1,135 @@
+/* ═══ LA CLAVE AL FINAL DE UNA PIEZA ═══
+   Ligera: va en el paquete principal, así que no trae nada del juego, solo cinco
+   celdas de muestra y un botón. El juego llega al tocar. */
+
+.se-clave-pieza {
+  margin: var(--se-space-md, 1.5rem) 0 0;
+}
+
+.se-clave-pieza__invitacion {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #d6d9d3;
+  border-radius: 14px;
+  background: #fbfaf6;
+  color: #1a1d1a;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-clave-pieza__invitacion:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0, 51, 24, 0.14);
+  }
+}
+
+.se-clave-pieza__invitacion:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-clave-pieza__celdas {
+  display: grid;
+  grid-template-columns: repeat(5, 30px);
+  gap: 4px;
+}
+
+.se-clave-pieza__celda {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 2px solid #8d938e;
+  border-radius: 5px;
+  background: #fff;
+  font-family: var(--se-font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.se-clave-pieza__celda--bien,
+.se-clave-pieza__celda--casi,
+.se-clave-pieza__celda--no {
+  border-color: transparent;
+  color: #fff;
+}
+
+.se-clave-pieza__celda--bien { background: #1f7a43; }
+.se-clave-pieza__celda--casi { background: #e3a51c; }
+.se-clave-pieza__celda--no { background: #7a7f84; }
+
+.se-clave-pieza__cuerpo {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.se-clave-pieza__kicker {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--marca-verde, #003318);
+}
+
+.se-clave-pieza__titulo {
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.se-clave-pieza__texto {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave-pieza__boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--marca-verde, #003318);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.se-clave-pieza__cargando {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-slate, #4a524c);
+}
+
+@media (max-width: 480px) {
+  .se-clave-pieza__invitacion {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  .se-clave-pieza__celdas {
+    grid-template-columns: repeat(5, 26px);
+  }
+  .se-clave-pieza__celda {
+    font-size: 0.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-clave-pieza__invitacion {
+    transition: none;
+  }
+}

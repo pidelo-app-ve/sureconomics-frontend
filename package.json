@@ -13,6 +13,7 @@
         "test:sitemap": "node api/sitemap.test.mjs",
         "test:i18n": "node src/i18n/motor.test.mjs",
         "test:guacamaya": "node src/juegos/guacamaya/motor.test.mjs",
+        "test:clave": "node src/juegos/clave/motor.test.mjs",
         "i18n": "node scripts/i18n-comprobar.mjs",
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },

@@ -55,6 +55,7 @@ export const PAGINAS_FIJAS = [
   "/suscribirse",
   "/entorno",
   "/pausa",
+  "/clave",
   "/el-analista",
 ];
 

@@ -7,6 +7,8 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { SITIO } from "../../lib/seo";
 import { getMarketTicker } from "../../services/marketTickerService";
 import { rutaDeFormato } from "../../lib/pieza";
+import { datoDelDolar } from "../datoDelDolar";
+import { IconoWhatsApp, REDES_DEL_JUEGO, enlaceWhatsApp } from "../compartir";
 import {
   ALTO,
   DURACION,
@@ -56,14 +58,6 @@ import "./guacamaya.css";
  * dirección que se comparte es la de la página en el idioma en que se juega.
  */
 
-/** El dato de cierre, sacado de la cinta de mercado: el dólar oficial del BCV. */
-const datoDelDolar = (cinta) => {
-  const fila = (cinta?.indicators ?? []).find(
-    (i) => /bcv/i.test(i.label) && /usd|\$|d[oó]lar/i.test(i.label)
-  );
-  return fila ? fila.value : null;
-};
-
 /** El listado de noticias. No hay `/noticias` a secas: se sale de la misma función que
  * usa el resto del sitio, para que no se rompa si el listado cambia de dirección. */
 const NOTICIAS = rutaDeFormato("noticia");
@@ -90,29 +84,6 @@ const Chaguaramo = ({ titulo }) => (
   </svg>
 );
 Chaguaramo.propTypes = { titulo: PropTypes.string.isRequired };
-
-/** El logo de WhatsApp: el globo y el teléfono, en blanco sobre el verde del botón. */
-const IconoWhatsApp = () => (
-  <svg viewBox="0 0 24 24" className="se-guaca__icono-whatsapp" aria-hidden="true" focusable="false">
-    <path
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinejoin="round"
-      d="M12 2.8a9.2 9.2 0 0 0-7.9 13.9L2.9 21.1l4.5-1.2A9.2 9.2 0 1 0 12 2.8z"
-    />
-    <path
-      fill="currentColor"
-      d="M8.6 7.2c.2-.4.5-.4.8-.4h.6c.2 0 .4.1.5.4l.8 1.9c.1.2 0 .5-.1.6l-.6.7c-.1.2-.2.4 0 .6.6 1.1 1.5 2 2.6 2.6.2.1.4.1.6 0l.7-.6c.2-.2.4-.2.6-.1l1.9.8c.3.1.4.3.4.5v.6c0 .3 0 .6-.4.8-.6.4-1.4.6-2.2.4-2.6-.6-4.9-2.9-5.5-5.5-.2-.8 0-1.6.4-2.2z"
-    />
-  </svg>
-);
-
-/** Las redes de la fila de compartir, además de WhatsApp (que va en su botón grande). */
-const REDES_DEL_JUEGO = ["facebook", "x", "telegram", "instagram"];
-
-/** Un enlace que abre WhatsApp con el mensaje ya escrito (en el teléfono, la app). */
-const enlaceWhatsApp = (texto) => `https://wa.me/?text=${encodeURIComponent(texto)}`;
 
 const IconoMango = () => (
   <svg viewBox="0 0 24 24" className="se-guaca__icono-mango" aria-hidden="true" focusable="false">

@@ -6,7 +6,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
-import { InvitacionPausa } from "../components/home/TarjetaPausa";
+import { BannerDeJuegos } from "../components/home/TarjetaPausa";
 import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
@@ -267,7 +267,7 @@ export const Home = () => {
       {!cargando && status === "success" && pieces.length && !isFiltered ? (
         <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
           <div className="se-container">
-            <InvitacionPausa enPortada />
+            <BannerDeJuegos />
           </div>
         </section>
       ) : null}

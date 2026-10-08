@@ -24,6 +24,7 @@ import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
 import { InvitacionPausa } from "../components/home/TarjetaPausa";
+import { ClaveDeLaPieza } from "../components/piece/ClaveDeLaPieza";
 import {
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
@@ -296,7 +297,9 @@ export const Pieza = () => {
                 ) : null}
                 <PieceBody pieza={pieza} enCabecera={conPortada} />
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
-                {/* Para quien llegó al final: un minuto de pausa antes de lo siguiente. */}
+                {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
+                    dejó) y un minuto de pausa antes de lo siguiente. */}
+                <ClaveDeLaPieza pieza={pieza} />
                 <InvitacionPausa />
 
                 {/* La tarjeta nativa del cuerpo, detrás del texto y de las etiquetas.

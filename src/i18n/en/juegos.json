@@ -182,6 +182,108 @@
         }
       }
     },
+    "clave": {
+      "titulo": "La Clave",
+      "meta": {
+        "titulo": "La Clave: guess the word of the day — {marca}",
+        "descripcion": "A hidden word and six tries. Pick a topic (economy, sports, entertainment, Venezuela and more) and guess today's word, the same for everyone."
+      },
+      "entrada": "A hidden word, six tries. Pick what you want it to be about and guess it: there's a new one every day, the same for everyone.",
+      "irAPausa": "Got another minute? Fly, macaw →",
+      "elegir": "What's today's word about?",
+      "cambiar": "Change topic",
+      "cargando": "Finding the word…",
+      "sinPalabras": "There are no words in this topic yet.",
+      "error": "Today's word couldn't be loaded.",
+      "reintentar": "Try again",
+      "palabras": {
+        "one": "{n} word",
+        "other": "{n} words"
+      },
+      "letras": {
+        "one": "{n} letter",
+        "other": "{n} letters"
+      },
+      "reto": "Challenge for {fecha} · {categoria} · {letras}",
+      "retoPieza": "This piece's word · {letras}",
+      "otrasRedes": "or share it on",
+      "categorias": {
+        "economia": "Economy",
+        "empresas": "Business",
+        "venezuela": "Venezuela",
+        "mundo": "World",
+        "deportes": "Sports",
+        "entretenimiento": "Entertainment",
+        "tecnologia": "Technology",
+        "sabor": "Flavor"
+      },
+      "reglas": {
+        "bien": "Green: the letter is there, in the right spot.",
+        "casi": "Yellow: it's there, but somewhere else.",
+        "no": "Gray: it's not in the word."
+      },
+      "teclado": {
+        "etiqueta": "Keyboard",
+        "enter": "Enter",
+        "borrar": "Delete"
+      },
+      "avisos": {
+        "pocasLetras": "Not enough letters: it has {n}."
+      },
+      "pista": {
+        "boton": "Show a hint",
+        "texto": "Hint: {pista}"
+      },
+      "fin": {
+        "gano": "You got it!",
+        "perdio": "Not this time",
+        "enIntentos": {
+          "one": "In {n} try",
+          "other": "In {n} tries"
+        },
+        "sinAcertar": "Out of tries",
+        "saleEn": "It appears in:",
+        "dolar": "While you were thinking, the official BCV dollar was at {valor}.",
+        "verNoticias": "See today's news",
+        "stats": {
+          "jugadas": "Played",
+          "acertadas": "Solved",
+          "racha": "Streak",
+          "mejorRacha": "Best streak"
+        },
+        "distribucion": "How many tries you need",
+        "cuadricula": "Your result, in squares",
+        "whatsapp": "Share on WhatsApp",
+        "copiar": "Copy result",
+        "copiado": "Result copied",
+        "manana": "There's a new word tomorrow. Come back.",
+        "otraCategoria": "Play another topic",
+        "masEnClave": "There's a new word every day, on whatever you choose.",
+        "irAClave": "Play the word of the day"
+      },
+      "compartir": {
+        "dia": "La Clave by {marca} · {categoria} · {fecha}: {resultado}",
+        "pieza": "La Clave by {marca}, this piece's word: {resultado}"
+      },
+      "invitar": {
+        "texto": "Challenge a friend: today's word is the same for everyone.",
+        "boton": "Challenge on WhatsApp",
+        "mensaje": "Can you guess today's word? La Clave by {marca}: {categoria}, {letras}, six tries."
+      },
+      "pieza": {
+        "kicker": "Read it all? La Clave",
+        "titulo": "Guess this piece's word",
+        "texto": "A word that has to do with what you just read. Six tries.",
+        "jugar": "Play"
+      },
+      "tarjeta": {
+        "kicker": "The word of the day",
+        "titulo": "La Clave",
+        "texto": "Guess today's word in six tries: economy, sports, entertainment, Venezuela and more.",
+        "jugar": "Play today's word",
+        "banner": "Guess the word of the day"
+      }
+    },
     "pausa": {
       "meta": {
         "titulo": "A one-minute break: Fly, macaw — {marca}",

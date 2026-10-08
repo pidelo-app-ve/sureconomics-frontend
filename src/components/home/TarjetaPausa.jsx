@@ -154,4 +154,70 @@ export const InvitacionPausa = ({ enPortada }) => {
 InvitacionPausa.propTypes = { enPortada: PropTypes.bool };
 InvitacionPausa.defaultProps = { enPortada: false };
 
+/** Cinco celdas de muestra: la palabra del juego con sus tres colores. */
+const CeldasClave = () => (
+  <span className="se-clave-mini" aria-hidden="true">
+    {[
+      ["C", "bien"],
+      ["L", "casi"],
+      ["A", ""],
+      ["V", "no"],
+      ["E", "bien"],
+    ].map(([letra, pinta]) => (
+      <span key={letra} className={`se-clave-mini__celda${pinta ? ` se-clave-mini__celda--${pinta}` : ""}`}>
+        {letra}
+      </span>
+    ))}
+  </span>
+);
+
+/**
+ * La tarjeta de La Clave en `/pausa`: entre la guacamaya y El Analista, con el verde
+ * de la casa y las celdas del juego. Solo un enlace: el juego se descarga en `/clave`.
+ */
+export const TarjetaClave = () => {
+  const { t } = useIdioma();
+  return (
+    <Enlace to="/clave" className="se-clave-tarjeta">
+      <span className="se-clave-tarjeta__escena">
+        <CeldasClave />
+      </span>
+      <span className="se-clave-tarjeta__cuerpo">
+        <span className="se-clave-tarjeta__kicker">{t("juegos.clave.tarjeta.kicker")}</span>
+        <span className="se-clave-tarjeta__titulo">{t("juegos.clave.tarjeta.titulo")}</span>
+        <span className="se-clave-tarjeta__texto">{t("juegos.clave.tarjeta.texto")}</span>
+        <span className="se-clave-tarjeta__boton">{t("juegos.clave.tarjeta.jugar")}</span>
+      </span>
+    </Enlace>
+  );
+};
+
+/** El banner de La Clave, hermano del de la guacamaya: mismo alto, otro color. */
+export const InvitacionClave = () => {
+  const { t } = useIdioma();
+  return (
+    <Enlace to="/clave" className="se-pausa-banner se-pausa-banner--clave">
+      <span className="se-pausa-banner__escena se-pausa-banner__escena--clave" aria-hidden="true">
+        <CeldasClave />
+      </span>
+      <span className="se-pausa-banner__cuerpo">
+        <span className="se-pausa-banner__kicker">{t("juegos.clave.tarjeta.kicker")}</span>
+        <span className="se-pausa-banner__titulo">{t("juegos.clave.tarjeta.banner")}</span>
+        <span className="se-pausa-banner__boton">{t("juegos.clave.tarjeta.jugar")}</span>
+      </span>
+    </Enlace>
+  );
+};
+
+/**
+ * La franja de juegos de la portada, bajo el buscador: los dos banners lado a lado
+ * (la guacamaya y La Clave), apilados en el teléfono.
+ */
+export const BannerDeJuegos = () => (
+  <div className="se-pausa-doble">
+    <InvitacionPausa enPortada />
+    <InvitacionClave />
+  </div>
+);
+
 export default TarjetaPausa;

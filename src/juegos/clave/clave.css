@@ -1,0 +1,619 @@
+/* ═══ LA CLAVE ═══════════════════════════════════════════════════════════════
+   Solo se descarga con el juego (carga perezosa). Los tres colores del juego son el
+   verde de la casa para «en su sitio», el mango de la guacamaya para «en otro sitio»
+   y un gris para «no está». Lo demás es papel: el juego se lee como parte del
+   periódico, no como una pantalla aparte. */
+
+.se-clave {
+  --clave-bien: #1f7a43;
+  --clave-casi: #e3a51c;
+  --clave-no: #7a7f84;
+  --clave-tinta: var(--marca-verde, #003318);
+  --clave-papel: #fbfaf6;
+  --clave-borde: #d6d9d3;
+  --clave-tecla: #e4e7e2;
+  --clave-vuelta: 260ms;
+
+  display: grid;
+  gap: 16px;
+  padding: 20px 18px 22px;
+  border: 1px solid var(--clave-borde);
+  border-radius: 18px;
+  background: var(--clave-papel);
+  color: #1a1d1a;
+  font-family: var(--se-font-ui, "Host Grotesk", system-ui, sans-serif);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.se-clave__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clave-tinta);
+}
+
+.se-clave__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.se-clave__reto {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__cambiar,
+.se-clave__secundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--clave-borde);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--clave-tinta);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 140ms ease-out, transform 140ms ease-out;
+}
+
+.se-clave__cambiar:hover,
+.se-clave__secundario:hover {
+  background: #eef3ee;
+}
+
+.se-clave__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--clave-tinta);
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 140ms ease-out, background 140ms ease-out;
+}
+
+.se-clave__boton:hover {
+  background: #0a4a28;
+}
+
+.se-clave__boton:active,
+.se-clave__secundario:active {
+  transform: scale(0.98);
+}
+
+.se-clave__boton:focus-visible,
+.se-clave__secundario:focus-visible,
+.se-clave__cambiar:focus-visible,
+.se-clave__categoria:focus-visible,
+.se-clave__tecla:focus-visible,
+.se-clave__whatsapp:focus-visible {
+  outline: 3px solid var(--clave-casi);
+  outline-offset: 2px;
+}
+
+/* —— Elegir categoría —— */
+.se-clave__pregunta {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.3rem, 1.1rem + 1vw, 1.7rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--clave-tinta);
+}
+
+.se-clave__categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.se-clave__categoria {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--clave-borde);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--clave-tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 140ms ease-out, transform 140ms ease-out, background 140ms ease-out;
+}
+
+.se-clave__categoria:hover {
+  border-color: var(--clave-bien);
+  background: #f1f7f2;
+}
+
+.se-clave__categoria:active {
+  transform: scale(0.98);
+}
+
+.se-clave__categoria-nombre {
+  font-family: var(--se-font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.se-clave__categoria-total {
+  font-size: 0.78rem;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__reglas {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__reglas li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.se-clave__muestra {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.se-clave__muestra--bien { background: var(--clave-bien); }
+.se-clave__muestra--casi { background: var(--clave-casi); }
+.se-clave__muestra--no { background: var(--clave-no); }
+
+/* —— El tablero —— */
+.se-clave__aviso {
+  min-height: 1.3em;
+  margin: -6px 0 -4px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--clave-tinta);
+}
+
+.se-clave__tablero {
+  display: grid;
+  gap: 6px;
+  justify-self: center;
+  width: 100%;
+  /* Cada celda, de 34 a 58 px según cuántas letras tenga la palabra y cuánto ancho haya. */
+  --clave-celda: clamp(34px, calc((min(100%, 520px) - (var(--clave-largo) - 1) * 6px) / var(--clave-largo)), 58px);
+  max-width: calc(var(--clave-largo) * 58px + (var(--clave-largo) - 1) * 6px);
+}
+
+.se-clave__fila {
+  display: grid;
+  grid-template-columns: repeat(var(--clave-largo), minmax(0, 1fr));
+  gap: 6px;
+}
+
+.se-clave__fila--tiembla {
+  animation: se-clave-tiembla 0.5s ease-in-out;
+}
+
+.se-clave__celda {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 2px solid var(--clave-borde);
+  border-radius: 6px;
+  background: #fff;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.1rem, 2.6vw + 0.4rem, 1.7rem);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #1a1d1a;
+  user-select: none;
+}
+
+.se-clave__celda--llena {
+  border-color: #8d938e;
+  animation: se-clave-pulsa 120ms ease-out;
+}
+
+.se-clave__celda--bien,
+.se-clave__celda--casi,
+.se-clave__celda--no {
+  border-color: transparent;
+  color: #fff;
+}
+
+.se-clave__celda--bien { background: var(--clave-bien); }
+.se-clave__celda--casi { background: var(--clave-casi); }
+.se-clave__celda--no { background: var(--clave-no); }
+
+/* La vuelta: cada letra gira y enseña su color, una tras otra (retraso en línea). */
+.se-clave__celda--revela {
+  animation: se-clave-vuelta calc(var(--clave-vuelta) * 2) ease-in-out both;
+}
+
+@keyframes se-clave-vuelta {
+  0% { transform: rotateX(0); background: #fff; border-color: #8d938e; color: #1a1d1a; }
+  49% { transform: rotateX(90deg); background: #fff; border-color: #8d938e; color: #1a1d1a; }
+  51% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
+}
+
+@keyframes se-clave-pulsa {
+  from { transform: scale(0.9); }
+  to { transform: scale(1); }
+}
+
+@keyframes se-clave-tiembla {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+/* —— La pista —— */
+.se-clave__pista {
+  display: grid;
+  justify-items: center;
+}
+
+.se-clave__pista-texto {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff6dd;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #5a4300;
+}
+
+/* —— El teclado —— */
+.se-clave__teclado {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+  user-select: none;
+}
+
+.se-clave__teclas {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.se-clave__tecla {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 44px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--clave-tecla);
+  color: #1a1d1a;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 140ms ease-out, color 140ms ease-out, transform 80ms ease-out;
+}
+
+.se-clave__tecla:active {
+  transform: scale(0.94);
+}
+
+.se-clave__tecla--ancha {
+  flex: 1.6 1 0;
+  max-width: 72px;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.se-clave__tecla--bien { background: var(--clave-bien); color: #fff; }
+.se-clave__tecla--casi { background: var(--clave-casi); color: #fff; }
+.se-clave__tecla--no { background: var(--clave-no); color: #fff; }
+
+.se-clave__icono {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+/* —— La pantalla final —— */
+.se-clave__final {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding-top: 6px;
+  text-align: center;
+  animation: se-clave-aparece 320ms ease-out both;
+}
+
+@keyframes se-clave-aparece {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.se-clave__final-kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clave-bien);
+}
+
+.se-clave__final-titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--clave-tinta);
+}
+
+.se-clave__palabra {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  max-width: 34em;
+}
+
+.se-clave__palabra-letras {
+  font-family: var(--se-font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clave-bien);
+}
+
+.se-clave__definicion {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__dato {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #eef3ee;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.se-clave__dato strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--clave-tinta);
+}
+
+.se-clave__dato a {
+  color: var(--clave-tinta);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.se-clave__stats {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.se-clave__cifras {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0;
+}
+
+.se-clave__cifras div {
+  display: grid;
+  gap: 2px;
+}
+
+.se-clave__cifras dt {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__cifras dd {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--clave-tinta);
+}
+
+.se-clave__stats-titulo {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__distribucion {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-clave__barra-fila {
+  display: grid;
+  grid-template-columns: 1.2em 1fr;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-clave__barra-n {
+  text-align: right;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__barra {
+  display: block;
+  min-width: 1.6em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--clave-no);
+  color: #fff;
+  font-weight: 700;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.se-clave__barra--hoy {
+  background: var(--clave-bien);
+}
+
+.se-clave__cuadricula {
+  margin: 0;
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  white-space: pre;
+}
+
+/* —— Compartir e invitar —— */
+.se-clave__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.se-clave__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #062e1a;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 3px 0 #1a9e4c;
+  transition: transform 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+.se-clave__whatsapp:hover {
+  transform: translateY(-1px);
+}
+
+.se-clave__whatsapp:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1a9e4c;
+}
+
+.se-clave__redes {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+}
+
+.se-clave__redes-texto {
+  font-size: 0.8125rem;
+  color: var(--color-slate, #4a524c);
+}
+
+.se-clave__redes .se-share__btn {
+  width: 36px;
+  height: 36px;
+}
+
+.se-clave__invitar {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--clave-borde);
+  text-align: center;
+}
+
+.se-clave__invitar-texto,
+.se-clave__nota {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-slate, #4a524c);
+}
+
+/* —— En el teléfono —— */
+@media (max-width: 480px) {
+  .se-clave {
+    padding: 16px 12px 18px;
+    border-radius: 14px;
+  }
+  .se-clave__tecla {
+    height: 48px;
+    font-size: 0.875rem;
+  }
+  .se-clave__cifras dd {
+    font-size: 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-clave__celda--revela,
+  .se-clave__celda--llena,
+  .se-clave__fila--tiembla,
+  .se-clave__final {
+    animation: none;
+  }
+  .se-clave__boton,
+  .se-clave__secundario,
+  .se-clave__cambiar,
+  .se-clave__categoria,
+  .se-clave__tecla,
+  .se-clave__whatsapp {
+    transition: none;
+  }
+}

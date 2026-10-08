@@ -182,6 +182,108 @@
         }
       }
     },
+    "clave": {
+      "titulo": "La Clave",
+      "meta": {
+        "titulo": "La Clave: adivina la palabra del día — {marca}",
+        "descripcion": "Una palabra escondida y seis intentos. Elige de qué va (economía, deportes, entretenimiento, Venezuela y más) y adivina la de hoy, la misma para todos."
+      },
+      "entrada": "Una palabra escondida, seis intentos. Elige de qué quieres que vaya y adivínala: cada día hay una nueva, la misma para todos.",
+      "irAPausa": "¿Tienes otro minuto? Vuela, guacamaya →",
+      "elegir": "¿De qué va la palabra de hoy?",
+      "cambiar": "Cambiar de categoría",
+      "cargando": "Buscando la palabra…",
+      "sinPalabras": "Todavía no hay palabras en esta categoría.",
+      "error": "No se pudo cargar la palabra de hoy.",
+      "reintentar": "Intentar de nuevo",
+      "palabras": {
+        "one": "{n} palabra",
+        "other": "{n} palabras"
+      },
+      "letras": {
+        "one": "{n} letra",
+        "other": "{n} letras"
+      },
+      "reto": "Reto del {fecha} · {categoria} · {letras}",
+      "retoPieza": "La palabra de esta pieza · {letras}",
+      "otrasRedes": "o compártelo en",
+      "categorias": {
+        "economia": "Economía",
+        "empresas": "Empresas",
+        "venezuela": "Venezuela",
+        "mundo": "Mundo",
+        "deportes": "Deportes",
+        "entretenimiento": "Entretenimiento",
+        "tecnologia": "Tecnología",
+        "sabor": "Sabor"
+      },
+      "reglas": {
+        "bien": "Verde: la letra está y en su sitio.",
+        "casi": "Amarillo: está, pero en otro sitio.",
+        "no": "Gris: no está en la palabra."
+      },
+      "teclado": {
+        "etiqueta": "Teclado",
+        "enter": "Probar",
+        "borrar": "Borrar"
+      },
+      "avisos": {
+        "pocasLetras": "Faltan letras: son {n}."
+      },
+      "pista": {
+        "boton": "Ver una pista",
+        "texto": "Pista: {pista}"
+      },
+      "fin": {
+        "gano": "¡La tienes!",
+        "perdio": "Esta vez no",
+        "enIntentos": {
+          "one": "En {n} intento",
+          "other": "En {n} intentos"
+        },
+        "sinAcertar": "Se acabaron los intentos",
+        "saleEn": "Sale en:",
+        "dolar": "Mientras pensabas, el dólar oficial del BCV estaba en {valor}.",
+        "verNoticias": "Ver las noticias de hoy",
+        "stats": {
+          "jugadas": "Jugadas",
+          "acertadas": "Acertadas",
+          "racha": "Racha",
+          "mejorRacha": "Mejor racha"
+        },
+        "distribucion": "En cuántos intentos aciertas",
+        "cuadricula": "Tu resultado, en cuadros",
+        "whatsapp": "Compartir por WhatsApp",
+        "copiar": "Copiar resultado",
+        "copiado": "Resultado copiado",
+        "manana": "Mañana hay otra palabra. Vuelve.",
+        "otraCategoria": "Jugar otra categoría",
+        "masEnClave": "Hay una palabra nueva cada día, de lo que tú elijas.",
+        "irAClave": "Jugar la palabra del día"
+      },
+      "compartir": {
+        "dia": "La Clave de {marca} · {categoria} · {fecha}: {resultado}",
+        "pieza": "La Clave de {marca}, la palabra de la pieza: {resultado}"
+      },
+      "invitar": {
+        "texto": "Reta a un pana: hoy la palabra es la misma para todos.",
+        "boton": "Retar por WhatsApp",
+        "mensaje": "¿Adivinas la palabra de hoy? La Clave de {marca}: {categoria}, {letras}, seis intentos."
+      },
+      "pieza": {
+        "kicker": "¿Leíste completo? La Clave",
+        "titulo": "Adivina la palabra de esta pieza",
+        "texto": "Una palabra que tiene que ver con lo que acabas de leer. Seis intentos.",
+        "jugar": "Jugar"
+      },
+      "tarjeta": {
+        "kicker": "La palabra del día",
+        "titulo": "La Clave",
+        "texto": "Adivina la palabra de hoy en seis intentos: economía, deportes, entretenimiento, Venezuela y más.",
+        "jugar": "Jugar la palabra de hoy",
+        "banner": "Adivina la palabra del día"
+      }
+    },
     "pausa": {
       "meta": {
         "titulo": "Un minuto de pausa: Vuela, guacamaya — {marca}",

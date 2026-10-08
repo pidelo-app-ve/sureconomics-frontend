@@ -368,6 +368,10 @@ export const piezaFromApi = (row) => {
     // publicitario no trae el campo, y el valor honesto para una pieza que no sabe
     // nada de esto es «sí lleva», que es lo que hace `Boolean(undefined)`.
     sinPublicidad: Boolean(row.sin_publicidad),
+    // La palabra de La Clave que la redacción dejó para esta pieza, y su pista. Nulas
+    // cuando no hay juego al final: la tarjeta no se pinta.
+    juegoPalabra: typeof row.juego_palabra === "string" && row.juego_palabra ? row.juego_palabra : null,
+    juegoPista: typeof row.juego_pista === "string" ? row.juego_pista : "",
     // Si la sección de esta pieza admite comentarios. Es una política del formato y
     // viaja anidada en la pieza justo para que la página no tenga que cruzar el
     // listado de formatos ni provocar un error para saber si dibuja la caja.

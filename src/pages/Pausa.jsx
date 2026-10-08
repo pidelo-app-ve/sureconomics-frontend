@@ -4,6 +4,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
+import { TarjetaClave } from "../components/home/TarjetaPausa";
 
 /** El Analista, dentro del sitio y en la misma pestaña: ver `pages/ElAnalista.jsx`. */
 const EL_ANALISTA = "/el-analista";
@@ -33,6 +34,8 @@ export const Pausa = () => {
             <p className="se-pausa__entrada">{t("juegos.pausa.entrada")}</p>
           </header>
           <Guacamaya patrocinio={<PatrocinioDelJuego />} />
+
+          <TarjetaClave />
 
           <section className="se-analista" aria-labelledby="analista-titulo">
             <p className="se-analista__kicker">{t("juegos.pausa.analista.kicker")}</p>

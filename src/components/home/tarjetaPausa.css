@@ -299,3 +299,231 @@
     font-size: 0.8125rem;
   }
 }
+
+/* ═══ LA CLAVE: la tarjeta de /pausa, el banner y la franja doble de la portada ═══ */
+
+.se-clave-mini {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  width: 100%;
+  max-width: 190px;
+}
+
+.se-clave-mini__celda {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 6px;
+  background: transparent;
+  font-family: var(--se-font-heading);
+  font-size: clamp(0.95rem, 0.7rem + 0.9vw, 1.25rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+}
+
+.se-clave-mini__celda--bien { background: #2e9a57; border-color: transparent; }
+.se-clave-mini__celda--casi { background: #e3a51c; border-color: transparent; }
+.se-clave-mini__celda--no { background: #7a7f84; border-color: transparent; }
+
+/* —— La tarjeta de /pausa —— */
+.se-clave-tarjeta {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--marca-verde, #003318);
+  color: #f3f5ef;
+  text-decoration: none;
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-clave-tarjeta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(0, 51, 24, 0.28);
+  }
+}
+
+.se-clave-tarjeta:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-clave-tarjeta__escena {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  padding: 20px;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), transparent 60%), #06452a;
+}
+
+.se-clave-tarjeta__cuerpo {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 8px;
+  padding: 20px 22px;
+}
+
+.se-clave-tarjeta__kicker {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9fd3b0;
+}
+
+.se-clave-tarjeta__titulo {
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.4rem, 1.2rem + 1vw, 1.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.se-clave-tarjeta__texto {
+  max-width: 30em;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(243, 245, 239, 0.86);
+}
+
+.se-clave-tarjeta__boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--marca-verde, #003318);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 560px) {
+  .se-clave-tarjeta {
+    grid-template-columns: 1fr;
+  }
+  .se-clave-tarjeta__escena {
+    min-height: 110px;
+    padding: 16px;
+  }
+}
+
+/* —— El banner de La Clave: el mismo molde que el de la guacamaya, en verde —— */
+.se-pausa-banner--clave {
+  background: var(--marca-verde, #003318);
+  color: #f3f5ef;
+}
+
+.se-pausa-banner--clave .se-pausa-banner__kicker {
+  color: #9fd3b0;
+}
+
+.se-pausa-banner--clave .se-pausa-banner__titulo {
+  color: #fff;
+}
+
+.se-pausa-banner--clave .se-pausa-banner__boton {
+  background: #fff;
+  color: var(--marca-verde, #003318);
+  box-shadow: 0 3px 0 #9fd3b0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-pausa-banner--clave:hover .se-pausa-banner__boton {
+    background: #e9f4ec;
+  }
+}
+
+.se-pausa-banner__escena--clave {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), transparent 60%), #06452a;
+}
+
+/* —— La franja doble de la portada —— */
+.se-pausa-doble {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.se-pausa-doble .se-pausa-banner {
+  margin-top: 0;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr);
+}
+
+.se-pausa-doble .se-pausa-banner__escena {
+  min-height: 0;
+}
+
+.se-pausa-doble .se-pausa-banner__cuerpo {
+  gap: 6px;
+  padding: 16px 18px;
+}
+
+.se-pausa-doble .se-pausa-banner__titulo {
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+}
+
+.se-pausa-doble .se-pausa-banner__boton {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 0.85rem;
+}
+
+.se-pausa-doble .se-pausa-banner__vuelo {
+  width: 64px;
+}
+
+@media (max-width: 760px) {
+  .se-pausa-doble {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .se-pausa-doble .se-pausa-banner {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+  .se-pausa-doble .se-pausa-banner__vuelo {
+    left: 14%;
+    top: 30%;
+    width: 60px;
+  }
+  .se-pausa-doble .se-pausa-banner__escena--clave {
+    padding: 10px;
+  }
+  .se-pausa-doble .se-clave-mini {
+    max-width: 92px;
+    gap: 3px;
+  }
+  .se-pausa-doble .se-clave-mini__celda {
+    border-radius: 4px;
+    font-size: 0.7rem;
+  }
+  .se-pausa-doble .se-pausa-banner__cuerpo {
+    gap: 5px;
+    padding: 12px 14px 14px;
+  }
+  .se-pausa-doble .se-pausa-banner__titulo {
+    font-size: 1.02rem;
+  }
+  .se-pausa-doble .se-pausa-banner__boton {
+    min-height: 36px;
+    padding: 0 16px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-clave-tarjeta {
+    transition: none;
+  }
+}

@@ -103,6 +103,7 @@ const rutasPublicas = () => [
             { path: "cookies", element: <Cookies /> },
             // El juego se descarga al abrir la página, no con el resto del sitio.
             { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa") },
+            { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },
@@ -177,6 +178,8 @@ export const router = createBrowserRouter([
                     { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
                     { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
+                    // El catálogo de La Clave: las palabras de las que sale la del día.
+                    { path: "juegos/palabras", lazy: pagina(() => import("./pages/admin/AdminJuegoPalabras"), "AdminJuegoPalabras") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.

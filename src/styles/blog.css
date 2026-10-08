@@ -22119,74 +22119,162 @@ html {
   cursor: pointer;
 }
 
-/* —— La ventana de la foto —— */
-.se-admin-app .se-adm-dialog__surface.se-imgdlg {
-  width: min(640px, calc(100vw - 2rem));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.se-imgdlg__cuerpo {
+/* —— La ventana de la foto ——
+   Sobre `ModalDelPanel` (tapa toda la pantalla). Dos estados: sin foto, el sitio para
+   soltarla y las recientes de la biblioteca; con foto, la previa sobre papel a la
+   izquierda y sus textos a la derecha. */
+.se-imgdlg__inicio {
   display: grid;
-  gap: 0.85rem;
+  gap: 1.4rem;
 }
 
 .se-imgdlg__suelo {
   display: grid;
   justify-items: center;
-  gap: 0.4rem;
-  padding: 2rem 1rem 1.6rem;
-  border: 1.5px dashed rgba(var(--se-tinte), 0.22);
-  border-radius: 14px;
+  gap: 0.55rem;
+  padding: 2.2rem 1.25rem 1.8rem;
+  border: 1.5px dashed transparent;
+  border-radius: var(--adm-radius-md, 14px);
+  background: color-mix(in srgb, var(--adm-text, #000) 4%, var(--adm-surface, #fff));
   text-align: center;
-  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+  transition: border-color 160ms ease-out, background-color 160ms ease-out;
 }
 
 .se-imgdlg__suelo--encima {
   border-color: var(--adm-accent);
-  background: var(--adm-accent-soft);
+  background: color-mix(in srgb, var(--adm-accent) 8%, var(--adm-surface, #fff));
 }
 
 .se-imgdlg__suelo-icono {
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  margin-bottom: 0.25rem;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 0.2rem;
   border-radius: 50%;
-  background: rgba(var(--se-tinte), 0.08);
-  color: rgba(var(--se-tinte), 0.85);
+  background: color-mix(in srgb, var(--adm-accent) 12%, var(--adm-surface, #fff));
+  color: var(--adm-accent);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.se-imgdlg__suelo--encima .se-imgdlg__suelo-icono {
+  transform: translateY(-3px) scale(1.06);
 }
 
 .se-imgdlg__suelo-icono svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .se-imgdlg__suelo-texto {
-  margin: 0;
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: rgba(var(--se-tinte), 0.92);
+  color: var(--adm-text);
 }
 
 .se-imgdlg__suelo-ayuda {
-  margin: 0 0 0.6rem;
+  margin: 0.2rem 0 0;
   font-size: 0.8125rem;
-  color: rgba(var(--se-tinte), 0.6);
+  color: var(--adm-text-muted);
 }
 
-.se-imgdlg__rotulo {
-  margin: 0 0 0.45rem;
-  font-size: 0.8125rem;
-  color: rgba(var(--se-tinte), 0.6);
+.se-imgdlg__biblio {
+  display: grid;
+  gap: 0.75rem;
 }
 
-/* La previa va sobre papel blanco y con la letra del sitio: es la pieza, no el panel. */
-.se-imgdlg__figura {
+.se-imgdlg__biblio-cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.se-imgdlg__biblio-titulo {
   margin: 0;
-  padding: 1rem 1.1rem 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--adm-text);
+}
+
+.se-imgdlg__recientes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-imgdlg__miniatura {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--adm-text, #000) 6%, var(--adm-surface, #fff));
+  cursor: pointer;
+  transition: box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+
+.se-imgdlg__miniatura img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-imgdlg__miniatura:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 2px var(--adm-accent), 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.se-imgdlg__miniatura:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--adm-accent);
+}
+
+.se-imgdlg__miniatura--cargando {
+  animation: se-imgdlg-pulso 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes se-imgdlg-pulso {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
+.se-imgdlg__vacio {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--adm-text-muted);
+}
+
+/* Con foto: la previa a la izquierda, los textos a la derecha. */
+.se-imgdlg__con-foto {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.se-imgdlg__previa {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+}
+
+/* La previa va sobre papel y con la letra del sitio: es la pieza, no el panel. */
+.se-imgdlg__papel {
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid var(--adm-border);
   border-radius: 12px;
   background: var(--color-paper, #fff);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
 .se-imgdlg__marco {
@@ -22198,7 +22286,7 @@ html {
 .se-imgdlg__img {
   display: block;
   width: 100%;
-  max-height: 38vh;
+  max-height: 46vh;
   object-fit: contain;
   background: #f2f1ee;
 }
@@ -22211,45 +22299,82 @@ html {
   color: #6b6b6b;
 }
 
-.se-imgdlg__fuentes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.25rem;
+.se-imgdlg__pie-previo--vacio {
+  font-style: italic;
+  color: #a3a3a3;
+}
+
+.se-imgdlg__nota {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--adm-text-muted);
+}
+
+.se-imgdlg__campos {
+  display: grid;
+  gap: 1rem;
+}
+
+.se-imgdlg__area {
+  min-height: 4.75rem;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .se-imgdlg__enlace {
   padding: 0;
   border: 0;
   background: none;
-  color: rgba(var(--se-tinte), 0.85);
+  color: var(--adm-text);
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
   text-underline-offset: 3px;
   cursor: pointer;
 }
 
+.se-imgdlg__enlace:hover {
+  text-decoration-color: currentColor;
+}
+
+.se-imgdlg__enlace:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .se-imgdlg__error {
   margin: 0;
-  color: #ff9a8a;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--adm-err-border);
+  border-radius: 10px;
+  background: var(--adm-err-bg);
+  color: var(--adm-err);
   font-size: 0.875rem;
 }
 
-.se-imgdlg__campos {
-  display: grid;
-  gap: 0.75rem;
+@media (max-width: 720px) {
+  .se-imgdlg__con-foto {
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+  .se-imgdlg__recientes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .se-imgdlg__img {
+    max-height: 38vh;
+  }
 }
 
-/* Los botones, siempre a la vista: con una foto alta la ventana hace scroll, y «Poner
-   en el texto» no puede quedar debajo. */
-.se-admin-app .se-imgdlg .se-adm-dialog__actions {
-  position: sticky;
-  bottom: -1.1rem;
-  z-index: 1;
-  margin: 0 -1.1rem -1.1rem;
-  padding: 0.75rem 1.1rem 1.1rem;
-  background: var(--adm-surface);
+@media (prefers-reduced-motion: reduce) {
+  .se-imgdlg__miniatura,
+  .se-imgdlg__suelo-icono {
+    transition: none;
+  }
+  .se-imgdlg__miniatura--cargando {
+    animation: none;
+  }
 }
 
 /* El botón de la vista previa, con su ojo. */

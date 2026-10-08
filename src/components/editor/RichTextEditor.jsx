@@ -36,7 +36,7 @@ ToolbarButton.propTypes = {
  *
  * @param {{ value: string, onChange: (html: string) => void, placeholder?: string, disabled?: boolean }} props
  */
-export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
+export const RichTextEditor = ({ value, onChange, placeholder, disabled, extensiones, className, children }) => {
   const { t } = useIdioma();
   // Tiptap only re-renders this component on content changes (`onUpdate`);
   // clicking a toolbar button toggles a mark/selection without necessarily
@@ -60,11 +60,17 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
   const textoDelMarcador = useRef(placeholder);
   textoDelMarcador.current = placeholder || t("cuenta.editor.marcador");
 
+  // Las extensiones de más (las fotos del cuerpo en el panel) se toman una vez, como
+  // todo lo que va en `useEditor`.
+  const extras = useRef(extensiones ?? []);
+
   const editor = useEditor({
     extensions: [
-      StarterKit, // i18n:ignorar
+      // La línea que marca dónde caerá lo que se suelta, del color del foco.
+      StarterKit.configure({ dropcursor: { color: "var(--se-form-focus)", width: 3 } }), // i18n:ignorar
       Link.configure({ openOnClick: false, autolink: true }),
       Placeholder.configure({ placeholder: () => textoDelMarcador.current }),
+      ...extras.current,
     ],
     content: value || "",
     editable: !disabled,
@@ -115,7 +121,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
   };
 
   return (
-    <div className="se-richtext">
+    <div className={`se-richtext${className ? ` ${className}` : ""}`}>
       <div className="se-richtext__toolbar" role="toolbar" aria-label={t("cuenta.editor.barra")}>
         <ToolbarButton
           label={<strong>B</strong>}
@@ -189,6 +195,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled }) => {
         />
       </div>
       <EditorContent editor={editor} className="se-richtext__content" />
+      {typeof children === "function" ? children(editor) : null}
       <LinkDialog
         open={linkDialogOpen}
         initialUrl={currentLinkHref}
@@ -205,4 +212,9 @@ RichTextEditor.propTypes = {
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
+  /** Extensiones de TipTap de más. Se leen una sola vez, al montar. */
+  extensiones: PropTypes.array,
+  className: PropTypes.string,
+  /** `(editor) => nodo`: lo que acompaña al editor (el «+» de las fotos, su ventana). */
+  children: PropTypes.func,
 };

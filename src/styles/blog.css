@@ -21814,3 +21814,551 @@ html {
   font-size: var(--se-text-small);
   color: var(--se-gray-500);
 }
+
+
+/* ═══ FOTOS EN EL CUERPO DE LAS PIEZAS (octubre de 2026) ═══
+   Cuatro sitios: la foto publicada en la pieza, la misma foto dentro del editor del
+   panel, el «+» de la línea vacía con que se pone, y la ventana para subirla o elegirla.
+   Más la vista previa de la pieza completa. */
+
+/* —— En la pieza publicada ——
+   Al ancho de la columna de lectura (la medida de 34em del cuerpo) y con el pie debajo,
+   en la letra de las etiquetas: se lee como pie, no como un párrafo más. Las medidas
+   que lleva la etiqueta reservan el hueco mientras carga, así el texto no salta. Una
+   foto vertical no puede ocupar más que la pantalla. */
+.se-piece__body figure {
+  margin: 2em 0;
+}
+
+.se-piece__body figure img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border-radius: 4px;
+  background: rgba(var(--se-tinte), 0.04);
+}
+
+.se-piece__body figcaption {
+  margin-top: 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+  text-wrap: pretty;
+}
+
+/* —— El editor con fotos ——
+   El texto se aparta un poco a la derecha para dejar el margen donde vive el «+»: así el
+   «+» no tapa el cursor de la línea vacía. */
+.se-richtext--imagenes .se-richtext__content {
+  position: relative;
+  padding-left: 2.85rem;
+}
+
+.se-insertar {
+  position: absolute;
+  left: 0.55rem;
+  z-index: 3;
+  transform: translateY(-50%);
+}
+
+.se-insertar__mas {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 50%;
+  background: var(--se-form-surface);
+  color: var(--se-form-muted, var(--se-form-text));
+  cursor: pointer;
+  animation: se-insertar-asoma 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 150ms ease-out, color 150ms ease-out;
+}
+
+.se-insertar__mas:hover,
+.se-insertar--abierto .se-insertar__mas {
+  border-color: var(--se-form-focus);
+  color: var(--se-form-text);
+}
+
+.se-insertar--abierto .se-insertar__mas {
+  transform: rotate(45deg);
+}
+
+.se-insertar__mas:focus-visible,
+.se-insertar__opcion:focus-visible {
+  outline: 2px solid var(--se-form-focus);
+  outline-offset: 2px;
+}
+
+.se-insertar__menu {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.5rem);
+  transform: translateY(-50%);
+  animation: se-insertar-menu 170ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.se-insertar__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.6rem;
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 999px;
+  background: var(--se-form-surface);
+  color: var(--se-form-text);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+  transition: border-color 150ms ease-out;
+}
+
+.se-insertar__opcion:hover {
+  border-color: var(--se-form-focus);
+}
+
+.se-insertar__nombre {
+  font-weight: 700;
+}
+
+.se-insertar__pista {
+  color: var(--se-form-muted, var(--se-form-text));
+}
+
+@keyframes se-insertar-asoma {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes se-insertar-menu {
+  from { opacity: 0; transform: translate(-6px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+/* La foto dentro del editor: como saldrá, con su barra de acciones encima. */
+.se-figura-ed {
+  position: relative;
+  margin: 1.2em 0;
+}
+
+.se-richtext__content .ProseMirror > .react-renderer + * {
+  margin-top: 0.75em;
+}
+
+.se-figura-ed__marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--se-form-text) 6%, transparent);
+  cursor: grab;
+}
+
+.se-figura-ed__marco:active {
+  cursor: grabbing;
+}
+
+.se-figura-ed__img {
+  display: block;
+  width: 100%;
+  max-height: 26rem;
+  object-fit: contain;
+}
+
+.se-figura-ed--elegida .se-figura-ed__marco,
+.ProseMirror-selectednode .se-figura-ed__marco {
+  outline: 2px solid var(--se-form-focus);
+  outline-offset: 3px;
+}
+
+/* Las acciones: sobre la foto, en una píldora oscura y velada -- el velo es lo que las
+   hace legibles sobre cualquier foto, clara u oscura. Aparecen al pasar, al elegirla o
+   al llegar con el teclado. */
+.se-figura-ed__acciones {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 10px;
+  background: rgba(16, 14, 22, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.se-figura-ed:hover .se-figura-ed__acciones,
+.se-figura-ed:focus-within .se-figura-ed__acciones,
+.se-figura-ed--elegida .se-figura-ed__acciones {
+  opacity: 1;
+  transform: none;
+}
+
+.se-figura-ed__accion {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.se-figura-ed__accion:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.se-figura-ed__accion:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.se-figura-ed__accion--quitar:hover {
+  color: #ffb4a8;
+}
+
+.se-figura-ed__falta {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f2b632;
+}
+
+.se-figura-ed__velo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: rgba(15, 12, 22, 0.55);
+  color: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.se-figura-ed__giro {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: se-figura-giro 0.8s linear infinite;
+}
+
+@keyframes se-figura-giro {
+  to { transform: rotate(360deg); }
+}
+
+/* El pie, escrito donde va a salir: sin caja, con una raya que aparece al tocarlo. */
+.se-figura-ed__pie {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.35rem 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--se-form-muted, var(--se-form-text));
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  transition: border-color 150ms ease-out;
+}
+
+.se-figura-ed__pie::placeholder {
+  color: var(--se-form-placeholder);
+}
+
+.se-figura-ed__pie:hover,
+.se-figura-ed__pie:focus {
+  outline: none;
+  border-bottom-color: var(--se-form-border);
+}
+
+.se-figura-ed__pie:focus {
+  border-bottom-color: var(--se-form-focus);
+}
+
+.se-richtext__aviso {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-top: 1.5px solid var(--se-form-border);
+  color: #ff9a8a;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+}
+
+.se-richtext__aviso button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* —— La ventana de la foto —— */
+.se-admin-app .se-adm-dialog__surface.se-imgdlg {
+  width: min(640px, calc(100vw - 2rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.se-imgdlg__cuerpo {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.se-imgdlg__suelo {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 2rem 1rem 1.6rem;
+  border: 1.5px dashed rgba(var(--se-tinte), 0.22);
+  border-radius: 14px;
+  text-align: center;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.se-imgdlg__suelo--encima {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent-soft);
+}
+
+.se-imgdlg__suelo-icono {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.25rem;
+  border-radius: 50%;
+  background: rgba(var(--se-tinte), 0.08);
+  color: rgba(var(--se-tinte), 0.85);
+}
+
+.se-imgdlg__suelo-icono svg {
+  width: 20px;
+  height: 20px;
+}
+
+.se-imgdlg__suelo-texto {
+  margin: 0;
+  font-weight: 700;
+  color: rgba(var(--se-tinte), 0.92);
+}
+
+.se-imgdlg__suelo-ayuda {
+  margin: 0 0 0.6rem;
+  font-size: 0.8125rem;
+  color: rgba(var(--se-tinte), 0.6);
+}
+
+.se-imgdlg__rotulo {
+  margin: 0 0 0.45rem;
+  font-size: 0.8125rem;
+  color: rgba(var(--se-tinte), 0.6);
+}
+
+/* La previa va sobre papel blanco y con la letra del sitio: es la pieza, no el panel. */
+.se-imgdlg__figura {
+  margin: 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 12px;
+  background: var(--color-paper, #fff);
+}
+
+.se-imgdlg__marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.se-imgdlg__img {
+  display: block;
+  width: 100%;
+  max-height: 38vh;
+  object-fit: contain;
+  background: #f2f1ee;
+}
+
+.se-imgdlg__pie-previo {
+  margin-top: 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #6b6b6b;
+}
+
+.se-imgdlg__fuentes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+.se-imgdlg__enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(var(--se-tinte), 0.85);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.se-imgdlg__error {
+  margin: 0;
+  color: #ff9a8a;
+  font-size: 0.875rem;
+}
+
+.se-imgdlg__campos {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Los botones, siempre a la vista: con una foto alta la ventana hace scroll, y «Poner
+   en el texto» no puede quedar debajo. */
+.se-admin-app .se-imgdlg .se-adm-dialog__actions {
+  position: sticky;
+  bottom: -1.1rem;
+  z-index: 1;
+  margin: 0 -1.1rem -1.1rem;
+  padding: 0.75rem 1.1rem 1.1rem;
+  background: var(--adm-surface);
+}
+
+/* El botón de la vista previa, con su ojo. */
+.se-btn.se-btn--previa {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* —— La vista previa de la pieza ——
+   A pantalla completa, sobre el papel del sitio, con una barra fina arriba que dice que
+   es una vista previa y cómo volver. */
+.se-previa {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: var(--se-white, #fff);
+  animation: se-previa-entra 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.se-previa__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  background: var(--marca-verde);
+  color: #fff;
+}
+
+.se-previa__titulo {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.se-previa__titulo span {
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.se-previa__cerrar {
+  padding: 0.5rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.se-previa__cerrar:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.se-previa__cerrar:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.se-previa__hoja {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.se-previa__vacio {
+  color: var(--color-slate-2);
+  font-style: italic;
+}
+
+@keyframes se-previa-entra {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 640px) {
+  .se-richtext--imagenes .se-richtext__content {
+    padding-left: 2.6rem;
+  }
+  .se-insertar {
+    left: 0.4rem;
+  }
+  .se-insertar__pista {
+    display: none;
+  }
+  .se-figura-ed__acciones {
+    opacity: 1;
+    transform: none;
+  }
+  .se-previa__titulo span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-insertar__mas,
+  .se-insertar__menu,
+  .se-previa,
+  .se-figura-ed__acciones {
+    animation: none;
+    transition: none;
+  }
+  .se-figura-ed__giro {
+    animation-duration: 2.4s;
+  }
+}

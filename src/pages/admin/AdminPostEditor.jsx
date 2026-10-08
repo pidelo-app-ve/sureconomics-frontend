@@ -46,6 +46,9 @@ import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { RichTextEditor } from "../../components/editor/RichTextEditor";
+import { EditorConImagenes } from "../../components/admin/cuerpo/EditorConImagenes";
+import { VistaPreviaDePieza } from "../../components/admin/VistaPreviaDePieza";
+import { IconoOjo } from "../../components/admin/cuerpo/iconos";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 
 /**
@@ -98,6 +101,9 @@ const FORMAT_FIELDS = {
     entrevista: ["interviewee"],
     informe: ["unit"],
 };
+
+/** Los formatos cuyo cuerpo admite fotos entre párrafos. */
+const FORMATOS_CON_FOTOS_EN_EL_CUERPO = new Set(["articulo", "noticia", "editorial"]);
 
 const emptyForm = () => ({
     format: "",
@@ -389,6 +395,7 @@ export const AdminPostEditor = () => {
     const [form, setForm] = useState(emptyForm);
     const [formats, setFormats] = useState([]);
     const [topics, setTopics] = useState([]);
+    const [vistaPrevia, setVistaPrevia] = useState(false);
     const [placeGroups, setPlaceGroups] = useState([]);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
@@ -996,10 +1003,21 @@ export const AdminPostEditor = () => {
                                     ? "Resumen escrito de la conversación"
                                     : "Contenido"}
                             </span>
-                            <RichTextEditor
-                                value={form.content}
-                                onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                            />
+                            {/* Fotos entre párrafos: solo donde el cuerpo es texto que se
+                                lee de corrido. La entrevista lleva aquí el resumen de la
+                                conversación, y su imagen es el video. */}
+                            {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
+                                <EditorConImagenes
+                                    value={form.content}
+                                    onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+                                    subir={uploadAdminMediaImage}
+                                />
+                            ) : (
+                                <RichTextEditor
+                                    value={form.content}
+                                    onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+                                />
+                            )}
                         </div>
                         </CampoMovil>
 
@@ -1488,12 +1506,31 @@ export const AdminPostEditor = () => {
                     </CampoMovil>
                     </div>
 
+                    <VistaPreviaDePieza
+                        abierta={vistaPrevia}
+                        onCerrar={() => setVistaPrevia(false)}
+                        form={form}
+                        assets={assets}
+                        topics={topics}
+                        formato={currentFormat}
+                    />
+
                     <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
 
                     <div className={`se-admin-form-actions${esMovil ? " se-admin-form-actions--movil" : ""}`}>
                         {esMovil && faltas.length ? (
                             <p className="se-admin-form-actions__faltas">Falta: {faltas.join(", ")}</p>
                         ) : null}
+                        <button
+                            type="button"
+                            className="se-btn se-btn--secondary se-btn--previa"
+                            onClick={() => setVistaPrevia(true)}
+                            disabled={!form.format}
+                            title={form.format ? undefined : "Elija primero el formato"}
+                        >
+                            <IconoOjo />
+                            Vista previa
+                        </button>
                         <button
                             type="button"
                             className="se-btn"

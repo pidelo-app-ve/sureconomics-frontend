@@ -325,8 +325,8 @@
 }
 
 .se-clave-mini__celda--bien { background: #2e9a57; border-color: transparent; }
-.se-clave-mini__celda--casi { background: #e3a51c; border-color: transparent; }
-.se-clave-mini__celda--no { background: #7a7f84; border-color: transparent; }
+.se-clave-mini__celda--casi { background: #c9612f; border-color: transparent; }
+.se-clave-mini__celda--no { background: #fff; border-color: transparent; color: #8a948c; }
 
 /* —— La tarjeta de /pausa —— */
 .se-clave-tarjeta {

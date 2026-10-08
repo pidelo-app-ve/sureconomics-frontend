@@ -4,6 +4,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
+import "./pausa.css";
 import { TarjetaClave } from "../components/home/TarjetaPausa";
 
 /** El Analista, dentro del sitio y en la misma pestaña: ver `pages/ElAnalista.jsx`. */

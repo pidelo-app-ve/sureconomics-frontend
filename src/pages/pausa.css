@@ -1,0 +1,64 @@
+/* ═══ LAS PÁGINAS DE JUEGO: /pausa y /clave ═══
+   La cabecera y la caja que comparten. Una columna estrecha: los juegos son verticales,
+   como en el teléfono, y en escritorio se agradece que no ocupen todo el ancho. Vive
+   aparte de los juegos porque cada uno se descarga solo cuando se abre, y la página
+   tiene que verse bien aunque el otro no haya cargado. */
+
+.se-section.se-pausa {
+  padding-top: var(--se-space-lg, 2rem);
+}
+
+.se-pausa__caja {
+  max-width: 560px;
+  display: grid;
+  gap: 18px;
+}
+
+/* La Clave es más ancha: el tablero de diez letras y las tarjetas de categoría lo piden. */
+.se-pausa__caja--clave {
+  max-width: 640px;
+}
+
+.se-pausa__cabeza {
+  display: grid;
+  gap: 6px;
+}
+
+.se-pausa__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-pausa__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.se-pausa__entrada {
+  margin: 0;
+  color: var(--color-slate);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* El enlace al otro juego, al pie. */
+.se-pausa__otro {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.se-pausa__otro a {
+  color: var(--marca-verde, #003318);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}

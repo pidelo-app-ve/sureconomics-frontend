@@ -219,8 +219,8 @@
       },
       "reglas": {
         "bien": "Verde: la letra está y en su sitio.",
-        "casi": "Amarillo: está, pero en otro sitio.",
-        "no": "Gris: no está en la palabra."
+        "casi": "Naranja: está, pero en otro sitio.",
+        "no": "Blanco: no está en la palabra."
       },
       "teclado": {
         "etiqueta": "Teclado",

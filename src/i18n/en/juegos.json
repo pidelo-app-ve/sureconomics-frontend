@@ -219,8 +219,8 @@
       },
       "reglas": {
         "bien": "Green: the letter is there, in the right spot.",
-        "casi": "Yellow: it's there, but somewhere else.",
-        "no": "Gray: it's not in the word."
+        "casi": "Orange: it's there, but somewhere else.",
+        "no": "White: it's not in the word."
       },
       "teclado": {
         "etiqueta": "Keyboard",

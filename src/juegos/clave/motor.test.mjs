@@ -37,7 +37,7 @@ check("la mejor pinta gana", teclado.P === "bien" && teclado.L === "bien" && tec
 check("lo que no está se apaga", teclado.E === "no" && teclado.R === "no" && teclado.Z === "no");
 
 console.log("\n  Cuadrícula");
-check("se comparte sin la palabra", cuadricula(["PERLA", "PLAYA"], "PLAYA") === "🟩⬜⬜🟨🟩\n🟩🟩🟩🟩🟩");
+check("se comparte sin la palabra", cuadricula(["PERLA", "PLAYA"], "PLAYA") === "🟩⬜⬜🟧🟩\n🟩🟩🟩🟩🟩");
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

@@ -71,7 +71,7 @@ export const estadoDelTeclado = (intentos, solucion) => {
   return estado;
 };
 
-const CUADRO = { bien: "🟩", casi: "🟨", no: "⬜" };
+const CUADRO = { bien: "🟩", casi: "🟧", no: "⬜" };
 
 /** La cuadrícula que se comparte: dice cómo te fue sin revelar la palabra. */
 export const cuadricula = (intentos, solucion) =>

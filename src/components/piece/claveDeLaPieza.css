@@ -13,9 +13,9 @@
   gap: 18px;
   width: 100%;
   padding: 18px 20px;
-  border: 1px solid #d6d9d3;
+  border: 1px solid #c3d3c0;
   border-radius: 14px;
-  background: #fbfaf6;
+  background: #e4eee2;
   color: #1a1d1a;
   font: inherit;
   text-align: left;
@@ -55,15 +55,14 @@
 }
 
 .se-clave-pieza__celda--bien,
-.se-clave-pieza__celda--casi,
-.se-clave-pieza__celda--no {
+.se-clave-pieza__celda--casi {
   border-color: transparent;
   color: #fff;
 }
 
 .se-clave-pieza__celda--bien { background: #1f7a43; }
-.se-clave-pieza__celda--casi { background: #e3a51c; }
-.se-clave-pieza__celda--no { background: #7a7f84; }
+.se-clave-pieza__celda--casi { background: #c9612f; }
+.se-clave-pieza__celda--no { background: #fff; border-color: #d9e0d6; color: #8a948c; }
 
 .se-clave-pieza__cuerpo {
   display: grid;

@@ -899,51 +899,6 @@
   }
 }
 
-/* —— La página /pausa ——
-   Una columna estrecha: el juego es vertical, como en el teléfono, y en escritorio
-   se agradece que no ocupe todo el ancho. */
-.se-section.se-pausa {
-  padding-top: var(--se-space-lg, 2rem);
-}
-
-.se-pausa__caja {
-  max-width: 560px;
-  display: grid;
-  gap: 18px;
-}
-
-.se-pausa__cabeza {
-  display: grid;
-  gap: 6px;
-}
-
-.se-pausa__kicker {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
-
-.se-pausa__titulo {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.1rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.se-pausa__entrada {
-  margin: 0;
-  color: var(--color-slate);
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
 /* —— El Analista: el juego largo, en su propio sitio ——
    Tarjeta sobria debajo de la guacamaya: el verde de la casa en vez del atardecer,
    para que se lea como otra cosa y no como una segunda pantalla del mismo juego. */

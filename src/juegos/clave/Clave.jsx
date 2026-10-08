@@ -21,6 +21,7 @@ import {
   leerPartida,
   recordarCategoria,
 } from "./registro";
+import { PaisajeClave, escenaDe } from "./Paisaje";
 import "./clave.css";
 
 /**
@@ -337,7 +338,10 @@ export const Clave = ({ pieza, categoriaInicial }) => {
   if (!esDePieza && !categoria) {
     return (
       <section className="se-clave se-clave--elegir" aria-labelledby="clave-elegir">
-        <p className="se-clave__kicker">{t("juegos.clave.titulo")}</p>
+        <div className="se-clave__paisaje">
+          <PaisajeClave escena="tepuy" />
+          <p className="se-clave__kicker se-clave__kicker--sobre">{t("juegos.clave.titulo")}</p>
+        </div>
         <h2 id="clave-elegir" className="se-clave__pregunta">{t("juegos.clave.elegir")}</h2>
         {categorias === null ? (
           <p className="se-clave__nota">{t("juegos.clave.cargando")}</p>
@@ -350,20 +354,37 @@ export const Clave = ({ pieza, categoriaInicial }) => {
                 key={c.categoria}
                 type="button"
                 role="listitem"
-                className="se-clave__categoria"
+                className={`se-clave__categoria se-clave__categoria--${c.categoria}`}
                 onClick={() => setCategoria(c.categoria)}
               >
-                <span className="se-clave__categoria-nombre">{t(`juegos.clave.categorias.${c.categoria}`)}</span>
-                <span className="se-clave__categoria-total">{t("juegos.clave.palabras", { n: c.total })}</span>
+                {/* La inicial en una celda del tablero: el juego presentándose a sí mismo. */}
+                <span className="se-clave__categoria-inicial" aria-hidden="true">
+                  {t(`juegos.clave.categorias.${c.categoria}`).charAt(0)}
+                </span>
+                <span className="se-clave__categoria-texto">
+                  <span className="se-clave__categoria-nombre">{t(`juegos.clave.categorias.${c.categoria}`)}</span>
+                  <span className="se-clave__categoria-total">{t("juegos.clave.palabras", { n: c.total })}</span>
+                </span>
+                <span className="se-clave__categoria-flecha" aria-hidden="true">→</span>
               </button>
             ))}
           </div>
         )}
-        <ul className="se-clave__reglas">
-          <li><span className="se-clave__muestra se-clave__muestra--bien" aria-hidden="true" />{t("juegos.clave.reglas.bien")}</li>
-          <li><span className="se-clave__muestra se-clave__muestra--casi" aria-hidden="true" />{t("juegos.clave.reglas.casi")}</li>
-          <li><span className="se-clave__muestra se-clave__muestra--no" aria-hidden="true" />{t("juegos.clave.reglas.no")}</li>
-        </ul>
+        {/* Las reglas, enseñadas y no solo dichas: una fila de muestra con las tres pintas. */}
+        <div className="se-clave__reglas" role="list">
+          {[
+            ["bien", "C"],
+            ["casi", "L"],
+            ["no", "A"],
+          ].map(([pinta, letra]) => (
+            <div key={pinta} className="se-clave__regla" role="listitem">
+              <span className={`se-clave__celda se-clave__celda--${pinta} se-clave__celda--muestra`} aria-hidden="true">
+                {letra}
+              </span>
+              <span className="se-clave__regla-texto">{t(`juegos.clave.reglas.${pinta}`)}</span>
+            </div>
+          ))}
+        </div>
       </section>
     );
   }
@@ -401,6 +422,9 @@ export const Clave = ({ pieza, categoriaInicial }) => {
 
   return (
     <section className="se-clave" aria-label={t("juegos.clave.titulo")}>
+      <div className="se-clave__paisaje">
+        <PaisajeClave escena={esDePieza ? "avila" : escenaDe(reto.categoria)} />
+      </div>
       <header className="se-clave__cabeza">
         <div>
           <p className="se-clave__kicker">{t("juegos.clave.titulo")}</p>
@@ -475,7 +499,7 @@ export const Clave = ({ pieza, categoriaInicial }) => {
                   <button
                     key={tecla}
                     type="button"
-                    className={`se-clave__tecla${especial ? " se-clave__tecla--ancha" : ""}${pinta ? ` se-clave__tecla--${pinta}` : ""}`}
+                    className={`se-clave__tecla${especial ? " se-clave__tecla--ancha" : ""}${tecla === "ENTER" ? " se-clave__tecla--probar" : ""}${pinta ? ` se-clave__tecla--${pinta}` : ""}`}
                     onClick={() => teclear(tecla)}
                     aria-label={tecla === "ENTER" ? t("juegos.clave.teclado.enter") : tecla === "BORRAR" ? t("juegos.clave.teclado.borrar") : undefined}
                   >

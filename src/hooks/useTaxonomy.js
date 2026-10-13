@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { idiomaActual, tActual } from "../i18n/motor";
+import { tActual } from "../i18n/motor";
 import { getFormats, getPlaces, getTopics } from "../services/publicContentService";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 /**
  * The reference data every public view needs: the five formats, the fourteen
@@ -47,9 +48,12 @@ export const resetTaxonomyCache = () => {
 export const useTaxonomy = () => {
   const [state, setState] = useState(() => ({ status: "loading", data: vacio(), error: null }));
 
+  // El idioma de la página: React conserva el componente al pasar de `/` a `/en`, y sin
+  // esto los nombres de temas y lugares se quedaban en el idioma anterior. Cada idioma
+  // tiene su caché, así que volver a uno ya visto no pide nada.
+  const { lang } = useIdioma();
   useEffect(() => {
     let alive = true;
-    const lang = idiomaActual();
     cache[lang] = cache[lang] ?? load();
     cache[lang]
       .then((data) => {
@@ -64,7 +68,7 @@ export const useTaxonomy = () => {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [lang]);
 
   return {
     ...state.data,

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
 import { Enlace, Redirigir } from "../components/Enlace";
 import { sinPrefijo } from "../i18n/motor";
@@ -18,8 +19,8 @@ import {
 } from "../components/piece";
 import { temaPrincipal } from "../lib/contentFilter";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
-import { getPiece, getRelated } from "../services/publicContentService";
-import { piezaFromApi } from "../lib/pieza";
+import { getPieceFila, getRelatedFilas } from "../services/publicContentService";
+import { piezaFromApi, piezasFromApi } from "../lib/pieza";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
@@ -59,7 +60,7 @@ const NoEncontrada = () => {
 };
 
 /**
- * La pieza que ya vino dentro del HTML, si es esta.
+ * La pieza que ya vino dentro del HTML, si es esta (tal cual, sin convertir).
  *
  * `api/pieza.js` la mete en `window.__SE_PIEZA__` al servir la página, para que los
  * buscadores vean el texto. Aprovecharla aquí ahorra pedirla otra vez a la API y, sobre
@@ -72,10 +73,46 @@ const tomarPiezaDelHtml = (slug) => {
   // llamada sin pieza -- y la página la volvía a pedir a la API.
   try {
     const datos = window.__SE_PIEZA__;
-    return datos && datos.slug === slug ? piezaFromApi(datos) : null;
+    return datos && datos.slug === slug ? datos : null;
   } catch {
     return null;
   }
+};
+
+/**
+ * Arriba de una pieza en `/en`, qué se está leyendo.
+ *
+ * - Sin versión en inglés: el original en español, y se dice antes del titular para
+ *   que nadie lo tome por un fallo de la página.
+ * - Traducida por Claude y sin revisar: se dice, con un enlace al original. Es lo
+ *   honesto con el lector y protege a la redacción de un error de traducción.
+ * - Traducida y revisada: nada que avisar.
+ */
+const AvisoDeIdioma = ({ pieza }) => {
+  const { t, rutaEnOtroIdioma } = useIdioma();
+  if (!pieza.tieneIngles) {
+    return (
+      <aside className="se-aviso-idioma" role="note">
+        <p className="se-aviso-idioma__titulo">{t("idioma.aviso.soloEspanol.titulo")}</p>
+        <p className="se-aviso-idioma__texto">{t("idioma.aviso.soloEspanol.texto")}</p>
+      </aside>
+    );
+  }
+  if (!pieza.traduccionAutomatica) return null;
+  return (
+    <aside className="se-aviso-idioma" role="note">
+      <p className="se-aviso-idioma__titulo">{t("idioma.aviso.automatica.titulo")}</p>
+      <p className="se-aviso-idioma__texto">
+        {t("idioma.aviso.automatica.texto")}{" "}
+        <Link to={rutaEnOtroIdioma} hrefLang="es">
+          {t("idioma.aviso.automatica.original")}
+        </Link>
+      </p>
+    </aside>
+  );
+};
+AvisoDeIdioma.propTypes = {
+  pieza: PropTypes.shape({ tieneIngles: PropTypes.bool, traduccionAutomatica: PropTypes.bool }).isRequired,
 };
 
 export const Pieza = () => {
@@ -83,47 +120,51 @@ export const Pieza = () => {
   const { pathname } = useLocation();
   const { t, lang } = useIdioma();
   const { geoTop } = useTaxonomy();
+  // La pieza y las relacionadas se guardan como las da la API y se convierten al pintar,
+  // en el idioma de la página: React conserva esta vista al pasar de `/` a `/en`, y
+  // convertidas al descargarlas se quedaban en el idioma anterior.
   const [state, setState] = useState(() => {
-    const pieza = tomarPiezaDelHtml(slug);
-    return pieza ? { status: "success", pieza, delHtml: true } : { status: "loading", pieza: null };
+    const fila = tomarPiezaDelHtml(slug);
+    return fila ? { status: "success", fila, delHtml: true } : { status: "loading", fila: null };
   });
-  const [relacionadas, setRelacionadas] = useState([]);
+  const [relacionadasFilas, setRelacionadasFilas] = useState([]);
 
   useEffect(() => {
     let alive = true;
-    const cargarRelacionadas = (pieza) => {
+    const cargarRelacionadas = (fila) => {
       // Related pieces load after the piece and never block it: the article is
       // what the reader came for, and a slow sidebar must not hold it back.
-      getRelated(pieza)
-        .then((items) => {
-          if (alive) setRelacionadas(items);
+      getRelatedFilas(piezaFromApi(fila))
+        .then((filas) => {
+          if (alive) setRelacionadasFilas(filas);
         })
         .catch(() => {
-          if (alive) setRelacionadas([]);
+          if (alive) setRelacionadasFilas([]);
         });
     };
     // La pieza ya llegó con el HTML: solo faltan las relacionadas.
-    if (state.delHtml && state.pieza?.slug === slug) {
+    if (state.delHtml && state.fila?.slug === slug) {
       try {
         window.__SE_PIEZA__ = null;
       } catch {
         /* nada */
       }
-      cargarRelacionadas(state.pieza);
+      cargarRelacionadas(state.fila);
       return () => {
         alive = false;
       };
     }
-    setState({ status: "loading", pieza: null });
-    setRelacionadas([]);
-    getPiece(slug)
-      .then((pieza) => {
+    setState({ status: "loading", fila: null });
+    setRelacionadasFilas([]);
+    getPieceFila(slug)
+      .then((fila) => {
         if (!alive) return;
-        setState({ status: pieza ? "success" : "missing", pieza });
-        if (pieza) cargarRelacionadas(pieza);
+        const valida = fila && typeof fila === "object" && fila.slug ? fila : null;
+        setState({ status: valida ? "success" : "missing", fila: valida });
+        if (valida) cargarRelacionadas(valida);
       })
       .catch(() => {
-        if (alive) setState({ status: "missing", pieza: null });
+        if (alive) setState({ status: "missing", fila: null });
       });
     return () => {
       alive = false;
@@ -134,12 +175,18 @@ export const Pieza = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  const pieza = state.pieza;
+  // `lang` en las dependencias: `piezaFromApi` lee el idioma del motor, y es lo que hace
+  // que la pieza cambie de idioma sin volver a pedirla.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const pieza = useMemo(() => (state.fila ? piezaFromApi(state.fila) : null), [state.fila, lang]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const relacionadas = useMemo(() => piezasFromApi(relacionadasFilas), [relacionadasFilas, lang]);
   const cargando = useDelayedFlag(state.status === "loading");
 
-  // El título, la descripción y las señales para Google, en su idioma. El texto de las
-  // piezas solo existe en español (`soloEspanol`): en `/en` la página sale con `noindex`
-  // y el canónico apuntando al español. Y una dirección que no lleva a ninguna pieza
+  // El título, la descripción y las señales para Google, en su idioma. Una pieza sin
+  // versión en inglés (`soloEspanol`) sale en `/en` con `noindex` y el canónico
+  // apuntando al español. Con ella, las dos páginas se declaran la una a la otra
+  // (`hreflang`), también la española. Y una dirección que no lleva a ninguna pieza
   // no debe quedar en los buscadores.
   useMetaPagina(
     state.status === "missing"
@@ -148,7 +195,7 @@ export const Pieza = () => {
         ? {
             title: t("piezas.pieza.meta.titulo", { titulo: pieza.titulo, marca: BRAND.name }),
             description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
-            soloEspanol: true,
+            soloEspanol: !pieza.tieneIngles,
           }
         : { soloEspanol: true }
   );
@@ -213,6 +260,8 @@ export const Pieza = () => {
 
   // La entradilla sale del campo que cada formato usa para ella.
   const entradilla = pieza.resumenHtml || pieza.entradaHtml || "";
+  // Una página en inglés de una pieza que no está traducida: todo su texto es español.
+  const enEspanolEnIngles = lang === "en" && !pieza.tieneIngles;
   // La entrevista no lleva portada en la cabecera: su portada es el video. Y sin
   // fotografía tampoco: la cabecera de dos columnas dejaba la de la derecha vacía y el
   // titular encajonado en la mitad del ancho.
@@ -241,16 +290,22 @@ export const Pieza = () => {
 
                 La entrevista queda fuera: su portada es el video, que se reproduce
                 y por tanto vive en el cuerpo, no en un hueco de cabecera. */}
+            {/* En `/en`: qué versión se está leyendo, dicho antes del titular. */}
+            {lang === "en" ? <AvisoDeIdioma pieza={pieza} /> : null}
+
             <header className={`se-piece__head${conPortada ? " se-piece__head--media" : ""}`}>
               <div className="se-piece__head-text">
                 <p className="se-piece__kicker">
                   {pieza.formatoNombre}
                   {tema ? ` · ${tema}` : ""}
                 </p>
-                <h1 className="se-piece__title">{pieza.titulo}</h1>
+                <h1 className="se-piece__title" lang={enEspanolEnIngles ? "es" : undefined}>
+                  {pieza.titulo}
+                </h1>
                 {entradilla ? (
                   <div
                     className="se-piece__lead se-piece__lead--head"
+                    lang={enEspanolEnIngles ? "es" : undefined}
                     dangerouslySetInnerHTML={{ __html: entradilla }}
                   />
                 ) : null}
@@ -290,12 +345,12 @@ export const Pieza = () => {
                 entera cansa, y el brandbook lo maqueta así. */}
             <div className="se-piece__cols">
               <div className="se-piece__main">
-                {/* El texto de las piezas solo existe en español. En `/en` se dice,
-                    discreto y antes del cuerpo, para que nadie lo tome por un fallo. */}
-                {lang === "en" ? (
-                  <p className="se-pieza__solo-espanol">{t("idioma.soloEnEspanol")}</p>
-                ) : null}
-                <PieceBody pieza={pieza} enCabecera={conPortada} />
+                {/* El texto en español dentro de una página en inglés va marcado como
+                    tal, para los lectores de pantalla. `display: contents`: la caja no
+                    existe para la maqueta. */}
+                <div lang={enEspanolEnIngles ? "es" : undefined} style={{ display: "contents" }}>
+                  <PieceBody pieza={pieza} enCabecera={conPortada} />
+                </div>
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
                 {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
                     dejó) y un minuto de pausa antes de lo siguiente. */}

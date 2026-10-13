@@ -6,6 +6,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
 import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Noticias: image cards, like every other format now.
@@ -51,7 +52,7 @@ export const NewsList = ({ items, espacioDeAnuncio }) => {
                 column: for this outlet "where" is the first thing a reader sorts by. */}
             <span className="se-meta se-meta--category">{geoPrincipal(n)}</span>
             <h3 className="se-artcard__title">
-              <Enlace to={rutaDePieza(n)}>{n.titulo}</Enlace>
+              <Enlace to={rutaDePieza(n)}><TituloDePieza pieza={n} /></Enlace>
             </h3>
             {n.resumen ? <p className="se-artcard__summary">{n.resumen}</p> : null}
             <div className="se-artcard__foot">

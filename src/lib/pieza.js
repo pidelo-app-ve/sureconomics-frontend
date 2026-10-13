@@ -273,6 +273,16 @@ const fechaValida = (iso) => {
 export const piezaFromApi = (row) => {
   if (!row || typeof row !== "object") return null;
   const meta = FORMATO_META[row.format];
+  // En `/en`, la versión en inglés cuando la pieza la tiene: título, resumen y
+  // cuerpo. «La tiene» lo dice el servidor (`en_ingles`: título y cuerpo en inglés),
+  // la misma regla que usan el sitemap y la vista previa para compartir; una
+  // traducción a medias no cuenta y la pieza sale entera en español. El idioma se lee
+  // aquí, al convertir, porque todas las vistas pasan por esta función y así ninguna
+  // tarjeta tiene que acordarse.
+  const en = idiomaActual() === "en" && Boolean(row.en_ingles);
+  const title = en ? row.title_en : row.title;
+  const excerpt = en ? row.excerpt_en || "" : row.excerpt;
+  const content = en ? row.content_en : row.content;
   return {
     id: String(row.id),
     slug: String(row.slug ?? ""),
@@ -280,15 +290,22 @@ export const piezaFromApi = (row) => {
     formato: meta?.plural ?? row.content_format?.name_plural ?? row.format ?? "",
     formatoNombre: meta ? nombreDeFormato(row.format) : row.content_format?.name_plural ?? row.format ?? "",
     formatoApi: row.format ?? "",
-    titulo: String(row.title ?? ""),
+    titulo: String(title ?? ""),
     // Two forms on purpose: the cards want text, the reading view wants the markup
     // the writer actually applied.
-    resumen: textoLlano(row.excerpt),
-    resumenHtml: row.excerpt || "",
+    resumen: textoLlano(excerpt),
+    resumenHtml: excerpt || "",
     // Editorial calls its opening line an "entrada"; it is the same column.
-    entrada: row.format === "editorial" ? textoLlano(row.excerpt) : "",
-    entradaHtml: row.format === "editorial" ? row.excerpt || "" : "",
-    cuerpo: row.content || "",
+    entrada: row.format === "editorial" ? textoLlano(excerpt) : "",
+    entradaHtml: row.format === "editorial" ? excerpt || "" : "",
+    cuerpo: content || "",
+    // Lo que se está enseñando es la versión en inglés.
+    enIngles: en,
+    // La pieza tiene versión en inglés, se esté leyendo en el idioma que sea: es lo
+    // que decide el `hreflang` de las dos páginas y la marca «ES» de las tarjetas.
+    tieneIngles: Boolean(row.en_ingles),
+    // La versión en inglés la escribió Claude y nadie la revisó: /en lo avisa.
+    traduccionAutomatica: Boolean(row.traduccion_automatica),
     temas: (row.topics ?? []).map(nombreTraducido),
     geos: (row.places ?? []).map(nombreTraducido),
     // The slugs of the principal tags. The names are what a reader sees; the slugs

@@ -5,6 +5,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Editorial: the outlet's own position, with no personal byline.
@@ -28,7 +29,7 @@ export const EditorialList = ({ items }) => {
             {t("portada.editorial.gorro", { tema: temaPrincipal(e) ?? geoPrincipal(e) })}
           </span>
           <h3 className="se-artcard__title">
-            <Enlace to={rutaDePieza(e)}>{e.titulo}</Enlace>
+            <Enlace to={rutaDePieza(e)}><TituloDePieza pieza={e} /></Enlace>
           </h3>
           {e.entrada ? <p className="se-artcard__summary">{e.entrada}</p> : null}
           <div className="se-artcard__foot">

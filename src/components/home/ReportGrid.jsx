@@ -5,6 +5,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Informes: presented as documents, with the producing unit credited.
@@ -28,7 +29,7 @@ export const ReportGrid = ({ items }) => {
         <div className="se-doccard__body">
           <span className="se-doccard__kicker">{t("portada.informes.gorro")}</span>
           <h3 className="se-doccard__title">
-            <Enlace to={rutaDePieza(r)}>{r.titulo}</Enlace>
+            <Enlace to={rutaDePieza(r)}><TituloDePieza pieza={r} /></Enlace>
           </h3>
           <p className="se-doccard__summary">{r.resumen}</p>
           <div className="se-doccard__foot">

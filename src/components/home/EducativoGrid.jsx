@@ -4,6 +4,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal } from "../../lib/contentFilter";
 import { FORMATO_META, nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Todo el contenido educativo en una sola rejilla, sin separar por formato.
@@ -33,7 +34,7 @@ export const EducativoGrid = ({ items }) => (
             {FORMATO_META[p.formatoApi] ? nombreDeFormato(p.formatoApi) : p.formato}
           </span>
           <h3 className="se-artcard__title">
-            <Enlace to={rutaDePieza(p)}>{p.titulo}</Enlace>
+            <Enlace to={rutaDePieza(p)}><TituloDePieza pieza={p} /></Enlace>
           </h3>
           {p.resumen ? <p className="se-artcard__summary">{p.resumen}</p> : null}
           <div className="se-artcard__foot">

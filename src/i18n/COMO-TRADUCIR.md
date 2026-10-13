@@ -97,10 +97,21 @@ export const Contacto = () => {
 ```
 
 - Títulos con la marca: `"titulo": "Contacto — {marca}"` y `t(..., { marca: BRAND.name })`.
-- Páginas cuyo **contenido** solo existe en español (una pieza, un módulo de educación):
-  `useMetaPagina({ title, description, soloEspanol: true })`. En `/en` salen con
-  `noindex` y el canonical al español, y la página enseña `t("idioma.soloEnEspanol")`
-  arriba del contenido cuando `lang === "en"`.
+- Páginas cuyo **contenido** solo existe en español (un módulo de educación, una pieza
+  sin versión en inglés): `useMetaPagina({ title, description, soloEspanol: true })`. En
+  `/en` salen con `noindex` y el canonical al español, y la página enseña
+  `t("idioma.soloEnEspanol")` arriba del contenido cuando `lang === "en"`.
+- **Las piezas sí pueden tener versión en inglés**: `title_en`, `excerpt_en` y `content_en`,
+  desde el editor (sección «En inglés»). La tienen cuando hay título **y** cuerpo en
+  inglés: lo decide el servidor (`en_ingles`) y todo lo demás -- tarjetas, página, sitemap,
+  vista previa para compartir -- lee esa misma marca. `piezaFromApi` ya devuelve el inglés
+  en `/en` (`pieza.enIngles`, `pieza.tieneIngles`): las vistas no tienen que hacer nada.
+  - En una tarjeta, el titular va con `<TituloDePieza pieza={p} />`: en `/en` marca con
+    «ES» (y `lang="es"`) lo que no está traducido.
+  - La página de la pieza pasa `soloEspanol: !pieza.tieneIngles` y enseña arriba el aviso
+    de idioma (`AvisoDeIdioma`): «solo en español», o «traducción automática» con enlace
+    al original si `pieza.traduccionAutomatica`.
+  - El botón «Traducir con Claude» solo aparece si el servidor tiene `ANTHROPIC_API_KEY`.
 - Páginas que no deben indexarse (cuenta, baja del boletín, 404): `noindex: true`, como antes.
 
 ## Lo que no se toca

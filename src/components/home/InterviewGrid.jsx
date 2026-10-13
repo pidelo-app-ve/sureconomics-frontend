@@ -5,6 +5,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /** Entrevistas: video thumbnails with a play affordance and a duration. */
 export const InterviewGrid = ({ items }) => (
@@ -28,7 +29,7 @@ export const InterviewGrid = ({ items }) => (
         <div className="se-vidcard__body">
           <span className="se-meta se-meta--category">{temaPrincipal(v)}</span>
           <h3 className="se-vidcard__title">
-            <Enlace to={rutaDePieza(v)}>{v.titulo}</Enlace>
+            <Enlace to={rutaDePieza(v)}><TituloDePieza pieza={v} /></Enlace>
           </h3>
           <div className="se-vidcard__foot">
             <span className="se-tagpill">{geoPrincipal(v)}</span>

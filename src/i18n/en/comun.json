@@ -2,7 +2,20 @@
   "idioma": {
     "cambiarA": "Switch to {idioma}",
     "otraAbreviatura": "ES",
-    "soloEnEspanol": "This content is only available in Spanish."
+    "soloEnEspanol": "This content is only available in Spanish.",
+    "marcaEspanol": "ES",
+    "marcaEspanolTitulo": "In Spanish only",
+    "aviso": {
+      "soloEspanol": {
+        "titulo": "Available in Spanish only",
+        "texto": "We haven't translated this piece yet, so below is the original in Spanish. Your browser can translate it for you."
+      },
+      "automatica": {
+        "titulo": "Machine translation",
+        "texto": "This piece was translated automatically from Spanish and our editors haven't reviewed it yet.",
+        "original": "Read the Spanish original"
+      }
+    }
   },
   "marca": {
     "lema": "Economics, markets and investing with regional insight.",

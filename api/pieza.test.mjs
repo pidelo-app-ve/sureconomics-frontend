@@ -339,5 +339,65 @@ await conFetch(async (url) => {
   check("entorno se cachea", /s-maxage=3600/.test(res.headers["Cache-Control"]));
 });
 
+// —— 7. Las piezas en inglés ——
+//
+// Con versión en inglés, `/en/...` es una página propia: titular y texto en inglés, el
+// documento en inglés, canónica en `/en` y las dos versiones enlazadas. Sin ella, `/en`
+// enseña el original: canónica al español y `noindex`.
+const EN_INGLES = {
+  ...PIEZA,
+  format: "articulo",
+  content: "<p>Texto en español.</p>",
+  en_ingles: true,
+  title_en: 'Tripartite "agreement" and real wages in Uruguay',
+  excerpt_en: "<p>Wage councils closed with a real raise of 1.8%.</p>",
+  content_en: "<p>English body.</p>",
+};
+await conFetch(fetchNormal(EN_INGLES), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "concertacion-tripartita", lang: "en" } }, res);
+  const h = res.body;
+  check("en: 200", res.code === 200, String(res.code));
+  check("en: titular en inglés", h.includes("<title>Tripartite &quot;agreement&quot; and real wages in Uruguay — SurEconomics</title>"));
+  check("en: descripción en inglés", h.includes('name="description" content="Wage councils closed with a real raise of 1.8%."'));
+  check("en: documento en inglés", h.includes('<html lang="en">'));
+  check("en: og:locale en inglés", h.includes('property="og:locale" content="en_US"'));
+  check("en: canónica propia", h.includes('rel="canonical" href="https://www.sureconomics.com/en/articulos/concertacion-tripartita"'));
+  check("en: las dos versiones enlazadas",
+    h.includes('hreflang="es" href="https://www.sureconomics.com/articulos/concertacion-tripartita"') &&
+    h.includes('hreflang="en" href="https://www.sureconomics.com/en/articulos/concertacion-tripartita"'));
+  // El HTML previo, en inglés. (La pieza entera, con su español, viaja aparte en
+  // `window.__SE_PIEZA__` para que la página no la pida otra vez: eso no se mira aquí.)
+  check("en: el cuerpo en inglés dentro", h.includes('<div class="se-piece__body"><p>English body.</p></div>'));
+  check("en: kicker y firma en inglés", h.includes(">Articles<") && h.includes(">By "));
+  check("en: la ficha dice inglés", h.includes('"inLanguage":"en"'));
+  check("en: se indexa", !h.includes('content="noindex'));
+});
+await conFetch(fetchNormal(EN_INGLES), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "concertacion-tripartita" } }, res);
+  const h = res.body;
+  check("es con inglés: sigue en español", h.includes('<html lang="es">') && h.includes("Texto en español"));
+  check("es con inglés: también declara la versión inglesa",
+    h.includes('hreflang="en" href="https://www.sureconomics.com/en/articulos/concertacion-tripartita"'));
+});
+await conFetch(fetchNormal({ ...PIEZA, format: "articulo", en_ingles: false, title_en: "Half done" }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "concertacion-tripartita", lang: "en" } }, res);
+  const h = res.body;
+  check("en sin traducción: el original en español", h.includes('<html lang="es">') && h.includes("Concertación"));
+  check("en sin traducción: canónica al español", h.includes('rel="canonical" href="https://www.sureconomics.com/articulos/concertacion-tripartita"'));
+  check("en sin traducción: noindex", h.includes('name="robots" content="noindex, follow"'));
+  check("en sin traducción: sin hreflang", !h.includes("hreflang="));
+});
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => "no es nuestro" };
+  return { ok: true, status: 200, json: async () => ({ data: EN_INGLES }) };
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "x", lang: "en" } }, res);
+  check("en: si falla, vuelve a la dirección en inglés", res.location === "/en/articulos/x?_s=1", res.location);
+});
+
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

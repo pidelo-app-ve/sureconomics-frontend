@@ -5,6 +5,7 @@ import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { CardMedia } from "./CardMedia";
 import { listaDePiezas, piezaShape } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * La apertura de la portada: la noticia principal en grande y, a su lado, las
@@ -115,7 +116,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                 {principal.fecha}
               </span>
               <h3 className="se-apertura__titulo">
-                <Enlace to={rutaDePieza(principal)}>{principal.titulo}</Enlace>
+                <Enlace to={rutaDePieza(principal)}><TituloDePieza pieza={principal} /></Enlace>
               </h3>
               {principal.resumen ? (
                 <p className="se-apertura__resumen">{principal.resumen}</p>
@@ -133,7 +134,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                     {n.fecha}
                   </span>
                   <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
-                    {n.titulo}
+                    <TituloDePieza pieza={n} />
                   </Enlace>
                 </li>
               ))}

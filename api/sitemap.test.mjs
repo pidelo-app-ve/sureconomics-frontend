@@ -43,6 +43,11 @@ check("las consultas escapadas", completo.includes("/articulos?formato=noticias"
 check("cada página fija también en inglés", completo.includes("<loc>https://www.sureconomics.com/en</loc>") && completo.includes("<loc>https://www.sureconomics.com/en/informes</loc>"));
 check("con sus dos idiomas enlazados", completo.includes('hreflang="en" href="https://www.sureconomics.com/en/informes"') && completo.includes('hreflang="x-default" href="https://www.sureconomics.com/informes"'));
 check("las piezas sin versión en inglés", !completo.includes("/en/noticias/pieza-1"));
+const conIngles = mapaCompleto([{ ...pieza(1, 2), en_ingles: true }]);
+const aMedias = mapaCompleto([{ ...pieza(1, 2), title_en: "Piece one", en_ingles: false }]);
+check("una traducción a medias no entra en inglés", !aMedias.includes("/en/noticias/pieza-1"));
+check("la pieza con inglés va en los dos idiomas", conIngles.includes("<loc>https://www.sureconomics.com/en/noticias/pieza-1</loc>"));
+check("y los dos enlazados", conIngles.includes('hreflang="en" href="https://www.sureconomics.com/en/noticias/pieza-1"'));
 check("enIngles", enIngles("/") === "/en" && enIngles("/articulos?formato=noticias") === "/en/articulos?formato=noticias");
 
 // 3. El de noticias: solo 48 horas, y escapado.

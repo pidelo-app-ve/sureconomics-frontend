@@ -49,6 +49,17 @@ export const createAdminPost = async (body, idempotencyKey) =>
 export const patchAdminPost = async (postId, body) =>
     unwrapEntity(await adminRequest(`/admin/posts/${postId}`, { method: "PATCH", json: body }));
 
+/** Si el servidor puede traducir con Claude (tiene la clave): `{ disponible, modelo }`. */
+export const getTraductor = async () => unwrapEntity(await adminRequest("/admin/posts/traducir"));
+
+/**
+ * Traduce al inglés lo que hay en el formulario (guardado o no) y lo devuelve sin
+ * guardar nada. Tarda unos segundos: el editor enseña un estado de espera.
+ * @param {{ title: string, excerpt: string, content: string }} campos
+ */
+export const traducirTextos = async (campos) =>
+    unwrapEntity(await adminRequest("/admin/posts/traducir", { method: "POST", json: campos }));
+
 /**
  * @param {string|number} postId
  */

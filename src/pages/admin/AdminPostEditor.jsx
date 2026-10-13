@@ -15,6 +15,8 @@ import {
     getAdminPost,
     patchAdminPost,
     publishAdminPost,
+    getTraductor,
+    traducirTextos,
     unpublishAdminPost,
 } from "../../services/adminPostsService";
 import {
@@ -139,6 +141,11 @@ const emptyForm = () => ({
     // La Clave al final de la pieza: vacío, no hay juego.
     juego_palabra: "",
     juego_pista: "",
+    // La pieza en inglés, para /en. Vacía, la pieza sale en español con aviso.
+    title_en: "",
+    excerpt_en: "",
+    content_en: "",
+    traduccion_automatica: false,
     // «Abrir la portada con esta pieza». Tres campos del formulario para un solo campo
     // de la API (`destacada_hasta`): la casilla, cuánto dura y, si se eligió una fecha,
     // cuál. Sin marcar por omisión: fijar la portada es una decisión, no un efecto.
@@ -318,6 +325,10 @@ const postToForm = (post) => {
         sin_publicidad: Boolean(post.sin_publicidad),
         juego_palabra: pickStr(post, ["juego_palabra"]),
         juego_pista: pickStr(post, ["juego_pista"]),
+        title_en: pickStr(post, ["title_en"]),
+        excerpt_en: pickStr(post, ["excerpt_en"]),
+        content_en: pickStr(post, ["content_en"]),
+        traduccion_automatica: Boolean(post.traduccion_automatica),
     };
 };
 
@@ -373,6 +384,11 @@ const formToPayload = (form) => {
     // Se mandan siempre: vacíos quitan el juego de la pieza (null en la API).
     payload.juego_palabra = (form.juego_palabra ?? "").trim() || null;
     payload.juego_pista = (form.juego_pista ?? "").trim() || null;
+    // La versión en inglés: vacía se manda como nulo, que es «sin inglés».
+    payload.title_en = (form.title_en ?? "").trim() || null;
+    payload.excerpt_en = (form.excerpt_en ?? "").trim() || null;
+    payload.content_en = (form.content_en ?? "").trim() || null;
+    payload.traduccion_automatica = Boolean(form.traduccion_automatica);
     payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
     // Nulo cuando la casilla no está marcada -- se manda, porque es lo que la suelta --
     // e indefinido (se borra abajo) cuando falta la fecha. Ver `destacadaHastaDe`.
@@ -423,6 +439,23 @@ export const AdminPostEditor = () => {
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
+    // «Traducir con Claude»: solo existe si el servidor tiene la clave (se pregunta al
+    // abrir). `versionEn` fuerza a los editores de texto en inglés a volver a montarse
+    // con lo que llegó, y `revisadaAhora` mantiene a la vista la casilla de «revisada»
+    // después de marcarla, por si alguien se equivoca y quiere desmarcarla.
+    const [traductorDisponible, setTraductorDisponible] = useState(false);
+    const [traduciendo, setTraduciendo] = useState(false);
+    const [versionEn, setVersionEn] = useState(0);
+    const [revisadaAhora, setRevisadaAhora] = useState(false);
+    useEffect(() => {
+        let vivo = true;
+        getTraductor()
+            .then((r) => vivo && setTraductorDisponible(Boolean(r?.disponible)))
+            .catch(() => {});
+        return () => {
+            vivo = false;
+        };
+    }, []);
 
     const numericPostId = useMemo(() => {
         if (!postId) return null;
@@ -500,6 +533,62 @@ export const AdminPostEditor = () => {
     useEffect(() => {
         if (flash) toastSuccess(flash);
     }, [flash, toastSuccess]);
+
+    // Traduce lo que hay en el formulario, guardado o no, y lo vuelca en los campos en
+    // inglés marcado como automático. No guarda: la redacción revisa y guarda.
+    const traducir = async () => {
+        if (!form.title.trim() || !textoPlano(form.content)) {
+            toastError("Escribe primero el título y el cuerpo en español.", "En inglés");
+            return;
+        }
+        const yaHayIngles =
+            form.title_en.trim() || textoPlano(form.excerpt_en) || textoPlano(form.content_en);
+        if (yaHayIngles && !window.confirm("Esto reemplaza lo que hay escrito en inglés. ¿Seguir?")) return;
+        setTraduciendo(true);
+        try {
+            const r = await traducirTextos({
+                title: form.title,
+                excerpt: form.excerpt,
+                content: form.content,
+            });
+            setForm((prev) => ({
+                ...prev,
+                title_en: r.title ?? "",
+                excerpt_en: r.excerpt ?? "",
+                content_en: r.content ?? "",
+                traduccion_automatica: true,
+            }));
+            setRevisadaAhora(false);
+            setVersionEn((v) => v + 1);
+            toastSuccess("Traducción lista. Revísala y guarda la pieza.", "En inglés");
+        } catch (err) {
+            toastError(adminErrorMessage(err, "No se pudo traducir."), "En inglés");
+        } finally {
+            setTraduciendo(false);
+        }
+    };
+
+    // Cómo va la versión en inglés. Sale en /en con título y cuerpo; con uno solo es una
+    // traducción a medias, y la pieza sigue saliendo en español: se dice aquí, no se
+    // descubre en el sitio.
+    const hayTituloEn = Boolean(form.title_en.trim());
+    const hayCuerpoEn = Boolean(textoPlano(form.content_en));
+    const estadoIngles =
+        hayTituloEn && hayCuerpoEn
+            ? {
+                  resumen: form.traduccion_automatica ? "Traducción automática, sin revisar" : "Lista",
+                  estado: "ok",
+                  aviso: null,
+              }
+            : hayTituloEn || hayCuerpoEn
+              ? {
+                    resumen: "A medias",
+                    estado: "falta",
+                    aviso: hayTituloEn
+                        ? "Falta el cuerpo en inglés: hasta que lo tenga, en /en la pieza sale en español."
+                        : "Falta el título en inglés: hasta que lo tenga, en /en la pieza sale en español.",
+                }
+              : { resumen: "Sin versión en inglés", estado: undefined, aviso: null };
 
     const handleChange = (field) => (e) => {
         const v = e.target.value;
@@ -1027,6 +1116,108 @@ export const AdminPostEditor = () => {
                                 />
                             )}
                         </div>
+                        </CampoMovil>
+
+                        {/* La pieza en inglés, para /en. Sale en inglés con título y cuerpo en
+                            inglés; el resumen es opcional. Sin ellos, /en la enseña en español
+                            con un aviso. El botón de Claude solo aparece si el servidor tiene
+                            la clave (ver `traduccion_service.py`). */}
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="En inglés"
+                            resumen={estadoIngles.resumen}
+                            estado={estadoIngles.estado}
+                        >
+                        <p className="se-admin-meta-hint" style={{ marginTop: 0 }}>
+                            Para que la pieza salga en inglés en la versión /en del sitio hacen
+                            falta el título y el cuerpo en inglés; el resumen es opcional. Si se
+                            dejan vacíos, en /en la pieza se muestra en español con un aviso.
+                        </p>
+                        {traductorDisponible ? (
+                            <div className="se-form-field">
+                                <div className="se-admin-filters" style={{ alignItems: "center" }}>
+                                    <button
+                                        type="button"
+                                        className="se-btn se-btn--secondary"
+                                        onClick={traducir}
+                                        disabled={traduciendo}
+                                    >
+                                        {traduciendo ? "Traduciendo…" : "Traducir con Claude"}
+                                    </button>
+                                    <span className="se-admin-meta-hint">
+                                        Traduce el título, el resumen y el cuerpo de arriba, aunque
+                                        no estén guardados. Revisa el resultado y guarda la pieza.
+                                    </span>
+                                </div>
+                            </div>
+                        ) : null}
+                        {estadoIngles.aviso ? (
+                            <p className="se-admin-meta-hint" role="status" style={{ color: "var(--color-accent)" }}>
+                                {estadoIngles.aviso}
+                            </p>
+                        ) : null}
+                        <label className="se-form-field" htmlFor="post-title-en">
+                            <span className="se-form-label">Título en inglés</span>
+                            <input
+                                id="post-title-en"
+                                className="se-form-control"
+                                value={form.title_en}
+                                onChange={handleChange("title_en")}
+                                maxLength={500}
+                            />
+                        </label>
+                        <div className="se-form-field se-form-field--brief" key={`resumen-en-${versionEn}`}>
+                            <span className="se-form-label">
+                                {form.format === "editorial" ? "Entradilla en inglés" : "Resumen en inglés"} (opcional)
+                            </span>
+                            <RichTextEditor
+                                value={form.excerpt_en}
+                                onChange={(html) => setForm((prev) => ({ ...prev, excerpt_en: html }))}
+                            />
+                            <span className="se-admin-meta-hint">
+                                El texto corto que va debajo del título y en las tarjetas de la
+                                portada en inglés.
+                            </span>
+                        </div>
+                        <div className="se-form-field se-editor-cuerpo" key={`cuerpo-en-${versionEn}`}>
+                            <span className="se-form-label">Cuerpo en inglés</span>
+                            {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
+                                <EditorConImagenes
+                                    value={form.content_en}
+                                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
+                                    subir={uploadAdminMediaImage}
+                                />
+                            ) : (
+                                <RichTextEditor
+                                    value={form.content_en}
+                                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
+                                />
+                            )}
+                        </div>
+                        {/* Solo cuando la traducción vino de Claude: una escrita a mano ya
+                            está revisada por quien la escribió. */}
+                        {form.traduccion_automatica || revisadaAhora ? (
+                            <label className="se-form-field se-acceso" htmlFor="post-traduccion-revisada">
+                                <span className="se-acceso__fila">
+                                    <input
+                                        id="post-traduccion-revisada"
+                                        type="checkbox"
+                                        checked={!form.traduccion_automatica}
+                                        onChange={(e) => {
+                                            setRevisadaAhora(true);
+                                            setForm((prev) => ({ ...prev, traduccion_automatica: !e.target.checked }));
+                                        }}
+                                    />
+                                    <span className="se-form-label se-acceso__titulo">
+                                        Ya revisé la traducción automática
+                                    </span>
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Mientras no se marque, la página en inglés avisa al lector de
+                                    que es una traducción automática sin revisar.
+                                </span>
+                            </label>
+                        ) : null}
                         </CampoMovil>
 
                     </div>

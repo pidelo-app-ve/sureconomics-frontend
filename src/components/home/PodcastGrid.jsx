@@ -4,6 +4,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Podcast: charlas cortas para escuchar. La misma forma de tarjeta que Editorial --
@@ -25,7 +26,7 @@ export const PodcastGrid = ({ items }) => (
             {nombreDeFormato("podcast")}{p.duracion ? ` · ${p.duracion}` : ""}
           </span>
           <h3 className="se-artcard__title">
-            <Enlace to={rutaDePieza(p)}>{p.titulo}</Enlace>
+            <Enlace to={rutaDePieza(p)}><TituloDePieza pieza={p} /></Enlace>
           </h3>
           {p.resumen ? <p className="se-artcard__summary">{p.resumen}</p> : null}
           <div className="se-artcard__foot">

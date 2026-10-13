@@ -107,9 +107,11 @@ export const enIngles = (ruta) => {
 /**
  * Una página fija, con sus dos idiomas enlazados (`xhtml:link hreflang`): así Google sabe
  * que `/en/informes` es la versión en inglés de `/informes` y no una página duplicada.
- * Las piezas no llevan versión en inglés todavía, así que van sin alternativas.
+ * Las piezas pasan por aquí solo cuando tienen versión en inglés (`en_ingles`: título y
+ * cuerpo en inglés, la regla del servidor); las
+ * demás van en español y sin alternativas.
  */
-const filaBilingue = (ruta) => {
+const filaBilingue = (ruta, extra = "") => {
   const es = `${SITIO}${ruta}`;
   const en = `${SITIO}${enIngles(ruta)}`;
   const alternativas =
@@ -117,8 +119,8 @@ const filaBilingue = (ruta) => {
     `<xhtml:link rel="alternate" hreflang="en" href="${xml(en)}"/>` +
     `<xhtml:link rel="alternate" hreflang="x-default" href="${xml(es)}"/>`;
   return [
-    `  <url><loc>${xml(es)}</loc>${alternativas}</url>`,
-    `  <url><loc>${xml(en)}</loc>${alternativas}</url>`,
+    `  <url><loc>${xml(es)}</loc>${extra}${alternativas}</url>`,
+    `  <url><loc>${xml(en)}</loc>${extra}${alternativas}</url>`,
   ];
 };
 
@@ -129,9 +131,12 @@ export const mapaCompleto = (piezas) => {
     const loc = urlDe(p);
     if (!loc) continue;
     const fecha = p.updated_at || p.published_at;
-    filas.push(
-      `  <url><loc>${xml(loc)}</loc>${fecha ? `<lastmod>${xml(new Date(fecha).toISOString())}</lastmod>` : ""}</url>`
-    );
+    const lastmod = fecha ? `<lastmod>${xml(new Date(fecha).toISOString())}</lastmod>` : "";
+    if (p.en_ingles) {
+      filas.push(...filaBilingue(loc.slice(SITIO.length), lastmod));
+      continue;
+    }
+    filas.push(`  <url><loc>${xml(loc)}</loc>${lastmod}</url>`);
   }
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',

@@ -2,7 +2,20 @@
   "idioma": {
     "cambiarA": "Cambiar a {idioma}",
     "otraAbreviatura": "EN",
-    "soloEnEspanol": "Este contenido solo está disponible en español."
+    "soloEnEspanol": "Este contenido solo está disponible en español.",
+    "marcaEspanol": "ES",
+    "marcaEspanolTitulo": "Solo en español",
+    "aviso": {
+      "soloEspanol": {
+        "titulo": "Solo en español",
+        "texto": "Esta pieza todavía no está traducida, así que debajo va el original en español."
+      },
+      "automatica": {
+        "titulo": "Traducción automática",
+        "texto": "Esta pieza se tradujo automáticamente del español y la redacción todavía no la ha revisado.",
+        "original": "Leer el original en español"
+      }
+    }
   },
   "marca": {
     "lema": "Economía, mercados e inversión con inteligencia regional.",

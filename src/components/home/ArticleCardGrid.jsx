@@ -7,6 +7,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
 import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
 export const ArticleCardGrid = ({ items, espacioDeAnuncio }) => {
@@ -31,7 +32,7 @@ export const ArticleCardGrid = ({ items, espacioDeAnuncio }) => {
           <div className="se-artcard__body">
             <span className="se-meta se-meta--category">{temaPrincipal(a)}</span>
             <h3 className="se-artcard__title">
-              <Enlace to={rutaDePieza(a)}>{a.titulo}</Enlace>
+              <Enlace to={rutaDePieza(a)}><TituloDePieza pieza={a} /></Enlace>
             </h3>
             {a.resumen ? <p className="se-artcard__summary">{a.resumen}</p> : null}
             <div className="se-artcard__foot">

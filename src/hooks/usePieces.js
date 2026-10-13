@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useIdioma } from "../i18n/ProveedorIdioma";
+import { piezasFromApi } from "../lib/pieza";
 import { getPieces } from "../services/publicContentService";
 
 /**
@@ -14,15 +16,22 @@ import { getPieces } from "../services/publicContentService";
  * `MAX_PAGES` and reports whether it stopped short. At five pages that is 500
  * pieces of one format; the site launches empty and the day a format passes that,
  * the filtering has to move to the server and the counts with it.
+ *
+ * Se guardan las filas tal como llegan y se convierten al pintar, con el idioma de la
+ * página: `/` y `/en` montan la misma vista, React la conserva al cambiar de idioma, y
+ * unas piezas convertidas al descargarlas se quedaban en el idioma anterior (titulares
+ * y fechas en inglés en la portada española). Convertir es barato; volver a pedir
+ * quinientas piezas por cada cambio de idioma, no.
  */
 
 const PER_PAGE = 100;
 const MAX_PAGES = 5;
 
 export const usePieces = ({ format, educational } = {}) => {
+  const { lang } = useIdioma();
   const [state, setState] = useState({
     status: "loading",
-    items: [],
+    filas: [],
     total: 0,
     truncated: false,
     error: null,
@@ -49,7 +58,7 @@ export const usePieces = ({ format, educational } = {}) => {
           page,
           limit: PER_PAGE,
         });
-        collected.push(...chunk.items);
+        collected.push(...chunk.filas);
         pages = chunk.pages || 1;
         total = chunk.total ?? collected.length;
         page += 1;
@@ -58,7 +67,7 @@ export const usePieces = ({ format, educational } = {}) => {
       if (alive) {
         setState({
           status: "success",
-          items: collected,
+          filas: collected,
           total,
           truncated: pages > MAX_PAGES,
           error: null,
@@ -66,7 +75,7 @@ export const usePieces = ({ format, educational } = {}) => {
       }
     })().catch((error) => {
       if (alive) {
-        setState({ status: "error", items: [], total: 0, truncated: false, error });
+        setState({ status: "error", filas: [], total: 0, truncated: false, error });
       }
     });
 
@@ -75,5 +84,9 @@ export const usePieces = ({ format, educational } = {}) => {
     };
   }, [format, educational]);
 
-  return state;
+  // `lang` en las dependencias aunque no se use dentro: es lo que hace que las piezas
+  // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const items = useMemo(() => piezasFromApi(state.filas), [state.filas, lang]);
+  return { status: state.status, items, total: state.total, truncated: state.truncated, error: state.error };
 };

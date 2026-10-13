@@ -180,15 +180,33 @@ export const descripcionDe = (pieza) =>
   textoLlano(pieza?.content) ||
   null;
 
-const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion, tipo = "article" }) => {
+const etiquetas = ({
+  titulo,
+  descripcion,
+  imagen,
+  url,
+  publicado,
+  seccion,
+  tipo = "article",
+  locale = "es_LA",
+  alternativas = null,
+}) => {
   const filas = [
     `<meta property="og:type" content="${escapar(tipo)}" />`,
     `<meta property="og:site_name" content="SurEconomics" />`,
-    `<meta property="og:locale" content="es_LA" />`,
+    `<meta property="og:locale" content="${escapar(locale)}" />`,
     `<meta property="og:title" content="${escapar(titulo)}" />`,
     `<meta property="og:url" content="${escapar(url)}" />`,
     `<link rel="canonical" href="${escapar(url)}" />`,
   ];
+  // Una pieza con versión en inglés: las dos páginas se declaran la una a la otra, y
+  // `x-default` apunta al español, la casa. Lo mismo que pone `useMetaPagina` al
+  // cargar, pero aquí lo lee también quien no ejecuta JavaScript.
+  if (alternativas) {
+    filas.push(`<link rel="alternate" hreflang="es" href="${escapar(alternativas.es)}" />`);
+    filas.push(`<link rel="alternate" hreflang="en" href="${escapar(alternativas.en)}" />`);
+    filas.push(`<link rel="alternate" hreflang="x-default" href="${escapar(alternativas.es)}" />`);
+  }
   if (descripcion) {
     filas.push(`<meta name="description" content="${escapar(descripcion)}" />`);
     filas.push(`<meta property="og:description" content="${escapar(descripcion)}" />`);
@@ -229,6 +247,29 @@ const etiquetas = ({ titulo, descripcion, imagen, url, publicado, seccion, tipo 
   return filas.join("\n    ");
 };
 
+/** La versión inglesa del kicker del HTML previo. */
+const FORMAT_NAME = {
+  noticia: "News",
+  articulo: "Articles",
+  editorial: "Editorial",
+  entrevista: "Interviews",
+  informe: "Reports & research",
+  podcast: "Podcast",
+};
+
+/**
+ * La pieza leída en inglés: los campos `_en` en el sitio de los españoles, para que el
+ * resto de este archivo -- descripción, HTML previo, ficha -- no tenga que saber de
+ * idiomas. Solo para piezas con `en_ingles` (título y cuerpo en inglés).
+ */
+export const enSuIngles = (pieza) => ({
+  ...pieza,
+  title: pieza.title_en,
+  excerpt: pieza.excerpt_en || "",
+  content: pieza.content_en,
+  meta_description: null,
+});
+
 /** El nombre del formato tal como lo ve el lector, para el kicker del HTML previo. */
 const NOMBRE_DE_FORMATO = {
   noticia: "Noticias",
@@ -263,10 +304,15 @@ const jsonEnScript = (valor) =>
     .replace(/\u2028/g, "\\u2028")
     .replace(/\u2029/g, "\\u2029");
 
-const fechaLarga = (iso) => {
+const fechaLarga = (iso, idioma = "es") => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Caracas" });
+  return d.toLocaleDateString(idioma === "en" ? "en-US" : "es", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "America/Caracas",
+  });
 };
 
 /**
@@ -277,7 +323,7 @@ const fechaLarga = (iso) => {
  * Google no hace nada distinto con los subtipos de opinión o análisis, y uno mal
  * elegido es peor que el genérico.
  */
-export const fichaDeNoticia = (pieza, { url, imagen }) => {
+export const fichaDeNoticia = (pieza, { url, imagen, idioma = "es" }) => {
   const autor = String(pieza.byline || "").trim();
   const esRedaccion = !autor || /redacci[oó]n|sureconomics/i.test(autor);
   const ficha = {
@@ -290,7 +336,7 @@ export const fichaDeNoticia = (pieza, { url, imagen }) => {
     image: imagen?.url ? [imagen.url] : undefined,
     datePublished: pieza.published_at || undefined,
     dateModified: pieza.updated_at || pieza.published_at || undefined,
-    inLanguage: "es",
+    inLanguage: idioma,
     isAccessibleForFree: true,
     articleSection: pieza.topics?.[0]?.name || NOMBRE_DE_FORMATO[pieza.format] || undefined,
     author: esRedaccion
@@ -312,10 +358,11 @@ export const fichaDeNoticia = (pieza, { url, imagen }) => {
  * Lleva las mismas clases que la página de verdad, así que mientras carga el JavaScript
  * se ve como el artículo y no como texto suelto. React la reemplaza al montar.
  */
-export const piezaEnHtml = (pieza, { imagen }) => {
-  const kicker = NOMBRE_DE_FORMATO[pieza.format] || "";
-  const firma = String(pieza.byline || "Redacción SurEconomics").trim();
-  const fecha = pieza.published_at ? fechaLarga(pieza.published_at) : "";
+export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
+  const en = idioma === "en";
+  const kicker = (en ? FORMAT_NAME : NOMBRE_DE_FORMATO)[pieza.format] || "";
+  const firma = String(pieza.byline || (en ? "SurEconomics" : "Redacción SurEconomics")).trim();
+  const fecha = pieza.published_at ? fechaLarga(pieza.published_at, idioma) : "";
   const entradilla = textoLlano(pieza.excerpt, 600);
   const foto = pieza.image_asset?.url || pieza.featured_image_url;
   const fotoAbsoluta = foto ? (foto.startsWith("/") ? `${SITIO}${foto}` : foto) : null;
@@ -324,7 +371,7 @@ export const piezaEnHtml = (pieza, { imagen }) => {
     kicker ? `<p class="se-piece__kicker">${escapar(kicker)}</p>` : "",
     `<h1 class="se-piece__title">${escapar(pieza.title)}</h1>`,
     entradilla ? `<p class="se-piece__lead">${escapar(entradilla)}</p>` : "",
-    `<p class="se-piece__meta">Por ${escapar(firma)}${fecha ? ` · <time datetime="${escapar(pieza.published_at)}">${escapar(fecha)}</time>` : ""}</p>`,
+    `<p class="se-piece__meta">${en ? "By" : "Por"} ${escapar(firma)}${fecha ? ` · <time datetime="${escapar(pieza.published_at)}">${escapar(fecha)}</time>` : ""}</p>`,
     fotoAbsoluta && !/\.svg(\?|$)/i.test(fotoAbsoluta)
       ? `<img class="se-previa__foto" src="${escapar(fotoAbsoluta)}" alt="${escapar(pieza.title)}" style="max-width:100%;height:auto" />`
       : "",
@@ -341,7 +388,7 @@ export const piezaEnHtml = (pieza, { imagen }) => {
  * Exported for the tests, which is the only way to check this without deploying:
  * a wrong `<head>` looks fine to a person and is invisible to every crawler.
  */
-export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, ...resto }) => {
+export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, idioma = "es", ...resto }) => {
   let bloque = etiquetas({ titulo, ...resto });
   if (ficha) {
     bloque += `\n    <script type="application/ld+json">${jsonEnScript(ficha)}</script>`;
@@ -369,7 +416,10 @@ export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, .
       ? `<title>${escapar(titulo)}</title>`
       : `<title>${escapar(titulo)} — SurEconomics</title>`
   );
-  const conCabecera = conTitulo.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
+  // El shell dice `<html lang="es">`; una pieza leída en inglés lo dice en inglés.
+  const conIdioma =
+    idioma === "es" ? conTitulo : conTitulo.replace(/<html lang="[^"]*">/i, `<html lang="${idioma}">`);
+  const conCabecera = conIdioma.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
   if (!html) return conCabecera;
   // El shell trae `<div id="root"></div>` vacío: la pieza va dentro.
   return conCabecera.replace(/<div id="root"><\/div>/i, `<div id="root">${html}</div>`);
@@ -394,14 +444,17 @@ export const esNuestroShell = (html) =>
   html.includes("/assets/");
 
 export default async function handler(req, res) {
-  const { seccion, slug } = req.query ?? {};
+  const { seccion, slug, lang } = req.query ?? {};
+  // `/en/noticias/x` llega aquí con `lang=en` (ver `vercel.json`).
+  const pideIngles = lang === "en";
+  const prefijo = pideIngles ? "/en" : "";
 
   /** Hand the request back to the static file. Used whenever we cannot produce
    *  the application's own HTML: one redirect, and the reader gets the page. */
   const alEstatico = (motivo) => {
     res.setHeader("X-Pieza-Meta", motivo);
     res.setHeader("Cache-Control", "public, s-maxage=30");
-    const ruta = seccion === "entorno" ? "/entorno" : `/${seccion}/${slug}`;
+    const ruta = seccion === "entorno" ? "/entorno" : `${prefijo}/${seccion}/${slug}`;
     res.redirect(307, `${ruta}?${SIN_META}=1`);
   };
 
@@ -432,7 +485,7 @@ export default async function handler(req, res) {
       inyectar(shell, {
         ...GENERICO,
         imagen: IMAGEN_DE_MARCA,
-        url: `${SITIO}/${seccion ?? ""}${slug ? `/${slug}` : ""}`,
+        url: `${SITIO}${prefijo}/${seccion ?? ""}${slug ? `/${slug}` : ""}`,
       })
     );
   };
@@ -469,7 +522,7 @@ export default async function handler(req, res) {
           ...GENERICO,
           titulo: "Pieza no encontrada — SurEconomics",
           imagen: IMAGEN_DE_MARCA,
-          url: `${SITIO}/${seccion}/${slug}`,
+          url: `${SITIO}${prefijo}/${seccion}/${slug}`,
           noindex: true,
         })
       );
@@ -491,19 +544,34 @@ export default async function handler(req, res) {
     return;
   }
 
-  const url = `${SITIO}/${seccion}/${slug}`;
+  // Las dos direcciones de la pieza. Con versión en inglés (`en_ingles`, la regla del
+  // servidor), cada una es la canónica de sí misma y declara a la otra. Sin ella, `/en`
+  // enseña el original en español: canónica al español y `noindex`, igual que la página
+  // al cargar (ver `useMetaPagina`), para que un buscador no vea dos veces lo mismo.
+  const urlEs = `${SITIO}/${seccion}/${slug}`;
+  const urlEn = `${SITIO}/en/${seccion}/${slug}`;
+  const tieneIngles = Boolean(pieza.en_ingles);
+  const enIngles = pideIngles && tieneIngles;
+  const idioma = enIngles ? "en" : "es";
+  const leida = enIngles ? enSuIngles(pieza) : pieza;
+  const url = enIngles ? urlEn : urlEs;
   const imagen =
     imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url) ?? IMAGEN_DE_MARCA;
   const html = inyectar(shell, {
-    titulo: pieza.title,
-    descripcion: descripcionDe(pieza),
+    titulo: leida.title,
+    descripcion: descripcionDe(leida),
     imagen,
     url,
     publicado: pieza.published_at || null,
     seccion: pieza.topics?.[0]?.name || null,
-    html: piezaEnHtml(pieza, { imagen }),
-    ficha: fichaDeNoticia(pieza, { url, imagen }),
+    html: piezaEnHtml(leida, { imagen, idioma }),
+    ficha: fichaDeNoticia(leida, { url, imagen, idioma }),
+    // La pieza tal cual la da la API: la página elige el idioma al convertirla.
     datos: pieza,
+    idioma,
+    locale: enIngles ? "en_US" : "es_LA",
+    alternativas: tieneIngles ? { es: urlEs, en: urlEn } : null,
+    noindex: pideIngles && !tieneIngles,
   });
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");

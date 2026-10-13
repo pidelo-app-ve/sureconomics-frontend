@@ -7,6 +7,7 @@ import { FORMATO_META, imagenAncho, imagenSrcSet, nombreDeFormato, rutaDePieza }
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas, piezaShape } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * Las tarjetas de «Al punto», la página que junta entrevistas y podcast.
@@ -126,7 +127,7 @@ export const TarjetaAlPunto = ({ pieza, variante }) => {
       <div className="se-alpunto__body">
         <span className="se-meta se-meta--category">{kicker}</span>
         <h3 className="se-alpunto__title">
-          <Enlace to={rutaDePieza(pieza)}>{pieza.titulo}</Enlace>
+          <Enlace to={rutaDePieza(pieza)}><TituloDePieza pieza={pieza} /></Enlace>
         </h3>
         {esEntrevista && pieza.entrevistado ? (
           <p className="se-alpunto__who">
@@ -175,7 +176,7 @@ const ColumnaLateral = ({ piezas, titulo, enlace }) => (
             {p.duracion ? ` · ${p.duracion}` : ""}
           </span>
           <Enlace className="se-alpunto__lateral-enlace" to={rutaDePieza(p)}>
-            {p.titulo}
+            <TituloDePieza pieza={p} />
           </Enlace>
         </li>
       ))}

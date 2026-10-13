@@ -153,14 +153,20 @@ export const getPieces = async ({
   const meta = payload?.meta ?? null;
   return {
     items: piezasFromApi(rows),
+    // Las filas tal como llegan. Quien las guarda en su estado convierte al pintar, en
+    // el idioma de ese momento: así cambiar de idioma no deja piezas en el anterior.
+    filas: Array.isArray(rows) ? rows : [],
     meta,
     total: meta?.total ?? (Array.isArray(rows) ? rows.length : 0),
     pages: meta?.pages ?? 1,
   };
 };
 
-export const getPiece = async (slug) =>
-  piezaFromApi(await client().request(`/posts/${encodeURIComponent(slug)}`));
+/** Una pieza, tal como la da la API (sin convertir). Ver `filas` en `getPieces`. */
+export const getPieceFila = async (slug) =>
+  (await client().request(`/posts/${encodeURIComponent(slug)}`)) ?? null;
+
+export const getPiece = async (slug) => piezaFromApi(await getPieceFila(slug));
 
 /**
  * Pieces related to this one: same topic or same place, never itself.
@@ -169,23 +175,27 @@ export const getPiece = async (slug) =>
  * the listing endpoint expresses — and adding an OR filter to serve one sidebar
  * would be a worse trade than two cheap reads.
  */
-export const getRelated = async (pieza, limite = 4) => {
+export const getRelatedFilas = async (pieza, limite = 4) => {
   if (!pieza) return [];
   const [porTema, porLugar] = await Promise.all([
     pieza.temaSlug || pieza.temas?.length
-      ? getPieces({ topic: pieza.temaSlug, limit: limite + 1 }).catch(() => ({ items: [] }))
-      : Promise.resolve({ items: [] }),
+      ? getPieces({ topic: pieza.temaSlug, limit: limite + 1 }).catch(() => ({ filas: [] }))
+      : Promise.resolve({ filas: [] }),
     pieza.geoSlug
-      ? getPieces({ place: pieza.geoSlug, limit: limite + 1 }).catch(() => ({ items: [] }))
-      : Promise.resolve({ items: [] }),
+      ? getPieces({ place: pieza.geoSlug, limit: limite + 1 }).catch(() => ({ filas: [] }))
+      : Promise.resolve({ filas: [] }),
   ]);
   const seen = new Set([pieza.slug]);
   const out = [];
-  for (const candidate of [...porTema.items, ...porLugar.items]) {
-    if (seen.has(candidate.slug)) continue;
+  for (const candidate of [...porTema.filas, ...porLugar.filas]) {
+    if (!candidate?.slug || seen.has(candidate.slug)) continue;
     seen.add(candidate.slug);
     out.push(candidate);
     if (out.length >= limite) break;
   }
   return out;
 };
+
+/** Las relacionadas ya convertidas, para quien no necesita cambiar de idioma en vivo. */
+export const getRelated = async (pieza, limite = 4) =>
+  piezasFromApi(await getRelatedFilas(pieza, limite));

@@ -7,6 +7,7 @@ import { temaPrincipal } from "../../lib/contentFilter";
 import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { piezaShape } from "./piezaShape";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * La editorial más reciente, en su propio bloque alto en la portada.
@@ -71,7 +72,7 @@ export const EditorialDelDia = ({ pieza }) => {
           </div>
           <div className="se-eddia__body">
             <span className="se-eddia__kicker">{t("portada.editorialDelDia.titulo")}</span>
-            <h2 className="se-eddia__title">{pieza.titulo}</h2>
+            <h2 className="se-eddia__title"><TituloDePieza pieza={pieza} /></h2>
             {entradilla ? <p className="se-eddia__lead">{entradilla}</p> : null}
             {/* La fecha larga sale del ISO, en el idioma del documento; si la pieza no
                 lo trae, queda la corta que ya viene formateada. */}

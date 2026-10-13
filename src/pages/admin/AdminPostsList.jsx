@@ -135,6 +135,7 @@ export const AdminPostsList = () => {
             status,
             busy: actionId === id,
             tema: principalTopic(row),
+            ingles: Boolean(row.en_ingles),
             lugar: principalPlace(row),
             // Says why publishing would be refused before anyone tries.
             missing:
@@ -362,6 +363,11 @@ export const AdminPostsList = () => {
                                         </Link>
                                         <div className="se-admin-tarjeta__pie">
                                             <span className={`se-status-pill ${d.estadoClase}`}>{d.estadoTexto}</span>
+                                            {d.ingles ? (
+                                                <span className="se-status-pill se-status-pill--neutral" title="Tiene versión en inglés">
+                                                    EN
+                                                </span>
+                                            ) : null}
                                             {d.portadaHasta ? (
                                                 <span className="se-status-pill se-status-pill--portada">
                                                     En portada hasta {d.portadaHasta}
@@ -458,6 +464,14 @@ export const AdminPostsList = () => {
                                                             ? "Borrador"
                                                             : status}
                                                 </span>
+                                                {row.en_ingles ? (
+                                                    <>
+                                                        {" "}
+                                                        <span className="se-status-pill se-status-pill--neutral" title="Tiene versión en inglés">
+                                                            EN
+                                                        </span>
+                                                    </>
+                                                ) : null}
                                                 {portadaHasta ? (
                                                     <>
                                                         <br />

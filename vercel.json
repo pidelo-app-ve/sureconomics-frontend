@@ -19,6 +19,20 @@
             "destination": "https://sureconomics-backend.onrender.com/media/:ruta*"
         },
         {
+            "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/index.html"
+        },
+        {
+            "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug&lang=en"
+        },
+        {
             "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
             "has": [
                 {

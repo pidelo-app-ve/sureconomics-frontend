@@ -3,6 +3,7 @@ import { geoPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "../home/piezaShape";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * "También te puede interesar": pieces sharing a topic or a place.
@@ -25,7 +26,7 @@ export const RelatedPieces = ({ items }) => {
           <li key={p.slug} className="se-newslist__row">
             <span className="se-newslist__geo">{geoPrincipal(p)}</span>
             <Enlace to={rutaDePieza(p)} className="se-newslist__title">
-              {p.titulo}
+              <TituloDePieza pieza={p} />
             </Enlace>
             <time className="se-newslist__date">{p.fecha}</time>
           </li>

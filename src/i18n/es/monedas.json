@@ -1,0 +1,51 @@
+{
+  "monedas": {
+    "titulo": "Monedas de la región",
+    "kicker": "Tipo de cambio oficial",
+    "meta": {
+      "titulo": "Monedas de América Latina hoy: dólar, bolívar, peso, real y más — {marca}",
+      "descripcion": "Cuánto vale un dólar hoy en bolívares, pesos mexicanos, reales, soles, pesos colombianos, chilenos, argentinos y dominicanos, guaraníes y euros, según cada banco central."
+    },
+    "entrada": "Cuánto vale un dólar en cada moneda, según su banco central. Se actualiza cada hora; un dato que no sea reciente no se publica.",
+    "columnas": {
+      "moneda": "Moneda",
+      "porDolar": "Por 1 USD",
+      "variacion": "Variación",
+      "fuente": "Fuente",
+      "fecha": "Dato del"
+    },
+    "nombres": {
+      "VES": "Bolívar",
+      "MXN": "Peso mexicano",
+      "BRL": "Real",
+      "COP": "Peso colombiano",
+      "ARS": "Peso argentino",
+      "PEN": "Sol",
+      "CLP": "Peso chileno",
+      "PYG": "Guaraní",
+      "DOP": "Peso dominicano",
+      "KYD": "Dólar de Islas Caimán",
+      "EUR": "Euro"
+    },
+    "paises": {
+      "VES": "Venezuela",
+      "MXN": "México",
+      "BRL": "Brasil",
+      "COP": "Colombia",
+      "ARS": "Argentina",
+      "PEN": "Perú",
+      "CLP": "Chile",
+      "PYG": "Paraguay",
+      "DOP": "República Dominicana",
+      "KYD": "Islas Caimán",
+      "EUR": "Eurozona"
+    },
+    "sinDato": "Sin dato reciente",
+    "fija": "Paridad fija",
+    "vieja": "El último dato es del {fecha}; no se publica por antiguo.",
+    "actualizado": "Última lectura: {fecha} a las {hora} (hora de Caracas).",
+    "nota": "Tasas oficiales de cada banco central (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay y BCE). Donde un banco no publica una API, el dato viene de open.er-api.com. La paridad del dólar de Islas Caimán es fija.",
+    "aviso": "Son cierres y referencias oficiales, no cotizaciones en vivo. Para operar, consulte a su banco.",
+    "error": "No se pudieron cargar las monedas. Inténtalo de nuevo en un momento."
+  }
+}

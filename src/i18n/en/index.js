@@ -10,6 +10,7 @@ import juegos from "./juegos.json";
 import paginas from "./paginas.json";
 import publicidad from "./publicidad.json";
 import lvbp from "./lvbp.json";
+import monedas from "./monedas.json";
 
 export default {
   ...comun,
@@ -23,4 +24,5 @@ export default {
   ...paginas,
   ...publicidad,
   ...lvbp,
+  ...monedas,
 };

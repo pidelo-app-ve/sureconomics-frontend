@@ -1,0 +1,51 @@
+{
+  "monedas": {
+    "titulo": "Currencies of the region",
+    "kicker": "Official exchange rates",
+    "meta": {
+      "titulo": "Latin American currencies today: dollar, bolívar, peso, real and more — {marca}",
+      "descripcion": "What a dollar is worth today in bolívars, Mexican pesos, reais, soles, Colombian, Chilean, Argentine and Dominican pesos, guaraníes and euros, according to each central bank."
+    },
+    "entrada": "What a dollar is worth in each currency, according to its central bank. Updated hourly; a rate that isn't recent is not published.",
+    "columnas": {
+      "moneda": "Currency",
+      "porDolar": "Per 1 USD",
+      "variacion": "Change",
+      "fuente": "Source",
+      "fecha": "As of"
+    },
+    "nombres": {
+      "VES": "Bolívar",
+      "MXN": "Mexican peso",
+      "BRL": "Real",
+      "COP": "Colombian peso",
+      "ARS": "Argentine peso",
+      "PEN": "Sol",
+      "CLP": "Chilean peso",
+      "PYG": "Guaraní",
+      "DOP": "Dominican peso",
+      "KYD": "Cayman Islands dollar",
+      "EUR": "Euro"
+    },
+    "paises": {
+      "VES": "Venezuela",
+      "MXN": "Mexico",
+      "BRL": "Brazil",
+      "COP": "Colombia",
+      "ARS": "Argentina",
+      "PEN": "Peru",
+      "CLP": "Chile",
+      "PYG": "Paraguay",
+      "DOP": "Dominican Republic",
+      "KYD": "Cayman Islands",
+      "EUR": "Eurozone"
+    },
+    "sinDato": "No recent data",
+    "fija": "Fixed peg",
+    "vieja": "The latest figure is from {fecha}; it isn't published because it's outdated.",
+    "actualizado": "Last reading: {fecha} at {hora} (Caracas time).",
+    "nota": "Official rates from each central bank (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay and the ECB). Where a bank publishes no API, the figure comes from open.er-api.com. The Cayman Islands dollar is pegged.",
+    "aviso": "These are official closes and reference rates, not live quotes. To trade, check with your bank.",
+    "error": "The currencies couldn't be loaded. Try again in a moment."
+  }
+}

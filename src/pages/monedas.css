@@ -1,0 +1,166 @@
+/* ═══ LA PÁGINA /monedas ═══
+   Una tabla de cotizaciones: cifras tabulares alineadas a la derecha, el código de la
+   moneda como etiqueta y la fuente al lado, que es lo que hace creíble una cifra. */
+
+.se-monedas__cabeza {
+  display: grid;
+  gap: 6px;
+  max-width: 44rem;
+  margin-bottom: var(--se-space-lg, 2rem);
+}
+
+.se-monedas__kicker {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--marca-rojo);
+}
+
+.se-monedas__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  color: var(--marca-verde);
+}
+
+.se-monedas__entrada {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-monedas__caja {
+  overflow-x: auto;
+  border: 1px solid var(--color-hairline-dark);
+  border-radius: 12px;
+  margin-bottom: var(--se-space-md, 1.5rem);
+}
+
+.se-monedas__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-monedas__tabla th,
+.se-monedas__tabla td {
+  padding: 12px 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.se-monedas__tabla thead th {
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  background: rgba(var(--se-tinte), 0.035);
+}
+
+.se-monedas__tabla tbody tr {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-monedas__col-moneda {
+  text-align: left !important;
+}
+
+.se-monedas__tabla tbody .se-monedas__col-moneda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.se-monedas__codigo {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1.5px solid var(--marca-verde);
+  border-radius: 5px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--marca-verde);
+}
+
+.se-monedas__pais {
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+.se-monedas__valor {
+  font-family: var(--se-font-heading);
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.se-monedas__sin,
+.se-monedas__fija {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+
+.se-monedas__var {
+  font-weight: 700;
+}
+
+.se-monedas__var--up { color: var(--color-green); }
+.se-monedas__var--down { color: var(--color-red); }
+
+.se-monedas__col-fuente {
+  color: var(--color-slate);
+  font-size: 0.8125rem;
+  white-space: normal !important;
+  min-width: 14rem;
+}
+
+.se-monedas__fecha {
+  color: var(--color-slate);
+  font-size: 0.875rem;
+}
+
+.se-monedas__fila--sin-dato .se-monedas__valor,
+.se-monedas__fila--sin-dato .se-monedas__fecha {
+  color: var(--color-slate);
+}
+
+.se-monedas__nota {
+  margin: 0 0 8px;
+  max-width: 60rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-monedas__nota--aviso {
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .se-monedas__tabla th,
+  .se-monedas__tabla td {
+    padding: 10px 10px;
+  }
+  .se-monedas__col-fuente {
+    display: none;
+  }
+  .se-monedas__pais {
+    display: none;
+  }
+}

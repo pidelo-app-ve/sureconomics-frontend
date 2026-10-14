@@ -106,6 +106,8 @@ const rutasPublicas = () => [
             { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage") },
             // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
             { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp") },
+            // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
+            { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },

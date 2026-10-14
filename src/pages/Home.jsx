@@ -7,6 +7,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import { BannerDeJuegos } from "../components/home/TarjetaPausa";
+import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
 import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
@@ -261,15 +262,23 @@ export const Home = () => {
         </section>
       ) : null}
 
-      {/* El juego, justo bajo el buscador: una franja baja, no una tarjeta, para que
-          la portada siga abriendo con el filtro y las noticias. Solo sin filtro: quien
-          busca algo concreto no vino a jugar. */}
+      {/* El béisbol y los juegos, justo bajo el buscador: franjas bajas, no tarjetas,
+          para que la portada siga abriendo con el filtro y las noticias. Solo sin
+          filtro: quien busca algo concreto no vino a jugar. La LVBP va primero porque
+          en temporada es lo que más gente mueve; fuera de temporada no se pinta. */}
       {!cargando && status === "success" && pieces.length && !isFiltered ? (
-        <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
-          <div className="se-container">
-            <BannerDeJuegos />
-          </div>
-        </section>
+        <>
+          <section className="se-section se-pausa-franja">
+            <div className="se-container">
+              <MarcadorLvbp />
+            </div>
+          </section>
+          <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
+            <div className="se-container">
+              <BannerDeJuegos />
+            </div>
+          </section>
+        </>
       ) : null}
 
       {cargando ? null : (

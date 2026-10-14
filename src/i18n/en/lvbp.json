@@ -1,0 +1,45 @@
+{
+  "lvbp": {
+    "titulo": "Venezuelan baseball: LVBP",
+    "nombre": "Venezuelan Professional Baseball League",
+    "temporada": "{temporada} season",
+    "verTabla": "Standings and results",
+    "meta": {
+      "titulo": "LVBP: today's games, results and standings — {marca}",
+      "descripcion": "Today's games, live scores and the standings of the Venezuelan Professional Baseball League, {temporada} season."
+    },
+    "entrada": "The day's games, live scores and the league standings, updated while the games are on.",
+    "dia": { "ayer": "Yesterday", "hoy": "Today", "manana": "Tomorrow" },
+    "estado": {
+      "enVivo": "Live",
+      "programado": "Scheduled",
+      "final": "Final",
+      "suspendido": "Suspended",
+      "pospuesto": "Postponed",
+      "cancelado": "Cancelled"
+    },
+    "inning": "{n}th",
+    "mitad": { "alta": "top", "baja": "bottom" },
+    "juegos": { "titulo": "Games", "sinJuegos": "No games scheduled for this day." },
+    "estadio": "{equipo}'s ballpark",
+    "compartir": {
+      "boton": "Share result",
+      "texto": "LVBP · {visitante} {cv} – {local} {cl} · Final · {fecha}. Results and standings at {marca}:"
+    },
+    "tabla": {
+      "titulo": "Standings",
+      "equipo": "Team",
+      "g": "W",
+      "p": "L",
+      "pct": "PCT",
+      "jd": "GB",
+      "leyenda": "W: wins · L: losses · PCT: winning percentage · GB: games behind the leader.",
+      "nota": "Computed from the completed games recorded by {marca}."
+    },
+    "actualizado": "Updated at {hora}",
+    "noticias": { "titulo": "LVBP news", "ver": "More sports" },
+    "presentadoPor": "Presented by {marca}",
+    "fueraDeTemporada": "The season hasn't started. Games and standings will appear here once it does.",
+    "error": "The games couldn't be loaded. Try again in a moment."
+  }
+}

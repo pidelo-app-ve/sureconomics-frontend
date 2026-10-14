@@ -9,6 +9,7 @@ import educacion from "./educacion.json";
 import juegos from "./juegos.json";
 import paginas from "./paginas.json";
 import publicidad from "./publicidad.json";
+import lvbp from "./lvbp.json";
 
 export default {
   ...comun,
@@ -21,4 +22,5 @@ export default {
   ...juegos,
   ...paginas,
   ...publicidad,
+  ...lvbp,
 };

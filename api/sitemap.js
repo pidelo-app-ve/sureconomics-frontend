@@ -56,6 +56,7 @@ export const PAGINAS_FIJAS = [
   "/entorno",
   "/pausa",
   "/clave",
+  "/lvbp",
   "/el-analista",
 ];
 

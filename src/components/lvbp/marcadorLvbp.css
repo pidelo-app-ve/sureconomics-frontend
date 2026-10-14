@@ -1,0 +1,317 @@
+/* ═══ EL MARCADOR DE LA LVBP ═══
+   La franja de la portada y las tarjetas de juego, que también usa /lvbp. Tres
+   colores con significado: el verde de la casa para «por jugar», el rojo para «en
+   vivo», y la tinta en negrita para el que ganó. Todo en la letra del sitio; las
+   carreras en cifras tabulares, que es lo que hace que una columna de marcadores se
+   lea de un vistazo. */
+
+.se-lvbp {
+  --lvbp-borde: var(--color-hairline-dark, rgba(0, 0, 0, 0.18));
+  --lvbp-suave: var(--color-hairline, rgba(0, 0, 0, 0.12));
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--lvbp-borde);
+  border-radius: 12px;
+  background: var(--color-paper, #fff);
+  font-family: var(--se-font-ui);
+}
+
+/* —— La cabecera: el logo de la liga, el nombre, la temporada, el enlace —— */
+.se-lvbp__cabeza {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 14px 16px;
+  border-right: 1px solid var(--lvbp-suave);
+  background: rgba(var(--se-tinte), 0.035);
+}
+
+.se-lvbp__liga {
+  grid-row: 1 / span 2;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.se-lvbp__cabeza-texto {
+  display: grid;
+  gap: 1px;
+}
+
+.se-lvbp__nombre {
+  font-family: var(--se-font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--marca-verde);
+}
+
+.se-lvbp__temporada {
+  font-size: 0.75rem;
+  color: var(--color-slate);
+}
+
+.se-lvbp__ver {
+  grid-column: 2;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--marca-verde);
+  text-underline-offset: 3px;
+}
+
+/* —— Los días, en fila; cada uno con sus juegos —— */
+.se-lvbp__dias {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lvbp-borde) transparent;
+}
+
+.se-lvbp__dia {
+  display: grid;
+  gap: 6px;
+  padding: 10px 14px;
+  flex: 0 0 auto;
+}
+
+.se-lvbp__dia + .se-lvbp__dia {
+  border-left: 1px solid var(--lvbp-suave);
+}
+
+.se-lvbp__dia-nombre {
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+}
+
+.se-lvbp__dia--hoy .se-lvbp__dia-nombre {
+  color: var(--marca-verde);
+}
+
+.se-lvbp__dia-fecha {
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.se-lvbp__juegos {
+  display: flex;
+  gap: 8px;
+}
+
+/* —— Una tarjeta de juego —— */
+.se-lvbp__juego {
+  display: grid;
+  gap: 5px;
+  padding: 8px 10px 9px;
+  border: 1px solid var(--lvbp-suave);
+  border-radius: 8px;
+  background: var(--color-paper, #fff);
+  scroll-snap-align: start;
+}
+
+/* En la franja las tarjetas tienen ancho fijo y se deslizan; en /lvbp ocupan su columna. */
+.se-lvbp__juegos .se-lvbp__juego {
+  width: 158px;
+  flex: 0 0 auto;
+}
+
+.se-lvbp__juego--programado {
+  background: rgba(0, 51, 24, 0.035);
+  border-color: rgba(0, 51, 24, 0.14);
+}
+
+.se-lvbp__juego--en_vivo {
+  border-color: rgba(185, 83, 42, 0.45);
+  box-shadow: 0 1px 0 rgba(185, 83, 42, 0.25);
+}
+
+.se-lvbp__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--se-font-label);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+}
+
+.se-lvbp__estado--hora {
+  color: var(--marca-verde);
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.75rem;
+}
+
+.se-lvbp__estado--vivo {
+  color: var(--marca-rojo);
+}
+
+.se-lvbp__estado--suspendido,
+.se-lvbp__estado--pospuesto,
+.se-lvbp__estado--cancelado {
+  color: #8a5a00;
+}
+
+.se-lvbp__punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--marca-rojo);
+  animation: se-lvbp-latido 1.4s ease-in-out infinite;
+}
+
+@keyframes se-lvbp-latido {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.se-lvbp__fila {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.se-lvbp__escudo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.se-lvbp__sigla {
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid var(--marca-verde);
+  border-radius: 4px;
+  font-family: var(--se-font-label);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: var(--marca-verde);
+}
+
+.se-lvbp__equipo {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-lvbp__carreras {
+  min-width: 1.4em;
+  text-align: right;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-lvbp__fila--gano {
+  font-weight: 800;
+}
+
+.se-lvbp__fila--gano .se-lvbp__carreras {
+  font-weight: 800;
+}
+
+.se-lvbp__fila--perdio {
+  color: var(--color-slate);
+  font-weight: 500;
+}
+
+.se-lvbp__fila--perdio .se-lvbp__carreras {
+  font-weight: 500;
+}
+
+/* —— La tarjeta grande, en /lvbp —— */
+.se-lvbp__juego--grande {
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.se-lvbp__juego--grande .se-lvbp__fila {
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 12px;
+  font-size: 1rem;
+}
+
+.se-lvbp__juego--grande .se-lvbp__escudo {
+  width: 30px;
+  height: 30px;
+}
+
+.se-lvbp__juego--grande .se-lvbp__sigla {
+  font-size: 0.6875rem;
+}
+
+.se-lvbp__juego--grande .se-lvbp__carreras {
+  font-size: 1.375rem;
+}
+
+.se-lvbp__juego--grande .se-lvbp__estado {
+  font-size: 0.6875rem;
+}
+
+.se-lvbp__juego--grande .se-lvbp__estado--hora {
+  font-size: 0.875rem;
+}
+
+/* —— Teléfono: la cabecera arriba y los juegos en una fila que se desliza —— */
+@media (max-width: 700px) {
+  .se-lvbp {
+    grid-template-columns: 1fr;
+  }
+  .se-lvbp__cabeza {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    gap: 2px 10px;
+    padding: 10px 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--lvbp-suave);
+  }
+  .se-lvbp__liga {
+    grid-row: auto;
+    width: 32px;
+    height: 32px;
+  }
+  .se-lvbp__cabeza-texto {
+    grid-template-columns: auto auto;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .se-lvbp__nombre {
+    font-size: 1.1rem;
+  }
+  .se-lvbp__ver {
+    grid-column: 3;
+    padding: 8px 0;
+  }
+  .se-lvbp__dias {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .se-lvbp__dia {
+    padding: 8px 12px 10px;
+  }
+  .se-lvbp__juegos .se-lvbp__juego {
+    width: 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-lvbp__punto {
+    animation: none;
+  }
+}

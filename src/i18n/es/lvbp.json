@@ -1,0 +1,45 @@
+{
+  "lvbp": {
+    "titulo": "Béisbol venezolano: LVBP",
+    "nombre": "Liga Venezolana de Béisbol Profesional",
+    "temporada": "Temporada {temporada}",
+    "verTabla": "Tabla y resultados",
+    "meta": {
+      "titulo": "LVBP: juegos de hoy, resultados y tabla de posiciones — {marca}",
+      "descripcion": "Los juegos del día, los marcadores en vivo y la tabla de posiciones de la Liga Venezolana de Béisbol Profesional, temporada {temporada}."
+    },
+    "entrada": "Los juegos del día, los marcadores en vivo y la tabla de posiciones de la liga, actualizados mientras se juega.",
+    "dia": { "ayer": "Ayer", "hoy": "Hoy", "manana": "Mañana" },
+    "estado": {
+      "enVivo": "En vivo",
+      "programado": "Por jugar",
+      "final": "Final",
+      "suspendido": "Suspendido",
+      "pospuesto": "Pospuesto",
+      "cancelado": "Cancelado"
+    },
+    "inning": "{n}.º",
+    "mitad": { "alta": "alta", "baja": "baja" },
+    "juegos": { "titulo": "Juegos", "sinJuegos": "No hay juegos programados este día." },
+    "estadio": "Estadio de {equipo}",
+    "compartir": {
+      "boton": "Compartir resultado",
+      "texto": "LVBP · {visitante} {cv} – {local} {cl} · Final · {fecha}. Resultados y tabla en {marca}:"
+    },
+    "tabla": {
+      "titulo": "Tabla de posiciones",
+      "equipo": "Equipo",
+      "g": "G",
+      "p": "P",
+      "pct": "PCT",
+      "jd": "JD",
+      "leyenda": "G: ganados · P: perdidos · PCT: promedio · JD: juegos detrás del líder.",
+      "nota": "Calculada con los juegos terminados que registra {marca}."
+    },
+    "actualizado": "Actualizado a las {hora}",
+    "noticias": { "titulo": "Noticias de la LVBP", "ver": "Ver más de deportes" },
+    "presentadoPor": "Presentado por {marca}",
+    "fueraDeTemporada": "La temporada no ha empezado. Aquí estarán los juegos y la tabla cuando arranque.",
+    "error": "No se pudieron cargar los juegos. Inténtalo de nuevo en un momento."
+  }
+}

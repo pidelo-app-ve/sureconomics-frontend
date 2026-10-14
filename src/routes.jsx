@@ -104,6 +104,8 @@ const rutasPublicas = () => [
             // El juego se descarga al abrir la página, no con el resto del sitio.
             { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa") },
             { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage") },
+            // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
+            { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", element: <CuentaEntrar /> },
             { path: "cuenta/registro", element: <CuentaRegistro /> },
@@ -180,6 +182,8 @@ export const router = createBrowserRouter([
                     { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
                     // El catálogo de La Clave: las palabras de las que sale la del día.
                     { path: "juegos/palabras", lazy: pagina(() => import("./pages/admin/AdminJuegoPalabras"), "AdminJuegoPalabras") },
+                    // Los juegos de la LVBP: cargar a mano lo que la API no da, corregir, sincronizar.
+                    { path: "lvbp", lazy: pagina(() => import("./pages/admin/AdminLvbp"), "AdminLvbp") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.

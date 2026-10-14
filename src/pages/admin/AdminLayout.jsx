@@ -131,6 +131,9 @@ const AdminShell = () => {
               <NavLink to="/admin/cinta" className={linkClass} end onClick={closeMenu}>
                 Cinta de mercado
               </NavLink>
+              <NavLink to="/admin/lvbp" className={linkClass} end onClick={closeMenu}>
+                Béisbol LVBP
+              </NavLink>
               <NavLink to="/admin/equipo" className={linkClass} end onClick={closeMenu}>
                 Fotos del equipo
               </NavLink>

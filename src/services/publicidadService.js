@@ -37,6 +37,8 @@ export const ESPACIOS = {
   // «Patrocinado por» del juego de /pausa. Formato C, como la franja de los listados:
   // se vende igual, apuntando la campaña a la sección `pausa`.
   PAUSA_PATROCINIO: "pausa-patrocinio",
+  // «Presentado por» de la página de la LVBP. Formato C, campaña con `seccion=lvbp`.
+  LVBP_PATROCINIO: "lvbp-patrocinio",
   LISTADO_NATIVO: "listado-nativo",
   ARTICULO_NATIVO: "articulo-nativo",
   ARTICULO_RAIL: "articulo-rail",

@@ -101,7 +101,9 @@ export const Lvbp = () => {
 
   const juegos = datos?.dias?.[dia] ?? [];
   const fecha = fechaDelDia(datos?.hoy, dia);
-  const hayAlgo = DIAS.some((d) => datos?.dias?.[d]?.length);
+  // La tabla se enseña en cuanto haya un juego terminado, aunque no haya juegos en los tres
+  // días de la ventana (día libre, parón): sin juegos que mostrar sigue siendo temporada.
+  const hayAlgo = DIAS.some((d) => datos?.dias?.[d]?.length) || (datos?.tabla ?? []).some((f) => f.g + f.p > 0);
   const actualizado = datos?.actualizado ? new Date(datos.actualizado) : null;
 
   return (
@@ -171,6 +173,7 @@ export const Lvbp = () => {
                     <thead>
                       <tr>
                         <th scope="col" className="se-lvbp-tabla__equipo">{t("lvbp.tabla.equipo")}</th>
+                        <th scope="col">{t("lvbp.tabla.jj")}</th>
                         <th scope="col">{t("lvbp.tabla.g")}</th>
                         <th scope="col">{t("lvbp.tabla.p")}</th>
                         <th scope="col">{t("lvbp.tabla.pct")}</th>
@@ -185,6 +188,7 @@ export const Lvbp = () => {
                             <Escudo sigla={f.sigla} tamano={24} />
                             <span className="se-lvbp-tabla__nombre" title={f.nombre}>{f.corto}</span>
                           </th>
+                          <td>{formatearNumero(f.g + f.p)}</td>
                           <td>{formatearNumero(f.g)}</td>
                           <td>{formatearNumero(f.p)}</td>
                           <td>{f.pct_texto}</td>

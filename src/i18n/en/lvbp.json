@@ -29,11 +29,12 @@
     "tabla": {
       "titulo": "Standings",
       "equipo": "Team",
+      "jj": "GP",
       "g": "W",
       "p": "L",
       "pct": "PCT",
       "jd": "GB",
-      "leyenda": "W: wins · L: losses · PCT: winning percentage · GB: games behind the leader.",
+      "leyenda": "GP: games played · W: wins · L: losses · PCT: winning percentage · GB: games behind the leader.",
       "nota": "Computed from the completed games recorded by {marca}."
     },
     "actualizado": "Updated at {hora}",

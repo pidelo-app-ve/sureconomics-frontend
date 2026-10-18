@@ -217,7 +217,7 @@
 
 .se-lvbp-tabla th,
 .se-lvbp-tabla td {
-  padding: 9px 10px;
+  padding: 9px 7px;
   text-align: right;
   white-space: nowrap;
 }
@@ -243,6 +243,7 @@
 
 .se-lvbp-tabla__equipo {
   text-align: left !important;
+  padding-left: 10px !important;
   font-weight: 600;
 }
 

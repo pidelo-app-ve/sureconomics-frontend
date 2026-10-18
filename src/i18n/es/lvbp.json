@@ -29,11 +29,12 @@
     "tabla": {
       "titulo": "Tabla de posiciones",
       "equipo": "Equipo",
+      "jj": "JJ",
       "g": "G",
       "p": "P",
       "pct": "PCT",
       "jd": "JD",
-      "leyenda": "G: ganados · P: perdidos · PCT: promedio · JD: juegos detrás del líder.",
+      "leyenda": "JJ: juegos jugados · G: ganados · P: perdidos · PCT: promedio · JD: juegos detrás del líder.",
       "nota": "Calculada con los juegos terminados que registra {marca}."
     },
     "actualizado": "Actualizado a las {hora}",

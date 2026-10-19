@@ -83,9 +83,15 @@ export const adminErrorMessage = (err, fallback = "No se pudo completar la acci�
       : "Hay campos inválidos. Revise el formulario e inténtelo de nuevo.";
   }
 
+  // El traductor contesta 502 cuando es Anthropic quien falla, pero su mensaje dice
+  // exactamente qué revisar (la clave, el crédito, la conexión). Taparlo con el texto
+  // genérico dejó a la redacción un día entero sin saber por qué no traducía.
+  const code = typeof err.code === "string" ? err.code : "";
+  const message = typeof err.message === "string" ? err.message.trim() : "";
+  if (code.startsWith("translation_") && message) return message;
+
   if (ALWAYS_OVERRIDE.has(status)) return BY_STATUS[status];
 
-  const message = typeof err.message === "string" ? err.message.trim() : "";
   if (message && !GENERIC_MESSAGES.has(message.toLowerCase())) return message;
 
   return BY_STATUS[status] || fallback;

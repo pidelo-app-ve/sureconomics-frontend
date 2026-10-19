@@ -195,6 +195,8 @@ export const router = createBrowserRouter([
                     { path: "juegos/palabras", lazy: pagina(() => import("./pages/admin/AdminJuegoPalabras"), "AdminJuegoPalabras") },
                     // Los juegos de la LVBP: cargar a mano lo que la API no da, corregir, sincronizar.
                     { path: "lvbp", lazy: pagina(() => import("./pages/admin/AdminLvbp"), "AdminLvbp") },
+                    // Traducir al inglés, en lote, las piezas publicadas que no lo tienen.
+                    { path: "traducciones", lazy: pagina(() => import("./pages/admin/AdminTraducciones"), "AdminTraducciones") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.

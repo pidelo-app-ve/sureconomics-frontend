@@ -87,49 +87,52 @@ AlPuntoLink.propTypes = {
   className: PropTypes.string,
 };
 
-/**
- * El Analista: el juego largo de la casa, dentro del sitio. Se abre en la misma pestaña:
- * la sesión del lector vive en `sessionStorage`, que es de cada pestaña, y en una nueva
- * llegaría sin cuenta y su carrera no sumaría al ranking.
- */
-const EL_ANALISTA = "/el-analista";
+const isJuegosActive = (pathname) => pathname === "/juegos" || pathname.startsWith("/juegos/");
 
-/** Una gráfica que se dibuja subiendo y termina en un punto: una carrera que despega. */
-const IconoAnalista = () => (
-  <svg viewBox="0 0 24 24" className="se-header__analista-icono" aria-hidden="true" focusable="false">
-    <path className="se-header__analista-eje" d="M3.5 20.5h17" />
-    <polyline className="se-header__analista-linea" points="4,16 9,12 13,14 20,6" />
-    <circle className="se-header__analista-punto" cx="20" cy="6" r="2.4" />
+/** Un mando de consola: dos asas, la cruz a la izquierda y dos botones que se pulsan solos. */
+const IconoJuegos = () => (
+  <svg viewBox="0 0 24 24" className="se-header__juegos-icono" aria-hidden="true" focusable="false">
+    <path
+      className="se-header__juegos-mando"
+      d="M7 7h10a5 5 0 0 1 4.9 6l-.8 3.6a2.6 2.6 0 0 1-4.5 1.1L14.8 16H9.2l-1.8 1.7a2.6 2.6 0 0 1-4.5-1.1L2.1 13A5 5 0 0 1 7 7z"
+    />
+    <path className="se-header__juegos-cruz" d="M7.5 10v4M5.5 12h4" />
+    <circle className="se-header__juegos-boton" cx="16" cy="11" r="1.3" />
+    <circle className="se-header__juegos-boton se-header__juegos-boton--b" cx="18.4" cy="13.6" r="1.3" />
   </svg>
 );
 
 /**
- * El botón de El Analista, junto a «Al punto» y con su misma forma: el indicador animado
- * a la izquierda -- aquí una gráfica que sube, en vez del punto rojo -- y un verbo,
- * JUGAR, como ENTRAR y REGISTRARSE. Dice que es un juego sin decir cuál: la curiosidad
- * es la mitad del botón. El nombre del juego aparece debajo al pasar el ratón o con el
- * foco. En el cajón del teléfono va a lo ancho y con el nombre entero.
+ * El botón de Juegos, junto a «Al punto» y con su misma forma: el indicador animado a la
+ * izquierda -- aquí un mando, en vez del punto rojo -- y una palabra. Lleva a `/juegos`,
+ * la página con todos los juegos del sitio. Antes este hueco era el botón de El Analista,
+ * que está en pausa (ver `routes.jsx`). En el cajón del teléfono va a lo ancho.
  */
-const AnalistaLink = ({ conTexto = false, onClick, className = "" }) => {
+const JuegosLink = ({ active, onClick, className = "" }) => {
   const { t } = useIdioma();
   return (
-  <Enlace
-    to={EL_ANALISTA}
-    className={`se-btn se-btn--secondary se-header__analista${
-      conTexto ? " se-header__analista--texto" : ""
-    }${className ? ` ${className}` : ""}`}
-    aria-label={t("nav.analistaHint")}
-    onClick={onClick}
-  >
-    <IconoAnalista />
-    <span className="se-header__analista-texto">{conTexto ? t("nav.jugarAnalista") : t("nav.jugar")}</span>
-    {conTexto ? null : (
-      <span className="se-header__analista-globo" aria-hidden="true">
-        {t("nav.analistaGlobo")}
+    <Enlace
+      to="/juegos"
+      className={`se-btn se-btn--secondary se-header__juegos${
+        active ? " se-header__juegos--active" : ""
+      }${className ? ` ${className}` : ""}`}
+      aria-current={active ? "page" : undefined}
+      onClick={onClick}
+    >
+      <IconoJuegos />
+      <span className="se-header__juegos-texto">{t("nav.juegos")}</span>
+      {/* Solo se ve donde la palabra no cabe y el botón se queda en el mando. */}
+      <span className="se-header__juegos-globo" aria-hidden="true">
+        {t("nav.juegos")}
       </span>
-    )}
-  </Enlace>
+    </Enlace>
   );
+};
+
+JuegosLink.propTypes = {
+  active: PropTypes.bool.isRequired,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
 };
 
 /**
@@ -158,12 +161,6 @@ const CambioDeIdioma = ({ className = "", onClick }) => {
 CambioDeIdioma.propTypes = {
   className: PropTypes.string,
   onClick: PropTypes.func,
-};
-
-AnalistaLink.propTypes = {
-  conTexto: PropTypes.bool,
-  onClick: PropTypes.func,
-  className: PropTypes.string,
 };
 
 export const Navbar = () => {
@@ -359,9 +356,9 @@ export const Navbar = () => {
         <div className="se-header__actions se-header__actions--desktop">
           {/* Antes de los botones de cuenta y con o sin sesión: es contenido, no
               cuenta, y quien entra a ver una entrevista no tiene por qué haber
-              entrado a su cuenta primero. El juego va al lado: también es
+              entrado a su cuenta primero. Los juegos van al lado: también son
               contenido. */}
-          <AnalistaLink />
+          <JuegosLink active={isJuegosActive(pathname)} />
           <AlPuntoLink
             active={isAlPuntoActive(pathname)}
             label={t("nav.alPunto")}
@@ -509,7 +506,11 @@ export const Navbar = () => {
                 onClick={closeMenu}
                 className="se-header__cta"
               />
-              <AnalistaLink conTexto onClick={closeMenu} className="se-header__cta" />
+              <JuegosLink
+                active={isJuegosActive(pathname)}
+                onClick={closeMenu}
+                className="se-header__cta"
+              />
               {isAuthenticated ? (
                 <nav
                   className="se-header__user-nav se-header__user-nav--stack"

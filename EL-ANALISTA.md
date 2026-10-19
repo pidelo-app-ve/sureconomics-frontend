@@ -3,6 +3,10 @@
 Octubre de 2026. Cómo está montado el juego en `sureconomics.com/el-analista`, cómo se trae
 cada versión nueva y qué queda pendiente.
 
+> **En pausa desde el 19 de octubre de 2026.** `/el-analista` redirige a `/juegos` y el botón
+> de la cabecera es ahora «Juegos». Todo lo de abajo sigue en su sitio; cómo volver a
+> encenderlo está en el comentario de la ruta en `src/routes.jsx`.
+
 ---
 
 ## La idea

@@ -7,7 +7,8 @@ import { resumen } from "../../juegos/guacamaya/registro";
 import "./tarjetaPausa.css";
 
 /**
- * «Un minuto de pausa» en la portada y al final de las piezas.
+ * «Un minuto de pausa»: las tarjetas y los banners que llevan a los juegos del sitio
+ * (`/pausa` y `/clave`), en la portada, al final de las piezas y en `/juegos`.
  *
  * Solo una ilustración y un enlace a `/pausa`: el juego no se descarga hasta que
  * alguien lo abre. La ilustración es la misma escena del juego -- el Ávila, el sol que
@@ -90,37 +91,46 @@ const lineaDeMemoria = (t, m) => {
   return null;
 };
 
-export const TarjetaPausa = () => {
+/**
+ * La tarjeta grande de la guacamaya. Con `suelta`, solo la tarjeta, sin la sección ni el
+ * contenedor que la rodean: así va en la lista de `/juegos`, que ya pone los suyos.
+ */
+export const TarjetaPausa = ({ suelta }) => {
   const { t } = useIdioma();
   // La memoria vive en el navegador: se lee después de montar.
   const [memoria, setMemoria] = useState(null);
   useEffect(() => setMemoria(resumen()), []);
   const linea = lineaDeMemoria(t, memoria);
 
+  const tarjeta = (
+    <Enlace to="/pausa" className="se-pausa-tarjeta__enlace">
+      <div className="se-pausa-tarjeta__escena" aria-hidden="true">
+        <PaisajeSvg className="se-pausa-tarjeta__paisaje" idCielo="pausa-cielo-tarjeta" />
+        <span className="se-pausa-tarjeta__vuelo">
+          <GuacamayaSvg className="se-pausa-ave" />
+        </span>
+      </div>
+      <div className="se-pausa-tarjeta__cuerpo">
+        <p className="se-pausa-tarjeta__kicker">{t("juegos.tarjetaPausa.kicker")}</p>
+        <h2 id="pausa-tarjeta-titulo" className="se-pausa-tarjeta__titulo">
+          {t("juegos.tarjetaPausa.titulo")}
+        </h2>
+        <p className="se-pausa-tarjeta__texto">{t("juegos.tarjetaPausa.texto")}</p>
+        <span className="se-pausa-tarjeta__boton">{t("juegos.tarjetaPausa.jugar")}</span>
+        {linea ? <p className="se-pausa-tarjeta__memoria">{linea}</p> : null}
+      </div>
+    </Enlace>
+  );
+  if (suelta) return tarjeta;
+
   return (
     <section className="se-section se-pausa-tarjeta" aria-labelledby="pausa-tarjeta-titulo">
-      <div className="se-container">
-        <Enlace to="/pausa" className="se-pausa-tarjeta__enlace">
-          <div className="se-pausa-tarjeta__escena" aria-hidden="true">
-            <PaisajeSvg className="se-pausa-tarjeta__paisaje" idCielo="pausa-cielo-tarjeta" />
-            <span className="se-pausa-tarjeta__vuelo">
-              <GuacamayaSvg className="se-pausa-ave" />
-            </span>
-          </div>
-          <div className="se-pausa-tarjeta__cuerpo">
-            <p className="se-pausa-tarjeta__kicker">{t("juegos.tarjetaPausa.kicker")}</p>
-            <h2 id="pausa-tarjeta-titulo" className="se-pausa-tarjeta__titulo">
-              {t("juegos.tarjetaPausa.titulo")}
-            </h2>
-            <p className="se-pausa-tarjeta__texto">{t("juegos.tarjetaPausa.texto")}</p>
-            <span className="se-pausa-tarjeta__boton">{t("juegos.tarjetaPausa.jugar")}</span>
-            {linea ? <p className="se-pausa-tarjeta__memoria">{linea}</p> : null}
-          </div>
-        </Enlace>
-      </div>
+      <div className="se-container">{tarjeta}</div>
     </section>
   );
 };
+TarjetaPausa.propTypes = { suelta: PropTypes.bool };
+TarjetaPausa.defaultProps = { suelta: false };
 
 /**
  * El banner del final de las piezas (premia a quien leyó entero) y, con `enPortada`, la
@@ -172,8 +182,8 @@ const CeldasClave = () => (
 );
 
 /**
- * La tarjeta de La Clave en `/pausa`: entre la guacamaya y El Analista, con el verde
- * de la casa y las celdas del juego. Solo un enlace: el juego se descarga en `/clave`.
+ * La tarjeta de La Clave en `/pausa` (debajo de la guacamaya) y en `/juegos`, con el
+ * verde de la casa y las celdas del juego. Solo un enlace: el juego se descarga en `/clave`.
  */
 export const TarjetaClave = () => {
   const { t } = useIdioma();

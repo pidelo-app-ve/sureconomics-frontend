@@ -29,6 +29,7 @@ import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
 import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
 import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
 import { ProveedorIdioma } from "./i18n/ProveedorIdioma";
+import { Redirigir } from "./components/Enlace";
 import { cargarIdioma } from "./i18n/motor";
 
 /**
@@ -53,9 +54,14 @@ const rutasPublicas = () => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
     { path: "entorno", element: <Entorno />, errorElement: <NotFound /> },
-    // El Analista, a pantalla completa y fuera de `Layout`: el juego abre pantallas
-    // fijas que taparían la cabecera. Ver `pages/ElAnalista.jsx`.
-    { path: "el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
+    // El Analista está EN PAUSA (octubre de 2026): la dirección lleva a /juegos, en el
+    // idioma de la página, y el juego no se descarga. La página, el servicio y el panel
+    // del ranking siguen en su sitio. Para volver a encenderlo, cambiar esta línea por
+    // la de abajo (a pantalla completa y fuera de `Layout`: el juego abre pantallas fijas
+    // que taparían la cabecera; ver `pages/ElAnalista.jsx`), y darle su tarjeta en
+    // `pages/Juegos.jsx` y su línea en `api/sitemap.js`:
+    // { path: "el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
+    { path: "el-analista", element: <Redirigir to="/juegos" replace /> },
     {
         element: <Layout />,
         errorElement: <NotFound />,
@@ -101,6 +107,9 @@ const rutasPublicas = () => [
             { path: "consultoria", element: <Consultoria /> },
             { path: "contacto", element: <Contacto /> },
             { path: "cookies", element: <Cookies /> },
+            // Todos los juegos del sitio, una tarjeta por juego. A ella lleva el botón
+            // «Juegos» de la cabecera.
+            { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos") },
             // El juego se descarga al abrir la página, no con el resto del sitio.
             { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa") },
             { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage") },

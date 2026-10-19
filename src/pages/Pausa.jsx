@@ -1,4 +1,3 @@
-import { Enlace } from "../components/Enlace";
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
@@ -6,9 +5,6 @@ import { Guacamaya } from "../juegos/guacamaya/Guacamaya";
 import { PatrocinioDelJuego } from "../juegos/guacamaya/PatrocinioDelJuego";
 import "./pausa.css";
 import { TarjetaClave } from "../components/home/TarjetaPausa";
-
-/** El Analista, dentro del sitio y en la misma pestaña: ver `pages/ElAnalista.jsx`. */
-const EL_ANALISTA = "/el-analista";
 
 /**
  * `/pausa`: un minuto de juego entre lecturas.
@@ -37,16 +33,6 @@ export const Pausa = () => {
           <Guacamaya patrocinio={<PatrocinioDelJuego />} />
 
           <TarjetaClave />
-
-          <section className="se-analista" aria-labelledby="analista-titulo">
-            <p className="se-analista__kicker">{t("juegos.pausa.analista.kicker")}</p>
-            <h2 id="analista-titulo" className="se-analista__titulo">El Analista</h2>
-            <p className="se-analista__texto">{t("juegos.pausa.analista.texto")}</p>
-            <Enlace className="se-analista__boton" to={EL_ANALISTA}>
-              {t("nav.jugarAnalista")}
-              <span className="se-analista__fuera" aria-hidden="true">→</span>
-            </Enlace>
-          </section>
         </div>
       </section>
     </main>

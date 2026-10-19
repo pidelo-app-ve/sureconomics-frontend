@@ -291,11 +291,17 @@
       },
       "kicker": "Un minuto de pausa",
       "titulo": "Entre lectura y lectura, un vuelo",
-      "entrada": "Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su resultado y vuelva a la lectura.",
-      "analista": {
-        "kicker": "Para cuando tenga más de un minuto",
-        "texto": "Un simulador de carrera e inversión: treinta años, un año por turno, con decisiones que pesan, noticias que sacuden el mercado, una cartera que reparte usted y un temario de finanzas que sube con su carrera."
-      }
+      "entrada": "Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su resultado y vuelva a la lectura."
+    },
+    "lista": {
+      "meta": {
+        "titulo": "Juegos — {marca}",
+        "descripcion": "Los juegos de {marca}: Vuela, guacamaya, un minuto de vuelo sobre Venezuela, y La Clave, la palabra del día. Un reto nuevo cada día, el mismo para todos."
+      },
+      "kicker": "Entre lectura y lectura",
+      "titulo": "Juegos",
+      "entrada": "Retos cortos que cambian cada día y son los mismos para todos. Elija uno, juegue y compare su resultado.",
+      "etiqueta": "Juegos de {marca}"
     },
     "tarjetaPausa": {
       "kicker": "Un minuto de pausa",

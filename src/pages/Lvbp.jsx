@@ -68,6 +68,14 @@ Compartir.propTypes = {
 };
 Compartir.defaultProps = { fecha: null };
 
+/** Juegos detrás como en el béisbol: «—» el líder, «½», «1», «1½»… (nunca «0½»). */
+const juegosDetras = (jd) => {
+  if (!jd) return "—";
+  const enteros = Math.floor(jd);
+  const medio = jd - enteros >= 0.5 ? "½" : "";
+  return `${enteros || ""}${medio}` || "—";
+};
+
 export const Lvbp = () => {
   const { t, lang } = useIdioma();
   const { status, datos } = useLvbp();
@@ -192,7 +200,7 @@ export const Lvbp = () => {
                           <td>{formatearNumero(f.g)}</td>
                           <td>{formatearNumero(f.p)}</td>
                           <td>{f.pct_texto}</td>
-                          <td>{f.jd === 0 ? "—" : String(f.jd).replace(".5", "½")}</td>
+                          <td>{juegosDetras(f.jd)}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -54,11 +54,11 @@ export const PAGINAS_FIJAS = [
   "/anunciate",
   "/suscribirse",
   "/entorno",
+  "/juegos",
   "/pausa",
   "/clave",
   "/lvbp",
   "/monedas",
-  "/el-analista",
 ];
 
 const xml = (valor) =>

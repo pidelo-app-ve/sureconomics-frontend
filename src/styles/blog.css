@@ -21552,12 +21552,12 @@ html {
   box-sizing: content-box;
 }
 
-/* ═══ EL ANALISTA EN LA CABECERA ═══════════════════════════════════════════
-   Un botón como «Al punto», a su lado y del mismo alto: indicador animado y un verbo. La gráfica se dibuja
-   subiendo y se enciende el punto final, cada cinco segundos: se mueve lo justo para
-   que se note, sin competir con el latido rojo de «Al punto». El nombre sale debajo
-   al pasar el ratón o con el foco, posicionado, así que no empuja nada. */
-.se-header .se-btn.se-header__analista {
+/* ═══ JUEGOS EN LA CABECERA ═══════════════════════════════════════════════
+   Un botón como «Al punto», a su lado y del mismo alto: indicador animado y una palabra.
+   El mando pulsa sus dos botones, uno tras otro, cada cinco segundos: se mueve lo justo
+   para que se note, sin competir con el latido rojo de «Al punto». Ocupa el hueco que
+   era de El Analista (en pausa) y hereda sus medidas. */
+.se-header .se-btn.se-header__juegos {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -21569,57 +21569,56 @@ html {
   text-decoration: none;
 }
 
-.se-header .se-btn.se-header__analista:hover,
-.se-header .se-btn.se-header__analista:focus-visible {
+.se-header .se-btn.se-header__juegos:hover,
+.se-header .se-btn.se-header__juegos:focus-visible {
   background: rgba(255, 255, 255, 0.1);
   border-color: #ffffff;
 }
 
-.se-header__analista-icono {
-  width: 16px;
-  height: 16px;
+/* Activo como «Al punto»: se enciende el fondo, no solo el borde. */
+.se-header .se-btn.se-header__juegos--active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #ffffff;
+}
+
+.se-header__juegos-icono {
+  width: 18px;
+  height: 18px;
   flex: 0 0 auto;
   overflow: visible;
 }
 
-.se-header__analista-eje {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.45);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-}
-
-.se-header__analista-linea {
+.se-header__juegos-mando,
+.se-header__juegos-cruz {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
-  /* El largo del trazo (algo más de 21 unidades): se dibuja de punta a punta. */
-  stroke-dasharray: 22;
-  stroke-dashoffset: 0;
-  animation: se-analista-traza 5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-.se-header__analista-punto {
+.se-header__juegos-boton {
   fill: #ffc928;
   transform-box: fill-box;
   transform-origin: center;
-  animation: se-analista-punto 5s ease-out infinite;
+  animation: se-juegos-pulsa 5s ease-out infinite;
 }
 
-@keyframes se-analista-traza {
-  0% { stroke-dashoffset: 22; }
-  30%, 100% { stroke-dashoffset: 0; }
+.se-header__juegos-boton--b {
+  animation-delay: 0.35s;
 }
 
-@keyframes se-analista-punto {
-  0%, 26% { opacity: 0; transform: scale(0.4); }
-  34% { opacity: 1; transform: scale(1.35); }
-  42%, 100% { opacity: 1; transform: scale(1); }
+@keyframes se-juegos-pulsa {
+  0%, 30%, 100% { transform: scale(1); opacity: 1; }
+  34% { transform: scale(0.55); opacity: 0.6; }
+  40% { transform: scale(1.2); opacity: 1; }
+  46% { transform: scale(1); }
 }
 
-.se-header__analista-globo {
+/* El nombre, debajo y posicionado para no empujar nada. Solo aparece donde la palabra
+   no cabe y el botón se queda en el mando (ver la franja de 1200 a 1439). */
+.se-header__juegos-globo {
+  display: none;
   position: absolute;
   top: calc(100% + 8px);
   left: 50%;
@@ -21641,8 +21640,8 @@ html {
   transition: opacity 140ms ease-out, transform 140ms ease-out;
 }
 
-.se-header__analista:hover .se-header__analista-globo,
-.se-header__analista:focus-visible .se-header__analista-globo {
+.se-header__juegos:hover .se-header__juegos-globo,
+.se-header__juegos:focus-visible .se-header__juegos-globo {
   opacity: 1;
   transform: translate(-50%, 0);
 }
@@ -21650,8 +21649,8 @@ html {
 /* El sitio que necesita, sin quitarle nada al menú ------------------------------
    Con el botón nuevo, al menú le faltaban 74 px a 1200, 37 a 1240, 16 a 1366 y 6 a
    1440 (medido: lo que la tira pide menos lo que recibe). Se cede en este orden, y
-   ningún enlace: hasta 1599 el botón se queda en la gráfica, sin la palabra (el
-   nombre sale igual al pasar el ratón), y los botones de la cabecera pierden un poco
+   ningún enlace: hasta 1439 el botón de Juegos se queda en el mando, sin la palabra
+   (el nombre sale igual al pasar el ratón), y los botones de la cabecera pierden un poco
    de relleno y de hueco entre ellos, que es invisible al lado de un enlace del menú
    cortado. Era hasta 1279; el conmutador de idioma («EN») pidió los 40 px de la palabra
    también entre 1440 y 1599, donde además vuelve a verse el reloj. */
@@ -21667,16 +21666,20 @@ html {
   }
 }
 
-/* El botón de El Analista dice «Analista» para que quien llega entienda qué es. Solo
-   por debajo de 1440 se queda en el icono (el nombre sale al pasar el ratón): ahí no
-   cabe la palabra sin cortar «Quiénes somos». De 1440 en adelante la cabecera tiene
+/* El botón de Juegos dice «Juegos» para que quien llega entienda qué es. Solo por
+   debajo de 1440 se queda en el mando (el nombre sale al pasar el ratón): ahí no cabe
+   la palabra sin cortar «Quiénes somos» (comprobado también con «Juegos», más corta que
+   «Analista»: a 1280 y a 1366 corta el menú). De 1440 en adelante la cabecera tiene
    sitio, y por encima de 1600 se ensancha un poco (ver más abajo). Medido con el menú
    completo a cada ancho. */
 @media (min-width: 1200px) and (max-width: 1439px) {
-  .se-header .se-header__actions--desktop .se-btn.se-header__analista {
+  .se-header .se-header__actions--desktop .se-btn.se-header__juegos {
     padding-inline: 0.55rem;
   }
-  .se-header__actions--desktop .se-header__analista-texto {
+  .se-header__actions--desktop .se-header__juegos-globo {
+    display: block;
+  }
+  .se-header__actions--desktop .se-header__juegos-texto {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -21711,19 +21714,15 @@ html {
 }
 
 /* En el cajón del teléfono, a lo ancho y con el nombre, como «Al punto». */
-.se-header__actions--mobile .se-btn.se-header__analista--texto {
+.se-header__actions--mobile .se-btn.se-header__juegos {
   padding: 0.55rem 1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-header__analista-linea,
-  .se-header__analista-punto {
+  .se-header__juegos-boton {
     animation: none;
   }
-  .se-header__analista-punto {
-    opacity: 1;
-  }
-  .se-header__analista-globo {
+  .se-header__juegos-globo {
     transition: none;
   }
 }

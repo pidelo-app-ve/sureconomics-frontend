@@ -1,4 +1,4 @@
-/* ═══ LAS PÁGINAS DE JUEGO: /pausa y /clave ═══
+/* ═══ LAS PÁGINAS DE JUEGO: /pausa, /clave y /juegos ═══
    La cabecera y la caja que comparten. Una columna estrecha: los juegos son verticales,
    como en el teléfono, y en escritorio se agradece que no ocupen todo el ancho. Vive
    aparte de los juegos porque cada uno se descarga solo cuando se abre, y la página
@@ -17,6 +17,12 @@
 /* La Clave es más ancha: el tablero de diez letras y las tarjetas de categoría lo piden. */
 .se-pausa__caja--clave {
   max-width: 640px;
+}
+
+/* /juegos, la lista de todos: las tarjetas van en horizontal (escena y texto) y piden
+   algo más de ancho que una columna de juego. */
+.se-pausa__caja--juegos {
+  max-width: 720px;
 }
 
 .se-pausa__cabeza {
@@ -61,4 +67,17 @@
   color: var(--marca-verde, #003318);
   font-weight: 700;
   text-underline-offset: 3px;
+}
+
+/* La lista de /juegos: una tarjeta por juego, una debajo de otra. */
+.se-pausa__juegos {
+  display: grid;
+  gap: 16px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-pausa__juegos > li {
+  min-width: 0;
 }

@@ -291,11 +291,17 @@
       },
       "kicker": "A one-minute break",
       "titulo": "Between one read and the next, a flight",
-      "entrada": "The flight changes every day, and it's the same for everyone. Play, compare your result and get back to reading.",
-      "analista": {
-        "kicker": "For when you have more than a minute",
-        "texto": "A career and investing simulator: thirty years, one year per turn, with decisions that matter, news that shakes the market, a portfolio you allocate yourself and a finance curriculum that grows with your career."
-      }
+      "entrada": "The flight changes every day, and it's the same for everyone. Play, compare your result and get back to reading."
+    },
+    "lista": {
+      "meta": {
+        "titulo": "Games — {marca}",
+        "descripcion": "The {marca} games: Fly, macaw, a one-minute flight over Venezuela, and La Clave, the word of the day. A new challenge every day, the same for everyone."
+      },
+      "kicker": "Between reads",
+      "titulo": "Games",
+      "entrada": "Short challenges that change every day and are the same for everyone. Pick one, play and compare your result.",
+      "etiqueta": "{marca} games"
     },
     "tarjetaPausa": {
       "kicker": "A one-minute break",

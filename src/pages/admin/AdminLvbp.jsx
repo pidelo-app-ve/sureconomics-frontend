@@ -116,6 +116,13 @@ export const AdminLvbp = () => {
         correr("sync", async () => {
             const r = unwrapEntity(await adminRequest("/admin/lvbp/sincronizar", { method: "POST", json: {} }));
             if (r?.agotado) throw new Error("Se agotaron las consultas de hoy.");
+            // La API tardó más de unos segundos: el servidor sigue por detrás y no
+            // deja este botón colgado. Se vuelve a mirar en un rato.
+            if (r?.en_marcha) {
+                toastSuccess("Se está actualizando por detrás. Los cambios aparecen en un momento.", "LVBP");
+                window.setTimeout(() => cargar(), 15000);
+                return r;
+            }
             toastSuccess(`Sincronizado: ${r.creados} nuevos, ${r.actualizados} actualizados.`, "LVBP");
             return r;
         });

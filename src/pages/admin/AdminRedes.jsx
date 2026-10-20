@@ -397,6 +397,10 @@ const normalizar = (d) =>
     ])
   );
 
+// El servidor contesta así cuando la red tarda más de unos segundos: sigue trayendo
+// lo último por detrás en vez de dejar el botón (y un hilo del servidor) esperando.
+const SIGUE_EN_MARCHA = "Se está actualizando por detrás. Vuelva a abrir esta página en un minuto para verlo.";
+
 export const AdminRedes = () => {
   const [listas, setListas] = useState({ instagram: [], x: [], tiktok: [] });
   const [inicial, setInicial] = useState(null);
@@ -508,7 +512,7 @@ export const AdminRedes = () => {
     try {
       const d = await accion();
       setAuto(d.instagram_auto?.activo ? d.instagram_auto : null);
-      setGuardado({ status: "ok", mensaje: exito });
+      setGuardado({ status: "ok", mensaje: d.en_marcha ? SIGUE_EN_MARCHA : exito });
     } catch (err) {
       setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo tocar Instagram.") });
     } finally {
@@ -531,7 +535,7 @@ export const AdminRedes = () => {
     try {
       const d = await accion();
       setTiktok(d.tiktok_auto ?? null);
-      setGuardado({ status: "ok", mensaje: exito });
+      setGuardado({ status: "ok", mensaje: d.en_marcha ? SIGUE_EN_MARCHA : exito });
     } catch (err) {
       setGuardado({ status: "error", mensaje: adminErrorMessage(err, "No se pudo tocar TikTok.") });
     } finally {

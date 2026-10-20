@@ -17,5 +17,13 @@ export const createAdminStaff = async (body) =>
 export const updateAdminStaffRole = async (staffId, role) =>
   unwrapEntity(await adminRequest(`/admin/staff/${staffId}`, { method: "PATCH", json: { role } }));
 
+/**
+ * Desactivar corta el acceso al panel sin borrar la cuenta (que firma piezas).
+ * @param {number} staffId
+ * @param {boolean} isActive
+ */
+export const setAdminStaffActive = async (staffId, isActive) =>
+  unwrapEntity(await adminRequest(`/admin/staff/${staffId}`, { method: "PATCH", json: { is_active: isActive } }));
+
 /** @param {number} staffId */
 export const deleteAdminStaff = async (staffId) => adminRequest(`/admin/staff/${staffId}`, { method: "DELETE" });

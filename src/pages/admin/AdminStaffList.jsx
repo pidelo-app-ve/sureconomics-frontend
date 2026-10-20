@@ -3,6 +3,7 @@ import {
   createAdminStaff,
   deleteAdminStaff,
   listAdminStaff,
+  setAdminStaffActive,
   updateAdminStaffRole,
 } from "../../services/adminStaffService";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
@@ -92,14 +93,42 @@ export const AdminStaffList = () => {
     }
   };
 
+  // Para quien deja el equipo. Eliminar no se puede si firmó piezas; desactivar sí, y
+  // corta el acceso en la petición siguiente sin tocar lo que firmó.
+  const handleActive = async (row) => {
+    const activar = row.is_active === false;
+    await confirm({
+      title: activar ? "Reactivar cuenta" : "Desactivar cuenta",
+      description: activar
+        ? `«${row.name}» podrá volver a entrar al panel con su contraseña.`
+        : `«${row.name}» no podrá entrar al panel y su sesión abierta se cierra. Sus piezas siguen firmadas por esta cuenta. Se puede reactivar cuando quiera.`,
+      confirmLabel: activar ? "Reactivar" : "Desactivar",
+      onConfirm: async () => {
+        setRoleActionError("");
+        try {
+          await setAdminStaffActive(row.id, activar);
+          await load();
+        } catch (err) {
+          setRoleActionError(err instanceof Error ? err.message : "No se pudo cambiar la cuenta.");
+        }
+      },
+    });
+  };
+
   const handleDelete = async (id, name) => {
     await confirm({
       title: "Eliminar cuenta",
       description: `¿Eliminar la cuenta de «${name}» de forma permanente?`,
       confirmLabel: "Eliminar cuenta",
       onConfirm: async () => {
-        await deleteAdminStaff(id);
-        await load();
+        setRoleActionError("");
+        try {
+          await deleteAdminStaff(id);
+          await load();
+        } catch (err) {
+          // El servidor explica el caso típico: firma piezas, hay que desactivarla.
+          setRoleActionError(err instanceof Error ? err.message : "No se pudo eliminar la cuenta.");
+        }
       },
     });
   };
@@ -216,7 +245,14 @@ export const AdminStaffList = () => {
               {state.items.map((row) => (
                 <tr key={row.id}>
                   <td>{row.id}</td>
-                  <td>{row.name}</td>
+                  <td>
+                    {row.name}
+                    {row.is_active === false ? (
+                      <span className="se-admin-meta-hint" style={{ display: "block" }}>
+                        Desactivada: no puede entrar
+                      </span>
+                    ) : null}
+                  </td>
                   <td>{row.email}</td>
                   <td>
                     <select
@@ -233,6 +269,13 @@ export const AdminStaffList = () => {
                     </select>
                   </td>
                   <td className="se-admin-table__actions">
+                    <button
+                      type="button"
+                      className="se-link se-header__nav-link--button"
+                      onClick={() => handleActive(row)}
+                    >
+                      {row.is_active === false ? "Reactivar" : "Desactivar"}
+                    </button>{" "}
                     <button
                       type="button"
                       className="se-link se-header__nav-link--button"

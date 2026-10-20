@@ -58,3 +58,18 @@ export const borrarLeccion = async (lessonId) =>
  */
 export const getResumenEducacion = async () =>
   unwrapEntity(await adminRequest("/admin/education/resumen"));
+
+/** Quién compró un módulo (solo admin). */
+export const listarComprasDeModulo = async (moduleId) =>
+  unwrapEntity(await adminRequest(`/admin/education/modules/${moduleId}/compras`))?.compras ?? [];
+
+/**
+ * Quitar o devolver el acceso de una compra a mano. Los reembolsos y contracargos de
+ * Stripe y Mercado Pago ya lo quitan solos; esto es para lo que pasa fuera de ellas.
+ */
+export const cambiarAccesoDeCompra = async (purchaseId, dar) =>
+  unwrapEntity(
+    await adminRequest(`/admin/education/compras/${purchaseId}/${dar ? "restaurar" : "revocar"}`, {
+      method: "POST",
+    }),
+  );

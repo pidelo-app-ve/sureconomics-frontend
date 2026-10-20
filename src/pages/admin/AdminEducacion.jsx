@@ -31,7 +31,10 @@ import {
   crearModulo,
   listarModulos,
   moverLeccion,
+  cambiarAccesoDeCompra,
+  listarComprasDeModulo,
 } from "../../services/adminEducacionService";
+import { useAuth } from "../../context/AuthContext";
 
 /**
  * El panel de Educacion: modulos, lecciones y su orden.
@@ -738,10 +741,117 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
               Añadir lección
             </button>
           </div>
+
+          {modulo.compras ? <ComprasDelModulo moduloId={modulo.id} total={modulo.compras} /> : null}
         </div>
       ) : null}
     </section>
   );
+};
+
+/**
+ * Quién compró el módulo, y quitar o devolver el acceso a mano.
+ *
+ * Los reembolsos y contracargos de las pasarelas ya cierran el acceso solos. Esto queda
+ * para lo que pasa fuera de ellas: un reembolso hecho por transferencia, un fraude, o
+ * devolver el acceso cuando una disputa se gana. Solo para admin, como en el servidor.
+ */
+const ComprasDelModulo = ({ moduloId, total }) => {
+  const { role } = useAuth();
+  const [compras, setCompras] = useState(null);
+  const [error, setError] = useState("");
+  const [ocupada, setOcupada] = useState(null);
+
+  if (role !== "admin") return null;
+
+  const cargar = async () => {
+    setError("");
+    try {
+      setCompras(await listarComprasDeModulo(moduloId));
+    } catch (err) {
+      setError(adminErrorMessage(err, "No se pudieron cargar las compras."));
+    }
+  };
+
+  const cambiar = async (compra) => {
+    const dar = compra.estado === "revocada";
+    if (!dar && !window.confirm(`¿Quitar el acceso a ${compra.correo || "esta compra"}? Deja de poder abrir las lecciones de pago.`)) {
+      return;
+    }
+    setOcupada(compra.id);
+    setError("");
+    try {
+      const nueva = await cambiarAccesoDeCompra(compra.id, dar);
+      setCompras((prev) => prev.map((c) => (c.id === nueva.id ? nueva : c)));
+    } catch (err) {
+      setError(adminErrorMessage(err, "No se pudo cambiar el acceso."));
+    } finally {
+      setOcupada(null);
+    }
+  };
+
+  return (
+    <div className="se-admin-edu__compras">
+      <h3 className="se-form-label" style={{ marginTop: "1.5rem" }}>
+        Compras
+      </h3>
+      {compras === null ? (
+        <button type="button" className="se-btn se-btn--secondary" onClick={cargar}>
+          Ver las {total} compra{total === 1 ? "" : "s"}
+        </button>
+      ) : compras.length === 0 ? (
+        <p className="se-admin-meta-hint">Ninguna pagada todavía.</p>
+      ) : (
+        <div className="se-admin-table-wrap">
+          <table className="se-admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Correo</th>
+                <th scope="col">Pagada</th>
+                <th scope="col">Importe</th>
+                <th scope="col">Acceso</th>
+                <th scope="col">
+                  <span className="se-sr-only">Acción</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {compras.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.correo || "—"}</td>
+                  <td>{c.pagada_en ? new Date(c.pagada_en).toLocaleDateString("es-VE") : "—"}</td>
+                  <td>
+                    {precioLegible(c.importe_centavos, c.moneda)} · {c.proveedor}
+                  </td>
+                  <td>{c.estado === "revocada" ? "Quitado" : "Activo"}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="se-link se-header__nav-link--button"
+                      disabled={ocupada === c.id}
+                      onClick={() => cambiar(c)}
+                    >
+                      {c.estado === "revocada" ? "Devolver acceso" : "Quitar acceso"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {error ? (
+        <p className="se-admin-form-feedback" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+ComprasDelModulo.propTypes = {
+  moduloId: PropTypes.number.isRequired,
+  total: PropTypes.number.isRequired,
 };
 
 TarjetaDeModulo.propTypes = {

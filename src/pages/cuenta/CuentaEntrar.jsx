@@ -14,6 +14,7 @@ import { persistAuth } from "../../lib/authStorage";
 import { dispatchAdminAuthSync } from "../../lib/api";
 import { persistUserAuth } from "../../lib/userAuthStorage";
 import { dispatchUserAuthSync } from "../../lib/userApi";
+import "../../styles/cuenta.css";
 
 /** Un correo con forma de correo, con el mismo criterio que el registro. */
 const pareceCorreo = (valor) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(valor.trim());

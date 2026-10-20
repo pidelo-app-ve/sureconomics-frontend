@@ -7,6 +7,7 @@ import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
+import "../../styles/cuenta.css";
 
 export const CuentaMarcadores = () => {
   const { t } = useIdioma();

@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import './styles/fuentes.css'
 import './index.css'
 import './styles/blog.css'
 import './styles/accesibilidad.css'
@@ -11,6 +12,15 @@ import "./i18n/diccionarios";
 import { AuthProvider } from "./context/AuthContext";
 import { UserAuthProvider } from "./context/UserAuthContext";
 import { ProveedorDeMarcadores } from "./context/MarcadoresContext";
+
+import { recargarUnaVez } from "./lib/recargaTrasDespliegue";
+
+// Vite avisa así cuando no puede precargar un trozo de código: casi siempre, una pestaña
+// abierta desde antes del último despliegue. Recargar trae la versión nueva. Ver
+// `lib/recargaTrasDespliegue.js`.
+window.addEventListener("vite:preloadError", (evento) => {
+    if (recargarUnaVez()) evento.preventDefault();
+});
 
 const Main = () => {
     return (

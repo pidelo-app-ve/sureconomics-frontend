@@ -94,8 +94,8 @@ export const semillaDe = (texto) => {
  * horario de verano desde 2016), así que basta con restar cuatro horas: el reto cambia
  * a la medianoche de Caracas para todos, juegue desde donde juegue.
  */
-export const diaDeCaracas = (ahora = new Date()) =>
-  new Date(ahora.getTime() - 4 * 3600 * 1000).toISOString().slice(0, 10);
+export { diaDeCaracas } from "./dia.js";
+import { diaDeCaracas } from "./dia.js";
 
 /** La semilla de un vuelo de un día. El primero conserva la de siempre. */
 export const semillaDelDia = (dia = diaDeCaracas(), nivel = 1) =>

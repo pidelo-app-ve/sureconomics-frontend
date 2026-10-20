@@ -9,6 +9,7 @@ import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
 import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import "../../styles/cuenta.css";
 
 export const CuentaEnviosList = () => {
   const { t } = useIdioma();

@@ -6,6 +6,7 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { getMisCompras } from "../../services/userMeService";
 import { duracionLegible, nivelLegible } from "../../services/educacionService";
+import "../../styles/cuenta.css";
 
 /**
  * Lo mío: los módulos de Educación comprados, y el recibo de cada pago.

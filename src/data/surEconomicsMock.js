@@ -76,7 +76,7 @@ export const PARTNERS = [
   {
     id: "rendigroup-advisors",
     name: "RendiGroup Advisors",
-    logo: aliada("advisors-logo.png"),
+    logo: aliada("advisors-logo.webp"),
     url: "https://rendigroup.com",
   },
   {
@@ -85,25 +85,25 @@ export const PARTNERS = [
     // El nombre largo va en el `title` del enlace: en una rejilla de logos el pie
     // tiene que caber en una línea.
     nameLong: "Rendivalores — Casa de Bolsa, Casa de Bolsa Agrícola y Fondos Mutuales",
-    logo: aliada("rendivalores-logo.png"),
+    logo: aliada("rendivalores-logo.webp"),
     url: "https://rendivalores.com",
   },
   {
     id: "alalza",
     name: "Alalza Inversiones",
-    logo: aliada("alalza-logo.png"),
+    logo: aliada("alalza-logo.webp"),
     url: "https://www.pidelove.com",
   },
   {
     id: "moore-capital",
     name: "Moore Capital",
-    logo: aliada("moore-logo.png"),
+    logo: aliada("moore-logo.webp"),
     url: "https://moorecapitals.com",
   },
   {
     id: "invicto-capital",
     name: "Invicto Capital",
-    logo: aliada("invicto-logo.png"),
+    logo: aliada("invicto-logo.webp"),
     url: "https://capitalinvicto.com",
   },
   // LOG Consultancy Group estuvo en esta lista y ya no existe (confirmado por el

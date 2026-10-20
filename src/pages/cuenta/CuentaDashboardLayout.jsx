@@ -6,6 +6,7 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { BRAND } from "../../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import "../../styles/cuenta.css";
 
 const IconGrid = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">

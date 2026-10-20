@@ -4,30 +4,10 @@ import "./i18n/diccionarios";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
-import { Subscribe } from "./pages/Subscribe";
-import { Entorno } from "./pages/Entorno";
-import { BoletinBaja } from "./pages/BoletinBaja";
-import { QuienesSomos } from "./pages/QuienesSomos";
-import { Articulos } from "./pages/Articulos";
-import { Informes } from "./pages/Informes";
-import { Audiovisual } from "./pages/Audiovisual";
 import { Pieza } from "./pages/Pieza";
-import { PiezaRedirect } from "./pages/PiezaRedirect";
-import { Explorar } from "./pages/Explorar";
-import { Educacion } from "./pages/Educacion";
-import { Anunciate } from "./pages/Anunciate";
-import { EducacionModulo } from "./pages/EducacionModulo";
-import { EducacionLeccion } from "./pages/EducacionLeccion";
-import { EducacionPagoVuelta } from "./pages/EducacionPagoVuelta";
-import { Consultoria } from "./pages/Consultoria";
-import { Contacto } from "./pages/Contacto";
-import { Cookies } from "./pages/Cookies";
 import { NotFound } from "./pages/NotFound";
+import { RouteError } from "./pages/RouteError";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
-import { CuentaEntrar } from "./pages/cuenta/CuentaEntrar";
-import { CuentaRegistro } from "./pages/cuenta/CuentaRegistro";
-import { CuentaVerificarEmail } from "./pages/cuenta/CuentaVerificarEmail";
-import { CuentaSolicitarCodigo } from "./pages/cuenta/CuentaSolicitarCodigo";
 import { ProveedorIdioma } from "./i18n/ProveedorIdioma";
 import { Redirigir } from "./components/Enlace";
 import { cargarIdioma } from "./i18n/motor";
@@ -53,48 +33,48 @@ const pagina = (cargar, nombre) => async () => ({ Component: (await cargar())[no
 const rutasPublicas = () => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
-    { path: "entorno", element: <Entorno />, errorElement: <NotFound /> },
+    { path: "entorno", lazy: pagina(() => import("./pages/Entorno"), "Entorno"), errorElement: <RouteError /> },
     // El Analista está EN PAUSA (octubre de 2026): la dirección lleva a /juegos, en el
     // idioma de la página, y el juego no se descarga. La página, el servicio y el panel
     // del ranking siguen en su sitio. Para volver a encenderlo, cambiar esta línea por
     // la de abajo (a pantalla completa y fuera de `Layout`: el juego abre pantallas fijas
     // que taparían la cabecera; ver `pages/ElAnalista.jsx`), y darle su tarjeta en
     // `pages/Juegos.jsx` y su línea en `api/sitemap.js`:
-    // { path: "el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <NotFound /> },
+    // { path: "el-analista", lazy: pagina(() => import("./pages/ElAnalista"), "ElAnalistaPagina"), errorElement: <RouteError /> },
     { path: "el-analista", element: <Redirigir to="/juegos" replace /> },
     {
         element: <Layout />,
-        errorElement: <NotFound />,
+        errorElement: <RouteError />,
         children: [
             { index: true, element: <Home /> },
-            { path: "suscribirse", element: <Subscribe /> },
+            { path: "suscribirse", lazy: pagina(() => import("./pages/Subscribe"), "Subscribe") },
             // A donde apunta el enlace de baja de cada boletin. Sin sesion: el
             // token de la direccion es la unica credencial. Ver `BoletinBaja`.
-            { path: "boletin/baja", element: <BoletinBaja /> },
-            { path: "quienes-somos", element: <QuienesSomos /> },
-            { path: "articulos", element: <Articulos /> },
-            { path: "informes", element: <Informes /> },
+            { path: "boletin/baja", lazy: pagina(() => import("./pages/BoletinBaja"), "BoletinBaja") },
+            { path: "quienes-somos", lazy: pagina(() => import("./pages/QuienesSomos"), "QuienesSomos") },
+            { path: "articulos", lazy: pagina(() => import("./pages/Articulos"), "Articulos") },
+            { path: "informes", lazy: pagina(() => import("./pages/Informes"), "Informes") },
             // «Al punto»: entrevistas y podcast juntos. Antes cada uno era un filtro de
             // /articulos; esas direcciones redirigen aquí (ver `Articulos`).
-            { path: "audiovisual", element: <Audiovisual /> },
-            { path: "explorar", element: <Explorar /> },
+            { path: "audiovisual", lazy: pagina(() => import("./pages/Audiovisual"), "Audiovisual") },
+            { path: "explorar", lazy: pagina(() => import("./pages/Explorar"), "Explorar") },
             // Cruza los seis formatos, como /explorar, pero por un valor de la pieza
             // en vez de por los filtros. De ahi su propia ruta y no un parametro mas.
-            { path: "educacion", element: <Educacion /> },
+            { path: "educacion", lazy: pagina(() => import("./pages/Educacion"), "Educacion") },
             // La pagina de venta del inventario. Publica y sin publicidad propia:
             // no declara ningun espacio, asi que no pide ninguno.
-            { path: "anunciate", element: <Anunciate /> },
+            { path: "anunciate", lazy: pagina(() => import("./pages/Anunciate"), "Anunciate") },
             // La vuelta del pago va ANTES que "/educacion/:slug": si fuera despues, la
             // ruta comodin se tragaria "pago" como si fuera el slug de un modulo.
-            { path: "educacion/pago/volver", element: <EducacionPagoVuelta /> },
-            { path: "educacion/:slug", element: <EducacionModulo /> },
-            { path: "educacion/:slug/:leccionSlug", element: <EducacionLeccion /> },
+            { path: "educacion/pago/volver", lazy: pagina(() => import("./pages/EducacionPagoVuelta"), "EducacionPagoVuelta") },
+            { path: "educacion/:slug", lazy: pagina(() => import("./pages/EducacionModulo"), "EducacionModulo") },
+            { path: "educacion/:slug/:leccionSlug", lazy: pagina(() => import("./pages/EducacionLeccion"), "EducacionLeccion") },
             // Everything published before the redesign lives at "articulo/<slug>".
             // Those addresses are indexed and shared, so they redirect to wherever
             // the piece sits now instead of 404ing. Same for "categoria/<slug>":
             // categories no longer exist, and the nearest thing a reader wanted is
             // the cross-format explorer.
-            { path: "articulo/:slug", element: <PiezaRedirect /> },
+            { path: "articulo/:slug", lazy: pagina(() => import("./pages/PiezaRedirect"), "PiezaRedirect") },
             { path: "categoria/:slug", element: <Navigate to="/explorar" replace /> },
             // One detail page for all six formats; the format sits in the path so
             // the URL reads as what it is.
@@ -104,9 +84,9 @@ const rutasPublicas = () => [
             { path: "entrevistas/:slug", element: <Pieza /> },
             { path: "informes/:slug", element: <Pieza /> },
             { path: "podcast/:slug", element: <Pieza /> },
-            { path: "consultoria", element: <Consultoria /> },
-            { path: "contacto", element: <Contacto /> },
-            { path: "cookies", element: <Cookies /> },
+            { path: "consultoria", lazy: pagina(() => import("./pages/Consultoria"), "Consultoria") },
+            { path: "contacto", lazy: pagina(() => import("./pages/Contacto"), "Contacto") },
+            { path: "cookies", lazy: pagina(() => import("./pages/Cookies"), "Cookies") },
             // Todos los juegos del sitio, una tarjeta por juego. A ella lleva el botón
             // «Juegos» de la cabecera.
             { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos") },
@@ -118,10 +98,10 @@ const rutasPublicas = () => [
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
             { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
-            { path: "cuenta/entrar", element: <CuentaEntrar /> },
-            { path: "cuenta/registro", element: <CuentaRegistro /> },
-            { path: "cuenta/verificar-email", element: <CuentaVerificarEmail /> },
-            { path: "cuenta/solicitar-codigo", element: <CuentaSolicitarCodigo /> },
+            { path: "cuenta/entrar", lazy: pagina(() => import("./pages/cuenta/CuentaEntrar"), "CuentaEntrar") },
+            { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro") },
+            { path: "cuenta/verificar-email", lazy: pagina(() => import("./pages/cuenta/CuentaVerificarEmail"), "CuentaVerificarEmail") },
+            { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./pages/cuenta/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo") },
             { path: "*", element: <NotFound /> },
         ],
     },
@@ -142,11 +122,11 @@ const rutasPublicas = () => [
 ];
 
 export const router = createBrowserRouter([
-    { path: "/", element: <ProveedorIdioma lang="es" />, errorElement: <NotFound />, children: rutasPublicas() },
+    { path: "/", element: <ProveedorIdioma lang="es" />, errorElement: <RouteError />, children: rutasPublicas() },
     {
         path: "/en",
         element: <ProveedorIdioma lang="en" />,
-        errorElement: <NotFound />,
+        errorElement: <RouteError />,
         // El diccionario en inglés se descarga antes de pintar: ni parpadeo ni textos
         // a medias. Es un archivo pequeño y se cachea; las visitas siguientes no esperan.
         loader: async () => {

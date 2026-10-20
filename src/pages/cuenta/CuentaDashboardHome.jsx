@@ -7,6 +7,7 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
+import "../../styles/cuenta.css";
 
 /**
  * El inicio de la cuenta: qué tiene hecho, qué le falta y qué puede hacer aquí.

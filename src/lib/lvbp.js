@@ -20,8 +20,10 @@ export const EQUIPOS = {
 
 export const equipo = (sigla) => EQUIPOS[sigla] ?? { nombre: sigla, corto: sigla, ciudad: "" };
 
-export const escudoDe = (sigla) => `/lvbp/${String(sigla || "").toLowerCase()}.png`;
-export const LOGO_LIGA = "/lvbp/liga.png";
+// WebP al doble del tamaño en pantalla (64 px como mucho): el PNG de 150 px pesaba hasta
+// 111 KB y se pintaba a 22. Los PNG siguen en `public/lvbp` por si algo de fuera los enlaza.
+export const escudoDe = (sigla) => `/lvbp/${String(sigla || "").toLowerCase()}.webp`;
+export const LOGO_LIGA = "/lvbp/liga.webp";
 
 /** "19:00" → "7:00 p.m." (es) o "7:00 PM" (en). Sin hora, nada. */
 export const horaBonita = (hora, lang = "es") => {

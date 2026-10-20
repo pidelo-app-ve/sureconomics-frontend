@@ -26,7 +26,7 @@
  * el vuelo que sea.
  */
 
-import { diaDeCaracas } from "./motor.js";
+import { diaDeCaracas } from "./dia.js";
 import { NIVELES, nivelDe } from "./niveles.js";
 
 const CLAVE = "se_pausa_guacamaya";

@@ -9,6 +9,7 @@ import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissio
 import * as userMeService from "../../services/userMeService";
 import { ErrorState, LoadingState, Pagination } from "../../components/content";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import "../../styles/cuenta.css";
 
 const PencilIcon = () => (
   <svg className="se-submission-detail__edit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -4,12 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/brand/v2/isotipo-verde.png" />
     <link rel="apple-touch-icon" href="/brand/v2/isotipo-verde.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- La letra del sitio, servida por nosotros (ver src/styles/fuentes.css). Se precarga
+         la que usa casi todo el texto para que no haya un salto al llegar. -->
+    <link rel="preload" href="/fuentes/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <!-- Quién publica: la ficha del medio para Google (logo, nombre, redes). Va en todas

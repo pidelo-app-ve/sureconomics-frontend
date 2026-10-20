@@ -27,62 +27,80 @@ import { getPieces } from "../services/publicContentService";
 const PER_PAGE = 100;
 const MAX_PAGES = 5;
 
+/**
+ * Lo ya descargado, por formato, durante un minuto.
+ *
+ * La portada, Artículos y Al punto piden el mismo listado; ir y volver lo pedía otra vez
+ * entero cada vez. Un minuto basta para navegar sin esperas y es lo mismo que guarda el
+ * servidor (`cache_publico`), así que no enseña nada más viejo de lo que ya enseñaría.
+ */
+const GUARDADO_MS = 60_000;
+const guardado = new Map();
+
+const pedirPagina = (format, educational, page) =>
+  // `undefined` y no `false` cuando no se pide: el cliente omite los nulos, y un
+  // `?educational=false` en la direccion se leeria como un filtro puesto.
+  getPieces({ format, educational: educational ? true : undefined, page, limit: PER_PAGE });
+
 export const usePieces = ({ format, educational } = {}) => {
   const { lang } = useIdioma();
-  const [state, setState] = useState({
-    status: "loading",
-    filas: [],
-    total: 0,
-    truncated: false,
-    error: null,
+  const clave = `${format ?? ""}|${educational ? 1 : 0}`;
+  const [state, setState] = useState(() => {
+    const previo = guardado.get(clave);
+    if (previo && Date.now() - previo.en < GUARDADO_MS) {
+      return { status: "success", filas: previo.filas, total: previo.total, truncated: previo.truncated, error: null };
+    }
+    return { status: "loading", filas: [], total: 0, truncated: false, error: null };
   });
 
   useEffect(() => {
     let alive = true;
+    const previo = guardado.get(clave);
+    if (previo && Date.now() - previo.en < GUARDADO_MS) {
+      setState({ status: "success", filas: previo.filas, total: previo.total, truncated: previo.truncated, error: null });
+      return () => {
+        alive = false;
+      };
+    }
     setState((s) => ({ ...s, status: "loading", error: null }));
 
     (async () => {
-      const collected = [];
-      let page = 1;
-      let pages = 1;
-      let total = 0;
+      // La primera, sola: es la que dice cuántas páginas hay. Y en cuanto llega, se
+      // pinta. Antes la portada esperaba las cinco, una detrás de otra, para enseñar
+      // las veintitantas piezas de arriba que ya venían en la primera.
+      const primera = await pedirPagina(format, educational, 1);
+      const pages = primera.pages || 1;
+      const total = primera.total ?? primera.filas.length;
+      const truncated = pages > MAX_PAGES;
+      if (!alive) return;
+      setState({ status: "success", filas: primera.filas, total, truncated, error: null });
 
-      while (page <= Math.min(pages, MAX_PAGES)) {
-        // Sequential on purpose: the first response is what says how many pages
-        // there are, so firing them in parallel would mean guessing.
-        // `undefined` y no `false` cuando no se pide: el cliente omite los nulos, y
-        // un `?educational=false` en la direccion se leeria como un filtro puesto.
-        const chunk = await getPieces({
-          format,
-          educational: educational ? true : undefined,
-          page,
-          limit: PER_PAGE,
-        });
-        collected.push(...chunk.filas);
-        pages = chunk.pages || 1;
-        total = chunk.total ?? collected.length;
-        page += 1;
+      // El resto a la vez y por detrás: completan el buscador y los contadores de los
+      // filtros sin que nadie mire una pantalla vacía mientras tanto.
+      const resto = [];
+      for (let page = 2; page <= Math.min(pages, MAX_PAGES); page += 1) resto.push(page);
+      let filas = primera.filas;
+      if (resto.length) {
+        const trozos = await Promise.all(resto.map((page) => pedirPagina(format, educational, page)));
+        filas = [...primera.filas, ...trozos.flatMap((t) => t.filas)];
+        if (!alive) return;
+        setState({ status: "success", filas, total, truncated, error: null });
       }
-
-      if (alive) {
-        setState({
-          status: "success",
-          filas: collected,
-          total,
-          truncated: pages > MAX_PAGES,
-          error: null,
-        });
-      }
+      guardado.set(clave, { filas, total, truncated, en: Date.now() });
     })().catch((error) => {
       if (alive) {
-        setState({ status: "error", filas: [], total: 0, truncated: false, error });
+        // Si la primera llegó y falla una de las siguientes, se queda lo que hay: mejor
+        // la portada con cien piezas que una pantalla de error.
+        setState((s) =>
+          s.filas.length ? { ...s, status: "success" } : { status: "error", filas: [], total: 0, truncated: false, error },
+        );
       }
     });
 
     return () => {
       alive = false;
     };
-  }, [format, educational]);
+  }, [clave, format, educational]);
 
   // `lang` en las dependencias aunque no se use dentro: es lo que hace que las piezas
   // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).

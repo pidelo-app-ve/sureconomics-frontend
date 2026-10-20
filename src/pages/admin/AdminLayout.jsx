@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { AdminToastProvider } from "../../context/AdminToastContext";
 import { AdminToastViewport } from "../../components/admin/AdminToastViewport";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
+import "../../styles/admin.css";
 
 const RAIL_MENU_ID = "se-admin-rail-menu";
 

@@ -159,64 +159,77 @@ const CintaMundial = () => {
     // deja dos cintas apiladas, y al cruzar el corte se acumularian.
     destino.innerHTML = "";
 
-    const contenedor = document.createElement("div");
-    contenedor.className = "tradingview-widget-container";
-    const hueco = document.createElement("div");
-    hueco.className = "tradingview-widget-container__widget";
-    contenedor.appendChild(hueco);
-
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.async = true;
-    script.src =
-      "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
-    // La configuracion va como TEXTO dentro del script, que es como lo pide TradingView.
-    script.text = JSON.stringify({
-      symbols: estrecho ? SIMBOLOS_MOVIL(oro) : SIMBOLOS_ESCRITORIO(oro),
-      showSymbolLogo: true,
-      isTransparent: true,
-      // `compact` y no `adaptive`: en adaptive TradingView pinta dos lineas por simbolo
-      // -- nombre arriba, precio abajo -- y pide 72 px de alto. La franja mide 46, asi
-      // que le cortabamos la mitad y se veia amputado. En compact va todo en una linea,
-      // que es como van nuestras cifras: los dos lados pesan lo mismo sin estirar la
-      // cabecera. Medido antes de cambiarlo: iframe 72 px en una caja de 46.
-      displayMode: "compact",
-      colorTheme: "dark",
-      // El idioma del documento: TradingView acepta "es" y "en" tal cual.
-      locale: lang,
-    });
-    contenedor.appendChild(script);
-    destino.appendChild(contenedor);
-
-    // El iframe lo crea su script cuando quiere, no nosotros, asi que se le espera.
-    // Dentro trae un enlace por simbolo: hasta trece paradas del tabulador antes de llegar a
-    // la cabecera, en cada pagina. `tabindex="-1"` saca el marco entero del recorrido
-    // del teclado sin esconderselo a un lector de pantalla, que sigue pudiendo leerlo,
-    // y el `title` le da el nombre que un marco necesita para anunciarse.
-    const domar = () => {
-      destino.querySelectorAll("iframe").forEach((marco) => {
-        if (marco.getAttribute("tabindex") !== "-1") marco.setAttribute("tabindex", "-1");
-        if (marco.getAttribute("title") !== tituloDelMarco) {
-          marco.setAttribute("title", tituloDelMarco);
-        }
-      });
-    };
-    domar();
+    // **Cuando el navegador esté libre**, no al montar. El script de TradingView pesa y
+    // arranca su propio marco con más scripts; inyectado al pintar la cabecera competía
+    // con la portada por la red y el procesador justo cuando el lector espera ver algo.
+    // Llega igual medio segundo después, y nadie mira primero la cinta de mercados.
     let vigia = null;
-    if (typeof MutationObserver !== "undefined") {
-      // Tambien atributos: si el script reescribe el `title` o el `tabindex` despues
-      // de crear el marco, se vuelven a poner. `domar` no escribe si ya estan bien, asi
-      // que esto no se realimenta.
-      vigia = new MutationObserver(domar);
-      vigia.observe(destino, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["tabindex", "title"],
+    const montar = () => {
+      const contenedor = document.createElement("div");
+      contenedor.className = "tradingview-widget-container";
+      const hueco = document.createElement("div");
+      hueco.className = "tradingview-widget-container__widget";
+      contenedor.appendChild(hueco);
+
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.async = true;
+      script.src =
+        "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
+      // La configuracion va como TEXTO dentro del script, que es como lo pide TradingView.
+      script.text = JSON.stringify({
+        symbols: estrecho ? SIMBOLOS_MOVIL(oro) : SIMBOLOS_ESCRITORIO(oro),
+        showSymbolLogo: true,
+        isTransparent: true,
+        // `compact` y no `adaptive`: en adaptive TradingView pinta dos lineas por simbolo
+        // -- nombre arriba, precio abajo -- y pide 72 px de alto. La franja mide 46, asi
+        // que le cortabamos la mitad y se veia amputado. En compact va todo en una linea,
+        // que es como van nuestras cifras: los dos lados pesan lo mismo sin estirar la
+        // cabecera. Medido antes de cambiarlo: iframe 72 px en una caja de 46.
+        displayMode: "compact",
+        colorTheme: "dark",
+        // El idioma del documento: TradingView acepta "es" y "en" tal cual.
+        locale: lang,
       });
-    }
+      contenedor.appendChild(script);
+      destino.appendChild(contenedor);
+
+      // El iframe lo crea su script cuando quiere, no nosotros, asi que se le espera.
+      // Dentro trae un enlace por simbolo: hasta trece paradas del tabulador antes de llegar a
+      // la cabecera, en cada pagina. `tabindex="-1"` saca el marco entero del recorrido
+      // del teclado sin esconderselo a un lector de pantalla, que sigue pudiendo leerlo,
+      // y el `title` le da el nombre que un marco necesita para anunciarse.
+      const domar = () => {
+        destino.querySelectorAll("iframe").forEach((marco) => {
+          if (marco.getAttribute("tabindex") !== "-1") marco.setAttribute("tabindex", "-1");
+          if (marco.getAttribute("title") !== tituloDelMarco) {
+            marco.setAttribute("title", tituloDelMarco);
+          }
+        });
+      };
+      domar();
+      if (typeof MutationObserver !== "undefined") {
+        // Tambien atributos: si el script reescribe el `title` o el `tabindex` despues
+        // de crear el marco, se vuelven a poner. `domar` no escribe si ya estan bien, asi
+        // que esto no se realimenta.
+        vigia = new MutationObserver(domar);
+        vigia.observe(destino, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["tabindex", "title"],
+        });
+      }
+    };
+
+    const ocioso = typeof window.requestIdleCallback === "function";
+    const turno = ocioso
+      ? window.requestIdleCallback(montar, { timeout: 2500 })
+      : window.setTimeout(montar, 1200);
 
     return () => {
+      if (ocioso) window.cancelIdleCallback(turno);
+      else window.clearTimeout(turno);
       vigia?.disconnect();
       destino.innerHTML = "";
     };

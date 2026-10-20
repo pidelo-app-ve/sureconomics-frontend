@@ -8,6 +8,7 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
+import "../../styles/cuenta.css";
 
 export const CuentaEnvioEditar = () => {
   const { t } = useIdioma();

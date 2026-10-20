@@ -6,6 +6,7 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { actualizarMiPerfil } from "../../services/userAuthService";
+import "../../styles/cuenta.css";
 
 /**
  * Mi perfil: editable, con retrato.

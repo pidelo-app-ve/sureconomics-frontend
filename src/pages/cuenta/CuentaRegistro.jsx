@@ -10,6 +10,7 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
+import "../../styles/cuenta.css";
 
 /**
  * Crear una cuenta. Cuatro campos.

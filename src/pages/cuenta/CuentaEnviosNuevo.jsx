@@ -7,6 +7,7 @@ import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 import { SubmissionForm } from "../../components/submissions/SubmissionForm";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
+import "../../styles/cuenta.css";
 
 export const CuentaEnviosNuevo = () => {
   const { t } = useIdioma();

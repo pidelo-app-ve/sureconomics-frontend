@@ -6,6 +6,7 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
+import "../../styles/cuenta.css";
 
 export const CuentaVerificarEmail = () => {
   const { t } = useIdioma();

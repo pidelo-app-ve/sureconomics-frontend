@@ -52,6 +52,7 @@ import { EditorConImagenes } from "../../components/admin/cuerpo/EditorConImagen
 import { VistaPreviaDePieza } from "../../components/admin/VistaPreviaDePieza";
 import { IconoOjo } from "../../components/admin/cuerpo/iconos";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
+import { enlaceWeb } from "../../lib/enlaces";
 
 /**
  * Which extra fields each format asks for.
@@ -1538,7 +1539,7 @@ export const AdminPostEditor = () => {
                                         biblioteca de archivos:{" "}
                                         <a
                                             className="se-link"
-                                            href={form.featured_image_url}
+                                            href={enlaceWeb(form.featured_image_url) || undefined}
                                             target="_blank"
                                             rel="noreferrer"
                                         >

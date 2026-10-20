@@ -51,3 +51,5 @@ jobs:
       # compartir un artículo, que es de las cosas que nadie nota hasta que importa.
       - name: Prueba de las vistas previas
         run: npm run test:og
+      - name: Enlaces que se pintan
+        run: npm run test:enlaces

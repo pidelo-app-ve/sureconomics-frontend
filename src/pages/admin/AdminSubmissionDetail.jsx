@@ -23,6 +23,7 @@ import {
 } from "../../services/adminSubmissionNotesService";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
+import { enlaceWeb } from "../../lib/enlaces";
 
 const normalizeStatusForSelect = (value) => {
   const s = String(value || "").toLowerCase();
@@ -275,7 +276,8 @@ export const AdminSubmissionDetail = () => {
   const title = adminPick(row, ["title"], "(sin título)");
   const excerpt = adminPick(row, ["excerpt", "summary"], "");
   const content = adminPick(row, ["content", "body"], "");
-  const img = adminPick(row, ["featured_image_url", "featuredImageUrl"], "");
+  // Lo escribio un lector: se abre solo si es una direccion web.
+  const img = enlaceWeb(adminPick(row, ["featured_image_url", "featuredImageUrl"], "")) || "";
   const rowStatus = adminPick(row, ["status"], "");
   const statusLabel = submissionStatusLabel(rowStatus);
   const statusMod = submissionStatusCssModifier(rowStatus);

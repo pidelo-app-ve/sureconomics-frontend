@@ -8,6 +8,7 @@ import { fetchPieceDocument } from "../../services/documentService";
 import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
 import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
+import { enlaceWeb, esDeDominio } from "../../lib/enlaces";
 
 /** Las mismas tallas que las tarjetas: las que genera el backend al subir. */
 const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
@@ -58,7 +59,9 @@ OpinionBlock.propTypes = { titulo: PropTypes.string.isRequired };
  */
 const Fuentes = ({ fuentes }) => {
   const { t } = useIdioma();
-  const filas = (fuentes ?? []).filter((f) => f?.nombre);
+  const filas = (fuentes ?? [])
+    .filter((f) => f?.nombre)
+    .map((f) => ({ ...f, url: enlaceWeb(f.url) }));
   if (!filas.length) return null;
   return (
     <div className="se-sources">
@@ -94,14 +97,17 @@ Fuentes.propTypes = {
  * arrive are a YouTube watch URL, a Vimeo one, and a direct file. Anything else
  * becomes a plain link rather than a broken frame.
  */
-const embedDe = (url) => {
+const embedDe = (valor) => {
+  // Solo una direccion web entra en un `src` o un `href`; lo demas se queda en nada.
+  const url = enlaceWeb(valor);
   if (!url) return null;
 
   // Nuestro propio servicio de video, primero: la direccion que manda el backend ya es
   // la del reproductor, asi que se usa tal cual. Sin esta rama caia hasta el final y
   // se pintaba como un enlace suelto -- un video alojado por nosotros mostrandose peor
-  // que uno de YouTube.
-  if (/(?:cloudflarestream\.com|videodelivery\.net)\//.test(url)) {
+  // que uno de YouTube. Se mira el dominio de verdad, no que el texto lo contenga: un
+  // iframe abre lo que le den, y "contiene cloudflarestream.com" lo cumple cualquiera.
+  if (esDeDominio(url, "cloudflarestream.com", "videodelivery.net")) {
     return { tipo: "iframe", src: url };
   }
 

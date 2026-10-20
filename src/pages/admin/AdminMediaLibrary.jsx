@@ -19,6 +19,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { enlaceWeb } from "../../lib/enlaces";
 
 const KINDS = [
     { value: "", label: "Todos" },
@@ -311,12 +312,12 @@ export const AdminMediaLibrary = () => {
                                                 />
                                             ) : null}
                                             {row.original_filename || "—"}
-                                            {row.url ? (
+                                            {enlaceWeb(row.url) ? (
                                                 <>
                                                     <br />
                                                     <a
                                                         className="se-link"
-                                                        href={row.url}
+                                                        href={enlaceWeb(row.url)}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         style={{ fontSize: "0.85em" }}

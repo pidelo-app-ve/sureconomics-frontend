@@ -9,6 +9,7 @@
  */
 
 import { formatearFecha, idiomaActual, tActual } from "../i18n/motor";
+import { enlaceWeb } from "./enlaces";
 
 /**
  * Display metadata per format slug. Copy that the API owns is read from it instead.
@@ -342,10 +343,10 @@ export const piezaFromApi = (row) => {
     // fallback covers a response from a build that predates the list, so the
     // deploys do not have to be ordered.
     fuentes: (row.sources ?? (row.source_name ? [{ name: row.source_name, url: row.source_url }] : []))
-      .map((f) => ({ nombre: (f.name ?? "").trim(), url: f.url || null }))
+      .map((f) => ({ nombre: (f.name ?? "").trim(), url: enlaceWeb(f.url) }))
       .filter((f) => f.nombre),
     imagen: varianteDe(row.slug ?? ""),
-    imagenUrl: row.image_asset?.url || row.featured_image_url || null,
+    imagenUrl: enlaceWeb(row.image_asset?.url) || enlaceWeb(row.featured_image_url),
     // El ancho de la original decide qué tallas existen en nuestro bucket: el backend no
     // genera ninguna mayor que el archivo, así que pedirla devolvería un 404 y dejaría
     // la tarjeta sin foto. Nulo para lo que viene de Cloudinary, donde los anchos los
@@ -355,8 +356,8 @@ export const piezaFromApi = (row) => {
     // carrying a legacy `featured_image_url` has no asset behind it and so no
     // credit, which is accurate -- nobody ever recorded one for those.
     imagenCredito: row.image_asset?.credit || null,
-    videoUrl: row.video_asset?.url || null,
-    audioUrl: row.audio_asset?.url || null,
+    videoUrl: enlaceWeb(row.video_asset?.url),
+    audioUrl: enlaceWeb(row.audio_asset?.url),
     // Campo compartido entre entrevista y podcast -- nunca es las dos a la vez, así
     // que no hay ambigüedad, y así InterviewGrid y PodcastGrid leen `p.duracion`
     // igual sin que a cada una le haga falta saber de qué formato viene la pieza.

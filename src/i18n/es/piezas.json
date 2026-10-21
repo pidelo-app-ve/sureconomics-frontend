@@ -122,6 +122,10 @@
       "guardarParaDespues": "Guardar para después",
       "error": "No se pudo guardar. Inténtelo de nuevo."
     },
+    "idioma": {
+      "leer": "Read in English",
+      "titulo": "Leer esta pieza en inglés"
+    },
     "geo": {
       "mundo": "Mundo",
       "americas": "Las Américas"

@@ -116,6 +116,41 @@ AvisoDeIdioma.propTypes = {
   pieza: PropTypes.shape({ tieneIngles: PropTypes.bool, traduccionAutomatica: PropTypes.bool }).isRequired,
 };
 
+/**
+ * «Read in English» / «Leer en español», junto a Guardar: lleva a la misma pieza en el
+ * otro idioma. Solo si la pieza tiene inglés -- sin él, `/en` enseña el original en
+ * español con un aviso, y un botón que promete inglés y no lo da es peor que no tenerlo.
+ *
+ * Es un enlace y no traduce nada al pulsarlo: la traducción ya está hecha (desde el
+ * editor o con «Traducir el archivo»). La etiqueta va en el idioma de destino, que es
+ * el que lee quien la busca, y por eso lleva su `lang`.
+ */
+const BotonDeIdioma = ({ pieza }) => {
+  const { t, rutaEnOtroIdioma, otroIdioma } = useIdioma();
+  if (!pieza.tieneIngles) return null;
+  return (
+    <Link
+      to={rutaEnOtroIdioma}
+      hrefLang={otroIdioma}
+      className="se-piece__idioma"
+      title={t("piezas.idioma.titulo")}
+    >
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        <path
+          d="M3.75 12h16.5M12 3.75c2.3 2.2 3.4 5 3.4 8.25s-1.1 6.05-3.4 8.25c-2.3-2.2-3.4-5-3.4-8.25S9.7 5.95 12 3.75Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span lang={otroIdioma}>{t("piezas.idioma.leer")}</span>
+    </Link>
+  );
+};
+BotonDeIdioma.propTypes = { pieza: PropTypes.shape({ tieneIngles: PropTypes.bool }).isRequired };
+
 export const Pieza = () => {
   const { slug } = useParams();
   const { pathname } = useLocation();
@@ -332,6 +367,7 @@ export const Pieza = () => {
                     después de leerlo». El botón faltaba por completo -- la sección de
                     marcadores de la cuenta existía con su pantalla y su endpoint, pero
                     nada la alimentaba, así que no podía tener nada dentro. */}
+                <BotonDeIdioma pieza={pieza} />
                 <BotonDeMarcador postId={pieza.id} />
                 <ShareButtons
                   url={enlaceParaCompartir(canonica, pieza.version)}

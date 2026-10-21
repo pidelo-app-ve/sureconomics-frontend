@@ -11,8 +11,9 @@ import { unwrapEntity } from "../../services/adminResponseUtils";
 /**
  * «Traducir el archivo»: las piezas publicadas que aún no tienen inglés, en lote.
  *
- * El trabajo lo hace el servidor con la API de lotes de Anthropic, por grupos de cien y
- * sin prisa (ver `services/traduccion_archivo.py` en el backend): esta pantalla sólo lo
+ * El trabajo lo hace el servidor: con Anthropic, por su API de lotes, en grupos de cien;
+ * con Cloudflare, que no tiene lotes, pieza a pieza (ver `services/traduccion_archivo.py`
+ * en el backend; `d.proveedor` y `d.modo` dicen cuál). Esta pantalla sólo lo
  * pone en marcha y enseña cómo va. Mientras hay algo en curso, pregunta cada quince
  * segundos. Se puede cerrar: el trabajo sigue solo y retoma tras un reinicio.
  */
@@ -69,8 +70,11 @@ export const AdminTraducciones = () => {
       description: (
         <>
           Se traducirán al inglés <strong>{d.pendientes}</strong> piezas publicadas que aún no lo tienen
-          {usd(d.costo_estimado_usd) ? <>, por unos <strong>{usd(d.costo_estimado_usd)}</strong> de crédito de Anthropic</> : null}.
-          Salen en /en con el aviso de traducción automática hasta que alguien las revise. Suele tardar menos de una hora.
+          {usd(d.costo_estimado_usd) ? <>, por unos <strong>{usd(d.costo_estimado_usd)}</strong> de crédito de {d.proveedor}</> : null}.
+          Salen en /en con el aviso de traducción automática hasta que alguien las revise.{" "}
+          {d.modo === "una_a_una"
+            ? `Van de tres en tres: unos ${Math.max(1, Math.ceil((d.pendientes * 6) / 60))} minutos.`
+            : "Suele tardar menos de una hora."}
         </>
       ),
       confirmLabel: "Traducir",
@@ -91,7 +95,7 @@ export const AdminTraducciones = () => {
   const cancelar = async () => {
     const ok = await confirm({
       title: "Cancelar la traducción",
-      description: "No se mandarán más piezas. Lo que Anthropic ya haya traducido se guarda igual.",
+      description: "No se mandarán más piezas. Lo que ya esté traducido se guarda igual.",
       confirmLabel: "Cancelar traducción",
       cancelLabel: "Seguir",
     });
@@ -137,7 +141,7 @@ export const AdminTraducciones = () => {
             <span className="se-admin-meta-hint">
               {d.disponible
                 ? `${d.pendientes} piezas publicadas sin inglés${usd(d.costo_estimado_usd) ? ` · costo aproximado: ${usd(d.costo_estimado_usd)}` : ""} · modelo: ${d.modelo}`
-                : "Sin clave de Anthropic (ANTHROPIC_API_KEY) en el servidor: no se puede traducir."}
+                : "Sin clave de Anthropic (ANTHROPIC_API_KEY) ni de Cloudflare (CF_IA_ACCOUNT_ID y CF_IA_API_TOKEN) en el servidor: no se puede traducir."}
             </span>
           </div>
           {puede && d.disponible && !enMarcha ? (
@@ -172,8 +176,9 @@ export const AdminTraducciones = () => {
             </div>
           ) : null}
           <p className="se-admin-meta-hint" style={{ margin: 0 }}>
-            Traducidas: <strong>{d.traducidas}</strong> · fallidas: {d.fallidas} · saltadas: {d.saltadas} · en
-            Anthropic ahora: {d.en_proceso} · esperando turno: {d.en_cola} · de {d.total}
+            Traducidas: <strong>{d.traducidas}</strong> · fallidas: {d.fallidas} · saltadas: {d.saltadas}
+            {d.modo === "lotes" ? ` · en Anthropic ahora: ${d.en_proceso}` : ""} · esperando turno: {d.en_cola} · de{" "}
+            {d.total}
           </p>
           <p className="se-admin-meta-hint" style={{ marginBottom: 0 }}>
             Empezó: {cuando(d.iniciado_en)}
@@ -187,7 +192,7 @@ export const AdminTraducciones = () => {
           ) : null}
           {d.ultimo_error ? (
             <p className="se-admin-meta-hint" style={{ marginBottom: 0, color: "var(--color-red, #b42318)" }}>
-              Último problema al hablar con Anthropic: {d.ultimo_error}. Se reintenta solo cada minuto.
+              Último problema al hablar con {d.proveedor}: {d.ultimo_error}. Se reintenta solo cada minuto.
             </p>
           ) : null}
           {d.errores?.length ? (

@@ -111,7 +111,7 @@ export const Contacto = () => {
   - La página de la pieza pasa `soloEspanol: !pieza.tieneIngles` y enseña arriba el aviso
     de idioma (`AvisoDeIdioma`): «solo en español», o «traducción automática» con enlace
     al original si `pieza.traduccionAutomatica`.
-  - El botón «Traducir con Claude» solo aparece si el servidor tiene `ANTHROPIC_API_KEY`.
+  - El botón «Traducir con Claude» solo aparece si el servidor tiene `ANTHROPIC_API_KEY`, o `CF_IA_ACCOUNT_ID` y `CF_IA_API_TOKEN` para traducir por Cloudflare.
 - Páginas que no deben indexarse (cuenta, baja del boletín, 404): `noindex: true`, como antes.
 
 ## Lo que no se toca

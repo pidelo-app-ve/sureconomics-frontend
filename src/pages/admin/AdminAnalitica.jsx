@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { getConsentimiento, getEnVivo, getResumen } from "../../services/adminAnaliticaService";
 import "../../styles/analitica-consentimiento.css";
+import { enlaceWeb } from "../../lib/enlaces";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
@@ -395,7 +396,8 @@ const Barras = ({ datos, enlazar }) => {
           {enlazar ? (
             <a
               className="se-aud__etiqueta se-aud__etiqueta--enlace"
-              href={d.clave}
+              // La ruta la manda el navegador de cualquier visitante: solo rutas del sitio.
+              href={enlaceWeb(d.clave) || undefined}
               target="_blank"
               rel="noreferrer"
               title={d.clave}

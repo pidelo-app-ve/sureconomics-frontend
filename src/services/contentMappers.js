@@ -2,11 +2,6 @@ import { tActual } from "../i18n/motor";
 
 const asString = (value) => (typeof value === "string" ? value : value == null ? "" : String(value));
 
-const asNumber = (value) => {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-};
-
 const pickFirstNonEmpty = (...values) => values.find((v) => v !== undefined && v !== null && String(v).trim() !== "");
 
 const normalizeSlug = (value) => {
@@ -117,18 +112,6 @@ export const normalizePost = (raw) => {
   };
 };
 
-export const normalizeHeadline = (raw) => {
-  if (!raw || typeof raw !== "object") return null;
-  return {
-    id: asNumber(raw.id) ?? raw.id,
-    title: asString(raw.title) ?? "",
-    summary: asString(raw.summary ?? raw.excerpt) ?? "",
-    sourceName: asString(raw.source_name ?? raw.sourceName) ?? "",
-    sourceUrl: asString(raw.source_url ?? raw.sourceUrl) ?? "",
-    publishedAt: asString(raw.published_at ?? raw.publishDate) ?? "",
-    isActive: raw.is_active !== false,
-  };
-};
 
 export const normalizePaginatedPosts = (payload) => {
   if (!payload) {

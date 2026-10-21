@@ -89,9 +89,15 @@
     }
   },
   "comun": {
-    "antiBots": { "noPaso": "We couldn't confirm you're not a robot. Reload the page and try again." },
+    "antiBots": {
+      "noPaso": "We couldn't confirm you're not a robot. Reload the page and try again."
+    },
     "leerMas": "Read more",
-    "versionNueva": { "titulo": "There is a new version of the site", "texto": "We published it while you had this page open. Reload to keep reading.", "recargar": "Reload the page" },
+    "versionNueva": {
+      "titulo": "There is a new version of the site",
+      "texto": "We published it while you had this page open. Reload to keep reading.",
+      "recargar": "Reload the page"
+    },
     "volverInicio": "Back to home",
     "cargando": "Loading…",
     "reintentar": "Try again",
@@ -106,8 +112,6 @@
     "sinResultados": "No results",
     "buscar": "Search",
     "limpiar": "Clear",
-    "todos": "All",
-    "todas": "All",
     "guardar": "Save",
     "cancelar": "Cancel",
     "compartir": "Share"

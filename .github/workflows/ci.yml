@@ -53,3 +53,9 @@ jobs:
         run: npm run test:og
       - name: Enlaces que se pintan
         run: npm run test:enlaces
+      - name: Mapa del sitio
+        run: npm run test:sitemap
+      - name: Motor de idiomas
+        run: npm run test:i18n
+      - name: Juegos (guacamaya y La Clave)
+        run: npm run test:guacamaya && npm run test:clave

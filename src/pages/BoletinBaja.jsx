@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { unsubscribeFromNewsletter } from "../services/newsletterService";
+import { unsubscribeFromNewsletter, volverAlBoletin } from "../services/newsletterService";
 import { BRAND } from "../data/surEconomicsMock";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
@@ -34,6 +34,7 @@ export const BoletinBaja = () => {
   useMetaPagina({ title: t("boletin.baja.meta.titulo", { marca: BRAND.name }), noindex: true });
   const token = params.get("token") || "";
   const [estado, setEstado] = useState({ status: token ? "loading" : "sin-token", email: "" });
+  const [vuelta, setVuelta] = useState("");
 
   // React 18 en modo estricto monta cada efecto dos veces en desarrollo. La baja es
   // idempotente en el servidor, así que dos llamadas no romperían nada -- pero el
@@ -87,7 +88,32 @@ export const BoletinBaja = () => {
                 })}
               </p>
               <p className="se-admin-meta-hint">{t("boletin.baja.sinQuerer")}</p>
+              <button
+                type="button"
+                className="se-btn se-btn--secondary"
+                disabled={vuelta === "enviando"}
+                onClick={async () => {
+                  setVuelta("enviando");
+                  try {
+                    await volverAlBoletin(token);
+                    setEstado({ status: "vuelto", email: estado.email });
+                  } catch {
+                    setVuelta("error");
+                  }
+                }}
+              >
+                {t("boletin.baja.volver")}
+              </button>
+              {vuelta === "error" ? <p className="se-admin-meta-hint" role="alert">{t("boletin.baja.error")}</p> : null}
             </>
+          ) : null}
+
+          {estado.status === "vuelto" ? (
+            <p className="se-gate__lead">
+              {t("boletin.baja.vuelto", {
+                correo: estado.email ? <strong>{estado.email}</strong> : t("boletin.baja.eseCorreo"),
+              })}
+            </p>
           ) : null}
 
           {estado.status === "sin-token" ? (

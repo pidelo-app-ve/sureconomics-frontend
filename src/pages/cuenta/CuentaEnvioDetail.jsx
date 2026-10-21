@@ -10,6 +10,7 @@ import * as userMeService from "../../services/userMeService";
 import { ErrorState, LoadingState, Pagination } from "../../components/content";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import "../../styles/cuenta.css";
+import { enlaceWeb } from "../../lib/enlaces";
 
 const PencilIcon = () => (
   <svg className="se-submission-detail__edit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -191,7 +192,7 @@ export const CuentaEnvioDetail = () => {
             </div>
             <div className="se-submission-detail__media-caption">
               <span>{t("cuenta.envio.imagenDestacada")}</span>
-              <a href={s.featuredImageUrl} className="se-link" rel="noopener noreferrer" target="_blank">
+              <a href={enlaceWeb(s.featuredImageUrl) || undefined} className="se-link" rel="noopener noreferrer" target="_blank">
                 {t("cuenta.envio.abrirOriginal")}
               </a>
             </div>
@@ -201,7 +202,7 @@ export const CuentaEnvioDetail = () => {
         {hasImageUrl && featuredImageFailed ? (
           <p className="se-submission-detail__media-fallback" role="alert">
             {t("cuenta.envio.sinVistaPrevia")}{" "}
-            <a href={s.featuredImageUrl} className="se-link" rel="noopener noreferrer" target="_blank">
+            <a href={enlaceWeb(s.featuredImageUrl) || undefined} className="se-link" rel="noopener noreferrer" target="_blank">
               {t("cuenta.envio.abrirUrl")}
             </a>
           </p>

@@ -31,6 +31,7 @@ check("acepta http", enlaceWeb("http://ejemplo.org") === "http://ejemplo.org");
 check("recorta espacios", enlaceWeb("  https://ejemplo.org  ") === "https://ejemplo.org");
 check("una ruta del sitio pasa (así llegan las fotos de R2)", enlaceWeb("/media/image/2026/10/foto-abc.png") === "/media/image/2026/10/foto-abc.png");
 check("una ruta del sitio no es de dominio", !esDeDominio("/media/x", "cloudflarestream.com"));
+check("/\\otro.com no es una ruta del sitio", enlaceWeb("/\\evil.example") === null);
 
 console.log("esDeDominio");
 check("subdominio de Stream", esDeDominio("https://customer-abc.cloudflarestream.com/xyz/iframe", "cloudflarestream.com"));

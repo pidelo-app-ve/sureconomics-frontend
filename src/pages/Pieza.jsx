@@ -62,7 +62,7 @@ const NoEncontrada = () => {
 /**
  * La pieza que ya vino dentro del HTML, si es esta (tal cual, sin convertir).
  *
- * `api/pieza.js` la mete en `window.__SE_PIEZA__` al servir la página, para que los
+ * `api/pieza.js` la mete en `<script type="application/json" id="se-pieza">` al servir la página, para que los
  * buscadores vean el texto. Aprovecharla aquí ahorra pedirla otra vez a la API y, sobre
  * todo, evita que el artículo que ya se veía desaparezca tras un «Cargando…» y vuelva.
  * Se usa una sola vez: al navegar a otra pieza dentro del sitio, se pide como siempre.
@@ -72,7 +72,8 @@ const tomarPiezaDelHtml = (slug) => {
   // a la función que prepara el estado inicial, y borrarla aquí dejaba la segunda
   // llamada sin pieza -- y la página la volvía a pedir a la API.
   try {
-    const datos = window.__SE_PIEZA__;
+    const nodo = document.getElementById("se-pieza");
+    const datos = nodo ? JSON.parse(nodo.textContent || "null") : null;
     return datos && datos.slug === slug ? datos : null;
   } catch {
     return null;
@@ -145,7 +146,7 @@ export const Pieza = () => {
     // La pieza ya llegó con el HTML: solo faltan las relacionadas.
     if (state.delHtml && state.fila?.slug === slug) {
       try {
-        window.__SE_PIEZA__ = null;
+        document.getElementById("se-pieza")?.remove();
       } catch {
         /* nada */
       }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
 import { getMarketTicker } from "../../services/marketTickerService";
+import { enlaceWeb } from "../../lib/enlaces";
 
 /**
  * Market strip: the closing figures the newsroom typed in.
@@ -353,10 +354,10 @@ export const MarketTicker = () => {
             </div>
           </div>
           {ticker.caption ? (
-            ticker.sourceUrl ? (
+            enlaceWeb(ticker.sourceUrl) ? (
               <a
                 className="se-ticker__stamp"
-                href={ticker.sourceUrl}
+                href={enlaceWeb(ticker.sourceUrl)}
                 target="_blank"
                 rel="noreferrer noopener"
               >

@@ -273,7 +273,8 @@ const DownloadGate = ({ pieza }) => {
           exigirSesion: !abierto,
         });
       } else {
-        window.open(doc.url, "_blank", "noopener,noreferrer");
+        const destino = enlaceWeb(doc.url);
+        if (destino) window.open(destino, "_blank", "noopener,noreferrer");
       }
       setState({ status: "idle", error: "" });
     } catch (err) {

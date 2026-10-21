@@ -26,7 +26,7 @@
  * fecha, imagen y cuerpo en el `<div id="root">`, y la ficha `NewsArticle` (JSON-LD)
  * que Google usa para Noticias destacadas. No es contenido para el robot y otro para la
  * persona: es el mismo texto que React pinta al cargar, y React lo sustituye. Para que
- * ese relevo no parpadee, la pieza también viaja en `window.__SE_PIEZA__` y la página
+ * ese relevo no parpadee, la pieza también viaja en `<script id="se-pieza">` (JSON) y la página
  * la usa en vez de volver a pedirla (ver `pages/Pieza.jsx`).
  *
  * Y una dirección que no corresponde a ninguna pieza responde 404 con `noindex`. Antes
@@ -395,7 +395,10 @@ export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, i
   }
   if (datos) {
     // La pieza tal como la da la API, para que la página no la pida otra vez.
-    bloque += `\n    <script>window.__SE_PIEZA__=${jsonEnScript(datos)}</script>`;
+    // Como JSON y no como `window.__SE_PIEZA__ = …`: un `<script type="application/json">`
+    // no se ejecuta, así que la política de seguridad del navegador (CSP) no tiene que
+    // permitir scripts en línea. La página lo lee con `JSON.parse` (ver `Pieza.jsx`).
+    bloque += `\n    <script type="application/json" id="se-pieza">${jsonEnScript(datos)}</script>`;
   }
   if (noindex) {
     bloque += `\n    <meta name="robots" content="noindex, follow" />`;

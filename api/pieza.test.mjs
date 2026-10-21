@@ -188,8 +188,8 @@ await conFetch(fetchNormal(CON_CUERPO), async () => {
   check("el titular va en un h1 dentro del root", /<h1 class="se-piece__title">Concertación &quot;tripartita&quot;/.test(raiz));
   check("el cuerpo va en el HTML", raiz.includes("Primer párrafo con <strong>datos</strong>"));
   check("la firma y la fecha también", raiz.includes("Por Pablo Quintero") && raiz.includes('datetime="2026-08-25T15:00:00+00:00"'));
-  // En el HTML visible no queda nada ejecutable. (En `__SE_PIEZA__` el cuerpo viaja
-  // escapado como texto, igual que llegaba antes de la API a la página.)
+  // En el HTML visible no queda nada ejecutable. (En `se-pieza` el cuerpo viaja
+  // escapado como texto JSON, igual que llegaba antes de la API a la página.)
   check("sin scripts ni manejadores del cuerpo", !raiz.includes("<script") && !raiz.includes("onclick") && !raiz.includes("alert(1)"));
   const ld = (h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
   let ficha = null;
@@ -200,8 +200,12 @@ await conFetch(fetchNormal(CON_CUERPO), async () => {
     && ficha?.image?.[0]?.includes("w_1200") && ficha?.author?.name === "Pablo Quintero"
     && ficha?.publisher?.name === "SurEconomics" && ficha?.publisher?.logo?.url);
   check("la URL de la ficha es la canónica", ficha?.mainEntityOfPage?.["@id"] === "https://www.sureconomics.com/articulos/concertacion-tripartita");
-  check("los datos para React viajan escapados",
-    h.includes("window.__SE_PIEZA__=") && !/window\.__SE_PIEZA__=[^\n]*<\/script>[^\n]*alert/.test(h) && h.includes("\\u003cscript"));
+  const datosPieza = (h.match(/<script type="application\/json" id="se-pieza">([\s\S]*?)<\/script>/) || [])[1];
+  let piezaLeida = null;
+  try { piezaLeida = JSON.parse(datosPieza); } catch { /* falla abajo */ }
+  check("los datos para React viajan escapados y como JSON que no se ejecuta",
+    piezaLeida?.slug === "concertacion-tripartita" && !h.includes("window.__SE_PIEZA__") && datosPieza.includes("\\u003cscript"),
+    datosPieza?.slice(0, 80));
 });
 
 // Una firma de la redacción sale como el medio, no como una persona llamada «Redacción».

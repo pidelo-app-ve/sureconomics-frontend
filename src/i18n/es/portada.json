@@ -62,24 +62,6 @@
       "oro": "Oro",
       "cierreDel": "Cierre del {fecha}"
     },
-    "titulares": {
-      "titulo": "Titulares",
-      "controles": "Controles de titulares",
-      "anterior": "Anterior titular",
-      "siguiente": "Siguiente titular",
-      "cargando": "Cargando titulares…",
-      "cargandoTexto": "Obteniendo resumen de noticias desde el servidor.",
-      "error": "No pudimos cargar los titulares",
-      "vacio": "No hay titulares publicados por el momento.",
-      "carril": "Titulares (desplazamiento horizontal)",
-      "titularNDeM": "Titular {n} de {total}"
-    },
-    "hero": {
-      "destacado": "Destacado principal",
-      "claim": "Análisis y perspectiva sobre economía, mercados e inversión en la región.",
-      "explorarArticulos": "Explorar artículos",
-      "accesoPremium": "Acceso premium"
-    },
     "boletin": {
       "kicker": "Boletín semanal · los lunes por la mañana",
       "titulo": "Entorno en Viñetas",
@@ -92,11 +74,6 @@
       "correoIncompleto": "Ese correo no parece completo. Revíselo y vuelva a probar.",
       "demasiadosIntentos": "Demasiados intentos seguidos. Espere un momento.",
       "fallo": "No se pudo completar la suscripción. Inténtelo de nuevo."
-    },
-    "blog": {
-      "ultimas": "Últimas publicaciones",
-      "destacados": "Destacados",
-      "tambien": "También te puede interesar"
     },
     "relleno": {
       "chart": "Gráfico",

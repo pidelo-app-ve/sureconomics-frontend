@@ -86,21 +86,6 @@
       "errorTitulo": "Error",
       "errorGenerico": "Something went wrong while loading the data.",
       "demasiadasSolicitudes": "Too many requests in a short time. Wait a few minutes and try again."
-    },
-    "filtros": {
-      "rotulo": "Article filters",
-      "titulo": "Filters",
-      "buscarPlaceholder": "Search by title or summary…",
-      "tipoContenido": "Content type",
-      "temaPrincipal": "Main topic",
-      "regionGeo": "Region / geography",
-      "sector": "Sector",
-      "fechaDesde": "Date (from)",
-      "porAutor": "By author",
-      "categoria": "Category",
-      "seleccionarCategoria": "Select a category",
-      "etiqueta": "Tag",
-      "seleccionarEtiqueta": "Select a tag"
     }
   }
 }

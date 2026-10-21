@@ -89,9 +89,15 @@
     }
   },
   "comun": {
-    "antiBots": { "noPaso": "No pudimos comprobar que no es un robot. Recargue la página y vuelva a intentarlo." },
+    "antiBots": {
+      "noPaso": "No pudimos comprobar que no es un robot. Recargue la página y vuelva a intentarlo."
+    },
     "leerMas": "Leer más",
-    "versionNueva": { "titulo": "Hay una versión nueva del sitio", "texto": "La publicamos mientras tenía esta página abierta. Recargue para seguir leyendo.", "recargar": "Recargar la página" },
+    "versionNueva": {
+      "titulo": "Hay una versión nueva del sitio",
+      "texto": "La publicamos mientras tenía esta página abierta. Recargue para seguir leyendo.",
+      "recargar": "Recargar la página"
+    },
     "volverInicio": "Volver al inicio",
     "cargando": "Cargando…",
     "reintentar": "Reintentar",
@@ -106,8 +112,6 @@
     "sinResultados": "Sin resultados",
     "buscar": "Buscar",
     "limpiar": "Limpiar",
-    "todos": "Todos",
-    "todas": "Todas",
     "guardar": "Guardar",
     "cancelar": "Cancelar",
     "compartir": "Compartir"

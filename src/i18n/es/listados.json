@@ -86,21 +86,6 @@
       "errorTitulo": "Error",
       "errorGenerico": "Ocurrió un error al cargar los datos.",
       "demasiadasSolicitudes": "Demasiadas solicitudes en poco tiempo. Espere unos minutos e inténtelo de nuevo."
-    },
-    "filtros": {
-      "rotulo": "Filtros de artículos",
-      "titulo": "Filtros",
-      "buscarPlaceholder": "Buscar por título o resumen…",
-      "tipoContenido": "Tipo de contenido",
-      "temaPrincipal": "Tema principal",
-      "regionGeo": "Región / geografía",
-      "sector": "Sector",
-      "fechaDesde": "Fecha (desde)",
-      "porAutor": "Por Autor",
-      "categoria": "Categoría",
-      "seleccionarCategoria": "Seleccionar categoría",
-      "etiqueta": "Etiqueta",
-      "seleccionarEtiqueta": "Seleccionar etiqueta"
     }
   }
 }

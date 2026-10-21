@@ -6,7 +6,6 @@ import './styles/blog.css'
 import './styles/accesibilidad.css'
 import { RouterProvider } from "react-router-dom";  // Import RouterProvider to use the router
 import { router } from "./routes";  // Import the router configuration test
-import { StoreProvider } from './hooks/useGlobalReducer';  // Import the StoreProvider for global state management
 // Registra el diccionario en español y deja preparado el inglés. Ver `i18n/motor.js`.
 import "./i18n/diccionarios";
 import { AuthProvider } from "./context/AuthContext";
@@ -24,17 +23,14 @@ window.addEventListener("vite:preloadError", (evento) => {
 
 const Main = () => {
     return (
-        <React.StrictMode>  
-            {/* Provide global state to all components */}
-              <StoreProvider> 
-                  <AuthProvider>
-                    <UserAuthProvider>
-                        <ProveedorDeMarcadores>
-                      <RouterProvider router={router} />
+        <React.StrictMode>
+            <AuthProvider>
+                <UserAuthProvider>
+                    <ProveedorDeMarcadores>
+                        <RouterProvider router={router} />
                     </ProveedorDeMarcadores>
-                    </UserAuthProvider>
-                  </AuthProvider>
-              </StoreProvider>
+                </UserAuthProvider>
+            </AuthProvider>
         </React.StrictMode>
     );
 }

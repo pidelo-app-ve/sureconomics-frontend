@@ -18,7 +18,9 @@ export const enlaceWeb = (valor) => {
   if (typeof valor !== "string") return null;
   const texto = valor.trim();
   if (!texto) return null;
-  if (texto.startsWith("/")) return texto.startsWith("//") ? null : texto;
+  // `//otro.com` y `/\\otro.com` no son rutas del sitio: el navegador los lee como otro
+  // dominio (el segundo, porque trata `\\` como `/`).
+  if (texto.startsWith("/")) return /^\/[\\/]/.test(texto) ? null : texto;
   let url;
   try {
     url = new URL(texto);

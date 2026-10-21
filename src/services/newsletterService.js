@@ -42,6 +42,16 @@ export const unsubscribeFromNewsletter = async (token, { client } = {}) => {
   return c.request("/newsletter/baja", { method: "POST", json: { token } });
 };
 
+/**
+ * Volver a la lista con el mismo enlace de baja. Es la única forma de volver de quien se
+ * dio de baja: el formulario de alta ya no reactiva (cualquiera puede escribir cualquier
+ * correo en él), y este token solo lo tiene quien recibe el boletín.
+ */
+export const volverAlBoletin = async (token, { client } = {}) => {
+  const c = ensureClient(client);
+  return c.request("/newsletter/volver", { method: "POST", json: { token } });
+};
+
 /** La lista, para el panel. */
 export const listNewsletterSubscribers = async (params = {}) => {
   const raw = await adminRequest("/admin/newsletter", {

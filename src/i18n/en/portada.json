@@ -62,24 +62,6 @@
       "oro": "Gold",
       "cierreDel": "Close of {fecha}"
     },
-    "titulares": {
-      "titulo": "Headlines",
-      "controles": "Headline controls",
-      "anterior": "Previous headline",
-      "siguiente": "Next headline",
-      "cargando": "Loading headlines…",
-      "cargandoTexto": "Fetching the news digest from the server.",
-      "error": "We couldn't load the headlines",
-      "vacio": "No headlines have been published yet.",
-      "carril": "Headlines (scroll horizontally)",
-      "titularNDeM": "Headline {n} of {total}"
-    },
-    "hero": {
-      "destacado": "Lead feature",
-      "claim": "Analysis and perspective on economics, markets and investing across the region.",
-      "explorarArticulos": "Explore articles",
-      "accesoPremium": "Premium access"
-    },
     "boletin": {
       "kicker": "Weekly newsletter · Monday mornings",
       "titulo": "Entorno en Viñetas",
@@ -92,11 +74,6 @@
       "correoIncompleto": "That email address looks incomplete. Check it and try again.",
       "demasiadosIntentos": "Too many attempts in a row. Please wait a moment.",
       "fallo": "We couldn't complete your subscription. Please try again."
-    },
-    "blog": {
-      "ultimas": "Latest posts",
-      "destacados": "Featured",
-      "tambien": "You may also like"
     },
     "relleno": {
       "chart": "Chart",

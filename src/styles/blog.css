@@ -1133,7 +1133,7 @@
    Se agrupa de 768 arriba y no en el telefono: ahi el hueco ya es pequeno y los tres
    bloques repartidos se leen equilibrados. 768 es el corte de tableta de siempre, no
    un numero elegido para tapar esto. */
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 768px) and (max-width: 1239px) {
   .se-header__inner .se-hora--header {
     margin-left: auto;
   }
@@ -1153,8 +1153,10 @@
    arriba; entre 1100 y 1199 seguia faltando -- 94 px a 1100 -- y de ahi este corte.
    Apretar mas la tipografia no era una opcion: ya esta a 13 px.
    El precio es que el iPad en horizontal pasa a menu. Lo hacen bastantes diarios, y
-   un menu con los nueve enlaces en columna se usa mejor que una tira recortada. */
-@media (max-width: 1199px) {
+   un menu con los nueve enlaces en columna se usa mejor que una tira recortada.
+   La tercera, a 1240 (21-oct-2026), al entrar «Última hora»: medido, entre 1200 y 1239
+   faltaban 32 px aun cediendo «Inicio» y apretando huecos y letra. */
+@media (max-width: 1239px) {
   .se-header__burger {
     display: flex;
   }
@@ -1166,7 +1168,7 @@
 }
 
 /* Desktop: show nav + Subscribe, hide burger and overlay menu */
-@media (min-width: 1200px) {
+@media (min-width: 1240px) {
   .se-header__burger {
     display: none;
   }
@@ -13784,3 +13786,45 @@ html {
   width: 100%;
   margin-top: 0.6rem;
 }
+
+/* «Última hora» en el menú (21-oct-2026) ----------------------------------------
+   El enlace nuevo dejó al menú corto entre 1200 y 1599 px: medido, faltaban 77 px a
+   1200, 50 a 1280, 32 a 1366, 22 a 1440 y 70 a 1536 («Quiénes somos» salía cortado).
+   En esos anchos se cede «Inicio», que en el escritorio repite al logotipo (los dos
+   llevan a la portada), y los huecos se juntan un poco. En el menú del móvil y desde
+   1600 px, «Inicio» sigue. */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .se-header__nav--desktop .se-header__enlace-inicio {
+    display: none;
+  }
+  .se-header .se-header__nav--desktop .se-header__nav-list {
+    column-gap: clamp(0.22rem, 0.45vw, 0.55rem);
+  }
+}
+
+/* Con eso aún faltaban 39 px entre 1200 y 1279 y 19 a 1536. Entre 1200 y 1279 la letra
+   del menú baja un punto (el reloj ya no se ve en esa franja), y hasta 1599 el botón de
+   Juegos se queda en el mando, sin la palabra, como ya hacía hasta 1439. */
+@media (min-width: 1200px) and (max-width: 1279px) {
+  /* El reloj ya está oculto aquí; lo que falta lo da la letra del menú, un punto menor. */
+  .se-header .se-header__nav--desktop .se-header__nav-link {
+    font-size: 0.8rem;
+  }
+}
+@media (min-width: 1440px) and (max-width: 1599px) {
+  .se-header .se-header__actions--desktop .se-btn.se-header__juegos {
+    padding-inline: 0.55rem;
+  }
+  .se-header__actions--desktop .se-header__juegos-globo {
+    display: block;
+  }
+  .se-header__actions--desktop .se-header__juegos-texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+

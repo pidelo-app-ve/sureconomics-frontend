@@ -6,6 +6,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { CardMedia } from "./CardMedia";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
+import { UltimaHoraTarjeta } from "../titulares/UltimaHoraTarjeta";
 
 /**
  * La apertura de la portada: la noticia principal en grande y, a su lado, las
@@ -125,6 +126,10 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
           </article>
 
           {secundarias.length ? (
+            <div className="se-apertura__lado">
+            {/* La última hora, encima de los titulares de la apertura (maqueta del 21-oct-2026).
+                No pinta nada si no hay titulares recientes, y la columna queda como antes. */}
+            <UltimaHoraTarjeta />
             <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
               {secundarias.map((n) => (
                 <li key={n.id} className="se-apertura__item">
@@ -139,6 +144,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
                 </li>
               ))}
             </ol>
+            </div>
           ) : null}
         </div>
       </div>

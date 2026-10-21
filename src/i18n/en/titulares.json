@@ -1,0 +1,28 @@
+{
+  "titulares": {
+    "seccion": {
+      "titulo": "Latest news",
+      "meta": "Latest news — {marca}",
+      "intro": "News from Latin America and the world, summarized by SurEconomics with its sources. Updated every 10 minutes.",
+      "cargando": "Loading the latest…",
+      "vacioTitulo": "No new headlines right now",
+      "vacio": "Check back in a few minutes: this section is updated every 10 minutes.",
+      "error": "We couldn't load the headlines.",
+      "fuente": "Source",
+      "fuentes": "Sources",
+      "masFuentes": "+{n}"
+    },
+    "tarjeta": {
+      "etiqueta": "Breaking",
+      "leer": "Read story",
+      "pausar": "Pause latest news",
+      "reanudar": "Resume latest news",
+      "region": "Latest news"
+    },
+    "hace": {
+      "ahora": "Just now",
+      "minutos": "{n} min ago",
+      "horas": "{n} h ago"
+    }
+  }
+}

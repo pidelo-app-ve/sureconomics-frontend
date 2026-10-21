@@ -337,7 +337,7 @@ export const Navbar = () => {
         >
           <ul className="se-header__nav-list">
             {mainNavItems.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} className={`se-header__enlace-${item.id}`}>
                 <Enlace
                   to={item.to}
                   className={navLinkClass(item.to)}

@@ -1,0 +1,28 @@
+{
+  "titulares": {
+    "seccion": {
+      "titulo": "Última hora",
+      "meta": "Última hora — {marca}",
+      "intro": "Las noticias de América Latina y del mundo, resumidas por SurEconomics con sus fuentes. Se actualiza cada 10 minutos.",
+      "cargando": "Cargando lo último…",
+      "vacioTitulo": "Ahora mismo no hay titulares nuevos",
+      "vacio": "Vuelva en unos minutos: la sección se actualiza cada 10 minutos.",
+      "error": "No se pudieron cargar los titulares.",
+      "fuente": "Fuente",
+      "fuentes": "Fuentes",
+      "masFuentes": "+{n}"
+    },
+    "tarjeta": {
+      "etiqueta": "Última hora",
+      "leer": "Leer nota",
+      "pausar": "Pausar la última hora",
+      "reanudar": "Reanudar la última hora",
+      "region": "Última hora"
+    },
+    "hace": {
+      "ahora": "Ahora",
+      "minutos": "Hace {n} min",
+      "horas": "Hace {n} h"
+    }
+  }
+}

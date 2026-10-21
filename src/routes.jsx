@@ -97,6 +97,8 @@ const rutasPublicas = () => [
             { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp") },
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
             { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas") },
+            // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
+            { path: "ultima-hora", lazy: pagina(() => import("./pages/UltimaHora"), "UltimaHora") },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", lazy: pagina(() => import("./pages/cuenta/CuentaEntrar"), "CuentaEntrar") },
             { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro") },
@@ -177,6 +179,7 @@ export const router = createBrowserRouter([
                     { path: "lvbp", lazy: pagina(() => import("./pages/admin/AdminLvbp"), "AdminLvbp") },
                     // Traducir al inglés, en lote, las piezas publicadas que no lo tienen.
                     { path: "traducciones", lazy: pagina(() => import("./pages/admin/AdminTraducciones"), "AdminTraducciones") },
+                    { path: "titulares", lazy: pagina(() => import("./pages/admin/AdminTitulares"), "AdminTitulares") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.

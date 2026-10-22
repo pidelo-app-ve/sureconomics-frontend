@@ -49,8 +49,18 @@
     "salir": "Sign out",
     "cerrarSesion": "Sign out",
     "saltarAlContenido": "Skip to content",
-    "caracas": "Caracas",
-    "horaCaracas": "Caracas time, Venezuela"
+    "relojes": {
+      "caracas": "Caracas",
+      "madrid": "Madrid",
+      "buenosAires": "Buenos Aires",
+      "california": "California"
+    },
+    "relojesTitulo": {
+      "caracas": "Caracas time, Venezuela",
+      "madrid": "Madrid time, Spain",
+      "buenosAires": "Buenos Aires time, Argentina",
+      "california": "California time, United States (Pacific Time)"
+    }
   },
   "pie": {
     "enlacesDelSitio": "Site links",

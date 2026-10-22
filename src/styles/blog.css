@@ -622,6 +622,79 @@
   }
 }
 
+/* Las cuatro ciudades del reloj (components/Relojes.jsx). Se apilan en la misma celda:
+   las «moldes», invisibles, dan al bloque el ancho de la más larga y así no empuja la
+   cabecera al rotar; la que entra y la que sale se cruzan encima. El recorte hace que
+   la que cae desaparezca por abajo y la nueva aparezca por arriba, como en la tarjeta
+   de «Última hora». */
+.se-hora__pila {
+  display: grid;
+  overflow: hidden;
+}
+
+.se-hora__pila > * {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.se-hora__molde {
+  visibility: hidden;
+}
+
+.se-hora__ciudad--entra {
+  animation: se-hora-entra 440ms cubic-bezier(0.2, 0.9, 0.25, 1) 160ms both;
+}
+
+.se-hora__ciudad--sale {
+  pointer-events: none;
+  animation: se-hora-cae 300ms cubic-bezier(0.45, 0, 0.9, 0.45) both;
+}
+
+@keyframes se-hora-entra {
+  0% { transform: translateY(-85%); opacity: 0; filter: blur(2px); }
+  55% { transform: translateY(7%); opacity: 1; filter: blur(0); }
+  78% { transform: translateY(-2%); }
+  100% { transform: translateY(0); opacity: 1; filter: none; }
+}
+
+@keyframes se-hora-cae {
+  0% { transform: translateY(0); opacity: 1; filter: none; }
+  60% { opacity: 0.15; }
+  100% { transform: translateY(110%); opacity: 0; filter: blur(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-hora__ciudad--entra { animation: none; }
+  .se-hora__ciudad--sale { display: none; }
+}
+
+/* En el escritorio, el rótulo un punto más pequeño y con menos aire entre letras:
+   «BUENOS AIRES» es lo más largo que rota y, a 11 px, entre 1600 y 1619 px de ancho
+   (donde vuelve «Inicio») le quitaba 9 px al menú. Así sobran unos cuantos. En el
+   teléfono no: ahí hay sitio y 11 px es el suelo de lo legible en la mano. */
+@media (min-width: 1200px) and (pointer: fine) {
+  .se-hora--header .se-hora__lugar {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* En el cajón del teléfono, las cuatro a la vez, en dos columnas. */
+.se-hora--lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.se-hora--lista .se-hora__ciudad {
+  display: flex;
+  flex-direction: column;
+}
+
 .se-hora__valor {
   font-size: 13px;
   font-weight: 600;
@@ -9015,15 +9088,10 @@ a.se-topics__chip:focus-visible {
    misma especificidad, asi que la cascada devolvia los valores viejos y las medidas
    salian identicas. */
 @media (min-width: 1100px) and (max-width: 1365px) {
-  .se-hora--header .se-hora__lugar {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
+  /* El rótulo de la ciudad ya no se esconde aquí (22-oct-2026): el reloj rota entre
+     cuatro ciudades y una hora sin decir de dónde es no dice nada. Se puede porque en
+     esta franja el reloj solo se ve entre 1100 y 1199, con el menú en la hamburguesa
+     y sitio de sobra; de 1200 a 1499 está oculto (más abajo). */
   .se-header__nav--desktop .se-header__nav-list {
     /* A 1280 el termino que manda es el `vw`, asi que bajar el tope no servia:
        hay que bajar el `vw`. De 0,7 a 0,55 son ~2 px por hueco y hay diez,

@@ -5,7 +5,7 @@ import { sinPrefijo } from "../i18n/motor";
 import PropTypes from "prop-types";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
-import { HoraCaracas } from "./HoraCaracas";
+import { Relojes, RelojesEnLista } from "./Relojes";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useUserAuth } from "../context/UserAuthContext";
 
@@ -414,7 +414,7 @@ export const Navbar = () => {
           <CambioDeIdioma className="se-header__idioma--barra" />
         </div>
 
-        <HoraCaracas className="se-hora--header" />
+        <Relojes className="se-hora--header" />
 
         <button
           ref={botonRef}
@@ -495,7 +495,7 @@ export const Navbar = () => {
                 ))}
               </ul>
             </nav>
-            <HoraCaracas className="se-hora--cajon" />
+            <RelojesEnLista className="se-hora--cajon" />
             <CambioDeIdioma className="se-header__idioma--cajon" onClick={closeMenu} />
 
             <div className="se-header__actions se-header__actions--mobile">

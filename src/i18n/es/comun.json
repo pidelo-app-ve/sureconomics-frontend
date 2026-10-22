@@ -49,8 +49,18 @@
     "salir": "Salir",
     "cerrarSesion": "Cerrar sesión",
     "saltarAlContenido": "Saltar al contenido",
-    "caracas": "Caracas",
-    "horaCaracas": "Hora de Caracas, Venezuela"
+    "relojes": {
+      "caracas": "Caracas",
+      "madrid": "Madrid",
+      "buenosAires": "Buenos Aires",
+      "california": "California"
+    },
+    "relojesTitulo": {
+      "caracas": "Hora de Caracas, Venezuela",
+      "madrid": "Hora de Madrid, España",
+      "buenosAires": "Hora de Buenos Aires, Argentina",
+      "california": "Hora de California, Estados Unidos (hora del Pacífico)"
+    }
   },
   "pie": {
     "enlacesDelSitio": "Enlaces del sitio",

@@ -6,18 +6,23 @@ import { getTitulares, getVersionTitulares } from "../services/titularesService"
  * Los titulares en caliente, al día sin recargar la página.
  *
  * Carga la lista una vez y después pregunta cada minuto la versión (una respuesta
- * mínima y en caché); solo si cambió pide lo nuevo con `since`, lo mezcla por `id` y
- * quita lo que el servidor diga en `removed_ids`. Así un titular nuevo aparece poco
- * después de cada ciclo de 10 minutos, y uno que borra la redacción desaparece de una
- * pestaña abierta en menos de dos minutos. Con la pestaña oculta no pregunta, y al
- * volver a ella pregunta enseguida.
+ * mínima y en caché); si cambió, **vuelve a pedir la lista entera y la reemplaza**. Así
+ * un titular nuevo aparece poco después de cada ciclo de 10 minutos, y uno que borra la
+ * redacción desaparece de una pestaña abierta en menos de dos minutos. Con la pestaña
+ * oculta no pregunta, y al volver a ella pregunta enseguida.
+ *
+ * Antes pedía solo lo cambiado (`since`) y lo mezclaba con lo que tenía. Eso fallaba
+ * justo en la emergencia: «Ocultar sección» llegaba como «nada cambió» y la pestaña
+ * seguía enseñando el titular falso; al volver a enseñarla, algunas quedaban vacías; y
+ * el orden se iba desviando, porque solo se recalculaba el de lo que había cambiado
+ * (revisión del 22-oct-2026, 1.1 y 3.1). La lista entera son como mucho 40 titulares, la
+ * misma copia en caché para todos los lectores de esa versión: no cuesta nada.
  *
  * Un solo almacén por idioma, compartido: la tarjeta de la portada y la sección piden
  * lo mismo, y pasar de una a otra no vuelve a bajar la lista.
  */
 
 const CADA_MS = 60_000;
-const MAX_EN_MEMORIA = 60;
 const almacenes = new Map();
 
 const ordenar = (items) => [...items].sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
@@ -39,10 +44,10 @@ const almacen = (lang) => {
 
 const avisar = (a) => a.oyentes.forEach((f) => f(a.estado));
 
-const cargarTodo = async (lang) => {
+const cargarTodo = async (lang, version) => {
   const a = almacen(lang);
   try {
-    const d = await getTitulares({ lang });
+    const d = await getTitulares({ lang, version });
     a.estado = {
       status: "success",
       items: ordenar(d?.items ?? []),
@@ -63,17 +68,8 @@ const revisar = async (lang) => {
   try {
     const v = await getVersionTitulares();
     if (v?.version === a.estado.version) return undefined;
-    const d = await getTitulares({ lang, since: a.estado.version });
-    const quitar = new Set(d?.removed_ids ?? []);
-    const porId = new Map(a.estado.items.filter((i) => !quitar.has(i.id)).map((i) => [i.id, i]));
-    for (const i of d?.items ?? []) porId.set(i.id, i);
-    a.estado = {
-      status: "success",
-      items: ordenar([...porId.values()]).slice(0, MAX_EN_MEMORIA),
-      version: d?.version ?? a.estado.version,
-      error: null,
-    };
-    avisar(a);
+    // Cambió algo: la lista entera de esa versión, para reemplazar (ver la cabecera).
+    await cargarTodo(lang, v?.version);
   } catch {
     // Se intenta otra vez en la vuelta siguiente: lo que ya se ve se queda.
   }

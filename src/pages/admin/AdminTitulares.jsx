@@ -43,6 +43,31 @@ const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona
 const usd = (n) => (typeof n === "number" ? `${n.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : "—");
 const ancla = (clave) => ({ [recorridoTitulares.atributo]: clave });
 
+/** Los nombres de las etapas del ciclo, para el aviso de «falló». */
+const ETAPAS = { recuperar: "recuperar notas", notas: "agrupar notas", grupos: "redactar y publicar",
+  caducar: "caducar", purgar: "limpiar" };
+
+/**
+ * Lo que hizo la última vuelta, en una línea. Sin esto, «no sale nada» no tenía
+ * explicación a la vista: si era el presupuesto, si no había noticias que pasaran el
+ * mínimo o si algo falló (revisión del 22-oct-2026).
+ */
+const resumenDelCiclo = (c) => {
+  if (!c) return null;
+  const n = (k) => Number(c[k] || 0);
+  const partes = [
+    [n("sumadas") + n("grupos_nuevos") + n("absorbidas"), "notas agrupadas"],
+    [n("descartadas"), "descartadas por el filtro"],
+    [n("redactados"), "redactados"],
+    [n("publicados"), "publicados"],
+    [n("sin_cupo"), "sin presupuesto"],
+    [n("fuera_del_tope"), "fuera del tope por ciclo"],
+    [n("caducados"), "caducados"],
+  ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
+  const fallos = Object.keys(c).filter((k) => k.startsWith("fallo_")).map((k) => ETAPAS[k.slice(6)] || k.slice(6));
+  return { texto: partes.length ? partes.join(" · ") : "sin nada nuevo", fallos };
+};
+
 const FormularioBorrar = ({ motivos, ocupado, onBorrar, onCancelar }) => {
   const [motivo, setMotivo] = useState("");
   const [nota, setNota] = useState("");
@@ -223,6 +248,7 @@ export const AdminTitulares = () => {
   const visible = ajustes?.section_visible;
   const motivos = ajustes?.motivos ?? {};
   const ciclo = resumen?.ultimo_ciclo;
+  const vuelta = resumenDelCiclo(ciclo);
 
   return (
     <main role="main">
@@ -276,9 +302,19 @@ export const AdminTitulares = () => {
             <span className="se-form-label">IA este mes</span>
             <span className="se-admin-meta-hint">
               {usd(resumen?.gasto_usd?.mes)} de {usd(resumen?.gasto_usd?.presupuesto_mes)} · hoy {usd(resumen?.gasto_usd?.hoy)}
-              {ciclo?.empezo ? ` · último ciclo: ${cuando(ciclo.empezo)}` : ""}
             </span>
           </div>
+          {vuelta ? (
+            <div className="se-admin-filters__field se-tit-ciclo" {...ancla("ciclo")}>
+              <span className="se-form-label">Último ciclo{ciclo?.empezo ? `, a las ${hora(ciclo.empezo)}` : ""}</span>
+              <span className="se-admin-meta-hint">{vuelta.texto}</span>
+              {vuelta.fallos.length ? (
+                <span className="se-tit-aviso" role="status">
+                  Falló: {vuelta.fallos.join(", ")}. El resto del ciclo siguió; si se repite, avise.
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
 

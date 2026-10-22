@@ -31,6 +31,16 @@ export const PASOS_TITULARES = [
       "El gasto se reparte por días: si se acaba lo de hoy, no se redacta nada nuevo hasta mañana.",
   },
   {
+    clave: "ciclo",
+    titulo: "Lo que hizo la última vuelta",
+    puntos: [
+      "Notas agrupadas: lo que llegó de los medios y se juntó por noticia.",
+      "Redactados y publicados: lo que salió de esa vuelta.",
+      "Sin presupuesto: lo que no se pudo pagar en esa vuelta; se intenta en la siguiente.",
+      "Falló: si alguna parte del ciclo dio error. El resto sigue funcionando; si se repite, hay que avisar.",
+    ],
+  },
+  {
     clave: "vistas",
     titulo: "Publicados y borrados",
     puntos: [

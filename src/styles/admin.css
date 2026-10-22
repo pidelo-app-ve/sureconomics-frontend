@@ -7609,3 +7609,12 @@
 .se-admin-app .se-res-adm-guardar {
   margin-bottom: 1rem;
 }
+
+/* Titulares: lo que hizo la última vuelta del ciclo, en su propia fila. */
+.se-admin-app .se-tit-ciclo {
+  flex-basis: 100%;
+}
+
+.se-admin-app .se-tit-ciclo .se-tit-aviso {
+  margin-top: 0.4rem;
+}

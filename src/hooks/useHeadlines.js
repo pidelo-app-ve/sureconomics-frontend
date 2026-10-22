@@ -25,7 +25,10 @@ import { getTitulares, getVersionTitulares } from "../services/titularesService"
 const CADA_MS = 60_000;
 const almacenes = new Map();
 
-const ordenar = (items) => [...items].sort((a, b) => (b.rank ?? 0) - (a.rank ?? 0));
+// El orden del backend: lo fijado arriba y después lo más reciente (la redacción, 22-oct-2026).
+const cuando = (i) => Date.parse(i.published_at || "") || 0;
+const ordenar = (items) => [...items].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))
+  || cuando(b) - cuando(a));
 
 const almacen = (lang) => {
   let a = almacenes.get(lang);

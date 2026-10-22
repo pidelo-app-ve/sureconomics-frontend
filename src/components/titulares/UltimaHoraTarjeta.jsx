@@ -8,9 +8,10 @@ import "../../styles/titulares.css";
 /**
  * La tarjeta verde «Última hora» de la portada, en la columna derecha de la apertura.
  *
- * Los seis titulares más calientes, uno a la vez cada 4 segundos, con una barra que
- * dice cuánto falta para el siguiente. El contenido cambia con cada ciclo de 10
- * minutos; la rotación es solo visual, entre esos seis.
+ * Los seis titulares más recientes (lo fijado, primero), uno a la vez cada 4 segundos,
+ * con una barra que dice cuánto falta para el siguiente: los mismos seis que enseña la
+ * sección, así «Leer nota» siempre cae en uno que está allí. El contenido cambia con
+ * cada ciclo de 10 minutos; la rotación es solo visual, entre esos seis.
  *
  * Al cambiar, el titular que estaba cae y se borra, y el nuevo entra desde arriba
  * con velocidad y se asienta con un pequeño rebote (lo pidió la redacción: que se

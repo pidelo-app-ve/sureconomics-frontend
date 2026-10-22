@@ -17,6 +17,7 @@
         "test:clave": "node src/juegos/clave/motor.test.mjs",
         "test:recorrido": "node src/lib/recorridoVista.test.mjs",
         "test:relojes": "node src/lib/relojes.test.mjs",
+        "test:ultimahora": "node src/lib/listaUltimaHora.test.mjs",
         "i18n": "node scripts/i18n-comprobar.mjs",
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },

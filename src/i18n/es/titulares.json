@@ -14,6 +14,10 @@
       "nuevos": {
         "one": "Ver {n} titular nuevo",
         "other": "Ver {n} titulares nuevos"
+      },
+      "entraron": {
+        "one": "Entró {n} titular nuevo",
+        "other": "Entraron {n} titulares nuevos"
       }
     },
     "tarjeta": {

@@ -1,9 +1,10 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { useHeadlines } from "../hooks/useHeadlines";
+import { nuevosEn, queHacer } from "../lib/listaUltimaHora";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import "../styles/titulares.css";
@@ -21,43 +22,71 @@ import "../styles/titulares.css";
  * por su ancla (`#t-<id>`), que aquí se resalta. Sin indexar por ahora (la guía lo
  * deja fuera de esta fase).
  *
- * Solo los ocho más importantes, en el orden de la tarjeta: la redacción pidió entre
- * seis y diez (21-oct-2026), porque la lista entera se leía como un muro. Al ser los
- * mismos en el mismo orden, los seis que rota la tarjeta siempre están aquí y su
- * enlace nunca cae en el vacío. La lista se renueva con cada ciclo de 10 minutos.
+ * Los seis más recientes (lo fijado, primero): uno nuevo entra arriba y el más antiguo
+ * sale (la redacción, 22-oct-2026; antes eran los ocho más calientes). Son los mismos
+ * seis, en el mismo orden, que rota la tarjeta de la portada: su enlace nunca cae en
+ * el vacío.
  *
- * Lo que llega mientras alguien lee no empuja la lista (revisión del 22-oct-2026, 3.2):
- * espera detrás de «Ver 3 titulares nuevos», que también oyen los lectores de pantalla.
- * Lo que sí cambia en el acto: un texto corregido, y lo que la redacción borra u oculta,
- * que desaparece aunque nadie pulse nada.
+ * Cuándo entra lo nuevo (`lib/listaUltimaHora.js`): solo si el lector está al principio
+ * de la lista. Si bajó leyendo, espera tras «Ver 1 titular nuevo» para no moverle el
+ * texto (revisión del 22-oct-2026, 3.2), y entra solo en cuanto vuelve arriba. Los dos
+ * casos se anuncian a los lectores de pantalla. Lo que sí cambia en el acto: un texto
+ * corregido, y lo que la redacción borra u oculta, que desaparece aunque nadie pulse nada.
  */
 
-const EN_LA_SECCION = 8;
+const EN_LA_SECCION = 6;
+/** Lo que acaba de entrar se ilumina este rato, para que se vea qué es nuevo. */
+const LLEGA_MS = 4000;
 
 /**
- * Los titulares que la página enseña, fijos hasta que el lector pide los nuevos.
- * Guarda solo los ids: cada uno se pinta con su versión de ahora, y uno que ya no está
- * en la lista (borrado, oculto) no sale.
+ * Los titulares que la página enseña. Guarda solo los ids: cada uno se pinta con su
+ * versión de ahora, y uno que ya no está en la lista (borrado, oculto) no sale. Cuándo
+ * se ponen los nuevos lo decide `queHacer`, según si el lector está arriba (`lista`).
  */
-const useListaEstable = (todos, status) => {
+const useListaEstable = (todos, status, lista) => {
   const [ids, setIds] = useState(null);
-  const arriba = todos.slice(0, EN_LA_SECCION);
+  const [llegados, setLlegados] = useState([]);
+  const [arriba, setArriba] = useState(true);
+
+  const objetivo = todos.slice(0, EN_LA_SECCION);
   const porId = new Map(todos.map((i) => [i.id, i]));
-  const items = ids === null ? arriba : ids.map((id) => porId.get(id)).filter(Boolean);
-  const nuevos = ids === null ? 0 : arriba.filter((i) => !ids.includes(i.id)).length;
-  const claveArriba = arriba.map((i) => i.id).join(",");
-  const vacia = ids !== null && !items.length;
+  const items = ids === null ? objetivo : ids.map((id) => porId.get(id)).filter(Boolean);
+  const enPantalla = items.map((i) => i.id);
+  const idsObjetivo = objetivo.map((i) => i.id);
+  const nuevos = ids === null ? [] : nuevosEn(enPantalla, idsObjetivo);
+  let decision = "nada";
+  if (status === "success") decision = ids === null ? "poner" : queHacer({ enPantalla, objetivo: idsObjetivo, arriba });
+  const clave = idsObjetivo.join(",");
+  const claveNuevos = nuevos.join(",");
 
-  // La primera carga, o una lista que se quedó vacía (todo borrado, o la sección que se
-  // vuelve a enseñar): no hay lectura que proteger, se enseña lo que hay.
+  const ponerAlDia = useCallback(() => {
+    setIds(clave ? clave.split(",").map(Number) : []);
+    setLlegados(claveNuevos ? claveNuevos.split(",").map(Number) : []);
+  }, [clave, claveNuevos]);
+
   useEffect(() => {
-    if (status !== "success" || !(ids === null || vacia)) return;
-    if (ids !== null && ids.join(",") === claveArriba) return;
-    setIds(claveArriba ? claveArriba.split(",").map(Number) : []);
-  }, [status, ids, vacia, claveArriba]);
+    if (decision === "poner") ponerAlDia();
+  }, [decision, ponerAlDia]);
 
-  const ponerAlDia = () => setIds(arriba.map((i) => i.id));
-  return { items, nuevos, ponerAlDia };
+  // «Arriba»: se ve el principio de la lista (un poco de margen para la cabecera fija).
+  useEffect(() => {
+    const medir = () => {
+      const el = lista.current;
+      const v = !el || el.getBoundingClientRect().top >= -24;
+      setArriba((antes) => (antes === v ? antes : v));
+    };
+    medir();
+    window.addEventListener("scroll", medir, { passive: true });
+    return () => window.removeEventListener("scroll", medir);
+  }, [lista]);
+
+  useEffect(() => {
+    if (!llegados.length) return undefined;
+    const reloj = setTimeout(() => setLlegados([]), LLEGA_MS);
+    return () => clearTimeout(reloj);
+  }, [llegados]);
+
+  return { items, nuevos: decision === "boton" ? nuevos.length : 0, llegados, ponerAlDia };
 };
 
 const Fuentes = ({ item, t }) => {
@@ -95,8 +124,8 @@ Fuentes.propTypes = {
 export const UltimaHora = () => {
   const { t } = useIdioma();
   const { status, items: todos, error } = useHeadlines();
-  const { items, nuevos, ponerAlDia } = useListaEstable(todos, status);
   const lista = useRef(null);
+  const { items, nuevos, llegados, ponerAlDia } = useListaEstable(todos, status, lista);
   const { hash } = useLocation();
 
   const verNuevos = () => {
@@ -144,12 +173,19 @@ export const UltimaHora = () => {
               {t("titulares.seccion.nuevos", { n: nuevos })}
             </button>
           ) : null}
+          {!nuevos && llegados.length ? (
+            <span className="se-sr-only">{t("titulares.seccion.entraron", { n: llegados.length })}</span>
+          ) : null}
         </div>
 
         {items.length ? (
           <ol className="se-uh-lista" ref={lista} tabIndex={-1}>
             {items.map((item) => (
-              <li key={item.id} id={`t-${item.id}`} className="se-uh-item">
+              <li
+                key={item.id}
+                id={`t-${item.id}`}
+                className={`se-uh-item${llegados.includes(item.id) ? " se-uh-item--llega" : ""}`}
+              >
                 <h2 className="se-uh-item__titulo">{item.title}</h2>
                 {item.summary ? <p className="se-uh-item__resumen">{item.summary}</p> : null}
                 <Fuentes item={item} t={t} />

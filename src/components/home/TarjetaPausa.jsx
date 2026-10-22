@@ -182,8 +182,9 @@ const CeldasClave = () => (
 );
 
 /**
- * La tarjeta de La Clave en `/pausa` (debajo de la guacamaya) y en `/juegos`, con el
- * verde de la casa y las celdas del juego. Solo un enlace: el juego se descarga en `/clave`.
+ * La tarjeta de La Clave en `/pausa` (debajo de la guacamaya) y en `/juegos`, en blanco
+ * con el verde de la casa, y las celdas del juego. Solo un enlace: el juego se descarga
+ * en `/clave`.
  */
 export const TarjetaClave = () => {
   const { t } = useIdioma();

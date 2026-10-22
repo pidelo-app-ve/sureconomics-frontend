@@ -328,14 +328,51 @@
 .se-clave-mini__celda--casi { background: #c9612f; border-color: transparent; }
 .se-clave-mini__celda--no { background: #fff; border-color: transparent; color: #8a948c; }
 
+/* La Clave va en blanco desde el 22-oct-2026, como la maqueta de la redacción: en verde
+   competía con la tarjeta de Última hora, que va justo debajo en la portada. El verde de
+   la casa queda para el título y el botón; el rótulo, en ladrillo (5,4:1 sobre el fondo). */
+.se-clave-tarjeta,
+.se-pausa-banner--clave {
+  --clave-fondo: #f3f4f1;
+  --clave-escena: #e4e8e3;
+  --clave-borde: #dde2dc;
+  --clave-tinta: var(--marca-verde, #003318);
+  --clave-texto: #3d4a40;
+  --clave-acento: #a3471f;
+  --clave-boton-sombra: #9fb3a4;
+  --clave-boton-hover: #0b4a28;
+}
+
+/* Las celdas de muestra, sobre blanco: la vacía con borde verde, la gris con borde claro. */
+.se-clave-tarjeta .se-clave-mini__celda,
+.se-pausa-banner--clave .se-clave-mini__celda {
+  border-color: var(--clave-tinta);
+  color: var(--clave-tinta);
+}
+
+.se-clave-tarjeta .se-clave-mini__celda--bien,
+.se-clave-tarjeta .se-clave-mini__celda--casi,
+.se-pausa-banner--clave .se-clave-mini__celda--bien,
+.se-pausa-banner--clave .se-clave-mini__celda--casi {
+  border-color: transparent;
+  color: #fff;
+}
+
+.se-clave-tarjeta .se-clave-mini__celda--no,
+.se-pausa-banner--clave .se-clave-mini__celda--no {
+  border-color: #cfd6cf;
+  color: #6d776f;
+}
+
 /* —— La tarjeta de /pausa —— */
 .se-clave-tarjeta {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
   overflow: hidden;
   border-radius: 16px;
-  background: var(--marca-verde, #003318);
-  color: #f3f5ef;
+  background: var(--clave-fondo);
+  box-shadow: inset 0 0 0 1px var(--clave-borde);
+  color: var(--clave-tinta);
   text-decoration: none;
   transition: transform 180ms ease-out, box-shadow 180ms ease-out;
 }
@@ -343,7 +380,7 @@
 @media (hover: hover) and (pointer: fine) {
   .se-clave-tarjeta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(0, 51, 24, 0.28);
+    box-shadow: inset 0 0 0 1px var(--clave-borde), 0 10px 26px rgba(0, 51, 24, 0.14);
   }
 }
 
@@ -357,7 +394,7 @@
   place-items: center;
   min-height: 150px;
   padding: 20px;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), transparent 60%), #06452a;
+  background: var(--clave-escena);
 }
 
 .se-clave-tarjeta__cuerpo {
@@ -374,7 +411,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9fd3b0;
+  color: var(--clave-acento);
 }
 
 .se-clave-tarjeta__titulo {
@@ -383,14 +420,14 @@
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--clave-tinta);
 }
 
 .se-clave-tarjeta__texto {
   max-width: 30em;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: rgba(243, 245, 239, 0.86);
+  color: var(--clave-texto);
 }
 
 .se-clave-tarjeta__boton {
@@ -400,8 +437,8 @@
   margin-top: 6px;
   padding: 0 22px;
   border-radius: 999px;
-  background: #fff;
-  color: var(--marca-verde, #003318);
+  background: var(--clave-tinta);
+  color: #fff;
   font-weight: 800;
   font-size: 0.95rem;
 }
@@ -416,29 +453,33 @@
   }
 }
 
-/* —— El banner de La Clave: el mismo molde que el de la guacamaya, en verde —— */
+/* —— El banner de La Clave: el mismo molde que el de la guacamaya, en blanco —— */
 .se-pausa-banner--clave {
-  background: var(--marca-verde, #003318);
-  color: #f3f5ef;
+  background: var(--clave-fondo);
+  box-shadow: inset 0 0 0 1px var(--clave-borde);
+  color: var(--clave-tinta);
 }
 
 .se-pausa-banner--clave .se-pausa-banner__kicker {
-  color: #9fd3b0;
+  color: var(--clave-acento);
 }
 
 .se-pausa-banner--clave .se-pausa-banner__titulo {
-  color: #fff;
+  color: var(--clave-tinta);
 }
 
 .se-pausa-banner--clave .se-pausa-banner__boton {
-  background: #fff;
-  color: var(--marca-verde, #003318);
-  box-shadow: 0 3px 0 #9fd3b0;
+  background: var(--clave-tinta);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--clave-boton-sombra);
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .se-pausa-banner--clave:hover {
+    box-shadow: inset 0 0 0 1px var(--clave-borde), 0 10px 26px rgba(0, 51, 24, 0.14);
+  }
   .se-pausa-banner--clave:hover .se-pausa-banner__boton {
-    background: #e9f4ec;
+    background: var(--clave-boton-hover);
   }
 }
 
@@ -446,7 +487,7 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), transparent 60%), #06452a;
+  background: var(--clave-escena);
 }
 
 /* —— La franja doble de la portada —— */

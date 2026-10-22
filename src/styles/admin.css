@@ -7441,3 +7441,171 @@
   margin-top: 0.2rem;
   accent-color: var(--marca-verde);
 }
+
+/* —— Resumen diario («Lo importante de hoy») ————————————————————————————— */
+
+.se-admin-app .se-res-adm-bloque {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.se-admin-app .se-res-adm-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+
+.se-admin-app .se-res-adm-chip {
+  display: inline-flex;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--adm-border);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.se-admin-app .se-res-adm-chip--borrador {
+  border-color: var(--adm-err-border);
+  background: var(--adm-err-bg);
+  color: var(--adm-err);
+}
+
+.se-admin-app .se-res-adm-chip--aprobado,
+.se-admin-app .se-res-adm-chip--publicado {
+  border-color: var(--adm-ok-border);
+  background: var(--adm-ok-bg);
+  color: var(--adm-ok);
+}
+
+.se-admin-app .se-res-adm-canales {
+  margin: 0.5rem 0 0;
+}
+
+/* El editor a la izquierda y la vista previa, fija, a la derecha; en pantallas
+   estrechas, uno debajo del otro. */
+.se-admin-app .se-res-adm-rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .se-admin-app .se-res-adm-rejilla {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+
+  .se-admin-app .se-res-adm-vista {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.se-admin-app .se-res-adm-seccion + .se-res-adm-seccion {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--adm-border);
+}
+
+.se-admin-app .se-res-adm-puntos {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.se-admin-app .se-res-adm-punto__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.se-admin-app .se-res-adm-punto__fila > .se-form-control {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.se-admin-app .se-res-adm-punto__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.se-admin-app .se-res-adm-punto__botones .se-btn {
+  padding-inline: 0.7rem;
+}
+
+.se-admin-app .se-res-adm-punto__mover {
+  width: auto;
+  min-width: 8rem;
+}
+
+.se-admin-app .se-res-adm-punto__meta {
+  margin: 0.3rem 0 0;
+}
+
+.se-admin-app .se-res-adm-punto__en {
+  margin-top: 0.3rem;
+}
+
+.se-admin-app .se-res-adm-punto__en .se-form-control {
+  margin-top: 0.3rem;
+}
+
+.se-admin-app .se-res-adm-anadir {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--adm-border);
+}
+
+.se-admin-app .se-res-adm-anadir .se-form-control {
+  width: auto;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.se-admin-app .se-res-adm-cifras {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-admin-app .se-res-adm-manual {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.se-admin-app .se-res-adm-manual .se-form-control {
+  flex: 1 1 10rem;
+  width: auto;
+  min-width: 0;
+}
+
+.se-admin-app .se-res-adm-texto {
+  margin: 0.5rem 0 0;
+  padding: 0.9rem 1rem;
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 8px;
+  background: #e7f3e5;
+  color: #10261b;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.se-admin-app .se-res-adm-guardar {
+  margin-bottom: 1rem;
+}

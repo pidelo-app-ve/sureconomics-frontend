@@ -16,6 +16,7 @@ import publicidad from "./publicidad.json";
 import lvbp from "./lvbp.json";
 import monedas from "./monedas.json";
 import titulares from "./titulares.json";
+import resumen from "./resumen.json";
 
 export default {
   ...comun,
@@ -31,4 +32,5 @@ export default {
   ...lvbp,
   ...monedas,
   ...titulares,
+  ...resumen,
 };

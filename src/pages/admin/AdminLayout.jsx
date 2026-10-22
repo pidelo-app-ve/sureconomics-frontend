@@ -143,6 +143,11 @@ const AdminShell = () => {
                   Titulares
                 </NavLink>
               ) : null}
+              {canSeeEditorial ? (
+                <NavLink to="/admin/resumen" className={linkClass} end onClick={closeMenu}>
+                  Resumen diario
+                </NavLink>
+              ) : null}
               <NavLink to="/admin/equipo" className={linkClass} end onClick={closeMenu}>
                 Fotos del equipo
               </NavLink>

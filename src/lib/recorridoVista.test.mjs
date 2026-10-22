@@ -13,6 +13,7 @@ window.localStorage = {
 
 const { crearRecorrido } = await import("./recorridoVista.js");
 const { PASOS_TITULARES, recorridoTitulares } = await import("./guias/guiaTitulares.js");
+const { PASOS_RESUMEN, recorridoResumen } = await import("./guias/guiaResumen.js");
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -50,6 +51,12 @@ check("el último vuelve al botón «Guía»", PASOS_TITULARES.at(-1).clave === 
 check("todos con título", PASOS_TITULARES.every((p) => p.titulo && (p.texto || p.puntos?.length)));
 check("puntos con la forma «Nombre: qué es»", PASOS_TITULARES.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
 check("anclaje data-tour-titulares", recorridoTitulares.atributo === "data-tour-titulares");
+
+console.log("guía del Resumen diario");
+check("empieza sin anclaje y acaba en «Guía»", PASOS_RESUMEN[0].clave === undefined && PASOS_RESUMEN.at(-1).clave === "guia");
+check("todos con título y texto", PASOS_RESUMEN.every((p) => p.titulo && (p.texto || p.puntos?.length)));
+check("puntos con la forma «Nombre: qué es»", PASOS_RESUMEN.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
+check("anclaje data-tour-resumen", recorridoResumen.atributo === "data-tour-resumen");
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

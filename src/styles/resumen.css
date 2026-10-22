@@ -1,0 +1,162 @@
+/*
+ * «Lo importante de hoy», la página del resumen diario (pages/Resumen.jsx). Se lee como
+ * una hoja de periódico: una columna estrecha, secciones con su filete y puntos cortos.
+ */
+
+.se-res {
+  padding-block: var(--se-space-xl, 2rem) var(--se-space-2xl, 3rem);
+}
+
+.se-res__caja {
+  max-width: 720px;
+}
+
+.se-res__eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--se-font-label);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--marca-rojo);
+}
+
+.se-res__titulo {
+  margin: 0;
+  font-family: var(--se-font-display, var(--se-font-ui));
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.se-res__fecha {
+  margin: 0.5rem 0 var(--se-space-lg, 1.5rem);
+  font-family: var(--se-font-ui);
+  font-size: 1rem;
+  color: var(--color-slate);
+}
+
+.se-res__fecha::first-letter {
+  text-transform: uppercase;
+}
+
+.se-res-seccion {
+  margin-top: 1.75rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-res-seccion__titulo {
+  margin: 0 0 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.se-res-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.se-res-punto {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-hairline);
+  font-family: var(--se-font-ui);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.se-res-punto__enlace {
+  color: var(--color-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.se-res-punto__enlace:hover {
+  color: var(--marca-rojo);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-res-punto__fuente {
+  font-family: var(--se-font-label);
+  font-size: 0.82rem;
+  color: var(--color-slate);
+}
+
+.se-res-lista--juegos li {
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--color-hairline);
+  font-family: var(--se-font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-res-cifras__lista {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem 1.5rem;
+}
+
+.se-res-cifra dt {
+  font-family: var(--se-font-label);
+  font-size: 0.78rem;
+  color: var(--color-slate);
+}
+
+.se-res-cifra dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-res-cifra__var {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+.se-res-monedas {
+  margin: 1rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-res-frase {
+  margin: 2rem 0 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--marca-rojo);
+  background: color-mix(in srgb, var(--marca-rojo) 6%, transparent);
+}
+
+.se-res-frase figcaption {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+}
+
+.se-res-frase blockquote {
+  margin: 0.35rem 0 0;
+  font-family: var(--se-font-display, var(--se-font-ui));
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+.se-res__nota {
+  margin: 2rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  color: var(--color-slate);
+}

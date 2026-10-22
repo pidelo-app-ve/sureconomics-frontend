@@ -42,6 +42,7 @@ export const SECCION_DE = {
 /** Las páginas fijas que vale la pena que el buscador conozca. Ni cuenta, ni panel, ni legales. */
 export const PAGINAS_FIJAS = [
   "/",
+  "/resumen",
   "/articulos?formato=noticias",
   "/articulos?formato=articulos",
   "/articulos?formato=editorial",

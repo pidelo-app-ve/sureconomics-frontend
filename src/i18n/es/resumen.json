@@ -1,0 +1,25 @@
+{
+  "resumen": {
+    "meta": "Lo importante de hoy — {marca}",
+    "descripcion": "El resumen de la mañana de SurEconomics: lo más trascendente de las últimas 24 horas, las cifras del día y la LVBP.",
+    "eyebrow": "Resumen diario",
+    "titulo": "Lo importante de hoy",
+    "sale": "Sale cada mañana a las 7:00, hora de Caracas.",
+    "cargando": "Cargando el resumen…",
+    "vacioTitulo": "Todavía no hay resumen",
+    "vacio": "El resumen sale cada mañana a las 7:00, hora de Caracas.",
+    "noEseDia": "No hay resumen de ese día.",
+    "error": "No se pudo cargar el resumen.",
+    "secciones": {
+      "importante": "Lo más importante",
+      "venezuela": "Venezuela",
+      "region": "Región y mundo",
+      "analisis": "Análisis y opinión"
+    },
+    "cifras": "Cifras",
+    "porDolar": "Por dólar",
+    "lvbp": "LVBP",
+    "frase": "Frase del día",
+    "ultimo": "Ver el último resumen"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "resumen": {
+    "meta": "Today's essentials — {marca}",
+    "descripcion": "The SurEconomics morning briefing: the most important stories of the last 24 hours, today's figures and the Venezuelan baseball league.",
+    "eyebrow": "Daily briefing",
+    "titulo": "Today's essentials",
+    "sale": "Out every morning at 7:00 a.m., Caracas time.",
+    "cargando": "Loading the briefing…",
+    "vacioTitulo": "No briefing yet",
+    "vacio": "The briefing comes out every morning at 7:00 a.m., Caracas time.",
+    "noEseDia": "There is no briefing for that day.",
+    "error": "The briefing could not be loaded.",
+    "secciones": {
+      "importante": "Top stories",
+      "venezuela": "Venezuela",
+      "region": "Region and world",
+      "analisis": "Analysis and opinion"
+    },
+    "cifras": "Figures",
+    "porDolar": "Per US dollar",
+    "lvbp": "Venezuelan baseball (LVBP)",
+    "frase": "Quote of the day",
+    "ultimo": "See the latest briefing"
+  }
+}

@@ -7271,3 +7271,173 @@
     animation-duration: 2.4s;
   }
 }
+
+/* —— Titulares: el panel completo (editar, fijar, historial, medios) ——————————————— */
+
+.se-admin-app .se-tit-cabecera {
+  align-items: flex-start;
+}
+
+.se-admin-app .se-tit-cabecera > div {
+  flex: 1 1 32rem;
+}
+
+.se-admin-app .se-tit-guia {
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.se-admin-app .se-tit-interruptores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.se-admin-app .se-tit-marcas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.45rem 0 0;
+}
+
+.se-admin-app .se-tit-marca {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--adm-text-muted);
+}
+
+.se-admin-app .se-tit-marca--fijado {
+  border-color: var(--adm-ok-border);
+  background: var(--adm-ok-bg);
+  color: var(--adm-ok);
+}
+
+.se-admin-app .se-tit-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-fijar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.se-admin-app .se-tit-fijar__durante .se-form-control {
+  width: auto;
+  min-width: 8.5rem;
+}
+
+/* Editar: el español y el inglés uno al lado del otro; en el teléfono, uno debajo. */
+.se-admin-app .se-tit-idiomas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.se-admin-app .se-tit-idioma {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.75rem 0.9rem 0.9rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+}
+
+.se-admin-app .se-tit-idioma legend {
+  padding: 0 0.35rem;
+}
+
+.se-admin-app .se-tit-campo .se-form-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.se-admin-app .se-tit-campo__cuenta {
+  font-weight: 400;
+  color: var(--adm-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-admin-app .se-tit-campo__cuenta--pasa {
+  color: var(--se-form-invalid);
+  font-weight: 700;
+}
+
+.se-admin-app .se-tit-aviso {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--adm-err-border);
+  border-radius: 8px;
+  background: var(--adm-err-bg);
+  color: var(--adm-err);
+  font-size: 0.88rem;
+}
+
+/* Historial */
+.se-admin-app .se-tit-historial {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.se-admin-app .se-tit-historial__lista {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.se-admin-app .se-tit-historial__lista li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+/* Medios */
+.se-admin-app .se-tit-fuentes {
+  margin-top: 1.5rem;
+  padding: 1rem;
+}
+
+.se-admin-app .se-tit-fuentes__resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+.se-admin-app .se-tit-fuentes__tabla {
+  margin-top: 0.75rem;
+  overflow-x: auto;
+}
+
+.se-admin-app .se-tit-fuentes__fila--muda td {
+  color: var(--adm-text-muted);
+}
+
+.se-admin-app .se-tit-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-admin-app .se-tit-casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+}
+
+.se-admin-app .se-tit-casilla input {
+  margin-top: 0.2rem;
+  accent-color: var(--marca-verde);
+}

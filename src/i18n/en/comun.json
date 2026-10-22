@@ -115,6 +115,15 @@
     "limpiar": "Clear",
     "guardar": "Save",
     "cancelar": "Cancel",
-    "compartir": "Share"
+    "compartir": "Share",
+    "recorrido": {
+      "region": "Page guide",
+      "omitir": "Skip the guide",
+      "anterior": "Back",
+      "siguiente": "Next",
+      "entendido": "Got it",
+      "cuenta": "{n} of {total}",
+      "boton": "Guide"
+    }
   }
 }

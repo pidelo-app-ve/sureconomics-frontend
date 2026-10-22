@@ -115,6 +115,15 @@
     "limpiar": "Limpiar",
     "guardar": "Guardar",
     "cancelar": "Cancelar",
-    "compartir": "Compartir"
+    "compartir": "Compartir",
+    "recorrido": {
+      "region": "Guía de la página",
+      "omitir": "Omitir la guía",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente",
+      "entendido": "Entendido",
+      "cuenta": "{n} de {total}",
+      "boton": "Guía"
+    }
   }
 }

@@ -1,0 +1,146 @@
+/*
+ * La guía paso a paso de una página (components/recorrido/RecorridoVista.jsx).
+ * Colores explícitos: la tarjeta tiene que leerse igual sobre cualquier página.
+ */
+
+.se-recorrido {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  font-family: var(--se-font-ui, system-ui, sans-serif);
+}
+
+/* El recuadro sobre el elemento: la sombra enorme oscurece todo lo demás. No recibe
+   clics, para que la página de debajo no se mueva por accidente. */
+.se-recorrido__foco {
+  position: absolute;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0, 20, 10, 0.66);
+  outline: 2px solid #fff;
+  outline-offset: 0;
+  pointer-events: none;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+
+.se-recorrido__velo {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 20, 10, 0.66);
+}
+
+.se-recorrido__tarjeta {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  width: min(34rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border-radius: 10px;
+  border-top: 4px solid var(--marca-rojo, #b9532a);
+  background: #fff;
+  color: #14201a;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  padding: 1.1rem 1.25rem 1rem;
+}
+
+.se-recorrido__cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.se-recorrido__titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--marca-verde, #003318);
+  text-wrap: balance;
+}
+
+.se-recorrido__cuenta {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: #5b6660;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-recorrido__cuerpo {
+  margin-top: 0.5rem;
+  max-height: 45vh;
+  overflow-y: auto;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #2c3832;
+}
+
+.se-recorrido__cuerpo p {
+  margin: 0;
+}
+
+.se-recorrido__cuerpo ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.se-recorrido__cuerpo strong {
+  color: var(--marca-verde, #003318);
+}
+
+.se-recorrido__pie {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.se-recorrido__omitir {
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8rem;
+  color: #5b6660;
+  cursor: pointer;
+}
+.se-recorrido__omitir:hover { text-decoration: underline; color: #14201a; }
+
+.se-recorrido__botones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.se-recorrido__boton {
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border: 1px solid #c9d1cc;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  color: #2c3832;
+  cursor: pointer;
+}
+.se-recorrido__boton:hover { background: #f1f4f2; }
+
+.se-recorrido__boton--principal {
+  border-color: var(--marca-verde, #003318);
+  background: var(--marca-verde, #003318);
+  color: #fff;
+  font-weight: 600;
+}
+.se-recorrido__boton--principal:hover { background: #0b4a29; }
+
+.se-recorrido__omitir:focus-visible,
+.se-recorrido__boton:focus-visible {
+  outline: 2px solid var(--marca-rojo, #b9532a);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-recorrido__foco { transition: none; }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useIdioma } from "../i18n/ProveedorIdioma";
+import { Bandera } from "./Bandera";
 import { CIUDADES, horaEn } from "../lib/relojes";
 
 /**
@@ -19,6 +20,8 @@ import { CIUDADES, horaEn } from "../lib/relojes";
  * - **Se para** con el cursor encima (para leerla tranquilo) y no rota con «reducir
  *   movimiento»: ahí se queda en Caracas, que es la hora de la redacción.
  * - En 24 horas: ahorra dos caracteres en una barra donde los enlaces van justos.
+ * - Con su bandera al lado (components/Bandera.jsx), para ver de un vistazo de qué país
+ *   es cada hora.
  */
 
 const CADA_MS = 5000;
@@ -60,13 +63,16 @@ const Ciudad = ({ indice, ahora, t, className = "", oculta = false }) => {
   const { hm, ss } = horaEn(indice, ahora);
   return (
     <div className={className} aria-hidden={oculta || undefined}>
-      <span className="se-hora__lugar">{t(`nav.relojes.${c.clave}`)}</span>
-      {/* Sin `role="timer"`: hay lectores de pantalla que lo tratan como región viva
-          y leerían la hora en voz alta cada segundo. */}
-      <time className="se-hora__valor" dateTime={`${hm}:${ss}`}>
-        {hm}
-        <span className="se-hora__seg">:{ss}</span>
-      </time>
+      <Bandera pais={c.pais} className="se-hora__bandera" />
+      <span className="se-hora__texto">
+        <span className="se-hora__lugar">{t(`nav.relojes.${c.clave}`)}</span>
+        {/* Sin `role="timer"`: hay lectores de pantalla que lo tratan como región viva
+            y leerían la hora en voz alta cada segundo. */}
+        <time className="se-hora__valor" dateTime={`${hm}:${ss}`}>
+          {hm}
+          <span className="se-hora__seg">:{ss}</span>
+        </time>
+      </span>
     </div>
   );
 };

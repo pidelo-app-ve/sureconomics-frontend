@@ -7,10 +7,10 @@
  */
 
 export const CIUDADES = [
-  { clave: "caracas", zona: "America/Caracas" },
-  { clave: "madrid", zona: "Europe/Madrid" },
-  { clave: "buenosAires", zona: "America/Argentina/Buenos_Aires" },
-  { clave: "california", zona: "America/Los_Angeles" },
+  { clave: "caracas", zona: "America/Caracas", pais: "ve" },
+  { clave: "madrid", zona: "Europe/Madrid", pais: "es" },
+  { clave: "buenosAires", zona: "America/Argentina/Buenos_Aires", pais: "ar" },
+  { clave: "california", zona: "America/Los_Angeles", pais: "us" },
 ];
 
 const formatos = CIUDADES.map(

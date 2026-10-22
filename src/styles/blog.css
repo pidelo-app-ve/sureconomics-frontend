@@ -635,7 +635,19 @@
 .se-hora__pila > * {
   grid-area: 1 / 1;
   display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* La ciudad: la bandera a la izquierda, y el nombre y la hora en dos líneas. */
+.se-hora__texto {
+  display: flex;
   flex-direction: column;
+}
+
+.se-hora__bandera {
+  flex-shrink: 0;
+  display: block;
 }
 
 .se-hora__molde {
@@ -678,6 +690,17 @@
     font-size: 10px;
     letter-spacing: 0.08em;
   }
+
+  /* Y la bandera, de 18 a 14 px: con la grande el reloj le quitaba 1 px al menú en
+     cualquier ancho desde 1600 (ahí la cabecera ya no crece). */
+  .se-hora--header .se-hora__bandera {
+    width: 14px;
+    height: 14px;
+  }
+
+  .se-hora--header .se-hora__pila > * {
+    gap: 0.35rem;
+  }
 }
 
 /* En el cajón del teléfono, las cuatro a la vez, en dos columnas. */
@@ -692,7 +715,8 @@
 
 .se-hora--lista .se-hora__ciudad {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .se-hora__valor {
@@ -13860,8 +13884,10 @@ html {
    1200, 50 a 1280, 32 a 1366, 22 a 1440 y 70 a 1536 («Quiénes somos» salía cortado).
    En esos anchos se cede «Inicio», que en el escritorio repite al logotipo (los dos
    llevan a la portada), y los huecos se juntan un poco. En el menú del móvil y desde
-   1600 px, «Inicio» sigue. */
-@media (min-width: 1200px) and (max-width: 1599px) {
+   1680 px, «Inicio» sigue.
+   Hasta 1679 y no hasta 1599 desde el 22-oct-2026: el reloj lleva ahora la bandera de
+   cada ciudad, y entre 1600 y 1679 le quitaba al menú hasta 16 px. */
+@media (min-width: 1200px) and (max-width: 1679px) {
   .se-header__nav--desktop .se-header__enlace-inicio {
     display: none;
   }

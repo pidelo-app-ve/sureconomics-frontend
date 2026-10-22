@@ -8,7 +8,8 @@ import { ModalDelPanel } from "../ModalDelPanel";
 /**
  * El historial de un titular: cada versión del texto (la que escribió el sistema, las
  * que reescribió al llegar más fuentes, las corregidas a mano) y lo que hizo la
- * redacción con él (borrar, restaurar, editar, fijar), con quién y cuándo.
+ * redacción con él (borrar, restaurar, editar, fijar), con quién y cuándo. También si la
+ * IA lo retiró al rehacerlo («Automático»).
  */
 
 const VERSION = {
@@ -33,6 +34,8 @@ const accion = (a, motivos) => {
       return `Fijado arriba ${d.minutos} minutos`;
     case "desfijar":
       return "Quitado de arriba";
+    case "retirado_ia":
+      return "Retirado por la IA al rehacerlo: con las fuentes nuevas lo marcó «descartar»";
     default:
       return a.accion;
   }
@@ -77,7 +80,9 @@ export const HistorialTitular = ({ grupo, motivos, onCerrar }) => {
               <ul className="se-tit-historial__lista">
                 {datos.acciones.map((a, k) => (
                   <li key={`a-${k}`}>
-                    <span className="se-admin-meta-hint">{cuando(a.cuando)} · {a.quien || "—"}</span>
+                    <span className="se-admin-meta-hint">
+                      {cuando(a.cuando)} · {a.quien || (a.accion === "retirado_ia" ? "Automático" : "—")}
+                    </span>
                     <span>{accion(a, motivos)}</span>
                   </li>
                 ))}

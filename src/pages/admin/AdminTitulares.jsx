@@ -61,6 +61,7 @@ const resumenDelCiclo = (c) => {
     [n("redactados"), "redactados"],
     [n("publicados"), "publicados"],
     [n("sin_cupo"), "sin presupuesto"],
+    [n("zona_gris_sin_saldo"), "dudosas sin consultar (día gastado)"],
     [n("fuera_del_tope"), "fuera del tope por ciclo"],
     [n("caducados"), "caducados"],
   ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);

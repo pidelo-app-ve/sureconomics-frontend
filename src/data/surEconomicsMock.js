@@ -35,8 +35,6 @@ export const BRAND = {
  */
 export const PRIMARY_NAV = [
   { id: "inicio", to: "/", labelKey: "nav.inicio" },
-  // Lo de última hora, al lado de Inicio: es lo que cambia cada diez minutos.
-  { id: "ultimaHora", to: "/ultima-hora", labelKey: "nav.ultimaHora" },
   { id: "noticias", to: "/articulos?formato=noticias", labelKey: "nav.noticias" },
   { id: "articulos", to: "/articulos", labelKey: "nav.articulos" },
   { id: "editorial", to: "/articulos?formato=editorial", labelKey: "nav.editorial" },

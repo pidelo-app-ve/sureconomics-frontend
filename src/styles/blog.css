@@ -13879,32 +13879,10 @@ html {
   margin-top: 0.6rem;
 }
 
-/* «Última hora» en el menú (21-oct-2026) ----------------------------------------
-   El enlace nuevo dejó al menú corto entre 1200 y 1599 px: medido, faltaban 77 px a
-   1200, 50 a 1280, 32 a 1366, 22 a 1440 y 70 a 1536 («Quiénes somos» salía cortado).
-   En esos anchos se cede «Inicio», que en el escritorio repite al logotipo (los dos
-   llevan a la portada), y los huecos se juntan un poco. En el menú del móvil y desde
-   1680 px, «Inicio» sigue.
-   Hasta 1679 y no hasta 1599 desde el 22-oct-2026: el reloj lleva ahora la bandera de
-   cada ciudad, y entre 1600 y 1679 le quitaba al menú hasta 16 px. */
-@media (min-width: 1200px) and (max-width: 1679px) {
-  .se-header__nav--desktop .se-header__enlace-inicio {
-    display: none;
-  }
-  .se-header .se-header__nav--desktop .se-header__nav-list {
-    column-gap: clamp(0.22rem, 0.45vw, 0.55rem);
-  }
-}
-
-/* Con eso aún faltaban 39 px entre 1200 y 1279 y 19 a 1536. Entre 1200 y 1279 la letra
-   del menú baja un punto (el reloj ya no se ve en esa franja), y hasta 1599 el botón de
-   Juegos se queda en el mando, sin la palabra, como ya hacía hasta 1439. */
-@media (min-width: 1200px) and (max-width: 1279px) {
-  /* El reloj ya está oculto aquí; lo que falta lo da la letra del menú, un punto menor. */
-  .se-header .se-header__nav--desktop .se-header__nav-link {
-    font-size: 0.8rem;
-  }
-}
+/* El botón de Juegos, solo con el mando hasta 1599 px (como ya hacía hasta 1439): entre
+   1500 y 1599 aparece el reloj de las ciudades, con su bandera, y al menú le faltaban
+   22 px. Medido el 22-oct-2026, al quitar «Última hora» del menú y volver «Inicio»: es
+   lo único que hizo falta de los ajustes que se pusieron para aquel enlace. */
 @media (min-width: 1440px) and (max-width: 1599px) {
   .se-header .se-header__actions--desktop .se-btn.se-header__juegos {
     padding-inline: 0.55rem;

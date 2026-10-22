@@ -240,11 +240,59 @@
   line-height: 1.5;
 }
 
+/* «Ver 3 titulares nuevos»: lo que llegó mientras se leía, sin empujar la lista
+   (revisión del 22-oct-2026, 3.2). La caja siempre está, vacía no ocupa nada: es la
+   región que avisa a los lectores de pantalla. */
+.se-uh-nuevos {
+  display: flex;
+}
+
+.se-uh-nuevos__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  margin: 0 0 1rem;
+  padding: 0.55rem 1.15rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--marca-verde);
+  color: #fff;
+  font-family: var(--se-font-label);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+  animation: se-uh-nuevos-entra 220ms ease-out;
+}
+
+.se-uh-nuevos__boton:hover { filter: brightness(1.12); }
+.se-uh-nuevos__boton:focus-visible {
+  outline: 3px solid var(--marca-rojo);
+  outline-offset: 3px;
+}
+
+@keyframes se-uh-nuevos-entra {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-uh-nuevos__boton { animation: none; }
+}
+
 .se-uh-lista {
   margin: 0;
   padding: 0;
   list-style: none;
   border-top: 2px solid var(--color-ink);
+}
+
+.se-uh-lista:focus { outline: none; }
+.se-uh-lista:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 4px;
 }
 
 .se-uh-item {

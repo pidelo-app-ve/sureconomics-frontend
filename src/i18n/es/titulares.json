@@ -10,7 +10,11 @@
       "error": "No se pudieron cargar los titulares.",
       "fuente": "Fuente",
       "fuentes": "Fuentes",
-      "masFuentes": "+{n}"
+      "masFuentes": "+{n}",
+      "nuevos": {
+        "one": "Ver {n} titular nuevo",
+        "other": "Ver {n} titulares nuevos"
+      }
     },
     "tarjeta": {
       "etiqueta": "Última hora",

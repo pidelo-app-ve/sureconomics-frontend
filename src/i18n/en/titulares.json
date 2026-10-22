@@ -10,7 +10,11 @@
       "error": "We couldn't load the headlines.",
       "fuente": "Source",
       "fuentes": "Sources",
-      "masFuentes": "+{n}"
+      "masFuentes": "+{n}",
+      "nuevos": {
+        "one": "Show {n} new headline",
+        "other": "Show {n} new headlines"
+      }
     },
     "tarjeta": {
       "etiqueta": "Breaking",

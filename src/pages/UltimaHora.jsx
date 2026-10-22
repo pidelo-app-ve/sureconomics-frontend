@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
@@ -25,9 +25,40 @@ import "../styles/titulares.css";
  * seis y diez (21-oct-2026), porque la lista entera se leía como un muro. Al ser los
  * mismos en el mismo orden, los seis que rota la tarjeta siempre están aquí y su
  * enlace nunca cae en el vacío. La lista se renueva con cada ciclo de 10 minutos.
+ *
+ * Lo que llega mientras alguien lee no empuja la lista (revisión del 22-oct-2026, 3.2):
+ * espera detrás de «Ver 3 titulares nuevos», que también oyen los lectores de pantalla.
+ * Lo que sí cambia en el acto: un texto corregido, y lo que la redacción borra u oculta,
+ * que desaparece aunque nadie pulse nada.
  */
 
 const EN_LA_SECCION = 8;
+
+/**
+ * Los titulares que la página enseña, fijos hasta que el lector pide los nuevos.
+ * Guarda solo los ids: cada uno se pinta con su versión de ahora, y uno que ya no está
+ * en la lista (borrado, oculto) no sale.
+ */
+const useListaEstable = (todos, status) => {
+  const [ids, setIds] = useState(null);
+  const arriba = todos.slice(0, EN_LA_SECCION);
+  const porId = new Map(todos.map((i) => [i.id, i]));
+  const items = ids === null ? arriba : ids.map((id) => porId.get(id)).filter(Boolean);
+  const nuevos = ids === null ? 0 : arriba.filter((i) => !ids.includes(i.id)).length;
+  const claveArriba = arriba.map((i) => i.id).join(",");
+  const vacia = ids !== null && !items.length;
+
+  // La primera carga, o una lista que se quedó vacía (todo borrado, o la sección que se
+  // vuelve a enseñar): no hay lectura que proteger, se enseña lo que hay.
+  useEffect(() => {
+    if (status !== "success" || !(ids === null || vacia)) return;
+    if (ids !== null && ids.join(",") === claveArriba) return;
+    setIds(claveArriba ? claveArriba.split(",").map(Number) : []);
+  }, [status, ids, vacia, claveArriba]);
+
+  const ponerAlDia = () => setIds(arriba.map((i) => i.id));
+  return { items, nuevos, ponerAlDia };
+};
 
 const Fuentes = ({ item, t }) => {
   const fuentes = item.sources || [];
@@ -64,8 +95,17 @@ Fuentes.propTypes = {
 export const UltimaHora = () => {
   const { t } = useIdioma();
   const { status, items: todos, error } = useHeadlines();
-  const items = todos.slice(0, EN_LA_SECCION);
+  const { items, nuevos, ponerAlDia } = useListaEstable(todos, status);
+  const lista = useRef(null);
   const { hash } = useLocation();
+
+  const verNuevos = () => {
+    ponerAlDia();
+    // Al principio de la lista, y el foco con ella: quien navega con teclado o lector de
+    // pantalla sigue leyendo desde ahí.
+    lista.current?.scrollIntoView({ block: "start" });
+    lista.current?.focus({ preventScroll: true });
+  };
 
   useMetaPagina({
     title: t("titulares.seccion.meta", { marca: BRAND.name }),
@@ -96,8 +136,18 @@ export const UltimaHora = () => {
           <EmptyState title={t("titulares.seccion.vacioTitulo")} description={t("titulares.seccion.vacio")} />
         ) : null}
 
+        {/* Siempre montado: una región que avisa tiene que existir antes del aviso. */}
+        <div className="se-uh-nuevos" role="status">
+          {nuevos ? (
+            <button type="button" className="se-uh-nuevos__boton" onClick={verNuevos}>
+              <span className="se-uh__punto" aria-hidden="true" />
+              {t("titulares.seccion.nuevos", { n: nuevos })}
+            </button>
+          ) : null}
+        </div>
+
         {items.length ? (
-          <ol className="se-uh-lista">
+          <ol className="se-uh-lista" ref={lista} tabIndex={-1}>
             {items.map((item) => (
               <li key={item.id} id={`t-${item.id}`} className="se-uh-item">
                 <h2 className="se-uh-item__titulo">{item.title}</h2>

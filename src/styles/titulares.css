@@ -36,19 +36,19 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.28rem 0.55rem;
+  padding: 0.36rem 0.7rem;
   border-radius: 3px;
   background: var(--marca-rojo);
   font-family: var(--se-font-label);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .se-uh__punto {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: #fff;
   animation: se-uh-latido 1.6s ease-in-out infinite;
@@ -67,12 +67,21 @@
   white-space: nowrap;
 }
 
-/* Tres líneas siempre: al rotar, la tarjeta no cambia de alto y no empuja la columna. */
+/* Tres líneas siempre: al rotar, la tarjeta no cambia de alto y no empuja la columna.
+   El marco recorta: el titular que cae sale por abajo y el nuevo entra por arriba. */
+.se-uh__marco {
+  position: relative;
+  overflow: hidden;
+  /* Aire para el rebote y para las letras con rabo (g, p) de la última línea. */
+  padding-block: 0.15rem;
+  margin-block: -0.15rem;
+}
+
 .se-uh__titulo {
   margin: 0;
   min-height: calc(1.3em * 3);
   font-family: var(--se-font-display, var(--se-font-ui));
-  font-size: 1.12rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.3;
   text-wrap: balance;
@@ -80,6 +89,35 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* El que entra: espera a que el otro se haya ido (sin eso se montan y no se lee
+   ninguno), baja deprisa, se pasa un poco y se asienta. El desenfoque al principio es
+   el «barrido» de la velocidad. */
+.se-uh__titulo--entra {
+  animation: se-uh-entra 440ms cubic-bezier(0.2, 0.9, 0.25, 1) 160ms both;
+}
+
+/* El que sale: cae acelerando y se borra. Encima del nuevo y fuera del flujo, para que
+   el marco mida lo mismo durante el cruce. Su duración es `CAIDA_MS` en el componente. */
+.se-uh__titulo--sale {
+  position: absolute;
+  inset: 0.15rem 0 auto 0;
+  pointer-events: none;
+  animation: se-uh-cae 300ms cubic-bezier(0.45, 0, 0.9, 0.45) both;
+}
+
+@keyframes se-uh-entra {
+  0% { transform: translateY(-85%); opacity: 0; filter: blur(3px); }
+  55% { transform: translateY(7%); opacity: 1; filter: blur(0); }
+  78% { transform: translateY(-2%); }
+  100% { transform: translateY(0); opacity: 1; filter: none; }
+}
+
+@keyframes se-uh-cae {
+  0% { transform: translateY(0); opacity: 1; filter: none; }
+  60% { opacity: 0.15; }
+  100% { transform: translateY(110%); opacity: 0; filter: blur(2px); }
 }
 
 .se-uh__pie {
@@ -163,6 +201,8 @@
 @media (prefers-reduced-motion: reduce) {
   .se-uh__punto { animation: none; }
   .se-uh__progreso { animation: none; }
+  .se-uh__titulo--entra { animation: none; }
+  .se-uh__titulo--sale { display: none; }
 }
 
 /* —— La sección /ultima-hora —— */

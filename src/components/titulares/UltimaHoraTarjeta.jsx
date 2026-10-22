@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { haceCuanto, useHeadlines } from "../../hooks/useHeadlines";
@@ -12,6 +12,11 @@ import "../../styles/titulares.css";
  * dice cuánto falta para el siguiente. El contenido cambia con cada ciclo de 10
  * minutos; la rotación es solo visual, entre esos seis.
  *
+ * Al cambiar, el titular que estaba cae y se borra, y el nuevo entra desde arriba
+ * con velocidad y se asienta con un pequeño rebote (lo pidió la redacción: que se
+ * sienta que está pasando). El que sale se pinta encima, fuera del flujo, para que
+ * la tarjeta no cambie de alto durante el cruce.
+ *
  * - Se para con el cursor encima o con el foco dentro, y con su botón de pausa: en el
  *   teléfono no hay cursor, y un texto que se mueve solo tiene que poder pararse.
  * - Con «reducir movimiento» en el sistema, no rota: el primero y, debajo, los dos siguientes.
@@ -22,6 +27,8 @@ import "../../styles/titulares.css";
 
 const CADA_MS = 4000;
 const CUANTOS = 6;
+/** Lo que dura la caída del que sale; tiene que coincidir con `se-uh-cae` en el CSS. */
+const CAIDA_MS = 300;
 const UN_DIA_MS = 24 * 60 * 60 * 1000;
 
 const prefiereQuieto = () =>
@@ -58,6 +65,8 @@ export const UltimaHoraTarjeta = () => {
   const [indice, setIndice] = useState(0);
   const [pausado, setPausado] = useState(false);
   const [encima, setEncima] = useState(false);
+  // El titular que está cayendo, mientras cae. `null` el resto del tiempo.
+  const [saliente, setSaliente] = useState(null);
 
   const seis = items.slice(0, CUANTOS);
   const parado = quieto || pausado || encima || seis.length < 2;
@@ -66,11 +75,30 @@ export const UltimaHoraTarjeta = () => {
     if (indice >= seis.length) setIndice(0);
   }, [indice, seis.length]);
 
+  // La lista y la posición por referencia: `seis` es otra lista en cada render (y hay
+  // uno cada 30 s por el reloj), y como dependencia reiniciaría el intervalo a mitad
+  // de camino, desacompasado de la barra.
+  const seisRef = useRef(seis);
+  seisRef.current = seis;
+  const indiceRef = useRef(indice);
+  indiceRef.current = indice;
+
   useEffect(() => {
     if (parado) return undefined;
-    const id = setInterval(() => setIndice((i) => (i + 1) % seis.length), CADA_MS);
+    const id = setInterval(() => {
+      const lista = seisRef.current;
+      const i = Math.min(indiceRef.current, lista.length - 1);
+      setSaliente(lista[i] ?? null);
+      setIndice((i + 1) % lista.length);
+    }, CADA_MS);
     return () => clearInterval(id);
   }, [parado, seis.length]);
+
+  useEffect(() => {
+    if (!saliente) return undefined;
+    const id = setTimeout(() => setSaliente(null), CAIDA_MS);
+    return () => clearTimeout(id);
+  }, [saliente]);
 
   const masReciente = seis.reduce((max, i) => Math.max(max, Date.parse(i.published_at || "") || 0), 0);
   if (!seis.length || ahora - masReciente > UN_DIA_MS) return null;
@@ -95,10 +123,21 @@ export const UltimaHoraTarjeta = () => {
         <span className="se-uh__hace">{haceCuanto(actual.published_at, t, ahora)}</span>
       </div>
 
-      {/* Solo se anuncia cuando está parado: uno que rota cada 4 s no puede hablar cada 4 s. */}
-      <p className="se-uh__titulo" aria-live={parado ? "polite" : "off"}>
-        {actual.title}
-      </p>
+      <div className="se-uh__marco">
+        {/* Solo se anuncia cuando está parado: uno que rota cada 4 s no puede hablar cada 4 s. */}
+        <p
+          key={actual.id}
+          className="se-uh__titulo se-uh__titulo--entra"
+          aria-live={parado ? "polite" : "off"}
+        >
+          {actual.title}
+        </p>
+        {saliente && saliente.id !== actual.id ? (
+          <p key={`sale-${saliente.id}`} className="se-uh__titulo se-uh__titulo--sale" aria-hidden="true">
+            {saliente.title}
+          </p>
+        ) : null}
+      </div>
 
       <div className="se-uh__pie">
         <Enlace to={`/ultima-hora#t-${actual.id}`} className="se-uh__leer">

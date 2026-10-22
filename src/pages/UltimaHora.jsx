@@ -20,7 +20,14 @@ import "../styles/titulares.css";
  * redacción desaparece sin recargar. La tarjeta de la portada enlaza a cada titular
  * por su ancla (`#t-<id>`), que aquí se resalta. Sin indexar por ahora (la guía lo
  * deja fuera de esta fase).
+ *
+ * Solo los ocho más importantes, en el orden de la tarjeta: la redacción pidió entre
+ * seis y diez (21-oct-2026), porque la lista entera se leía como un muro. Al ser los
+ * mismos en el mismo orden, los seis que rota la tarjeta siempre están aquí y su
+ * enlace nunca cae en el vacío. La lista se renueva con cada ciclo de 10 minutos.
  */
+
+const EN_LA_SECCION = 8;
 
 const Fuentes = ({ item, t }) => {
   const fuentes = item.sources || [];
@@ -56,7 +63,8 @@ Fuentes.propTypes = {
 
 export const UltimaHora = () => {
   const { t } = useIdioma();
-  const { status, items, error } = useHeadlines();
+  const { status, items: todos, error } = useHeadlines();
+  const items = todos.slice(0, EN_LA_SECCION);
   const { hash } = useLocation();
 
   useMetaPagina({

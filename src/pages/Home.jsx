@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import { BannerDeJuegos } from "../components/home/TarjetaPausa";
 import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
+import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
 import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, MasLeido, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
@@ -98,7 +99,17 @@ const LAYOUTS = {
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
   podcast: (items) => <PodcastGrid items={items} />,
+  // Entrevistas y podcast juntos (ver `AL_PUNTO`), con la tarjeta de /audiovisual.
+  alpunto: (items) => <AudiovisualGrid items={items} />,
 };
+
+/**
+ * «Al punto» en la portada (23-oct-2026): Entrevistas y Podcast en una sola sección,
+ * las tres piezas más recientes de los dos formatos, intercaladas. Eran dos
+ * bloques seguidos de tres tarjetas oscuras y alargaban el final. Con un filtro puesto
+ * vuelven a ir por separado: ahí son resultados de búsqueda, agrupados por formato.
+ */
+const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 3 };
 
 export const Home = () => {
   const { t, lang } = useIdioma();
@@ -212,7 +223,25 @@ export const Home = () => {
       // cuantas hay.
       return { formatoApi, items, total: all.length };
     })
-    .filter((b) => b.items.length > 0);
+    .filter((b) => b.items.length > 0)
+    .reduce((acc, b) => {
+      if (isFiltered || !AL_PUNTO.formatos.includes(b.formatoApi)) return [...acc, b];
+      const previo = acc.find((x) => x.formatoApi === "alpunto");
+      if (previo) {
+        // Intercaladas y no por fecha: por fecha salían tres episodios de podcast y
+        // ninguna entrevista, y la sección se llama «Al punto» por las dos.
+        const [x, y] = [previo.items, b.items];
+        const mezcla = [];
+        for (let k = 0; k < Math.max(x.length, y.length); k += 1) {
+          if (x[k]) mezcla.push(x[k]);
+          if (y[k]) mezcla.push(y[k]);
+        }
+        previo.items = mezcla.slice(0, AL_PUNTO.cuantas);
+        previo.total += b.total;
+        return acc;
+      }
+      return [...acc, { formatoApi: "alpunto", items: b.items.slice(0, AL_PUNTO.cuantas), total: b.total }];
+    }, []);
 
   // El nombre que la redacción puso en el panel manda en español; en inglés sale el
   // del diccionario, porque el panel sólo guarda el nombre en español.
@@ -384,8 +413,8 @@ export const Home = () => {
       {(cargando ? [] : blocks).map(({ formatoApi, items, total }) => (
         <Fragment key={formatoApi}>
           <FormatSection
-            title={nombrePlural(formatoApi)}
-            to={rutaDeFormato(formatoApi)}
+            title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}
+            to={formatoApi === "alpunto" ? "/audiovisual" : rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
           >
             {LAYOUTS[formatoApi](items)}

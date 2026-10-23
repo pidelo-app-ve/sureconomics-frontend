@@ -6701,7 +6701,7 @@ a.se-topics__chip:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 44px;
+  height: 36px;
   padding-left: 12px;
   background: #02150c;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -6771,9 +6771,8 @@ a.se-topics__chip:focus-visible {
 
 .se-ticker__item {
   display: inline-flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
+  align-items: center;
+  gap: 6px;
   padding: 0 14px;
   border-right: 1px solid rgba(255, 255, 255, 0.16);
   white-space: nowrap;
@@ -15057,9 +15056,7 @@ html {
 }
 
 .se-ticker__stamp {
-  max-width: 220px;
-  white-space: normal;
-  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .se-ticker .se-ticker__mundo {
@@ -15068,19 +15065,37 @@ html {
   display: flex;
   align-items: flex-start;
   min-width: 0;
-  height: 44px;
+  height: 36px;
   overflow: hidden;
   border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
+/* El widget a escala 0,8: su contenido (nombre y precio, 44 px en un marco de 84 que
+   no se deja achicar) queda en 35 y cabe en la cinta de 36. Se ensancha en la misma
+   proporción para que la escala no deje un hueco a la derecha. */
 .se-ticker .se-ticker__mundo-caja {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: calc((100% - 96px) / 0.8);
   min-width: 0;
   height: 84px;
-  /* El contenido del marco empieza a unos 10 px de su borde: subirlo 7 deja nombre y
-     precio centrados en los 44 de la cinta. */
-  margin-top: -7px;
+  margin-top: -5px;
   overflow: hidden;
+  transform: scale(0.8);
+  transform-origin: left top;
+}
+
+.se-ticker .se-ticker__mundo {
+  position: relative;
+}
+
+.se-ticker .se-ticker__mundo-credito {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  background: #02150c;
 }
 
 .se-ticker .se-ticker__mundo-credito {
@@ -15099,7 +15114,7 @@ html {
   color: rgba(255, 255, 255, 0.85);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1599px) {
   .se-ticker__stamp {
     display: none;
   }
@@ -15107,7 +15122,7 @@ html {
 
 @media (max-width: 860px) {
   .se-ticker {
-    height: 40px;
+    height: 34px;
   }
 }
 

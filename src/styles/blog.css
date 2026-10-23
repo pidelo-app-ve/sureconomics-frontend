@@ -13362,7 +13362,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   background: transparent;
   color: #ffffff;
   cursor: pointer;
-  z-index: 2;
+  /* Por encima de la barra, que lleva z-index 30 por sus desplegables. */
+  z-index: 31;
 }
 
 .se-explorer-section__cerrar:hover {

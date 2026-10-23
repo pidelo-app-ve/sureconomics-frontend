@@ -162,6 +162,16 @@ export const getPieces = async ({
   };
 };
 
+/**
+ * Las piezas más leídas de los últimos `dias`, tal como las da la API (sin convertir):
+ * quien las guarda convierte al pintar, en el idioma de ese momento.
+ */
+export const getMasLeidas = async (dias = 7) => {
+  const payload = await client().request("/analitica/mas-leidas", { query: { dias } });
+  const rows = payload && "data" in payload ? payload.data : payload;
+  return Array.isArray(rows) ? rows : [];
+};
+
 /** Una pieza, tal como la da la API (sin convertir). Ver `filas` en `getPieces`. */
 export const getPieceFila = async (slug) =>
   (await client().request(`/posts/${encodeURIComponent(slug)}`)) ?? null;

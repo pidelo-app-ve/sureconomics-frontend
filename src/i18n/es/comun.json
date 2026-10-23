@@ -82,7 +82,17 @@
     "derechos": "Todos los derechos reservados.",
     "politicaCookies": "Política de cookies",
     "anunciateAqui": "Anúnciate aquí",
-    "siguenos": "Síguenos en"
+    "siguenos": "Síguenos en",
+    "masDelSitio": "Más del sitio",
+    "irAlBoletin": "Suscribirse arriba, en «Entorno en Viñetas»",
+    "descargo": "SurEconomics es un medio de información económica. Lo que publica es periodismo y contenido educativo, no asesoría financiera ni recomendación de inversión: cada decisión de inversión es responsabilidad de quien la toma.",
+    "mas": {
+      "ultimaHora": "Última hora",
+      "resumenDiario": "Lo importante de hoy",
+      "monedas": "Monedas de la región",
+      "lvbp": "Béisbol LVBP",
+      "juegos": "Juegos"
+    }
   },
   "formatos": {
     "noticia": "Noticias",

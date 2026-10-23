@@ -1454,6 +1454,7 @@
 }
 
 .se-footer__nav,
+.se-footer__mas,
 .se-footer__contact,
 .se-footer__newsletter {
   padding-top: var(--se-space-lg);
@@ -1462,13 +1463,35 @@
 
 @media (min-width: 1024px) {
   .se-footer__nav,
+  .se-footer__mas,
   .se-footer__contact,
   .se-footer__newsletter {
     padding-top: 0;
     border-top: 0;
-    padding-left: var(--se-space-xl);
+    padding-left: var(--se-space-lg);
     border-left: 1px solid rgba(var(--se-tinte), 0.12);
   }
+}
+
+/* En la portada el boletín es un enlace al bloque de arriba, en línea para que la
+   flecha siga al texto cuando parte en dos renglones. */
+.se-footer__newsletter .se-footer__link {
+  display: inline;
+}
+
+/* Las redes, dentro de la columna de contacto (23-oct-2026). */
+.se-footer__contact .se-footer__social {
+  margin-top: var(--se-space-md);
+}
+
+/* El descargo: una frase de medio económico, pequeña y entera. */
+.se-footer__descargo {
+  margin: 0;
+  max-width: 78ch;
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  line-height: var(--se-line-height-relaxed);
+  color: rgba(var(--se-tinte), 0.7);
 }
 
 .se-footer__about {
@@ -1842,6 +1865,13 @@
   .se-footer__grid {
     grid-template-columns: 1.1fr 0.8fr 0.9fr 1fr;
     align-items: start;
+  }
+
+  /* Cinco columnas desde el 23-oct-2026: marca, navegación, más del sitio, contacto
+     con redes, y boletín. El hueco baja para que quepan. */
+  .se-footer__grid--cinco {
+    grid-template-columns: 1.35fr 0.7fr 0.85fr 0.95fr 1.15fr;
+    gap: var(--se-space-lg);
   }
 }
 
@@ -13123,6 +13153,170 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-franja__pie a {
   color: var(--color-ink);
+  text-underline-offset: 3px;
+}
+
+/* —— Noticias en lista densa con carril (23-oct-2026) ——
+   Dos columnas de notas de cable -- lugar, fecha, titular, una línea -- y a la derecha
+   el carril: «Lo más leído» y la tarjeta nativa. La tarjeta con foto queda para los
+   listados; en la portada seis tarjetas iguales bajo la apertura eran lo más
+   «de plantilla» de la página. */
+.se-noticias {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-space-xl);
+  align-items: start;
+}
+
+.se-noticias--con-carril {
+  grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
+}
+
+.se-noticias__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: var(--se-space-xl);
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-noticias__nota {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--color-hairline);
+  break-inside: avoid;
+}
+
+.se-noticias__meta {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-noticias__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+.se-noticias__titulo a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-noticias__titulo a:hover,
+.se-noticias__titulo a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.se-noticias__titulo a:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.se-noticias__resumen {
+  display: -webkit-box;
+  margin: 0;
+  font-family: var(--se-font-reading);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--color-slate);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.se-noticias__carril {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-lg);
+  min-width: 0;
+}
+
+@media (max-width: 1023px) {
+  .se-noticias--con-carril {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .se-noticias__lista {
+    columns: 1;
+  }
+}
+
+/* —— Lo más leído (23-oct-2026) ——
+   Un ranking de verdad, de la medición propia: por eso lleva números. */
+.se-masleido {
+  padding: var(--se-space-md) 0 0;
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-masleido__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.se-masleido__nota {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-masleido__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-masleido__item {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-masleido__numero {
+  font-family: var(--se-font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+
+.se-masleido__enlace {
+  font-family: var(--se-font-heading);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+.se-masleido__enlace:hover,
+.se-masleido__enlace:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
 

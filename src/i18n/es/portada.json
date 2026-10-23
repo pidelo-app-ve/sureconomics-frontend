@@ -22,6 +22,10 @@
       "pausar": "Detener el cambio de noticia",
       "reanudar": "Reanudar el cambio de noticia"
     },
+    "masLeido": {
+      "titulo": "Lo más leído",
+      "nota": "Lo que más leyeron los lectores en los últimos siete días."
+    },
     "franja": {
       "region": "Últimas noticias, análisis y monedas",
       "ultimasNoticias": "Últimas noticias",

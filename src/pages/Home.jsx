@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import { BannerDeJuegos } from "../components/home/TarjetaPausa";
 import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
-import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
+import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, MasLeido, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
@@ -59,7 +59,9 @@ const EN_LA_FRANJA = { noticias: 6, analisis: 2 };
  * el lector veia **una sola** editorial nueva de las diez publicadas.
  */
 const PREVIEW = {
-  noticia: 6,
+  // Diez y no seis desde el 23-oct-2026: la lista densa a dos columnas enseña diez
+  // notas en el alto que antes ocupaban seis tarjetas.
+  noticia: 10,
   articulo: 3,
   editorial: 3,
   entrevista: 3,
@@ -73,8 +75,14 @@ const PREVIEW = {
    formato para que no desentonara, y la portada acabaria siendo mas anuncio que
    portada. Con dos basta. */
 const LAYOUTS = {
+  // Lista densa con carril (23-oct-2026): «Lo más leído» y la tarjeta nativa van al
+  // lado, en el blanco que antes sobraba; la tarjeta con foto queda para los listados.
   noticia: (items) => (
-    <NewsList items={items} espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO} />
+    <NoticiasDensas
+      items={items}
+      espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO}
+      carril={<MasLeido />}
+    />
   ),
   articulo: (items) => (
     <ArticleCardGrid
@@ -214,6 +222,25 @@ export const Home = () => {
     status === "loading" ||
     (status === "success" && pieces.length > 0 && taxonomy.status === "loading");
 
+  // El béisbol y los juegos: franjas bajas, no tarjetas. Solo sin filtro: quien busca
+  // algo concreto no vino a jugar. La LVBP va primero porque en temporada es lo que
+  // más gente mueve; fuera de temporada no se pinta.
+  const pausa =
+    !cargando && status === "success" && pieces.length && !isFiltered ? (
+      <>
+        <section className="se-section se-pausa-franja">
+          <div className="se-container">
+            <MarcadorLvbp />
+          </div>
+        </section>
+        <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
+          <div className="se-container">
+            <BannerDeJuegos />
+          </div>
+        </section>
+      </>
+    ) : null;
+
   return (
     <main className="se-blog" role="main">
       {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
@@ -291,25 +318,6 @@ export const Home = () => {
         </section>
       ) : null}
 
-      {/* El béisbol y los juegos, justo bajo el buscador: franjas bajas, no tarjetas,
-          para que la portada siga abriendo con el filtro y las noticias. Solo sin
-          filtro: quien busca algo concreto no vino a jugar. La LVBP va primero porque
-          en temporada es lo que más gente mueve; fuera de temporada no se pinta. */}
-      {!cargando && status === "success" && pieces.length && !isFiltered ? (
-        <>
-          <section className="se-section se-pausa-franja">
-            <div className="se-container">
-              <MarcadorLvbp />
-            </div>
-          </section>
-          <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
-            <div className="se-container">
-              <BannerDeJuegos />
-            </div>
-          </section>
-        </>
-      ) : null}
-
       {cargando ? null : (
         <AperturaPortada
           principal={apertura.principal}
@@ -321,6 +329,10 @@ export const Home = () => {
       {cargando || isFiltered ? null : (
         <FranjaPortada noticias={franja.noticias} analisis={franja.analisis} />
       )}
+
+      {/* Si no hay bloque de noticias, el béisbol y los juegos van aquí, bajo la
+          franja; si lo hay, van detrás de él (ver el mapa de bloques). */}
+      {hayNoticias ? null : pausa}
 
       {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 
@@ -338,6 +350,10 @@ export const Home = () => {
               y el cliente pidio lo que decia la maqueta: misma retícula que una
               pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
+          {/* El béisbol y los juegos, detrás de las noticias (23-oct-2026): antes iban
+              encima de la apertura, y un juego delante hacía que el sitio pareciera de
+              juegos antes que de prensa. Y detrás de ellos, la editorial del día. */}
+          {formatoApi === "noticia" ? pausa : null}
           {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
           {i === 1 ? (
             <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />

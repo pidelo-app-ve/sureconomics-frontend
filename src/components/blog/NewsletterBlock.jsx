@@ -86,6 +86,7 @@ export const NewsletterBlock = () => {
   return (
     <section
       ref={sectionRef}
+      id="boletin"
       className="se-newsletter se-section se-reveal"
       aria-labelledby="newsletter-title"
     >

@@ -22,6 +22,10 @@
       "pausar": "Stop the story rotation",
       "reanudar": "Resume the story rotation"
     },
+    "masLeido": {
+      "titulo": "Most read",
+      "nota": "What readers read most in the last seven days."
+    },
     "franja": {
       "region": "Latest news, analysis and currencies",
       "ultimasNoticias": "Latest news",

@@ -1,4 +1,6 @@
+import { useLocation } from "react-router-dom";
 import { Enlace } from "./Enlace";
+import { sinPrefijo } from "../i18n/motor";
 import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
 import { IconInstagram, IconTikTok, IconX } from "./icons/social";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
@@ -18,6 +20,20 @@ const ICONO_RED = {
 
 export const Footer = () => {
   const { t } = useIdioma();
+  // La columna «Más del sitio»: lo que no está en el menú principal y sí existe. Cada
+  // entrada es una página real; si una se retira, se quita de aquí. Las claves van
+  // literales para que `npm run i18n` las vea usadas.
+  const masDelSitio = [
+    { to: "/ultima-hora", texto: t("pie.mas.ultimaHora") },
+    { to: "/resumen", texto: t("pie.mas.resumenDiario") },
+    { to: "/monedas", texto: t("pie.mas.monedas") },
+    { to: "/lvbp", texto: t("pie.mas.lvbp") },
+    { to: "/juegos", texto: t("pie.mas.juegos") },
+    { to: "/anunciate", texto: t("pie.anunciateAqui") },
+  ];
+  // En la portada el pie no repite el formulario: ahí ya está el bloque «Entorno en
+  // Viñetas», y dos formularios de correo en la misma página era pedir dos veces.
+  const enPortada = sinPrefijo(useLocation().pathname) === "/";
   // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
   const humano = useVerificacionHumana();
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -77,7 +93,7 @@ export const Footer = () => {
   return (
     <footer className="se-footer" role="contentinfo">
       <div className="se-container">
-        <div className="se-footer__grid">
+        <div className="se-footer__grid se-footer__grid--cinco">
           <div className="se-footer__about">
             <h2 className="se-footer__brand">
               <img
@@ -97,7 +113,8 @@ export const Footer = () => {
           <nav className="se-footer__nav" aria-label={t("pie.enlacesDelSitio")}>
             <div className="se-footer__contact-title">{t("pie.navegacion")}</div>
             <ul className="se-footer__nav-list">
-              {PRIMARY_NAV.map((item) => (
+              {/* Sin «Inicio»: el logotipo de arriba ya lleva a la portada. */}
+              {PRIMARY_NAV.filter((item) => item.to !== "/").map((item) => (
                 <li key={item.id}>
                   <Enlace to={item.to} className="se-footer__link">
                     {t(item.labelKey)}
@@ -107,77 +124,129 @@ export const Footer = () => {
             </ul>
           </nav>
 
+          <nav className="se-footer__mas" aria-label={t("pie.masDelSitio")}>
+            <div className="se-footer__contact-title">{t("pie.masDelSitio")}</div>
+            <ul className="se-footer__nav-list">
+              {masDelSitio.map(({ to, texto }) => (
+                <li key={to}>
+                  <Enlace to={to} className="se-footer__link">
+                    {texto}
+                  </Enlace>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           {/* Sin `aria-label`: sobre un `div` sin papel no lo lee nadie, y el rotulo
-              visible de debajo ya dice que es. */}
+              visible de debajo ya dice que es. Las redes van aquí, con el contacto:
+              son otra forma de llegar a la redacción. */}
           <div className="se-footer__contact">
             <div className="se-footer__contact-title">{t("nav.contacto")}</div>
             <a className="se-footer__link" href={`mailto:${CONTACT.primaryEmail}`}>
               {CONTACT.primaryEmail}
             </a>
+            <div className="se-footer__social">
+              <span className="se-footer__social-title" id="se-footer-redes">
+                {t("pie.siguenos")}
+              </span>
+              <ul className="se-footer__social-list" aria-labelledby="se-footer-redes">
+                {SOCIAL.map(({ id, label, handle, url }) => {
+                  const Icono = ICONO_RED[id];
+                  if (!Icono) return null;
+                  return (
+                    <li key={id}>
+                      <a
+                        className={`se-footer__social-link se-footer__social-link--${id}`}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${label}: ${handle}`}
+                        title={`${label} ${handle}`}
+                      >
+                        <Icono className="se-footer__social-svg" />
+                        <span className="se-sr-only">{`${label} ${handle}`}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
 
           <div className="se-footer__newsletter">
             <div className="se-footer__contact-title">{t("pie.boletin")}</div>
             <p className="se-footer__newsletter-text">{t("pie.boletinTexto")}</p>
-            {/* El nombre va en el formulario, que si lo anuncia: con nombre es una
-                region de formulario y se puede saltar a ella. */}
-            <form
-              onFocus={humano.activar}
-              className="se-footer__newsletter-form"
-              onSubmit={handleNewsletterSubmit}
-              aria-label={t("pie.boletinFormulario")}
-            >
-              <label className="se-sr-only" htmlFor="footer-newsletter-email">
-                {t("pie.correo")}
-              </label>
-              <input
-                id="footer-newsletter-email"
-                type="email"
-                className="se-footer__newsletter-input"
-                placeholder={t("pie.suCorreo")}
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                disabled={newsletterState.status === "loading"}
-                required
-                aria-label={t("pie.correoParaBoletin")}
-              />
-              {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
-                  rellenara sin querer, su suscripción se descartaría. */}
-              <input
-                type="text"
-                name="website"
-                className="se-sr-only"
-                tabIndex={-1}
-                aria-hidden="true"
-                autoComplete="off"
-                value={newsletterTrampa}
-                onChange={(e) => setNewsletterTrampa(e.target.value)}
-              />
-              <button
-                type="submit"
-                className="se-footer__newsletter-btn"
-                disabled={newsletterState.status === "loading"}
-                aria-label={t("pie.suscribirmeAlBoletin")}
-              >
-                {newsletterState.status === "loading" ? t("pie.enviando") : t("pie.suscribirme")}
-              </button>
-              {humano.control}
-            </form>
-            <div className="se-footer__newsletter-status" aria-live="polite">
-              {newsletterState.status === "success" ? (
-                <p className="se-footer__newsletter-ok">{newsletterState.message}</p>
-              ) : null}
-              {newsletterState.status === "error" ? (
-                <p className="se-footer__newsletter-error" role="alert">
-                  {newsletterState.message}
-                </p>
-              ) : null}
-            </div>
+            {enPortada ? (
+              // Un `a` y no `Enlace`: es un ancla de la misma página, no una ruta.
+              <a className="se-footer__link" href="#boletin">
+                {t("pie.irAlBoletin")}
+              </a>
+            ) : (
+              <>
+                {/* El nombre va en el formulario, que si lo anuncia: con nombre es una
+                    region de formulario y se puede saltar a ella. */}
+                <form
+                  onFocus={humano.activar}
+                  className="se-footer__newsletter-form"
+                  onSubmit={handleNewsletterSubmit}
+                  aria-label={t("pie.boletinFormulario")}
+                >
+                  <label className="se-sr-only" htmlFor="footer-newsletter-email">
+                    {t("pie.correo")}
+                  </label>
+                  <input
+                    id="footer-newsletter-email"
+                    type="email"
+                    className="se-footer__newsletter-input"
+                    placeholder={t("pie.suCorreo")}
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    disabled={newsletterState.status === "loading"}
+                    required
+                    aria-label={t("pie.correoParaBoletin")}
+                  />
+                  {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
+                      rellenara sin querer, su suscripción se descartaría. */}
+                  <input
+                    type="text"
+                    name="website"
+                    className="se-sr-only"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    autoComplete="off"
+                    value={newsletterTrampa}
+                    onChange={(e) => setNewsletterTrampa(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="se-footer__newsletter-btn"
+                    disabled={newsletterState.status === "loading"}
+                    aria-label={t("pie.suscribirmeAlBoletin")}
+                  >
+                    {newsletterState.status === "loading" ? t("pie.enviando") : t("pie.suscribirme")}
+                  </button>
+                  {humano.control}
+                </form>
+                <div className="se-footer__newsletter-status" aria-live="polite">
+                  {newsletterState.status === "success" ? (
+                    <p className="se-footer__newsletter-ok">{newsletterState.message}</p>
+                  ) : null}
+                  {newsletterState.status === "error" ? (
+                    <p className="se-footer__newsletter-error" role="alert">
+                      {newsletterState.message}
+                    </p>
+                  ) : null}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         <hr className="se-divider se-footer__divider" />
         <div className="se-footer__bottom">
+          {/* El descargo de un medio económico: lo que se publica es periodismo, no
+              asesoría. Va en todas las páginas porque toda pieza puede leerse suelta. */}
+          <p className="se-footer__descargo">{t("pie.descargo")}</p>
           <p className="se-footer__copy">
             © {new Date().getFullYear()} {BRAND.name}. {t("pie.derechos")}
             {" · "}
@@ -187,41 +256,7 @@ export const Footer = () => {
             <Enlace to="/cookies" className="se-footer__legal">
               {t("pie.politicaCookies")}
             </Enlace>
-            {" · "}
-            {/* La puerta de entrada comercial. Va en el pie y no en el menu
-                principal a proposito: quien viene a leer no tiene por que
-                tropezarse con ella, y quien viene a comprar espacio la busca. */}
-            <Enlace to="/anunciate" className="se-footer__legal">
-              {t("pie.anunciateAqui")}
-            </Enlace>
           </p>
-
-          <div className="se-footer__social">
-            <span className="se-footer__social-title" id="se-footer-redes">
-              {t("pie.siguenos")}
-            </span>
-            <ul className="se-footer__social-list" aria-labelledby="se-footer-redes">
-              {SOCIAL.map(({ id, label, handle, url }) => {
-                const Icono = ICONO_RED[id];
-                if (!Icono) return null;
-                return (
-                  <li key={id}>
-                    <a
-                      className={`se-footer__social-link se-footer__social-link--${id}`}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${label}: ${handle}`}
-                      title={`${label} ${handle}`}
-                    >
-                      <Icono className="se-footer__social-svg" />
-                      <span className="se-sr-only">{`${label} ${handle}`}</span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
         </div>
       </div>
     </footer>

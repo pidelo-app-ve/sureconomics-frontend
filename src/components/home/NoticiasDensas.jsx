@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
-import { geoPrincipal } from "../../lib/contentFilter";
+import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
+import { CardMedia } from "./CardMedia";
 import { rutaDePieza } from "../../lib/pieza";
 import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
 import { listaDePiezas } from "./piezaShape";
@@ -20,53 +21,86 @@ import { TituloDePieza } from "../content/TituloDePieza";
  * El carril de la derecha es el blanco que sobraba: lo que la portada quiera poner
  * ahí (`carril`, hoy «Lo más leído»). Sin nada que poner, la lista ocupa todo.
  *
- * La primera nota manda: a todo el ancho de la lista, más grande y con su entradilla.
- * Diez titulares del mismo tamaño no tienen jerarquía y se leen como un índice.
+ * La primera nota manda: con su foto grande, el titular y la entradilla. Las demás
+ * llevan miniatura: solo texto se leía como un índice y la redacción pidió imagen.
  *
  * La publicidad va DEBAJO del bloque, como franja ancha (`lista`), no como ficha en
  * el carril: la ficha pinta un logotipo pequeño sobre un recuadro vacío, y al lado de
  * una lista de titulares se veía como algo que no cargó. La franja lleva el arte
  * completo del anunciante, que es lo que mejor se ve en todo el sitio.
  */
+/** La línea «Lugar · fecha» de una nota. */
+const Meta = ({ pieza }) => (
+  <span className="se-noticias__meta">
+    <span className="se-meta__lugar">{geoPrincipal(pieza)}</span>
+    {pieza.fecha ? <span aria-hidden="true"> · </span> : null}
+    {pieza.fecha}
+  </span>
+);
+Meta.propTypes = { pieza: PropTypes.object.isRequired };
+
 export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
   const hay = useHayAnuncio(espacioDeAnuncio, "lista");
   const hayCarril = Boolean(carril);
+  const [lead, ...resto] = items;
+  if (!lead) return null;
 
   return (
     <div className={`se-noticias${hayCarril ? " se-noticias--con-carril" : ""}`}>
-      <ol className="se-noticias__lista">
-        {items.map((n) => (
-          <li key={n.id} className="se-noticias__nota">
-            {/* El lugar primero: para este medio «dónde» es lo primero por lo que
-                un lector ordena. Igual que en la columna de la apertura. */}
-            <span className="se-noticias__meta">
-              <span className="se-meta__lugar">{geoPrincipal(n)}</span>
-              {n.fecha ? <span aria-hidden="true"> · </span> : null}
-              {n.fecha}
-            </span>
-            <h3 className="se-noticias__titulo">
-              <Enlace to={rutaDePieza(n)}>
-                <TituloDePieza pieza={n} />
+      <div className="se-noticias__principal">
+        {/* La que manda: foto grande al lado del titular y la entradilla. */}
+        <article className="se-noticias__lead">
+          <Enlace to={rutaDePieza(lead)} className="se-noticias__foto" aria-hidden="true" tabIndex={-1}>
+            <CardMedia pieza={lead} ancho={1100} etiqueta={temaPrincipal(lead)} sizes="(max-width: 899px) 92vw, 34vw" />
+          </Enlace>
+          <div className="se-noticias__lead-texto">
+            <Meta pieza={lead} />
+            <h3 className="se-noticias__titulo se-noticias__titulo--lead">
+              <Enlace to={rutaDePieza(lead)}>
+                <TituloDePieza pieza={lead} />
               </Enlace>
             </h3>
-            {n.resumen ? <p className="se-noticias__resumen">{n.resumen}</p> : null}
-          </li>
-        ))}
-      </ol>
+            {lead.resumen ? <p className="se-noticias__resumen">{lead.resumen}</p> : null}
+          </div>
+        </article>
+
+        {/* Las demás, a dos columnas, cada una con su miniatura: el lugar primero,
+            que para este medio es lo primero por lo que un lector ordena. */}
+        {resto.length ? (
+          <ol className="se-noticias__lista">
+            {resto.map((n) => (
+              <li key={n.id} className="se-noticias__nota">
+                <Enlace to={rutaDePieza(n)} className="se-noticias__mini" aria-hidden="true" tabIndex={-1}>
+                  <CardMedia pieza={n} ancho={400} etiqueta={null} sizes="128px" />
+                </Enlace>
+                <div className="se-noticias__texto">
+                  <Meta pieza={n} />
+                  <h3 className="se-noticias__titulo">
+                    <Enlace to={rutaDePieza(n)}>
+                      <TituloDePieza pieza={n} />
+                    </Enlace>
+                  </h3>
+                </div>
+              </li>
+            ))}
+          </ol>
+        ) : null}
+
+        {/* En la columna de noticias, a su ancho: el carril de al lado acompaña al bajar
+            dentro del mismo bloque y ya no se mete debajo del anuncio. */}
+        {hay ? (
+          <div className="se-noticias__anuncio">
+            <EspacioPublicitario espacio={espacioDeAnuncio} variante="lista" />
+          </div>
+        ) : null}
+      </div>
       {hayCarril ? <aside className="se-noticias__carril">{carril}</aside> : null}
-      {/* A todo el ancho del bloque, debajo de la lista y del carril: a media anchura
-          dejaba un hueco blanco bajo «Lo más leído». */}
-      {hay ? (
-        <div className="se-noticias__anuncio">
-          <EspacioPublicitario espacio={espacioDeAnuncio} variante="lista" />
-        </div>
-      ) : null}
     </div>
   );
 };
 
 NoticiasDensas.propTypes = {
-  items: listaDePiezas({ resumen: PropTypes.string }),
+  items: listaDePiezas({ resumen: PropTypes.string, imagenUrl: PropTypes.string }),
   /** La clave del hueco de publicidad del carril. */
   espacioDeAnuncio: PropTypes.string,
   /** Lo que va en el carril encima del anuncio. */

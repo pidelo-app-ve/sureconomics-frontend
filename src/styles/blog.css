@@ -14452,7 +14452,7 @@ html {
     display: none;
   }
 
-  .se-noticias__nota:nth-child(n + 7) {
+  .se-noticias__nota:nth-child(n + 6) {
     display: none;
   }
 }
@@ -14788,29 +14788,6 @@ html {
   border-top: 0;
 }
 
-/* La nota que manda: a todo el ancho de la lista, más grande, con su entradilla. */
-.se-noticias__nota:first-child {
-  column-span: all;
-  gap: 0.5rem;
-  padding: 0 0 1.25rem;
-  margin-bottom: 0.25rem;
-  border-bottom: 1px solid var(--color-hairline-dark);
-}
-
-.se-noticias__nota:first-child .se-noticias__titulo {
-  max-width: 30ch;
-  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  text-wrap: balance;
-}
-
-.se-noticias__nota:first-child .se-noticias__resumen {
-  max-width: 62ch;
-  font-size: 1.0625rem;
-  -webkit-line-clamp: 3;
-}
-
 /* El carril acompaña al bajar: arriba, bajo la cabecera fija. */
 @media (min-width: 1024px) {
   .se-noticias__carril {
@@ -14819,9 +14796,9 @@ html {
   }
 }
 
+/* El anuncio, en la columna de noticias y a su ancho. */
 .se-noticias__anuncio {
-  grid-column: 1 / -1;
-  margin-top: var(--se-space-md);
+  margin-top: var(--se-space-lg);
 }
 
 /* Lo más leído: sin la regla gruesa de arriba (la del título ya separa), con un
@@ -14930,5 +14907,120 @@ html {
   .se-eddia__card--sin-foto .se-eddia__cta {
     grid-column: 2;
     grid-row: 3;
+  }
+}
+
+/* ═══ Noticias con imágenes (23-oct-2026, noche) ═══ */
+.se-noticias__principal {
+  min-width: 0;
+}
+
+/* La que manda: foto a la izquierda, titular y entradilla a la derecha. */
+.se-noticias__lead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-space-md);
+  padding-bottom: var(--se-space-md);
+  margin-bottom: var(--se-space-sm);
+  border-bottom: 1px solid var(--color-hairline-dark);
+}
+
+@media (min-width: 760px) {
+  .se-noticias__lead {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--se-space-lg);
+    align-items: center;
+  }
+}
+
+.se-noticias__foto,
+.se-noticias__mini {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  color: #ffffff;
+  text-decoration: none;
+  background: rgba(0, 51, 24, 0.07);
+}
+
+.se-noticias__foto {
+  aspect-ratio: 16 / 10;
+}
+
+.se-noticias__mini {
+  aspect-ratio: 4 / 3;
+}
+
+.se-noticias__foto > *,
+.se-noticias__mini > * {
+  width: 100%;
+  height: 100%;
+}
+
+.se-noticias__foto .se-artcard__img,
+.se-noticias__mini .se-artcard__img {
+  object-fit: cover;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.se-noticias__lead:hover .se-artcard__img,
+.se-noticias__nota:hover .se-artcard__img {
+  transform: scale(1.03);
+}
+
+.se-noticias__lead-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.se-noticias__titulo--lead {
+  font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.se-noticias__lead .se-noticias__resumen {
+  font-size: 1.0625rem;
+  -webkit-line-clamp: 4;
+}
+
+/* Las demás: miniatura y texto. */
+.se-noticias__nota {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.se-noticias__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.se-noticias__nota .se-noticias__titulo {
+  font-size: 1.0625rem;
+}
+
+@media (max-width: 700px) {
+  .se-noticias__nota {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-noticias__foto .se-artcard__img,
+  .se-noticias__mini .se-artcard__img {
+    transition: none;
+  }
+
+  .se-noticias__lead:hover .se-artcard__img,
+  .se-noticias__nota:hover .se-artcard__img {
+    transform: none;
   }
 }

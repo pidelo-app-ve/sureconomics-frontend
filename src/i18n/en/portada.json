@@ -30,7 +30,8 @@
       "ultimasNoticias": "Latest news",
       "analisis": "Analysis",
       "monedas": "Regional currencies",
-      "todasLasMonedas": "All currencies and their change"
+      "todasLasMonedas": "All currencies and their change",
+      "mundo": "World markets"
     },
     "explorador": {
       "buscarEn": "Search {alcance}",

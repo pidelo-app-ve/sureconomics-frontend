@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import PropTypes from "prop-types";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
 import { getMarketTicker } from "../../services/marketTickerService";
@@ -120,7 +121,12 @@ const SIMBOLOS_MOVIL = (oro) => [
 /** El mismo corte que usa el componente original: por debajo, los dos se apilan. */
 const CORTE_MOVIL = "(max-width: 860px)";
 
-const CintaMundial = () => {
+/**
+ * Desde el 23-oct-2026 no va en la cinta de arriba -- ahí hacía la franja alta y pesada
+ * -- sino en la franja de mercados bajo la apertura (`FranjaPortada`), en tema claro.
+ * `tema` es el de TradingView: "light" sobre papel, "dark" sobre verde.
+ */
+export const CintaMundial = ({ tema = "light" }) => {
   const { t, lang } = useIdioma();
   // Textos resueltos fuera del efecto: son cadenas, asi que solo cambian con el
   // idioma y el widget no se vuelve a pedir en cada navegacion.
@@ -188,7 +194,7 @@ const CintaMundial = () => {
         // que es como van nuestras cifras: los dos lados pesan lo mismo sin estirar la
         // cabecera. Medido antes de cambiarlo: iframe 72 px en una caja de 46.
         displayMode: "compact",
-        colorTheme: "dark",
+        colorTheme: tema,
         // El idioma del documento: TradingView acepta "es" y "en" tal cual.
         locale: lang,
       });
@@ -234,7 +240,7 @@ const CintaMundial = () => {
       vigia?.disconnect();
       destino.innerHTML = "";
     };
-  }, [estrecho, lang, oro, tituloDelMarco]);
+  }, [estrecho, lang, oro, tituloDelMarco, tema]);
 
   return (
     <div className="se-ticker__mundo">
@@ -254,6 +260,8 @@ const CintaMundial = () => {
     </div>
   );
 };
+
+CintaMundial.propTypes = { tema: PropTypes.oneOf(["light", "dark"]) };
 
 export const MarketTicker = () => {
   const { t } = useIdioma();
@@ -323,6 +331,9 @@ export const MarketTicker = () => {
     return <div className="se-ticker se-ticker--hueco" aria-hidden="true" />;
   }
 
+  // Sin cifras no hay banda: una franja vacía no dice nada.
+  if (!hayCifras) return null;
+
   const flecha = (direccion) => (direccion === "up" ? "▲" : direccion === "down" ? "▼" : "▬");
   const run = (ticker?.indicators ?? []).map((item, i) => (
     <span className="se-ticker__item" key={`${item.label}-${i}`}>
@@ -345,13 +356,12 @@ export const MarketTicker = () => {
     // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
     // papel no lo lee ningun lector de pantalla.
     //
-    // Una línea (23-oct-2026): a la izquierda la pastilla «Mercados» y el desfile de
-    // nuestras cifras en fila -- antes iban apiladas en tres renglones --, y a la
-    // derecha el widget de TradingView con los índices mundiales, que sigue aquí
-    // porque es lo que la redacción quiere ver al lado del BCV.
+    // Una sola línea fina (23-oct-2026): la pastilla «Mercados», el desfile de
+    // nuestras cifras en fila y, a la derecha, de dónde salen. El widget de TradingView
+    // vive en la franja de mercados bajo la apertura: aquí hacía la cinta alta y pesada.
     <div className="se-ticker" role="region" aria-label={t("portada.cinta.cifrasDeMercado")}>
       {hayCifras ? (
-        <div className="se-ticker__casa">
+        <>
           <span className="se-ticker__pill">
             <span className="se-ticker__pulso" aria-hidden="true" />
             {t("portada.cinta.mercados")}
@@ -390,10 +400,8 @@ export const MarketTicker = () => {
               </span>
             )
           ) : null}
-        </div>
+        </>
       ) : null}
-
-      <CintaMundial />
     </div>
   );
 };

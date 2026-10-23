@@ -8,6 +8,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { getMonedas } from "../../services/monedasService";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { listaDePiezas } from "./piezaShape";
+import { CintaMundial } from "./MarketTicker";
 
 /**
  * La franja bajo la apertura: tres columnas de diario, como la segunda maqueta de la
@@ -18,6 +19,9 @@ import { listaDePiezas } from "./piezaShape";
  * - **Análisis**: los artículos más recientes, con firma y un párrafo.
  * - **Monedas**: seis cotizaciones de /monedas, que hasta hoy no tenía enlace desde
  *   el sitio. La misma regla del cintillo: un dato viejo o sin valor no se pinta.
+ * - **Mercados del mundo**: la cuarta fila, a lo ancho, con el widget de TradingView
+ *   (índices, oro, Brent, bitcoin). Salió de la cinta de arriba, donde la hacía alta y
+ *   pesada; aquí, bajo las monedas, es contexto de mercado y no mástil.
  *
  * Cada columna sólo existe si tiene con qué llenarse; la franja entera se calla si no
  * hay nada. Las monedas se piden aquí y no en la portada porque son un dato aparte
@@ -136,6 +140,11 @@ export const FranjaPortada = ({ noticias, analisis }) => {
               </p>
             </div>
           ) : null}
+
+          <div className="se-franja__mundo">
+            <span className="se-franja__mundo-rotulo">{t("portada.franja.mundo")}</span>
+            <CintaMundial tema="light" />
+          </div>
         </div>
       </div>
     </section>

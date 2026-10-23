@@ -30,7 +30,8 @@
       "ultimasNoticias": "Últimas noticias",
       "analisis": "Análisis",
       "monedas": "Monedas de la región",
-      "todasLasMonedas": "Todas las monedas y su variación"
+      "todasLasMonedas": "Todas las monedas y su variación",
+      "mundo": "Mercados del mundo"
     },
     "explorador": {
       "buscarEn": "Buscar {alcance}",

@@ -286,7 +286,10 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 2px solid var(--color-ink);
+  /* Las rayas, en el verde de la casa (pedido de la redacción, 23-oct-2026): la de
+     arriba gruesa, de cabecera; las de entre titulares finas y suaves, para que separen
+     sin pesar más que el texto. */
+  border-top: 3px solid var(--marca-verde);
 }
 
 .se-uh-lista:focus { outline: none; }
@@ -300,8 +303,13 @@
   flex-direction: column;
   gap: 0.45rem;
   padding: 1.15rem 0;
-  border-bottom: 1px solid var(--color-hairline);
+  border-bottom: 1px solid rgba(0, 51, 24, 0.28);
   scroll-margin-top: 6rem;
+}
+
+.se-uh-item:last-child {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--marca-verde);
 }
 
 /* Lo que acaba de entrar se ilumina un momento y se apaga: así se ve qué es nuevo. */

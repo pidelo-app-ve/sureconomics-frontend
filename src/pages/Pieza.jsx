@@ -292,7 +292,6 @@ export const Pieza = () => {
   if (sinPrefijo(pathname) !== canonica) return <Redirigir to={canonica} replace />;
 
   const lugar = pieza.geos?.[0] ?? geoTop;
-  const tema = temaPrincipal(pieza);
 
   // La entradilla sale del campo que cada formato usa para ella.
   const entradilla = pieza.resumenHtml || pieza.entradaHtml || "";
@@ -331,10 +330,9 @@ export const Pieza = () => {
 
             <header className={`se-piece__head${conPortada ? " se-piece__head--media" : ""}`}>
               <div className="se-piece__head-text">
-                <p className="se-piece__kicker">
-                  {pieza.formatoNombre}
-                  {tema ? ` · ${tema}` : ""}
-                </p>
+                {/* Sin rótulo «FORMATO · TEMA» encima del titular (23-oct-2026): el
+                    formato ya está en las migas, dos líneas más arriba, y el tema va en
+                    las etiquetas del pie. El titular manda solo. */}
                 <h1 className="se-piece__title" lang={enEspanolEnIngles ? "es" : undefined}>
                   {pieza.titulo}
                 </h1>
@@ -389,20 +387,6 @@ export const Pieza = () => {
                   <PieceBody pieza={pieza} enCabecera={conPortada} />
                 </div>
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
-                {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
-                    dejó) y un minuto de pausa antes de lo siguiente. */}
-                <ClaveDeLaPieza pieza={pieza} />
-                <InvitacionPausa />
-
-                {/* La tarjeta nativa del cuerpo, detrás del texto y de las etiquetas.
-                    Se probó a mitad del cuerpo, partiendo los párrafos, y el cliente
-                    lo descartó: en una pieza corta el corte llega enseguida y la
-                    lectura se parte antes de haber dicho nada.
-
-                    Lleva la misma etiqueta de publicidad que en la portada: lo que la
-                    separa de una pieza de la redacción no puede depender de dónde
-                    esté. */}
-                <EspacioPublicitario espacio={ESPACIOS.ARTICULO_NATIVO} variante="cuerpo" />
 
                 {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
                     conversación es sobre lo que se acaba de leer.
@@ -415,6 +399,21 @@ export const Pieza = () => {
                 {pieza.admiteComentarios ? (
                   <PieceComments pieza={{ slug: pieza.slug, rutaCanonica: canonica }} />
                 ) : null}
+
+                {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
+                    dejó) y un minuto de pausa antes de lo siguiente. Detrás de los
+                    comentarios desde el 23-oct-2026: lo último que ve quien terminó un
+                    editorial es la conversación, no una guacamaya. */}
+                <ClaveDeLaPieza pieza={pieza} />
+                <InvitacionPausa />
+
+                {/* La tarjeta nativa del cuerpo, al final. Se probó a mitad del cuerpo,
+                    partiendo los párrafos, y el cliente lo descartó: en una pieza corta
+                    el corte llega enseguida y la lectura se parte antes de haber dicho
+                    nada. Lleva la misma etiqueta de publicidad que en la portada: lo
+                    que la separa de una pieza de la redacción no puede depender de
+                    dónde esté. */}
+                <EspacioPublicitario espacio={ESPACIOS.ARTICULO_NATIVO} variante="cuerpo" />
               </div>
 
               <aside className="se-piece__aside" aria-label={t("piezas.pieza.masContenido")}>

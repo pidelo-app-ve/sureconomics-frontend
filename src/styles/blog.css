@@ -14438,3 +14438,187 @@ html {
 .se-format__more::after {
   margin-left: 0.35em;
 }
+
+/* ═══ La página de una pieza (23-oct-2026): la voz de la casa ═══
+   Lo que la hacía «plantilla de blog»: titular de 40 px por debajo de la apertura de
+   la portada, rótulo que repetía las migas, cinco botones de compartir con cinco
+   colores ajenos, y un cuerpo sin sistema (párrafos, enlaces, citas y listas con los
+   estilos del navegador). Aquí el titular es el tipo más grande que ve el lector ese
+   día, la regla de tinta separa la firma del texto, y el cuerpo tiene sus propias
+   reglas con la paleta de la casa. */
+
+/* —— La cabecera —— */
+.se-piece__title {
+  max-width: 18ch;
+  font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.se-piece__head:not(.se-piece__head--media) .se-piece__title {
+  max-width: 24ch;
+}
+
+@media (min-width: 900px) {
+  .se-piece__head--media {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  }
+}
+
+.se-piece__lead--head {
+  max-width: 38em;
+  font-size: 1.25rem;
+  line-height: 1.45;
+}
+
+/* La firma, entre la regla de tinta y el filete; y un solo salto grande (56) antes
+   del cuerpo, que es el que dice «aquí empieza el texto». */
+.se-piece__meta {
+  margin-top: var(--se-space-md);
+  padding: 20px 0;
+  margin-bottom: 40px;
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+@media (min-width: 1000px) {
+  .se-piece__meta {
+    margin-bottom: 56px;
+  }
+
+  .se-piece__cols {
+    gap: 56px;
+  }
+}
+
+/* —— El cuerpo —— */
+.se-piece__main .se-piece__body p {
+  margin: 0 0 1.25em;
+}
+
+.se-piece__main .se-piece__body > p:first-of-type {
+  font-size: 1.1875rem;
+  color: var(--se-black);
+}
+
+.se-piece__main .se-piece__body a {
+  color: var(--marca-verde);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(0, 51, 24, 0.35);
+  text-underline-offset: 3px;
+}
+
+.se-piece__main .se-piece__body a:hover,
+.se-piece__main .se-piece__body a:focus-visible {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+/* El intertítulo lleva la regla de tinta: la misma que abre cada sección del sitio. */
+.se-piece__main .se-piece__body h2 {
+  margin: 2.25em 0 0.5em;
+  padding-top: 0.75em;
+  border-top: 2px solid var(--color-ink);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.se-piece__main .se-piece__body h3 {
+  margin: 1.75em 0 0.4em;
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+/* La cita: en verde, grande, con la barra cobre de 56 × 3 que llevan los títulos de
+   sección. Nada de filete lateral grueso. */
+.se-piece__main .se-piece__body blockquote {
+  position: relative;
+  margin: 2em 0;
+  padding: 0.9em 0 0;
+  border: 0;
+  font-family: var(--se-font-heading);
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--marca-verde);
+}
+
+.se-piece__main .se-piece__body blockquote::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 3px;
+  background: var(--color-accent);
+}
+
+.se-piece__main .se-piece__body blockquote p {
+  margin: 0 0 0.5em;
+  font-size: inherit;
+  color: inherit;
+}
+
+.se-piece__main .se-piece__body ul,
+.se-piece__main .se-piece__body ol {
+  margin: 0 0 1.25em;
+  padding-left: 1.25em;
+}
+
+.se-piece__main .se-piece__body li {
+  margin: 0 0 0.4em;
+}
+
+.se-piece__main .se-piece__body li::marker {
+  color: var(--color-accent);
+}
+
+.se-piece__main .se-piece__body strong {
+  color: var(--se-black);
+}
+
+/* La selección del navegador con la paleta de la casa. */
+.se-piece ::selection {
+  background: rgba(0, 51, 24, 0.16);
+}
+
+/* —— Compartir: monocromo, pequeño, sin sombra; WhatsApp primero, que es la región —— */
+.se-piece__share .se-share__btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-hairline-dark);
+  background: transparent;
+  color: var(--color-ink);
+  box-shadow: none;
+}
+
+.se-piece__share .se-share__btn:hover,
+.se-piece__share .se-share__btn:focus-visible {
+  transform: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.se-piece__share .se-share__btn--wa {
+  order: -1;
+}
+
+.se-piece__share .se-share__btn:hover .se-share__svg {
+  transform: none;
+}
+
+/* —— Etiquetas y relacionados —— */
+.se-piece__tags {
+  margin-top: 56px;
+}
+
+.se-piece__related-title {
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--color-ink);
+  font-size: 1.0625rem;
+}

@@ -94,6 +94,12 @@ export const Resumen = () => {
 
         {datos ? (
           <>
+            {datos.imagen?.url ? (
+              <figure className="se-res__imagen">
+                <img src={datos.imagen.url} alt={datos.imagen.alt || ""} />
+                {datos.imagen.credito ? <figcaption>{datos.imagen.credito}</figcaption> : null}
+              </figure>
+            ) : null}
             {datos.secciones.map((s) => (
               <section key={s.clave} className="se-res-seccion" aria-labelledby={`res-${s.clave}`}>
                 <h2 id={`res-${s.clave}`} className="se-res-seccion__titulo">{t(`resumen.secciones.${s.clave}`)}</h2>

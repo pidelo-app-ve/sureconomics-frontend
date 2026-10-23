@@ -36,6 +36,31 @@
   color: var(--color-slate);
 }
 
+/* La imagen del día (opcional), entre la fecha y la primera sección. */
+.se-res__imagen {
+  margin: 0 0 var(--se-space-lg, 1.5rem);
+}
+
+/* Entera y sin recortar (puede ser una infografía), pero sin pasar de media pantalla:
+   una cuadrada a todo el ancho empujaba el resumen fuera de la vista. */
+.se-res__imagen img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(520px, 60vh);
+  margin-inline: auto;
+  border-radius: 6px;
+}
+
+.se-res__imagen figcaption {
+  margin-top: 0.35rem;
+  text-align: center;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  color: var(--color-slate);
+}
+
 .se-res__fecha::first-letter {
   text-transform: uppercase;
 }

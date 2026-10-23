@@ -7449,6 +7449,15 @@
   padding: 1rem;
 }
 
+/* La imagen del día: la vista previa encima del campo para subirla o elegirla. */
+.se-admin-app .se-res-adm-imagen__vista {
+  display: block;
+  max-width: min(100%, 320px);
+  margin-bottom: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-hairline);
+}
+
 .se-admin-app .se-res-adm-estado {
   display: flex;
   flex-wrap: wrap;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { AssetField } from "../../components/admin/AssetField";
 import { ErrorState, LoadingState } from "../../components/content";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
@@ -8,6 +9,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
 import { recorridoResumen } from "../../lib/guias/guiaResumen";
 import { applyPageMeta } from "../../lib/seo";
+import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
 import { unwrapEntity } from "../../services/adminResponseUtils";
 
 /**
@@ -50,7 +52,53 @@ const editable = (r) => ({
   })),
   frase: r?.frase ?? "",
   cifras_manuales: (r?.cifras_manuales ?? []).map((c) => ({ etiqueta: c.etiqueta, valor: c.valor })),
+  imagen_id: r?.imagen_id ?? null,
 });
+
+/**
+ * La imagen del día (opcional): sale primero en WhatsApp y en Telegram, antes del texto,
+ * y arriba en la web. Se sube o se elige de la biblioteca como la portada del boletín, y
+ * se guarda con el resto («Guardar cambios»). Sur la manda en JPG de 1600 px como mucho.
+ */
+const ImagenDelDia = ({ resumen, imagenId, elegida, bloqueado, onCambio }) => {
+  const guardada = imagenId && imagenId === resumen.imagen_id ? resumen.imagen : null;
+  const url = elegida?.url ?? guardada?.url ?? null;
+  const asset = imagenId
+    ? { id: imagenId, url, original_filename: elegida?.original_filename || guardada?.alt || "Imagen del día" }
+    : null;
+  return (
+    <div className="se-res-adm-imagen">
+      {url ? <img src={url} alt="" className="se-res-adm-imagen__vista" /> : null}
+      {bloqueado ? (
+        <p className="se-admin-meta-hint">{url ? "Imagen del día." : "Sin imagen del día."}</p>
+      ) : (
+        <AssetField
+          id={`res-${resumen.id}-imagen`}
+          label="Imagen del día (opcional)"
+          hint="Sale primero en WhatsApp y en Telegram, antes del texto, y arriba en la web. Tiene que ser pública."
+          kind="image"
+          value={imagenId}
+          asset={asset}
+          onChange={onCambio}
+          onUpload={uploadAdminMediaImage}
+          accept={ACCEPTED_IMAGE_MIME}
+        />
+      )}
+    </div>
+  );
+};
+
+ImagenDelDia.propTypes = {
+  resumen: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    imagen_id: PropTypes.number,
+    imagen: PropTypes.shape({ url: PropTypes.string, alt: PropTypes.string }),
+  }).isRequired,
+  imagenId: PropTypes.number,
+  elegida: PropTypes.shape({ url: PropTypes.string, original_filename: PropTypes.string }),
+  bloqueado: PropTypes.bool.isRequired,
+  onCambio: PropTypes.func.isRequired,
+};
 
 const Punto = ({ punto, info, secciones, clave, primero, ultimo, bloqueado, onCambio, onMover, onQuitar, onSubir, onBajar }) => (
   <li className="se-res-adm-punto">
@@ -106,6 +154,8 @@ export const AdminResumen = () => {
   const [actual, setActual] = useState(null);
   const [edicion, setEdicion] = useState(null);
   const [sucio, setSucio] = useState(false);
+  // La imagen que se acaba de subir o elegir, para enseñarla antes de guardar.
+  const [imagenElegida, setImagenElegida] = useState(null);
   const [ocupado, setOcupado] = useState(false);
   const [anadir, setAnadir] = useState({ id: "", seccion: "importante" });
 
@@ -117,6 +167,7 @@ export const AdminResumen = () => {
     const r = unwrapEntity(await adminRequest(`/admin/resumen/${id}`));
     setActual(r);
     setEdicion(editable(r));
+    setImagenElegida(null);
     setSucio(false);
   }, []);
 
@@ -409,6 +460,20 @@ export const AdminResumen = () => {
                   onChange={(e) => { setEdicion((x) => ({ ...x, frase: e.target.value })); setSucio(true); }} />
               </section>
 
+              <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("imagen")}>
+                <ImagenDelDia
+                  resumen={actual}
+                  imagenId={edicion.imagen_id}
+                  elegida={imagenElegida}
+                  bloqueado={bloqueado}
+                  onCambio={(id, row) => {
+                    setEdicion((x) => ({ ...x, imagen_id: id ?? null }));
+                    setImagenElegida(row ?? null);
+                    setSucio(true);
+                  }}
+                />
+              </section>
+
               {!bloqueado ? (
                 <div className="se-tit-acciones se-res-adm-guardar">
                   <button type="button" className="se-btn se-btn--primary" disabled={!sucio || ocupado} onClick={guardar}>Guardar cambios</button>
@@ -422,6 +487,9 @@ export const AdminResumen = () => {
 
             <section className="se-admin-table-wrap se-res-adm-bloque se-res-adm-vista" {...ancla("vista")}>
               <h2 className="se-form-label">Así sale en WhatsApp</h2>
+              {actual.imagen ? (
+                <p className="se-admin-meta-hint">Primero sale la imagen del día y, enseguida, este texto.</p>
+              ) : null}
               <pre className="se-res-adm-texto">{actual.texto_whatsapp}</pre>
               {sucio ? <p className="se-admin-meta-hint">La vista previa se actualiza al guardar.</p> : null}
             </section>

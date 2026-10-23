@@ -59,6 +59,14 @@ export const PASOS_RESUMEN = [
     texto: "Opcional. Si la escribes, sale al final del mensaje en cursiva. Si la dejas vacía, no sale nada.",
   },
   {
+    clave: "imagen",
+    titulo: "La imagen del día",
+    texto:
+      "Opcional. Si eliges una, en WhatsApp y en Telegram sale primero la imagen y enseguida el resumen, y en " +
+      "la web va arriba. Puedes subirla o elegirla de la biblioteca; tiene que ser pública. Se guarda con " +
+      "«Guardar cambios».",
+  },
+  {
     clave: "vista",
     titulo: "Así sale",
     texto:

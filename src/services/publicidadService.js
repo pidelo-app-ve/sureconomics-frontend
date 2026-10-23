@@ -1,3 +1,4 @@
+import { listaDeQuery } from "../lib/listaDeQuery";
 import { userPublicRequest } from "../lib/userApi";
 
 /**
@@ -45,14 +46,6 @@ export const ESPACIOS = {
   BOLETIN: "boletin",
   BARRA_INFERIOR: "barra-inferior",
   PREROLL: "preroll",
-};
-
-const listaDeQuery = (valor) => {
-  if (!valor) return null;
-  const partes = (Array.isArray(valor) ? valor : [valor])
-    .map((v) => String(v ?? "").trim())
-    .filter(Boolean);
-  return partes.length ? partes.join(",") : null;
 };
 
 /**

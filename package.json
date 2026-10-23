@@ -18,6 +18,7 @@
         "test:recorrido": "node src/lib/recorridoVista.test.mjs",
         "test:relojes": "node src/lib/relojes.test.mjs",
         "test:ultimahora": "node src/lib/listaUltimaHora.test.mjs",
+        "test:publicidad": "node src/lib/listaDeQuery.test.mjs",
         "i18n": "node scripts/i18n-comprobar.mjs",
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },

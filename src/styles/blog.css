@@ -12928,7 +12928,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-franja__rejilla {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   border-top: 2px solid var(--color-ink);
   border-bottom: 1px solid var(--color-hairline);
 }
@@ -15116,4 +15116,71 @@ html {
   .se-franja__mundo {
     display: none;
   }
+}
+
+/* ═══ Tanda J (23-oct-2026, noche) ═══ */
+
+/* Aliados: una fila quieta de logos, sin desfile. La segunda pasada (la copia que hacía
+   el bucle) sobra. */
+.se-partners {
+  padding: var(--se-space-xl) 0;
+}
+
+.se-partners__viewport {
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.se-partners__track {
+  width: auto;
+  max-width: var(--se-container-max);
+  margin: 0 auto;
+  padding: 0 var(--se-content-gutter);
+  animation: none;
+}
+
+.se-partners__run {
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--se-space-md) var(--se-space-lg);
+}
+
+.se-partners__run[aria-hidden="true"] {
+  display: none;
+}
+
+.se-partners__logo {
+  width: auto;
+  height: 96px;
+  padding: 0;
+}
+
+.se-partners__img {
+  max-height: 72px;
+  max-width: 180px;
+}
+
+@media (max-width: 700px) {
+  .se-partners__run {
+    justify-content: center;
+  }
+
+  .se-partners__logo {
+    height: 72px;
+  }
+
+  .se-partners__img {
+    max-height: 52px;
+    max-width: 130px;
+  }
+}
+
+/* Informe sin portada: ficha de documento, con la regla de tinta arriba. */
+.se-doccard--sin-foto {
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-doccard--sin-foto .se-doccard__body {
+  padding-top: var(--se-space-lg);
 }

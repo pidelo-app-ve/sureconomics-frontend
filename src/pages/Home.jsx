@@ -53,7 +53,7 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
 const CIERRE_CAJON_MS = 200;
 
 /** Cuántas piezas lleva cada columna de la franja bajo la apertura. */
-const EN_LA_FRANJA = { noticias: 6, analisis: 2 };
+const EN_LA_FRANJA = { analisis: 2 };
 
 /**
  * How many pieces each block shows when nothing is filtered.
@@ -163,16 +163,15 @@ export const Home = () => {
     [apertura.principal, ...apertura.secundarias].filter(Boolean).map((p) => p.id)
   );
 
-  // La franja bajo la apertura (23-oct-2026): las noticias que siguen a las de la
-  // apertura, y los artículos más recientes. Sólo sin filtro, como la apertura. Las
-  // monedas las pide la propia franja.
+  // La franja bajo la apertura: los artículos más recientes (las monedas las pide la
+  // propia franja). Sin «Últimas noticias» desde el 23-oct-2026: era la segunda de tres
+  // listas de titulares seguidas. Sólo sin filtro, como la apertura.
   const franja = isFiltered
-    ? { noticias: [], analisis: [] }
+    ? { analisis: [] }
     : {
-        noticias: pieces.filter((p) => p.formatoApi === "noticia" && !enApertura.has(p.id)).slice(0, EN_LA_FRANJA.noticias),
         analisis: pieces.filter((p) => p.formatoApi === "articulo" && !enApertura.has(p.id)).slice(0, EN_LA_FRANJA.analisis),
       };
-  const enFranja = new Set([...franja.noticias, ...franja.analisis].map((p) => p.id));
+  const enFranja = new Set(franja.analisis.map((p) => p.id));
 
   // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
   // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
@@ -248,6 +247,7 @@ export const Home = () => {
   // La editorial va detras de noticias. Si el filtro dejo la portada sin bloque de
   // noticias, va delante de todo: no puede caerse de la pagina por un filtro.
   const hayNoticias = blocks.some((b) => b.formatoApi === "noticia");
+  const hayEditorial = blocks.some((b) => b.formatoApi === "editorial");
 
   // Mientras llega el contenido -- y el arbol de temas, sin el cual el filtro de arriba
   // no se pinta -- la portada guarda una pantalla de alto. Antes no dibujaba nada: el
@@ -372,7 +372,7 @@ export const Home = () => {
       )}
 
       {cargando || isFiltered ? null : (
-        <FranjaPortada noticias={franja.noticias} analisis={franja.analisis} />
+        <FranjaPortada analisis={franja.analisis} />
       )}
 
       {/* Si no hay bloque de noticias, el béisbol y los juegos van aquí, bajo la
@@ -381,7 +381,7 @@ export const Home = () => {
 
       {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 
-      {(cargando ? [] : blocks).map(({ formatoApi, items, total }, i) => (
+      {(cargando ? [] : blocks).map(({ formatoApi, items, total }) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={nombrePlural(formatoApi)}
@@ -400,7 +400,10 @@ export const Home = () => {
               juegos antes que de prensa. Y detrás de ellos, la editorial del día. */}
           {formatoApi === "noticia" ? pausa : null}
           {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
-          {i === 1 ? (
+          {/* La banda grande, detrás de Editorial (o de Artículos si no hay
+              Editorial): detrás de Artículos, que ya lleva su ficha, eran dos anuncios
+              en la misma pantalla. */}
+          {formatoApi === (hayEditorial ? "editorial" : "articulo") ? (
             <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
           ) : null}
         </Fragment>

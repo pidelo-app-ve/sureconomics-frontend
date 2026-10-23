@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { formatearFecha, formatearNumero } from "../../i18n/motor";
+import { formatearNumero } from "../../i18n/motor";
 import { porDolar } from "../../lib/monedas";
 import { rutaDePieza } from "../../lib/pieza";
 import { getMonedas } from "../../services/monedasService";
@@ -14,8 +14,6 @@ import { CintaMundial } from "./MarketTicker";
  * La franja bajo la apertura: tres columnas de diario, como la segunda maqueta de la
  * redacción (23-oct-2026).
  *
- * - **Últimas noticias**: las que vienen después de las de la apertura, con su hora.
- *   Una lista densa y no tarjetas: lo que se compara aquí son titulares.
  * - **Análisis**: los artículos más recientes, con firma y un párrafo.
  * - **Monedas**: seis cotizaciones de /monedas, que hasta hoy no tenía enlace desde
  *   el sitio. La misma regla del cintillo: un dato viejo o sin valor no se pinta.
@@ -31,21 +29,7 @@ import { CintaMundial } from "./MarketTicker";
 /** Cuántas cotizaciones caben en la columna sin que se alargue más que las otras. */
 const MONEDAS_EN_FRANJA = 6;
 
-/** La hora si la pieza es de hoy; si no, día y mes («6 ago»): aquí lo que importa es
- *  lo reciente, y el año es ruido en una columna estrecha. */
-const cuando = (pieza, ahora) => {
-  const momento = Date.parse(pieza.fechaIso ?? "");
-  if (!momento) return pieza.fecha ?? "";
-  const hoy = new Date(ahora);
-  const esa = new Date(momento);
-  const mismoDia =
-    hoy.getFullYear() === esa.getFullYear() &&
-    hoy.getMonth() === esa.getMonth() &&
-    hoy.getDate() === esa.getDate();
-  return formatearFecha(esa, mismoDia ? "hora" : "diaMes");
-};
-
-export const FranjaPortada = ({ noticias, analisis }) => {
+export const FranjaPortada = ({ analisis }) => {
   const { t, lang } = useIdioma();
   const [monedas, setMonedas] = useState([]);
 
@@ -65,33 +49,12 @@ export const FranjaPortada = ({ noticias, analisis }) => {
     };
   }, []);
 
-  if (!noticias.length && !analisis.length && !monedas.length) return null;
-  const ahora = Date.now();
+  if (!analisis.length && !monedas.length) return null;
 
   return (
     <section className="se-section se-franja" aria-label={t("portada.franja.region")}>
       <div className="se-container">
         <div className="se-franja__rejilla">
-          {noticias.length ? (
-            <div className="se-franja__celda se-franja__celda--noticias">
-              <h2 className="se-franja__titulo">
-                <Enlace to="/articulos?formato=noticia">{t("portada.franja.ultimasNoticias")}</Enlace>
-              </h2>
-              <ol className="se-franja__lista">
-                {noticias.map((n) => (
-                  <li key={n.id} className="se-franja__nota">
-                    <time className="se-franja__hora" dateTime={n.fechaIso ?? undefined}>
-                      {cuando(n, ahora)}
-                    </time>
-                    <Enlace to={rutaDePieza(n)} className="se-franja__enlace">
-                      <TituloDePieza pieza={n} />
-                    </Enlace>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
-
           {analisis.length ? (
             <div className="se-franja__celda se-franja__celda--analisis">
               <h2 className="se-franja__titulo">
@@ -153,7 +116,6 @@ export const FranjaPortada = ({ noticias, analisis }) => {
 };
 
 FranjaPortada.propTypes = {
-  noticias: listaDePiezas({ fechaIso: PropTypes.string }),
   analisis: listaDePiezas({ autor: PropTypes.string, resumen: PropTypes.string }),
 };
 

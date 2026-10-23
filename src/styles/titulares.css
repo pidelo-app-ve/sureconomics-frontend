@@ -339,6 +339,15 @@
   font-weight: 700;
   line-height: 1.3;
   text-wrap: balance;
+  /* Subrayado verde pegado a las letras (pedido de la redacción, 23-oct-2026). Es un
+     subrayado y no un borde: así sigue a cada línea cuando el título se parte, y se
+     corta donde termina el texto, no donde termina la caja. `skip-ink` lo mantiene
+     bajo las letras con rabo (p, g, j) sin cortarlas. */
+  text-decoration: underline;
+  text-decoration-color: var(--marca-verde);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: auto;
 }
 
 .se-uh-item__resumen {

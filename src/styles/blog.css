@@ -13347,7 +13347,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 .se-explorer-section__cerrar {
   position: absolute;
   top: 50%;
-  right: 8px;
+  /* Dentro de la barra verde, no en el margen del contenedor (ahí era blanco sobre
+     blanco y no se veía). */
+  right: calc(var(--se-content-gutter) + 10px);
   transform: translateY(-50%);
   display: inline-flex;
   align-items: center;

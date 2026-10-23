@@ -6701,7 +6701,7 @@ a.se-topics__chip:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 32px;
+  height: 44px;
   padding-left: 12px;
   background: #02150c;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -6771,8 +6771,9 @@ a.se-topics__chip:focus-visible {
 
 .se-ticker__item {
   display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
   padding: 0 14px;
   border-right: 1px solid rgba(255, 255, 255, 0.16);
   white-space: nowrap;
@@ -15022,5 +15023,97 @@ html {
   .se-noticias__lead:hover .se-artcard__img,
   .se-noticias__nota:hover .se-artcard__img {
     transform: none;
+  }
+}
+
+/* ═══ La cinta con los mercados del mundo, en una línea (23-oct-2026, noche) ═══
+   Nuestras cifras a dos renglones (nombre arriba; cifra y variación abajo), el mismo
+   ritmo que el widget de TradingView, que se recorta a los 44 px de la cinta: su
+   contenido vive en los 44 de arriba de un marco de 84 que no se deja achicar. */
+.se-ticker__fila {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.se-ticker__k {
+  line-height: 1.2;
+}
+
+.se-ticker__pill {
+  align-self: center;
+}
+
+.se-ticker__viewport {
+  flex: 1 1 52%;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+}
+
+.se-ticker__track,
+.se-ticker__run {
+  align-items: stretch;
+}
+
+.se-ticker__stamp {
+  max-width: 220px;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.se-ticker .se-ticker__mundo {
+  flex: 1 1 48%;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  height: 44px;
+  overflow: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.se-ticker .se-ticker__mundo-caja {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 84px;
+  /* El contenido del marco empieza a unos 10 px de su borde: subirlo 7 deja nombre y
+     precio centrados en los 44 de la cinta. */
+  margin-top: -7px;
+  overflow: hidden;
+}
+
+.se-ticker .se-ticker__mundo-credito {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0 12px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.se-ticker .se-ticker__mundo-credito:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 1100px) {
+  .se-ticker__stamp {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .se-ticker {
+    height: 40px;
+  }
+}
+
+/* En escritorio el mundo va en la cinta: la fila de la franja solo en el teléfono. */
+@media (min-width: 861px) {
+  .se-franja__mundo {
+    display: none;
   }
 }

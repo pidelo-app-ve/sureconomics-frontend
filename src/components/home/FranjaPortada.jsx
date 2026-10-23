@@ -141,9 +141,10 @@ export const FranjaPortada = ({ noticias, analisis }) => {
             </div>
           ) : null}
 
+          {/* Solo en el teléfono: en escritorio los mercados del mundo van en la cinta. */}
           <div className="se-franja__mundo">
             <span className="se-franja__mundo-rotulo">{t("portada.franja.mundo")}</span>
-            <CintaMundial tema="light" />
+            <CintaMundial tema="light" solo="estrecho" />
           </div>
         </div>
       </div>

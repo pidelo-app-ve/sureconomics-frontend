@@ -296,27 +296,6 @@
 }
 
 /* —— Teléfono: la cabecera arriba y los juegos en una fila que se desliza —— */
-/* En escritorio no hay scroll: los días y los juegos se reparten en filas. Con siete
-   juegos crece a dos filas en vez de cortarse con una barra; con tres llena el ancho. */
-@media (min-width: 1024px) {
-  .se-lvbp__dias {
-    flex-wrap: wrap;
-    overflow-x: visible;
-  }
-  .se-lvbp__dia {
-    flex: 1 1 auto;
-  }
-  .se-lvbp__juegos {
-    flex-wrap: wrap;
-    row-gap: 8px;
-  }
-  .se-lvbp__juegos .se-lvbp__juego {
-    width: auto;
-    flex: 1 1 150px;
-    min-width: 150px;
-  }
-}
-
 @media (max-width: 700px) {
   .se-lvbp {
     grid-template-columns: 1fr;
@@ -362,5 +341,106 @@
   .se-lvbp__punto,
   .se-lvbp__carreras {
     animation: none;
+  }
+}
+
+/* ═══ La franja de la portada, rehecha (23-oct-2026, noche) ═══
+   Antes la cabecera era una columna de 184 px que partía «Temporada» y la flecha en
+   líneas sueltas, y en escritorio cada juego se estiraba hasta 375 px: el marcador
+   quedaba lejos del equipo. Ahora la cabecera es una línea encima, y los juegos
+   tienen el mismo ancho en los dos días, el justo para leer equipo y carreras de un
+   vistazo, como en la página de deportes de un diario. */
+.se-lvbp {
+  display: block;
+}
+
+.se-lvbp__cabeza {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--lvbp-suave);
+}
+
+.se-lvbp__liga {
+  width: 32px;
+  height: 32px;
+}
+
+.se-lvbp__cabeza-texto {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.se-lvbp__nombre {
+  font-size: 1.25rem;
+}
+
+.se-lvbp__temporada {
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.se-lvbp__ver {
+  margin-left: auto;
+  padding: 6px 0;
+  white-space: nowrap;
+}
+
+.se-lvbp__dia-nombre {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink);
+}
+
+.se-lvbp__dia-fecha {
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-slate);
+}
+
+@media (min-width: 1100px) {
+  .se-lvbp__dias {
+    overflow-x: visible;
+  }
+
+  .se-lvbp__dia {
+    flex: var(--juegos, 1) 1 0;
+    min-width: 0;
+    padding: 14px 20px 16px;
+  }
+
+  .se-lvbp__dia:first-child {
+    padding-left: 0;
+  }
+
+  .se-lvbp__dia:last-child {
+    padding-right: 0;
+  }
+
+  .se-lvbp__juegos {
+    display: grid;
+    grid-template-columns: repeat(var(--juegos, 1), minmax(0, 1fr));
+  }
+
+  .se-lvbp__juegos .se-lvbp__juego {
+    width: auto;
+    min-width: 0;
+    padding: 4px 18px 6px;
+  }
+
+  .se-lvbp__juegos .se-lvbp__juego:last-child {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .se-lvbp__temporada {
+    display: none;
   }
 }

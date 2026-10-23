@@ -63,9 +63,9 @@ const EN_LA_FRANJA = { noticias: 6, analisis: 2 };
  * el lector veia **una sola** editorial nueva de las diez publicadas.
  */
 const PREVIEW = {
-  // Diez y no seis desde el 23-oct-2026: la lista densa a dos columnas enseña diez
-  // notas en el alto que antes ocupaban seis tarjetas.
-  noticia: 10,
+  // Once desde el 23-oct-2026: la primera manda a todo el ancho y las otras diez van
+  // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
+  noticia: 11,
   articulo: 3,
   editorial: 3,
   entrevista: 3,

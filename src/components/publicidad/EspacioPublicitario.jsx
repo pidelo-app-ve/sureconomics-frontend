@@ -108,7 +108,9 @@ const Montaje = ({ hueco, modificador }) => {
   return (
     <Envoltorio
       hueco={hueco}
-      className={`se-ad se-ad--montaje se-ad--${modificador}${hueco.cinta_movil ? " se-ad--con-movil" : ""}`}
+      className={`se-ad se-ad--montaje se-ad--${modificador}${hueco.cinta_movil ? " se-ad--con-movil" : ""}${
+        hueco.cinta ? "" : " se-ad--solo-logo"
+      }`}
     >
       <div className="se-ad__cinta">
         {/* En el teléfono, su propia composición si la hay. El corte de 640 px tiene

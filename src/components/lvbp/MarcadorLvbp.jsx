@@ -182,7 +182,9 @@ export const MarcadorLvbp = () => {
       </div>
       <div className="se-lvbp__dias">
         {grupos.map(([dia, juegos]) => (
-          <div key={dia} className={`se-lvbp__dia se-lvbp__dia--${dia}`}>
+          // `--juegos`: el día ocupa tanto ancho como juegos tiene, y cada juego mide lo
+          // mismo en los dos días. Así el marcador queda al lado del equipo.
+          <div key={dia} className={`se-lvbp__dia se-lvbp__dia--${dia}`} style={{ "--juegos": juegos.length }}>
             <span className="se-lvbp__dia-nombre">
               {t(`lvbp.dia.${dia}`)}
               <span className="se-lvbp__dia-fecha"> · {formatearFecha(fechaDelDia(datos.hoy, dia), "diaMes")}</span>

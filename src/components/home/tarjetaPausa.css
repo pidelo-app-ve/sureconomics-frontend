@@ -263,14 +263,14 @@
 /* La sección de pausa de la portada (LVBP + juegos), detrás de las noticias.
    48 px arriba y 0 abajo (la editorial pone los suyos): el ritmo es 48 / 20 / 48. */
 .se-section.se-pausa-franja {
-  padding-top: var(--se-space-xl);
+  padding-top: var(--se-space-lg);
   padding-bottom: 0;
 }
 .se-pausa-franja .se-pausa-banner {
   margin-top: 0;
 }
 .se-pausa-franja .se-lvbp + .se-pausa-doble {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 /* En el teléfono la franja de la portada va en dos columnas, no apilada: poco alto. */
@@ -543,7 +543,7 @@
 }
 .se-pausa-doble .se-pausa-banner__titulo,
 .se-pausa-doble .se-pausa-banner--clave .se-pausa-banner__titulo {
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.01em;
@@ -562,7 +562,8 @@
   font-weight: 700;
 }
 .se-pausa-doble .se-pausa-banner__boton::after {
-  content: " →";
+  content: "→";
+  margin-left: 0.35em;
 }
 @media (hover: hover) and (pointer: fine) {
   .se-pausa-doble .se-pausa-banner:hover,

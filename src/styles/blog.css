@@ -7602,28 +7602,26 @@ a.se-topics__chip:focus-visible {
 }
 
 /* La regla de tinta de arriba se dibuja de izquierda a derecha cuando la editorial se
-   asoma (`se-reveal--in`, puesto por el observador): la casa anunciándose. Es el único
-   movimiento al hacer scroll que queda en la portada. */
-.se-eddia__card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--color-ink);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+   asoma (`se-reveal--in`, puesto por el observador): la casa anunciándose. Va como
+   fondo de 2 px y no como `::before`: la tarjeta es una rejilla y el trazo absoluto se
+   colocaba en una de sus celdas, así que salía a medias. */
+.se-eddia__card {
+  padding-top: 2px;
+  background-color: var(--color-paper);
+  background-image: linear-gradient(var(--color-ink), var(--color-ink));
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 0% 2px;
+  transition: background-size 700ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.se-eddia.se-reveal--in .se-eddia__card::before {
-  transform: scaleX(1);
+.se-eddia.se-reveal--in .se-eddia__card {
+  background-size: 100% 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-eddia__card::before {
-    transform: scaleX(1);
+  .se-eddia__card {
+    background-size: 100% 2px;
     transition: none;
   }
 }
@@ -14781,4 +14779,156 @@ html {
   font-family: var(--se-font-ui);
   font-size: 0.75rem;
   letter-spacing: 0;
+}
+
+/* ═══ Noticias y publicidad, rehechos (23-oct-2026, noche) ═══ */
+
+/* Una regla y no dos: la del título de la sección ya separa. */
+.se-noticias__lista {
+  border-top: 0;
+}
+
+/* La nota que manda: a todo el ancho de la lista, más grande, con su entradilla. */
+.se-noticias__nota:first-child {
+  column-span: all;
+  gap: 0.5rem;
+  padding: 0 0 1.25rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-hairline-dark);
+}
+
+.se-noticias__nota:first-child .se-noticias__titulo {
+  max-width: 30ch;
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.se-noticias__nota:first-child .se-noticias__resumen {
+  max-width: 62ch;
+  font-size: 1.0625rem;
+  -webkit-line-clamp: 3;
+}
+
+/* El carril acompaña al bajar: arriba, bajo la cabecera fija. */
+@media (min-width: 1024px) {
+  .se-noticias__carril {
+    position: sticky;
+    top: 100px;
+  }
+}
+
+.se-noticias__anuncio {
+  grid-column: 1 / -1;
+  margin-top: var(--se-space-md);
+}
+
+/* Lo más leído: sin la regla gruesa de arriba (la del título ya separa), con un
+   título propio sobre filete y los números grandes en el verde de la casa. */
+.se-masleido {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.se-masleido__titulo {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-ink);
+  font-size: 1.125rem;
+}
+
+.se-masleido__nota {
+  margin: 0.5rem 0 0.25rem;
+}
+
+.se-masleido__item {
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.25rem;
+  padding: 0.85rem 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-masleido__numero {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--marca-verde);
+}
+
+.se-masleido__enlace {
+  font-size: 1rem;
+}
+
+/* El bloque de Noticias no necesita los 80-96 px de una sección debajo: le sigue la
+   franja de béisbol, que pone los suyos. */
+.se-section.se-format:has(.se-noticias) {
+  padding-bottom: var(--se-space-md);
+}
+
+/* La publicidad ancha, en todo el sitio: sin caja redondeada ni borde, el arte y una
+   línea debajo que dice qué es. Es la misma mano que el resto de la página. */
+.se-ad--montaje {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-ad__cinta-sello {
+  padding: 6px 0 0;
+  background: transparent;
+  border-top: 0;
+}
+
+.se-ad__cinta-sello .se-ad__etiqueta {
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Una campaña que solo trae logotipo (sin cinta): una banda baja con el logo a su
+   tamaño, no el logo inflado a todo el ancho. */
+.se-ad--solo-logo .se-ad__cinta {
+  aspect-ratio: auto;
+  height: 112px;
+}
+
+.se-ad--solo-logo .se-ad__cinta-img {
+  padding: 22px 0;
+}
+
+/* La editorial sin foto: a dos columnas, la firma y el titular a la izquierda, la
+   entradilla y el enlace a la derecha. A una columna dejaba media fila vacía. */
+@media (min-width: 900px) {
+  .se-eddia__card--sin-foto .se-eddia__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    column-gap: clamp(32px, 5vw, 80px);
+    row-gap: 14px;
+    align-items: end;
+    max-width: none;
+    padding-right: 0;
+  }
+
+  .se-eddia__card--sin-foto .se-eddia__firma {
+    grid-column: 1 / -1;
+  }
+
+  .se-eddia__card--sin-foto .se-eddia__title {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    align-self: start;
+  }
+
+  .se-eddia__card--sin-foto .se-eddia__lead {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .se-eddia__card--sin-foto .se-eddia__cta {
+    grid-column: 2;
+    grid-row: 3;
+  }
 }

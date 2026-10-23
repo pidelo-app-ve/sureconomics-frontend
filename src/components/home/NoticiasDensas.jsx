@@ -38,7 +38,7 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
             {/* El lugar primero: para este medio «dónde» es lo primero por lo que
                 un lector ordena. Igual que en la columna de la apertura. */}
             <span className="se-noticias__meta">
-              {geoPrincipal(n)}
+              <span className="se-meta__lugar">{geoPrincipal(n)}</span>
               {n.fecha ? <span aria-hidden="true"> · </span> : null}
               {n.fecha}
             </span>

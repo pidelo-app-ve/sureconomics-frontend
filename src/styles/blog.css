@@ -14673,3 +14673,112 @@ html {
   border-bottom: 2px solid var(--color-ink);
   font-size: 1.0625rem;
 }
+
+/* ═══ Salir del molde (23-oct-2026) ═══
+   Lo que hacía que la web «se viera muy IA» no eran los colores ni la letra: eran los
+   tics que comparte toda página generada. Rótulos en versalitas cobre encima de cada
+   titular; el guion cobre bajo cada título de sección con un «VER TODAS →» en
+   versalitas; tarjetas grises con borde; píldoras redondas. Aquí se sustituyen por el
+   lenguaje de un diario: el lugar en negrita y la fecha en frase, el título de sección
+   sobre una regla verde de la casa, tarjetas sin caja, etiquetas cuadradas. Acotado a
+   las páginas públicas (`.se-blog`); el panel no cambia. */
+
+/* —— 1. Rótulos en frase —— */
+.se-blog .se-meta,
+.se-apertura__meta,
+.se-noticias__meta,
+.se-artcard__by,
+.se-doccard__kicker,
+.se-newsletter__kicker,
+.se-piece__tags-label,
+.se-footer__contact-title {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-slate);
+}
+
+.se-meta__lugar {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.se-footer__contact-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+/* —— 2. El título de sección, sobre la regla verde de la casa —— */
+.se-blog .se-heading-section {
+  margin: 0 0 var(--se-space-lg);
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--marca-verde);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  letter-spacing: -0.03em;
+}
+
+.se-blog .se-heading-section::before {
+  display: none;
+}
+
+.se-format__head {
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--marca-verde);
+}
+
+.se-format__head .se-heading-section {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.se-format__more {
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--marca-verde);
+}
+
+.se-format__more:hover {
+  color: var(--color-accent);
+}
+
+/* —— 3. Tarjetas sin caja: la foto, el texto y un filete —— */
+.se-blog .se-artcard {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-hairline);
+  padding-bottom: 12px;
+}
+
+.se-blog .se-artcard:hover {
+  border-color: var(--color-hairline-dark);
+}
+
+.se-blog .se-artcard__body {
+  padding: 12px 0 0;
+}
+
+.se-blog .se-artcard__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.se-blog .se-artcard--editorial {
+  border-left: 0;
+}
+
+/* —— 4. Etiquetas cuadradas, no píldoras —— */
+.se-tagpill {
+  border-radius: 3px;
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  letter-spacing: 0;
+}

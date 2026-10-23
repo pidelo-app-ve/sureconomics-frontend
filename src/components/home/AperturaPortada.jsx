@@ -232,7 +232,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
             >
               <div className="se-apertura__linea">
                 <span className="se-apertura__meta">
-                  {lugar}
+                  <span className="se-meta__lugar">{lugar}</span>
                   {actual.fecha ? <span aria-hidden="true"> · </span> : null}
                   {actual.fecha}
                 </span>
@@ -268,7 +268,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
               {columna.map((n) => (
                 <li key={n.id} className="se-apertura__item">
                   <span className="se-apertura__meta">
-                    {geoPrincipal(n)}
+                    <span className="se-meta__lugar">{geoPrincipal(n)}</span>
                     {n.fecha ? <span aria-hidden="true"> · </span> : null}
                     {n.fecha}
                   </span>

@@ -22,14 +22,12 @@ export const ReportGrid = ({ items }) => {
   return (
   <div className="se-docgrid">
     {items.map((r) => (
-      // Sin portada no hay caja de imagen: un rectángulo de color vacío del tamaño de
-      // una foto se leía como algo que no cargó. Sin ella es una ficha de documento.
-      <article key={r.id} className={`se-doccard${r.imagenUrl ? "" : " se-doccard--sin-foto"}`}>
-        {r.imagenUrl ? (
-          <Enlace to={rutaDePieza(r)} className="se-doccard__media" aria-label={r.titulo}>
-            <CardMedia pieza={r} />
-          </Enlace>
-        ) : null}
+      // La previsualización siempre: la portada del informe o, si no tiene, el color
+      // de su tema. La redacción la quiere aunque no haya foto.
+      <article key={r.id} className="se-doccard">
+        <Enlace to={rutaDePieza(r)} className="se-doccard__media" aria-label={r.titulo}>
+          <CardMedia pieza={r} />
+        </Enlace>
         <div className="se-doccard__body">
           <span className="se-doccard__kicker">{t("portada.informes.gorro")}</span>
           <h3 className="se-doccard__title">

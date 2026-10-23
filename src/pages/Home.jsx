@@ -67,8 +67,10 @@ const PREVIEW = {
   // Once desde el 23-oct-2026: la primera manda a todo el ancho y las otras diez van
   // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
   noticia: 11,
-  articulo: 3,
-  editorial: 3,
+  // Cuatro desde el 23-oct-2026: con el contenedor a 1440 caben cuatro columnas, y con
+  // tres quedaba un hueco a la derecha. Donde caben tres, la cuarta se oculta (CSS).
+  articulo: 4,
+  editorial: 4,
   entrevista: 3,
   informe: 2,
   podcast: 3,
@@ -93,6 +95,7 @@ const LAYOUTS = {
     <ArticleCardGrid
       items={items}
       espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO_ARTICULOS}
+      columnas={4}
     />
   ),
   editorial: (items) => <EditorialList items={items} />,
@@ -109,7 +112,7 @@ const LAYOUTS = {
  * bloques seguidos de tres tarjetas oscuras y alargaban el final. Con un filtro puesto
  * vuelven a ir por separado: ahí son resultados de búsqueda, agrupados por formato.
  */
-const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 3 };
+const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 4 };
 
 export const Home = () => {
   const { t, lang } = useIdioma();
@@ -303,7 +306,7 @@ export const Home = () => {
     ) : null;
 
   return (
-    <main className="se-blog" role="main">
+    <main className="se-blog se-portada" role="main">
       {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
           hero y con el el unico `h1`; una portada sin encabezado deja a los
           buscadores y a los lectores de pantalla sin saber que pagina es esta. */}

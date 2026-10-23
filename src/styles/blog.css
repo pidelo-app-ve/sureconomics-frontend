@@ -15135,14 +15135,7 @@ html {
 
 /* ═══ Tanda J (23-oct-2026, noche) ═══ */
 
-/* Informe sin portada: ficha de documento, con la regla de tinta arriba. */
-.se-doccard--sin-foto {
-  border-top: 2px solid var(--color-ink);
-}
 
-.se-doccard--sin-foto .se-doccard__body {
-  padding-top: var(--se-space-lg);
-}
 
 /* ═══ El pie en verde intenso (23-oct-2026, noche) ═══
    Como la maqueta de la redacción: verde Cardin de borde a borde, letra blanca, la
@@ -15355,5 +15348,50 @@ html {
   .se-footer__grid--cinco .se-footer__mas {
     padding-top: 0;
     border-top: 0;
+  }
+}
+
+/* ═══ Cuatro por fila en la portada (23-oct-2026, noche) ═══
+   Artículos, Editorial y Al punto llevan cuatro piezas: cuatro columnas de 1200 px
+   arriba, tres (y la cuarta oculta) entre 900 y 1199, dos filas de dos en tableta, y
+   tres en el teléfono, que ya es largo. */
+.se-portada .se-format .se-artgrid,
+.se-portada .se-format .se-alpunto__grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1199px) {
+  .se-portada .se-format .se-artgrid,
+  .se-portada .se-format .se-alpunto__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
+  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .se-portada .se-format .se-artgrid,
+  .se-portada .se-format .se-alpunto__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
+  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
+    display: revert;
+  }
+}
+
+@media (max-width: 599px) {
+  .se-portada .se-format .se-artgrid,
+  .se-portada .se-format .se-alpunto__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
+  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
+    display: none;
   }
 }

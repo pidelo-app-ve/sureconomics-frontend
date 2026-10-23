@@ -52,10 +52,10 @@ export const posicionDelAnuncio = (cuantas, columnas = 3) => {
  * reciente a más antigua, así que la que se cae es la más vieja del bloque, que es la
  * que menos duele.
  */
-export const conAnuncio = (tarjetas, anuncio) => {
+export const conAnuncio = (tarjetas, anuncio, columnas = 3) => {
   if (!anuncio) return tarjetas;
   const visibles = tarjetas.slice(0, Math.max(0, tarjetas.length - 1));
-  const i = posicionDelAnuncio(visibles.length);
+  const i = posicionDelAnuncio(visibles.length, columnas);
   // Con su `key`: entra en un array junto a las tarjetas, y sin ella React avisa por
   // consola en cada render. Se pone aqui y no en quien lo pasa porque es aqui donde
   // el elemento se convierte en un elemento de lista.

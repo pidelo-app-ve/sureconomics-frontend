@@ -18,7 +18,6 @@
       "apertura": "Lead story",
       "loMasReciente": "Latest",
       "otrasNoticias": "Other recent news",
-      "enLaApertura": "Lead stories",
       "pausar": "Stop the story rotation",
       "reanudar": "Resume the story rotation"
     },
@@ -72,6 +71,7 @@
     },
     "cinta": {
       "cifrasDeMercado": "Market figures",
+      "mercados": "Markets",
       "indicesMundiales": "World indices (TradingView)",
       "oro": "Gold",
       "cierreDel": "Close of {fecha}"

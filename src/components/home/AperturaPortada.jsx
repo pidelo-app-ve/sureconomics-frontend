@@ -36,10 +36,12 @@ import { IconoPausa, UltimaHoraTarjeta } from "../titulares/UltimaHoraTarjeta";
  * de la columna -- con el mismo mecanismo que la tarjeta de Última hora: un intervalo,
  * pausa con el ratón o el foco encima, un botón de pausa, y quieta del todo si el
  * lector pidió menos movimiento. La foto saliente se desvanece sobre la que entra, que
- * se asienta desde un poco más grande; el texto sube con ella. La columna señala cuál
- * está en pantalla. Cada 8 s y no cada 4 como Última hora: dos cosas al mismo compás en
- * la misma pantalla se anulan. La pieza fijada por la redacción no rota: fijar es
- * decir «esta manda».
+ * se asienta desde un poco más grande; el texto sube con ella. La columna enseña las
+ * otras tres: la que está en grande sale de la lista y entra la que acaba de dejar de
+ * estarlo, así que nunca se lee el mismo titular dos veces en la misma pantalla (en el
+ * teléfono la lista va justo debajo del titular grande, y repetirlo se notaba). Cada 8 s
+ * y no cada 4 como Última hora: dos cosas al mismo compás en la misma pantalla se
+ * anulan. La pieza fijada por la redacción no rota: fijar es decir «esta manda».
  */
 
 /** Cuántas noticias acompañan a la principal en la columna. */
@@ -160,7 +162,7 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
 
   if (!principal) return null;
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
-  const columna = rota ? conjunto : secundarias;
+  const columna = rota ? conjunto.filter((n) => n.id !== actual.id) : secundarias;
   const cruzando = Boolean(saliente && saliente.id !== actual.id);
   const lugar = geoPrincipal(actual);
   const entradillaDoble = (actual.resumen?.length ?? 0) > ENTRADILLA_DOBLE;
@@ -262,29 +264,19 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
             {/* La última hora, encima de los titulares de la apertura (maqueta del 21-oct-2026).
                 No pinta nada si no hay titulares recientes, y la columna queda como antes. */}
             <UltimaHoraTarjeta />
-            <ol
-              className={`se-apertura__columna${rota ? " se-apertura__columna--rota" : ""}`}
-              aria-label={rota ? t("portada.apertura.enLaApertura") : t("portada.apertura.otrasNoticias")}
-            >
-              {columna.map((n) => {
-                const activa = rota && n.id === actual.id;
-                return (
-                  <li
-                    key={n.id}
-                    className={`se-apertura__item${activa ? " se-apertura__item--activa" : ""}`}
-                    aria-current={activa ? "true" : undefined}
-                  >
-                    <span className="se-apertura__meta">
-                      {geoPrincipal(n)}
-                      {n.fecha ? <span aria-hidden="true"> · </span> : null}
-                      {n.fecha}
-                    </span>
-                    <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
-                      <TituloDePieza pieza={n} />
-                    </Enlace>
-                  </li>
-                );
-              })}
+            <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
+              {columna.map((n) => (
+                <li key={n.id} className="se-apertura__item">
+                  <span className="se-apertura__meta">
+                    {geoPrincipal(n)}
+                    {n.fecha ? <span aria-hidden="true"> · </span> : null}
+                    {n.fecha}
+                  </span>
+                  <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
+                    <TituloDePieza pieza={n} />
+                  </Enlace>
+                </li>
+              ))}
             </ol>
             </div>
           ) : null}

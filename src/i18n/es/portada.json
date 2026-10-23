@@ -18,7 +18,6 @@
       "apertura": "Apertura",
       "loMasReciente": "Lo más reciente",
       "otrasNoticias": "Otras noticias recientes",
-      "enLaApertura": "Noticias de la apertura",
       "pausar": "Detener el cambio de noticia",
       "reanudar": "Reanudar el cambio de noticia"
     },
@@ -72,6 +71,7 @@
     },
     "cinta": {
       "cifrasDeMercado": "Cifras de mercado",
+      "mercados": "Mercados",
       "indicesMundiales": "Índices mundiales (TradingView)",
       "oro": "Oro",
       "cierreDel": "Cierre del {fecha}"

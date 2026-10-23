@@ -373,11 +373,6 @@ export const Navbar = () => {
               decoding="async"
             />
           </picture>
-          {/* El lema de la casa bajo el logotipo, como el mástil de un diario. Solo se
-              pinta de 1360 arriba (CSS); el `aria-label` del enlace ya dice la marca. */}
-          <span className="se-header__lema" aria-hidden="true">
-            {t("marca.lema")}
-          </span>
         </Enlace>
 
         {/* Desktop nav — visible only from 992px up */}

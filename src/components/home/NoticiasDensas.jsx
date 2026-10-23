@@ -18,15 +18,20 @@ import { TituloDePieza } from "../content/TituloDePieza";
  * paginación sí tiene sentido.
  *
  * El carril de la derecha es el blanco que sobraba: lo que la portada quiera poner
- * ahí (`carril`, hoy «Lo más leído») y debajo la tarjeta nativa de publicidad, que
- * antes iba intercalada en la rejilla. Sin nada que poner, la lista ocupa todo.
+ * ahí (`carril`, hoy «Lo más leído»). Sin nada que poner, la lista ocupa todo.
+ *
+ * La publicidad va DEBAJO de la lista, como franja ancha (`lista`), no como ficha en
+ * el carril: la ficha pinta un logotipo pequeño sobre un recuadro vacío, y al lado de
+ * una lista de titulares se veía como algo que no cargó. La franja lleva el arte
+ * completo del anunciante, que es lo que mejor se ve en todo el sitio.
  */
 export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
-  const hay = useHayAnuncio(espacioDeAnuncio, "tarjeta");
-  const hayCarril = Boolean(carril) || hay;
+  const hay = useHayAnuncio(espacioDeAnuncio, "lista");
+  const hayCarril = Boolean(carril);
 
   return (
     <div className={`se-noticias${hayCarril ? " se-noticias--con-carril" : ""}`}>
+      <div className="se-noticias__principal">
       <ol className="se-noticias__lista">
         {items.map((n) => (
           <li key={n.id} className="se-noticias__nota">
@@ -46,12 +51,13 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
           </li>
         ))}
       </ol>
-      {hayCarril ? (
-        <aside className="se-noticias__carril">
-          {carril}
-          {hay ? <EspacioPublicitario espacio={espacioDeAnuncio} variante="tarjeta" /> : null}
-        </aside>
+      {hay ? (
+        <div className="se-noticias__anuncio">
+          <EspacioPublicitario espacio={espacioDeAnuncio} variante="lista" />
+        </div>
       ) : null}
+      </div>
+      {hayCarril ? <aside className="se-noticias__carril">{carril}</aside> : null}
     </div>
   );
 };

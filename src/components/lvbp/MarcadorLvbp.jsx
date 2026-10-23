@@ -117,7 +117,9 @@ const Fila = ({ sigla, carreras, gano, perdio, grande }) => (
   <div className={`se-lvbp__fila${gano ? " se-lvbp__fila--gano" : ""}${perdio ? " se-lvbp__fila--perdio" : ""}`}>
     <Escudo sigla={sigla} tamano={grande ? 30 : 26} />
     <span className="se-lvbp__equipo">{grande ? equipo(sigla).nombre : equipo(sigla).corto}</span>
-    <span className="se-lvbp__carreras">{carreras ?? ""}</span>
+    {/* `key` por valor: cuando cambia el marcador la cifra se vuelve a montar y entra
+        con `se-lvbp-entra`. Es el único movimiento que significa «pasó algo». */}
+    <span key={carreras ?? "-"} className="se-lvbp__carreras">{carreras ?? ""}</span>
   </div>
 );
 Fila.propTypes = {

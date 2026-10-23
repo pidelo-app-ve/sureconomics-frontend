@@ -27,11 +27,15 @@ import "../../styles/titulares.css";
  *   tienen página propia, son título, resumen y su fuente.
  */
 
-const CADA_MS = 4000;
+/* 8 s desde el 23-oct-2026, el mismo compás que la apertura y el reloj: con 4 / 5 / 8 s
+   las tres cosas se pisaban y la primera pantalla titilaba. */
+const CADA_MS = 8000;
 const CUANTOS = 6;
 /** Lo que dura la caída del que sale; tiene que coincidir con `se-uh-cae` en el CSS. */
 const CAIDA_MS = 300;
 const UN_DIA_MS = 24 * 60 * 60 * 1000;
+/** El punto de «Última hora» late solo mientras la noticia tiene menos de una hora. */
+const UNA_HORA_MS = 60 * 60 * 1000;
 
 const useAhora = (cada) => {
   const [ahora, setAhora] = useState(() => Date.now());
@@ -116,7 +120,12 @@ export const UltimaHoraTarjeta = () => {
     >
       <div className="se-uh__cabeza">
         <span className="se-uh__etiqueta">
-          <span className="se-uh__punto" aria-hidden="true" />
+          <span
+            className={`se-uh__punto${
+              ahora - (Date.parse(actual.published_at || "") || 0) < UNA_HORA_MS ? " se-uh__punto--reciente" : ""
+            }`}
+            aria-hidden="true"
+          />
           {t("titulares.tarjeta.etiqueta")}
         </span>
         <span className="se-uh__hace">{haceCuanto(actual.published_at, t, ahora)}</span>

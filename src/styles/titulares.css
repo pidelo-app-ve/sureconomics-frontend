@@ -51,6 +51,10 @@
   height: 0.55rem;
   border-radius: 50%;
   background: #fff;
+}
+
+/* Late solo con una noticia de menos de una hora: un pulso perpetuo deja de verse. */
+.se-uh__punto--reciente {
   animation: se-uh-latido 1.6s ease-in-out infinite;
 }
 
@@ -174,7 +178,7 @@
   height: 100%;
   background: var(--marca-rojo);
   transform-origin: left center;
-  animation: se-uh-avance 4s linear forwards;
+  animation: se-uh-avance 8s linear forwards;
 }
 .se-uh__progreso--quieto {
   animation: none;

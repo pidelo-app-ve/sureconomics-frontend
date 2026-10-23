@@ -6735,7 +6735,6 @@ a.se-topics__chip:focus-visible {
   height: 6px;
   border-radius: 50%;
   background: #6ee7a0;
-  animation: se-ticker-pulso 2.2s ease-in-out infinite;
 }
 
 @keyframes se-ticker-pulso {
@@ -7597,10 +7596,36 @@ a.se-topics__chip:focus-visible {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   background: var(--color-paper);
-  border-top: 2px solid var(--color-ink);
   border-bottom: 1px solid var(--color-hairline);
   text-decoration: none;
   transition: border-color 0.2s ease;
+}
+
+/* La regla de tinta de arriba se dibuja de izquierda a derecha cuando la editorial se
+   asoma (`se-reveal--in`, puesto por el observador): la casa anunciándose. Es el único
+   movimiento al hacer scroll que queda en la portada. */
+.se-eddia__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.se-eddia.se-reveal--in .se-eddia__card::before {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-eddia__card::before {
+    transform: scaleX(1);
+    transition: none;
+  }
 }
 
 @media (min-width: 860px) {
@@ -12704,6 +12729,25 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   flex-direction: column;
   gap: var(--se-space-md);
   min-width: 0;
+  /* La llegada de la página (una vez): la principal sube y las de la columna detrás,
+     escalonadas 60 ms. Nunca al hacer scroll. */
+  animation: se-apertura-sube 480ms cubic-bezier(0.2, 0.9, 0.25, 1) 80ms both;
+}
+
+.se-apertura__lado .se-apertura__item {
+  animation: se-apertura-sube 420ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+.se-apertura__lado .se-apertura__item:nth-child(1) { animation-delay: 200ms; }
+.se-apertura__lado .se-apertura__item:nth-child(2) { animation-delay: 260ms; }
+.se-apertura__lado .se-apertura__item:nth-child(3) { animation-delay: 320ms; }
+.se-apertura__lado .se-apertura__item:nth-child(4) { animation-delay: 380ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .se-apertura__principal,
+  .se-apertura__lado .se-apertura__item {
+    animation: none;
+  }
 }
 
 .se-apertura__media {
@@ -14011,7 +14055,14 @@ html {
   fill: #ffc928;
   transform-box: fill-box;
   transform-origin: center;
-  animation: se-juegos-pulsa 5s ease-out infinite;
+  /* Una vez al cargar y mientras el ratón está encima: dos luces latiendo en el mástil
+     (REC y esta) eran una de más, y REC es la que significa algo. */
+  animation: se-juegos-pulsa 5s ease-out 1;
+}
+
+.se-header__juegos:hover .se-header__juegos-boton,
+.se-header__juegos:focus-visible .se-header__juegos-boton {
+  animation-iteration-count: infinite;
 }
 
 .se-header__juegos-boton--b {

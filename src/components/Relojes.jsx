@@ -24,7 +24,8 @@ import { CIUDADES, horaEn } from "../lib/relojes";
  *   es cada hora.
  */
 
-const CADA_MS = 5000;
+/* 8 s desde el 23-oct-2026: el mismo compás que la apertura y Última hora. */
+const CADA_MS = 8000;
 /** Lo que dura la caída de la que sale; tiene que coincidir con `se-hora-cae` en el CSS. */
 const CAIDA_MS = 300;
 

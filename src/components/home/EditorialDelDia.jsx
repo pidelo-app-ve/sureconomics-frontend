@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { Enlace } from "../Enlace";
 import { BRAND } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
@@ -40,6 +41,11 @@ const SIZES = "(max-width: 859px) 100vw, 44vw";
 export const EditorialDelDia = ({ pieza }) => {
   const { t } = useIdioma();
   const [fallo, setFallo] = useState(false);
+  // Al asomarse en pantalla, la regla de tinta de arriba se dibuja de izquierda a
+  // derecha (`se-reveal--in` + CSS): el único movimiento al hacer scroll que queda en
+  // la portada, y es el de la casa anunciándose.
+  const seccion = useRef(null);
+  useRevealOnScroll(seccion);
   if (!pieza) return null;
 
   const entradilla = pieza.entrada || pieza.resumen || "";
@@ -49,7 +55,7 @@ export const EditorialDelDia = ({ pieza }) => {
   const hayFoto = Boolean(pieza.imagenUrl) && !fallo;
 
   return (
-    <section className="se-section se-eddia" aria-label={t("portada.editorialDelDia.titulo")}>
+    <section ref={seccion} className="se-section se-eddia" aria-label={t("portada.editorialDelDia.titulo")}>
       <div className="se-container">
         <Enlace
           to={rutaDePieza(pieza)}

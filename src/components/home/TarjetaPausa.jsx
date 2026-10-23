@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { Enlace } from "../Enlace";
 import { formatearNumero } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
@@ -224,11 +225,17 @@ export const InvitacionClave = () => {
  * La franja de juegos de la portada, bajo el buscador: los dos banners lado a lado
  * (la guacamaya y La Clave), apilados en el teléfono.
  */
-export const BannerDeJuegos = () => (
-  <div className="se-pausa-doble">
-    <InvitacionPausa enPortada />
-    <InvitacionClave />
-  </div>
-);
+export const BannerDeJuegos = () => {
+  // La guacamaya bate las alas unas veces al asomarse la franja (`se-reveal--in`) y
+  // cuando el ratón está encima; no para siempre.
+  const franja = useRef(null);
+  useRevealOnScroll(franja);
+  return (
+    <div ref={franja} className="se-pausa-doble">
+      <InvitacionPausa enPortada />
+      <InvitacionClave />
+    </div>
+  );
+};
 
 export default TarjetaPausa;

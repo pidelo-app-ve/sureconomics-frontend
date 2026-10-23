@@ -577,6 +577,20 @@
     color: var(--color-accent);
   }
 }
+/* El aleteo con motivo: quieto hasta que la franja se asoma, seis batidas entonces
+   (unos 2,5 s), y mientras el ratón o el foco están encima. */
+.se-pausa-doble .se-pausa-ave__ala {
+  animation-play-state: paused;
+}
+.se-pausa-doble.se-reveal--in .se-pausa-ave__ala {
+  animation-play-state: running;
+  animation-iteration-count: 6;
+}
+.se-pausa-doble .se-pausa-banner:hover .se-pausa-ave__ala,
+.se-pausa-doble .se-pausa-banner:focus-within .se-pausa-ave__ala {
+  animation-play-state: running;
+  animation-iteration-count: infinite;
+}
 @media (max-width: 760px) {
   .se-pausa-doble {
     grid-template-columns: 1fr;

@@ -1,11 +1,10 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { Enlace } from "../Enlace";
+import { BRAND } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
-import { temaPrincipal } from "../../lib/contentFilter";
 import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
-import { fondoDeTema } from "../../lib/tarjeta";
 import { piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 
@@ -26,6 +25,13 @@ import { TituloDePieza } from "../content/TituloDePieza";
  * No pinta nada cuando no hay editorial. Un bloque que anuncia la posición de la
  * casa con un marco vacío dentro es peor que no tener bloque: anuncia que el medio
  * no tiene nada que decir.
+ *
+ * Desde el 23-oct-2026 ya no es una tarjeta con filete verde: es una sección del
+ * periódico, entre la regla de tinta y el filete que usan la franja y la LVBP, y la
+ * firma la casa con su isotipo (la misma firma que lleva una editorial en su página),
+ * en vez de un rótulo en versalitas igual al de cualquier tarjeta. Sin foto no hay
+ * columna de imagen: antes pintaba 600 × 320 px de verde plano, el objeto más pesado
+ * de la portada sin nada dentro.
  */
 /** La columna de la imagen: todo el ancho en telefono, el 44% al lado del texto. */
 const ANCHOS = [600, 900, 1200, 1600];
@@ -37,21 +43,20 @@ export const EditorialDelDia = ({ pieza }) => {
   if (!pieza) return null;
 
   const entradilla = pieza.entrada || pieza.resumen || "";
-  // La fotografía cuando la hay; si no, el color del tema, el mismo tratamiento
-  // que usan las tarjetas, para que la página se sostenga en los dos casos.
-  // El color del tema cubre las dos cosas: la pieza sin foto y la foto que no llega.
-  // Auditando produccion salio que hay imagenes alojadas fuera que contestan 429, y
-  // el recuadro roto del navegador en el bloque de la editorial es lo peor que puede
-  // salir en esa posicion.
+  // La fotografía cuando la hay y llega. Auditando producción salió que hay imágenes
+  // alojadas fuera que contestan 429, y el recuadro roto del navegador en el bloque de
+  // la editorial es lo peor que puede salir en esa posición: si falla, sin columna.
   const hayFoto = Boolean(pieza.imagenUrl) && !fallo;
-  const fondo = hayFoto ? null : fondoDeTema(temaPrincipal(pieza));
 
   return (
     <section className="se-section se-eddia" aria-label={t("portada.editorialDelDia.titulo")}>
       <div className="se-container">
-        <Enlace to={rutaDePieza(pieza)} className="se-eddia__card">
-          <div className="se-eddia__media">
-            {hayFoto ? (
+        <Enlace
+          to={rutaDePieza(pieza)}
+          className={`se-eddia__card${hayFoto ? "" : " se-eddia__card--sin-foto"}`}
+        >
+          {hayFoto ? (
+            <div className="se-eddia__media">
               <img
                 className="se-eddia__img"
                 src={imagenAncho(pieza.imagenUrl, 1200)}
@@ -62,25 +67,26 @@ export const EditorialDelDia = ({ pieza }) => {
                 decoding="async"
                 onError={() => setFallo(true)}
               />
-            ) : (
-              <div
-                className="se-eddia__fill"
-                style={{ background: fondo }}
-                aria-hidden="true"
-              />
-            )}
-          </div>
+            </div>
+          ) : null}
           <div className="se-eddia__body">
-            <span className="se-eddia__kicker">{t("portada.editorialDelDia.titulo")}</span>
+            {/* La firma de la casa: el isotipo, «Editorial» y la fecha, como en la
+                página de la pieza (`PieceByline`). Es lo que ningún otro bloque tiene. */}
+            <div className="se-eddia__firma">
+              <img className="se-eddia__marca" src={BRAND.isotipo} alt="" width="44" height="44" />
+              <span className="se-eddia__quien">
+                <span className="se-eddia__rotulo">{t("portada.editorialDelDia.titulo")}</span>
+                {/* La fecha larga sale del ISO, en el idioma del documento; si la pieza no
+                    lo trae, queda la corta que ya viene formateada. */}
+                {pieza.fecha ? (
+                  <time className="se-eddia__fecha" dateTime={pieza.fechaIso ?? pieza.fecha}>
+                    {formatearFecha(pieza.fechaIso, "larga") || pieza.fecha}
+                  </time>
+                ) : null}
+              </span>
+            </div>
             <h2 className="se-eddia__title"><TituloDePieza pieza={pieza} /></h2>
             {entradilla ? <p className="se-eddia__lead">{entradilla}</p> : null}
-            {/* La fecha larga sale del ISO, en el idioma del documento; si la pieza no
-                lo trae, queda la corta que ya viene formateada. */}
-            {pieza.fecha ? (
-              <time className="se-eddia__fecha" dateTime={pieza.fechaIso ?? pieza.fecha}>
-                {formatearFecha(pieza.fechaIso, "larga") || pieza.fecha}
-              </time>
-            ) : null}
             <span className="se-eddia__cta">{t("portada.editorialDelDia.leer")}</span>
           </div>
         </Enlace>

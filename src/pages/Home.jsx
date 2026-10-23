@@ -262,18 +262,15 @@ export const Home = () => {
   // más gente mueve; fuera de temporada no se pinta.
   const pausa =
     !cargando && status === "success" && pieces.length && !isFiltered ? (
-      <>
-        <section className="se-section se-pausa-franja">
-          <div className="se-container">
-            <MarcadorLvbp />
-          </div>
-        </section>
-        <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
-          <div className="se-container">
-            <BannerDeJuegos />
-          </div>
-        </section>
-      </>
+      // Una sola sección para las dos cosas (23-oct-2026): como dos secciones, la
+      // regla `.se-section + .se-section` las pegaba (4 px) y el aire caía todo
+      // debajo. Ahora el ritmo es 48 / 20 / 48.
+      <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
+        <div className="se-container">
+          <MarcadorLvbp />
+          <BannerDeJuegos />
+        </div>
+      </section>
     ) : null;
 
   return (

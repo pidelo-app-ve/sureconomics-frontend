@@ -1,5 +1,6 @@
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useNavegar } from "../components/Enlace";
 import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
@@ -47,6 +48,9 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
  * Entrevistas e Informes, y los grupos vacios se caen. Sin filtrar, cada bloque
  * muestra su punado mas reciente.
  */
+
+/** Lo que tarda el cajón del buscador en cerrarse: `se-cajon-cierra` en el CSS. */
+const CIERRE_CAJON_MS = 200;
 
 /** Cuántas piezas lleva cada columna de la franja bajo la apertura. */
 const EN_LA_FRANJA = { noticias: 6, analisis: 2 };
@@ -110,11 +114,42 @@ export const Home = () => {
     useContentFilter(pieces, tree);
 
   // El explorador solo se pinta con `?buscar=1` en la URL (la lupa de la cabecera).
+  //
+  // El cajón se abre y se cierra con animación. La URL manda, pero al cerrar el cajón
+  // sigue pintado `CIERRE_CAJON_MS` más -- el tiempo de `se-cajon-cierra` -- y solo
+  // entonces se quita y se limpia la selección. Sin esto desaparecía de golpe, y si
+  // había un filtro puesto la portada saltaba de los resultados a todo en el mismo
+  // cuadro. Escape lo cierra, y el foco vuelve a la lupa si estaba dentro.
   const [parametros] = useSearchParams();
+  const navegar = useNavegar();
   const buscadorAbierto = parametros.get("buscar") === "1";
+  const [cajon, setCajon] = useState(buscadorAbierto ? "abierto" : "cerrado");
+  const cajonRef = useRef(null);
   useEffect(() => {
-    if (!buscadorAbierto) reset();
+    if (buscadorAbierto) {
+      setCajon("abierto");
+      return undefined;
+    }
+    setCajon((estado) => (estado === "abierto" ? "cerrando" : estado));
+    const id = setTimeout(() => {
+      const teniaElFoco = cajonRef.current?.contains(document.activeElement);
+      setCajon("cerrado");
+      reset();
+      if (teniaElFoco) document.querySelector(".se-header__buscar")?.focus();
+    }, CIERRE_CAJON_MS);
+    return () => clearTimeout(id);
   }, [buscadorAbierto, reset]);
+  const cerrarBuscador = () => navegar("/");
+  useEffect(() => {
+    if (!buscadorAbierto) return undefined;
+    const alTeclear = (e) => {
+      if (e.key === "Escape") cerrarBuscador();
+    };
+    document.addEventListener("keydown", alTeclear);
+    return () => document.removeEventListener("keydown", alTeclear);
+    // `cerrarBuscador` cambia con `navegar`, que es estable mientras no cambie el idioma.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscadorAbierto]);
 
   // La apertura: la pieza que manda y su columna. Sale de la lista sin filtrar; pero
   // con un filtro puesto se retira, porque entonces el lector está buscando y lo que
@@ -267,12 +302,15 @@ export const Home = () => {
       {/* El filtro, pegado al navbar, solo cuando la lupa lo abre. Nada que explorar
           antes de que haya algo publicado, y una barra de filtros vacia el dia del
           lanzamiento se lee como un control roto y no como uno honesto. */}
-      {buscadorAbierto && !cargando && status === "success" && taxonomy.ready && pieces.length ? (
+      {cajon !== "cerrado" && !cargando && status === "success" && taxonomy.ready && pieces.length ? (
         <section
-          className="se-section se-explorer-section se-explorer-section--primera"
+          ref={cajonRef}
+          className={`se-section se-explorer-section se-explorer-section--primera${
+            cajon === "cerrando" ? " se-explorer-section--cierra" : ""
+          }`}
           aria-label={t("portada.inicio.explorarContenido")}
         >
-          <div className="se-container">
+          <div className="se-container se-explorer-section__marco">
             {/* `nombreTraducido` y no `name`: las piezas ya traen sus temas traducidos
                 (`piezaFromApi`), y las opciones tienen que decir lo mismo que ellas
                 para que las cuentas casen. */}
@@ -292,6 +330,16 @@ export const Home = () => {
               scopeLabel={t("portada.inicio.enTodoElSitio")}
               enfocarAlMontar
             />
+            <button
+              type="button"
+              className="se-explorer-section__cerrar"
+              onClick={cerrarBuscador}
+              aria-label={t("comun.cerrar")}
+            >
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+                <path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
           </div>
         </section>
       ) : null}

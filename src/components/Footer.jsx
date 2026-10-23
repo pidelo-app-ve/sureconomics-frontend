@@ -106,7 +106,6 @@ export const Footer = () => {
               />
               <span className="se-sr-only">{BRAND.name}</span>
             </h2>
-            <p className="se-footer__tagline">{t("marca.lema")}</p>
             <p className="se-footer__description">{t("marca.descripcion")}</p>
           </div>
 

@@ -120,12 +120,7 @@ const SIMBOLOS_MOVIL = (oro) => [
 /** El mismo corte que usa el componente original: por debajo, los dos se apilan. */
 const CORTE_MOVIL = "(max-width: 860px)";
 
-/*
- * Desde el 23-oct-2026 el widget NO va en la cinta: la cinta es una sola línea fina con
- * nuestras cifras (maqueta de la redacción). Se conserva exportado por si vuelve a otro
- * sitio (por ejemplo /monedas); no se pinta en ninguna parte.
- */
-export const CintaMundial = () => {
+const CintaMundial = () => {
   const { t, lang } = useIdioma();
   // Textos resueltos fuera del efecto: son cadenas, asi que solo cambian con el
   // idioma y el widget no se vuelve a pedir en cada navegacion.
@@ -328,13 +323,8 @@ export const MarketTicker = () => {
     return <div className="se-ticker se-ticker--hueco" aria-hidden="true" />;
   }
 
-  // Sin cifras no hay banda: una franja vacía no dice nada. (Vuelve la regla de
-  // siempre: el widget mundial, que era lo único que la mantenía viva sin datos, ya
-  // no va en la cinta.)
-  if (!hayCifras) return null;
-
   const flecha = (direccion) => (direccion === "up" ? "▲" : direccion === "down" ? "▼" : "▬");
-  const run = ticker.indicators.map((item, i) => (
+  const run = (ticker?.indicators ?? []).map((item, i) => (
     <span className="se-ticker__item" key={`${item.label}-${i}`}>
       <span className="se-ticker__k">{item.label}</span>
       <span className="se-ticker__v">{item.value}</span>
@@ -355,49 +345,55 @@ export const MarketTicker = () => {
     // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
     // papel no lo lee ningun lector de pantalla.
     //
-    // Una sola línea, de borde a borde (23-oct-2026): la pastilla «Mercados» a la
-    // izquierda, el desfile de cifras y, a la derecha, de dónde salen. Antes eran dos
-    // segmentos de 46 px -- los nuestros y el widget de TradingView -- con dos texturas
-    // distintas, y en el teléfono dos bandas apiladas antes de la cabecera.
+    // Una línea (23-oct-2026): a la izquierda la pastilla «Mercados» y el desfile de
+    // nuestras cifras en fila -- antes iban apiladas en tres renglones --, y a la
+    // derecha el widget de TradingView con los índices mundiales, que sigue aquí
+    // porque es lo que la redacción quiere ver al lado del BCV.
     <div className="se-ticker" role="region" aria-label={t("portada.cinta.cifrasDeMercado")}>
-      <span className="se-ticker__pill">
-        <span className="se-ticker__pulso" aria-hidden="true" />
-        {t("portada.cinta.mercados")}
-      </span>
-      <div className="se-ticker__viewport">
-        <div className="se-ticker__track">
-          <div className="se-ticker__run">{run}</div>
-          <div className="se-ticker__run" aria-hidden="true">
-            {run}
-          </div>
-        </div>
-      </div>
-      {ticker.caption ? (
-        enlaceWeb(ticker.sourceUrl) ? (
-          <a
-            className="se-ticker__stamp"
-            href={enlaceWeb(ticker.sourceUrl)}
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            {ticker.caption}
-            <span aria-hidden="true"> ↗</span>
-          </a>
-        ) : (
-          <span
-            className="se-ticker__stamp"
-            title={
-              ticker.effectiveDate
-                ? t("portada.cinta.cierreDel", {
-                    fecha: formatearFecha(ticker.effectiveDate, "larga") || ticker.effectiveDate,
-                  })
-                : undefined
-            }
-          >
-            {ticker.caption}
+      {hayCifras ? (
+        <div className="se-ticker__casa">
+          <span className="se-ticker__pill">
+            <span className="se-ticker__pulso" aria-hidden="true" />
+            {t("portada.cinta.mercados")}
           </span>
-        )
+          <div className="se-ticker__viewport">
+            <div className="se-ticker__track">
+              <div className="se-ticker__run">{run}</div>
+              <div className="se-ticker__run" aria-hidden="true">
+                {run}
+              </div>
+            </div>
+          </div>
+          {ticker.caption ? (
+            enlaceWeb(ticker.sourceUrl) ? (
+              <a
+                className="se-ticker__stamp"
+                href={enlaceWeb(ticker.sourceUrl)}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {ticker.caption}
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            ) : (
+              <span
+                className="se-ticker__stamp"
+                title={
+                  ticker.effectiveDate
+                    ? t("portada.cinta.cierreDel", {
+                        fecha: formatearFecha(ticker.effectiveDate, "larga") || ticker.effectiveDate,
+                      })
+                    : undefined
+                }
+              >
+                {ticker.caption}
+              </span>
+            )
+          ) : null}
+        </div>
       ) : null}
+
+      <CintaMundial />
     </div>
   );
 };

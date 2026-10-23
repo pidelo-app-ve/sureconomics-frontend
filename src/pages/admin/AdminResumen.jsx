@@ -268,6 +268,13 @@ export const AdminResumen = () => {
                 armado {actual.armado_con === "ia" ? "con IA" : "por reglas"} a las {hora(actual.armado_en)}
               </span>
             </div>
+            {actual.armado_con !== "ia" && actual.estado !== "publicado" ? (
+              <p className="se-tit-aviso" role="alert">
+                Este borrador salió por reglas, no por la IA
+                {actual.motivo_reglas ? ` (${actual.motivo_reglas})` : ""}: es un reparto mecánico, sin
+                redactar y con huecos. Antes de aprobarlo, pulse «Rehacer» para que lo arme la IA.
+              </p>
+            ) : null}
             {actual.estado === "publicado" ? (
               <p className="se-admin-meta-hint se-res-adm-canales">
                 Telegram: {CANAL[actual.canales.telegram.estado]}

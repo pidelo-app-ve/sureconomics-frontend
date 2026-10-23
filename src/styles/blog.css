@@ -12836,6 +12836,309 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
 }
 
+/* La entradilla larga, a dos columnas de periódico (23-oct-2026). Sólo si hay texto
+   para las dos (lo decide el componente por longitud): una frase partida en dos
+   columnas deja una huérfana. */
+@media (min-width: 900px) {
+  .se-apertura__resumen--doble {
+    max-width: 58em;
+    columns: 2;
+    column-gap: 2.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* —— La apertura rota (23-oct-2026) ——
+   La foto que se va se desvanece encima de la que entra, que se asienta desde un poco
+   más grande; el cuerpo sube con ella. Es el único movimiento autorizado en la
+   apertura además de Última hora, y para con el ratón encima, con el botón de pausa
+   y con movimiento reducido (entonces no rota: lo decide el componente). */
+.se-apertura__escena {
+  position: relative;
+}
+
+.se-apertura__media--sale {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  animation: se-apertura-sale 700ms ease both;
+}
+
+.se-apertura__media--entra .se-artcard__img,
+.se-apertura__media--entra .se-cardfill {
+  animation: se-apertura-asienta 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.se-apertura__cuerpo--entra {
+  animation: se-apertura-sube 480ms cubic-bezier(0.2, 0.9, 0.25, 1) 120ms both;
+}
+
+@keyframes se-apertura-sale {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes se-apertura-asienta {
+  from { transform: scale(1.04); }
+  to { transform: scale(1); }
+}
+
+@keyframes se-apertura-sube {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.se-apertura__linea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.se-apertura__pausa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--color-hairline-dark);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.se-apertura__pausa:hover {
+  background: var(--color-hairline);
+}
+
+.se-apertura__pausa:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* La columna señala cuál está en pantalla: un filo verde a la izquierda, sin mover
+   nada (el relleno es el mismo en todas). */
+.se-apertura__columna--rota .se-apertura__item {
+  padding-left: 0.85rem;
+  box-shadow: inset 0 0 0 transparent;
+  transition: box-shadow 0.3s ease;
+}
+
+.se-apertura__columna--rota .se-apertura__item--activa {
+  box-shadow: inset 3px 0 0 var(--marca-verde);
+}
+
+.se-apertura__item--activa .se-apertura__enlace {
+  color: var(--marca-verde);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-apertura__media--sale,
+  .se-apertura__media--entra .se-artcard__img,
+  .se-apertura__media--entra .se-cardfill,
+  .se-apertura__cuerpo--entra {
+    animation: none;
+  }
+}
+
+/* —— La franja bajo la apertura (23-oct-2026) ——
+   Tres columnas de diario entre una regla negra y un filete: últimas noticias con su
+   hora, análisis con firma, y seis monedas de la región. Densa a propósito: aquí se
+   comparan titulares y cifras, no tarjetas. */
+.se-franja {
+  padding-top: 0;
+}
+
+.se-franja__rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.85fr);
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-franja__celda {
+  min-width: 0;
+  padding: var(--se-space-md) 0;
+}
+
+.se-franja__celda + .se-franja__celda {
+  margin-left: var(--se-space-lg);
+  padding-left: var(--se-space-lg);
+  border-left: 1px solid var(--color-hairline);
+}
+
+.se-franja__titulo {
+  margin: 0 0 0.6rem;
+  font-family: var(--se-font-heading);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.se-franja__titulo a,
+.se-franja__enlace,
+.se-franja__analisis-titulo a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-franja__titulo a:hover,
+.se-franja__enlace:hover,
+.se-franja__analisis-titulo a:hover,
+.se-franja__titulo a:focus-visible,
+.se-franja__enlace:focus-visible,
+.se-franja__analisis-titulo a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.se-franja__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-franja__nota {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-franja__hora {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate);
+  white-space: nowrap;
+}
+
+.se-franja__enlace {
+  font-family: var(--se-font-heading);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: pretty;
+}
+
+.se-franja__analisis + .se-franja__analisis {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-franja__analisis-titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+
+.se-franja__autor {
+  margin: 0.3rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-franja__resumen {
+  display: -webkit-box;
+  margin: 0.45rem 0 0;
+  font-family: var(--se-font-reading);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--color-slate);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.se-franja__monedas {
+  margin: 0;
+}
+
+.se-franja__moneda {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--color-hairline);
+  font-size: 0.875rem;
+}
+
+.se-franja__moneda-nombre,
+.se-franja__moneda-dato {
+  margin: 0;
+  min-width: 0;
+}
+
+.se-franja__moneda-dato {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.se-franja__codigo {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-franja__nombre {
+  margin-left: 0.4rem;
+  color: var(--color-slate);
+}
+
+.se-franja__valor {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-franja__var {
+  margin-left: 0.5rem;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-slate);
+}
+
+.se-franja__var--up {
+  color: var(--color-green);
+}
+
+.se-franja__var--down {
+  color: var(--color-red);
+}
+
+.se-franja__pie {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+}
+
+.se-franja__pie a {
+  color: var(--color-ink);
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .se-franja__rejilla {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-franja__celda + .se-franja__celda {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--color-hairline-dark);
+  }
+}
+
 /* La columna: titulares entre reglas finas, como la segunda columna de un diario. */
 .se-apertura__columna {
   margin: 0;

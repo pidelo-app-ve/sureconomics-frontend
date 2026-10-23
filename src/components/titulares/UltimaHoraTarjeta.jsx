@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { haceCuanto, useHeadlines } from "../../hooks/useHeadlines";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { prefiereQuieto } from "../../lib/movimiento";
 import "../../styles/titulares.css";
 
 /**
@@ -32,9 +33,6 @@ const CUANTOS = 6;
 const CAIDA_MS = 300;
 const UN_DIA_MS = 24 * 60 * 60 * 1000;
 
-const prefiereQuieto = () =>
-  typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
 const useAhora = (cada) => {
   const [ahora, setAhora] = useState(() => Date.now());
   useEffect(() => {
@@ -44,7 +42,7 @@ const useAhora = (cada) => {
   return ahora;
 };
 
-const IconoPausa = ({ pausado }) =>
+export const IconoPausa = ({ pausado }) =>
   pausado ? (
     <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
       <path d="M8 5.5v13l10-6.5-10-6.5Z" fill="currentColor" />

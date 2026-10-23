@@ -17,7 +17,17 @@
     "apertura": {
       "apertura": "Lead story",
       "loMasReciente": "Latest",
-      "otrasNoticias": "Other recent news"
+      "otrasNoticias": "Other recent news",
+      "enLaApertura": "Lead stories",
+      "pausar": "Stop the story rotation",
+      "reanudar": "Resume the story rotation"
+    },
+    "franja": {
+      "region": "Latest news, analysis and currencies",
+      "ultimasNoticias": "Latest news",
+      "analisis": "Analysis",
+      "monedas": "Regional currencies",
+      "todasLasMonedas": "All currencies and their change"
     },
     "explorador": {
       "buscarEn": "Search {alcance}",

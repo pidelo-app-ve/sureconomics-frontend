@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
 import { BannerDeJuegos } from "../components/home/TarjetaPausa";
 import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
-import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
+import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, NewsList, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePieces } from "../hooks/usePieces";
@@ -47,6 +47,9 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
  * Entrevistas e Informes, y los grupos vacios se caen. Sin filtrar, cada bloque
  * muestra su punado mas reciente.
  */
+
+/** Cuántas piezas lleva cada columna de la franja bajo la apertura. */
+const EN_LA_FRANJA = { noticias: 6, analisis: 2 };
 
 /**
  * How many pieces each block shows when nothing is filtered.
@@ -117,6 +120,17 @@ export const Home = () => {
     [apertura.principal, ...apertura.secundarias].filter(Boolean).map((p) => p.id)
   );
 
+  // La franja bajo la apertura (23-oct-2026): las noticias que siguen a las de la
+  // apertura, y los artículos más recientes. Sólo sin filtro, como la apertura. Las
+  // monedas las pide la propia franja.
+  const franja = isFiltered
+    ? { noticias: [], analisis: [] }
+    : {
+        noticias: pieces.filter((p) => p.formatoApi === "noticia" && !enApertura.has(p.id)).slice(0, EN_LA_FRANJA.noticias),
+        analisis: pieces.filter((p) => p.formatoApi === "articulo" && !enApertura.has(p.id)).slice(0, EN_LA_FRANJA.analisis),
+      };
+  const enFranja = new Set([...franja.noticias, ...franja.analisis].map((p) => p.id));
+
   // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
   // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
   // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
@@ -142,7 +156,8 @@ export const Home = () => {
       // Lo mismo con lo que está en la apertura: ya está arriba, en grande. Se mira en
       // todos los formatos y no sólo en noticias, porque la pieza fijada puede ser una
       // entrevista o un informe, y sin esto abriría también su propio bloque.
-      const sinApertura = all.filter((p) => !enApertura.has(p.id));
+      // Y lo que está en la franja de debajo de la apertura, por lo mismo.
+      const sinApertura = all.filter((p) => !enApertura.has(p.id) && !enFranja.has(p.id));
       const visibles =
         formatoApi === "editorial" && editorialDelDia
           ? sinApertura.filter((p) => p.id !== editorialDelDia.id)
@@ -301,6 +316,10 @@ export const Home = () => {
           secundarias={apertura.secundarias}
           fijada={apertura.fijada}
         />
+      )}
+
+      {cargando || isFiltered ? null : (
+        <FranjaPortada noticias={franja.noticias} analisis={franja.analisis} />
       )}
 
       {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}

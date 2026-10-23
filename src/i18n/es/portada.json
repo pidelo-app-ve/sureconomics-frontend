@@ -17,7 +17,17 @@
     "apertura": {
       "apertura": "Apertura",
       "loMasReciente": "Lo más reciente",
-      "otrasNoticias": "Otras noticias recientes"
+      "otrasNoticias": "Otras noticias recientes",
+      "enLaApertura": "Noticias de la apertura",
+      "pausar": "Detener el cambio de noticia",
+      "reanudar": "Reanudar el cambio de noticia"
+    },
+    "franja": {
+      "region": "Últimas noticias, análisis y monedas",
+      "ultimasNoticias": "Últimas noticias",
+      "analisis": "Análisis",
+      "monedas": "Monedas de la región",
+      "todasLasMonedas": "Todas las monedas y su variación"
     },
     "explorador": {
       "buscarEn": "Buscar {alcance}",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BRAND } from "../data/surEconomicsMock";
 import { formatearFecha, formatearNumero } from "../i18n/motor";
+import { porDolar } from "../lib/monedas";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getMonedas } from "../services/monedasService";
@@ -15,13 +16,6 @@ import "./monedas.css";
  * enseña como «sin dato reciente», nunca como una cifra con fecha de hoy.
  */
 
-/** Dos decimales a partir de 100; cuatro por debajo (0,8333 no se lee con dos). */
-const porDolar = (valor, lang) => {
-  const n = Number(valor);
-  if (!Number.isFinite(n)) return "";
-  const decimales = n >= 100 ? 2 : 4;
-  return formatearNumero(n, lang, { minimumFractionDigits: decimales, maximumFractionDigits: decimales, useGrouping: "always" });
-};
 
 export const Monedas = () => {
   const { t, lang } = useIdioma();

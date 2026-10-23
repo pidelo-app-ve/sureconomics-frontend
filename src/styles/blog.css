@@ -15143,3 +15143,217 @@ html {
 .se-doccard--sin-foto .se-doccard__body {
   padding-top: var(--se-space-lg);
 }
+
+/* ═══ El pie en verde intenso (23-oct-2026, noche) ═══
+   Como la maqueta de la redacción: verde Cardin de borde a borde, letra blanca, la
+   marca en dos columnas, el descargo en su recuadro y una barra final con el copyright
+   y las ciudades del grupo. El sitio queda entre dos verdes: el mástil y el pie. */
+.se-footer {
+  --pie-linea: rgba(255, 255, 255, 0.14);
+  --pie-texto: rgba(255, 255, 255, 0.74);
+  padding: 64px 0 28px;
+  background: var(--marca-verde);
+  color: #ffffff;
+  border-top: 0;
+}
+
+.se-footer__grid,
+.se-footer__grid--cinco {
+  gap: var(--se-space-lg);
+  padding-bottom: var(--se-space-xl);
+  border-bottom: 1px solid var(--pie-linea);
+}
+
+@media (min-width: 1024px) {
+  .se-footer__grid--cinco {
+    grid-template-columns: minmax(0, 1.9fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.25fr);
+    gap: var(--se-space-xl);
+  }
+
+  .se-footer__nav,
+  .se-footer__mas,
+  .se-footer__contact,
+  .se-footer__newsletter {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .se-footer__grid--cinco {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.se-footer__nav,
+.se-footer__mas,
+.se-footer__contact,
+.se-footer__newsletter {
+  border-top-color: var(--pie-linea);
+}
+
+.se-footer__brand-mark {
+  height: 36px;
+  width: auto;
+}
+
+.se-footer__description,
+.se-footer__newsletter-text {
+  max-width: 44ch;
+  color: var(--pie-texto);
+}
+
+.se-footer__contact-title {
+  margin-bottom: 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.se-footer__nav-list {
+  gap: 10px;
+}
+
+.se-footer__link {
+  color: var(--pie-texto);
+  font-size: 0.9375rem;
+}
+
+.se-footer__link::after {
+  content: none;
+}
+
+.se-footer__link:hover,
+.se-footer__link:focus-visible {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-footer__link:focus-visible,
+.se-footer__legal:focus-visible,
+.se-footer__social-link:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.se-footer__social-title {
+  color: var(--pie-texto);
+}
+
+.se-footer__social-link {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: transparent;
+  color: #ffffff;
+}
+
+.se-footer__social-link:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* El formulario del boletín (en las páginas que no son la portada), sobre verde. */
+.se-footer__newsletter-input {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.se-footer__newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.se-footer__newsletter-btn {
+  border-radius: 4px;
+}
+
+.se-footer__newsletter-ok {
+  color: #ffffff;
+}
+
+/* El descargo, en su recuadro. */
+.se-footer__aviso {
+  margin-top: var(--se-space-lg);
+  padding: 16px 20px;
+  border: 1px solid var(--pie-linea);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.se-footer__aviso-titulo {
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.se-footer__descargo {
+  max-width: none;
+  font-size: 0.875rem;
+  color: var(--pie-texto);
+}
+
+/* La barra final: copyright a la izquierda, ciudades a la derecha. */
+.se-footer__divider {
+  display: none;
+}
+
+.se-footer__bottom {
+  margin-top: var(--se-space-md);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+@media (min-width: 720px) {
+  .se-footer__bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.se-footer__copy,
+.se-footer__ciudades {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.se-footer__legal {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.se-footer__legal:hover {
+  color: #ffffff;
+}
+
+/* En el teléfono y la tableta, Navegación y Más del sitio lado a lado: una debajo de
+   otra el pie medía más que una pantalla de enlaces. */
+@media (max-width: 1023px) {
+  .se-footer__grid--cinco {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--se-space-md);
+  }
+
+  .se-footer__grid--cinco .se-footer__about,
+  .se-footer__grid--cinco .se-footer__contact,
+  .se-footer__grid--cinco .se-footer__newsletter {
+    grid-column: 1 / -1;
+  }
+
+  /* Las dos columnas de enlaces, a la misma altura: sin el filete de arriba. */
+  .se-footer__grid--cinco .se-footer__nav,
+  .se-footer__grid--cinco .se-footer__mas {
+    padding-top: 0;
+    border-top: 0;
+  }
+}

@@ -98,7 +98,7 @@ export const Footer = () => {
             <h2 className="se-footer__brand">
               <img
                 className="se-footer__brand-mark"
-                src={BRAND_PUBLIC_LOGO.light.wordmarkNoTagline}
+                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
                 alt=""
                 width={220}
                 height={48}
@@ -242,10 +242,14 @@ export const Footer = () => {
         </div>
 
         <hr className="se-divider se-footer__divider" />
-        <div className="se-footer__bottom">
-          {/* El descargo de un medio económico: lo que se publica es periodismo, no
-              asesoría. Va en todas las páginas porque toda pieza puede leerse suelta. */}
+        {/* El descargo de un medio económico, en su recuadro: lo que se publica es
+            periodismo, no asesoría. Va en todas las páginas porque toda pieza puede
+            leerse suelta. */}
+        <div className="se-footer__aviso">
+          <p className="se-footer__aviso-titulo">{t("pie.descargoTitulo")}</p>
           <p className="se-footer__descargo">{t("pie.descargo")}</p>
+        </div>
+        <div className="se-footer__bottom">
           <p className="se-footer__copy">
             © {new Date().getFullYear()} {BRAND.name}. {t("pie.derechos")}
             {" · "}
@@ -256,6 +260,8 @@ export const Footer = () => {
               {t("pie.politicaCookies")}
             </Enlace>
           </p>
+          {/* Donde está el grupo: las mismas ciudades que dice la descripción. */}
+          <p className="se-footer__ciudades" translate="no">{t("pie.ciudades")}</p>
         </div>
       </div>
     </footer>

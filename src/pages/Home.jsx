@@ -1,4 +1,5 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
@@ -26,8 +27,13 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
  * Desde octubre de 2026, entre el filtro y las noticias va la apertura
  * (`AperturaPortada`): la pieza principal en grande y tres titulares al lado. La
  * principal la fija la redaccion desde el editor por un tiempo («Abrir la portada con
- * esta pieza») o, si no hay nada fijado, es la noticia mas reciente. El filtro sigue
- * primero, como pidio el socio, pero en una franja delgada.
+ * esta pieza») o, si no hay nada fijado, es la noticia mas reciente.
+ *
+ * Desde el 23-oct-2026 el filtro ya no esta siempre a la vista: lo abre la lupa de la
+ * cabecera (`?buscar=1`) y cuelga del mastil, en su sitio de siempre. La redaccion
+ * pidio «solo el icono»: bajo el mastil lo primero es la noticia. Al cerrarlo (la
+ * lupa otra vez, o «atras») la seleccion se limpia, porque un filtro puesto con el
+ * explorador escondido seria una portada recortada sin que se vea por que.
  *
  * El hero -- logotipo grande, claim, descripcion y los dos botones -- se queda en
  * `components/blog/Hero.jsx` sin renderizarse, a peticion expresa: "dejalo por ahi,
@@ -89,8 +95,15 @@ export const Home = () => {
     regiones: taxonomy.regiones,
     ancestros: taxonomy.ancestros,
   };
-  const { temas, geos, query, results, setSelection, setQuery, isFiltered } =
+  const { temas, geos, query, results, setSelection, setQuery, reset, isFiltered } =
     useContentFilter(pieces, tree);
+
+  // El explorador solo se pinta con `?buscar=1` en la URL (la lupa de la cabecera).
+  const [parametros] = useSearchParams();
+  const buscadorAbierto = parametros.get("buscar") === "1";
+  useEffect(() => {
+    if (!buscadorAbierto) reset();
+  }, [buscadorAbierto, reset]);
 
   // La apertura: la pieza que manda y su columna. Sale de la lista sin filtrar; pero
   // con un filtro puesto se retira, porque entonces el lector está buscando y lo que
@@ -209,10 +222,10 @@ export const Home = () => {
         </section>
       ) : null}
 
-      {/* El filtro, lo primero bajo el navbar. Nada que explorar antes de que haya
-          algo publicado, y una barra de filtros vacia el dia del lanzamiento se lee
-          como un control roto y no como uno honesto. */}
-      {!cargando && status === "success" && taxonomy.ready && pieces.length ? (
+      {/* El filtro, pegado al navbar, solo cuando la lupa lo abre. Nada que explorar
+          antes de que haya algo publicado, y una barra de filtros vacia el dia del
+          lanzamiento se lee como un control roto y no como uno honesto. */}
+      {buscadorAbierto && !cargando && status === "success" && taxonomy.ready && pieces.length ? (
         <section
           className="se-section se-explorer-section se-explorer-section--primera"
           aria-label={t("portada.inicio.explorarContenido")}
@@ -235,6 +248,7 @@ export const Home = () => {
               onQueryChange={setQuery}
               total={results.length}
               scopeLabel={t("portada.inicio.enTodoElSitio")}
+              enfocarAlMontar
             />
           </div>
         </section>

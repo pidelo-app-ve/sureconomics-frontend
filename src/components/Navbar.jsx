@@ -89,6 +89,48 @@ AlPuntoLink.propTypes = {
 
 const isJuegosActive = (pathname) => pathname === "/juegos" || pathname.startsWith("/juegos/");
 
+/** La misma lupa que lleva el campo del explorador (`ContentExplorer`). */
+const IconoLupa = () => (
+  <svg viewBox="0 0 16 16" className="se-header__buscar-icono" aria-hidden="true" focusable="false">
+    <circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    <path d="M10.8 10.8 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+  </svg>
+);
+
+/**
+ * La lupa de la cabecera. Desde el 23-oct-2026 el buscador no es una barra verde bajo
+ * el mástil sino este botón (la redacción pidió «solo el icono»): abre el explorador
+ * de la portada con `?buscar=1` y, si ya está abierto, lo cierra volviendo a `/`.
+ * Es un enlace y no un botón porque el estado vive en la URL: se puede compartir,
+ * el botón «atrás» lo cierra y desde cualquier otra página lleva a la portada con
+ * el buscador abierto. En el cajón del teléfono va a lo ancho y con la palabra.
+ */
+const BuscarLink = ({ abierto, enPortada, onClick, className = "" }) => {
+  const { t } = useIdioma();
+  const cierra = enPortada && abierto;
+  return (
+    <Enlace
+      to={cierra ? "/" : "/?buscar=1"}
+      className={`se-header__buscar${abierto ? " se-header__buscar--on" : ""}${
+        className ? ` ${className}` : ""
+      }`}
+      aria-label={cierra ? t("nav.cerrarBuscador") : t("nav.buscar")}
+      aria-expanded={enPortada ? abierto : undefined}
+      onClick={onClick}
+    >
+      <IconoLupa />
+      <span className="se-header__buscar-texto">{t("nav.buscar")}</span>
+    </Enlace>
+  );
+};
+
+BuscarLink.propTypes = {
+  abierto: PropTypes.bool.isRequired,
+  enPortada: PropTypes.bool.isRequired,
+  onClick: PropTypes.func,
+  className: PropTypes.string,
+};
+
 /** Un mando de consola: dos asas, la cruz a la izquierda y dos botones que se pulsan solos. */
 const IconoJuegos = () => (
   <svg viewBox="0 0 24 24" className="se-header__juegos-icono" aria-hidden="true" focusable="false">
@@ -170,6 +212,9 @@ export const Navbar = () => {
   // Las comprobaciones de «página activa» comparan con rutas sin idioma.
   const pathname = sinPrefijo(location.pathname);
   const { t } = useIdioma();
+  const enPortada = pathname === "/";
+  const buscadorAbierto =
+    enPortada && new URLSearchParams(location.search).get("buscar") === "1";
   const { isAuthenticated, logout } = useUserAuth();
   const botonRef = useRef(null);
   const panelRef = useRef(null);
@@ -328,6 +373,11 @@ export const Navbar = () => {
               decoding="async"
             />
           </picture>
+          {/* El lema de la casa bajo el logotipo, como el mástil de un diario. Solo se
+              pinta de 1360 arriba (CSS); el `aria-label` del enlace ya dice la marca. */}
+          <span className="se-header__lema" aria-hidden="true">
+            {t("marca.lema")}
+          </span>
         </Enlace>
 
         {/* Desktop nav — visible only from 992px up */}
@@ -357,7 +407,8 @@ export const Navbar = () => {
           {/* Antes de los botones de cuenta y con o sin sesión: es contenido, no
               cuenta, y quien entra a ver una entrevista no tiene por qué haber
               entrado a su cuenta primero. Los juegos van al lado: también son
-              contenido. */}
+              contenido. La lupa va primero: es la puerta a todo lo publicado. */}
+          <BuscarLink abierto={buscadorAbierto} enPortada={enPortada} />
           <JuegosLink active={isJuegosActive(pathname)} />
           <AlPuntoLink
             active={isAlPuntoActive(pathname)}
@@ -499,6 +550,12 @@ export const Navbar = () => {
             <CambioDeIdioma className="se-header__idioma--cajon" onClick={closeMenu} />
 
             <div className="se-header__actions se-header__actions--mobile">
+              <BuscarLink
+                abierto={buscadorAbierto}
+                enPortada={enPortada}
+                onClick={closeMenu}
+                className="se-header__cta"
+              />
               <AlPuntoLink
                 active={isAlPuntoActive(pathname)}
                 label={t("nav.alPunto")}

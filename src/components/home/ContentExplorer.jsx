@@ -30,10 +30,18 @@ export const ContentExplorer = ({
   onQueryChange,
   total,
   scopeLabel,
+  enfocarAlMontar = false,
 }) => {
   const { t } = useIdioma();
   const [open, setOpen] = useState(null);
   const rootRef = useRef(null);
+  const campoRef = useRef(null);
+
+  // Cuando lo abre la lupa de la cabecera, el foco entra en el campo: quien pulsó
+  // una lupa viene a escribir. Al montar y no en cada cambio.
+  useEffect(() => {
+    if (enfocarAlMontar) campoRef.current?.focus();
+  }, [enfocarAlMontar]);
   // Los dos botones que abren, para devolverles el foco al cerrar con Escape.
   const temaRef = useRef(null);
   const geoRef = useRef(null);
@@ -150,6 +158,7 @@ export const ContentExplorer = ({
               <path d="M10.8 10.8 14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
             <input
+              ref={campoRef}
               id="explorer-search"
               type="search"
               className="se-explorer__search"
@@ -353,4 +362,6 @@ ContentExplorer.propTypes = {
   total: PropTypes.number.isRequired,
   /** Donde busca: "en todo el sitio", "en Artículos". Va dentro del campo. */
   scopeLabel: PropTypes.string,
+  /** Foco en el campo de búsqueda al montar (cuando lo abre la lupa de la cabecera). */
+  enfocarAlMontar: PropTypes.bool,
 };

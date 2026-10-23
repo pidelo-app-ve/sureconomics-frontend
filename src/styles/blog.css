@@ -115,7 +115,13 @@
   --se-space-2xl: 4rem;
   --se-space-3xl: 6rem;
   --se-section-gap: 5rem;
-  --se-container-max: 1200px;
+  /* 1440 y no 1200 desde el 23-oct-2026: el contenido mide lo mismo que el mástil y
+     comparten borde en todos los anchos. Antes el mástil llegaba a 1440 y el
+     contenido a 1200, y entre 1440 y 1919 el logotipo quedaba fuera del borde del
+     texto: eso era lo que se veía como «márgenes vacíos». Las columnas de lectura
+     siguen acotadas en `ch` por su cuenta, así que ensanchar el marco no alarga
+     las líneas. */
+  --se-container-max: 1440px;
   --se-container-narrow: 720px;
   --se-content-gutter: 1.5rem;
 
@@ -167,93 +173,10 @@
   max-width: var(--se-container-narrow);
 }
 
-/* Scroll reveal (Home sections) */
-.se-reveal--stagger > .se-container > .se-heading-section,
-.se-reveal--stagger > .se-container > .se-headlines__top,
-.se-reveal--stagger > .se-container > .se-headlines__rail-wrap,
-.se-reveal--stagger > .se-container > .se-state,
-.se-reveal--stagger > .se-container > .se-text-body,
-.se-reveal--stagger > .se-container > .se-featured__grid > *,
-.se-reveal--stagger > .se-container > .se-feed__list > li,
-.se-reveal--stagger > .se-container > .se-suggested__list > li,
-.se-reveal--stagger > .se-container > .se-partners__head,
-.se-reveal--stagger > .se-container > .se-partners__grid > li,
-.se-reveal > .se-container > .se-newsletter__card {
-  opacity: 0;
-  transform: translate3d(0, 16px, 0);
-  transition:
-    opacity 650ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 650ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity, transform;
-}
-
-.se-reveal--in > .se-container > .se-heading-section,
-.se-reveal--in > .se-container > .se-headlines__top,
-.se-reveal--in > .se-container > .se-headlines__rail-wrap,
-.se-reveal--in > .se-container > .se-state,
-.se-reveal--in > .se-container > .se-text-body,
-.se-reveal--in > .se-container > .se-featured__grid > *,
-.se-reveal--in > .se-container > .se-feed__list > li,
-.se-reveal--in > .se-container > .se-suggested__list > li,
-.se-reveal--in > .se-container > .se-partners__head,
-.se-reveal--in > .se-container > .se-partners__grid > li,
-.se-reveal--in > .se-container > .se-newsletter__card {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-.se-reveal--stagger > .se-container > .se-featured__grid > *:nth-child(1),
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(1),
-.se-reveal--stagger > .se-container > .se-suggested__list > li:nth-child(1),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(1) {
-  transition-delay: 40ms;
-}
-
-.se-reveal--stagger > .se-container > .se-featured__grid > *:nth-child(2),
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(2),
-.se-reveal--stagger > .se-container > .se-suggested__list > li:nth-child(2),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(2) {
-  transition-delay: 110ms;
-}
-
-.se-reveal--stagger > .se-container > .se-featured__grid > *:nth-child(3),
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(3),
-.se-reveal--stagger > .se-container > .se-suggested__list > li:nth-child(3),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(3) {
-  transition-delay: 180ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(4),
-.se-reveal--stagger > .se-container > .se-suggested__list > li:nth-child(4),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(4) {
-  transition-delay: 250ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(5),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(5) {
-  transition-delay: 320ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(6),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(6) {
-  transition-delay: 390ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(7),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(7) {
-  transition-delay: 460ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(8),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(8) {
-  transition-delay: 530ms;
-}
-
-.se-reveal--stagger > .se-container > .se-feed__list > li:nth-child(n + 9),
-.se-reveal--stagger > .se-container > .se-partners__grid > li:nth-child(n + 9) {
-  transition-delay: 600ms;
-}
-
+/* Las apariciones al hacer scroll se quitaron el 23-oct-2026 (revisión de la portada):
+   el «fade-up» en cada sección es el tic más reconocible de página generada y no
+   comunica nada. Todo se pinta visible desde el primer cuadro. El observador
+   (`useRevealOnScroll`) sigue poniendo la clase, que ya no estila nada. */
 @media (prefers-reduced-motion: reduce) {
   .se-reveal--stagger > .se-container > .se-heading-section,
   .se-reveal--stagger > .se-container > .se-headlines__top,
@@ -577,7 +500,9 @@
      1440 (ver la consulta de `:root` de mas abajo) y las dos piezas comparten
      borde. Por debajo el mastil sigue siendo el mas ancho, porque a 1120 utiles los
      nueve enlaces, el reloj y los botones no caben. */
-  max-width: max(1440px, var(--se-container-max));
+  /* Desde el 23-oct-2026 el mástil mide lo mismo que el contenedor (1440, y 1600 de
+     1920 arriba): la marca y el texto comparten borde en todos los anchos. */
+  max-width: var(--se-container-max);
 }
 
 /* En una pantalla de 1920 o mas el contenedor de 1200 dejaba el logotipo 120 px a
@@ -587,7 +512,7 @@
    que hay debajo. */
 @media (min-width: 1920px) {
   :root {
-    --se-container-max: 1440px;
+    --se-container-max: 1600px;
   }
 }
 
@@ -797,6 +722,93 @@
   height: clamp(26px, 4.2vw, 34px);
   object-fit: contain;
   object-position: left center;
+}
+
+/* —— El lema bajo el logotipo (23-oct-2026) ——
+   La marca en dos líneas, como el mástil de un diario: el logotipo y, debajo, el
+   lema de la casa (`marca.lema`, el mismo del pie). En dos líneas y dentro del
+   ancho del logotipo: medido, a una línea ensanchaba la marca 82 px y el reloj dejaba
+   de caber. Solo de 1360 arriba, donde la fila no se aprieta. */
+.se-header__lema {
+  display: none;
+}
+
+@media (min-width: 1360px) {
+  .se-header__brand {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    line-height: 1;
+  }
+
+  .se-header__lema {
+    display: block;
+    font-family: var(--se-font-sans);
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.78);
+    max-width: 200px;
+    text-wrap: balance;
+  }
+}
+
+/* —— La lupa (23-oct-2026) ——
+   El buscador ya no es una barra verde bajo el mástil: es una lupa entre los
+   botones de la cabecera (decisión de la redacción: «solo el icono»). Pulsada,
+   abre el explorador de la portada (`?buscar=1`); pulsada otra vez, lo cierra.
+   En el cajón del teléfono va a lo ancho y con la palabra. */
+.se-header__buscar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-cream);
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.se-header__buscar:hover,
+.se-header__buscar--on {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.se-header__buscar--on {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.se-header__buscar:focus-visible {
+  outline: 2px solid var(--color-cream);
+  outline-offset: 2px;
+}
+
+.se-header__buscar-icono {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.se-header__buscar-texto {
+  display: none;
+}
+
+.se-header__actions--mobile .se-header__buscar {
+  width: 100%;
+  height: auto;
+  gap: 10px;
+  padding: 0.55rem 1rem;
+  border-color: rgba(255, 255, 255, 0.35);
+  font-size: var(--se-text-small);
+}
+
+.se-header__actions--mobile .se-header__buscar-texto {
+  display: inline;
 }
 
 /* Burger button — visible only on tablet/phone */
@@ -1419,9 +1431,9 @@
 /* Footer */
 .se-footer {
   position: relative;
-  background:
-    radial-gradient(1100px 680px at 18% 0%, rgba(0, 51, 24, 0.05), transparent 60%),
-    linear-gradient(180deg, #ffffff 0%, #ffffff 52%, #ffffff 100%);
+  /* Papel plano desde el 23-oct-2026: el brillo radial y el rayado diagonal de
+     debajo no decían nada del medio. */
+  background: var(--color-paper);
   color: var(--color-cream);
   padding: 72px 0 30px;
   margin-top: 0;
@@ -1429,23 +1441,6 @@
   overflow: hidden;
 }
 
-.se-footer::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(120% 120% at 6% 0%, rgba(0, 51, 24, 0.05), transparent 58%),
-    repeating-linear-gradient(
-      125deg,
-      rgba(255, 255, 255, 0.06) 0px,
-      rgba(255, 255, 255, 0.06) 1px,
-      transparent 1px,
-      transparent 10px
-    );
-  opacity: 0.28;
-  mask-image: radial-gradient(80% 70% at 24% 18%, #000 0%, transparent 70%);
-}
 
 .se-footer .se-container {
   position: relative;
@@ -1474,29 +1469,6 @@
     padding-left: var(--se-space-xl);
     border-left: 1px solid rgba(var(--se-tinte), 0.12);
   }
-}
-
-.se-footer__about,
-.se-footer__nav,
-.se-footer__contact,
-.se-footer__newsletter {
-  animation: se-page-rise 0.65s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-.se-footer__about {
-  animation-delay: 70ms;
-}
-
-.se-footer__nav {
-  animation-delay: 120ms;
-}
-
-.se-footer__contact {
-  animation-delay: 170ms;
-}
-
-.se-footer__newsletter {
-  animation-delay: 220ms;
 }
 
 .se-footer__about {
@@ -2138,7 +2110,6 @@
 }
 
 .se-card--default:hover {
-  transform: translateY(-4px);
 }
 
 .se-card--default:hover .se-heading-card a {
@@ -2184,7 +2155,6 @@
 }
 
 .se-card--hero:hover {
-  transform: translateY(-4px);
   border-color: var(--color-accent);
 }
 
@@ -2715,17 +2685,6 @@
   border: 1px solid var(--color-hairline);
 }
 
-.se-newsletter__card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(rgba(185, 83, 42, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(185, 83, 42, 0.08) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse at 30% 50%, black 10%, transparent 60%);
-  -webkit-mask-image: radial-gradient(ellipse at 30% 50%, black 10%, transparent 60%);
-  z-index: -1;
-}
 
 /* `minmax(0, 1fr)`: sin el, una palabra larga del titular ensancha la pista mas alla
    de la tarjeta. */
@@ -6882,8 +6841,8 @@ a.se-topics__chip:focus-visible {
      lo mismo: el cobrizo es acento, y aquí ya lo lleva el filo izquierdo. */
   background: var(--marca-verde);
   color: #ffffff;
-  box-shadow: 0 18px 44px rgba(0, 51, 24, 0.28);
-  animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
+  /* Sin sombra ni animación de entrada desde el 23-oct-2026: una pastilla verde
+     flotando bajo una cabecera verde se leía como panel de control. */
   /* La animación de entrada deja un `transform` puesto —termina con `both`— y un
      elemento transformado es su propio contexto de apilamiento. Eso encerraba el
      `z-index: 40` del panel desplegable dentro del filtro, así que las tarjetas
@@ -7408,7 +7367,6 @@ a.se-topics__chip:focus-visible {
 
 .se-artcard:hover {
   border-color: rgba(var(--se-tinte), 0.28);
-  transform: translateY(-2px);
 }
 
 /* The placeholder graphic grows to fill whatever box it gets, so pin the ratio —
@@ -7629,7 +7587,6 @@ a.se-topics__chip:focus-visible {
 }
 
 .se-eddia__card:hover {
-  transform: translateY(-2px);
   border-color: rgba(var(--se-tinte), 0.28);
 }
 
@@ -12925,17 +12882,20 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
    Sigue siendo lo primero bajo la cabecera, como pidió el socio, pero delgado: la
    caja alta con sombra grande y filo cobrizo pesaba más que la noticia de debajo,
    y en el teléfono ocupaba media pantalla con tres renglones. */
+/* Desde el 23-oct-2026 el explorador no está siempre a la vista: lo abre la lupa de
+   la cabecera (`?buscar=1`) y cuelga pegado al mástil, del mismo verde y sin radio,
+   como un cajón de la propia cabecera. Así bajo el mástil lo primero es papel. */
 .se-explorer-section--primera {
-  padding-top: var(--se-space-md);
+  padding-top: 0;
   padding-bottom: 0;
 }
 
 .se-explorer-section--primera .se-explorer {
   padding: 10px 12px;
-  border-left-width: 1px;
+  border-width: 0 0 1px;
   border-color: rgba(0, 51, 24, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 51, 24, 0.14);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .se-explorer-section--primera .se-explorer__search,
@@ -13617,12 +13577,6 @@ html {
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
-  }
-}
-
-@media (min-width: 1600px) {
-  .se-header__inner {
-    max-width: max(1600px, var(--se-container-max));
   }
 }
 

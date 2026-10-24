@@ -260,17 +260,18 @@
   }
 }
 
-/* La sección de pausa de la portada (LVBP + juegos), detrás de las noticias.
-   48 px arriba y 0 abajo (la editorial pone los suyos): el ritmo es 48 / 20 / 48. */
+/* La sección de pausa de la portada (LVBP + juegos), detrás de las noticias: una
+   banda de papel, para que se lea como el respiro que es. */
 .se-section.se-pausa-franja {
-  padding-top: var(--se-space-lg);
-  padding-bottom: 0;
+  padding-top: var(--se-space-xl);
+  padding-bottom: var(--se-space-xl);
+  background: var(--banda-papel);
 }
 .se-pausa-franja .se-pausa-banner {
   margin-top: 0;
 }
 .se-pausa-franja .se-lvbp + .se-pausa-doble {
-  margin-top: 24px;
+  margin-top: var(--se-space-lg);
 }
 
 
@@ -480,10 +481,9 @@
   grid-template-columns: 112px minmax(0, 1fr);
   min-height: 96px;
   border-radius: 0;
-  background: var(--color-paper);
+  background: transparent;
   color: var(--color-ink);
   box-shadow: none;
-  border-bottom: 1px solid var(--color-hairline);
 }
 .se-pausa-doble .se-pausa-banner__escena {
   min-height: 0;
@@ -544,7 +544,6 @@
   .se-pausa-doble .se-pausa-banner--clave:hover {
     transform: none;
     box-shadow: none;
-    border-bottom-color: var(--color-hairline-dark);
   }
   .se-pausa-doble .se-pausa-banner:hover .se-pausa-banner__boton,
   .se-pausa-doble .se-pausa-banner--clave:hover .se-pausa-banner__boton {

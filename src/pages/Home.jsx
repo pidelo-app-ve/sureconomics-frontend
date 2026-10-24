@@ -436,6 +436,7 @@ export const Home = () => {
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}
             to={formatoApi === "alpunto" ? "/audiovisual" : rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
+            tono={formatoApi === "alpunto" ? "oscuro" : undefined}
           >
             {LAYOUTS[formatoApi](items, { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
           </FormatSection>

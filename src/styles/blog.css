@@ -13,6 +13,11 @@
   --marca-gris: #6b6b6b; /* Dim Gray */
   --marca-verde: #003318; /* Cardin Green */
 
+  /* Las bandas de la portada: papel con un punto del verde de la casa (datos, pausa,
+     boletín) y tinta verde casi negra (lo que se ve y se escucha). */
+  --banda-papel: #edf1eb;
+  --banda-tinta: #0b1a11;
+
   /* —— Tokens de marca (única fuente de verdad) ——
      Los nombres se conservan porque 273 reglas los usan, pero vuelven a
      significar lo que dicen. Este sitio nació claro y se invirtió redefiniendo
@@ -191,9 +196,9 @@
 }
 
 /* Section background rhythm (Home) */
-.se-newsletter,
-.se-partners {
-  background: #f7f7f5;
+.se-section.se-newsletter {
+  padding-top: var(--se-section-gap);
+  background: var(--banda-papel);
 }
 
 /* Headings */
@@ -2151,13 +2156,9 @@
    Contrastes medidos sobre #f7f7f5: negro 19.58:1, acento 4.52:1, gris de marca 4.97:1,
    y blanco sobre el acento del boton 4.85:1. Los cuatro pasan AA. */
 .se-newsletter__card {
-  background: #f7f7f5;
   color: var(--color-cream);
-  padding: clamp(36px, 4vw, 60px) clamp(28px, 5vw, 64px);
   position: relative;
-  overflow: hidden;
   isolation: isolate;
-  border: 1px solid var(--color-hairline);
 }
 
 /* `minmax(0, 1fr)`: sin el, una palabra larga del titular ensancha la pista mas alla
@@ -2188,9 +2189,9 @@
 .se-newsletter__title {
   font-family: var(--se-font-heading);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  font-size: clamp(30px, 3.6vw, 44px);
-  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-size: clamp(2.25rem, 1.3rem + 3vw, 4rem);
+  line-height: 1;
   color: var(--color-cream);
   margin: 0 0 12px;
   max-width: 20ch;
@@ -3011,7 +3012,6 @@
 
 .se-partners {
   padding: 80px 0;
-  border-top: 1px solid var(--color-hairline);
   margin-top: 0;
 }
 
@@ -4903,39 +4903,28 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   }
 }
 
-/* Una sección del periódico, no una tarjeta: regla de tinta arriba y filete abajo
-   (las mismas de la franja), sin borde, sin filete verde, sin radio. */
+/* La posición de la casa, en una banda cobre a todo el ancho: la única de ese color
+   en la página, para que se lea como lo que es. Sin caja ni reglas dentro. Al
+   asomarse, el titular entra con el mismo barrido que la foto de la apertura. */
+.se-section.se-eddia {
+  background: var(--marca-rojo);
+  color: #ffffff;
+}
+
 .se-eddia__card {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  background: var(--color-paper);
-  border-bottom: 1px solid var(--color-hairline);
   text-decoration: none;
 }
 
-/* La regla de tinta de arriba se dibuja de izquierda a derecha cuando la editorial se
-   asoma (`se-reveal--in`, puesto por el observador): la casa anunciándose. Va como
-   fondo de 2 px y no como `::before`: la tarjeta es una rejilla y el trazo absoluto se
-   colocaba en una de sus celdas, así que salía a medias. */
-.se-eddia__card {
-  padding-top: 2px;
-  background-color: var(--color-paper);
-  background-image: linear-gradient(var(--color-ink), var(--color-ink));
-  background-repeat: no-repeat;
-  background-position: left top;
-  background-size: 0% 2px;
-  transition: background-size 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.se-eddia.se-reveal--in .se-eddia__card {
-  background-size: 100% 2px;
+.se-eddia.se-reveal--in .se-eddia__title {
+  animation: se-apertura-barre 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-eddia__card {
-    background-size: 100% 2px;
-    transition: none;
+  .se-eddia.se-reveal--in .se-eddia__title {
+    animation: none;
   }
 }
 
@@ -4986,8 +4975,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   flex-direction: column;
   justify-content: center;
   gap: 14px;
-  padding: clamp(28px, 3vw, 48px) clamp(20px, 4vw, 64px) clamp(28px, 3vw, 48px) 0;
-  background: var(--color-paper);
+  padding: 0;
 }
 
 @media (min-width: 860px) {
@@ -5026,44 +5014,52 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
-  color: var(--marca-verde);
+  color: #ffffff;
 }
 
 .se-eddia__fecha {
   font-size: 0.8125rem;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  color: var(--color-slate);
+  color: #ffffff;
 }
 
 .se-eddia__title {
   margin: 0;
-  max-width: 22ch;
-  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
-  line-height: 1.05;
+  max-width: 20ch;
+  font-size: clamp(2rem, 1.1rem + 3vw, 3.75rem);
+  line-height: 1;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.04em;
   text-wrap: balance;
-  color: var(--color-cream);
+  color: #ffffff;
 }
 
 .se-eddia__lead {
   margin: 0;
-  max-width: 52ch;
+  max-width: 48ch;
   font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
   line-height: 1.5;
-  color: var(--color-slate);
+  color: #ffffff;
 }
 
 .se-eddia__cta {
   margin-top: 4px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-cream);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 .se-eddia__card:hover .se-eddia__cta {
-  color: var(--color-accent);
+  text-decoration-color: var(--marca-verde);
+}
+
+.se-eddia__card:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 6px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6108,7 +6104,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    Cada logo conserva su color: pasarlos todos a blanco pedía una banda oscura, y
    esta sección va sobre el fondo claro del sitio. */
 .se-partners {
-  background: var(--se-offwhite);
+  background: var(--color-paper);
   padding: var(--se-space-2xl) 0;
   overflow: hidden;
 }
@@ -9733,10 +9729,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 /* ═══ Portada: la apertura, como una emisión ═════════════════════════════
    El mismo verde de la cabecera sigue hacia abajo: mástil, noticia principal y el
    rótulo de Última hora son un solo bloque, como la pantalla de un canal. El titular
-   grande en blanco a la izquierda; la foto a sangre hasta el borde derecho de la
-   pantalla. Sin filetes ni cajas: separa el aire. Ver `AperturaPortada.jsx`. */
+   grande en blanco a la izquierda; la foto a la derecha, hasta el mismo margen que
+   la cabecera: a sangre solo por un lado, la página se veía corrida en pantallas
+   anchas. Sin filetes ni cajas: separa el aire. Ver `AperturaPortada.jsx`. */
 .se-apertura {
-  --apertura-borde: max(var(--se-content-gutter), calc((100vw - var(--se-container-max)) / 2 + var(--se-content-gutter)));
   position: relative;
   overflow-x: clip;
   background: var(--marca-verde);
@@ -9821,7 +9817,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* La foto a sangre: llega hasta el borde derecho de la pantalla. */
 .se-apertura__escena {
   position: relative;
   min-width: 0;
@@ -9830,7 +9825,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 @media (min-width: 960px) {
   .se-apertura__escena {
-    margin-right: calc(-1 * var(--apertura-borde));
     aspect-ratio: auto;
     min-height: clamp(360px, 34vw, 520px);
   }
@@ -9895,7 +9889,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 /* Cuál de las cuatro está en pantalla, y la pausa: sobre la foto, abajo a la derecha. */
 .se-apertura__mando {
   position: absolute;
-  right: max(20px, var(--apertura-borde));
+  right: 20px;
   bottom: 18px;
   z-index: 2;
   display: flex;
@@ -10002,29 +9996,26 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 
 /* —— La franja bajo la apertura ——
-   Datos entre una regla negra y un filete: dos análisis con firma y seis monedas de la
-   región (y los mercados del mundo en el teléfono). Densa a propósito: aquí se comparan
-   cifras, no tarjetas. */
-.se-franja {
-  padding-top: 0;
+   Dos análisis con firma y seis monedas de la región (y los mercados del mundo en el
+   teléfono), sobre una banda de papel que sale del verde de la apertura. Densa a
+   propósito: aquí se comparan cifras, no tarjetas. Sin reglas: separa el aire. */
+.se-section.se-franja {
+  padding-top: var(--se-space-lg);
+  padding-bottom: var(--se-space-lg);
+  background: var(--banda-papel);
 }
 
 .se-franja__rejilla {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  border-top: 2px solid var(--color-ink);
-  border-bottom: 1px solid var(--color-hairline);
 }
 
 .se-franja__celda {
   min-width: 0;
-  padding: var(--se-space-md) 0;
 }
 
 .se-franja__celda + .se-franja__celda {
-  margin-left: var(--se-space-lg);
-  padding-left: var(--se-space-lg);
-  border-left: 1px solid var(--color-hairline);
+  margin-left: clamp(32px, 5vw, 96px);
 }
 
 .se-franja__titulo {
@@ -10052,9 +10043,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 }
 
 .se-franja__analisis + .se-franja__analisis {
-  margin-top: 0.9rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--color-hairline);
+  margin-top: 1.25rem;
 }
 
 .se-franja__analisis-titulo {
@@ -10094,8 +10083,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.45rem 0;
-  border-top: 1px solid var(--color-hairline);
+  padding: 0.3rem 0;
   font-size: 0.875rem;
 }
 
@@ -10173,8 +10161,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-noticias__nota {
   flex-direction: column;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--color-hairline);
+  padding: 0 0 var(--se-space-md);
   break-inside: avoid;
 }
 
@@ -10305,8 +10292,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   align-items: center;
   gap: var(--se-space-md);
   min-width: 0;
-  padding: 0.35rem 0;
-  border-top: 1px solid var(--color-hairline-dark);
+  margin-top: var(--se-space-md);
 }
 
 .se-franja__mundo-rotulo {
@@ -10344,7 +10330,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
   text-decoration: none;
   white-space: nowrap;
-  border-left: 1px solid var(--color-hairline);
 }
 
 .se-franja__mundo .se-ticker__mundo-credito:hover {
@@ -10363,9 +10348,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
   .se-franja__celda + .se-franja__celda {
     margin-left: 0;
-    padding-left: 0;
-    border-left: 0;
-    border-top: 1px solid var(--color-hairline-dark);
+    margin-top: var(--se-space-lg);
   }
 }
 
@@ -11668,13 +11651,17 @@ html {
 }
 
 
-/* —— 2. El título de sección, sobre la regla verde de la casa —— */
+/* —— 2. El título de sección: grande y sin regla ——
+   La regla verde bajo cada título, seis veces por página, era el tic que delataba la
+   plantilla. Las secciones se separan por el color de las bandas y por el aire; el
+   título carga solo, como el rótulo de un bloque del noticiero. */
 .se-blog .se-heading-section {
   margin: 0 0 var(--se-space-lg);
-  padding-bottom: 8px;
-  border-bottom: 3px solid var(--marca-verde);
-  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
-  letter-spacing: -0.03em;
+  padding-bottom: 0;
+  border-bottom: 0;
+  font-size: clamp(1.75rem, 1.15rem + 1.9vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .se-blog .se-heading-section::before {
@@ -11682,43 +11669,70 @@ html {
 }
 
 .se-format__head {
-  padding-bottom: 8px;
-  border-bottom: 3px solid var(--marca-verde);
-}
-
-.se-format__head .se-heading-section {
-  margin: 0;
+  margin-bottom: clamp(20px, 2.4vw, 36px);
   padding-bottom: 0;
   border-bottom: 0;
 }
 
+.se-format__head .se-heading-section {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: 0;
+}
+
+.se-format__head .se-header__alpunto-punto {
+  width: 0.3em;
+  height: 0.3em;
+}
+
 .se-format__more {
   font-family: var(--se-font-ui);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
   letter-spacing: 0;
   text-transform: none;
+  text-decoration: none;
   color: var(--marca-verde);
+}
+
+.se-format__more::after {
+  display: inline-block;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .se-format__more:hover {
   color: var(--color-accent);
 }
 
-/* —— 3. Tarjetas sin caja: la foto, el texto y un filete —— */
+.se-format__more:hover::after {
+  transform: translateX(4px);
+}
+
+/* —— 3. Tarjetas sin caja: la foto y el texto, sin filete ni borde —— */
 .se-blog .se-artcard {
   background: transparent;
   border: 0;
-  border-bottom: 1px solid var(--color-hairline);
-  padding-bottom: 12px;
+  padding-bottom: 0;
 }
 
-.se-blog .se-artcard:hover {
-  border-color: var(--color-hairline-dark);
+.se-blog .se-artcard__media,
+.se-blog .se-doccard__media {
+  border-bottom: 0;
 }
 
 .se-blog .se-artcard__body {
-  padding: 12px 0 0;
+  padding: 14px 0 0;
+}
+
+/* Los informes, igual: sin la caja gris, el borde y la raya negra a la izquierda. */
+.se-blog .se-doccard {
+  border: 0;
+  background: transparent;
+}
+
+.se-blog .se-doccard__body {
+  padding: 16px 0 0;
 }
 
 .se-blog .se-artcard__title {
@@ -11732,12 +11746,24 @@ html {
   border-left: 0;
 }
 
-/* —— 4. Etiquetas cuadradas, no píldoras —— */
-.se-tagpill {
-  border-radius: 3px;
+/* —— 4. Etiquetas en texto, no en cajitas ——
+   «Bolivia · 6 ago 2026», como lo firma un diario. Una cajita por etiqueta era otro
+   bloque dentro del bloque. */
+.se-blog .se-tagpill {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   font-family: var(--se-font-ui);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
   letter-spacing: 0;
+  color: var(--color-ink);
+}
+
+.se-blog .se-tagpill:not(:last-child)::after {
+  content: " ·";
+  font-weight: 400;
+  color: var(--color-slate);
 }
 
 /* ═══ Noticias, «Lo más leído» y la publicidad ancha ═══ */
@@ -11768,9 +11794,9 @@ html {
 }
 
 .se-masleido__titulo {
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-ink);
-  font-size: 1.125rem;
+  padding-bottom: 0;
+  font-size: 1.375rem;
+  letter-spacing: -0.03em;
 }
 
 .se-masleido__nota {
@@ -11780,26 +11806,24 @@ html {
 .se-masleido__item {
   grid-template-columns: 2.25rem minmax(0, 1fr);
   gap: 0.25rem;
-  padding: 0.85rem 0;
-  border-top: 0;
-  border-bottom: 1px solid var(--color-hairline);
+  padding: 0.7rem 0;
+  border: 0;
 }
 
 .se-masleido__numero {
-  font-size: 1.875rem;
+  font-size: 2.25rem;
   font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--marca-verde);
+  letter-spacing: -0.05em;
+  color: var(--color-accent);
 }
 
 .se-masleido__enlace {
   font-size: 1rem;
 }
 
-/* El bloque de Noticias no necesita los 80-96 px de una sección debajo: le sigue la
-   franja de béisbol, que pone los suyos. */
+/* El bloque de Noticias cierra con aire propio antes de la banda del béisbol. */
 .se-section.se-format:has(.se-noticias) {
-  padding-bottom: var(--se-space-md);
+  padding-bottom: var(--se-space-xl);
 }
 
 /* La publicidad ancha, en todo el sitio: sin caja redondeada ni borde, el arte y una
@@ -11879,9 +11903,7 @@ html {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--se-space-md);
-  padding-bottom: var(--se-space-md);
-  margin-bottom: var(--se-space-sm);
-  border-bottom: 1px solid var(--color-hairline-dark);
+  margin-bottom: var(--se-space-lg);
 }
 
 @media (min-width: 760px) {
@@ -12097,8 +12119,8 @@ html {
 
 /* ═══ El pie en verde intenso ═══
    Como la maqueta de la redacción: verde Cardin de borde a borde, letra blanca, la
-   marca en dos columnas, el descargo en su recuadro y una barra final con el copyright
-   y las ciudades del grupo. El sitio queda entre dos verdes: el mástil y el pie. */
+   marca en dos columnas y una barra final con el copyright y las ciudades del grupo,
+   separada por aire y no por una raya. El sitio queda entre dos verdes: el mástil y el pie. */
 .se-footer {
   --pie-linea: rgba(255, 255, 255, 0.14);
   --pie-texto: rgba(255, 255, 255, 0.74);
@@ -12112,7 +12134,6 @@ html {
 .se-footer__grid--cinco {
   gap: var(--se-space-lg);
   padding-bottom: var(--se-space-xl);
-  border-bottom: 1px solid var(--pie-linea);
 }
 
 @media (min-width: 1024px) {
@@ -12342,3 +12363,55 @@ html {
     display: none;
   }
 }
+
+/* ═══ Las bandas de la portada ═══
+   Lo que separa una sección de otra es el color de su banda y el aire, no una regla.
+   Verde (apertura), papel (datos), blanco (noticias), papel (la pausa), cobre (la
+   editorial), blanco (artículos y editoriales), tinta («Al punto»), blanco
+   (informes), papel (boletín), verde (pie). Una sección blanca detrás de una banda
+   necesita su propio aire arriba: la regla general se lo quita. */
+:is(.se-franja, .se-pausa-franja, .se-eddia, .se-format--oscuro) + .se-section {
+  padding-top: var(--se-section-gap);
+}
+
+.se-section.se-eddia {
+  padding-top: clamp(56px, 7vw, 112px);
+  padding-bottom: clamp(56px, 7vw, 112px);
+}
+
+/* «Al punto», en tinta: vídeo y pódcast como el bloque de un canal. Los colores base
+   se redefinen dentro de la banda y las tarjetas se adaptan solas. */
+.se-section.se-format--oscuro {
+  --color-ink: #ffffff;
+  --color-cream: #ffffff;
+  --se-black: #ffffff;
+  --color-slate: rgba(255, 255, 255, 0.78);
+  --color-slate-2: rgba(255, 255, 255, 0.7);
+  --se-tinte: 255, 255, 255;
+  padding-top: var(--se-section-gap);
+  background: var(--banda-tinta);
+  color: #ffffff;
+}
+
+.se-format--oscuro .se-format__more {
+  color: #ffffff;
+}
+
+.se-format--oscuro .se-header__alpunto-punto {
+  background: #e5322d;
+}
+
+/* Las miniaturas, sin el contorno que separa una foto clara del blanco: sobre la
+   tinta no hace falta y se leía como una caja. */
+.se-format--oscuro .se-alpunto__thumb {
+  border-color: transparent;
+}
+
+.se-format--oscuro .se-format__more:hover {
+  color: #f3a27f;
+}
+
+.se-format--oscuro .se-alpunto__title a:hover {
+  color: #f3a27f;
+}
+

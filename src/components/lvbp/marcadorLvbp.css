@@ -5,16 +5,12 @@
    carreras en cifras tabulares, que es lo que hace que una columna de marcadores se
    lea de un vistazo.
 
-   En la portada es una sección del periódico, no una caja: regla de tinta arriba,
-   filete abajo, la cabecera de la liga en una línea y un solo nivel de borde (los
-   filetes entre juegos). */
+   En la portada va sobre la banda de la pausa, sin caja ni reglas: la cabecera de la
+   liga en una línea y los juegos separados por aire. */
 
 .se-lvbp {
   --lvbp-borde: var(--color-hairline-dark, rgba(0, 0, 0, 0.18));
   --lvbp-suave: var(--color-hairline, rgba(0, 0, 0, 0.12));
-  border-top: 2px solid var(--color-ink);
-  border-bottom: 1px solid var(--color-hairline);
-  background: var(--color-paper, #fff);
   font-family: var(--se-font-ui);
 }
 
@@ -23,8 +19,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--lvbp-suave);
+  padding: 0 0 8px;
 }
 
 .se-lvbp__liga {
@@ -83,7 +78,7 @@
 }
 
 .se-lvbp__dia + .se-lvbp__dia {
-  border-left: 1px solid var(--lvbp-suave);
+  margin-left: clamp(16px, 2.5vw, 40px);
 }
 
 .se-lvbp__dia-nombre {
@@ -142,9 +137,7 @@
   padding-left: 0;
 }
 
-.se-lvbp__juegos .se-lvbp__juego + .se-lvbp__juego {
-  border-left: 1px solid var(--lvbp-suave);
-}
+
 
 .se-lvbp__estado {
   display: inline-flex;

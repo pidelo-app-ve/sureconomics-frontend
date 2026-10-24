@@ -20,6 +20,10 @@
       "otrasNoticias": "Other recent news",
       "pausar": "Stop the story rotation"
     },
+    "plana": {
+      "opinion": "Opinion",
+      "todaLaUltimaHora": "All breaking news"
+    },
     "masLeido": {
       "titulo": "Most read",
       "nota": "What readers read most in the last seven days."
@@ -28,8 +32,6 @@
       "region": "Baseball and games"
     },
     "franja": {
-      "region": "Analysis and currencies",
-      "analisis": "Analysis",
       "monedas": "Regional currencies",
       "todasLasMonedas": "All currencies and their change",
       "mundo": "World markets"
@@ -57,12 +59,13 @@
       "gorro": "Editorial · {tema}"
     },
     "editorialDelDia": {
-      "titulo": "Today's editorial",
-      "leer": "Read where we stand →"
+      "titulo": "Today's editorial"
     },
     "informes": {
-      "gorro": "Report · registration required",
-      "investigacionDe": "Research by {unidad}"
+      "investigacionDe": "Research by {unidad}",
+      "pdf": "PDF",
+      "pdfPaginas": "PDF · {n} pp.",
+      "exclusivo": "Members only"
     },
     "alPunto": {
       "episodio": "Episode"
@@ -79,7 +82,6 @@
       "cierreDel": "Close of {fecha}"
     },
     "boletin": {
-      "kicker": "Weekly newsletter · Monday mornings",
       "titulo": "Entorno en Viñetas",
       "texto": "The week's economic landscape, told in vignettes: what moved the markets, what's ahead and what deserves a closer look. It lands in your inbox every Monday morning, before the week starts moving.",
       "suCorreo": "Your email",

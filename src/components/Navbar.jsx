@@ -363,18 +363,14 @@ export const Navbar = () => {
           aria-label={t("nav.marcaInicio")}
           onClick={closeMenu}
         >
-          <picture>
-            <source
-              media="(max-width: 520px)"
-              srcSet={BRAND_PUBLIC_LOGO.dark.wordmarkCompressed}
-            />
-            <img
-              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
-              alt=""
-              className="se-header__logo"
-              decoding="async"
-            />
-          </picture>
+          {/* La marca entera también en el teléfono: sin el reloj en la barra cabe a
+              24 px de alto, y la versión comprimida («Sur E») se leía como un logo roto. */}
+          <img
+            src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+            alt=""
+            className="se-header__logo"
+            decoding="async"
+          />
         </Enlace>
 
         {/* Desktop nav — visible only from 992px up */}
@@ -463,6 +459,9 @@ export const Navbar = () => {
         </div>
 
         <Relojes className="se-hora--header" />
+
+        {/* En el teléfono la lupa va en la barra, a la derecha; el menú, a la izquierda. */}
+        <BuscarLink abierto={buscadorAbierto} enPortada={enPortada} className="se-header__buscar--movil" />
 
         <button
           ref={botonRef}

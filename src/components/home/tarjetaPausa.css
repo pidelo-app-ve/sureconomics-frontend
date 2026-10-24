@@ -260,12 +260,47 @@
   }
 }
 
-/* La sección de pausa de la portada (LVBP + juegos), detrás de las noticias: una
-   banda de papel, para que se lea como el respiro que es. */
+/* La sección de pausa de la portada (LVBP + juegos), detrás de las noticias: un módulo
+   discreto bajo su filete. En el teléfono va plegado (`PausaPortada`). */
 .se-section.se-pausa-franja {
-  padding-top: var(--se-space-xl);
-  padding-bottom: var(--se-space-xl);
-  background: var(--banda-papel);
+  padding-top: var(--se-space-lg);
+  padding-bottom: var(--se-space-lg);
+}
+
+.se-pausa-plegable {
+  border-top: 1px solid var(--color-ink);
+}
+
+.se-pausa-plegable__rotulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 0;
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.se-pausa-plegable__rotulo::-webkit-details-marker {
+  display: none;
+}
+
+.se-pausa-plegable__rotulo svg {
+  flex: 0 0 auto;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-pausa-plegable[open] .se-pausa-plegable__rotulo svg {
+  transform: rotate(180deg);
+}
+
+.se-pausa-plegable__rotulo:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 2px;
 }
 .se-pausa-franja .se-pausa-banner {
   margin-top: 0;

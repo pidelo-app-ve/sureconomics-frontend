@@ -1,0 +1,72 @@
+/* ═══ LA BARRA DE ABAJO DEL TELÉFONO ═══
+   Cuatro accesos al alcance del pulgar, sobre papel, con un filete encima. Solo por
+   debajo de 760 px; el contenido reserva su alto para que el pie no quede tapado, y lo
+   que también se fija abajo (la barra de publicidad, el aviso de cookies) sube encima. */
+
+.se-barra-inferior {
+  display: none;
+}
+
+@media (max-width: 759px) {
+  .se-publico {
+    --barra-inferior: calc(56px + env(safe-area-inset-bottom));
+    padding-bottom: var(--barra-inferior);
+  }
+
+  .se-barra-inferior {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 60;
+    display: block;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--color-hairline-dark);
+    background: var(--color-paper);
+  }
+
+  .se-barra-inferior__lista {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .se-barra-inferior__enlace {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 56px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-slate);
+    text-decoration: none;
+    transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .se-barra-inferior__enlace:active {
+    transform: scale(0.96);
+  }
+
+  .se-barra-inferior__enlace[aria-current="page"],
+  .se-barra-inferior__enlace[aria-expanded="true"] {
+    color: var(--marca-verde);
+  }
+
+  .se-barra-inferior__enlace[aria-current="page"] svg,
+  .se-barra-inferior__enlace[aria-expanded="true"] svg {
+    stroke-width: 2;
+  }
+
+  .se-barra-inferior__enlace:focus-visible {
+    outline: 2px solid var(--marca-verde);
+    outline-offset: -4px;
+  }
+
+  .se-publico .se-ad-barra,
+  .se-publico .se-cookies,
+  .se-publico .se-invitacion {
+    bottom: var(--barra-inferior);
+  }
+}

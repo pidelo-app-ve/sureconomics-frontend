@@ -13,10 +13,18 @@
   --marca-gris: #6b6b6b; /* Dim Gray */
   --marca-verde: #003318; /* Cardin Green */
 
-  /* Las bandas de la portada: papel con un punto del verde de la casa (datos, pausa,
-     boletín) y tinta verde casi negra (lo que se ve y se escucha). */
-  --banda-papel: #edf1eb;
-  --banda-tinta: #0b1a11;
+  /* —— La prensa: el papel, la tinta y los filetes de la parte pública ——
+     Se aplican dentro de `.se-publico` (el marco de `Layout.jsx`), no aquí: el panel
+     comparte estos nombres y sigue en blanco. */
+  --papel: #f9f8f6;
+  --tinta: #111827;
+  --filete: #ddd8cc;
+  --filete-fuerte: #c4bcab;
+
+  /* Titulares en una serif de periódico; cifras de mercado en monoespaciada, para que
+     los decimales caigan en columna. Las dos servidas desde /fuentes. */
+  --titular: "Newsreader", Georgia, "Times New Roman", serif;
+  --cifras: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   /* —— Tokens de marca (única fuente de verdad) ——
      Los nombres se conservan porque 273 reglas los usan, pero vuelven a
@@ -412,14 +420,6 @@
 
 .se-placeholder--hero {
   aspect-ratio: 21 / 9;
-}
-
-/* Divider */
-.se-divider {
-  height: 1px;
-  background: var(--se-divider);
-  border: none;
-  margin: 0;
 }
 
 /* Responsive gutters */
@@ -1402,14 +1402,6 @@
   margin-top: var(--se-space-md);
 }
 
-/* El descargo: una frase de medio económico, pequeña y entera. */
-.se-footer__descargo {
-  margin: 0;
-  font-family: var(--se-font-ui);
-  line-height: var(--se-line-height-relaxed);
-  color: rgba(var(--se-tinte), 0.7);
-}
-
 .se-footer__about {
   max-width: none;
   margin-bottom: 0;
@@ -1628,10 +1620,6 @@
   outline: 2px solid rgba(185, 83, 42, 0.65);
   outline-offset: 3px;
   border-radius: 10px;
-}
-
-.se-footer__divider {
-  margin-bottom: var(--se-space-md);
 }
 
 .se-footer__copy {
@@ -1904,7 +1892,6 @@
   transition: transform 0.3s ease;
 }
 
-
 .se-card--default:hover .se-heading-card a {
   color: var(--color-accent);
 }
@@ -2170,20 +2157,6 @@
 
 .se-newsletter__copy {
   min-width: 0;
-}
-
-/* El mismo tratamiento que el cintillo de la editorial del dia: mono, versalitas y
-   acento. Es lo que hace que este bloque se lea como parte del sistema y no como una
-   pieza traida de fuera. */
-.se-newsletter__kicker {
-  display: block;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  margin-bottom: 12px;
-  font-weight: 600;
 }
 
 .se-newsletter__title {
@@ -4891,191 +4864,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    lado del texto en pantalla ancha, encima en el teléfono. */
 /* Regla de sección propia: gana a `.se-section + .se-section { padding-top: 0 }`,
    que la dejaba pegada a los juegos con todo el aire debajo. */
-.se-section.se-eddia {
-  padding-top: var(--se-space-xl);
-  padding-bottom: var(--se-space-xl);
-}
-
-@media (min-width: 1024px) {
-  .se-section.se-eddia {
-    padding-top: var(--se-space-2xl);
-    padding-bottom: var(--se-space-2xl);
-  }
-}
-
-/* La posición de la casa, en una banda cobre a todo el ancho: la única de ese color
-   en la página, para que se lea como lo que es. Sin caja ni reglas dentro. Al
-   asomarse, el titular entra con el mismo barrido que la foto de la apertura. */
-.se-section.se-eddia {
-  background: var(--marca-rojo);
-  color: #ffffff;
-}
-
-.se-eddia__card {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  text-decoration: none;
-}
-
-.se-eddia.se-reveal--in .se-eddia__title {
-  animation: se-apertura-barre 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-eddia.se-reveal--in .se-eddia__title {
-    animation: none;
-  }
-}
-
-@media (min-width: 860px) {
-  .se-eddia__card {
-    /* La imagen no se lleva la mitad: el titular de una editorial es largo y con
-       menos de la mitad ancha se parte en cinco renglones. */
-    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
-    align-items: stretch;
-  }
-
-  .se-eddia__card--sin-foto {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.se-eddia__media {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-  background: rgba(0, 51, 24, 0.07);
-}
-
-@media (min-width: 860px) {
-  .se-eddia__media {
-    aspect-ratio: auto;
-    min-height: 300px;
-    max-height: 440px;
-  }
-}
-
-.se-eddia__img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.se-eddia__card:hover .se-eddia__img {
-  transform: scale(1.03);
-}
-
-.se-eddia__body {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 14px;
-  padding: 0;
-}
-
-@media (min-width: 860px) {
-  .se-eddia__card:not(.se-eddia__card--sin-foto) .se-eddia__body {
-    padding-left: clamp(24px, 4vw, 64px);
-  }
-}
-
-.se-eddia__card--sin-foto .se-eddia__body {
-  max-width: 62ch;
-}
-
-/* La firma de la casa: isotipo, «Editorial del día» y la fecha, en una línea. */
-.se-eddia__firma {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.se-eddia__marca {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 auto;
-}
-
-.se-eddia__quien {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.se-eddia__rotulo {
-  font-family: var(--se-font-heading);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  color: #ffffff;
-}
-
-.se-eddia__fecha {
-  font-size: 0.8125rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  color: #ffffff;
-}
-
-.se-eddia__title {
-  margin: 0;
-  max-width: 20ch;
-  font-size: clamp(2rem, 1.1rem + 3vw, 3.75rem);
-  line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-  color: #ffffff;
-}
-
-.se-eddia__lead {
-  margin: 0;
-  max-width: 48ch;
-  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
-  line-height: 1.5;
-  color: #ffffff;
-}
-
-.se-eddia__cta {
-  margin-top: 4px;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #ffffff;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
-
-.se-eddia__card:hover .se-eddia__cta {
-  text-decoration-color: var(--marca-verde);
-}
-
-.se-eddia__card:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 6px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-eddia__card,
-  .se-eddia__img {
-    transition: none;
-  }
-
-  .se-eddia__card:hover {
-    transform: none;
-  }
-
-  .se-eddia__card:hover .se-eddia__img {
-    transform: none;
-  }
-}
 
 /* El filtro cuando abre la pagina: sin el hero por delante no hay nada que lo
    separe del navbar, y el relleno de seccion completo lo dejaba flotando. */
@@ -5211,15 +4999,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 }
 
 .se-doccard:hover { border-left-color: var(--color-accent); }
-
-.se-doccard__kicker {
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
-  font-weight: 600;
-}
 
 .se-doccard__title {
   margin: 0;
@@ -6302,9 +6081,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
      que a ese tamaño y en la mano es donde peor se lee. */
   /* 11 px, como `.se-meta` y el resto de las versalitas: 0,72rem daba 11,52, un
      tamaño suelto entre dos peldaños de la escala. */
-  .se-doccard__kicker {
-    font-size: 0.6875rem;
-  }
 
   .se-format__more {
     display: inline-flex;
@@ -8513,7 +8289,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   border-radius:0 0 6px;
 }
 
-
 /* --- F · cintillo -------------------------------------------------------- */
 /* `display: contents` para que el envoltorio no cree una caja propia: lo que se
    vende es el patrocinio de esas cifras, y una caja intermedia lo separaría de
@@ -9726,147 +9501,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* ═══ Portada: la apertura, como una emisión ═════════════════════════════
-   El mismo verde de la cabecera sigue hacia abajo: mástil, noticia principal y el
-   rótulo de Última hora son un solo bloque, como la pantalla de un canal. El titular
-   grande en blanco a la izquierda; la foto a la derecha, hasta el mismo margen que
-   la cabecera: a sangre solo por un lado, la página se veía corrida en pantallas
-   anchas. Sin filetes ni cajas: separa el aire. Ver `AperturaPortada.jsx`. */
-.se-apertura {
-  position: relative;
-  overflow-x: clip;
-  background: var(--marca-verde);
-  color: #ffffff;
-}
-
-.se-apertura__marco {
-  padding-top: clamp(20px, 3vw, 40px);
-  padding-bottom: clamp(28px, 3.5vw, 48px);
-}
-
-.se-apertura__principal {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--se-space-lg);
-  min-width: 0;
-}
-
-@media (min-width: 960px) {
-  .se-apertura__principal {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 7fr);
-    align-items: end;
-    gap: clamp(32px, 4vw, 64px);
-  }
-}
-
-.se-apertura__cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-  padding-bottom: 8px;
-}
-
-.se-apertura .se-apertura__meta {
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  text-transform: none;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.se-apertura .se-meta__lugar {
-  color: #ffffff;
-}
-
-.se-apertura__titulo {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(2.25rem, 1.2rem + 2.7vw, 4rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
-
-.se-apertura__titulo a,
-.se-apertura__enlace {
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.se-apertura__titulo a:hover,
-.se-apertura__enlace:hover {
-  text-decoration: underline;
-  text-decoration-thickness: 3px;
-  text-decoration-color: var(--color-accent);
-  text-underline-offset: 0.12em;
-}
-
-.se-apertura__titulo a:focus-visible,
-.se-apertura__enlace:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 4px;
-}
-
-.se-apertura__resumen {
-  margin: 0;
-  max-width: 46ch;
-  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.se-apertura__escena {
-  position: relative;
-  min-width: 0;
-  aspect-ratio: 16 / 10;
-}
-
-@media (min-width: 960px) {
-  .se-apertura__escena {
-    aspect-ratio: auto;
-    min-height: clamp(360px, 34vw, 520px);
-  }
-}
-
-@media (max-width: 959px) {
-  .se-apertura__escena {
-    order: -1;
-    margin-inline: calc(-1 * var(--se-content-gutter));
-  }
-}
-
-.se-apertura__media {
-  position: absolute;
-  inset: 0;
-  display: block;
-  overflow: hidden;
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.se-apertura__media > * {
-  width: 100%;
-  height: 100%;
-}
-
-/* El cambio de noticia: la foto nueva barre a la anterior de izquierda a derecha, como
-   el corte de un canal, y el titular entra con ella. */
-.se-apertura__media--sale {
-  z-index: 0;
-  pointer-events: none;
-}
-
-.se-apertura__media--entra {
-  z-index: 1;
-  animation: se-apertura-barre 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.se-apertura__cuerpo--entra {
-  animation: se-apertura-sube 620ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
-}
-
 @keyframes se-apertura-barre {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
@@ -9875,267 +9509,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 @keyframes se-apertura-sube {
   from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
   to { opacity: 1; transform: none; filter: none; }
-}
-
-/* La llegada de la página: el titular sube y la foto se descubre una vez. */
-.se-apertura__principal .se-apertura__cuerpo {
-  animation: se-apertura-sube 700ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
-}
-
-.se-apertura__principal .se-apertura__media:not(.se-apertura__media--sale) {
-  animation: se-apertura-barre 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Cuál de las cuatro está en pantalla, y la pausa: sobre la foto, abajo a la derecha. */
-.se-apertura__mando {
-  position: absolute;
-  right: 20px;
-  bottom: 18px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.se-apertura__puntos {
-  display: flex;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.se-apertura__puntos li {
-  width: 22px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.4);
-  transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), background-color 300ms ease;
-}
-
-.se-apertura__puntos .se-apertura__punto--actual {
-  width: 40px;
-  background: #ffffff;
-}
-
-.se-apertura__pausa {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.se-apertura__pausa:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.se-apertura__pausa:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-/* Las otras tres, debajo y en fila: titular en blanco, sin filetes. */
-.se-apertura__columna {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
-  margin: clamp(28px, 3vw, 44px) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 760px) {
-  .se-apertura__columna {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(24px, 3vw, 48px);
-  }
-}
-
-.se-apertura__item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.se-apertura__enlace {
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.0625rem, 0.95rem + 0.4vw, 1.3125rem);
-  font-weight: 650;
-  line-height: 1.22;
-  letter-spacing: -0.015em;
-  text-wrap: pretty;
-}
-
-.se-apertura__columna .se-apertura__item {
-  animation: se-apertura-sube 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.se-apertura__columna .se-apertura__item:nth-child(1) { animation-delay: 220ms; }
-.se-apertura__columna .se-apertura__item:nth-child(2) { animation-delay: 290ms; }
-.se-apertura__columna .se-apertura__item:nth-child(3) { animation-delay: 360ms; }
-
-@media (prefers-reduced-motion: reduce) {
-  .se-apertura__media--entra,
-  .se-apertura__cuerpo--entra,
-  .se-apertura__principal .se-apertura__cuerpo,
-  .se-apertura__principal .se-apertura__media:not(.se-apertura__media--sale),
-  .se-apertura__columna .se-apertura__item {
-    animation: none;
-  }
-
-  .se-apertura__puntos li {
-    transition: none;
-  }
-}
-
-/* —— La franja bajo la apertura ——
-   Dos análisis con firma y seis monedas de la región (y los mercados del mundo en el
-   teléfono), sobre una banda de papel que sale del verde de la apertura. Densa a
-   propósito: aquí se comparan cifras, no tarjetas. Sin reglas: separa el aire. */
-.se-section.se-franja {
-  padding-top: var(--se-space-lg);
-  padding-bottom: var(--se-space-lg);
-  background: var(--banda-papel);
-}
-
-.se-franja__rejilla {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-}
-
-.se-franja__celda {
-  min-width: 0;
-}
-
-.se-franja__celda + .se-franja__celda {
-  margin-left: clamp(32px, 5vw, 96px);
-}
-
-.se-franja__titulo {
-  margin: 0 0 0.6rem;
-  font-family: var(--se-font-heading);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-.se-franja__titulo a,
-.se-franja__analisis-titulo a {
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.se-franja__titulo a:hover,
-.se-franja__analisis-titulo a:hover,
-.se-franja__titulo a:focus-visible,
-.se-franja__analisis-titulo a:focus-visible {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-}
-
-.se-franja__analisis + .se-franja__analisis {
-  margin-top: 1.25rem;
-}
-
-.se-franja__analisis-titulo {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: 1.125rem;
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  text-wrap: pretty;
-}
-
-.se-franja__autor {
-  margin: 0.3rem 0 0;
-  font-size: 0.8125rem;
-  color: var(--color-slate);
-}
-
-.se-franja__resumen {
-  display: -webkit-box;
-  margin: 0.45rem 0 0;
-  font-family: var(--se-font-reading);
-  font-size: 0.9375rem;
-  line-height: 1.45;
-  color: var(--color-slate);
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.se-franja__monedas {
-  margin: 0;
-}
-
-.se-franja__moneda {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.3rem 0;
-  font-size: 0.875rem;
-}
-
-.se-franja__moneda-nombre,
-.se-franja__moneda-dato {
-  margin: 0;
-  min-width: 0;
-}
-
-.se-franja__moneda-dato {
-  flex: 0 0 auto;
-  text-align: right;
-}
-
-.se-franja__codigo {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.se-franja__nombre {
-  margin-left: 0.4rem;
-  color: var(--color-slate);
-}
-
-.se-franja__valor {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.se-franja__var {
-  margin-left: 0.5rem;
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-slate);
-}
-
-.se-franja__var--up {
-  color: var(--color-green);
-}
-
-.se-franja__var--down {
-  color: var(--color-red);
-}
-
-.se-franja__pie {
-  margin: 0.75rem 0 0;
-  font-size: 0.8125rem;
-}
-
-.se-franja__pie a {
-  color: var(--color-ink);
-  text-underline-offset: 3px;
 }
 
 /* —— Noticias: la que manda con su foto, las demás con miniatura a dos columnas, y a
@@ -10161,7 +9534,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-noticias__nota {
   flex-direction: column;
-  padding: 0 0 var(--se-space-md);
+  padding: 14px 0;
+  border-top: 1px solid var(--color-hairline);
   break-inside: avoid;
 }
 
@@ -10176,11 +9550,11 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 .se-noticias__titulo {
   margin: 0;
-  font-family: var(--se-font-heading);
+  font-family: var(--titular);
   font-size: 1.125rem;
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.005em;
   text-wrap: pretty;
 }
 
@@ -10283,73 +9657,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
-}
-
-/* La cuarta fila: los mercados del mundo (TradingView), a lo ancho, sobre papel. */
-.se-franja__mundo {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: var(--se-space-md);
-  min-width: 0;
-  margin-top: var(--se-space-md);
-}
-
-.se-franja__mundo-rotulo {
-  flex: 0 0 auto;
-  font-family: var(--se-font-heading);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.se-franja__mundo .se-ticker__mundo {
-  display: flex;
-  align-items: center;
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.se-franja__mundo .se-ticker__mundo-caja {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-/* La atribución de TradingView, que sus condiciones exigen: discreta, en tinta apagada. */
-.se-franja__mundo .se-ticker__mundo-credito {
-  flex: 0 0 auto;
-  padding: 0 0 0 12px;
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-slate);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.se-franja__mundo .se-ticker__mundo-credito:hover {
-  color: var(--color-ink);
-}
-
-@media (max-width: 900px) {
-  .se-franja__rejilla {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .se-franja__mundo {
-    flex-wrap: wrap;
-    gap: 0.25rem var(--se-space-md);
-  }
-
-  .se-franja__celda + .se-franja__celda {
-    margin-left: 0;
-    margin-top: var(--se-space-lg);
-  }
 }
 
 /* —— El filtro de la portada, en franja ——
@@ -10499,11 +9806,10 @@ html {
    `width`/`height`, para que la caja dibujada siga igual donde ya mide lo suficiente. */
 @media (pointer: coarse) {
   .se-share__btn,
-  .se-marcar__btn,
-  .se-pager__btn,
-  .se-apertura__pausa,
-  .se-explorer-section__cerrar,
-  .se-header__buscar {
+.se-marcar__btn,
+.se-pager__btn,
+.se-explorer-section__cerrar,
+.se-header__buscar {
     min-width: 44px;
     min-height: 44px;
   }
@@ -10533,9 +9839,6 @@ html {
    titular caía dos pantallas más abajo. Foto y texto lado a lado, como en el
    escritorio, y la foto con techo por si la columna sale ancha. */
 @media (orientation: landscape) and (max-height: 500px) {
-  .se-apertura__escena {
-    max-height: 60svh;
-  }
 
   /* La cabecera de la pieza, igual: a dos columnas, que es lo que ya hace de 900
      arriba, y la portada con el mismo techo. */
@@ -11413,7 +10716,6 @@ html {
   }
 }
 
-
 .se-noticias__anuncio {
   margin-top: var(--se-space-lg);
 }
@@ -11634,8 +10936,6 @@ html {
 .se-blog .se-meta,
 .se-noticias__meta,
 .se-artcard__by,
-.se-doccard__kicker,
-.se-newsletter__kicker,
 .se-piece__tags-label {
   font-family: var(--se-font-ui);
   font-size: 0.8125rem;
@@ -11650,18 +10950,19 @@ html {
   color: var(--color-ink);
 }
 
-
-/* —— 2. El título de sección: grande y sin regla ——
-   La regla verde bajo cada título, seis veces por página, era el tic que delataba la
-   plantilla. Las secciones se separan por el color de las bandas y por el aire; el
-   título carga solo, como el rótulo de un bloque del noticiero. */
+/* —— 2. El título de sección, como la cabecera de una sección del diario ——
+   Un filete de tinta encima, el nombre en la serif de los titulares y «Ver todas» al
+   otro extremo. Sin la regla verde gruesa ni el guion de color. */
 .se-blog .se-heading-section {
   margin: 0 0 var(--se-space-lg);
-  padding-bottom: 0;
+  padding: 10px 0 0;
+  border-top: 2px solid var(--color-ink);
   border-bottom: 0;
-  font-size: clamp(1.75rem, 1.15rem + 1.9vw, 3rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-family: var(--titular);
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
 }
 
 .se-blog .se-heading-section::before {
@@ -11669,51 +10970,51 @@ html {
 }
 
 .se-format__head {
-  margin-bottom: clamp(20px, 2.4vw, 36px);
-  padding-bottom: 0;
+  margin-bottom: clamp(18px, 2vw, 28px);
+  padding: 10px 0 0;
+  border-top: 2px solid var(--color-ink);
   border-bottom: 0;
 }
 
 .se-format__head .se-heading-section {
-  display: flex;
-  align-items: center;
-  gap: 0.35em;
   margin: 0;
-}
-
-.se-format__head .se-header__alpunto-punto {
-  width: 0.3em;
-  height: 0.3em;
+  padding: 0;
+  border-top: 0;
 }
 
 .se-format__more {
   font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
   text-decoration: none;
-  color: var(--marca-verde);
+  color: var(--color-ink);
 }
 
 .se-format__more::after {
   display: inline-block;
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: 0.25em;
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .se-format__more:hover {
-  color: var(--color-accent);
+  color: var(--marca-verde);
 }
 
-.se-format__more:hover::after {
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .se-format__more:hover::after {
+    transform: translateX(3px);
+  }
 }
 
-/* —— 3. Tarjetas sin caja: la foto y el texto, sin filete ni borde —— */
-.se-blog .se-artcard {
-  background: transparent;
+/* —— 3. Tarjetas de prensa: un filete encima, la foto y el texto, sin caja —— */
+.se-blog .se-artcard,
+.se-blog .se-doccard {
+  padding: 12px 0 0;
   border: 0;
-  padding-bottom: 0;
+  border-top: 1px solid var(--color-hairline);
+  background: transparent;
 }
 
 .se-blog .se-artcard__media,
@@ -11722,28 +11023,84 @@ html {
 }
 
 .se-blog .se-artcard__body {
-  padding: 14px 0 0;
-}
-
-/* Los informes, igual: sin la caja gris, el borde y la raya negra a la izquierda. */
-.se-blog .se-doccard {
-  border: 0;
-  background: transparent;
+  padding: 12px 0 0;
 }
 
 .se-blog .se-doccard__body {
-  padding: 16px 0 0;
+  padding: 14px 0 0;
 }
 
-.se-blog .se-artcard__title {
-  font-size: 1.125rem;
-  font-weight: 700;
+.se-blog .se-artcard__title,
+.se-blog .se-doccard__title,
+.se-blog .se-alpunto__title {
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .se-blog .se-artcard--editorial {
   border-left: 0;
+}
+
+/* Las insignias de un informe: lo que el lector se lleva (el PDF y sus páginas, en
+   rojo y en la monoespaciada de las cifras) y si pide registro (en la letra del sitio,
+   solo con filete). */
+.se-doccard__insignias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.se-doccard__insignias:empty {
+  display: none;
+}
+
+.se-insignia {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.se-insignia--pdf {
+  font-family: var(--cifras);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  border-color: var(--marca-rojo);
+  background: var(--marca-rojo);
+  color: #ffffff;
+}
+
+/* En el teléfono los informes se deslizan de lado, uno y un poco del siguiente. */
+@media (max-width: 759px) {
+  .se-blog .se-docgrid {
+    display: flex;
+    gap: 16px;
+    margin-inline: calc(-1 * var(--se-content-gutter));
+    padding-inline: var(--se-content-gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--se-content-gutter);
+    scrollbar-width: none;
+  }
+
+  .se-blog .se-docgrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .se-blog .se-docgrid > .se-doccard {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
+  }
 }
 
 /* —— 4. Etiquetas en texto, no en cajitas ——
@@ -11760,10 +11117,24 @@ html {
   color: var(--color-ink);
 }
 
-.se-blog .se-tagpill:not(:last-child)::after {
-  content: " ·";
+.se-blog .se-artcard__foot,
+.se-blog .se-doccard__foot,
+.se-blog .se-alpunto__foot {
+  gap: 2px 8px;
+}
+
+.se-blog .se-artcard__foot > * + *::before,
+.se-blog .se-doccard__foot > .se-tagpill + .se-tagpill::before,
+.se-blog .se-alpunto__foot > * + *::before {
+  content: "·";
+  margin-right: 8px;
   font-weight: 400;
   color: var(--color-slate);
+}
+
+/* Quién firma el informe, en su línea. */
+.se-blog .se-doccard__unit {
+  flex-basis: 100%;
 }
 
 /* ═══ Noticias, «Lo más leído» y la publicidad ancha ═══ */
@@ -11794,9 +11165,12 @@ html {
 }
 
 .se-masleido__titulo {
-  padding-bottom: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--color-ink);
+  font-family: var(--titular);
   font-size: 1.375rem;
-  letter-spacing: -0.03em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .se-masleido__nota {
@@ -11808,13 +11182,19 @@ html {
   gap: 0.25rem;
   padding: 0.7rem 0;
   border: 0;
+  border-top: 1px solid var(--color-hairline);
 }
 
 .se-masleido__numero {
-  font-size: 2.25rem;
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  color: var(--color-accent);
+  font-family: var(--titular);
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--marca-rojo);
+}
+
+.se-masleido__enlace {
+  font-family: var(--titular);
 }
 
 .se-masleido__enlace {
@@ -11861,37 +11241,6 @@ html {
 
 /* La editorial sin foto: a dos columnas, la firma y el titular a la izquierda, la
    entradilla y el enlace a la derecha. A una columna dejaba media fila vacía. */
-@media (min-width: 900px) {
-  .se-eddia__card--sin-foto .se-eddia__body {
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-    column-gap: clamp(32px, 5vw, 80px);
-    row-gap: 14px;
-    align-items: end;
-    max-width: none;
-    padding-right: 0;
-  }
-
-  .se-eddia__card--sin-foto .se-eddia__firma {
-    grid-column: 1 / -1;
-  }
-
-  .se-eddia__card--sin-foto .se-eddia__title {
-    grid-column: 1;
-    grid-row: 2 / span 2;
-    align-self: start;
-  }
-
-  .se-eddia__card--sin-foto .se-eddia__lead {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .se-eddia__card--sin-foto .se-eddia__cta {
-    grid-column: 2;
-    grid-row: 3;
-  }
-}
 
 /* ═══ Noticias con imágenes ═══ */
 .se-noticias__principal {
@@ -11903,7 +11252,8 @@ html {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--se-space-md);
-  margin-bottom: var(--se-space-lg);
+  margin-bottom: 0;
+  padding-bottom: var(--se-space-md);
 }
 
 @media (min-width: 760px) {
@@ -11958,8 +11308,8 @@ html {
 
 .se-noticias__titulo--lead {
   font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2.1rem);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 
@@ -11968,12 +11318,16 @@ html {
   -webkit-line-clamp: 4;
 }
 
-/* Las demás: miniatura y texto. */
+/* Las demás: el titular a la izquierda y la miniatura a la derecha, como en prensa. */
 .se-noticias__nota {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 16px;
   align-items: start;
+}
+
+.se-noticias__nota .se-noticias__mini {
+  order: 2;
 }
 
 .se-noticias__texto {
@@ -11989,8 +11343,12 @@ html {
 
 @media (max-width: 700px) {
   .se-noticias__nota {
-    grid-template-columns: 96px minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr) 80px;
+    gap: 14px;
+  }
+
+  .se-noticias__nota .se-noticias__mini {
+    aspect-ratio: 1;
   }
 }
 
@@ -12110,12 +11468,6 @@ html {
 
 /* En escritorio el mundo va en la cinta: la fila de la franja solo en el teléfono, y
    una franja que solo tendría esa fila no se pinta. */
-@media (min-width: 861px) {
-  .se-franja__mundo,
-  .se-franja--solo-mundo {
-    display: none;
-  }
-}
 
 /* ═══ El pie en verde intenso ═══
    Como la maqueta de la redacción: verde Cardin de borde a borde, letra blanca, la
@@ -12248,29 +11600,6 @@ html {
   color: #ffffff;
 }
 
-/* El descargo, en su recuadro. */
-.se-footer__aviso {
-  margin-top: var(--se-space-lg);
-  padding: 16px 20px;
-  border: 1px solid var(--pie-linea);
-  background: rgba(0, 0, 0, 0.18);
-}
-
-.se-footer__aviso-titulo {
-  margin: 0 0 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-
-.se-footer__descargo {
-  max-width: none;
-  font-size: 0.875rem;
-  color: var(--pie-texto);
-}
-
 /* La barra final: copyright a la izquierda, ciudades a la derecha. */
 .se-footer__bottom {
   margin-top: var(--se-space-md);
@@ -12364,54 +11693,233 @@ html {
   }
 }
 
-/* ═══ Las bandas de la portada ═══
-   Lo que separa una sección de otra es el color de su banda y el aire, no una regla.
-   Verde (apertura), papel (datos), blanco (noticias), papel (la pausa), cobre (la
-   editorial), blanco (artículos y editoriales), tinta («Al punto»), blanco
-   (informes), papel (boletín), verde (pie). Una sección blanca detrás de una banda
-   necesita su propio aire arriba: la regla general se lo quita. */
-:is(.se-franja, .se-pausa-franja, .se-eddia, .se-format--oscuro) + .se-section {
-  padding-top: var(--se-section-gap);
+/* ═══ El marco público: papel, tinta y filetes ═══
+   `Layout.jsx` envuelve la parte pública en `.se-publico`. Aquí los colores base pasan a
+   los de la prensa, y todo lo que ya los usaba los hereda; el panel no cambia. */
+.se-publico {
+  --color-paper: var(--papel);
+  --color-ink: var(--tinta);
+  --color-cream: var(--tinta);
+  --se-black: var(--tinta);
+  --color-hairline: var(--filete);
+  --color-hairline-dark: var(--filete-fuerte);
+  min-height: 100vh;
+  background: var(--papel);
+  color: var(--tinta);
 }
 
-.se-section.se-eddia {
-  padding-top: clamp(56px, 7vw, 112px);
-  padding-bottom: clamp(56px, 7vw, 112px);
+.se-publico ::selection {
+  background: rgba(0, 51, 24, 0.16);
+  color: var(--tinta);
 }
 
-/* «Al punto», en tinta: vídeo y pódcast como el bloque de un canal. Los colores base
-   se redefinen dentro de la banda y las tarjetas se adaptan solas. */
-.se-section.se-format--oscuro {
-  --color-ink: #ffffff;
-  --color-cream: #ffffff;
-  --se-black: #ffffff;
-  --color-slate: rgba(255, 255, 255, 0.78);
-  --color-slate-2: rgba(255, 255, 255, 0.7);
-  --se-tinte: 255, 255, 255;
+:root:has(.se-publico) {
+  scrollbar-color: var(--filete-fuerte) var(--papel);
+}
+
+/* Los titulares de las páginas de pieza, en la misma serif. */
+.se-publico .se-piece__title {
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* El boletín: el bloque destacado de la página, en el verde de la casa. */
+.se-section.se-newsletter {
   padding-top: var(--se-section-gap);
-  background: var(--banda-tinta);
+  background: var(--marca-verde);
   color: #ffffff;
 }
 
-.se-format--oscuro .se-format__more {
+.se-newsletter .se-newsletter__card {
   color: #ffffff;
 }
 
-.se-format--oscuro .se-header__alpunto-punto {
-  background: #e5322d;
+.se-newsletter .se-newsletter__title {
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #ffffff;
 }
 
-/* Las miniaturas, sin el contorno que separa una foto clara del blanco: sobre la
-   tinta no hace falta y se leía como una caja. */
-.se-format--oscuro .se-alpunto__thumb {
+.se-newsletter .se-newsletter__label {
+  color: #d9c08a;
+}
+
+.se-newsletter .se-newsletter__text {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.se-newsletter .se-newsletter__field {
   border-color: transparent;
 }
 
-.se-format--oscuro .se-format__more:hover {
-  color: #f3a27f;
+/* —— Noticias: el lugar y la fecha bajo el titular, como en la primera plana ——
+   Encima se leían como antetítulo. La principal asienta el texto al pie de la foto. */
+.se-noticias__lead-texto > .se-noticias__meta,
+.se-noticias__texto > .se-noticias__meta {
+  order: 2;
 }
 
-.se-format--oscuro .se-alpunto__title a:hover {
-  color: #f3a27f;
+@media (min-width: 760px) {
+  .se-noticias__lead {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+  }
+
+  .se-noticias__lead .se-noticias__foto {
+    aspect-ratio: 4 / 3;
+  }
+
+  .se-noticias__titulo--lead {
+    font-size: clamp(1.75rem, 1.1rem + 1.5vw, 2.625rem);
+  }
 }
 
+/* —— La cabecera de escritorio sin botones de aplicación ——
+   Juegos, Al punto y Entrar pasan a enlaces de texto en la cabecera; Registrarse se
+   queda como la única llamada, sin mayúsculas. */
+@media (min-width: 1240px) {
+  .se-header .se-header__actions--desktop .se-btn {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.875rem;
+  }
+
+  .se-header .se-header__actions--desktop .se-btn--secondary {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .se-header .se-header__actions--desktop .se-btn--secondary:hover {
+    border-color: transparent;
+    background: transparent;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .se-header .se-header__actions--desktop .se-btn:hover {
+    transform: none;
+  }
+}
+
+/* —— La lupa de la cabecera, en blanco sobre el verde ——
+   Tomaba `--color-cream`, que en la parte pública es la tinta del papel. */
+.se-header .se-header__buscar {
+  color: #ffffff;
+}
+
+.se-header .se-header__buscar:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* —— El tema de una tarjeta, abajo con la fecha y no encima del titular ——
+   Una etiqueta sobre cada titular es un antetítulo, y el titular carga solo. */
+.se-blog .se-artcard__body > .se-meta--category,
+.se-blog .se-alpunto__body > .se-meta--category {
+  order: 9;
+}
+
+/* —— Los informes en escritorio: la portada del informe al lado del texto ——
+   Dos fotos de 16:9 a media página medían 370 px de alto cada una. */
+@media (min-width: 900px) {
+  .se-blog .se-doccard {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .se-blog .se-doccard__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .se-blog .se-doccard__body {
+    padding-top: 0;
+  }
+}
+
+/* —— Aliados: la cabecera de sección a todo el ancho, como las demás —— */
+.se-publico .se-partners__head {
+  max-width: none;
+}
+
+/* —— Las cifras de la cinta, en la monoespaciada de los datos —— */
+.se-ticker__v,
+.se-ticker__d {
+  font-family: var(--cifras);
+}
+
+/* —— La cabecera en el teléfono ——
+   Fija y baja (52 px): el menú a la izquierda, la marca, y la lupa a la derecha. La
+   cinta de mercados pasa debajo de la cabecera y se desliza con el dedo en vez de
+   desfilar sola. La lupa de la barra solo existe mientras manda el menú (< 1240). */
+.se-header__buscar--movil {
+  display: none;
+}
+
+@media (max-width: 1239px) {
+  .se-header__inner .se-header__buscar--movil {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    margin-left: 0.5rem;
+  }
+}
+
+@media (max-width: 759px) {
+  .se-publico {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .se-publico > .se-header {
+    order: -1;
+  }
+
+  .se-header__inner {
+    height: 52px;
+    gap: 4px;
+  }
+
+  .se-header__inner .se-header__burger {
+    order: -1;
+    margin-left: -10px;
+  }
+
+  .se-header__inner .se-hora--header {
+    display: none;
+  }
+
+  .se-header__inner .se-header__buscar--movil {
+    margin-left: auto;
+    margin-right: -8px;
+  }
+
+  .se-header__logo {
+    height: 24px;
+  }
+
+  .se-ticker__track {
+    animation: none;
+  }
+
+  .se-ticker__run + .se-ticker__run {
+    display: none;
+  }
+
+  .se-ticker__viewport {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .se-ticker__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .se-ticker__item {
+    scroll-snap-align: start;
+  }
+}

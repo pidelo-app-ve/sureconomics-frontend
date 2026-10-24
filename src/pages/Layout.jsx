@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom"
 import ScrollToTop from "../components/ScrollToTop"
 import { Navbar } from "../components/Navbar"
 import { Footer } from "../components/Footer"
+import { BarraInferior } from "../components/BarraInferior"
 import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 import { AvisoDeCookies } from "../components/AvisoDeCookies"
@@ -37,6 +38,10 @@ export const Layout = () => {
                 quiere. Una que no declare ninguno -- contacto, cookies -- no lleva
                 publicidad, y esa es la manera de decirlo. */}
             <ProveedorDePublicidad>
+                {/* El marco de la parte pública: los colores de prensa (papel, tinta y
+                    filetes) se fijan en `.se-publico` y el panel no los hereda. En el
+                    teléfono ordena la cabecera antes de la cinta. */}
+                <div className="se-publico">
                 {/* Lo primero que se tabula, antes que la cinta y la cabecera: sin el,
                     llegar al articulo con teclado pasa por todo el menu en cada pagina. */}
                 <a className="se-saltar" href={`#${CONTENIDO_ID}`} onClick={saltarAlContenido}>
@@ -59,6 +64,9 @@ export const Layout = () => {
                     redaccion no ha destacado ninguna publicacion. */}
                 <EnRedes />
                 <Footer />
+                {/* En el teléfono, los cuatro accesos fijos de abajo. Detrás del pie en
+                    el árbol: se posiciona sola y no se lee antes que el contenido. */}
+                <BarraInferior />
                 {/* La barra fija va aqui abajo por lo mismo que el aviso de cookies: se
                     posiciona sola, asi que en el arbol tiene que ser de lo ultimo que
                     lee un lector de pantalla y no lo primero. Nace apagada. */}
@@ -73,6 +81,7 @@ export const Layout = () => {
                     cuando salir; ver `lib/invitacionBoletin.js`. */}
                 <InvitacionAlBoletin />
                 <AvisoDeRuta destinoId={CONTENIDO_ID} />
+                </div>
             </ProveedorDePublicidad>
         </ScrollToTop>
     )

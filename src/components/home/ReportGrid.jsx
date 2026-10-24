@@ -29,7 +29,18 @@ export const ReportGrid = ({ items }) => {
           <CardMedia pieza={r} />
         </Enlace>
         <div className="se-doccard__body">
-          <span className="se-doccard__kicker">{t("portada.informes.gorro")}</span>
+          {/* Las insignias dicen lo que el lector se lleva: el PDF (con sus páginas) y si
+              pide registro. Solo lo que es verdad de esa pieza. */}
+          <p className="se-doccard__insignias">
+            {r.tieneDocumento ? (
+              <span className="se-insignia se-insignia--pdf">
+                {r.paginas ? t("portada.informes.pdfPaginas", { n: r.paginas }) : t("portada.informes.pdf")}
+              </span>
+            ) : null}
+            {r.tieneDocumento && !r.documentoAbierto ? (
+              <span className="se-insignia">{t("portada.informes.exclusivo")}</span>
+            ) : null}
+          </p>
           <h3 className="se-doccard__title">
             <Enlace to={rutaDePieza(r)}><TituloDePieza pieza={r} /></Enlace>
           </h3>
@@ -50,6 +61,9 @@ ReportGrid.propTypes = {
   items: listaDePiezas({
     unidad: PropTypes.string.isRequired,
     resumen: PropTypes.string,
+    tieneDocumento: PropTypes.bool,
+    documentoAbierto: PropTypes.bool,
+    paginas: PropTypes.number,
     imagenUrl: PropTypes.string,
   }),
 };

@@ -20,6 +20,10 @@
       "otrasNoticias": "Otras noticias recientes",
       "pausar": "Detener el cambio de noticia"
     },
+    "plana": {
+      "opinion": "Opinión",
+      "todaLaUltimaHora": "Toda la última hora"
+    },
     "masLeido": {
       "titulo": "Lo más leído",
       "nota": "Lo que más leyeron los lectores en los últimos siete días."
@@ -28,8 +32,6 @@
       "region": "Béisbol y juegos"
     },
     "franja": {
-      "region": "Análisis y monedas",
-      "analisis": "Análisis",
       "monedas": "Monedas de la región",
       "todasLasMonedas": "Todas las monedas y su variación",
       "mundo": "Mercados del mundo"
@@ -57,12 +59,13 @@
       "gorro": "Editorial · {tema}"
     },
     "editorialDelDia": {
-      "titulo": "Editorial del día",
-      "leer": "Leer la posición del medio →"
+      "titulo": "Editorial del día"
     },
     "informes": {
-      "gorro": "Informe · requiere registro",
-      "investigacionDe": "Investigación de {unidad}"
+      "investigacionDe": "Investigación de {unidad}",
+      "pdf": "PDF",
+      "pdfPaginas": "PDF · {n} págs.",
+      "exclusivo": "Exclusivo para registrados"
     },
     "alPunto": {
       "episodio": "Episodio"
@@ -79,7 +82,6 @@
       "cierreDel": "Cierre del {fecha}"
     },
     "boletin": {
-      "kicker": "Boletín semanal · los lunes por la mañana",
       "titulo": "Entorno en Viñetas",
       "texto": "El entorno económico de la semana, contado en viñetas: lo que movió los mercados, lo que viene y lo que conviene mirar. Le llega al correo cada lunes por la mañana, antes de que la semana empiece a moverse.",
       "suCorreo": "Su correo",

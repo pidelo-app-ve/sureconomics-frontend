@@ -7,18 +7,12 @@ import { Enlace } from "../Enlace";
  * The document is explicit that no format outranks the others, so every block
  * gets the same heading treatment and the same weight; only the body layout
  * changes between them.
- *
- * `tono="oscuro"`: la banda de tinta de «Al punto», que es lo que se ve y se escucha
- * (vídeo y pódcast), con el mismo punto rojo de grabar que lleva en el menú.
  */
-export const FormatSection = ({ title, to, linkLabel, tono, children }) => (
-  <section className={`se-section se-format${tono === "oscuro" ? " se-format--oscuro" : ""}`} aria-label={title}>
+export const FormatSection = ({ title, to, linkLabel, children }) => (
+  <section className="se-section se-format" aria-label={title}>
     <div className="se-container">
       <div className="se-format__head">
-        <h2 className="se-heading-section se-format__title">
-          {tono === "oscuro" ? <span className="se-header__alpunto-punto" aria-hidden="true" /> : null}
-          {title}
-        </h2>
+        <h2 className="se-heading-section se-format__title">{title}</h2>
         <Enlace to={to} className="se-format__more">
           {linkLabel}
         </Enlace>
@@ -32,6 +26,5 @@ FormatSection.propTypes = {
   title: PropTypes.string.isRequired,
   to: PropTypes.string.isRequired,
   linkLabel: PropTypes.string.isRequired,
-  tono: PropTypes.oneOf(["oscuro"]),
   children: PropTypes.node.isRequired,
 };

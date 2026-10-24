@@ -123,7 +123,7 @@ const CORTE_MOVIL = "(max-width: 860px)";
 
 /**
  * Va en la cinta de arriba, en línea con nuestras cifras, en escritorio; y en el
- * teléfono, en la franja de mercados bajo la apertura (`FranjaPortada`), donde hay sitio.
+ * teléfono, bajo las monedas de la primera plana (`PrimeraPlana`), donde hay sitio.
  * `solo` dice en cuál de los dos anchos se pinta, para que nunca se monten dos widgets:
  * "ancho" (de 861 arriba) o "estrecho". `tema` es el de TradingView: "dark" sobre
  * verde, "light" sobre papel.

@@ -40,6 +40,12 @@
     "alPuntoHint": "Al punto: interviews and podcast",
     "juegos": "Games",
     "buscar": "Search",
+    "barra": {
+      "region": "Quick links",
+      "portada": "Front page",
+      "mercados": "Markets",
+      "informes": "Reports"
+    },
     "cerrarBuscador": "Close search",
     "readerAuth": "Reader sign-in",
     "cuentaLector": "Reader account",

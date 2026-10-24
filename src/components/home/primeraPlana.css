@@ -1,0 +1,661 @@
+/* ═══ LA PRIMERA PLANA ═══
+   Tres columnas de diario separadas por filetes: Última hora | la que manda | opinión e
+   indicadores. Papel, tinta y la serif de los titulares; esquinas rectas, sin sombras.
+   Ver `PrimeraPlana.jsx`. */
+
+.se-plana {
+  padding: clamp(20px, 2.6vw, 36px) 0 0;
+  background: var(--color-paper);
+}
+
+/* La sección siguiente, a la distancia de un cambio de sección del diario y no de dos. */
+.se-plana + .se-section {
+  padding-top: clamp(40px, 5vw, 72px);
+}
+
+.se-plana__rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "uh"
+    "centro"
+    "opinion"
+    "monedas";
+  gap: var(--se-space-lg);
+}
+
+.se-plana__uh { grid-area: uh; min-width: 0; }
+.se-plana__centro { grid-area: centro; min-width: 0; }
+.se-plana__opinion { grid-area: opinion; min-width: 0; }
+.se-plana__monedas { grid-area: monedas; min-width: 0; }
+
+/* Tableta y portátil pequeño: la que manda a la izquierda y, en el carril derecho,
+   Última hora (en la primera pantalla) y las monedas; la opinión debajo, a lo ancho y
+   en tres columnas, para que ninguna de las dos columnas de arriba quede con un vacío. */
+@media (min-width: 960px) {
+  .se-plana__rejilla {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "centro uh"
+      "centro monedas"
+      "opinion opinion";
+    gap: var(--se-space-lg) 0;
+  }
+
+  .se-plana__centro {
+    padding-right: clamp(20px, 2vw, 32px);
+    border-right: 1px solid var(--color-hairline);
+  }
+
+  .se-plana__uh,
+  .se-plana__monedas {
+    padding-left: clamp(20px, 2vw, 32px);
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1199px) {
+  .se-plana__opinion {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 0;
+  }
+
+  .se-plana__opinion > .se-plana__cabeza {
+    grid-column: 1 / -1;
+  }
+
+  .se-plana__opinion > article {
+    padding: 6px 20px 0;
+    border-top: 0;
+    border-left: 1px solid var(--color-hairline);
+  }
+
+  .se-plana__opinion > article:nth-child(2) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (min-width: 960px) and (max-width: 1199px) {
+  .se-plana__uh-item:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+/* Escritorio: las tres columnas, 3/6/3. */
+@media (min-width: 1200px) {
+  .se-plana__rejilla {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "uh centro opinion"
+      "uh centro monedas";
+    gap: 0;
+  }
+
+  .se-plana__uh {
+    padding-left: 0;
+    padding-right: clamp(20px, 1.8vw, 28px);
+    border-right: 1px solid var(--color-hairline);
+  }
+
+  .se-plana__centro {
+    padding-inline: clamp(20px, 1.8vw, 28px);
+    border-right: 1px solid var(--color-hairline);
+  }
+
+
+
+  .se-plana__opinion,
+  .se-plana__monedas {
+    padding-left: clamp(20px, 1.8vw, 28px);
+  }
+
+  .se-plana__monedas {
+    padding-top: var(--se-space-lg);
+  }
+
+  /* Bajo la fecha y su doble filete, las columnas de la primera fila no repiten regla. */
+  .se-plana__opinion > .se-plana__cabeza {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+/* —— Las cabeceras de columna: un filete de tinta y el nombre —— */
+/* La fecha de la edición: una línea en la serif, bajo la cabecera, sobre un filete
+   doble como el de un diario. */
+.se-plana__fecha {
+  margin: 0 0 clamp(14px, 1.6vw, 22px);
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--color-ink);
+  font-family: var(--titular);
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--color-slate);
+}
+
+.se-plana__fecha time::first-letter {
+  text-transform: uppercase;
+}
+
+.se-plana__cabeza,
+.se-plana__uh-cabeza {
+  margin: 0 0 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-ink);
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.se-plana__cabeza a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-plana__cabeza a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-plana__mas {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-hairline-dark);
+  text-underline-offset: 3px;
+}
+
+.se-plana__mas:hover {
+  text-decoration-color: currentColor;
+}
+
+/* —— Izquierda: Última hora —— */
+/* Última hora va siempre en la primera fila, bajo la fecha: sin regla propia. */
+.se-plana__uh-cabeza {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.se-plana__uh-pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 9px;
+  border: 1px solid var(--color-ink);
+  border-radius: 2px;
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-plana__uh-pastilla:hover {
+  border-color: var(--marca-verde);
+  color: var(--marca-verde);
+}
+
+.se-plana__uh-punto {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-slate-2);
+}
+
+/* En vivo: el punto verde late, como el piloto de una transmisión. Solo con algo de
+   la última hora; con noticias de ayer se queda quieto y gris. */
+.se-plana__uh-punto--vivo {
+  background: var(--color-green);
+}
+
+.se-plana__uh-punto--vivo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-green);
+  animation: se-plana-late 1.8s cubic-bezier(0.23, 1, 0.32, 1) infinite;
+}
+
+@keyframes se-plana-late {
+  from { transform: scale(1); opacity: 0.55; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+
+.se-plana__uh-lista {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-plana__uh-item {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-plana__uh-item:first-child {
+  border-top: 0;
+  padding-top: 4px;
+}
+
+.se-plana__uh-hora {
+  padding-top: 2px;
+  font-family: var(--cifras);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--marca-rojo);
+  white-space: nowrap;
+}
+
+.se-plana__uh-titulo {
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+.se-plana__uh-titulo:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* En el teléfono, tres: lo justo antes de la que manda. */
+@media (max-width: 959px) {
+  .se-plana__uh-item:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+/* —— Centro: la que manda —— */
+.se-plana__principal {
+  position: relative;
+}
+
+.se-plana__foto {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: rgba(0, 51, 24, 0.08);
+}
+
+@media (max-width: 759px) {
+  .se-plana__foto {
+    margin-inline: calc(-1 * var(--se-content-gutter));
+  }
+}
+
+.se-plana__media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.se-plana__media > * {
+  width: 100%;
+  height: 100%;
+}
+
+.se-plana__media .se-artcard__img {
+  object-fit: cover;
+}
+
+/* El cambio de noticia: la foto nueva barre a la anterior de izquierda a derecha, como
+   el corte de un canal, y el titular entra con ella. Al llegar, la primera se descubre
+   una vez con el mismo barrido. */
+.se-plana__media--sale {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.se-plana__media--entra,
+.se-plana__principal .se-plana__media:not(.se-plana__media--sale) {
+  z-index: 1;
+  animation: se-plana-barre 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.se-plana__texto--entra {
+  animation: se-plana-entra 520ms cubic-bezier(0.23, 1, 0.32, 1) 120ms both;
+}
+
+@keyframes se-plana-barre {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes se-plana-entra {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.se-plana__texto {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.se-plana__titulo {
+  margin: 0;
+  font-family: var(--titular);
+  font-size: clamp(1.375rem, 0.95rem + 1.9vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.se-plana__titulo a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-plana__titulo a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.12em;
+}
+
+.se-plana__resumen {
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-plana__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-plana__cuando .se-meta__lugar {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.se-plana__autor {
+  font-style: italic;
+}
+
+/* Cuál de las cuatro está en pantalla, y la pausa: sobre la foto, arriba a la derecha. */
+.se-plana__mando {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  background: rgba(17, 24, 39, 0.72);
+}
+
+@media (max-width: 759px) {
+  .se-plana__mando {
+    right: calc(12px - var(--se-content-gutter));
+  }
+}
+
+.se-plana__puntos {
+  display: flex;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-plana__puntos li {
+  width: 14px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.45);
+  transition: background 200ms ease;
+}
+
+.se-plana__puntos .se-plana__punto--actual {
+  width: 26px;
+  background: #ffffff;
+}
+
+.se-plana__pausa {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.se-plana__pausa:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Las otras tres, bajo la que manda: a tres columnas entre filetes; en el teléfono, en
+   lista. */
+.se-plana__otras {
+  display: grid;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-plana__otra {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+@media (min-width: 760px) {
+  .se-plana__otras {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .se-plana__otra {
+    padding: 12px 16px 0;
+    border-top: 0;
+    border-left: 1px solid var(--color-hairline);
+  }
+
+  .se-plana__otra:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .se-plana__otra:last-child {
+    padding-right: 0;
+  }
+}
+
+.se-plana__otra-titulo {
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+.se-plana__otra-titulo:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-plana__otra .se-plana__cuando {
+  font-size: 0.75rem;
+  color: var(--color-slate);
+}
+
+/* —— Derecha: opinión de la casa y monedas —— */
+.se-plana__editorial,
+.se-plana__analisis {
+  padding: 12px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-plana__editorial {
+  border-top: 0;
+  padding-top: 6px;
+}
+
+.se-plana__titulo-editorial,
+.se-plana__titulo-analisis {
+  margin: 0;
+  font-family: var(--titular);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.se-plana__titulo-editorial {
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.se-plana__titulo-analisis {
+  font-size: 1.0625rem;
+}
+
+.se-plana__titulo-editorial a,
+.se-plana__titulo-analisis a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-plana__titulo-editorial a:hover,
+.se-plana__titulo-analisis a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-plana__firma {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--color-slate);
+}
+
+.se-plana__editorial .se-plana__firma {
+  font-family: var(--titular);
+  font-size: 0.9375rem;
+  color: var(--marca-verde);
+}
+
+.se-plana__bajada {
+  display: -webkit-box;
+  margin: 8px 0 0;
+  font-family: var(--titular);
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--color-slate);
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Las monedas: una tabla de cifras en monoespaciada, los decimales en columna. */
+.se-plana__tabla {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-plana__tabla tr + tr {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-plana__tabla th,
+.se-plana__tabla td {
+  padding: 7px 0;
+}
+
+.se-plana__tabla th {
+  text-align: left;
+  font-weight: 600;
+}
+
+.se-plana__tabla abbr {
+  text-decoration: none;
+}
+
+.se-plana__valor {
+  text-align: right;
+}
+
+.se-plana__var {
+  width: 5.5em;
+  text-align: right;
+  color: var(--color-slate);
+}
+
+.se-plana__var--up { color: var(--color-green); }
+.se-plana__var--down { color: var(--color-red); }
+
+/* Los índices del mundo (TradingView): solo en el teléfono; en escritorio van en la cinta. */
+.se-plana__mundo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-plana__mundo-rotulo {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.se-plana__mundo .se-ticker__mundo {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 861px) {
+  .se-plana__mundo {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-plana__media--entra,
+  .se-plana__principal .se-plana__media:not(.se-plana__media--sale),
+  .se-plana__texto--entra,
+  .se-plana__uh-punto--vivo::after {
+    animation: none;
+  }
+}

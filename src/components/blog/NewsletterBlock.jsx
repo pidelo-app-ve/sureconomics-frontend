@@ -95,10 +95,6 @@ export const NewsletterBlock = () => {
         <div className="se-newsletter__card">
           <div className="se-newsletter__grid">
             <div className="se-newsletter__copy">
-              <span className="se-newsletter__kicker">
-                {t("portada.boletin.kicker")}
-              </span>
-
               <h2 id="newsletter-title" className="se-newsletter__title">
                 {t("portada.boletin.titulo")}
               </h2>

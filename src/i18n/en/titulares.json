@@ -21,10 +21,7 @@
       }
     },
     "tarjeta": {
-      "etiqueta": "Breaking",
-      "leer": "Read story",
-      "pausar": "Pause latest news",
-      "region": "Latest news"
+      "etiqueta": "Breaking"
     },
     "hace": {
       "ahora": "Just now",

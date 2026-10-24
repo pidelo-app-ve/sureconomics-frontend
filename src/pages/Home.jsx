@@ -7,11 +7,10 @@ import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
-import { AperturaPortada, elegirApertura } from "../components/home/AperturaPortada";
-import { BannerDeJuegos } from "../components/home/TarjetaPausa";
-import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
+import { PrimeraPlana, elegirApertura } from "../components/home/PrimeraPlana";
+import { PausaPortada } from "../components/home/PausaPortada";
 import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
-import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
+import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { useMasLeidas } from "../hooks/useMasLeidas";
@@ -27,10 +26,10 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
  * entrada al sitio; despues noticias, que ocupa el lugar donde estaba el hero; y
  * detras la editorial del dia.
  *
- * Desde octubre de 2026, entre el filtro y las noticias va la apertura
- * (`AperturaPortada`): la pieza principal en grande y tres titulares al lado. La
- * principal la fija la redaccion desde el editor por un tiempo («Abrir la portada con
- * esta pieza») o, si no hay nada fijado, es la noticia mas reciente.
+ * Arriba va la primera plana (`PrimeraPlana`), como un diario financiero: Última
+ * hora, la noticia que manda y, a la derecha, la editorial del día, dos análisis y las
+ * monedas. La principal la fija la redaccion desde el editor por un tiempo («Abrir la
+ * portada con esta pieza») o, si no hay nada fijado, es la noticia mas reciente.
  *
  * El filtro no esta siempre a la vista: lo abre la lupa de la
  * cabecera (`?buscar=1`) y cuelga del mastil, en su sitio de siempre. La redaccion
@@ -54,8 +53,8 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
 /** Lo que tarda el cajón del buscador en cerrarse: `se-cajon-cierra` en el CSS. */
 const CIERRE_CAJON_MS = 200;
 
-/** Cuántas piezas lleva cada columna de la franja bajo la apertura. */
-const EN_LA_FRANJA = { analisis: 2 };
+/** Cuántos análisis con firma lleva la columna de opinión de la primera plana. */
+const ANALISIS_EN_PLANA = 2;
 
 /**
  * How many pieces each block shows when nothing is filtered.
@@ -193,21 +192,16 @@ export const Home = () => {
     [apertura.principal, ...apertura.secundarias].filter(Boolean).map((p) => p.id)
   );
 
-  // La franja bajo la apertura: los artículos más recientes (las monedas las pide la
-  // propia franja). Sin «Últimas noticias»: era la segunda de tres
-  // listas de titulares seguidas. Sólo sin filtro, como la apertura.
-  const franja = isFiltered
-    ? { analisis: [] }
-    : {
-        analisis: pieces.filter((p) => p.formatoApi === "articulo" && !enApertura.has(p.id)).slice(0, EN_LA_FRANJA.analisis),
-      };
-  const enFranja = new Set(franja.analisis.map((p) => p.id));
+  // Los análisis de la columna de opinión: los artículos más recientes que no están ya
+  // arriba. Solo sin filtro, como la primera plana entera.
+  const analisis = isFiltered
+    ? []
+    : pieces.filter((p) => p.formatoApi === "articulo" && !enApertura.has(p.id)).slice(0, ANALISIS_EN_PLANA);
+  const enOpinion = new Set(analisis.map((p) => p.id));
 
-  // La editorial mas reciente, para el bloque que va detras de noticias. Se lee de
-  // la lista sin filtrar a proposito: es la posicion del medio, no un resultado de
-  // busqueda, y no tiene que desaparecer porque el lector haya estrechado el filtro.
-  // Si la editorial más reciente es la que está fijada arriba, pasa a la siguiente:
-  // la misma pieza dos veces en la primera pantalla no es énfasis, es un error.
+  // La editorial más reciente, para la columna de opinión de la primera plana. Si es
+  // la que está fijada como principal, pasa a la siguiente: la misma pieza dos veces
+  // en la primera pantalla no es énfasis, es un error.
   const editorialDelDia =
     pieces.find((p) => p.formatoApi === "editorial" && !enApertura.has(p.id)) ?? null;
 
@@ -228,10 +222,10 @@ export const Home = () => {
       // Lo mismo con lo que está en la apertura: ya está arriba, en grande. Se mira en
       // todos los formatos y no sólo en noticias, porque la pieza fijada puede ser una
       // entrevista o un informe, y sin esto abriría también su propio bloque.
-      // Y lo que está en la franja de debajo de la apertura, por lo mismo.
-      const sinApertura = all.filter((p) => !enApertura.has(p.id) && !enFranja.has(p.id));
+      // Y los análisis de la columna de opinión de arriba, por lo mismo.
+      const sinApertura = all.filter((p) => !enApertura.has(p.id) && !enOpinion.has(p.id));
       const visibles =
-        formatoApi === "editorial" && editorialDelDia
+        formatoApi === "editorial" && editorialDelDia && !isFiltered
           ? sinApertura.filter((p) => p.id !== editorialDelDia.id)
           : sinApertura;
 
@@ -305,21 +299,10 @@ export const Home = () => {
     status === "loading" ||
     (status === "success" && pieces.length > 0 && taxonomy.status === "loading");
 
-  // El béisbol y los juegos: franjas bajas, no tarjetas. Solo sin filtro: quien busca
-  // algo concreto no vino a jugar. La LVBP va primero porque en temporada es lo que
-  // más gente mueve; fuera de temporada no se pinta.
+  // El béisbol y los juegos, discretos: solo sin filtro (quien busca algo concreto no
+  // vino a jugar), y en el teléfono plegados.
   const pausa =
-    !cargando && status === "success" && pieces.length && !isFiltered ? (
-      // Una sola sección para las dos cosas: como dos secciones, la
-      // regla `.se-section + .se-section` las pegaba (4 px) y el aire caía todo
-      // debajo. Ahora el ritmo es 48 / 20 / 48.
-      <section className="se-section se-pausa-franja" aria-label={t("portada.pausa.region")}>
-        <div className="se-container">
-          <MarcadorLvbp />
-          <BannerDeJuegos />
-        </div>
-      </section>
-    ) : null;
+    !cargando && status === "success" && pieces.length && !isFiltered ? <PausaPortada /> : null;
 
   return (
     <main className="se-blog se-portada" role="main">
@@ -413,22 +396,19 @@ export const Home = () => {
       ) : null}
 
       {cargando ? null : (
-        <AperturaPortada
+        <PrimeraPlana
           principal={apertura.principal}
           secundarias={apertura.secundarias}
           fijada={apertura.fijada}
+          editorial={isFiltered ? null : editorialDelDia}
+          analisis={analisis}
+          recientes={pieces.filter((p) => !enApertura.has(p.id))}
         />
       )}
 
-      {cargando || isFiltered ? null : (
-        <FranjaPortada analisis={franja.analisis} />
-      )}
-
       {/* Si no hay bloque de noticias, el béisbol y los juegos van aquí, bajo la
-          franja; si lo hay, van detrás de él (ver el mapa de bloques). */}
+          primera plana; si lo hay, van detrás de él. */}
       {hayNoticias ? null : pausa}
-
-      {cargando || hayNoticias ? null : <EditorialDelDia pieza={editorialDelDia} />}
 
       {(cargando ? [] : blocks).map(({ formatoApi, items, total }) => (
         <Fragment key={formatoApi}>
@@ -436,7 +416,6 @@ export const Home = () => {
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}
             to={formatoApi === "alpunto" ? "/audiovisual" : rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
-            tono={formatoApi === "alpunto" ? "oscuro" : undefined}
           >
             {LAYOUTS[formatoApi](items, { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
           </FormatSection>
@@ -445,11 +424,9 @@ export const Home = () => {
               y el cliente pidio lo que decia la maqueta: misma retícula que una
               pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
-          {/* El béisbol y los juegos, detrás de las noticias: antes iban
-              encima de la apertura, y un juego delante hacía que el sitio pareciera de
-              juegos antes que de prensa. Y detrás de ellos, la editorial del día. */}
+          {/* El béisbol y los juegos, detrás de las noticias: un juego delante hacía
+              que el sitio pareciera de juegos antes que de prensa. */}
           {formatoApi === "noticia" ? pausa : null}
-          {formatoApi === "noticia" ? <EditorialDelDia pieza={editorialDelDia} /> : null}
           {/* La banda grande, detrás de Editorial (o de Artículos si no hay
               Editorial): detrás de Artículos, que ya lleva su ficha, eran dos anuncios
               en la misma pantalla. */}

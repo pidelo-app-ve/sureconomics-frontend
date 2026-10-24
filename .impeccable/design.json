@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T13:00:00Z",
+  "title": "Design System: SurEconomics",
+  "extensions": {
+    "scope": "La paleta de prensa se aplica dentro de .se-publico (Layout.jsx), que redefine --color-paper, --color-ink, --color-cream, --se-black, --color-hairline y --color-hairline-dark hacia --papel, --tinta y --filete/--filete-fuerte. El panel de la redacción conserva su aspecto propio.",
+    "colorMeta": {
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#f9f8f6",
+        "tonalRamp": [
+          "oklch(15% 0.003 84)",
+          "oklch(25% 0.003 84)",
+          "oklch(35% 0.003 84)",
+          "oklch(45% 0.003 84)",
+          "oklch(55% 0.003 84)",
+          "oklch(65% 0.003 84)",
+          "oklch(80% 0.003 84)",
+          "oklch(98% 0.003 84)"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#111827",
+        "tonalRamp": [
+          "oklch(15% 0.032 265)",
+          "oklch(21% 0.032 265)",
+          "oklch(35% 0.032 265)",
+          "oklch(45% 0.032 265)",
+          "oklch(55% 0.032 265)",
+          "oklch(65% 0.032 265)",
+          "oklch(80% 0.02 265)",
+          "oklch(95% 0.01 265)"
+        ]
+      },
+      "filete": {
+        "role": "neutral",
+        "displayName": "Filete",
+        "canonical": "#ddd8cc",
+        "tonalRamp": [
+          "oklch(15% 0.017 87)",
+          "oklch(25% 0.017 87)",
+          "oklch(35% 0.017 87)",
+          "oklch(45% 0.017 87)",
+          "oklch(55% 0.017 87)",
+          "oklch(65% 0.017 87)",
+          "oklch(80% 0.017 87)",
+          "oklch(89% 0.017 87)"
+        ]
+      },
+      "filete-fuerte": {
+        "role": "neutral",
+        "displayName": "Filete fuerte",
+        "canonical": "#c4bcab",
+        "tonalRamp": [
+          "oklch(15% 0.024 85)",
+          "oklch(25% 0.024 85)",
+          "oklch(35% 0.024 85)",
+          "oklch(45% 0.024 85)",
+          "oklch(55% 0.024 85)",
+          "oklch(65% 0.024 85)",
+          "oklch(80% 0.024 85)",
+          "oklch(95% 0.012 85)"
+        ]
+      },
+      "verde-cardin": {
+        "role": "primary",
+        "displayName": "Verde Cardin",
+        "canonical": "#003318",
+        "tonalRamp": [
+          "oklch(15% 0.04 155)",
+          "oklch(27.5% 0.06 155)",
+          "oklch(35% 0.07 155)",
+          "oklch(45% 0.08 155)",
+          "oklch(55% 0.08 155)",
+          "oklch(65% 0.07 155)",
+          "oklch(80% 0.05 155)",
+          "oklch(95% 0.02 155)"
+        ]
+      },
+      "rojo-cattail": {
+        "role": "secondary",
+        "displayName": "Rojo Cattail",
+        "canonical": "#b9532a",
+        "tonalRamp": [
+          "oklch(15% 0.05 42)",
+          "oklch(25% 0.08 42)",
+          "oklch(35% 0.11 42)",
+          "oklch(48% 0.13 42)",
+          "oklch(56% 0.14 42)",
+          "oklch(65% 0.12 42)",
+          "oklch(80% 0.07 42)",
+          "oklch(95% 0.02 42)"
+        ]
+      },
+      "rojo-cattail-hondo": {
+        "role": "secondary",
+        "displayName": "Rojo Cattail hondo (hover)",
+        "canonical": "#9d4423"
+      },
+      "pizarra": {
+        "role": "neutral",
+        "displayName": "Pizarra",
+        "canonical": "#3d3d3d",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(25% 0 0)",
+          "oklch(36% 0 0)",
+          "oklch(45% 0 0)",
+          "oklch(55% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "gris-dim": {
+        "role": "neutral",
+        "displayName": "Gris Dim",
+        "canonical": "#6b6b6b",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(25% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(45% 0 0)",
+          "oklch(52% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "subida": {
+        "role": "tertiary",
+        "displayName": "Subida",
+        "canonical": "#0f7a3d",
+        "tonalRamp": [
+          "oklch(15% 0.05 150)",
+          "oklch(25% 0.08 150)",
+          "oklch(35% 0.1 150)",
+          "oklch(45% 0.11 150)",
+          "oklch(51% 0.12 150)",
+          "oklch(65% 0.12 150)",
+          "oklch(80% 0.08 150)",
+          "oklch(95% 0.03 150)"
+        ]
+      },
+      "bajada": {
+        "role": "tertiary",
+        "displayName": "Bajada",
+        "canonical": "#c1272d",
+        "tonalRamp": [
+          "oklch(15% 0.06 25)",
+          "oklch(25% 0.1 25)",
+          "oklch(35% 0.14 25)",
+          "oklch(45% 0.17 25)",
+          "oklch(52% 0.19 25)",
+          "oklch(65% 0.15 25)",
+          "oklch(80% 0.08 25)",
+          "oklch(95% 0.02 25)"
+        ]
+      },
+      "blanco": {
+        "role": "neutral",
+        "displayName": "Blanco",
+        "canonical": "#ffffff"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Titular de apertura",
+        "purpose": "El titular de la noticia que manda en la primera plana."
+      },
+      "headline": {
+        "displayName": "Título de sección",
+        "purpose": "Nombre de cada sección bajo su regla de 2 px; título del boletín."
+      },
+      "title-editorial": {
+        "displayName": "Titular editorial",
+        "purpose": "La editorial del día en la columna de opinión."
+      },
+      "title": {
+        "displayName": "Titular de tarjeta",
+        "purpose": "Tarjetas de prensa: artículos, informes, Al punto."
+      },
+      "title-columna": {
+        "displayName": "Cabecera de columna",
+        "purpose": "Opinión, Monedas de la región, rótulo del módulo plegable."
+      },
+      "title-sm": {
+        "displayName": "Titular secundario",
+        "purpose": "Las tres secundarias bajo la principal y los análisis con firma."
+      },
+      "titular-lista": {
+        "displayName": "Titular de lista",
+        "purpose": "Última hora y Lo más leído."
+      },
+      "fecha": {
+        "displayName": "Fecha de la edición",
+        "fontStyle": "italic",
+        "purpose": "La fecha larga sobre el doble filete de 3 px, en la cursiva real de Newsreader (newsreader-italic-latin.woff2)."
+      },
+      "body": {
+        "displayName": "Lectura",
+        "purpose": "Texto corrido."
+      },
+      "bajada": {
+        "displayName": "Bajada",
+        "purpose": "Entrada de la principal, máximo 62 ch."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Lugar · fecha · firma bajo el titular."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Solo la pastilla de Última hora y los botones; mayúsculas."
+      },
+      "cifras": {
+        "displayName": "Cifras",
+        "purpose": "Monedas, variaciones, horas, cinta de mercados, páginas del PDF."
+      },
+      "firma-editorial": {
+        "displayName": "Firma editorial",
+        "fontStyle": "italic",
+        "purpose": "«Editorial del día» bajo el titular editorial: Newsreader cursiva real, verde Cardin."
+      },
+      "firma": {
+        "displayName": "Firma de análisis",
+        "fontStyle": "italic",
+        "purpose": "«Por …» bajo los análisis y la principal: Host Grotesk cursiva real, pizarra."
+      }
+    },
+    "rules": {
+      "pesos": [
+        {
+          "name": "filete",
+          "value": "1px solid #ddd8cc",
+          "purpose": "Entre piezas, columnas y filas de tabla."
+        },
+        {
+          "name": "regla-seccion",
+          "value": "2px solid #111827",
+          "purpose": "Sobre el título de cada sección."
+        },
+        {
+          "name": "regla-columna",
+          "value": "1px solid #111827",
+          "purpose": "Sobre la cabecera de una columna o de un módulo."
+        },
+        {
+          "name": "doble-fecha",
+          "value": "3px double #111827",
+          "purpose": "Bajo la fecha de la edición."
+        }
+      ]
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "barrido-apertura",
+        "value": "clip-path inset(0 100% 0 0) -> inset(0) 900ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "La foto nueva de la principal barre a la anterior."
+      },
+      {
+        "name": "entrada-texto",
+        "value": "opacity 0 + translateY(8px) -> none 520ms cubic-bezier(0.23, 1, 0.32, 1) 120ms",
+        "purpose": "El titular de la principal entra con la foto."
+      },
+      {
+        "name": "latido-vivo",
+        "value": "scale(1) opacity 0.55 -> scale(3.2) opacity 0, 1.8s cubic-bezier(0.23, 1, 0.32, 1) infinite",
+        "purpose": "Punto de Última hora mientras lo primero tiene menos de una hora."
+      },
+      {
+        "name": "ease-out-quint",
+        "value": "200ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Flecha de «Ver todas», chevrón del módulo plegable."
+      },
+      {
+        "name": "pulsacion",
+        "value": "scale(0.96) 140ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Enlaces de la barra inferior al pulsar."
+      },
+      {
+        "name": "menu",
+        "value": "0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Cajón del menú."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "telefono",
+        "value": "max-width: 759px"
+      },
+      {
+        "name": "tableta",
+        "value": "960px"
+      },
+      {
+        "name": "carril-noticias",
+        "value": "1024px"
+      },
+      {
+        "name": "escritorio",
+        "value": "1200px"
+      },
+      {
+        "name": "cabecera-escritorio",
+        "value": "1240px"
+      }
+    ],
+    "fontFaces": [
+      "Host Grotesk normal y cursiva 300-800",
+      "Newsreader normal 400-700",
+      "Newsreader cursiva 400-700 (latín básico)",
+      "JetBrains Mono normal 400-700"
+    ]
+  },
+  "components": [
+    {
+      "name": "Cabecera de sección",
+      "kind": "custom",
+      "refersTo": "headline",
+      "description": "Regla de tinta de 2 px, el nombre en Newsreader y «Ver todas →» al otro extremo.",
+      "html": "<div class=\"ds-seccion\"><h2 class=\"ds-seccion__titulo\">Noticias</h2><a class=\"ds-seccion__mas\" href=\"#\">Ver todas</a></div>",
+      "css": ".ds-seccion { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-top: 10px; border-top: 2px solid var(--tinta, #111827); background: var(--papel, #f9f8f6); color: var(--tinta, #111827); } .ds-seccion__titulo { margin: 0; font-family: var(--titular, 'Newsreader', Georgia, serif); font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.25rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.015em; } .ds-seccion__mas { font-family: 'Host Grotesk', sans-serif; font-size: 0.875rem; font-weight: 600; color: var(--tinta, #111827); text-decoration: none; } .ds-seccion__mas::after { content: '→'; display: inline-block; margin-left: 0.25em; transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-seccion__mas:hover { color: var(--marca-verde, #003318); } .ds-seccion__mas:hover::after { transform: translateX(3px); } .ds-seccion__mas:focus-visible { outline: 2px solid var(--marca-verde, #003318); outline-offset: 2px; }"
+    },
+    {
+      "name": "Última hora",
+      "kind": "custom",
+      "refersTo": "pastilla-ultima-hora",
+      "description": "Pastilla con punto vivo y lista de titulares con hora en monoespaciada roja, entre filetes de 1 px.",
+      "html": "<section class=\"ds-uh\"><a class=\"ds-uh__pastilla\" href=\"#\"><span class=\"ds-uh__punto\"></span>Última hora</a><ol class=\"ds-uh__lista\"><li><time>11:02</time><a href=\"#\">Brasil eleva su tasa de interés básica a 11,25 % para frenar la inflación</a></li><li><time>10:51</time><a href=\"#\">PDVSA retoma envíos de crudo a India con licencia específica</a></li><li><time>10:19</time><a href=\"#\">Tipo de cambio oficial venezolano se sitúa en 36,52 bolívares</a></li></ol></section>",
+      "css": ".ds-uh { max-width: 320px; background: var(--papel, #f9f8f6); color: var(--tinta, #111827); } .ds-uh__pastilla { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 9px; border: 1px solid var(--tinta, #111827); border-radius: 2px; font-family: 'Host Grotesk', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta, #111827); text-decoration: none; } .ds-uh__pastilla:hover { border-color: var(--marca-verde, #003318); color: var(--marca-verde, #003318); } .ds-uh__pastilla:focus-visible { outline: 2px solid var(--marca-verde, #003318); outline-offset: 2px; } .ds-uh__punto { position: relative; width: 7px; height: 7px; border-radius: 50%; background: #0f7a3d; } .ds-uh__punto::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: #0f7a3d; animation: ds-late 1.8s cubic-bezier(0.23, 1, 0.32, 1) infinite; } @keyframes ds-late { from { transform: scale(1); opacity: 0.55; } to { transform: scale(3.2); opacity: 0; } } @media (prefers-reduced-motion: reduce) { .ds-uh__punto::after { animation: none; } } .ds-uh__lista { margin: 10px 0 0; padding: 0; list-style: none; } .ds-uh__lista li { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--filete, #ddd8cc); } .ds-uh__lista li:first-child { border-top: 0; padding-top: 4px; } .ds-uh__lista time { padding-top: 2px; font-family: var(--cifras, 'JetBrains Mono', monospace); font-size: 0.75rem; font-variant-numeric: tabular-nums; color: var(--marca-rojo, #b9532a); } .ds-uh__lista a { font-family: var(--titular, 'Newsreader', Georgia, serif); font-size: 1rem; font-weight: 500; line-height: 1.3; color: var(--tinta, #111827); text-decoration: none; } .ds-uh__lista a:hover { text-decoration: underline; text-underline-offset: 3px; }"
+    },
+    {
+      "name": "Tarjeta de prensa",
+      "kind": "card",
+      "refersTo": "tarjeta-prensa",
+      "description": "Sin caja: filete de 1 px, foto 16:9, titular serif y pie «Tema · Lugar · fecha».",
+      "html": "<article class=\"ds-tarjeta\"><div class=\"ds-tarjeta__foto\"></div><h3 class=\"ds-tarjeta__titulo\"><a href=\"#\">Litio: por qué industrializar no es lo mismo que exportar</a></h3><p class=\"ds-tarjeta__pie\"><b>Bolivia</b><span>6 ago 2026</span></p></article>",
+      "css": ".ds-tarjeta { max-width: 300px; padding-top: 12px; border-top: 1px solid var(--filete, #ddd8cc); background: var(--papel, #f9f8f6); color: var(--tinta, #111827); } .ds-tarjeta__foto { aspect-ratio: 16 / 9; background: rgba(0, 51, 24, 0.08); } .ds-tarjeta__titulo { margin: 12px 0 6px; font-family: var(--titular, 'Newsreader', Georgia, serif); font-size: 1.25rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; } .ds-tarjeta__titulo a { color: inherit; text-decoration: none; } .ds-tarjeta__titulo a:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-tarjeta__titulo a:focus-visible { outline: 2px solid var(--marca-verde, #003318); outline-offset: 2px; } .ds-tarjeta__pie { display: flex; gap: 8px; margin: 0; font-family: 'Host Grotesk', sans-serif; font-size: 0.8125rem; color: #3d3d3d; } .ds-tarjeta__pie b { color: var(--tinta, #111827); } .ds-tarjeta__pie span::before { content: '·'; margin-right: 8px; }"
+    },
+    {
+      "name": "Tabla de monedas",
+      "kind": "custom",
+      "refersTo": "cifras",
+      "description": "Cifras en monoespaciada tabular, decimales en columna, variación en verde o rojo de mercado.",
+      "html": "<table class=\"ds-monedas\"><tbody><tr><th>VES</th><td>36,5200</td><td class=\"ds-up\">+0,17%</td></tr><tr><th>MXN</th><td>18,4053</td><td class=\"ds-down\">-0,12%</td></tr><tr><th>BRL</th><td>5,6077</td><td class=\"ds-down\">-0,05%</td></tr><tr><th>CLP</th><td>938,10</td><td>—</td></tr></tbody></table>",
+      "css": ".ds-monedas { width: 280px; border-collapse: collapse; background: var(--papel, #f9f8f6); color: var(--tinta, #111827); font-family: var(--cifras, 'JetBrains Mono', monospace); font-size: 0.8125rem; font-variant-numeric: tabular-nums; } .ds-monedas tr + tr { border-top: 1px solid var(--filete, #ddd8cc); } .ds-monedas th, .ds-monedas td { padding: 7px 0; } .ds-monedas th { text-align: left; font-weight: 600; } .ds-monedas td { text-align: right; } .ds-monedas td:last-child { width: 5.5em; color: #3d3d3d; } .ds-monedas .ds-up { color: #0f7a3d; } .ds-monedas .ds-down { color: #c1272d; }"
+    },
+    {
+      "name": "Insignias de informe",
+      "kind": "chip",
+      "refersTo": "insignia-pdf",
+      "description": "PDF con páginas en rojo Cattail y mono; «Exclusivo para registrados» solo con borde de tinta.",
+      "html": "<p class=\"ds-insignias\"><span class=\"ds-insignia ds-insignia--pdf\">PDF · 24 págs.</span><span class=\"ds-insignia\">Exclusivo para registrados</span></p>",
+      "css": ".ds-insignias { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; } .ds-insignia { display: inline-flex; align-items: center; min-height: 22px; padding: 0 7px; border: 1px solid var(--tinta, #111827); border-radius: 0; font-family: 'Host Grotesk', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--tinta, #111827); background: var(--papel, #f9f8f6); } .ds-insignia--pdf { font-family: var(--cifras, 'JetBrains Mono', monospace); font-size: 0.6875rem; font-weight: 500; border-color: var(--marca-rojo, #b9532a); background: var(--marca-rojo, #b9532a); color: #ffffff; }"
+    },
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "boton-primario",
+      "description": "La única llamada rellena de una zona: Registrarse, Únase al boletín.",
+      "html": "<button class=\"ds-btn\">Registrarse</button>",
+      "css": ".ds-btn { padding: 11px 20px; border: 1px solid var(--marca-rojo, #b9532a); border-radius: 2px; background: var(--marca-rojo, #b9532a); color: #ffffff; font-family: 'Host Grotesk', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease; } .ds-btn:hover { background: #9d4423; border-color: #9d4423; } .ds-btn:focus-visible { outline: 2px solid var(--marca-rojo, #b9532a); outline-offset: 2px; } .ds-btn:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Barra inferior",
+      "kind": "nav",
+      "refersTo": "barra-inferior-enlace",
+      "description": "Teléfono (< 760 px): cuatro accesos sobre papel con filete fuerte encima; activo en verde Cardin.",
+      "html": "<nav class=\"ds-barra\"><a href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M4 5.5h12.5v13H6a2 2 0 0 1-2-2v-11ZM16.5 9H20v7.5a2 2 0 0 1-2 2h-1.5M7 9h6.5M7 12h6.5M7 15h4\"/></svg><span>Portada</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M3.5 19.5h17M4.5 15l4.5-4.5 3.5 3 6.5-7M15.5 6.5H19V10\"/></svg><span>Mercados</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M6.5 3.5h7.5l4 4v13h-11.5v-17ZM14 3.5v4h4M9.5 12h5M9.5 15.5h5\"/></svg><span>Informes</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path d=\"M10.5 4.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12ZM15 15l4.5 4.5\"/></svg><span>Buscar</span></a></nav>",
+      "css": ".ds-barra { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 390px; border-top: 1px solid var(--filete-fuerte, #c4bcab); background: var(--papel, #f9f8f6); } .ds-barra a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; font-family: 'Host Grotesk', sans-serif; font-size: 0.6875rem; font-weight: 600; color: #3d3d3d; text-decoration: none; transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-barra svg path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } .ds-barra a[aria-current='page'] { color: var(--marca-verde, #003318); } .ds-barra a[aria-current='page'] svg path { stroke-width: 2; } .ds-barra a:active { transform: scale(0.96); } .ds-barra a:focus-visible { outline: 2px solid var(--marca-verde, #003318); outline-offset: -4px; }"
+    },
+    {
+      "name": "Módulo plegable",
+      "kind": "custom",
+      "refersTo": "title-columna",
+      "description": "Béisbol y juegos: un details bajo filete de tinta, abierto en escritorio y plegado en el teléfono.",
+      "html": "<details class=\"ds-plegable\" open><summary><span>Béisbol y juegos</span><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\"><path d=\"m6 9 6 6 6-6\"/></svg></summary><p>Marcador de la LVBP y la franja de juegos.</p></details>",
+      "css": ".ds-plegable { border-top: 1px solid var(--tinta, #111827); background: var(--papel, #f9f8f6); color: var(--tinta, #111827); } .ds-plegable summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 8px 0; font-family: var(--titular, 'Newsreader', Georgia, serif); font-size: 1.125rem; font-weight: 600; list-style: none; cursor: pointer; } .ds-plegable summary::-webkit-details-marker { display: none; } .ds-plegable svg path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; } .ds-plegable svg { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1); } .ds-plegable[open] svg { transform: rotate(180deg); } .ds-plegable summary:focus-visible { outline: 2px solid var(--marca-verde, #003318); outline-offset: 2px; } .ds-plegable p { margin: 0 0 12px; font-family: 'Host Grotesk', sans-serif; font-size: 0.875rem; color: #3d3d3d; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La primera plana",
+    "overview": "La parte pública de SurEconomics se compone como la primera plana de un diario financiero (la familia de FT, Bloomberg, WSJ, DF SUD): papel cálido, tinta casi negra, titulares en serif periodística y cifras en monoespaciada. La jerarquía la dicen el cuerpo del titular y el peso de los filetes, no las cajas, los fondos de color ni las sombras. Una pieza se separa de la siguiente con un filete de 1 px; una sección empieza bajo una regla de tinta de 2 px; la edición del día se fecha sobre un doble filete de 3 px.\n\nLa densidad es de periódico: tres columnas en escritorio, listas apretadas con hora delante del titular, tablas de cifras alineadas al decimal. En el teléfono todo se apila en el mismo orden de lectura, con una cabecera fija de 52 px y una barra de cuatro accesos abajo. El verde Cardin es el único tono profundo y se reserva para la cabecera, el boletín y el pie; el resto de la página es papel.\n\nLa paleta de prensa vive solo dentro de `.se-publico` (el marco de `Layout.jsx`): ahí se redefinen `--color-paper`, `--color-ink` y `--color-hairline` hacia `--papel`, `--tinta` y `--filete`. El panel de la redacción comparte los nombres de los tokens pero conserva su aspecto propio (blanco, negro de marca, velos en `rgba`); este documento no lo describe.",
+    "keyCharacteristics": [
+      "Papel cálido y tinta, sin tarjetas con caja ni sombras.",
+      "Tres pesos de regla con significado fijo: 1 px entre piezas, 2 px de tinta sobre la sección, 3 px doble bajo la fecha.",
+      "Newsreader para titulares, Host Grotesk para cuerpo e interfaz, JetBrains Mono solo para cifras y horas.",
+      "Verde Cardin como único tono profundo; verde y rojo de mercado solo en cifras.",
+      "Esquinas rectas; 2 px como máximo en pastillas y botones."
+    ],
+    "rules": [
+      {
+        "name": "La Regla del Verde Único",
+        "body": "El verde Cardin es la única superficie profunda: cabecera, boletín y pie. Ninguna sección se pinta de otro color de fondo.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de las Cifras",
+        "body": "El verde de subida y el rojo de bajada solo pintan números de mercado (y el piloto vivo). No se usan para destacar texto, fondos ni botones.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Serif que Manda",
+        "body": "Todo lo que es un titular va en Newsreader; todo lo que es interfaz o lectura, en Host Grotesk. Un titular en la Grotesk es un error de jerarquía.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Decimal",
+        "body": "JetBrains Mono es para datos que se comparan en columna (monedas, variaciones, horas, páginas de un PDF). No se usa para rótulos ni texto pequeño decorativo.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla del Papel Plano",
+        "body": "Nada flota. Si un bloque necesita separarse, gana un filete o una regla, nunca una sombra, un fondo gris o un levantamiento al pasar el ratón.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Regla de los Tres Pesos",
+        "body": "1 px de filete entre piezas y columnas; 2 px de tinta sobre el título de una sección (1 px de tinta sobre la cabecera de una columna o de un módulo); 3 px de doble filete de tinta bajo la fecha de la edición. Cada peso significa una sola cosa; ninguna regla se dobla con otra (bajo la fecha, la primera fila no repite regla; bajo el título de sección, la lista no lleva la suya).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** separar piezas con un filete de 1 px en `filete` y abrir cada sección con una regla de tinta de 2 px.",
+      "**Do** escribir cada titular en Newsreader 600 y cada cifra de mercado u hora en JetBrains Mono con numerales tabulares.",
+      "**Do** poner el lugar y la fecha debajo del titular («Venezuela · 6 ago 2026»), con el lugar en negrita de tinta.",
+      "**Do** reservar el verde Cardin para cabecera, boletín, pie y estados activos.",
+      "**Do** pintar subidas y bajadas solo en las cifras, con `subida` y `bajada`.",
+      "**Do** desactivar el barrido, la entrada del texto y el latido con `prefers-reduced-motion`.",
+      "**Do** mantener la paleta de prensa dentro de `.se-publico`; el panel conserva su aspecto."
+    ],
+    "donts": [
+      "**Don't** meter piezas en tarjetas con borde gris, fondo propio o esquinas de más de 2 px.",
+      "**Don't** usar sombras ni levantar bloques al pasar el ratón.",
+      "**Don't** pintar el fondo de una sección con un color propio; el verde Cardin es la única superficie profunda.",
+      "**Don't** colocar la etiqueta del tema encima del titular.",
+      "**Don't** poner un titular en Host Grotesk ni un rótulo en JetBrains Mono.",
+      "**Don't** apilar dos reglas donde una ya separa."
+    ]
+  }
+}

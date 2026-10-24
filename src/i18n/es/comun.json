@@ -40,6 +40,12 @@
     "alPuntoHint": "Al punto: entrevistas y podcast",
     "juegos": "Juegos",
     "buscar": "Buscar",
+    "barra": {
+      "region": "Accesos rápidos",
+      "portada": "Portada",
+      "mercados": "Mercados",
+      "informes": "Informes"
+    },
     "cerrarBuscador": "Cerrar el buscador",
     "readerAuth": "Acceso de lectores",
     "cuentaLector": "Cuenta de lector",

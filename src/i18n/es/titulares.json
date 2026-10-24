@@ -21,10 +21,7 @@
       }
     },
     "tarjeta": {
-      "etiqueta": "Última hora",
-      "leer": "Leer nota",
-      "pausar": "Pausar la última hora",
-      "region": "Última hora"
+      "etiqueta": "Última hora"
     },
     "hace": {
       "ahora": "Ahora",

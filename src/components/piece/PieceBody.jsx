@@ -415,15 +415,10 @@ Media.propTypes = { pieza: piezaShape().isRequired, conMarcador: PropTypes.bool 
  */
 export const PieceBody = ({ pieza, enCabecera }) => {
   const { t } = useIdioma();
-  // La fotografía y la entradilla suben a la cabecera, junto al titular, que es
-  // donde el brandbook las pone. `enCabecera` existe para que el cuerpo deje de
-  // dibujarlas sin que cada rama tenga que enterarse dos veces.
+  // La fotografía sube a la cabecera, junto al titular, cuando la hay. La entradilla
+  // va siempre en la cabecera (`Pieza.jsx`): repetirla aquí la sacaba dos veces en
+  // las piezas sin foto.
   const Portada = enCabecera ? () => null : Media;
-  const Entradilla = ({ html }) =>
-    !enCabecera && html ? (
-      <div className="se-piece__lead" dangerouslySetInnerHTML={{ __html: html }} />
-    ) : null;
-  Entradilla.propTypes = { html: PropTypes.string };
 
   // Se compara por `formatoApi`, la clave estable, y no por el nombre, que se traduce.
   if (pieza.formatoApi === "noticia") {
@@ -470,7 +465,6 @@ export const PieceBody = ({ pieza, enCabecera }) => {
     return (
       <>
         <Portada pieza={pieza} />
-        <Entradilla html={pieza.resumenHtml} />
         <Cuerpo html={pieza.cuerpo} />
         {pieza.tieneDocumento ? <DownloadGate pieza={pieza} /> : null}
       </>
@@ -482,7 +476,6 @@ export const PieceBody = ({ pieza, enCabecera }) => {
       <>
         <Portada pieza={pieza} />
         <OpinionBlock titulo={t("piezas.cuerpo.editorialDe")} />
-        <Entradilla html={pieza.entradaHtml} />
         <Cuerpo html={pieza.cuerpo} />
       </>
     );
@@ -495,7 +488,6 @@ export const PieceBody = ({ pieza, enCabecera }) => {
       {/* El artículo es el único que reserva el hueco aunque no traiga fotografía,
           pero solo cuando la portada se dibuja aquí. */}
       {enCabecera ? null : <Media pieza={pieza} conMarcador />}
-      <Entradilla html={pieza.resumenHtml} />
       <Cuerpo html={pieza.cuerpo} />
     </>
   );

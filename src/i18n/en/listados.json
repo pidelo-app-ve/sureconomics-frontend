@@ -27,7 +27,6 @@
         "titulo": "{titulo} — {marca}",
         "descripcion": "{marca} coverage of {titulo}."
       },
-      "kicker": "Explore",
       "todoElContenido": "All content",
       "union": " and ",
       "enLugar": "in {lugares}",

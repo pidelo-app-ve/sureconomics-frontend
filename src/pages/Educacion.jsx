@@ -81,7 +81,6 @@ export const Educacion = () => {
           el catálogo entero por debajo del pliegue. */}
       <section className="se-edu__portada">
         <div className="se-container">
-          <p className="se-edu__portada-kicker">{t("educacion.catalogo.kicker")}</p>
           <h1 className="se-edu__portada-titulo">{t("educacion.catalogo.titulo")}</h1>
           <p className="se-edu__portada-claim">{t("educacion.catalogo.claim")}</p>
 

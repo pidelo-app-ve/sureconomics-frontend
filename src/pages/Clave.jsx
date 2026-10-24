@@ -27,7 +27,6 @@ export const ClavePage = () => {
       <section className="se-section se-pausa">
         <div className="se-container se-pausa__caja se-pausa__caja--clave">
           <header className="se-pausa__cabeza">
-            <p className="se-pausa__kicker">{t("juegos.pausa.kicker")}</p>
             <h1 className="se-pausa__titulo">{t("juegos.clave.titulo")}</h1>
             <p className="se-pausa__entrada">{t("juegos.clave.entrada")}</p>
           </header>

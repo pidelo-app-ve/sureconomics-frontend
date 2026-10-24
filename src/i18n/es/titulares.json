@@ -18,6 +18,13 @@
       "entraron": {
         "one": "Entró {n} titular nuevo",
         "other": "Entraron {n} titulares nuevos"
+      },
+      "lateral": {
+        "region": "También en SurEconomics",
+        "resumen": "Lo importante de hoy",
+        "resumenTexto": "El resumen del día, cada mañana a las 7:00 (hora de Caracas).",
+        "monedas": "Monedas de la región",
+        "monedasTexto": "Doce monedas frente al dólar, con su fuente oficial y la variación del día."
       }
     },
     "tarjeta": {

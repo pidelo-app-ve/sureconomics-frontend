@@ -134,11 +134,11 @@ export const CuentaLoMio = () => {
                   </div>
 
                   <div className="se-mio__copy">
+                    <h3 className="se-mio__titulo">{m.titulo}</h3>
                     <p className="se-mio__kicker">
                       {nivel ? t("cuenta.loMio.nivel", { nivel: nivel.toLowerCase() }) : t("cuenta.loMio.modulo")}
                       {duracion ? ` · ${duracion}` : ""}
                     </p>
-                    <h3 className="se-mio__titulo">{m.titulo}</h3>
                     {m.resumen ? <p className="se-mio__resumen">{m.resumen}</p> : null}
 
                     <p className="se-mio__recibo">

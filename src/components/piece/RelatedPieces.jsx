@@ -24,11 +24,15 @@ export const RelatedPieces = ({ items }) => {
       <ul className="se-newslist">
         {items.map((p) => (
           <li key={p.slug} className="se-newslist__row">
-            <span className="se-newslist__geo">{geoPrincipal(p)}</span>
+            {/* El titular primero; el lugar y la fecha debajo, como en la portada. */}
             <Enlace to={rutaDePieza(p)} className="se-newslist__title">
               <TituloDePieza pieza={p} />
             </Enlace>
-            <time className="se-newslist__date">{p.fecha}</time>
+            <span className="se-newslist__meta">
+              <span className="se-newslist__geo">{geoPrincipal(p)}</span>
+              <span aria-hidden="true"> · </span>
+              <time className="se-newslist__date">{p.fecha}</time>
+            </span>
           </li>
         ))}
       </ul>

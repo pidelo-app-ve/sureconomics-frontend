@@ -48,6 +48,9 @@ export const TarjetaDeModulo = ({ modulo }) => {
         </span>
       ) : null}
 
+      <span className="se-modulo__titulo">{modulo.titulo}</span>
+
+      {/* El nivel y el precio, bajo el título: encima eran un antetítulo. */}
       <span className="se-modulo__cabeza">
         <span className="se-modulo__etiqueta">
           {modulo.gratuito ? t("educacion.tarjeta.cortesia") : nivel || t("educacion.comun.modulo")}
@@ -58,8 +61,6 @@ export const TarjetaDeModulo = ({ modulo }) => {
             : precioLegible(modulo.precio_centavos, modulo.moneda)}
         </span>
       </span>
-
-      <span className="se-modulo__titulo">{modulo.titulo}</span>
 
       {modulo.resumen ? (
         <span className="se-modulo__resumen">{modulo.resumen}</span>

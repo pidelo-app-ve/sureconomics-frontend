@@ -12,11 +12,12 @@
   align-items: center;
   gap: 18px;
   width: 100%;
-  padding: 18px 20px;
-  border: 1px solid #c3d3c0;
-  border-radius: 14px;
-  background: #e4eee2;
-  color: #1a1d1a;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--color-ink, #111827);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-ink, #111827);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -70,21 +71,12 @@
   gap: 6px;
 }
 
-.se-clave-pieza__kicker {
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--marca-verde, #003318);
-}
-
 .se-clave-pieza__titulo {
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.35rem);
-  font-weight: 800;
+  font-family: var(--titular, serif);
+  font-size: clamp(1.15rem, 1rem + 0.6vw, 1.375rem);
+  font-weight: 600;
   line-height: 1.15;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
@@ -97,14 +89,15 @@
 .se-clave-pieza__boton {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  margin-top: 4px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: var(--marca-verde, #003318);
-  color: #fff;
-  font-size: 0.875rem;
-  font-weight: 800;
+  margin-top: 2px;
+  color: var(--marca-verde, #003318);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.se-clave-pieza__boton::after {
+  content: "→";
+  margin-left: 0.35em;
 }
 
 .se-clave-pieza__cargando {
@@ -117,7 +110,6 @@
   .se-clave-pieza__invitacion {
     grid-template-columns: 1fr;
     gap: 12px;
-    padding: 16px;
   }
   .se-clave-pieza__celdas {
     grid-template-columns: repeat(5, 26px);

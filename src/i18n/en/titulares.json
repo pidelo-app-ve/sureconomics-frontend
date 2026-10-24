@@ -18,6 +18,13 @@
       "entraron": {
         "one": "{n} new headline added",
         "other": "{n} new headlines added"
+      },
+      "lateral": {
+        "region": "Also on SurEconomics",
+        "resumen": "Today's essentials",
+        "resumenTexto": "The day's summary, every morning at 7:00 (Caracas time).",
+        "monedas": "Regional currencies",
+        "monedasTexto": "Twelve currencies against the dollar, with their official source and the day's change."
       }
     },
     "tarjeta": {

@@ -27,7 +27,6 @@
         "titulo": "{titulo} — {marca}",
         "descripcion": "Contenido de {marca} sobre {titulo}."
       },
-      "kicker": "Explorar",
       "todoElContenido": "Todo el contenido",
       "union": " y ",
       "enLugar": "en {lugares}",

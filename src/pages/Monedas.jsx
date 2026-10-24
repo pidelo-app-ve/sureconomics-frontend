@@ -44,7 +44,6 @@ export const Monedas = () => {
       <section className="se-section">
         <div className="se-container">
           <header className="se-monedas__cabeza">
-            <p className="se-monedas__kicker">{t("monedas.kicker")}</p>
             <h1 className="se-monedas__titulo">{t("monedas.titulo")}</h1>
             <p className="se-monedas__entrada">{t("monedas.entrada")}</p>
           </header>

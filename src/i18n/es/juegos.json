@@ -271,7 +271,6 @@
         "mensaje": "¿Adivinas la palabra de hoy? La Clave de {marca}: {categoria}, {letras}, seis intentos."
       },
       "pieza": {
-        "kicker": "¿Leíste completo? La Clave",
         "titulo": "Adivina la palabra de esta pieza",
         "texto": "Una palabra que tiene que ver con lo que acabas de leer. Seis intentos.",
         "jugar": "Jugar"
@@ -289,7 +288,6 @@
         "titulo": "Un minuto de pausa: Vuela, guacamaya — {marca}",
         "descripcion": "Un juego de un minuto con siete vuelos sobre Venezuela, de Caracas a Canaima y un jefe que tira piedras. Cada día, el mismo vuelo para todos."
       },
-      "kicker": "Un minuto de pausa",
       "titulo": "Entre lectura y lectura, un vuelo",
       "entrada": "Cada día el vuelo cambia, y es el mismo para todos. Juegue, compare su resultado y vuelva a la lectura."
     },
@@ -298,7 +296,6 @@
         "titulo": "Juegos — {marca}",
         "descripcion": "Los juegos de {marca}: Vuela, guacamaya, un minuto de vuelo sobre Venezuela, y La Clave, la palabra del día. Un reto nuevo cada día, el mismo para todos."
       },
-      "kicker": "Entre lectura y lectura",
       "titulo": "Juegos",
       "entrada": "Retos cortos que cambian cada día y son los mismos para todos. Elija uno, juegue y compare su resultado.",
       "etiqueta": "Juegos de {marca}"

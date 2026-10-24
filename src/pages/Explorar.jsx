@@ -120,7 +120,6 @@ export const Explorar = () => {
       <section className="se-section se-articles__hero" aria-label={titulo}>
         <div className="se-container">
           <div className="se-articles__head">
-            <p className="se-articles__kicker">{t("listados.explorar.kicker")}</p>
             <h1 className="se-articles__title">{titulo}</h1>
             {status === "success" ? (
               <p className="se-text-body se-articles__lead">

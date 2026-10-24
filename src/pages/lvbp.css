@@ -23,23 +23,17 @@
 
 .se-lvbp-pagina__kicker {
   margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--marca-rojo);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--marca-verde);
 }
 
 .se-lvbp-pagina__titulo {
   margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
-  font-weight: 800;
+  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
   line-height: 1.05;
-  letter-spacing: -0.03em;
   text-wrap: balance;
-  color: var(--marca-verde);
+  color: var(--color-ink);
 }
 
 .se-lvbp-pagina__entrada {
@@ -56,9 +50,6 @@
 
 .se-lvbp-pagina__patrocinio--casa {
   margin: 0;
-  padding: 10px 14px;
-  border: 1px solid var(--color-hairline-dark);
-  border-radius: 10px;
   font-size: 0.8125rem;
   color: var(--color-slate);
   white-space: nowrap;
@@ -86,6 +77,8 @@
 }
 
 .se-lvbp-pagina__barra {
+  padding-top: 10px;
+  border-top: 2px solid var(--color-ink);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -95,19 +88,13 @@
 
 .se-lvbp-pagina__h2 {
   margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 1.5rem;
 }
 
-/* Los tres días, como pestañas en una pastilla. */
+/* Los tres días, como pestañas de texto: el elegido, subrayado en tinta. */
 .se-lvbp-pagina__dias {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgba(var(--se-tinte), 0.06);
+  gap: 1.25rem;
 }
 
 .se-lvbp-pagina__dia {
@@ -116,17 +103,18 @@
   align-items: center;
   gap: 1px;
   min-height: 44px;
-  padding: 5px 16px;
+  padding: 5px 0;
   border: 0;
-  border-radius: 999px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  color: var(--marca-verde);
+  color: var(--color-slate);
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.1;
   cursor: pointer;
-  transition: background 140ms ease-out, color 140ms ease-out;
+  transition: border-color 140ms ease-out, color 140ms ease-out;
 }
 
 .se-lvbp-pagina__dia-fecha {
@@ -136,8 +124,8 @@
 }
 
 .se-lvbp-pagina__dia--activo {
-  background: var(--marca-verde);
-  color: #ffffff;
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
 }
 
 .se-lvbp-pagina__dia:focus-visible {
@@ -147,7 +135,7 @@
 
 .se-lvbp-pagina__lista {
   display: grid;
-  gap: 12px;
+  gap: 0;
 }
 
 .se-lvbp-pagina__pie {
@@ -170,8 +158,8 @@
   align-items: center;
   gap: 6px;
   min-height: 40px;
-  padding: 0 12px;
-  border-radius: 999px;
+  padding: 0;
+  border-radius: 0;
   font-size: 0.8125rem;
   font-weight: 700;
   color: #0b6b3a;
@@ -180,7 +168,8 @@
 }
 
 .se-lvbp-pagina__compartir:hover {
-  background: rgba(37, 211, 102, 0.12);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .se-lvbp-pagina__icono {
@@ -204,14 +193,14 @@
 /* —— La tabla —— */
 .se-lvbp-pagina__tabla-caja {
   overflow-x: auto;
-  border: 1px solid var(--color-hairline-dark);
-  border-radius: 12px;
+  border-bottom: 1px solid var(--color-ink);
 }
 
 .se-lvbp-tabla {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -223,13 +212,10 @@
 }
 
 .se-lvbp-tabla thead th {
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--color-slate);
-  background: rgba(var(--se-tinte), 0.035);
 }
 
 .se-lvbp-tabla tbody tr {
@@ -243,7 +229,8 @@
 
 .se-lvbp-tabla__equipo {
   text-align: left !important;
-  padding-left: 10px !important;
+  padding-left: 0 !important;
+  font-family: var(--se-font-ui);
   font-weight: 600;
 }
 

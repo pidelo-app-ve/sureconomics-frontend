@@ -183,7 +183,6 @@ export const CuentaEntrar = () => {
   return (
     <main className="se-blog se-entrada" role="main">
       <div className="se-entrada__caja">
-        <p className="se-entrada__kicker">{t("cuenta.entrar.kicker")}</p>
         <h1 className="se-entrada__titulo">{t("cuenta.entrar.titulo")}</h1>
         <p className="se-entrada__lead">
           {t("cuenta.entrar.lead")}

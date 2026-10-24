@@ -1,240 +1,79 @@
 /*
- * Titulares en caliente: la tarjeta verde «Última hora» de la portada y la sección
- * /ultima-hora. Cada titular es título, resumen y su fuente, nada más (decisión de la
- * redacción). Colores de la marca: verde Cardin y rojo Cattail.
+ * «Última hora» (/ultima-hora). La columna de la portada tiene su hoja en
+ * `components/home/primeraPlana.css`.
  */
 
-/* —— La tarjeta de la portada (en la columna derecha de la apertura) —— */
-
-.se-apertura__lado {
-  display: flex;
-  flex-direction: column;
-  gap: var(--se-space-lg, 1.25rem);
-  min-width: 0;
-}
-
-.se-uh {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 1.1rem 1.15rem 1rem;
-  border-radius: 6px;
-  background: var(--marca-verde);
-  color: #fff;
-  overflow: hidden;
-}
-
-.se-uh__cabeza {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.se-uh__etiqueta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.36rem 0.7rem;
-  border-radius: 3px;
-  background: var(--marca-rojo);
-  font-family: var(--se-font-label);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
+/* El punto del título: verde y latiendo mientras lo más reciente tiene menos de una
+   hora; si no, no se pinta. */
 .se-uh__punto {
+  position: relative;
+  flex: 0 0 auto;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-slate-2);
 }
 
-/* Late solo con una noticia de menos de una hora: un pulso perpetuo deja de verse. */
-.se-uh__punto--reciente {
-  animation: se-uh-latido 1.6s ease-in-out infinite;
+.se-uh-seccion__titulo .se-uh__punto:not(.se-uh__punto--vivo) {
+  display: none;
 }
 
-@keyframes se-uh-latido {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+.se-uh__punto--vivo {
+  background: var(--color-green);
 }
 
-.se-uh__hace {
-  font-family: var(--se-font-ui);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.78);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* Tres líneas siempre: al rotar, la tarjeta no cambia de alto y no empuja la columna.
-   El marco recorta: el titular que cae sale por abajo y el nuevo entra por arriba. */
-.se-uh__marco {
-  position: relative;
-  overflow: hidden;
-  /* Aire para el rebote y para las letras con rabo (g, p) de la última línea. */
-  padding-block: 0.15rem;
-  margin-block: -0.15rem;
-}
-
-.se-uh__titulo {
-  margin: 0;
-  min-height: calc(1.3em * 3);
-  font-family: var(--se-font-display, var(--se-font-ui));
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1.3;
-  text-wrap: balance;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* El que entra: espera a que el otro se haya ido (sin eso se montan y no se lee
-   ninguno), baja deprisa, se pasa un poco y se asienta. El desenfoque al principio es
-   el «barrido» de la velocidad. */
-.se-uh__titulo--entra {
-  animation: se-uh-entra 440ms cubic-bezier(0.2, 0.9, 0.25, 1) 160ms both;
-}
-
-/* El que sale: cae acelerando y se borra. Encima del nuevo y fuera del flujo, para que
-   el marco mida lo mismo durante el cruce. Su duración es `CAIDA_MS` en el componente. */
-.se-uh__titulo--sale {
+.se-uh__punto--vivo::after {
+  content: "";
   position: absolute;
-  inset: 0.15rem 0 auto 0;
-  pointer-events: none;
-  animation: se-uh-cae 300ms cubic-bezier(0.45, 0, 0.9, 0.45) both;
-}
-
-@keyframes se-uh-entra {
-  0% { transform: translateY(-85%); opacity: 0; filter: blur(3px); }
-  55% { transform: translateY(7%); opacity: 1; filter: blur(0); }
-  78% { transform: translateY(-2%); }
-  100% { transform: translateY(0); opacity: 1; filter: none; }
-}
-
-@keyframes se-uh-cae {
-  0% { transform: translateY(0); opacity: 1; filter: none; }
-  60% { opacity: 0.15; }
-  100% { transform: translateY(110%); opacity: 0; filter: blur(2px); }
-}
-
-.se-uh__pie {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.se-uh__leer {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-family: var(--se-font-label);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #f3c7b2;
-  text-decoration: none;
-}
-.se-uh__leer:hover { color: #fff; text-decoration: underline; }
-.se-uh__leer:focus-visible,
-.se-uh__pausa:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-.se-uh__pausa {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  inset: 0;
   border-radius: 50%;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-}
-.se-uh__pausa:hover { background: rgba(255, 255, 255, 0.12); }
-
-.se-uh__barra {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--color-green);
+  animation: se-uh-late 1.8s cubic-bezier(0.23, 1, 0.32, 1) infinite;
 }
 
-.se-uh__progreso {
-  display: block;
-  height: 100%;
-  background: var(--marca-rojo);
-  transform-origin: left center;
-  /* Lo mismo que `ROTACION_MS` (lib/movimiento.js). */
-  animation: se-uh-avance 8s linear forwards;
-}
-.se-uh__progreso--quieto {
-  animation: none;
-  transform: scaleX(0);
-}
-
-@keyframes se-uh-avance {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-.se-uh__lista {
-  margin: 0;
-  padding: 0.6rem 0 0;
-  list-style: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-  display: grid;
-  gap: 0.45rem;
-  font-family: var(--se-font-ui);
-  font-size: 0.86rem;
-  line-height: 1.35;
+@keyframes se-uh-late {
+  from { transform: scale(1); opacity: 0.55; }
+  to { transform: scale(3); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-uh__punto,
-  .se-uh__punto--reciente { animation: none; }
-  .se-uh__progreso { animation: none; }
-  .se-uh__titulo--entra { animation: none; }
-  .se-uh__titulo--sale { display: none; }
+  .se-uh__punto--vivo::after { animation: none; }
 }
 
-/* —— La sección /ultima-hora —— */
+/* —— La sección —— */
 
 .se-uh-seccion {
   padding-block: var(--se-space-xl, 2rem) var(--se-space-2xl, 3rem);
 }
 
-.se-uh-seccion__caja {
-  max-width: 760px;
+.se-uh-seccion__rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-space-xl, 2rem);
+}
+
+@media (min-width: 1024px) {
+  .se-uh-seccion__rejilla {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: 0;
+  }
+
+  .se-uh-seccion__caja {
+    padding-right: clamp(24px, 3vw, 48px);
+    border-right: 1px solid var(--color-hairline);
+  }
 }
 
 .se-uh-seccion__titulo {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
   margin: 0 0 0.5rem;
-  font-family: var(--se-font-display, var(--se-font-ui));
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  line-height: 1.1;
-}
-
-.se-uh-seccion__titulo .se-uh__punto {
-  width: 0.6rem;
-  height: 0.6rem;
-  background: var(--marca-rojo);
+  font-family: var(--titular);
+  font-size: clamp(2rem, 1.4rem + 2vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
 }
 
 .se-uh-seccion__intro {
@@ -242,8 +81,58 @@
   max-width: 60ch;
   color: var(--color-slate);
   font-family: var(--se-font-ui);
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.5;
+}
+
+/* —— El lateral: el resumen del día y las monedas —— */
+.se-uh-lateral {
+  display: grid;
+  align-content: start;
+  gap: var(--se-space-lg, 1.5rem);
+}
+
+@media (min-width: 1024px) {
+  .se-uh-lateral {
+    position: sticky;
+    top: 100px;
+    padding-left: clamp(24px, 3vw, 48px);
+  }
+}
+
+.se-uh-lateral__bloque {
+  padding-top: 10px;
+  border-top: 2px solid var(--color-ink);
+}
+
+.se-uh-lateral__titulo {
+  margin: 0 0 6px;
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.se-uh-lateral__titulo a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-uh-lateral__titulo a::after {
+  content: " →";
+  font-family: var(--se-font-ui);
+  font-size: 0.875em;
+}
+
+.se-uh-lateral__titulo a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-uh-lateral__bloque p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-slate);
 }
 
 /* «Ver 3 titulares nuevos»: lo que llegó mientras se leía, sin empujar la lista
@@ -261,15 +150,13 @@
   margin: 0 0 1rem;
   padding: 0.55rem 1.15rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 2px;
   background: var(--marca-verde);
   color: #fff;
-  font-family: var(--se-font-label);
-  font-size: 0.85rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
   animation: se-uh-nuevos-entra 220ms ease-out;
 }
 
@@ -305,9 +192,9 @@
 }
 
 .se-uh-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 0 1rem;
   padding: 1.15rem 0;
   border-bottom: 1px solid rgba(0, 51, 24, 0.28);
   scroll-margin-top: 6rem;
@@ -338,11 +225,48 @@
   padding-left: 0.9rem;
 }
 
+.se-uh-item__cuando {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  margin: 0;
+  padding-top: 3px;
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--marca-rojo);
+}
+
+.se-uh-item__cuando span {
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  color: var(--color-slate);
+}
+
+.se-uh-item__cuerpo {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .se-uh-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+
+  .se-uh-item__cuando {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+}
+
 .se-uh-item__titulo {
   margin: 0;
-  font-family: var(--se-font-display, var(--se-font-ui));
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
   line-height: 1.3;
   text-wrap: balance;
   /* Subrayado verde pegado a las letras (pedido de la redacción). Es un
@@ -378,64 +302,6 @@
 }
 .se-uh-item__fuentes a:hover { color: var(--color-accent); }
 
-/* —— El rótulo de Última hora en la apertura ——
-   Una sola línea a lo ancho de la pantalla, pegada al pie del bloque verde, como el
-   rótulo inferior de un canal: la etiqueta roja, cuándo, el titular que cambia, «Leer»
-   y la pausa. La barra de progreso corre por su borde de abajo. */
-.se-uh--rotulo {
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-  min-height: 52px;
-  padding: 0 max(var(--se-content-gutter, 20px), calc((100vw - var(--se-container-max, 1440px)) / 2 + var(--se-content-gutter, 20px)));
-  border-radius: 0;
-  background: #00200f;
-}
-
-.se-uh--rotulo .se-uh__cabeza {
-  flex: 0 0 auto;
-  gap: 12px;
-}
-
-.se-uh--rotulo .se-uh__marco {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-}
-
-.se-uh--rotulo .se-uh__titulo {
-  min-height: 0;
-  -webkit-line-clamp: 1;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.se-uh--rotulo .se-uh__pie {
-  flex: 0 0 auto;
-  gap: 12px;
-}
-
-.se-uh--rotulo .se-uh__lista {
-  display: none;
-}
-
-@media (max-width: 700px) {
-  .se-uh--rotulo {
-    flex-wrap: wrap;
-    gap: 6px 12px;
-    padding-block: 12px;
-  }
-
-  .se-uh--rotulo .se-uh__marco {
-    flex-basis: 100%;
-    order: 3;
-  }
-
-  .se-uh--rotulo .se-uh__titulo {
-    -webkit-line-clamp: 2;
-  }
-
-  .se-uh--rotulo .se-uh__pie {
-    margin-left: auto;
-  }
+.se-uh-nuevos__boton .se-uh__punto {
+  background: #ffffff;
 }

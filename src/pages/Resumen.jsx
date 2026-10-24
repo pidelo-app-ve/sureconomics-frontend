@@ -83,7 +83,6 @@ export const Resumen = () => {
   return (
     <main className="se-section se-res" role="main">
       <div className="se-container se-res__caja">
-        <p className="se-res__eyebrow">{t("resumen.eyebrow")}</p>
         <h1 className="se-res__titulo">{t("resumen.titulo")}</h1>
         {datos ? <p className="se-res__fecha">{fechaLarga(datos.fecha, lang)}</p> : null}
 

@@ -249,10 +249,15 @@
 }
 
 /* —— La tarjeta grande, en /lvbp —— */
+/* En /lvbp, cada juego en su renglón de prensa: un filete encima, sin caja ni fondo. */
 .se-lvbp__juego--grande {
   gap: 10px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .se-lvbp__juego--grande .se-lvbp__fila {

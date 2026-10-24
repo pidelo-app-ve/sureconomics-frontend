@@ -55,7 +55,6 @@ export const Anunciate = () => {
     <main className="se-blog se-anunciate" role="main">
       <section className="se-section se-anunciate__hero">
         <div className="se-container">
-          <p className="se-anunciate__kicker">{t("paginas.anunciate.kicker")}</p>
           <h1 className="se-anunciate__title">{t("paginas.anunciate.titulo")}</h1>
           <p className="se-anunciate__lead">{t("paginas.anunciate.lead")}</p>
           <Enlace className="se-btn se-btn--primary" to={asuntoGeneral}>

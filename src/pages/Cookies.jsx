@@ -156,7 +156,6 @@ export const Cookies = () => {
     <main className="se-blog" role="main">
       <article className="se-legal">
           <header className="se-legal__cabeza">
-          <p className="se-legal__kicker">{t("paginas.cookies.kicker")}</p>
           <h1 className="se-legal__titulo">{t("paginas.cookies.titulo")}</h1>
           <p className="se-legal__entrada">{t("paginas.cookies.entrada", { marca: BRAND.name })}</p>
           <p className="se-legal__fecha">

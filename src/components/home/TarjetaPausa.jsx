@@ -112,7 +112,6 @@ export const TarjetaPausa = ({ suelta }) => {
         </span>
       </div>
       <div className="se-pausa-tarjeta__cuerpo">
-        <p className="se-pausa-tarjeta__kicker">{t("juegos.tarjetaPausa.kicker")}</p>
         <h2 id="pausa-tarjeta-titulo" className="se-pausa-tarjeta__titulo">
           {t("juegos.tarjetaPausa.titulo")}
         </h2>
@@ -195,7 +194,6 @@ export const TarjetaClave = () => {
         <CeldasClave />
       </span>
       <span className="se-clave-tarjeta__cuerpo">
-        <span className="se-clave-tarjeta__kicker">{t("juegos.clave.tarjeta.kicker")}</span>
         <span className="se-clave-tarjeta__titulo">{t("juegos.clave.tarjeta.titulo")}</span>
         <span className="se-clave-tarjeta__texto">{t("juegos.clave.tarjeta.texto")}</span>
         <span className="se-clave-tarjeta__boton">{t("juegos.clave.tarjeta.jugar")}</span>

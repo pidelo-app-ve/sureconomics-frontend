@@ -1,7 +1,6 @@
 {
   "monedas": {
     "titulo": "Monedas de la región",
-    "kicker": "Tipo de cambio oficial",
     "meta": {
       "titulo": "Monedas de América Latina hoy: dólar, bolívar, peso, real y más — {marca}",
       "descripcion": "Cuánto vale un dólar hoy en bolívares, pesos mexicanos, reales, soles, pesos colombianos, chilenos, argentinos y dominicanos, guaraníes y euros, según cada banco central."

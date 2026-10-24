@@ -197,15 +197,14 @@ export const Audiovisual = () => {
       <section className="se-section se-articles__hero" aria-labelledby="alpunto-titulo">
         <div className="se-container">
           <div className="se-articles__head">
-            <p className="se-articles__kicker">{t("listados.alPunto.kicker")}</p>
             {/* El mismo rótulo que el botón de la cabecera, en grande: el punto rojo de
                 grabación titilando delante del nombre. Así la página se reconoce como
-                el sitio al que lleva ese botón. */}
+                el sitio al que lleva ese botón. Debajo, qué es. */}
             <h1 id="alpunto-titulo" className="se-articles__title se-alpunto__titulo">
               <span className="se-alpunto__rec" aria-hidden="true" />
-              {/* El nombre propio de la sección, en mayúsculas: no se traduce. i18n:ignorar */}
-              AL PUNTO
+              {t("nav.alPunto")}
             </h1>
+            <p className="se-text-body se-articles__lead">{t("listados.alPunto.kicker")}</p>
           </div>
 
           <div className="se-alpunto__seg" role="group" aria-label={t("listados.alPunto.queVer")}>

@@ -981,12 +981,10 @@
   display: flex;
   align-items: baseline;
   gap: 0.45rem;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 /* «opcional» escrito, no deducible por la ausencia de un asterisco: nadie cuenta
    asteriscos, y el que falta es justo el que hace dudar. */

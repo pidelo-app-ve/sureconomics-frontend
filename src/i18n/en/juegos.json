@@ -271,7 +271,6 @@
         "mensaje": "Can you guess today's word? La Clave by {marca}: {categoria}, {letras}, six tries."
       },
       "pieza": {
-        "kicker": "Read it all? La Clave",
         "titulo": "Guess this piece's word",
         "texto": "A word that has to do with what you just read. Six tries.",
         "jugar": "Play"
@@ -289,7 +288,6 @@
         "titulo": "A one-minute break: Fly, macaw — {marca}",
         "descripcion": "A one-minute game with seven flights over Venezuela, from Caracas to Canaima, and a boss who throws stones. Every day, the same flight for everyone."
       },
-      "kicker": "A one-minute break",
       "titulo": "Between one read and the next, a flight",
       "entrada": "The flight changes every day, and it's the same for everyone. Play, compare your result and get back to reading."
     },
@@ -298,7 +296,6 @@
         "titulo": "Games — {marca}",
         "descripcion": "The {marca} games: Fly, macaw, a one-minute flight over Venezuela, and La Clave, the word of the day. A new challenge every day, the same for everyone."
       },
-      "kicker": "Between reads",
       "titulo": "Games",
       "entrada": "Short challenges that change every day and are the same for everyone. Pick one, play and compare your result.",
       "etiqueta": "{marca} games"

@@ -42,7 +42,6 @@ export const ClaveDeLaPieza = ({ pieza }) => {
             <span className="se-clave-pieza__celda se-clave-pieza__celda--bien">E</span>
           </span>
           <span className="se-clave-pieza__cuerpo">
-            <span className="se-clave-pieza__kicker">{t("juegos.clave.pieza.kicker")}</span>
             <span id="clave-pieza-titulo" className="se-clave-pieza__titulo">
               {t("juegos.clave.pieza.titulo")}
             </span>

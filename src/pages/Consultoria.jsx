@@ -17,7 +17,6 @@ export const Consultoria = () => {
         <div className="se-container">
           <div className="se-consulting__hero-grid">
             <div className="se-consulting__hero-copy">
-              <p className="se-consulting__kicker">{t("paginas.consultoria.kicker")}</p>
               <h1 className="se-consulting__title">{t("paginas.consultoria.titulo")}</h1>
               <p className="se-text-lead se-consulting__lead">{t("paginas.consultoria.lead")}</p>
 
@@ -76,7 +75,6 @@ export const Consultoria = () => {
               {SERVICES.map((s) => (
                 <article key={s.id} className="se-card se-card--service se-consulting__service-card">
                   <div className="se-card__body">
-                    <p className="se-consulting__service-meta">{t("paginas.consultoria.servicioMeta")}</p>
                     <h3 className="se-heading-card se-heading-card--small">{t(`paginas.consultoria.servicio.${s.id}.titulo`)}</h3>
                     <p className="se-card__excerpt se-text-body">{t(`paginas.consultoria.servicio.${s.id}.descripcion`)}</p>
                     <Enlace

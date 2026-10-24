@@ -25,7 +25,6 @@ export const Juegos = () => {
       <section className="se-section se-pausa">
         <div className="se-container se-pausa__caja se-pausa__caja--juegos">
           <header className="se-pausa__cabeza">
-            <p className="se-pausa__kicker">{t("juegos.lista.kicker")}</p>
             <h1 className="se-pausa__titulo">{t("juegos.lista.titulo")}</h1>
             <p className="se-pausa__entrada">{t("juegos.lista.entrada")}</p>
           </header>

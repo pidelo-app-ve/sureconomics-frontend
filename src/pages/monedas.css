@@ -1,6 +1,7 @@
 /* ═══ LA PÁGINA /monedas ═══
-   Una tabla de cotizaciones: cifras tabulares alineadas a la derecha, el código de la
-   moneda como etiqueta y la fuente al lado, que es lo que hace creíble una cifra. */
+   Una tabla de cotizaciones como la de un diario financiero: regla de tinta arriba,
+   filetes entre filas, cifras en la monoespaciada alineadas a la derecha y la fuente al
+   lado, que es lo que hace creíble una cifra. */
 
 .se-monedas__cabeza {
   display: grid;
@@ -9,25 +10,12 @@
   margin-bottom: var(--se-space-lg, 2rem);
 }
 
-.se-monedas__kicker {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--marca-rojo);
-}
-
 .se-monedas__titulo {
   margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
-  font-weight: 800;
+  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
   line-height: 1.05;
-  letter-spacing: -0.03em;
   text-wrap: balance;
-  color: var(--marca-verde);
+  color: var(--color-ink);
 }
 
 .se-monedas__entrada {
@@ -39,8 +27,8 @@
 
 .se-monedas__caja {
   overflow-x: auto;
-  border: 1px solid var(--color-hairline-dark);
-  border-radius: 12px;
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
   margin-bottom: var(--se-space-md, 1.5rem);
 }
 
@@ -59,13 +47,10 @@
 }
 
 .se-monedas__tabla thead th {
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--color-slate);
-  background: rgba(var(--se-tinte), 0.035);
 }
 
 .se-monedas__tabla tbody tr {
@@ -84,18 +69,11 @@
 }
 
 .se-monedas__codigo {
-  display: inline-grid;
-  place-items: center;
-  min-width: 44px;
-  height: 26px;
-  padding: 0 6px;
-  border: 1.5px solid var(--marca-verde);
-  border-radius: 5px;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: var(--marca-verde);
+  min-width: 3em;
+  font-family: var(--cifras);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 .se-monedas__pais {
@@ -104,9 +82,9 @@
 }
 
 .se-monedas__valor {
-  font-family: var(--se-font-heading);
-  font-size: 1.125rem;
-  font-weight: 800;
+  font-family: var(--cifras);
+  font-size: 1.0625rem;
+  font-weight: 600;
 }
 
 .se-monedas__sin,
@@ -117,7 +95,12 @@
 }
 
 .se-monedas__var {
-  font-weight: 700;
+  font-family: var(--cifras);
+  font-weight: 500;
+}
+
+.se-monedas__fecha {
+  font-family: var(--cifras);
 }
 
 .se-monedas__var--up { color: var(--color-green); }

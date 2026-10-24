@@ -184,7 +184,6 @@
       "metodologia": "Metodología",
       "metodologiaTexto": "Convertimos datos y señales cualitativas en entregables accionables: marco, escenarios, riesgos, próximos pasos.",
       "serviciosRegion": "Servicios de consultoría",
-      "servicioMeta": "Entregable · Confidencial · Executive-ready",
       "solicitar": "Solicitar conversación",
       "solicitarCon": "Solicitar conversación: {servicio}",
       "servicio": {
@@ -219,7 +218,6 @@
         "titulo": "Anúnciate aquí — {marca}",
         "descripcion": "Formatos publicitarios de SurEconomics: claros, medibles y sin interrumpir la lectura. Ocho maneras de llegar a quienes toman decisiones económicas en América Latina."
       },
-      "kicker": "Anúnciate aquí",
       "titulo": "Llegue a quienes toman decisiones económicas en la región",
       "lead": "Formatos claros, medibles y sin interrupciones forzadas: pensados para acompañar el contenido, no para competir con él. Nada de código de terceros, nada de rastreo del lector.",
       "solicitar": "Solicitar información",

@@ -119,7 +119,6 @@ export const QuienesSomos = () => {
         <div className="se-container">
           <div className="se-about__hero-grid">
             <div className="se-about__hero-copy">
-              <p className="se-about__kicker">{t("paginas.quienesSomos.kicker")}</p>
               <h1 className="se-about__title">
                 <BrandWordmark />
               </h1>

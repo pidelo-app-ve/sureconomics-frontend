@@ -23,15 +23,14 @@ export const FORMATO_META = {
     slug: "noticias",
     plural: "Noticias",
     /**
-     * How many fit on a listing page. A layout decision, so it lives here.
-     *
-     * Nine, not ten, since noticias became a grid: the grid is three columns wide,
-     * and ten left a last row with a single card in it and two empty slots beside.
+     * Cuántas caben en una página de listado. Es una decisión de maqueta, así que vive
+     * aquí. Doce: la rejilla tiene cuatro columnas en escritorio y tres en tableta, y
+     * doce llena las filas en las dos (con nueve quedaba una tarjeta suelta).
      */
-    porPagina: 9,
+    porPagina: 12,
   },
-  articulo: { slug: "articulos", plural: "Artículos", porPagina: 9 },
-  editorial: { slug: "editorial", plural: "Editorial", porPagina: 6 },
+  articulo: { slug: "articulos", plural: "Artículos", porPagina: 12 },
+  editorial: { slug: "editorial", plural: "Editorial", porPagina: 12 },
   entrevista: { slug: "entrevistas", plural: "Entrevistas", porPagina: 6 },
   informe: { slug: "informes", plural: "Informes", porPagina: 6 },
   podcast: { slug: "podcast", plural: "Podcast", porPagina: 6 },

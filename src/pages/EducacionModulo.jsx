@@ -138,13 +138,13 @@ export const EducacionModulo = () => {
                 página abre con el título y no con un precio sin contexto, y la lista
                 larga queda después de la decisión. */}
             <div className="se-modulo-detalle__cabecera">
+              <h1 className="se-modulo-detalle__titulo">{modulo.titulo}</h1>
               <p className="se-modulo-detalle__kicker">
                 {nivel
                   ? t("educacion.modulo.nivel", { nivel: nivel.toLowerCase() })
                   : t("educacion.comun.modulo")}
                 {duracion ? ` · ${duracion}` : ""}
               </p>
-              <h1 className="se-modulo-detalle__titulo">{modulo.titulo}</h1>
               {modulo.resumen ? (
                 <p className="se-modulo-detalle__resumen">{modulo.resumen}</p>
               ) : null}

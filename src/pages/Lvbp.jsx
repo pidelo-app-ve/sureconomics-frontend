@@ -121,8 +121,8 @@ export const Lvbp = () => {
           <header className="se-lvbp-pagina__cabeza">
             <img className="se-lvbp-pagina__liga" src={LOGO_LIGA} alt="" width="64" height="64" decoding="async" />
             <div className="se-lvbp-pagina__cabeza-texto">
-              <p className="se-lvbp-pagina__kicker">{t("lvbp.temporada", { temporada: datos?.temporada ?? "2026-2027" })}</p>
               <h1 className="se-lvbp-pagina__titulo">{t("lvbp.nombre")}</h1>
+              <p className="se-lvbp-pagina__kicker">{t("lvbp.temporada", { temporada: datos?.temporada ?? "2026-2027" })}</p>
               <p className="se-lvbp-pagina__entrada">{t("lvbp.entrada")}</p>
             </div>
             <Patrocinio />

@@ -190,7 +190,6 @@ export const CuentaDashboardHome = () => {
       <header className="se-cuenta__cabecera se-cuenta__cabecera--con-cara">
         <AvatarDelLector perfil={profile} tamano="md" />
         <div>
-          <p className="se-cuenta__kicker">{t("cuenta.panel.suEspacio")}</p>
           <h1 className="se-cuenta__titulo">{t("cuenta.inicio.hola", { nombre })}</h1>
         </div>
       </header>

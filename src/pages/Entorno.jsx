@@ -77,7 +77,6 @@ export const Entorno = () => {
           <img src="/brand/v2/lockup-verde.png" alt="SurEconomics" width="900" height="117" />
         </Enlace>
 
-        <p className="se-entorno__kicker">{t("boletin.entorno.kicker")}</p>
         <h1 className="se-entorno__titulo">{t("boletin.nombre")}</h1>
         <p className="se-entorno__texto">{t("boletin.entorno.texto")}</p>
 

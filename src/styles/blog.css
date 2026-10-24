@@ -1780,18 +1780,6 @@
   isolation: isolate;
 }
 
-.se-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: linear-gradient(rgba(var(--se-tinte), 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(var(--se-tinte), 0.04) 1px, transparent 1px);
-  background-size: 80px 80px;
-  mask-image: radial-gradient(ellipse at 80% 50%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at 80% 50%, black 20%, transparent 70%);
-  z-index: 0;
-}
-
 @keyframes se-hero-charts-drift {
   0% {
     transform: translate3d(-1.5%, 0.5%, 0) scale(1.02);
@@ -2537,10 +2525,6 @@
   outline-offset: 4px;
 }
 
-.se-about__band--alt {
-  border-left: 4px solid rgba(185, 83, 42, 0.75);
-}
-
 .se-about__band-title {
   margin: 0 0 0.75rem;
   font-family: var(--se-font-heading);
@@ -3144,14 +3128,6 @@
 
 .se-consulting__contact {
   border-color: var(--se-suite-border);
-  background:
-    var(--se-suite-surface);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-left: 4px solid rgba(185, 83, 42, 0.75);
-  animation: se-page-rise 0.6s var(--se-suite-ease) both;
-  animation-delay: 120ms;
 }
 
 .se-consulting__contact-cta {
@@ -3164,12 +3140,10 @@
 
 .se-consulting__service-meta {
   margin: 0 0 0.5rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.58);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-slate);
 }
 
 .se-consulting__service-card {
@@ -3222,11 +3196,9 @@
 }
 
 .se-contact .se-form-label {
-  font-family: var(--se-font-label);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.68);
+  font-family: var(--se-font-ui);
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 .se-contact__grid {
@@ -3319,10 +3291,6 @@
   border: 1px solid var(--color-hairline);
   border-radius: 14px;
   background: #fff;
-}
-/* La primera lleva el acento: es la respuesta a "y si no quiero el formulario". */
-.se-contact__tarjeta:first-child {
-  border-left: 3px solid var(--color-accent);
 }
 .se-contact__tarjeta-titulo {
   margin: 0;
@@ -3487,9 +3455,8 @@
 
 /* Reports */
 .se-card--compact {
-  background: #f7f7f5;
-  border: 1px solid var(--color-hairline);
-  border-left: 3px solid var(--color-accent);
+  border: 0;
+  border-top: 1px solid var(--color-ink);
 }
 
 .se-card--compact .se-card__body {
@@ -3795,8 +3762,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   padding: var(--se-space-sm) var(--se-space-md);
   background: var(--adm-err-bg, rgba(185, 83, 42, 0.09));
   border: 1px solid var(--adm-err-border, rgba(185, 83, 42, 0.34));
-  border-left: 3px solid var(--marca-rojo);
-  border-radius: 8px;
+  border-radius: 2px;
 }
 
 @keyframes se-image-field-spin {
@@ -4584,55 +4550,47 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   height: auto;
 }
 
-/* —— Noticias: lista sin imagen —— */
+/* —— «También te puede interesar»: titular y, debajo, lugar · fecha —— */
 .se-newslist {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--color-hairline);
 }
 
 .se-newslist__row {
-  display: flex;
-  gap: var(--se-space-sm);
-  align-items: baseline;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--color-hairline);
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-hairline);
 }
 
-.se-newslist__geo {
-  flex: 0 0 160px;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
+.se-newslist__row:first-child {
+  border-top: 0;
 }
 
 .se-newslist__title {
-  flex: 1 1 auto;
   min-width: 0;
-  font-size: 15.5px;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--color-cream);
-  transition: color 0.18s ease;
+  text-decoration: none;
 }
 
-.se-newslist__title:hover { color: var(--color-accent); }
+.se-newslist__title:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
-.se-newslist__date {
-  flex: 0 0 auto;
-  font-family: var(--se-font-label);
+.se-newslist__meta {
   font-size: 0.75rem;
-  color: var(--color-slate-2);
-  white-space: nowrap;
+  color: var(--color-slate);
 }
 
-@media (max-width: 720px) {
-  .se-newslist__row { flex-wrap: wrap; }
-  .se-newslist__geo { flex-basis: 100%; }
-  .se-newslist__title { flex-basis: 100%; }
+.se-newslist__geo {
+  font-weight: 700;
+  color: var(--color-ink);
 }
 
 /* —— Artículos: tarjetas con imagen y firma —— */
@@ -4788,20 +4746,10 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   color: var(--color-slate-2);
 }
 
-/* —— Editorial: sin firma, marcado con la regla de acento ——
-   Era una lista propia (`se-edlist`/`se-edrow`) y ahora son tarjetas como el
-   resto del sitio, así que solo queda el modificador: la regla de acento a la
-   izquierda es lo que distingue la posición del medio de un análisis firmado sin
-   que el lector tenga que notar que falta una firma. */
-.se-artcard--editorial {
-  border-left: 4px solid var(--color-cream);
-  transition: border-left-color 0.2s ease, border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.se-artcard--editorial:hover {
-  border-left-color: var(--color-accent);
-}
+/* —— Editorial: sin firma ——
+   Era una lista propia (`se-edlist`/`se-edrow`) y ahora son tarjetas como el resto
+   del sitio. Lo que la distingue de un análisis firmado es el «Editorial · tema» de
+   su pie, no una raya de color. */
 
 /* —— El relleno de una tarjeta sin fotografía ——
    El color lo pone el componente en línea, porque se deriva del tema y no puede
@@ -4965,10 +4913,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 .se-doccard {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-hairline);
-  border-left: 4px solid var(--color-cream);
-  background: #f7f7f5;
-  transition: border-left-color 0.2s ease;
 }
 
 /* The padding used to sit on the card. It moved down here when the card gained an
@@ -4998,7 +4942,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   object-fit: cover;
 }
 
-.se-doccard:hover { border-left-color: var(--color-accent); }
 
 .se-doccard__title {
   margin: 0;
@@ -5145,12 +5088,10 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    ancho completo se despegaba de la columna. */
 .se-opinion {
   margin: var(--se-space-lg) 0;
-  padding: var(--se-space-md);
+  padding: 12px 0;
   max-width: 68ch;
-  border: 1px solid var(--color-hairline);
-  border-left: 5px solid var(--color-accent);
-  border-radius: 4px;
-  background: var(--se-offwhite);
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
 }
 
 /* Solo la etiqueta, sin texto debajo: una banda fina y no una caja. */
@@ -5319,18 +5260,16 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 /* What asks for registration is the file, never the page around it. */
 .se-gate {
   margin: var(--se-space-xl) 0 0;
-  padding: var(--se-space-lg);
-  border: 2px solid var(--color-accent);
-  border-radius: 8px;
-  background: rgba(185, 83, 42, 0.06);
+  padding: 12px 0 0;
+  border-top: 2px solid var(--color-ink);
 }
 
 .se-gate__title {
   margin: 0 0 6px;
-  font-family: var(--se-font-heading);
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--color-cream);
 }
 
@@ -5340,15 +5279,13 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   flex: 0 0 auto;
   padding: 11px 20px;
   border: 1px solid var(--color-accent);
-  border-radius: 8px;
+  border-radius: 2px;
   background: var(--color-accent);
   color: #ffffff;
   text-decoration: none;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -5372,19 +5309,21 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   color: var(--color-slate-2);
 }
 
-.se-piece__tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.se-piece__tags-list { display: flex; flex-wrap: wrap; gap: 4px 12px; }
 
+/* Etiquetas en texto subrayado, no en píldoras: «Empresas y Negocios · Paraguay». */
 .se-piece__tag {
-  padding: 6px 13px;
-  border: 1px solid var(--color-hairline);
-  border-radius: 999px;
-  font-size: 13px;
-  color: var(--color-slate);
-  transition: border-color 0.18s ease, color 0.18s ease;
+  padding: 4px 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-hairline-dark);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.18s ease;
 }
 
-.se-piece__tag:hover { border-color: var(--color-accent); color: var(--color-cream); }
-.se-piece__tag--geo { font-family: var(--se-font-label); font-size: 0.75rem; }
+.se-piece__tag:hover { text-decoration-color: currentColor; }
 
 .se-piece__related { margin-top: var(--se-space-2xl); }
 
@@ -5451,13 +5390,8 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 /* Mas callado por el color y el borde discontinuo, no por la opacidad: al 66 % el
    texto bajaba a 4,0:1 y no llegaba al 4,5 que pide la letra pequeña. */
 .se-piece__tag--heredado {
-  color: var(--se-gray-500);
-  border-style: dashed;
-}
-
-.se-piece__tag--heredado:hover,
-.se-piece__tag--heredado:focus-visible {
-  border-style: solid;
+  font-weight: 500;
+  color: var(--color-slate);
 }
 
 /* The report wall: an account, not a lead form. */
@@ -5750,10 +5684,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   margin-top: var(--se-space-lg);
 }
 
-.se-piece__aside .se-newslist__geo {
-  color: var(--color-accent);
-}
-
 /* El bloque llevaba 4rem de margen superior, que era la separación que necesitaba
    cuando iba *debajo* del artículo en una sola columna. Al lado solo lo empuja
    hacia abajo y lo descuadra del primer párrafo. Arriba del todo, a la altura del
@@ -5774,34 +5704,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    arriba que nadie entiende. */
 .se-piece__aside [data-espacio] + .se-piece__related {
   margin-top: 2.1rem;
-}
-
-/* —— La lista lateral de "también te puede interesar" ——
-   `se-newslist` es una rejilla de tres columnas —lugar · titular · fecha— pensada
-   para el ancho completo del pie de una pieza. Metida en una barra de 320 px, el
-   titular se quedaba con una columna de setenta píxeles y salía a una palabra por
-   renglón. En la barra se apila. */
-.se-piece__aside .se-newslist__row {
-  display: block;
-  padding: var(--se-space-sm) 0;
-}
-
-.se-piece__aside .se-newslist__geo {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.se-piece__aside .se-newslist__title {
-  display: block;
-  font-size: 0.98rem;
-  line-height: 1.35;
-}
-
-.se-piece__aside .se-newslist__date {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px; /* 11,5 no estaba en la escala; 12 como la fecha de la lista base */
-  color: var(--se-gray-500);
 }
 
 /* —— Sin animaciones de entrada ——
@@ -6294,7 +6196,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   background: rgba(var(--se-tinte), 0.07);
   overflow: hidden;
   opacity: 0;
-  transition: opacity 0.4s, height 0.2s;
+  transition: opacity 0.4s;
 }
 .se-redes__progreso--activo { opacity: 1; }
 .se-redes__pista:focus-visible + .se-redes__progreso {
@@ -6415,16 +6317,16 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   content: "";
   position: absolute;
   left: 0;
+  right: 0;
   top: 0;
-  bottom: 0;
-  width: 3px;
+  height: 2px;
   background: var(--color-accent);
-  transform: scaleY(0);
-  transform-origin: top;
+  transform: scaleX(0);
+  transform-origin: left;
   transition: transform 0.35s var(--redes-frenado);
 }
 .se-redes__pieza--texto:hover::before,
-.se-redes__pieza--texto:focus-visible::before { transform: scaleY(1); }
+.se-redes__pieza--texto:focus-visible::before { transform: scaleX(1); }
 .se-redes__pieza--texto p {
   margin: 0;
   font-family: var(--se-font-reading);
@@ -6763,22 +6665,17 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 .se-legal__entrada { font-size: 1.1rem; line-height: 1.65; }
 
 .se-legal__fecha {
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
 }
 
 /* El aviso de "en revision": mismo filete de acento que el resto de avisos del sitio,
    para que se lea como un estado real de la pagina y no como una nota suelta. */
 .se-legal__revision {
   margin: 1.25rem 0 0;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--color-hairline);
-  border-left: 4px solid var(--color-accent);
-  border-radius: 10px;
-  background: var(--se-offwhite);
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--color-ink);
   font-family: var(--se-font-ui);
   font-size: 0.85rem;
   line-height: 1.55;
@@ -6817,11 +6714,9 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    reconozca, pero sin botones de verdad: aqui es una cita, no un control. */
 .se-legal__cita {
   margin: 0 0 1.3rem;
-  padding: 1.1rem 1.25rem;
-  border: 1px solid var(--color-hairline);
-  border-left: 4px solid var(--color-accent);
-  border-radius: 12px;
-  background: var(--se-offwhite);
+  padding: 12px 0;
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
   font-family: var(--se-font-ui);
   font-size: 0.9rem;
   line-height: 1.6;
@@ -6873,13 +6768,12 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 
 .se-legal__tabla thead th {
   padding: 0.85rem 0.95rem;
-  background: var(--marca-verde);
-  color: #ffffff;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  border-bottom: 1px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -6903,8 +6797,8 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   background: var(--se-offwhite);
   font-family: var(--se-font-ui);
 }
-.se-legal__estado--si { border-left: 4px solid var(--marca-verde); }
-.se-legal__estado--no { border-left: 4px solid var(--color-accent); }
+.se-legal__estado--si { border-top-color: var(--marca-verde); }
+.se-legal__estado--no { border-top-color: var(--color-accent); }
 
 .se-legal__estado-titulo {
   margin: 0 0 0.5rem;
@@ -7140,11 +7034,9 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    hace ya tiene cuenta verificada, que es el paso que frena las compras. Por eso
    se distingue -- con un filete de acento, no con un color de fondo que lo
    sacaria del lenguaje de tarjeta del sitio. */
-.se-modulo--cortesia {
-  border-color: rgba(185, 83, 42, 0.45);
-  box-shadow: inset 3px 0 0 var(--color-accent);
+.se-modulo--cortesia .se-modulo__titulo {
+  color: var(--color-accent);
 }
-.se-modulo--cortesia:hover { border-color: var(--color-accent); }
 
 .se-modulo__foto {
   display: block;
@@ -7694,11 +7586,8 @@ a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
    completa esta en el unico momento en que la compra se explica sola. */
 .se-edu__continuar {
   margin-top: 2.5rem;
-  padding: 1.5rem 1.6rem;
-  border: 1px solid var(--color-hairline);
-  border-left: 3px solid var(--color-accent);
-  border-radius: 12px;
-  background: var(--se-offwhite);
+  padding: 14px 0 0;
+  border-top: 2px solid var(--color-ink);
 }
 .se-edu__continuar-titulo {
   margin: 0 0 0.35rem;
@@ -8462,7 +8351,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 .se-anunciate__hero {
   background: var(--marca-verde);
   color: #f6f3ed;
-  text-align: center;
+  text-align: left;
 }
 .se-anunciate__kicker {
   margin: 0 0 0.6rem;
@@ -9008,16 +8897,13 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
    `.se-meta`, `.se-sello-edu` -- y sólo añade lo que la página no tenía. */
 
 /* —— El título, como el botón de la cabecera pero en grande ——
-   El nombre en mayúsculas con el punto rojo de grabación delante, con el mismo latido
-   de dos segundos (`se-alpunto-latido`, definido con el botón). Sin caja: en el tamaño
-   del título el borde pesaba más que el nombre. */
+   El nombre con el punto rojo de grabación delante, con el mismo latido de dos
+   segundos (`se-alpunto-latido`, definido con el botón), dentro de la columna. */
 .se-alpunto__titulo {
   --se-rec: #e5322d;
   display: inline-flex;
   align-items: center;
-  gap: 0.45em;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  gap: 0.35em;
   line-height: 1;
 }
 
@@ -9031,17 +8917,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   animation: se-alpunto-latido 2s ease-in-out infinite;
 }
 
-/* El punto, colgado en el margen: el título se corre a la izquierda lo que miden el
-   punto y su hueco, y así el rótulo de encima, «AL PUNTO» y el selector de debajo
-   comparten un mismo borde. Con el punto dentro de la columna, el rótulo quedaba
-   alineado con el punto y el nombre 50 px más allá: dos márgenes en dos líneas.
-   En el teléfono no hay margen donde colgarlo y va en línea. */
-@media (min-width: 700px) {
-  .se-alpunto__titulo {
-    margin-left: calc(-0.36em - 0.45em);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .se-alpunto__rec {
     animation: none;
@@ -9050,30 +8925,28 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 
 /* —— El control segmentado: Todo / Entrevistas / Podcast ——
    Botones y no enlaces, porque cambian una vista dentro de la misma página; el
-   estado se anuncia con `aria-pressed`. Los 44px de alto son el mínimo táctil. */
+   estado se anuncia con `aria-pressed`. Pestañas de texto, como las secciones de un
+   diario: la elegida, subrayada en tinta. 44 px de alto, el mínimo táctil. */
 .se-alpunto__seg {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 0 1.5rem;
   margin: calc(-1 * var(--se-space-md)) 0 var(--se-space-xl);
-  /* Sin caja detrás: la pastilla blanca sobre el fondo crema se leía como una mancha.
-     El botón activo, en verde, ya dice solo cuál es la vista. */
 }
 
 .se-alpunto__seg-btn {
   min-height: 44px;
-  padding: 0 1.15rem;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  font-family: var(--se-font-label);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.62);
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-slate);
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease;
+  transition: color 0.18s ease, border-color 0.18s ease;
 }
 
 .se-alpunto__seg-btn:hover {
@@ -9085,24 +8958,19 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   outline-offset: 2px;
 }
 
-/* El estado activo va en el verde de la marca, con texto blanco fijo: el token de
-   texto es negro en tema claro y no se leería sobre el verde. */
 .se-alpunto__seg-btn--on,
 .se-alpunto__seg-btn--on:hover {
-  background: var(--marca-verde);
-  color: #ffffff;
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
 }
 
 /* —— Encabezados de las dos secciones —— */
 .se-alpunto__h2 {
   margin: 0 0 var(--se-space-md);
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--color-cream);
-  font-family: var(--se-font-heading);
-  font-size: var(--se-text-h3, 1.35rem);
-  font-weight: 700;
+  padding-top: 10px;
+  border-top: 2px solid var(--color-ink);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
   line-height: 1.1;
-  letter-spacing: -0.02em;
   color: var(--se-black);
 }
 
@@ -9125,94 +8993,68 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   align-items: stretch;
 }
 
-/* —— La columna lateral: caja propia, título con raya y lista con hilo —— */
+/* —— La columna lateral: los últimos episodios, en lista de prensa ——
+   Sin caja ni hilo: el filete de la columna a la izquierda, una regla de tinta arriba y
+   filetes entre episodios. */
 .se-alpunto__lateral {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 1.15rem 1.25rem 1.25rem;
-  border: 1px solid var(--color-hairline);
-  border-radius: 14px;
-  background: #fff;
+  padding: 10px 0 0 var(--se-space-lg);
+  border-left: 1px solid var(--color-hairline);
 }
 
 .se-alpunto__lateral-titulo {
-  margin: 0 0 0.9rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 2px solid var(--color-accent);
-  font-family: var(--se-font-heading);
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+  padding-top: 8px;
+  border-top: 2px solid var(--color-ink);
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-/* El hilo: una raya a la izquierda y un punto por entrada, en el verde de la marca. */
 .se-alpunto__lateral-lista {
-  position: relative;
   margin: 0;
-  padding: 0 0 0 1.35rem;
+  padding: 0;
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1.05rem;
-}
-
-.se-alpunto__lateral-lista::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 5px;
-  width: 2px;
-  background: rgba(0, 51, 24, 0.18);
 }
 
 .se-alpunto__lateral-item {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-hairline);
 }
 
-.se-alpunto__lateral-item::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: calc(-1.35rem + 1px);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid var(--marca-verde);
-  background: #fff;
-  box-sizing: border-box;
+.se-alpunto__lateral-item:first-child {
+  border-top: 0;
 }
 
 .se-alpunto__lateral-meta {
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.02em;
-  color: rgba(var(--se-tinte), 0.58);
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  color: var(--color-slate);
 }
 
 .se-alpunto__lateral-enlace {
-  font-family: var(--se-font-heading);
-  font-size: 1rem;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--color-ink);
   text-decoration: none;
 }
 
 .se-alpunto__lateral-enlace:hover,
 .se-alpunto__lateral-enlace:focus-visible {
-  color: var(--color-accent);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .se-alpunto__lateral-enlace:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--marca-verde);
   outline-offset: 2px;
 }
 
@@ -9220,23 +9062,22 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   margin-top: auto;
   padding-top: 1rem;
   align-self: flex-start;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  text-decoration: none;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-hairline-dark);
+  text-underline-offset: 3px;
 }
 
 .se-alpunto__lateral-todos:hover,
 .se-alpunto__lateral-todos:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: currentColor;
 }
 
 .se-alpunto__lateral-todos:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--marca-verde);
   outline-offset: 2px;
 }
 
@@ -9450,7 +9291,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 
   .se-alpunto__lateral {
-    padding: 1rem 1.1rem 1.1rem;
+    padding: 0;
+    border-left: 0;
   }
 
   .se-alpunto__hero--sola {
@@ -9468,9 +9310,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 
   .se-alpunto__seg-btn {
-    flex: 1 1 0;
-    padding: 0 0.5rem;
-    border-radius: 10px;
+    flex: 0 0 auto;
   }
 
   .se-alpunto__card--hero .se-alpunto__play {
@@ -10918,9 +10758,11 @@ html {
 }
 
 .se-piece__related-title {
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--color-ink);
-  font-size: 1.0625rem;
+  margin-bottom: 4px;
+  padding: 10px 0 0;
+  border-top: 2px solid var(--color-ink);
+  border-bottom: 0;
+  font-size: 1.25rem;
 }
 
 /* ═══ Rótulos, títulos de sección y tarjetas del sitio público ═══
@@ -11038,10 +10880,6 @@ html {
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.2;
-}
-
-.se-blog .se-artcard--editorial {
-  border-left: 0;
 }
 
 /* Las insignias de un informe: lo que el lector se lleva (el PDF y sus páginas, en
@@ -11922,4 +11760,796 @@ html {
   .se-ticker__item {
     scroll-snap-align: start;
   }
+}
+
+/* ═══ La prensa en el resto del sitio ═══
+   Lo mismo que la portada en todas las vistas públicas: títulos en la serif, filetes en
+   vez de cajas, esquinas rectas y sin sombras flotantes. Los juegos conservan su
+   propio mundo dentro de su escena. */
+
+/* —— Títulos de página y de sección, en la serif de los titulares —— */
+.se-publico main :is(h1, h2):not(.se-sr-only):not([class*="pausa-"]):not([class*="clave"]):not([class*="guacamaya"]) {
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.se-publico .se-articles {
+  background: var(--papel);
+}
+
+.se-publico .se-articles__title {
+  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
+  line-height: 1.05;
+  color: var(--tinta);
+}
+
+/* —— El filtro de los listados: una fila de prensa sobre el papel ——
+   El de la portada sigue colgando verde del mástil (`.se-explorer-section--primera`). */
+.se-publico .se-articles .se-explorer {
+  padding: 14px 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--filete);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__search,
+.se-publico .se-articles .se-explorer__btn {
+  border: 1px solid var(--filete-fuerte);
+  border-radius: 0;
+  background: #ffffff;
+  color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__search::placeholder {
+  color: var(--color-slate-2);
+}
+
+.se-publico .se-articles .se-explorer__lupa,
+.se-publico .se-articles .se-explorer__field:focus-within .se-explorer__lupa {
+  color: var(--color-slate);
+}
+
+.se-publico .se-articles .se-explorer__search:focus,
+.se-publico .se-articles .se-explorer__btn:hover,
+.se-publico .se-articles .se-explorer__btn:focus-visible {
+  border-color: var(--tinta);
+  background: #ffffff;
+}
+
+.se-publico .se-articles .se-explorer__search:focus-visible,
+.se-publico .se-articles .se-explorer__btn:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 2px;
+}
+
+.se-publico .se-articles .se-explorer__total,
+.se-publico .se-articles .se-explorer__none,
+.se-publico .se-articles .se-explorer__caret,
+.se-publico .se-articles .se-explorer__bar .se-explorer__n {
+  color: var(--color-slate);
+}
+
+.se-publico .se-articles .se-explorer__sel,
+.se-publico .se-articles .se-explorer__total strong {
+  color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__total strong {
+  font-family: var(--cifras);
+}
+
+.se-publico .se-articles .se-explorer__chip,
+.se-publico .se-articles .se-explorer__clear {
+  border-radius: 0;
+  border-color: var(--tinta);
+  color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__chip {
+  background: transparent;
+}
+
+.se-publico .se-articles .se-explorer__chip:hover,
+.se-publico .se-articles .se-explorer__clear:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.se-publico .se-articles .se-explorer__active {
+  border-top-color: var(--filete);
+}
+
+.se-publico .se-explorer__panel {
+  border-radius: 0;
+  border-color: var(--filete-fuerte);
+  background: var(--papel);
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.14);
+}
+
+.se-publico .se-explorer__opt {
+  border-radius: 0;
+}
+
+/* —— El paginador: casillas rectas, la página actual en tinta —— */
+.se-publico .se-pager__btn {
+  border-radius: 0;
+  border-color: var(--filete-fuerte);
+  font-family: var(--cifras);
+}
+
+.se-publico .se-pager__btn--edge {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-pager__btn:hover:not(:disabled) {
+  border-color: var(--tinta);
+  color: var(--tinta);
+}
+
+.se-publico .se-pager__btn--on {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: #ffffff;
+}
+
+.se-publico .se-pager__count strong {
+  font-family: var(--cifras);
+}
+
+/* —— Botones y campos de la parte pública: sin mayúsculas, sin elevarse, rectos —— */
+.se-publico .se-btn {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.9375rem;
+}
+
+.se-publico .se-btn:hover,
+.se-publico .se-btn--secondary:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.se-publico .se-btn:active {
+  transform: scale(0.98);
+}
+
+.se-publico main :is(input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="url"], textarea, select) {
+  border-radius: 0;
+}
+
+.se-publico .se-link {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* —— Quiénes somos: el propósito como entradilla, el equipo en listas de prensa —— */
+.se-publico .se-about {
+  --about-canvas: var(--papel);
+  --about-surface: transparent;
+}
+
+.se-publico .se-about__band,
+.se-publico .se-about__acc {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.se-publico .se-about__band {
+  padding: 12px 0 0;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-publico .se-about__band:hover,
+.se-publico .se-about__acc:hover {
+  transform: none;
+}
+
+/* «Propósito», como «Equipo»: un título de sección, y la declaración debajo. */
+.se-publico .se-about__band-title {
+  margin-bottom: 0.75rem;
+  font-family: var(--titular);
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.se-publico .se-about__band-text--lead {
+  max-width: 44ch;
+  font-family: var(--titular);
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  line-height: 1.4;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__acc {
+  overflow: visible;
+  border-top: 1px solid var(--tinta);
+}
+
+.se-publico .se-about__acc-summary {
+  padding: 14px 0;
+}
+
+.se-publico .se-about__acc-summary:focus-visible {
+  border-radius: 0;
+  outline-color: var(--marca-verde);
+}
+
+.se-publico .se-about__acc-title {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__acc-meta {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--cifras);
+  font-weight: 500;
+  color: var(--color-slate);
+}
+
+.se-publico .se-about__acc-chevron,
+.se-publico .se-about__acc[open] .se-about__acc-chevron,
+.se-publico .se-about__acc-summary:hover .se-about__acc-chevron {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-about__acc-body {
+  padding: 0 0 1.5rem;
+  border-top: 0;
+}
+
+.se-publico .se-team-grid {
+  margin-top: 0;
+  gap: 0 var(--se-space-lg);
+}
+
+.se-publico .se-member-card {
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--filete);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.se-publico .se-member-card::before {
+  display: none;
+}
+
+.se-publico .se-member-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--filete);
+}
+
+.se-publico .se-member-card__avatar {
+  border: 1px solid var(--filete-fuerte);
+  background: #ffffff;
+  box-shadow: none;
+  font-family: var(--titular);
+  color: var(--tinta);
+}
+
+.se-publico .se-member-card__name {
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--tinta);
+}
+
+.se-publico .se-member-card__bio {
+  color: var(--color-slate);
+}
+
+.se-publico .se-member-card__link {
+  font-size: 0.8125rem;
+  color: var(--tinta);
+  border-bottom-color: var(--filete-fuerte);
+}
+
+.se-publico .se-member-card__link:hover {
+  color: var(--marca-verde);
+  border-color: var(--marca-verde);
+}
+
+/* —— Contacto y Consultoría: sin tarjetas; filetes y la letra del sitio —— */
+.se-publico .se-contact-form,
+.se-publico .se-contact__tarjeta,
+.se-publico .se-contact-block,
+.se-publico .se-card--service,
+.se-publico .se-consulting__aside-card {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-card--service {
+  border-top-width: 1px;
+}
+
+.se-publico .se-contact__tarjeta:first-child {
+  border-left: 0;
+}
+
+.se-publico .se-contact__tarjeta-titulo,
+.se-publico .se-contact-form fieldset.se-form-field legend {
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tinta);
+  background: transparent;
+}
+
+.se-publico .se-contact-form fieldset.se-form-field {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-contact__camino {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--filete);
+  border-radius: 0;
+}
+
+.se-publico .se-contact__camino:hover {
+  background: transparent;
+}
+
+.se-publico .se-contact__camino-titulo {
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.se-publico .se-consulting__chip {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.se-publico .se-consulting__chip + .se-consulting__chip::before {
+  content: "·";
+  margin-right: 0.75rem;
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+.se-publico .se-consulting__service-meta {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* —— Anúnciate: el formato en lista de prensa, la letra en la serif —— */
+.se-publico .se-anunciate__h2 {
+  margin-bottom: 0.25rem;
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+.se-publico .se-anunciate__tarjeta {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-anunciate__letra {
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-anunciate__estado {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* —— Cookies: la tabla y los estados, sin caja ni borde de color —— */
+.se-publico .se-legal__tabla-caja {
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  border-radius: 0;
+}
+
+.se-publico .se-legal__estado {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 2px solid var(--marca-verde);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-legal__estado--no {
+  border-top-color: var(--marca-rojo);
+}
+
+/* —— Educación: tarjetas de módulo y secciones de prensa —— */
+.se-publico .se-edu__h2 {
+  padding-top: 10px;
+  border-top: 2px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+.se-publico .se-modulo {
+  padding: 0 0 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-modulo:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.se-publico .se-modulo--cortesia {
+  box-shadow: none;
+}
+
+.se-publico .se-modulo__foto {
+  margin: 0 0 0.5rem;
+  border-radius: 0;
+}
+
+.se-publico .se-modulo__titulo {
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.se-publico .se-modulo__etiqueta {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-edu__paso-num {
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__duda dt {
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+/* —— Cuenta: entrar y registrarse, sin caja flotante —— */
+.se-publico .se-entrada__caja {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* —— Lo importante de hoy: rótulos de sección en la serif —— */
+.se-publico .se-res-seccion__titulo {
+  padding-top: 10px;
+  border-top: 2px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* —— Los juegos fuera de la portada (/juegos y el final de cada pieza) ——
+   La escena ilustrada se queda; alrededor, papel y un enlace con flecha en vez de la
+   tarjeta morada con botón amarillo en píldora. */
+.se-publico .se-pausa-tarjeta__enlace,
+.se-publico .se-clave-tarjeta,
+.se-publico .se-pausa-banner:not(.se-pausa-doble .se-pausa-banner) {
+  border-radius: 0;
+  border-top: 1px solid var(--tinta);
+  background: transparent;
+  box-shadow: none;
+  color: var(--tinta);
+}
+
+.se-publico .se-pausa-tarjeta__enlace:hover,
+.se-publico .se-clave-tarjeta:hover,
+.se-publico .se-pausa-banner:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.se-publico .se-pausa-tarjeta__titulo,
+.se-publico .se-clave-tarjeta__titulo,
+.se-publico .se-pausa-banner:not(.se-pausa-doble .se-pausa-banner) .se-pausa-banner__titulo {
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.se-publico .se-pausa-tarjeta__texto,
+.se-publico .se-pausa-tarjeta__memoria {
+  color: var(--color-slate);
+}
+
+.se-publico .se-pausa-banner:not(.se-pausa-doble .se-pausa-banner) .se-pausa-banner__kicker {
+  display: none;
+}
+
+.se-publico .se-pausa-tarjeta__boton,
+.se-publico .se-clave-tarjeta__boton,
+.se-publico .se-pausa-banner:not(.se-pausa-doble .se-pausa-banner) .se-pausa-banner__boton {
+  min-height: 0;
+  margin-top: 4px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--marca-verde);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.se-publico .se-pausa-tarjeta__boton::after,
+.se-publico .se-clave-tarjeta__boton::after,
+.se-publico .se-pausa-banner:not(.se-pausa-doble .se-pausa-banner) .se-pausa-banner__boton::after {
+  content: "→";
+  margin-left: 0.35em;
+}
+
+/* —— Esquinas: rectas en cajas y medios, 2 px en controles ——
+   Lo redondo se queda donde es un círculo de verdad (redes, compartir, cerrar,
+   avatares). Los anuncios conservan sus formatos, que tienen reglas propias. */
+.se-publico :is(
+  .se-piece__media,
+  .se-videostage,
+  .se-videostage__frame,
+  .se-redes__pieza,
+  .se-redes-video__marco,
+  .se-edu__video,
+  .se-retrato,
+  .se-temario,
+  .se-compra,
+  .se-edu__muro,
+  .se-comments__item,
+  .se-research-cta,
+  .se-reader-card,
+  .se-submission-format,
+  .se-cookies__caja,
+  .se-invitacion__caja,
+  .se-legal__revision,
+  .se-legal__cita,
+  .se-aviso-idioma,
+  .se-contact__banner,
+  .se-footer__newsletter-ok,
+  .se-footer__newsletter-error,
+  .se-newsletter__error,
+  .se-entorno__listo,
+  .se-share__toast,
+  .se-header__menu .se-header__nav-link
+) {
+  border-radius: 0;
+}
+
+.se-publico :is(
+  .se-form-control,
+  label.se-form-field,
+  .se-cookies__btn,
+  .se-legal__btn,
+  .se-legal__cita-btn,
+  .se-edu__continuar,
+  .se-entorno__input,
+  .se-entorno__boton,
+  .se-invitacion__input,
+  .se-invitacion__btn,
+  .se-invitacion__cerrar,
+  .se-invitacion__error,
+  .se-temario__num,
+  .se-temario__sello,
+  .se-piece__idioma,
+  .se-marcar__btn,
+  .se-explorer__search,
+  .se-header__buscar
+) {
+  border-radius: 2px;
+}
+
+/* —— Consultoría: los servicios al filo del filete, con un enlace y no una barra ——
+   Seis botones cobrizos a todo el ancho, uno por servicio, eran la pantalla de una
+   aplicación. */
+.se-publico .se-card--service .se-card__body {
+  padding: 0;
+}
+
+.se-publico .se-consulting__service-cta {
+  align-self: flex-start;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--marca-verde);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.se-publico .se-consulting__service-cta:hover {
+  background: transparent;
+  color: var(--tinta);
+}
+
+.se-publico .se-consulting__service-cta::after {
+  content: " →";
+}
+
+/* —— Suscripción: el plan, sin caja —— */
+.se-publico .se-research-cta {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* —— Anúnciate: la cabecera alineada a la izquierda y a la medida del texto —— */
+.se-publico .se-anunciate__hero :is(.se-anunciate__title, .se-anunciate__lead) {
+  margin-left: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
+/* —— Papel en todas las vistas: `.se-blog` pintaba blanco (Cookies) y la banda de
+   Educación, un gris frío —— */
+.se-publico .se-blog,
+.se-publico .se-section.se-edu__banda {
+  background-color: var(--papel);
+}
+
+/* —— Educación y Anúnciate: la cabecera sobre papel, bajo la regla de sección ——
+   El verde queda para la cabecera del sitio, el boletín y el pie. */
+.se-publico .se-edu__portada,
+.se-publico .se-anunciate__hero {
+  background: var(--papel);
+  color: var(--tinta);
+}
+
+/* La regla, dentro de la retícula: en el contenedor mismo iba a sangre por su relleno. */
+.se-publico .se-edu__portada,
+.se-publico .se-anunciate__hero {
+  padding-top: var(--se-space-lg);
+}
+
+.se-publico .se-edu__portada > .se-container::before,
+.se-publico .se-anunciate__hero > .se-container::before {
+  content: "";
+  display: block;
+  margin-bottom: clamp(18px, 2vw, 28px);
+  border-top: 2px solid var(--tinta);
+}
+
+.se-publico :is(.se-edu__portada-titulo, .se-edu__promesa strong, .se-anunciate__title) {
+  color: var(--tinta);
+}
+
+.se-publico :is(.se-edu__portada-claim, .se-edu__promesa, .se-anunciate__lead) {
+  color: var(--color-slate);
+}
+
+.se-publico .se-edu__promesa-icono {
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__promesas {
+  border-top-color: var(--filete);
+}
+
+/* —— Una sola escala para el título de página ——
+   La de los listados (unos 52 px en escritorio). La pieza y el logotipo de Quiénes
+   somos llevan la suya. */
+.se-publico main h1:not(.se-sr-only):not(.se-piece__title):not(.se-about__title):not(.se-uh-seccion__titulo) {
+  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
+  line-height: 1.05;
+}
+
+/* —— Consultoría: títulos de servicio y de bloque en la serif —— */
+.se-publico .se-consulting__service-card :is(h2, h3),
+.se-publico .se-contact-block__title {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.se-publico .se-consulting__aside-kicker {
+  margin: 0 0 0.5rem;
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+/* —— Suscripción: precio y método, a cuerpo de texto, no como titulares —— */
+.se-publico :is(.se-subscription-price__value, .se-subscription-method__value) {
+  font-family: var(--se-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+
+/* —— Quiénes somos y Consultoría: la cabecera en la retícula de todas las vistas ——
+   Llevaban un segundo margen dentro del contenedor y empezaban más adentro. */
+.se-publico .se-consulting__hero-grid {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* En Quiénes somos el contenedor iba sin relleno y la rejilla de dos columnas, con un
+   solo hijo, lo centraba en la primera: el bloque quedaba corrido 20 px. */
+.se-publico .se-about__hero .se-container {
+  max-width: var(--se-container-max);
+  padding-inline: var(--se-content-gutter);
+}
+
+.se-publico .se-about__hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
 }

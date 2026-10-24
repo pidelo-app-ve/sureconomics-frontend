@@ -67,9 +67,9 @@ const PREVIEW = {
   // Once: la primera manda a todo el ancho y las otras diez van
   // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
   noticia: 11,
-  // Cuatro: con el contenedor a 1440 caben cuatro columnas, y con
-  // tres quedaba un hueco a la derecha. Donde caben tres, la cuarta se oculta (CSS).
-  articulo: 4,
+  // Cinco: la primera manda, a dos filas, y las otras cuatro van a su lado de dos en
+  // dos. El anuncio, si lo hay, ocupa el sitio de la última: el bloque mide igual.
+  articulo: 5,
   editorial: 4,
   entrevista: 3,
   informe: 2,
@@ -95,6 +95,7 @@ const LAYOUTS = {
       items={items}
       espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO_ARTICULOS}
       columnas={4}
+      principal
     />
   ),
   editorial: (items) => <EditorialList items={items} />,

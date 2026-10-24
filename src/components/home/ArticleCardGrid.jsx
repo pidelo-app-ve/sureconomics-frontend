@@ -10,7 +10,7 @@ import { listaDePiezas } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
-export const ArticleCardGrid = ({ items, espacioDeAnuncio, columnas = 3 }) => {
+export const ArticleCardGrid = ({ items, espacioDeAnuncio, columnas = 3, principal = false }) => {
   const { t } = useIdioma();
   // Se pregunta **antes** de montar la rejilla: el anuncio le quita el sitio a
   // una pieza, así que si no hay campaña que encaje la rejilla tiene que saberlo
@@ -21,7 +21,7 @@ export const ArticleCardGrid = ({ items, espacioDeAnuncio, columnas = 3 }) => {
   ) : null;
 
   return (
-  <div className="se-artgrid">
+  <div className={`se-artgrid${principal ? " se-artgrid--principal" : ""}`}>
     {/* Intercalado en el centro de la rejilla, no al final. Ver `conAnuncio`. */}
     {conAnuncio(
       items.map((a) => (
@@ -55,6 +55,8 @@ export const ArticleCardGrid = ({ items, espacioDeAnuncio, columnas = 3 }) => {
 ArticleCardGrid.propTypes = {
   /** Columnas de la rejilla, para colocar el anuncio en medio de la fila. */
   columnas: PropTypes.number,
+  /** La primera manda: ocupa dos filas a la izquierda y las demás van a su lado. */
+  principal: PropTypes.bool,
   /** La clave del hueco. La rejilla monta el anuncio ella misma: necesita saber si
       lo habra antes de decidir cuantas piezas caben. */
   espacioDeAnuncio: PropTypes.string,

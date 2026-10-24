@@ -1,11 +1,11 @@
 import PropTypes from "prop-types";
-import { useEffect, useRef, useState } from "react";
-import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
+import { useEffect, useState } from "react";
 import { Enlace } from "../Enlace";
 import { formatearNumero } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { resumen } from "../../juegos/guacamaya/registro";
 import "./tarjetaPausa.css";
+import { Recorte, Recortes } from "../comun/Recorte";
 
 /**
  * «Un minuto de pausa»: las tarjetas y los banners que llevan a los juegos del sitio
@@ -223,17 +223,18 @@ export const InvitacionClave = () => {
  * La franja de juegos de la portada, detrás de las noticias: los dos banners lado a lado
  * (la guacamaya y La Clave), apilados en el teléfono.
  */
-export const BannerDeJuegos = () => {
-  // La guacamaya bate las alas unas veces al asomarse la franja (`se-reveal--in`) y
-  // cuando el ratón está encima; no para siempre.
-  const franja = useRef(null);
-  useRevealOnScroll(franja);
-  return (
-    <div ref={franja} className="se-pausa-doble">
+export const BannerDeJuegos = () => (
+  // Dos recortes de la página de pasatiempos. Al asomarse se asientan, y la guacamaya
+  // bate las alas unas veces (`se-reveal--in`, que pone `Recortes`) y cuando el ratón
+  // está encima; no para siempre.
+  <Recortes className="se-pausa-doble">
+    <Recorte indice={0}>
       <InvitacionPausa enPortada />
+    </Recorte>
+    <Recorte indice={1}>
       <InvitacionClave />
-    </div>
-  );
-};
+    </Recorte>
+  </Recortes>
+);
 
 export default TarjetaPausa;

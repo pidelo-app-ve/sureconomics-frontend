@@ -6,6 +6,7 @@ import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
+import { Recorte, Recortes } from "../comun/Recorte";
 
 /**
  * Informes: presented as documents, with the producing unit credited.
@@ -20,11 +21,12 @@ import { TituloDePieza } from "../content/TituloDePieza";
 export const ReportGrid = ({ items }) => {
   const { t } = useIdioma();
   return (
-  <div className="se-docgrid">
-    {items.map((r) => (
+  <Recortes className="se-docgrid">
+    {items.map((r, i) => (
       // La previsualización siempre: la portada del informe o, si no tiene, el color
       // de su tema. La redacción la quiere aunque no haya foto.
-      <article key={r.id} className="se-doccard">
+      <Recorte key={r.id} indice={i}>
+      <article className="se-doccard">
         <Enlace to={rutaDePieza(r)} className="se-doccard__media" aria-label={r.titulo}>
           <CardMedia pieza={r} />
         </Enlace>
@@ -52,8 +54,9 @@ export const ReportGrid = ({ items }) => {
           </div>
         </div>
       </article>
+      </Recorte>
     ))}
-  </div>
+  </Recortes>
   );
 };
 

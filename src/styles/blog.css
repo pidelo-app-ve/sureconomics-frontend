@@ -7247,12 +7247,10 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 .se-modulo-detalle__lado { grid-area: panel; }
 
 .se-modulo-detalle__kicker {
-  margin: 0 0 0.5rem;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--color-accent);
 }
 .se-modulo-detalle__titulo {
@@ -10935,7 +10933,7 @@ html {
     display: none;
   }
 
-  .se-blog .se-docgrid > .se-doccard {
+  .se-blog .se-docgrid > .se-recorte {
     flex: 0 0 84%;
     scroll-snap-align: start;
   }
@@ -11784,93 +11782,204 @@ html {
   color: var(--tinta);
 }
 
-/* —— El filtro de los listados: una fila de prensa sobre el papel ——
-   El de la portada sigue colgando verde del mástil (`.se-explorer-section--primera`). */
+/* —— El buscador de los listados: el índice de un diario ——
+   La búsqueda es una línea de titular: se escribe en la serif, a tamaño de título,
+   sobre un filete que se vuelve verde al enfocar. Debajo, los filtros se leen como
+   una frase: «Tema · Dónde · 24 resultados». El de la portada sigue colgando verde
+   del mástil (`.se-explorer-section--primera`). */
 .se-publico .se-articles .se-explorer {
-  padding: 14px 0;
+  padding: 0;
   border: 0;
-  border-top: 2px solid var(--tinta);
-  border-bottom: 1px solid var(--filete);
   border-radius: 0;
   background: transparent;
   color: var(--tinta);
 }
 
-.se-publico .se-articles .se-explorer__search,
-.se-publico .se-articles .se-explorer__btn {
-  border: 1px solid var(--filete-fuerte);
-  border-radius: 0;
-  background: #ffffff;
+.se-publico .se-articles .se-explorer__bar {
+  gap: 10px 22px;
+  align-items: baseline;
+}
+
+.se-publico .se-articles .se-explorer__field {
+  flex: 1 1 100%;
+}
+
+.se-publico .se-articles .se-explorer__lupa {
+  left: 0;
+  width: 26px;
+  height: 26px;
   color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__field:focus-within .se-explorer__lupa {
+  color: var(--marca-verde);
+}
+
+.se-publico .se-articles .se-explorer__search {
+  padding: 10px 0 12px 40px;
+  border: 0;
+  border-bottom: 2px solid var(--tinta);
+  border-radius: 0;
+  background:
+    linear-gradient(var(--marca-verde), var(--marca-verde)) left bottom / 0% 2px no-repeat,
+    transparent;
+  color: var(--tinta);
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: background-size 420ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .se-publico .se-articles .se-explorer__search::placeholder {
   color: var(--color-slate-2);
+  font-style: italic;
 }
 
-.se-publico .se-articles .se-explorer__lupa,
-.se-publico .se-articles .se-explorer__field:focus-within .se-explorer__lupa {
-  color: var(--color-slate);
-}
-
-.se-publico .se-articles .se-explorer__search:focus,
-.se-publico .se-articles .se-explorer__btn:hover,
-.se-publico .se-articles .se-explorer__btn:focus-visible {
+.se-publico .se-articles .se-explorer__search:focus {
+  background-size: 100% 2px, auto;
   border-color: var(--tinta);
-  background: #ffffff;
+  outline: none;
 }
 
-.se-publico .se-articles .se-explorer__search:focus-visible,
+.se-publico .se-articles .se-explorer__search:focus-visible {
+  outline: none;
+}
+
+/* Los filtros, en frase: texto con su flecha, sin caja. */
+.se-publico .se-articles .se-explorer__btn {
+  min-width: 0;
+  min-height: 44px;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  font-family: var(--se-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--filete-fuerte);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.se-publico .se-articles .se-explorer__btn:hover,
+.se-publico .se-articles .se-explorer__btn--on {
+  border: 0;
+  background: transparent;
+  text-decoration-color: var(--tinta);
+}
+
+.se-publico .se-articles .se-explorer__btn--filled {
+  color: var(--marca-verde);
+  text-decoration-color: var(--marca-verde);
+}
+
 .se-publico .se-articles .se-explorer__btn:focus-visible {
   outline: 2px solid var(--marca-verde);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
-.se-publico .se-articles .se-explorer__total,
-.se-publico .se-articles .se-explorer__none,
-.se-publico .se-articles .se-explorer__caret,
-.se-publico .se-articles .se-explorer__bar .se-explorer__n {
+.se-publico .se-articles .se-explorer__caret {
   color: var(--color-slate);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.se-publico .se-articles .se-explorer__sel,
-.se-publico .se-articles .se-explorer__total strong {
-  color: var(--tinta);
+.se-publico .se-articles .se-explorer__btn--on .se-explorer__caret {
+  transform: rotate(180deg);
+}
+
+.se-publico .se-articles .se-explorer__total {
+  margin-left: 0;
+  color: var(--color-slate);
+  font-size: 0.9375rem;
+}
+
+.se-publico .se-articles .se-explorer__total::before {
+  content: "·";
+  margin-right: 22px;
+  color: var(--filete-fuerte);
 }
 
 .se-publico .se-articles .se-explorer__total strong {
   font-family: var(--cifras);
-}
-
-.se-publico .se-articles .se-explorer__chip,
-.se-publico .se-articles .se-explorer__clear {
-  border-radius: 0;
-  border-color: var(--tinta);
+  font-size: 1rem;
   color: var(--tinta);
 }
 
-.se-publico .se-articles .se-explorer__chip {
-  background: transparent;
+/* La cifra entra de abajo cuando cambia: el filtro respondió. */
+.se-explorer__cifra {
+  display: inline-block;
+  animation: se-explorer-cifra 360ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.se-publico .se-articles .se-explorer__chip:hover,
+@keyframes se-explorer-cifra {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-explorer__cifra { animation: none; }
+  .se-publico .se-articles .se-explorer__search { transition: none; }
+}
+
+.se-publico .se-articles .se-explorer__clear {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--marca-rojo);
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 .se-publico .se-articles .se-explorer__clear:hover {
-  background: rgba(17, 24, 39, 0.06);
+  background: transparent;
+  color: var(--tinta);
 }
 
 .se-publico .se-articles .se-explorer__active {
-  border-top-color: var(--filete);
+  margin-top: 6px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.se-publico .se-articles .se-explorer__chip {
+  padding: 4px 10px;
+  border: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  font-size: 0.875rem;
+}
+
+.se-publico .se-articles .se-explorer__chip:hover {
+  background: var(--tinta);
+  color: #ffffff;
 }
 
 .se-publico .se-explorer__panel {
   border-radius: 0;
-  border-color: var(--filete-fuerte);
+  border-color: var(--tinta);
+  border-top-width: 2px;
   background: var(--papel);
-  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.14);
+  box-shadow: 0 12px 28px -12px rgba(17, 24, 39, 0.35);
 }
 
 .se-publico .se-explorer__opt {
   border-radius: 0;
+}
+
+.se-publico .se-explorer__panel .se-explorer__opt--on {
+  background: var(--tinta);
+  color: #ffffff;
 }
 
 /* —— El paginador: casillas rectas, la página actual en tinta —— */
@@ -12553,3 +12662,504 @@ html {
   margin-inline: 0;
   padding-inline: 0;
 }
+
+/* ═══ Educación como suplemento del diario ═══
+   El catálogo es una mesa de recortes: cada módulo, un pedazo de papel rasgado que se
+   asienta al asomarse (`Recorte`). El módulo abre con su índice, como la portadilla
+   de un suplemento: números grandes en la serif, filetes entre clases y la abierta
+   marcada en rojo. El precio va en un cupón recortado. */
+.se-publico .se-edu__grid {
+  gap: clamp(1.75rem, 3vw, 2.75rem) clamp(1.25rem, 2.5vw, 2rem);
+  padding-top: 8px;
+}
+
+.se-edu__grid > .se-recorte > .se-recorte__papel {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.se-edu__grid > .se-recorte {
+  display: flex;
+}
+
+.se-publico .se-edu__grid .se-modulo {
+  padding: 0;
+}
+
+.se-publico .se-edu__grid .se-modulo__titulo {
+  font-size: 1.375rem;
+  line-height: 1.15;
+}
+
+/* —— El índice del módulo —— */
+.se-publico .se-temario {
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-temario__fila + .se-temario__fila {
+  border-top-color: var(--filete);
+}
+
+.se-publico .se-temario__fila--cerrada {
+  background: transparent;
+}
+
+.se-publico .se-temario__enlace {
+  padding: 1rem 0;
+  gap: 1.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.se-publico a.se-temario__enlace:hover {
+  background: transparent;
+}
+
+.se-publico .se-temario__num {
+  width: auto;
+  min-width: 2ch;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tinta);
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), color 0.2s ease;
+}
+
+.se-publico .se-temario__fila--cerrada .se-temario__num {
+  opacity: 1;
+  color: var(--filete-fuerte);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-publico a.se-temario__enlace:hover .se-temario__num {
+    transform: translateX(4px);
+    color: var(--marca-rojo);
+  }
+}
+
+.se-publico .se-temario__titulo {
+  font-family: var(--titular);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.se-publico a.se-temario__enlace:hover .se-temario__titulo {
+  color: var(--tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-publico .se-temario__meta {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-temario__sello {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-temario__sello--libre {
+  background: transparent;
+  color: var(--marca-rojo);
+}
+
+/* —— El cupón del precio —— */
+.se-publico .se-modulo-detalle__lado .se-compra {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-compra__precio {
+  font-family: var(--titular);
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.se-publico .se-modulo-detalle__titulo {
+  font-size: clamp(2.25rem, 1.4rem + 2.8vw, 3.75rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+/* ═══ La clase: una lectura larga ═══
+   Portadilla con el título grande en la serif; debajo, dónde está uno (lección y
+   duración) y el avance del módulo. El cuerpo, a medida de lectura, con letra capital,
+   intertítulos en la serif y la cita como destacado entre reglas. Arriba de la
+   pantalla, una barra cobre se llena al leer. */
+.se-publico .se-edu__lectura {
+  max-width: calc(68ch + 2 * var(--se-content-gutter));
+}
+
+.se-publico .se-edu__titulo {
+  margin: clamp(1rem, 2vw, 1.75rem) 0 0.75rem;
+  font-size: clamp(2.5rem, 1.5rem + 3.2vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.se-publico .se-edu__leccion-kicker {
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__leccion-kicker-dato {
+  letter-spacing: 0;
+  color: var(--color-slate);
+}
+
+.se-publico .se-edu__avance {
+  height: 2px;
+  margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
+  border-radius: 0;
+  background: var(--filete);
+}
+
+.se-publico .se-edu__avance-barra {
+  border-radius: 0;
+  background: var(--tinta);
+}
+
+.se-publico .se-edu__video {
+  border-radius: 0;
+}
+
+.se-publico .se-edu__cuerpo {
+  margin-top: 0;
+  font-size: 1.1875rem;
+  line-height: 1.7;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-family: var(--titular);
+  font-size: 4.4em;
+  font-weight: 600;
+  line-height: 0.82;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__cuerpo :is(h2, h3) {
+  margin: 2.25rem 0 0.75rem;
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo h2 { font-size: 1.75rem; }
+.se-publico .se-edu__cuerpo h3 { font-size: 1.375rem; }
+
+.se-publico .se-edu__cuerpo ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.se-publico .se-edu__cuerpo ul > li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.se-publico .se-edu__cuerpo ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.75rem;
+  height: 2px;
+  background: var(--marca-rojo);
+}
+
+.se-publico .se-edu__cuerpo blockquote {
+  margin: 2.25rem 0;
+  padding: 1rem 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-style: italic;
+  line-height: 1.25;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo blockquote p {
+  margin: 0;
+}
+
+/* La invitación del final, en un recorte. */
+.se-publico .se-edu__continuar {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.se-publico .se-edu__continuar .se-recorte__papel {
+  padding-top: calc(var(--rasgado) + 22px);
+}
+
+.se-publico .se-edu__continuar-titulo {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+/* Anterior y siguiente, como el pie de una página de diario. */
+.se-publico .se-edu__vecinas {
+  margin-top: 2.5rem;
+  padding-top: 14px;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-publico .se-edu__vecinas .se-link {
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-bottom: 0;
+}
+
+/* La barra de lectura: se llena con el desplazamiento, sin JavaScript. */
+.se-edu__leyendo {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .se-edu__leyendo {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 70;
+    display: block;
+    height: 3px;
+    background: var(--marca-rojo);
+    transform-origin: left;
+    animation: se-edu-leyendo linear both;
+    animation-timeline: scroll(root);
+  }
+
+  @keyframes se-edu-leyendo {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-edu__leyendo { display: none; }
+}
+
+/* ═══ Quiénes somos: la mancheta ═══
+   Como el recuadro de un diario donde figura quién lo hace: cada cargo con su nombre en
+   versalita de la serif, sobre un filete, y las personas debajo; los cargos corren en
+   columnas de periódico. El propósito, en un recorte; las ciudades, entre reglas como
+   la línea de fecha de una cabecera. */
+.se-publico .se-about__intro {
+  margin-top: 1rem;
+  padding: 8px 0;
+  border-top: 1px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+}
+
+.se-publico .se-about__intro-line {
+  margin: 0;
+  font-family: var(--titular);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--color-slate);
+}
+
+.se-publico .se-about__tagline {
+  max-width: 34ch;
+  margin-top: 1rem;
+  font-family: var(--titular);
+  font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
+  line-height: 1.25;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__proposito {
+  max-width: 46rem;
+  margin: 0 0 var(--se-space-xl);
+}
+
+.se-publico .se-about__proposito .se-about__band-title {
+  font-size: 1rem;
+  font-family: var(--se-font-ui);
+  font-weight: 700;
+  color: var(--marca-rojo);
+}
+
+.se-mancheta {
+  columns: 3 16rem;
+  column-gap: clamp(1.5rem, 3vw, 2.75rem);
+  column-rule: 1px solid var(--filete);
+}
+
+.se-mancheta__grupo {
+  break-inside: avoid;
+  margin: 0 0 clamp(1.5rem, 2.5vw, 2.25rem);
+  padding-top: 8px;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-mancheta__cargo {
+  margin: 0 0 0.5rem;
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  color: var(--tinta);
+}
+
+.se-mancheta__nombres {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-mancheta__nombres > li + li {
+  border-top: 1px solid var(--filete);
+}
+
+/* La persona, en un renglón: retrato pequeño, nombre y su enlace. */
+.se-publico .se-mancheta .se-member-card {
+  padding: 10px 0;
+  border: 0;
+}
+
+.se-publico .se-mancheta .se-member-card__top {
+  gap: 12px;
+}
+
+.se-publico .se-mancheta .se-member-card__avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.75rem;
+}
+
+.se-publico .se-mancheta .se-member-card__name {
+  font-size: 1.0625rem;
+}
+
+.se-publico .se-mancheta .se-member-card__links {
+  margin: 2px 0 0 48px;
+  padding-top: 0;
+}
+
+/* ═══ La portada de la LVBP hacia abajo ═══ */
+
+/* —— Artículos: uno manda —— La primera pieza, grande y a dos filas; las otras cuatro
+   a su lado, de dos en dos y sin resumen. En tableta la primera va a todo el ancho. */
+.se-portada .se-format .se-artgrid--principal > *,
+.se-portada .se-format .se-artgrid--principal > :nth-child(n + 4) {
+  display: flex;
+}
+
+@media (min-width: 900px) {
+  .se-portada .se-format .se-artgrid--principal {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(20px, 2.2vw, 32px);
+  }
+
+  .se-portada .se-format .se-artgrid--principal > :first-child {
+    grid-row: span 2;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .se-portada .se-format .se-artgrid--principal > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 599px) {
+  .se-portada .se-format .se-artgrid--principal > :nth-child(n + 4) {
+    display: none;
+  }
+}
+
+.se-portada .se-artgrid--principal > .se-artcard:first-child .se-artcard__title {
+  font-size: clamp(1.625rem, 1.1rem + 1.4vw, 2.375rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.se-portada .se-artgrid--principal > .se-artcard:first-child .se-artcard__media {
+  aspect-ratio: 3 / 2;
+}
+
+.se-portada .se-artgrid--principal > .se-artcard:first-child .se-artcard__summary {
+  font-size: 1.0625rem;
+}
+
+@media (min-width: 900px) {
+  .se-portada .se-artgrid--principal > .se-artcard:not(:first-child) .se-artcard__summary {
+    display: none;
+  }
+}
+
+/* —— Informes: cada uno, un recorte —— Dentro del papel, sin el filete de la tarjeta. */
+.se-publico .se-docgrid {
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+  padding: 6px 0 10px;
+}
+
+.se-publico .se-recorte .se-doccard {
+  padding: 0;
+  border-top: 0;
+}
+
+/* —— Los juegos: dos recortes de pasatiempos —— */
+.se-pausa-doble {
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.se-pausa-doble > .se-recorte .se-recorte__papel {
+  padding: calc(var(--rasgado) + 10px) 14px calc(var(--rasgado) + 12px);
+}
+
+.se-pausa-doble > .se-recorte .se-pausa-banner {
+  background: transparent;
+}
+
+/* —— Botones del boletín (bloque y pie) en frase, como los demás —— */
+.se-publico :is(.se-newsletter__btn, .se-footer__newsletter-btn) {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.9375rem;
+}
+
+/* El recorte del final de la clase no lleva la regla del bloque que sustituye. */
+.se-publico .se-recorte.se-edu__continuar {
+  padding: 0;
+  border-top: 0;
+}
+

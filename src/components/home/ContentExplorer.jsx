@@ -13,6 +13,13 @@ import { countForOption } from "../../lib/contentFilter";
  * Format is deliberately absent: it comes from the header menu, and inside a
  * format page these two axes narrow without leaving the format.
  */
+/** La flecha de los desplegables: dibujada, no un carácter. */
+const Flecha = () => (
+  <svg className="se-explorer__caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">
+    <path d="m2.5 4.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export const ContentExplorer = ({
   pieces,
   // The available options and the tree they live in. Props rather than an import:
@@ -183,9 +190,7 @@ export const ContentExplorer = ({
             aria-expanded={open === "tema"}
           >
             <span>{label(temas, t("portada.explorador.tema"))}</span>
-            <span className="se-explorer__caret" aria-hidden="true">
-              ▾
-            </span>
+            <Flecha />
           </button>
           {open === "tema" ? (
             // Un grupo de botones que se encienden y apagan, y no un `listbox`: la
@@ -230,9 +235,7 @@ export const ContentExplorer = ({
             aria-expanded={open === "geo"}
           >
             <span>{label(geos, t("portada.explorador.donde"))}</span>
-            <span className="se-explorer__caret" aria-hidden="true">
-              ▾
-            </span>
+            <Flecha />
           </button>
           {open === "geo" ? (
             <div
@@ -317,7 +320,8 @@ export const ContentExplorer = ({
         </div>
 
         <span className="se-explorer__total" aria-live="polite">
-          {t("portada.explorador.resultados", { n: total, numero: <strong>{total}</strong> })}
+          {/* La cifra vuelve a entrar cuando cambia: así se ve que el filtro respondió. */}
+          {t("portada.explorador.resultados", { n: total, numero: <strong key={total} className="se-explorer__cifra">{total}</strong> })}
         </span>
 
         {hasSelection ? (

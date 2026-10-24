@@ -7,6 +7,7 @@ import { IconReloj } from "../components/icons/educacion";
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
+import { Recorte, Recortes } from "../components/comun/Recorte";
 import {
   descargarArchivoDeLeccion,
   duracionLegible,
@@ -260,6 +261,12 @@ export const EducacionLeccion = () => {
 
           {leccion ? (
             <>
+              {/* La barra que se llena al leer, arriba de la pantalla (solo donde el
+                  navegador sabe atar una animación al desplazamiento). */}
+              <div className="se-edu__leyendo" aria-hidden="true" />
+
+              <h1 className="se-edu__titulo">{leccion.titulo}</h1>
+
               {/* Donde esta uno y cuanto queda. Un "Leccion 2" a secas no dice nada:
                   lo que sostiene la lectura hasta el final de un modulo es ver que
                   el final existe y esta cerca. El total viaja con la leccion, asi
@@ -294,8 +301,6 @@ export const EducacionLeccion = () => {
                 </div>
               ) : null}
 
-              <h1 className="se-edu__titulo">{leccion.titulo}</h1>
-
               <Reproductor leccion={leccion} moduloSlug={slug} />
 
               {leccion.cuerpo ? (
@@ -313,22 +318,24 @@ export const EducacionLeccion = () => {
                   enganchado. Decirlo aqui, con el precio y el boton, convierte ese
                   tropiezo en la oferta. */}
               {siguienteCerrada ? (
-                <div className="se-edu__continuar">
-                  <p className="se-edu__continuar-titulo">
-                    {t("educacion.leccion.sigueEn", { modulo: <strong>{modulo.titulo}</strong> })}
-                  </p>
-                  <p className="se-edu__continuar-texto">
-                    {t("educacion.leccion.siguienteQuedan", {
-                      titulo: leccion.vecinas.siguiente.titulo,
-                      n: modulo.lecciones - modulo.lecciones_libres,
-                    })}
-                  </p>
-                  <BotonesDePago
-                    modulo={modulo}
-                    pasarelas={pasarelas}
-                    onComprado={cargar}
-                  />
-                </div>
+                <Recortes>
+                  <Recorte className="se-edu__continuar">
+                    <p className="se-edu__continuar-titulo">
+                      {t("educacion.leccion.sigueEn", { modulo: <strong>{modulo.titulo}</strong> })}
+                    </p>
+                    <p className="se-edu__continuar-texto">
+                      {t("educacion.leccion.siguienteQuedan", {
+                        titulo: leccion.vecinas.siguiente.titulo,
+                        n: modulo.lecciones - modulo.lecciones_libres,
+                      })}
+                    </p>
+                    <BotonesDePago
+                      modulo={modulo}
+                      pasarelas={pasarelas}
+                      onComprado={cargar}
+                    />
+                  </Recorte>
+                </Recortes>
               ) : null}
 
               <nav className="se-edu__vecinas" aria-label={t("educacion.leccion.navegacionEntreLecciones")}>

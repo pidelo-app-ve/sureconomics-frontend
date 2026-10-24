@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCatalogo } from "../services/educacionService";
 import { TarjetaDeModulo } from "../components/educacion/TarjetaDeModulo";
+import { Recorte, Recortes } from "../components/comun/Recorte";
 import { IconEscudo, IconLlave, IconVisto } from "../components/icons/educacion";
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
@@ -117,13 +118,15 @@ export const Educacion = () => {
               <h2 className="se-edu__h2">
                 {t("educacion.catalogo.disponibles", { n: estado.modulos.length })}
               </h2>
-              <ul className="se-edu__grid">
-                {estado.modulos.map((modulo) => (
-                  <li key={modulo.slug}>
+              {/* Cada módulo, un recorte del suplemento: al asomarse se asientan uno
+                  detrás de otro. */}
+              <Recortes as="ul" className="se-edu__grid">
+                {estado.modulos.map((modulo, i) => (
+                  <Recorte as="li" key={modulo.slug} indice={i}>
                     <TarjetaDeModulo modulo={modulo} />
-                  </li>
+                  </Recorte>
                 ))}
-              </ul>
+              </Recortes>
             </>
           ) : null}
         </div>

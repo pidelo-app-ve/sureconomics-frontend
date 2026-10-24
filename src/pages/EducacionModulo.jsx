@@ -6,6 +6,7 @@ import { IconCandado, IconLlave, IconoDeTipo, IconReloj } from "../components/ic
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
+import { Recorte, Recortes } from "../components/comun/Recorte";
 import {
   duracionLegible,
   getCatalogo,
@@ -254,13 +255,16 @@ export const EducacionModulo = () => {
               </ol>
             </div>
 
-            <div className="se-modulo-detalle__lado">
-              <PanelDeCompra
-                modulo={modulo}
-                pasarelas={pasarelas}
-                onComprado={cargar}
-              />
-            </div>
+            {/* El precio y lo que incluye, como un cupón recortado del suplemento. */}
+            <Recortes className="se-modulo-detalle__lado">
+              <Recorte>
+                <PanelDeCompra
+                  modulo={modulo}
+                  pasarelas={pasarelas}
+                  onComprado={cargar}
+                />
+              </Recorte>
+            </Recortes>
           </div>
         </div>
       </section>

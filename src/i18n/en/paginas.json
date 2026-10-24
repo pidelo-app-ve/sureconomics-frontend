@@ -300,11 +300,6 @@
       "propositoTexto": "To build a solid platform for reporting on, analyzing and understanding the economic and financial reality of Latin America.",
       "equipo": "Team",
       "equipoLead": "The editorial and operating structure behind SurEconomics.",
-      "abrirSeccion": "Open section {seccion}",
-      "integrantes": {
-        "one": "{n} member",
-        "other": "{n} members"
-      },
       "secciones": {
         "junta": "Board of Directors",
         "directorGeneral": "General Director",

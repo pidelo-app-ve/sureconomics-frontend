@@ -300,11 +300,6 @@
       "propositoTexto": "Construir una plataforma sólida para informar, analizar y comprender la realidad económica y financiera de América Latina.",
       "equipo": "Equipo",
       "equipoLead": "La estructura editorial y operativa detrás de SurEconomics.",
-      "abrirSeccion": "Abrir sección {seccion}",
-      "integrantes": {
-        "one": "{n} integrante",
-        "other": "{n} integrantes"
-      },
       "secciones": {
         "junta": "Junta Directiva",
         "directorGeneral": "Director General",

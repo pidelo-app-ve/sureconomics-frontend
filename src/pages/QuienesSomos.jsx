@@ -4,17 +4,9 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getFotosDelEquipo } from "../services/publicContentService";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
+import { Recorte, Recortes } from "../components/comun/Recorte";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-
-const useInitialAccordionOpen = () => {
-  const [initiallyOpen, setInitiallyOpen] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia?.("(min-width: 960px)");
-    setInitiallyOpen(Boolean(mq?.matches));
-  }, []);
-  return initiallyOpen;
-};
 
 /**
  * El logotipo, del archivo del brandbook y no dibujado a mano.
@@ -60,53 +52,36 @@ const useFotosDelEquipo = () => {
   return fotos;
 };
 
-const TeamSection = ({ title, members, initiallyOpen, fotos }) => {
-  const { t } = useIdioma();
-  const hasMembers = Boolean(members?.length);
-  const [open, setOpen] = useState(Boolean(initiallyOpen));
-  useEffect(() => {
-    setOpen(Boolean(initiallyOpen));
-  }, [initiallyOpen]);
-
-  if (!hasMembers) return null;
-
+/**
+ * Un cargo de la mancheta: su nombre y, debajo, quienes lo ocupan. Como en la mancheta
+ * de un diario, todo a la vista: eran acordeones con tarjetas dentro, y la página se
+ * leía como una presentación.
+ */
+const TeamSection = ({ title, members, fotos }) => {
+  if (!members?.length) return null;
   return (
-    <details
-      className="se-about__acc"
-      open={open}
-      onToggle={(e) => setOpen(Boolean(e.currentTarget.open))}
-    >
-      <summary className="se-about__acc-summary" aria-label={t("paginas.quienesSomos.abrirSeccion", { seccion: title })}>
-        <span className="se-about__acc-title">{title}</span>
-        <span className="se-about__acc-right">
-          <span className="se-about__acc-meta" aria-label={t("paginas.quienesSomos.integrantes", { n: members.length })}>
-            {members.length}
-          </span>
-          <span className="se-about__acc-chevron" aria-hidden="true" />
-        </span>
-      </summary>
-      <div className="se-about__acc-body">
-        <div className="se-team-grid">
-          {members.map((m) => (
-            <TeamMemberCard key={m.id} member={m} foto={fotos?.[claveDeFoto(m)] || ""} />
-          ))}
-        </div>
-      </div>
-    </details>
+    <section className="se-mancheta__grupo">
+      <h3 className="se-mancheta__cargo">{title}</h3>
+      <ul className="se-mancheta__nombres">
+        {members.map((m) => (
+          <li key={m.id}>
+            <TeamMemberCard member={m} foto={fotos?.[claveDeFoto(m)] || ""} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 };
 
 TeamSection.propTypes = {
   title: PropTypes.string.isRequired,
   members: PropTypes.arrayOf(PropTypes.object),
-  initiallyOpen: PropTypes.bool,
   /** `{ id de persona: direccion }`. Quien no este, sale con sus iniciales. */
   fotos: PropTypes.objectOf(PropTypes.string),
 };
 
 export const QuienesSomos = () => {
   const { t } = useIdioma();
-  const initiallyOpen = useInitialAccordionOpen();
   const fotos = useFotosDelEquipo();
   useMetaPagina({
     title: t("paginas.quienesSomos.meta.titulo", { marca: BRAND.name }),
@@ -145,12 +120,15 @@ export const QuienesSomos = () => {
           nada mas lo usaba. */}
       <section className="se-section se-about__bands">
         <div className="se-container">
-          <article className="se-about__band se-about__band--alt">
-            <h2 className="se-about__band-title">{t("paginas.quienesSomos.proposito")}</h2>
-            <p className="se-text-body se-about__band-text se-about__band-text--lead">
-              {t("paginas.quienesSomos.propositoTexto")}
-            </p>
-          </article>
+          {/* El propósito, recortado como una cita de la casa. */}
+          <Recortes className="se-about__proposito">
+            <Recorte as="article">
+              <h2 className="se-about__band-title">{t("paginas.quienesSomos.proposito")}</h2>
+              <p className="se-text-body se-about__band-text se-about__band-text--lead">
+                {t("paginas.quienesSomos.propositoTexto")}
+              </p>
+            </Recorte>
+          </Recortes>
         </div>
       </section>
 
@@ -161,7 +139,7 @@ export const QuienesSomos = () => {
             <p className="se-text-body se-about__team-lead">{t("paginas.quienesSomos.equipoLead")}</p>
           </header>
 
-          <div className="se-about__acc-list">
+          <div className="se-mancheta">
             {/* Seis grupos, calcados del documento del cliente ("Quiénes Somos - SurE",
                 15/09/2026) y en su mismo orden. Antes eran tres: Director General y
                 Editor en Jefe vivian fusionados con Comite Editorial, y no habia ni
@@ -172,37 +150,31 @@ export const QuienesSomos = () => {
             <TeamSection
               title={t("paginas.quienesSomos.secciones.junta")}
               members={TEAM.board}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
               title={t("paginas.quienesSomos.secciones.directorGeneral")}
               members={TEAM.directorGeneral}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
               title={t("paginas.quienesSomos.secciones.editorEnJefe")}
               members={TEAM.editorEnJefe}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
               title={t("paginas.quienesSomos.secciones.comiteEditorial")}
               members={TEAM.editorialCommittee}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
               title={t("paginas.quienesSomos.secciones.equipo")}
               members={TEAM.team}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
             <TeamSection
               title={t("paginas.quienesSomos.secciones.colaboradores")}
               members={TEAM.collaborators}
-              initiallyOpen={initiallyOpen}
               fotos={fotos}
             />
           </div>

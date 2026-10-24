@@ -1,0 +1,72 @@
+/* ═══ EL RECORTE ═══
+   Un pedazo de periódico: papel un punto más claro que la página, rasgado arriba y
+   abajo, con una sombra corta que lo despega del fondo. Se usa donde una pieza
+   merece aislarse (los módulos de Educación, los informes, el propósito de la casa),
+   nunca como la caja de todo.
+
+   Al asomarse, los recortes de un grupo se asientan uno detrás de otro: bajan un
+   poco y enderezan el giro hasta quedarse con el suyo, pequeño. Sin el observador
+   (o con movimiento reducido) ya están en su sitio: la animación nunca esconde nada.
+   Ver `components/comun/Recorte.jsx`. */
+
+.se-recorte {
+  --giro: 0deg;
+  position: relative;
+  transform: rotate(var(--giro));
+  filter: drop-shadow(0 1px 1px rgba(17, 24, 39, 0.1)) drop-shadow(0 10px 14px rgba(17, 24, 39, 0.12));
+}
+
+.se-recorte__papel {
+  --rasgado: 10px;
+  position: relative;
+  padding: calc(var(--rasgado) + 18px) clamp(18px, 2vw, 26px) calc(var(--rasgado) + 20px);
+  background: #fffdf9;
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 12%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0 12 L0.0 2.6 L7.4 9.5 L16.9 5.7 L23.3 3.2 L29.3 1.8 L39.7 7.6 L50.2 3.5 L54.5 1.9 L61.8 1.6 L72.2 9.1 L75.8 7.3 L86.7 10.5 L96.1 3.7 L101.4 4.1 L107.1 6.4 L111.2 1.9 L121.5 4.9 L124.9 2.5 L130.7 7.0 L134.3 5.0 L139.2 6.7 L142.5 7.2 L147.5 9.6 L151.1 6.5 L155.1 6.0 L159.5 7.6 L164.8 7.0 L169.2 7.5 L174.2 6.7 L182.8 6.8 L188.8 10.2 L193.0 3.1 L201.7 10.1 L210.7 6.9 L218.7 2.9 L224.2 4.5 L235.1 8.6 L240.2 3.1 L244.0 6.9 L253.0 10.0 L260.2 6.6 L263.6 2.3 L274.5 7.4 L280.8 10.1 L291.2 9.9 L299.3 1.8 L309.3 2.7 L317.5 5.8 L322.4 4.9 L331.4 7.0 L337.0 5.2 L340.2 9.9 L350.3 9.6 L360.9 5.6 L366.8 11.0 L377.0 5.0 L386.3 9.7 L396.7 5.6 L401.7 8.2 L409.6 9.6 L416.8 9.3 L425.0 8.7 L433.3 10.3 L441.1 8.8 L447.8 4.1 L451.2 6.1 L461.5 8.6 L469.2 10.5 L477.3 9.4 L485.4 11.2 L489.7 5.4 L499.8 7.0 L504.9 8.8 L515.6 9.9 L519.7 4.0 L526.0 6.2 L535.3 6.6 L540.2 10.5 L545.5 6.7 L556.3 7.4 L560.7 5.3 L569.4 2.3 L578.2 11.2 L585.0 2.6 L594.1 8.3 L600 6.8 L600 12 Z%22 fill=%22%23000%22/%3E%3C/svg%3E") top / 100% var(--rasgado) no-repeat,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--rasgado) + 2px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 12%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0 0 L0.0 4.6 L5.2 6.4 L11.7 5.1 L21.1 1.6999999999999993 L30.8 4.9 L39.7 1.5 L45.7 0.5999999999999996 L54.7 5.1 L58.6 5.0 L68.6 2.5 L77.3 7.8 L84.5 5.3 L92.8 5.6 L99.9 3.5 L104.5 2.5 L108.2 2.4000000000000004 L114.9 6.5 L125.8 3.8000000000000007 L135.4 5.5 L143.3 2.6999999999999993 L149.8 2.8000000000000007 L152.8 1.0 L161.0 9.6 L171.2 4.9 L181.9 2.9000000000000004 L189.2 1.9000000000000004 L195.6 7.5 L203.4 10.2 L207.3 2.8000000000000007 L213.7 3.0999999999999996 L223.3 4.7 L231.9 6.1 L242.5 2.4000000000000004 L250.7 1.0 L254.4 9.7 L263.3 10.3 L266.7 9.5 L276.4 4.2 L286.8 1.8000000000000007 L290.7 2.3000000000000007 L300.5 1.0 L305.0 5.3 L313.7 8.1 L322.9 1.4000000000000004 L326.2 2.9000000000000004 L337.0 10.4 L346.2 0.9000000000000004 L350.3 3.8000000000000007 L355.6 2.5 L363.4 9.3 L369.8 7.3 L373.3 10.3 L380.1 3.5 L386.0 1.9000000000000004 L395.0 4.3 L403.6 3.5999999999999996 L412.2 6.2 L419.3 3.8000000000000007 L425.7 1.5 L436.1 10.0 L442.4 9.0 L451.9 3.5 L456.7 1.0999999999999996 L465.5 2.4000000000000004 L471.7 3.5999999999999996 L481.8 9.4 L491.5 2.9000000000000004 L500.6 6.7 L506.5 1.0 L510.1 7.3 L513.1 2.9000000000000004 L516.4 10.2 L521.9 4.2 L526.5 10.3 L530.8 2.4000000000000004 L536.6 1.0999999999999996 L540.3 1.9000000000000004 L549.0 4.9 L553.5 3.6999999999999993 L563.0 6.4 L572.3 4.6 L577.0 1.1999999999999993 L580.2 7.3 L588.7 4.9 L594.5 5.6 L600 1.0 L600 0 Z%22 fill=%22%23000%22/%3E%3C/svg%3E") bottom / 100% var(--rasgado) no-repeat;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 12%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0 12 L0.0 2.6 L7.4 9.5 L16.9 5.7 L23.3 3.2 L29.3 1.8 L39.7 7.6 L50.2 3.5 L54.5 1.9 L61.8 1.6 L72.2 9.1 L75.8 7.3 L86.7 10.5 L96.1 3.7 L101.4 4.1 L107.1 6.4 L111.2 1.9 L121.5 4.9 L124.9 2.5 L130.7 7.0 L134.3 5.0 L139.2 6.7 L142.5 7.2 L147.5 9.6 L151.1 6.5 L155.1 6.0 L159.5 7.6 L164.8 7.0 L169.2 7.5 L174.2 6.7 L182.8 6.8 L188.8 10.2 L193.0 3.1 L201.7 10.1 L210.7 6.9 L218.7 2.9 L224.2 4.5 L235.1 8.6 L240.2 3.1 L244.0 6.9 L253.0 10.0 L260.2 6.6 L263.6 2.3 L274.5 7.4 L280.8 10.1 L291.2 9.9 L299.3 1.8 L309.3 2.7 L317.5 5.8 L322.4 4.9 L331.4 7.0 L337.0 5.2 L340.2 9.9 L350.3 9.6 L360.9 5.6 L366.8 11.0 L377.0 5.0 L386.3 9.7 L396.7 5.6 L401.7 8.2 L409.6 9.6 L416.8 9.3 L425.0 8.7 L433.3 10.3 L441.1 8.8 L447.8 4.1 L451.2 6.1 L461.5 8.6 L469.2 10.5 L477.3 9.4 L485.4 11.2 L489.7 5.4 L499.8 7.0 L504.9 8.8 L515.6 9.9 L519.7 4.0 L526.0 6.2 L535.3 6.6 L540.2 10.5 L545.5 6.7 L556.3 7.4 L560.7 5.3 L569.4 2.3 L578.2 11.2 L585.0 2.6 L594.1 8.3 L600 6.8 L600 12 Z%22 fill=%22%23000%22/%3E%3C/svg%3E") top / 100% var(--rasgado) no-repeat,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--rasgado) + 2px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 600 12%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0 0 L0.0 4.6 L5.2 6.4 L11.7 5.1 L21.1 1.6999999999999993 L30.8 4.9 L39.7 1.5 L45.7 0.5999999999999996 L54.7 5.1 L58.6 5.0 L68.6 2.5 L77.3 7.8 L84.5 5.3 L92.8 5.6 L99.9 3.5 L104.5 2.5 L108.2 2.4000000000000004 L114.9 6.5 L125.8 3.8000000000000007 L135.4 5.5 L143.3 2.6999999999999993 L149.8 2.8000000000000007 L152.8 1.0 L161.0 9.6 L171.2 4.9 L181.9 2.9000000000000004 L189.2 1.9000000000000004 L195.6 7.5 L203.4 10.2 L207.3 2.8000000000000007 L213.7 3.0999999999999996 L223.3 4.7 L231.9 6.1 L242.5 2.4000000000000004 L250.7 1.0 L254.4 9.7 L263.3 10.3 L266.7 9.5 L276.4 4.2 L286.8 1.8000000000000007 L290.7 2.3000000000000007 L300.5 1.0 L305.0 5.3 L313.7 8.1 L322.9 1.4000000000000004 L326.2 2.9000000000000004 L337.0 10.4 L346.2 0.9000000000000004 L350.3 3.8000000000000007 L355.6 2.5 L363.4 9.3 L369.8 7.3 L373.3 10.3 L380.1 3.5 L386.0 1.9000000000000004 L395.0 4.3 L403.6 3.5999999999999996 L412.2 6.2 L419.3 3.8000000000000007 L425.7 1.5 L436.1 10.0 L442.4 9.0 L451.9 3.5 L456.7 1.0999999999999996 L465.5 2.4000000000000004 L471.7 3.5999999999999996 L481.8 9.4 L491.5 2.9000000000000004 L500.6 6.7 L506.5 1.0 L510.1 7.3 L513.1 2.9000000000000004 L516.4 10.2 L521.9 4.2 L526.5 10.3 L530.8 2.4000000000000004 L536.6 1.0999999999999996 L540.3 1.9000000000000004 L549.0 4.9 L553.5 3.6999999999999993 L563.0 6.4 L572.3 4.6 L577.0 1.1999999999999993 L580.2 7.3 L588.7 4.9 L594.5 5.6 L600 1.0 L600 0 Z%22 fill=%22%23000%22/%3E%3C/svg%3E") bottom / 100% var(--rasgado) no-repeat;
+}
+
+/* El asiento: del giro de entrada (más torcido y un poco arriba) al suyo. */
+.se-recortes.se-reveal--in .se-recorte {
+  animation: se-recorte-asienta 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes se-recorte-asienta {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) rotate(calc(var(--giro) * 3.5));
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--giro));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a.se-recorte,
+  .se-recorte:has(> a) {
+    transition: transform 260ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  a.se-recorte:hover,
+  .se-recorte:has(> a):hover {
+    transform: rotate(0deg) translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-recortes.se-reveal--in .se-recorte {
+    animation: none;
+  }
+
+  a.se-recorte,
+  .se-recorte:has(> a) {
+    transition: none;
+  }
+}

@@ -98,7 +98,7 @@ const IconoLupa = () => (
 );
 
 /**
- * La lupa de la cabecera. Desde el 23-oct-2026 el buscador no es una barra verde bajo
+ * La lupa de la cabecera. El buscador no es una barra verde bajo
  * el mástil sino este botón (la redacción pidió «solo el icono»): abre el explorador
  * de la portada con `?buscar=1` y, si ya está abierto, lo cierra volviendo a `/`.
  * Es un enlace y no un botón porque el estado vive en la URL: se puede compartir,
@@ -111,10 +111,12 @@ const BuscarLink = ({ abierto, enPortada, onClick, className = "" }) => {
   return (
     <Enlace
       to={cierra ? "/" : "/?buscar=1"}
+      replace={cierra}
+      state={cierra ? undefined : { desdeLaLupa: true }}
       className={`se-header__buscar${abierto ? " se-header__buscar--on" : ""}${
         className ? ` ${className}` : ""
       }`}
-      aria-label={cierra ? t("nav.cerrarBuscador") : t("nav.buscar")}
+      aria-label={t("nav.buscar")}
       aria-expanded={enPortada ? abierto : undefined}
       onClick={onClick}
     >

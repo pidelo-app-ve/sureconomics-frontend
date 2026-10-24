@@ -10,7 +10,7 @@ import { TituloDePieza } from "../content/TituloDePieza";
 /**
  * Noticias en la portada: una lista densa a dos columnas con un carril al lado.
  *
- * Hasta el 23-oct-2026 la portada pintaba las noticias con la misma tarjeta con foto
+ * La portada pintaba antes las noticias con la misma tarjeta con foto
  * que los artículos (`NewsList`), y la redacción lo señaló como lo más «de plantilla»
  * de la página: seis tarjetas iguales justo debajo de la apertura, que existe para
  * que una noticia mande. Aquí vuelve la lista de cable -- lugar, fecha, titular, una
@@ -24,10 +24,9 @@ import { TituloDePieza } from "../content/TituloDePieza";
  * La primera nota manda: con su foto grande, el titular y la entradilla. Las demás
  * llevan miniatura: solo texto se leía como un índice y la redacción pidió imagen.
  *
- * La publicidad va DEBAJO del bloque, como franja ancha (`lista`), no como ficha en
- * el carril: la ficha pinta un logotipo pequeño sobre un recuadro vacío, y al lado de
- * una lista de titulares se veía como algo que no cargó. La franja lleva el arte
- * completo del anunciante, que es lo que mejor se ve en todo el sitio.
+ * La publicidad va al final de la columna de noticias, a su ancho, como franja
+ * (`lista`) y no como ficha: la ficha pintaba un logotipo pequeño sobre un recuadro
+ * vacío y se veía como algo que no cargó.
  */
 /** La línea «Lugar · fecha» de una nota. */
 const Meta = ({ pieza }) => (
@@ -101,9 +100,9 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
 
 NoticiasDensas.propTypes = {
   items: listaDePiezas({ resumen: PropTypes.string, imagenUrl: PropTypes.string }),
-  /** La clave del hueco de publicidad del carril. */
+  /** La clave del hueco de publicidad del final de la columna. */
   espacioDeAnuncio: PropTypes.string,
-  /** Lo que va en el carril encima del anuncio. */
+  /** Lo que va en el carril de la derecha («Lo más leído»); sin él, la lista ocupa todo. */
   carril: PropTypes.node,
 };
 

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavegar } from "../components/Enlace";
 import { NewsletterBlock } from "../components/blog";
 import { BRAND, PARTNERS } from "../data/surEconomicsMock";
@@ -11,9 +11,10 @@ import { AperturaPortada, elegirApertura } from "../components/home/AperturaPort
 import { BannerDeJuegos } from "../components/home/TarjetaPausa";
 import { MarcadorLvbp } from "../components/lvbp/MarcadorLvbp";
 import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
-import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, MasLeido, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
+import { ArticleCardGrid, ContentExplorer, EditorialDelDia, EditorialList, FormatSection, FranjaPortada, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
+import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { ESPACIOS } from "../services/publicidadService";
@@ -31,7 +32,7 @@ import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/pub
  * principal la fija la redaccion desde el editor por un tiempo («Abrir la portada con
  * esta pieza») o, si no hay nada fijado, es la noticia mas reciente.
  *
- * Desde el 23-oct-2026 el filtro ya no esta siempre a la vista: lo abre la lupa de la
+ * El filtro no esta siempre a la vista: lo abre la lupa de la
  * cabecera (`?buscar=1`) y cuelga del mastil, en su sitio de siempre. La redaccion
  * pidio «solo el icono»: bajo el mastil lo primero es la noticia. Al cerrarlo (la
  * lupa otra vez, o «atras») la seleccion se limpia, porque un filtro puesto con el
@@ -64,10 +65,10 @@ const EN_LA_FRANJA = { analisis: 2 };
  * el lector veia **una sola** editorial nueva de las diez publicadas.
  */
 const PREVIEW = {
-  // Once desde el 23-oct-2026: la primera manda a todo el ancho y las otras diez van
+  // Once: la primera manda a todo el ancho y las otras diez van
   // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
   noticia: 11,
-  // Cuatro desde el 23-oct-2026: con el contenedor a 1440 caben cuatro columnas, y con
+  // Cuatro: con el contenedor a 1440 caben cuatro columnas, y con
   // tres quedaba un hueco a la derecha. Donde caben tres, la cuarta se oculta (CSS).
   articulo: 4,
   editorial: 4,
@@ -82,13 +83,12 @@ const PREVIEW = {
    formato para que no desentonara, y la portada acabaria siendo mas anuncio que
    portada. Con dos basta. */
 const LAYOUTS = {
-  // Lista densa con carril (23-oct-2026): «Lo más leído» y la tarjeta nativa van al
-  // lado, en el blanco que antes sobraba; la tarjeta con foto queda para los listados.
-  noticia: (items) => (
+  // Noticias con el carril de «Lo más leído» al lado, si hay datos para él.
+  noticia: (items, { carril } = {}) => (
     <NoticiasDensas
       items={items}
       espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO}
-      carril={<MasLeido />}
+      carril={carril}
     />
   ),
   articulo: (items) => (
@@ -107,8 +107,8 @@ const LAYOUTS = {
 };
 
 /**
- * «Al punto» en la portada (23-oct-2026): Entrevistas y Podcast en una sola sección,
- * las tres piezas más recientes de los dos formatos, intercaladas. Eran dos
+ * «Al punto» en la portada: Entrevistas y Podcast en una sola sección,
+ * las cuatro piezas más recientes de los dos formatos, intercaladas. Eran dos
  * bloques seguidos de tres tarjetas oscuras y alargaban el final. Con un filtro puesto
  * vuelven a ir por separado: ahí son resultados de búsqueda, agrupados por formato.
  */
@@ -126,6 +126,7 @@ export const Home = () => {
   };
   const { temas, geos, query, results, setSelection, setQuery, reset, isFiltered } =
     useContentFilter(pieces, tree);
+  const masLeidas = useMasLeidas();
 
   // El explorador solo se pinta con `?buscar=1` en la URL (la lupa de la cabecera).
   //
@@ -135,13 +136,21 @@ export const Home = () => {
   // había un filtro puesto la portada saltaba de los resultados a todo en el mismo
   // cuadro. Escape lo cierra, y el foco vuelve a la lupa si estaba dentro.
   const [parametros] = useSearchParams();
+  const ubicacion = useLocation();
   const navegar = useNavegar();
+  // El foco entra en el campo solo si el lector pulsó la lupa; no al cargar un enlace
+  // compartido con `?buscar=1`, que dejaría el foco antes de la cabecera.
+  const desdeLaLupa = Boolean(ubicacion.state?.desdeLaLupa);
   const buscadorAbierto = parametros.get("buscar") === "1";
   const [cajon, setCajon] = useState(buscadorAbierto ? "abierto" : "cerrado");
+  // Cuántas veces se ha abierto: la clave del explorador, para que vuelva a montarse (y
+  // a enfocar el campo) al reabrir aunque el cierre anterior no hubiera terminado.
+  const [aperturas, setAperturas] = useState(0);
   const cajonRef = useRef(null);
   useEffect(() => {
     if (buscadorAbierto) {
       setCajon("abierto");
+      setAperturas((n) => n + 1);
       return undefined;
     }
     setCajon((estado) => (estado === "abierto" ? "cerrando" : estado));
@@ -149,18 +158,25 @@ export const Home = () => {
       const teniaElFoco = cajonRef.current?.contains(document.activeElement);
       setCajon("cerrado");
       reset();
-      if (teniaElFoco) document.querySelector(".se-header__buscar")?.focus();
+      // La lupa que se ve: hay dos (barra y cajón del menú) y la primera puede estar oculta.
+      if (teniaElFoco) {
+        [...document.querySelectorAll(".se-header__buscar")].find((b) => b.offsetParent)?.focus();
+      }
     }, CIERRE_CAJON_MS);
     return () => clearTimeout(id);
   }, [buscadorAbierto, reset]);
-  const cerrarBuscador = () => navegar("/");
+  // `replace`: cerrar no es una página más, y «atrás» no tiene que volver a abrirlo.
+  const cerrarBuscador = () => navegar("/", { replace: true });
   useEffect(() => {
     if (!buscadorAbierto) return undefined;
     const alTeclear = (e) => {
-      if (e.key === "Escape") cerrarBuscador();
+      // Si Escape ya cerró un desplegable del explorador, no cierra también el cajón.
+      // En `window` y no en `document`: así este oyente va después del del explorador
+      // y ve su `preventDefault`.
+      if (e.key === "Escape" && !e.defaultPrevented) cerrarBuscador();
     };
-    document.addEventListener("keydown", alTeclear);
-    return () => document.removeEventListener("keydown", alTeclear);
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
     // `cerrarBuscador` cambia con `navegar`, que es estable mientras no cambie el idioma.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buscadorAbierto]);
@@ -178,7 +194,7 @@ export const Home = () => {
   );
 
   // La franja bajo la apertura: los artículos más recientes (las monedas las pide la
-  // propia franja). Sin «Últimas noticias» desde el 23-oct-2026: era la segunda de tres
+  // propia franja). Sin «Últimas noticias»: era la segunda de tres
   // listas de titulares seguidas. Sólo sin filtro, como la apertura.
   const franja = isFiltered
     ? { analisis: [] }
@@ -294,10 +310,10 @@ export const Home = () => {
   // más gente mueve; fuera de temporada no se pinta.
   const pausa =
     !cargando && status === "success" && pieces.length && !isFiltered ? (
-      // Una sola sección para las dos cosas (23-oct-2026): como dos secciones, la
+      // Una sola sección para las dos cosas: como dos secciones, la
       // regla `.se-section + .se-section` las pegaba (4 px) y el aire caía todo
       // debajo. Ahora el ritmo es 48 / 20 / 48.
-      <section className="se-section se-pausa-franja" aria-label={t("juegos.tarjetaPausa.kicker")}>
+      <section className="se-section se-pausa-franja" aria-label={t("portada.pausa.region")}>
         <div className="se-container">
           <MarcadorLvbp />
           <BannerDeJuegos />
@@ -357,13 +373,14 @@ export const Home = () => {
               onQueryChange={setQuery}
               total={results.length}
               scopeLabel={t("portada.inicio.enTodoElSitio")}
-              enfocarAlMontar
+              enfocarAlMontar={desdeLaLupa}
+              key={aperturas}
             />
             <button
               type="button"
               className="se-explorer-section__cerrar"
               onClick={cerrarBuscador}
-              aria-label={t("comun.cerrar")}
+              aria-label={t("nav.cerrarBuscador")}
             >
               <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
                 <path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -420,14 +437,14 @@ export const Home = () => {
             to={formatoApi === "alpunto" ? "/audiovisual" : rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
           >
-            {LAYOUTS[formatoApi](items)}
+            {LAYOUTS[formatoApi](items, { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
           </FormatSection>
           {/* La franja nativa ancha que iba aqui se movio **dentro** de la rejilla
               -- ver LAYOUTS. Iba detras de las noticias, a lo ancho del contenedor,
               y el cliente pidio lo que decia la maqueta: misma retícula que una
               pieza. Una franja ancha entre dos bloques parte la pagina en dos; una
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
-          {/* El béisbol y los juegos, detrás de las noticias (23-oct-2026): antes iban
+          {/* El béisbol y los juegos, detrás de las noticias: antes iban
               encima de la apertura, y un juego delante hacía que el sitio pareciera de
               juegos antes que de prensa. Y detrás de ellos, la editorial del día. */}
           {formatoApi === "noticia" ? pausa : null}

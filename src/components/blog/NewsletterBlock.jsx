@@ -87,6 +87,7 @@ export const NewsletterBlock = () => {
     <section
       ref={sectionRef}
       id="boletin"
+      tabIndex={-1}
       className="se-newsletter se-section se-reveal"
       aria-labelledby="newsletter-title"
     >

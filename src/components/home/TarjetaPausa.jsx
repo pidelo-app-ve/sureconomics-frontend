@@ -222,7 +222,7 @@ export const InvitacionClave = () => {
 };
 
 /**
- * La franja de juegos de la portada, bajo el buscador: los dos banners lado a lado
+ * La franja de juegos de la portada, detrás de las noticias: los dos banners lado a lado
  * (la guacamaya y La Clave), apilados en el teléfono.
  */
 export const BannerDeJuegos = () => {

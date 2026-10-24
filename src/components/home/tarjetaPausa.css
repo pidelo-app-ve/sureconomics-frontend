@@ -273,32 +273,6 @@
   margin-top: 24px;
 }
 
-/* En el teléfono la franja de la portada va en dos columnas, no apilada: poco alto. */
-@media (max-width: 560px) {
-  .se-pausa-franja .se-pausa-banner {
-    grid-template-columns: 112px minmax(0, 1fr);
-  }
-  .se-pausa-franja .se-pausa-banner__escena {
-    min-height: 0;
-  }
-  .se-pausa-franja .se-pausa-banner__vuelo {
-    left: 14%;
-    top: 30%;
-    width: 60px;
-  }
-  .se-pausa-franja .se-pausa-banner__cuerpo {
-    gap: 5px;
-    padding: 12px 14px 14px;
-  }
-  .se-pausa-franja .se-pausa-banner__titulo {
-    font-size: 1.02rem;
-  }
-  .se-pausa-franja .se-pausa-banner__boton {
-    min-height: 36px;
-    padding: 0 16px;
-    font-size: 0.8125rem;
-  }
-}
 
 /* ═══ LA CLAVE: la tarjeta de /pausa, el banner y la franja doble de la portada ═══ */
 
@@ -490,7 +464,7 @@
 }
 
 /* —— La franja doble de la portada ——
-   Baja (unos 100 px) y de la misma familia que la LVBP y la editorial (23-oct-2026):
+   Baja (unos 100 px) y de la misma familia que la LVBP y la editorial:
    los dos juegos sobre papel con un filete, la escena pequeña a la izquierda -- el
    atardecer y la guacamaya se quedan ahí, que es donde cuentan -- y el texto al lado
    con un enlace, no un botón de aplicación. Antes eran dos tarjetas de 150 px, una

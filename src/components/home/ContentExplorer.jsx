@@ -56,6 +56,8 @@ export const ContentExplorer = ({
     };
     const onKey = (e) => {
       if (e.key !== "Escape") return;
+      // Marcado como atendido: el cajón de la portada no se cierra por este Escape.
+      e.preventDefault();
       const boton = (open === "tema" ? temaRef : geoRef).current;
       setOpen(null);
       boton?.focus();

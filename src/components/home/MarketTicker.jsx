@@ -340,9 +340,6 @@ export const MarketTicker = () => {
     return <div className="se-ticker se-ticker--hueco" aria-hidden="true" />;
   }
 
-  // Sin cifras no hay banda: una franja vacía no dice nada.
-  if (!hayCifras) return null;
-
   const flecha = (direccion) => (direccion === "up" ? "▲" : direccion === "down" ? "▼" : "▬");
   const run = (ticker?.indicators ?? []).map((item, i) => (
     <span className="se-ticker__item" key={`${item.label}-${i}`}>
@@ -367,10 +364,15 @@ export const MarketTicker = () => {
     // `region` para que el nombre sirva de algo: un `aria-label` sobre un `div` sin
     // papel no lo lee ningun lector de pantalla.
     //
-    // Una línea (23-oct-2026): la pastilla «Mercados», el desfile de nuestras cifras,
-    // de dónde salen, y a la derecha los mercados del mundo de TradingView recortados a
-    // la misma altura. En el teléfono el mundo va en la franja bajo la apertura.
-    <div className="se-ticker" role="region" aria-label={t("portada.cinta.cifrasDeMercado")}>
+    // Una línea: la pastilla «Mercados», el desfile de nuestras cifras, de dónde salen,
+    // y a la derecha los mercados del mundo de TradingView recortados a la misma altura.
+    // Sin cifras nuestras la cinta sigue en escritorio con el mundo dentro; en el
+    // teléfono el mundo va en la franja, y una cinta vacía se oculta (CSS).
+    <div
+      className={`se-ticker${hayCifras ? "" : " se-ticker--solo-mundo"}`}
+      role="region"
+      aria-label={t("portada.cinta.cifrasDeMercado")}
+    >
       {hayCifras ? (
         <>
           <span className="se-ticker__pill">

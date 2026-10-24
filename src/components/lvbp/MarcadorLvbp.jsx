@@ -113,15 +113,30 @@ export const EstadoDelJuego = ({ juego }) => {
 };
 EstadoDelJuego.propTypes = { juego: PropTypes.object.isRequired };
 
-const Fila = ({ sigla, carreras, gano, perdio, grande }) => (
-  <div className={`se-lvbp__fila${gano ? " se-lvbp__fila--gano" : ""}${perdio ? " se-lvbp__fila--perdio" : ""}`}>
-    <Escudo sigla={sigla} tamano={grande ? 30 : 26} />
-    <span className="se-lvbp__equipo">{grande ? equipo(sigla).nombre : equipo(sigla).corto}</span>
-    {/* `key` por valor: cuando cambia el marcador la cifra se vuelve a montar y entra
-        con `se-lvbp-entra`. Es el único movimiento que significa «pasó algo». */}
-    <span key={carreras ?? "-"} className="se-lvbp__carreras">{carreras ?? ""}</span>
-  </div>
-);
+/** Si `valor` cambió desde el render anterior (y no es la primera vez que se pinta). */
+const useCambio = (valor) => {
+  const previo = useRef(valor);
+  const cambio = previo.current !== null && previo.current !== undefined && previo.current !== valor;
+  useEffect(() => {
+    previo.current = valor;
+  }, [valor]);
+  return cambio;
+};
+
+const Fila = ({ sigla, carreras, gano, perdio, grande }) => {
+  // Cuando cambia el marcador la cifra entra desde arriba: el único movimiento que
+  // significa «pasó algo». Al cargar no anima.
+  const cambio = useCambio(carreras);
+  return (
+    <div className={`se-lvbp__fila${gano ? " se-lvbp__fila--gano" : ""}${perdio ? " se-lvbp__fila--perdio" : ""}`}>
+      <Escudo sigla={sigla} tamano={grande ? 30 : 26} />
+      <span className="se-lvbp__equipo">{grande ? equipo(sigla).nombre : equipo(sigla).corto}</span>
+      <span key={carreras ?? "-"} className={`se-lvbp__carreras${cambio ? " se-lvbp__carreras--cambia" : ""}`}>
+        {carreras ?? ""}
+      </span>
+    </div>
+  );
+};
 Fila.propTypes = {
   sigla: PropTypes.string.isRequired,
   carreras: PropTypes.number,

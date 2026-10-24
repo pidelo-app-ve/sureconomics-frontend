@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { haceCuanto, useHeadlines } from "../../hooks/useHeadlines";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { prefiereQuieto } from "../../lib/movimiento";
+import { useRotacion } from "../../hooks/useRotacion";
 import "../../styles/titulares.css";
 
 /**
@@ -27,9 +27,6 @@ import "../../styles/titulares.css";
  *   tienen página propia, son título, resumen y su fuente.
  */
 
-/* 8 s desde el 23-oct-2026, el mismo compás que la apertura y el reloj: con 4 / 5 / 8 s
-   las tres cosas se pisaban y la primera pantalla titilaba. */
-const CADA_MS = 8000;
 const CUANTOS = 6;
 /** Lo que dura la caída del que sale; tiene que coincidir con `se-uh-cae` en el CSS. */
 const CAIDA_MS = 300;
@@ -64,60 +61,17 @@ export const UltimaHoraTarjeta = () => {
   const { t } = useIdioma();
   const { items } = useHeadlines();
   const ahora = useAhora(30_000);
-  const [quieto] = useState(prefiereQuieto);
-  const [indice, setIndice] = useState(0);
-  const [pausado, setPausado] = useState(false);
-  const [encima, setEncima] = useState(false);
-  // El titular que está cayendo, mientras cae. `null` el resto del tiempo.
-  const [saliente, setSaliente] = useState(null);
-
   const seis = items.slice(0, CUANTOS);
-  const parado = quieto || pausado || encima || seis.length < 2;
-
-  useEffect(() => {
-    if (indice >= seis.length) setIndice(0);
-  }, [indice, seis.length]);
-
-  // La lista y la posición por referencia: `seis` es otra lista en cada render (y hay
-  // uno cada 30 s por el reloj), y como dependencia reiniciaría el intervalo a mitad
-  // de camino, desacompasado de la barra.
-  const seisRef = useRef(seis);
-  seisRef.current = seis;
-  const indiceRef = useRef(indice);
-  indiceRef.current = indice;
-
-  useEffect(() => {
-    if (parado) return undefined;
-    const id = setInterval(() => {
-      const lista = seisRef.current;
-      const i = Math.min(indiceRef.current, lista.length - 1);
-      setSaliente(lista[i] ?? null);
-      setIndice((i + 1) % lista.length);
-    }, CADA_MS);
-    return () => clearInterval(id);
-  }, [parado, seis.length]);
-
-  useEffect(() => {
-    if (!saliente) return undefined;
-    const id = setTimeout(() => setSaliente(null), CAIDA_MS);
-    return () => clearTimeout(id);
-  }, [saliente]);
+  const { indice, saliente, parado, quieto, pausado, alternarPausa, eventos } = useRotacion(seis, {
+    salidaMs: CAIDA_MS,
+  });
 
   const masReciente = seis.reduce((max, i) => Math.max(max, Date.parse(i.published_at || "") || 0), 0);
   if (!seis.length || ahora - masReciente > UN_DIA_MS) return null;
 
-  const actual = seis[Math.min(indice, seis.length - 1)];
+  const actual = seis[indice];
   return (
-    <section
-      className="se-uh"
-      aria-label={t("titulares.tarjeta.region")}
-      onMouseEnter={() => setEncima(true)}
-      onMouseLeave={() => setEncima(false)}
-      onFocus={() => setEncima(true)}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setEncima(false);
-      }}
-    >
+    <section className="se-uh" aria-label={t("titulares.tarjeta.region")} {...eventos}>
       <div className="se-uh__cabeza">
         <span className="se-uh__etiqueta">
           <span
@@ -132,7 +86,7 @@ export const UltimaHoraTarjeta = () => {
       </div>
 
       <div className="se-uh__marco">
-        {/* Solo se anuncia cuando está parado: uno que rota cada 4 s no puede hablar cada 4 s. */}
+        {/* Solo se anuncia cuando está parado: uno que cambia cada pocos segundos no puede hablar a ese ritmo. */}
         <p
           key={actual.id}
           className="se-uh__titulo se-uh__titulo--entra"
@@ -159,8 +113,8 @@ export const UltimaHoraTarjeta = () => {
             type="button"
             className="se-uh__pausa"
             aria-pressed={pausado}
-            aria-label={pausado ? t("titulares.tarjeta.reanudar") : t("titulares.tarjeta.pausar")}
-            onClick={() => setPausado((p) => !p)}
+            aria-label={t("titulares.tarjeta.pausar")}
+            onClick={alternarPausa}
           >
             <IconoPausa pausado={pausado} />
           </button>

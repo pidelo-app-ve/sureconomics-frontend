@@ -178,6 +178,7 @@
   height: 100%;
   background: var(--marca-rojo);
   transform-origin: left center;
+  /* Lo mismo que `ROTACION_MS` (lib/movimiento.js). */
   animation: se-uh-avance 8s linear forwards;
 }
 .se-uh__progreso--quieto {
@@ -203,7 +204,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-uh__punto { animation: none; }
+  .se-uh__punto,
+  .se-uh__punto--reciente { animation: none; }
   .se-uh__progreso { animation: none; }
   .se-uh__titulo--entra { animation: none; }
   .se-uh__titulo--sale { display: none; }
@@ -290,7 +292,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  /* Las rayas, en el verde de la casa (pedido de la redacción, 23-oct-2026): la de
+  /* Las rayas, en el verde de la casa (pedido de la redacción): la de
      arriba gruesa, de cabecera; las de entre titulares finas y suaves, para que separen
      sin pesar más que el texto. */
   border-top: 3px solid var(--marca-verde);
@@ -343,7 +345,7 @@
   font-weight: 700;
   line-height: 1.3;
   text-wrap: balance;
-  /* Subrayado verde pegado a las letras (pedido de la redacción, 23-oct-2026). Es un
+  /* Subrayado verde pegado a las letras (pedido de la redacción). Es un
      subrayado y no un borde: así sigue a cada línea cuando el título se parte, y se
      corta donde termina el texto, no donde termina la caja. `skip-ink` lo mantiene
      bajo las letras con rabo (p, g, j) sin cortarlas. */

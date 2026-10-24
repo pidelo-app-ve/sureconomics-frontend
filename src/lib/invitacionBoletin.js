@@ -67,7 +67,7 @@ export const RUTAS_SIN_INVITACION = [
 
 export const rutaExcluida = (pathname) => {
   const ruta = typeof pathname === "string" ? pathname : "";
-  // La portada tampoco (23-oct-2026): ya lleva el bloque del boletín, y una tarjeta
+  // La portada tampoco: ya lleva el bloque del boletín, y una tarjeta
   // flotante encima era el tercer pedido de correo en la misma página. Se mira aparte
   // porque «/» es prefijo de todo.
   if (ruta === "/" || ruta === "/en" || ruta === "/en/") return true;

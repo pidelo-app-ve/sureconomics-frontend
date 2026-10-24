@@ -4,26 +4,23 @@ import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearNumero } from "../../i18n/motor";
 import { porDolar } from "../../lib/monedas";
-import { rutaDePieza } from "../../lib/pieza";
+import { rutaDeFormato, rutaDePieza } from "../../lib/pieza";
 import { getMonedas } from "../../services/monedasService";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { listaDePiezas } from "./piezaShape";
 import { CintaMundial } from "./MarketTicker";
 
 /**
- * La franja bajo la apertura: tres columnas de diario, como la segunda maqueta de la
- * redacción (23-oct-2026).
+ * La franja bajo la apertura: datos, no titulares.
  *
- * - **Análisis**: los artículos más recientes, con firma y un párrafo.
- * - **Monedas**: seis cotizaciones de /monedas, que hasta hoy no tenía enlace desde
- *   el sitio. La misma regla del cintillo: un dato viejo o sin valor no se pinta.
- * - **Mercados del mundo**: la cuarta fila, a lo ancho, con el widget de TradingView
- *   (índices, oro, Brent, bitcoin). Salió de la cinta de arriba, donde la hacía alta y
- *   pesada; aquí, bajo las monedas, es contexto de mercado y no mástil.
+ * - **Análisis**: los dos artículos más recientes, con firma y un párrafo.
+ * - **Monedas**: seis cotizaciones de /monedas. La misma regla del cintillo: un dato
+ *   viejo o sin valor no se pinta.
+ * - **Mercados del mundo** (solo en el teléfono): el widget de TradingView, que en
+ *   escritorio va en la cinta de arriba.
  *
- * Cada columna sólo existe si tiene con qué llenarse; la franja entera se calla si no
- * hay nada. Las monedas se piden aquí y no en la portada porque son un dato aparte
- * del contenido: si fallan, la franja sigue con las otras dos columnas.
+ * Las monedas se piden aquí y no en la portada porque son un dato aparte del
+ * contenido: si fallan, la franja sigue con los análisis.
  */
 
 /** Cuántas cotizaciones caben en la columna sin que se alargue más que las otras. */
@@ -42,23 +39,28 @@ export const FranjaPortada = ({ analisis }) => {
         setMonedas(conDato.slice(0, MONEDAS_EN_FRANJA));
       })
       .catch(() => {
-        /* Sin monedas la franja sigue con las otras columnas. */
+        /* Sin monedas la franja sigue con los análisis. */
       });
     return () => {
       vivo = false;
     };
   }, []);
 
-  if (!analisis.length && !monedas.length) return null;
+  // Sin análisis ni monedas la franja sigue existiendo por los mercados del mundo del
+  // teléfono; en escritorio, entonces, no se pinta (CSS `--solo-mundo`).
+  const soloMundo = !analisis.length && !monedas.length;
 
   return (
-    <section className="se-section se-franja" aria-label={t("portada.franja.region")}>
+    <section
+      className={`se-section se-franja${soloMundo ? " se-franja--solo-mundo" : ""}`}
+      aria-label={t("portada.franja.region")}
+    >
       <div className="se-container">
         <div className="se-franja__rejilla">
           {analisis.length ? (
             <div className="se-franja__celda se-franja__celda--analisis">
               <h2 className="se-franja__titulo">
-                <Enlace to="/articulos?formato=articulo">{t("portada.franja.analisis")}</Enlace>
+                <Enlace to={rutaDeFormato("articulo")}>{t("portada.franja.analisis")}</Enlace>
               </h2>
               {analisis.map((a) => (
                 <article key={a.id} className="se-franja__analisis">

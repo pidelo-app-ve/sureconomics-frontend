@@ -18,15 +18,17 @@
       "apertura": "Lead story",
       "loMasReciente": "Latest",
       "otrasNoticias": "Other recent news",
-      "pausar": "Stop the story rotation",
-      "reanudar": "Resume the story rotation"
+      "pausar": "Stop the story rotation"
     },
     "masLeido": {
       "titulo": "Most read",
       "nota": "What readers read most in the last seven days."
     },
+    "pausa": {
+      "region": "Baseball and games"
+    },
     "franja": {
-      "region": "Latest news, analysis and currencies",
+      "region": "Analysis and currencies",
       "analisis": "Analysis",
       "monedas": "Regional currencies",
       "todasLasMonedas": "All currencies and their change",

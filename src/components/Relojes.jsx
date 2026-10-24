@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { Bandera } from "./Bandera";
 import { CIUDADES, horaEn } from "../lib/relojes";
+import { ROTACION_MS } from "../lib/movimiento";
 
 /**
  * La hora de cuatro ciudades: Caracas, Madrid, Buenos Aires y California.
@@ -24,8 +25,7 @@ import { CIUDADES, horaEn } from "../lib/relojes";
  *   es cada hora.
  */
 
-/* 8 s desde el 23-oct-2026: el mismo compás que la apertura y Última hora. */
-const CADA_MS = 8000;
+const CADA_MS = ROTACION_MS;
 /** Lo que dura la caída de la que sale; tiene que coincidir con `se-hora-cae` en el CSS. */
 const CAIDA_MS = 300;
 

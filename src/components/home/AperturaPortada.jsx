@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { prefiereQuieto } from "../../lib/movimiento";
-import { imagenAncho, rutaDePieza } from "../../lib/pieza";
-import { CardMedia } from "./CardMedia";
+import { temaPrincipal } from "../../lib/contentFilter";
+import { LugarYFecha } from "./LugarYFecha";
+import { useRotacion } from "../../hooks/useRotacion";
+import { imagenAncho, imagenSrcSet, rutaDePieza } from "../../lib/pieza";
+import { ANCHOS, CardMedia } from "./CardMedia";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { IconoPausa, UltimaHoraTarjeta } from "../titulares/UltimaHoraTarjeta";
@@ -31,24 +32,15 @@ import { IconoPausa, UltimaHoraTarjeta } from "../titulares/UltimaHoraTarjeta";
  * La columna es sólo texto a propósito: al lado de una imagen grande, tres miniaturas
  * compiten con ella y no se lee ninguna. Lo que se compara ahí son titulares.
  *
- * **Rota.** Desde el 23-oct-2026, cuando la principal la elige la regla (no la
- * redacción), la apertura va pasando por las cuatro noticias -- la principal y las tres
- * de la columna -- con el mismo mecanismo que la tarjeta de Última hora: un intervalo,
- * pausa con el ratón o el foco encima, un botón de pausa, y quieta del todo si el
- * lector pidió menos movimiento. La foto saliente se desvanece sobre la que entra, que
- * se asienta desde un poco más grande; el texto sube con ella. La columna enseña las
- * otras tres: la que está en grande sale de la lista y entra la que acaba de dejar de
- * estarlo, así que nunca se lee el mismo titular dos veces en la misma pantalla (en el
- * teléfono la lista va justo debajo del titular grande, y repetirlo se notaba). Cada 8 s
- * y no cada 4 como Última hora: dos cosas al mismo compás en la misma pantalla se
- * anulan. La pieza fijada por la redacción no rota: fijar es decir «esta manda».
+ * **Rota** cuando la principal la elige la regla y no la redacción: pasa por las cuatro
+ * noticias con `useRotacion`, el mismo motor que la tarjeta de Última hora. La foto que
+ * sale se desvanece sobre la que entra y el texto sube con ella. La columna enseña las
+ * otras tres, así que el titular grande nunca se repite debajo. La pieza fijada no
+ * rota: fijar es decir «esta manda».
  */
 
 /** Cuántas noticias acompañan a la principal en la columna. */
 export const EN_LA_COLUMNA = 3;
-
-/** Cada cuánto cambia la principal cuando rota. */
-export const CADA_MS = 8000;
 
 /** Lo que tarda la foto saliente en desvanecerse: `se-apertura-sale` en el CSS. */
 const DESVANECE_MS = 700;
@@ -107,81 +99,35 @@ const CAMPOS = {
 
 export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
   const { t } = useIdioma();
-  const [quieto] = useState(prefiereQuieto);
-  const [indice, setIndice] = useState(0);
-  const [pausado, setPausado] = useState(false);
-  const [encima, setEncima] = useState(false);
-  // La pieza cuya foto se está desvaneciendo, mientras se desvanece. `null` el resto.
-  const [saliente, setSaliente] = useState(null);
-
   const conjunto = principal ? [principal, ...secundarias] : [];
-  const rota = !fijada && !quieto && conjunto.length > 1;
-  const parado = !rota || pausado || encima;
+  const { indice, saliente, rota, pausado, alternarPausa, eventos } = useRotacion(conjunto, {
+    activa: !fijada,
+    salidaMs: DESVANECE_MS,
+  });
 
+  // La siguiente foto se pide antes de que le toque, con el mismo `srcset` y `sizes` que
+  // pinta `CardMedia`: así el navegador elige la misma talla y la encuentra en caché, y
+  // el cruce no enseña el relleno de color.
+  const siguiente = rota ? conjunto[(indice + 1) % conjunto.length] : null;
   useEffect(() => {
-    if (indice >= conjunto.length) setIndice(0);
-  }, [indice, conjunto.length]);
-
-  // Por referencia, como en Última hora: `conjunto` es otra lista en cada render, y
-  // como dependencia reiniciaría el intervalo a cada rato.
-  const conjuntoRef = useRef(conjunto);
-  conjuntoRef.current = conjunto;
-  const indiceRef = useRef(indice);
-  indiceRef.current = indice;
-
-  useEffect(() => {
-    if (parado) return undefined;
-    const id = setInterval(() => {
-      const lista = conjuntoRef.current;
-      const i = Math.min(indiceRef.current, lista.length - 1);
-      setSaliente(lista[i] ?? null);
-      setIndice((i + 1) % lista.length);
-    }, CADA_MS);
-    return () => clearInterval(id);
-  }, [parado, conjunto.length]);
-
-  useEffect(() => {
-    if (!saliente) return undefined;
-    const id = setTimeout(() => setSaliente(null), DESVANECE_MS);
-    return () => clearTimeout(id);
-  }, [saliente]);
-
-  // La siguiente foto se pide antes de que le toque: sin esto el cruce enseñaba el
-  // relleno de color un momento y luego la foto de golpe. El mismo `srcset` y `sizes`
-  // que pinta `CardMedia`, para que el navegador elija la misma talla y la encuentre
-  // en caché.
-  useEffect(() => {
-    if (!rota) return;
-    const lista = conjuntoRef.current;
-    const siguiente = lista[(indice + 1) % lista.length];
     if (!siguiente?.imagenUrl) return;
     const img = new Image();
-    img.sizes = SIZES_APERTURA;
+    const srcset = imagenSrcSet(siguiente.imagenUrl, ANCHOS, siguiente.imagenAnchoOriginal);
+    if (srcset) {
+      img.sizes = SIZES_APERTURA;
+      img.srcset = srcset;
+    }
     img.src = imagenAncho(siguiente.imagenUrl, 1400);
-  }, [rota, indice]);
+  }, [siguiente?.imagenUrl, siguiente?.imagenAnchoOriginal]);
 
   if (!principal) return null;
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
   const columna = rota ? conjunto.filter((n) => n.id !== actual.id) : secundarias;
   const cruzando = Boolean(saliente && saliente.id !== actual.id);
-  const lugar = geoPrincipal(actual);
   const entradillaDoble = (actual.resumen?.length ?? 0) > ENTRADILLA_DOBLE;
 
   return (
-    <section
-      className="se-section se-apertura"
-      aria-labelledby="apertura-titulo"
-      onMouseEnter={rota ? () => setEncima(true) : undefined}
-      onMouseLeave={rota ? () => setEncima(false) : undefined}
-      onFocus={rota ? () => setEncima(true) : undefined}
-      onBlur={
-        rota
-          ? (e) => {
-              if (!e.currentTarget.contains(e.relatedTarget)) setEncima(false);
-            }
-          : undefined
-      }
-    >
+    <section className="se-section se-apertura" aria-labelledby="apertura-titulo" {...eventos}>
       <div className="se-container">
         {/* Fijada a mano no es «lo más reciente»: puede ser un informe de hace una
             semana, y el encabezado oculto tiene que decir la verdad al lector de
@@ -231,18 +177,14 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
               className={`se-apertura__cuerpo${cruzando ? " se-apertura__cuerpo--entra" : ""}`}
             >
               <div className="se-apertura__linea">
-                <span className="se-apertura__meta">
-                  <span className="se-meta__lugar">{lugar}</span>
-                  {actual.fecha ? <span aria-hidden="true"> · </span> : null}
-                  {actual.fecha}
-                </span>
+                <LugarYFecha pieza={actual} clase="se-apertura__meta" />
                 {rota ? (
                   <button
                     type="button"
                     className="se-apertura__pausa"
                     aria-pressed={pausado}
-                    aria-label={pausado ? t("portada.apertura.reanudar") : t("portada.apertura.pausar")}
-                    onClick={() => setPausado((p) => !p)}
+                    aria-label={t("portada.apertura.pausar")}
+                    onClick={alternarPausa}
                   >
                     <IconoPausa pausado={pausado} />
                   </button>
@@ -261,23 +203,18 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
 
           {columna.length ? (
             <div className="se-apertura__lado">
-            {/* La última hora, encima de los titulares de la apertura (maqueta del 21-oct-2026).
-                No pinta nada si no hay titulares recientes, y la columna queda como antes. */}
-            <UltimaHoraTarjeta />
-            <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
-              {columna.map((n) => (
-                <li key={n.id} className="se-apertura__item">
-                  <span className="se-apertura__meta">
-                    <span className="se-meta__lugar">{geoPrincipal(n)}</span>
-                    {n.fecha ? <span aria-hidden="true"> · </span> : null}
-                    {n.fecha}
-                  </span>
-                  <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
-                    <TituloDePieza pieza={n} />
-                  </Enlace>
-                </li>
-              ))}
-            </ol>
+              {/* Última hora encima de los titulares; no pinta nada sin titulares recientes. */}
+              <UltimaHoraTarjeta />
+              <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
+                {columna.map((n) => (
+                  <li key={n.id} className="se-apertura__item">
+                    <LugarYFecha pieza={n} clase="se-apertura__meta" />
+                    <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
+                      <TituloDePieza pieza={n} />
+                    </Enlace>
+                  </li>
+                ))}
+              </ol>
             </div>
           ) : null}
         </div>

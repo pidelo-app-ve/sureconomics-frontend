@@ -330,7 +330,7 @@ export const Pieza = () => {
 
             <header className={`se-piece__head${conPortada ? " se-piece__head--media" : ""}`}>
               <div className="se-piece__head-text">
-                {/* Sin rótulo «FORMATO · TEMA» encima del titular (23-oct-2026): el
+                {/* Sin rótulo «FORMATO · TEMA» encima del titular: el
                     formato ya está en las migas, dos líneas más arriba, y el tema va en
                     las etiquetas del pie. El titular manda solo. */}
                 <h1 className="se-piece__title" lang={enEspanolEnIngles ? "es" : undefined}>
@@ -401,9 +401,8 @@ export const Pieza = () => {
                 ) : null}
 
                 {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
-                    dejó) y un minuto de pausa antes de lo siguiente. Detrás de los
-                    comentarios desde el 23-oct-2026: lo último que ve quien terminó un
-                    editorial es la conversación, no una guacamaya. */}
+                    dejó) y un minuto de pausa. Detrás de los comentarios, para que lo
+                    primero después del texto sea la conversación y no un juego. */}
                 <ClaveDeLaPieza pieza={pieza} />
                 <InvitacionPausa />
 

@@ -115,7 +115,7 @@
   --se-space-2xl: 4rem;
   --se-space-3xl: 6rem;
   --se-section-gap: 5rem;
-  /* 1440 y no 1200 desde el 23-oct-2026: el contenido mide lo mismo que el mástil y
+  /* 1440 y no 1200: el contenido mide lo mismo que el mástil y
      comparten borde en todos los anchos. Antes el mástil llegaba a 1440 y el
      contenido a 1200, y entre 1440 y 1919 el logotipo quedaba fuera del borde del
      texto: eso era lo que se veía como «márgenes vacíos». Las columnas de lectura
@@ -166,7 +166,7 @@
   max-width: var(--se-container-narrow);
 }
 
-/* Las apariciones al hacer scroll se quitaron el 23-oct-2026 (revisión de la portada):
+/* Sin apariciones al hacer scroll:
    el «fade-up» en cada sección es el tic más reconocible de página generada y no
    comunica nada. Todo se pinta visible desde el primer cuadro. El observador
    (`useRevealOnScroll`) sigue poniendo la clase, que ya no estila nada. */
@@ -465,7 +465,7 @@
      1440 (ver la consulta de `:root` de mas abajo) y las dos piezas comparten
      borde. Por debajo el mastil sigue siendo el mas ancho, porque a 1120 utiles los
      nueve enlaces, el reloj y los botones no caben. */
-  /* Desde el 23-oct-2026 el mástil mide lo mismo que el contenedor (1440, y 1600 de
+  /* El mástil mide lo mismo que el contenedor (1440, y 1600 de
      1920 arriba): la marca y el texto comparten borde en todos los anchos. */
   max-width: var(--se-container-max);
 }
@@ -689,7 +689,7 @@
   object-position: left center;
 }
 
-/* —— La lupa (23-oct-2026) ——
+/* —— La lupa ——
    El buscador ya no es una barra verde bajo el mástil: es una lupa entre los
    botones de la cabecera (decisión de la redacción: «solo el icono»). Pulsada,
    abre el explorador de la portada (`?buscar=1`); pulsada otra vez, lo cierra.
@@ -1350,7 +1350,7 @@
 /* Footer */
 .se-footer {
   position: relative;
-  /* Papel plano desde el 23-oct-2026: el brillo radial y el rayado diagonal de
+  /* Papel plano: el brillo radial y el rayado diagonal de
      debajo no decían nada del medio. */
   background: var(--color-paper);
   margin-top: 0;
@@ -1392,7 +1392,7 @@
   display: inline;
 }
 
-/* Las redes, dentro de la columna de contacto (23-oct-2026). */
+/* Las redes, dentro de la columna de contacto. */
 .se-footer__contact .se-footer__social {
   margin-top: var(--se-space-md);
 }
@@ -1742,7 +1742,7 @@
     align-items: start;
   }
 
-  /* Cinco columnas desde el 23-oct-2026: marca, navegación, más del sitio, contacto
+  /* Cinco columnas: marca, navegación, más del sitio, contacto
      con redes, y boletín. El hueco baja para que quepan. */
   .se-footer__grid--cinco {
     gap: var(--se-space-lg);
@@ -3435,9 +3435,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .se-consulting__hero-copy,
-.se-consulting__contact,
-.se-contact__panel,
-.se-contact__aside {
+  .se-consulting__contact,
+  .se-contact__panel,
+  .se-contact__aside {
     animation: none !important;
   }
 
@@ -4047,16 +4047,11 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    ========================================================================== */
 
 /* —— Cintillo de mercado —— */
-/* —— La cinta de cierre ——
-   Verde Cardin, como la define el brandbook, y por encima de la cabecera. Es la
-   primera franja de la página, así que su contenido se fija en blanco: el token de
-   tinta daría negro sobre verde. */
-/* —— La cinta de mercados (23-oct-2026): una sola línea fina ——
-   De borde a borde, 32 px de alto, sobre un verde más oscuro que el mástil para que
-   se lea como marco y no como otra cabecera. La pastilla «Mercados» a la izquierda, el
-   desfile de cifras en una línea -- etiqueta apagada, cifra en blanco, variación en
-   color con su flecha -- y a la derecha de dónde salen. El widget de TradingView ya no
-   va aquí (ver `CintaMundial`). Pausa con el ratón encima; quieta con movimiento
+/* —— La cinta de mercados ——
+   Una línea fina de borde a borde (36 px; 34 en el teléfono), sobre un verde más oscuro
+   que el mástil para que se lea como marco y no como otra cabecera: la pastilla
+   «Mercados», el desfile de nuestras cifras, de dónde salen, y a la derecha los
+   mercados del mundo de TradingView. Pausa con el ratón encima; quieta con movimiento
    reducido, y entonces se desplaza con el dedo. */
 .se-ticker {
   position: relative;
@@ -4070,10 +4065,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   font-family: var(--mono);
   font-size: 12px;
   overflow: hidden;
-}
-
-.se-ticker--hueco {
-  min-height: 32px;
 }
 
 .se-ticker__pill {
@@ -4097,11 +4088,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   height: 6px;
   border-radius: 50%;
   background: #6ee7a0;
-}
-
-@keyframes se-ticker-pulso {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.45; transform: scale(0.8); }
 }
 
 .se-ticker__viewport {
@@ -4180,10 +4166,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 
 .se-ticker__stamp:hover { color: #ffffff; }
 
-@media (max-width: 760px) {
-  .se-ticker__stamp { display: none; }
-}
-
 @media (max-width: 480px) {
   .se-ticker { padding-left: 8px; gap: 8px; }
   .se-ticker__pill { padding: 2px 6px; font-size: 10px; }
@@ -4192,7 +4174,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 @media (prefers-reduced-motion: reduce) {
   .se-ticker__track { animation: none; }
   .se-ticker__viewport { overflow-x: auto; }
-  .se-ticker__pulso { animation: none; }
 }
 
 /* —— Explorador de dos ejes ——
@@ -4211,7 +4192,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
      lo mismo: el cobrizo es acento, y aquí ya lo lleva el filo izquierdo. */
   background: var(--marca-verde);
   color: #ffffff;
-  /* Sin sombra ni animación de entrada desde el 23-oct-2026: una pastilla verde
+  /* Sin sombra ni animación de entrada: una pastilla verde
      flotando bajo una cabecera verde se leía como panel de control. */
   /* La animación de entrada deja un `transform` puesto —termina con `both`— y un
      elemento transformado es su propio contexto de apilamiento. Eso encerraba el
@@ -4905,13 +4886,9 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 }
 
 /* —— Editorial del día: el bloque de portada ——
-   Papel blanco con el filo verde alrededor, como se pidio: el bloque tiene que
-   leerse como una pieza de opinion y no como una portada, asi que el papel manda y
-   el verde lo enmarca.
-
-   La imagen tiene columna propia. Antes iba en `position: absolute; inset: 0` con
-   el cuerpo pintandole encima un blanco opaco: la fotografia se descargaba y no se
-   veia nunca. Al lado del texto en pantalla ancha, encima en el telefono. */
+   Una sección del periódico y no una tarjeta: regla de tinta arriba (que se dibuja al
+   asomarse), filete abajo y la firma de la casa. La foto, si la hay, en su columna: al
+   lado del texto en pantalla ancha, encima en el teléfono. */
 /* Regla de sección propia: gana a `.se-section + .se-section { padding-top: 0 }`,
    que la dejaba pegada a los juegos con todo el aire debajo. */
 .se-section.se-eddia {
@@ -6287,8 +6264,8 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    una jerarquía que funciona y agrandar la letra la rompería. */
 @media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
   .se-footer__link,
-.se-member-card__link,
-.se-footer a.se-link {
+  .se-member-card__link,
+  .se-footer a.se-link {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -6342,10 +6319,9 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 }
 
 /* El sitio que guarda la cinta mientras llegan las cifras, para que la cabecera no
-   dé un salto de 33 px cuando aparecen. Mismo alto y mismo color: lo único que le
-   falta es el contenido. */
+   dé un salto cuando aparecen. El alto es el de `.se-ticker`, que el hueco también
+   lleva: lo único que le falta es el contenido. */
 .se-ticker--hueco {
-  height: 33px;
   display: block;
 }
 
@@ -9782,8 +9758,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   flex-direction: column;
   gap: var(--se-space-md);
   min-width: 0;
-  /* La llegada de la página (una vez): la principal sube y las de la columna detrás,
-     escalonadas 60 ms. Nunca al hacer scroll. */
+  /* La llegada de la página: la principal sube y las de la columna detrás,
+     escalonadas 60 ms; cuando la apertura rota, la que vuelve a la columna entra igual.
+     Nunca al hacer scroll. */
   animation: se-apertura-sube 480ms cubic-bezier(0.2, 0.9, 0.25, 1) 80ms both;
 }
 
@@ -9880,7 +9857,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
 }
 
-/* La entradilla larga, a dos columnas de periódico (23-oct-2026). Sólo si hay texto
+/* La entradilla larga, a dos columnas de periódico. Sólo si hay texto
    para las dos (lo decide el componente por longitud): una frase partida en dos
    columnas deja una huérfana. */
 @media (min-width: 900px) {
@@ -9892,7 +9869,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* —— La apertura rota (23-oct-2026) ——
+/* —— La apertura rota ——
    La foto que se va se desvanece encima de la que entra, que se asienta desde un poco
    más grande; el cuerpo sube con ella. Es el único movimiento autorizado en la
    apertura además de Última hora, y para con el ratón encima, con el botón de pausa
@@ -9972,10 +9949,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* —— La franja bajo la apertura (23-oct-2026) ——
-   Tres columnas de diario entre una regla negra y un filete: últimas noticias con su
-   hora, análisis con firma, y seis monedas de la región. Densa a propósito: aquí se
-   comparan titulares y cifras, no tarjetas. */
+/* —— La franja bajo la apertura ——
+   Datos entre una regla negra y un filete: dos análisis con firma y seis monedas de la
+   región (y los mercados del mundo en el teléfono). Densa a propósito: aquí se comparan
+   cifras, no tarjetas. */
 .se-franja {
   padding-top: 0;
 }
@@ -10121,11 +10098,8 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   text-underline-offset: 3px;
 }
 
-/* —— Noticias en lista densa con carril (23-oct-2026) ——
-   Dos columnas de notas de cable -- lugar, fecha, titular, una línea -- y a la derecha
-   el carril: «Lo más leído» y la tarjeta nativa. La tarjeta con foto queda para los
-   listados; en la portada seis tarjetas iguales bajo la apertura eran lo más
-   «de plantilla» de la página. */
+/* —— Noticias: la que manda con su foto, las demás con miniatura a dos columnas, y a
+   la derecha el carril con «Lo más leído». La publicidad cierra la columna. —— */
 .se-noticias {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -10219,7 +10193,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* —— Lo más leído (23-oct-2026) ——
+/* —— Lo más leído ——
    Un ranking de verdad, de la medición propia: por eso lleva números. */
 .se-masleido {
   padding: var(--se-space-md) 0 0;
@@ -10389,7 +10363,7 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
    Sigue siendo lo primero bajo la cabecera, como pidió el socio, pero delgado: la
    caja alta con sombra grande y filo cobrizo pesaba más que la noticia de debajo,
    y en el teléfono ocupaba media pantalla con tres renglones. */
-/* Desde el 23-oct-2026 el explorador no está siempre a la vista: lo abre la lupa de
+/* El explorador no está siempre a la vista: lo abre la lupa de
    la cabecera (`?buscar=1`) y cuelga pegado al mástil, del mismo verde y sin radio,
    como un cajón de la propia cabecera. Así bajo el mástil lo primero es papel. */
 .se-explorer-section--primera {
@@ -10532,8 +10506,11 @@ html {
    `width`/`height`, para que la caja dibujada siga igual donde ya mide lo suficiente. */
 @media (pointer: coarse) {
   .se-share__btn,
-.se-marcar__btn,
-.se-pager__btn {
+  .se-marcar__btn,
+  .se-pager__btn,
+  .se-apertura__pausa,
+  .se-explorer-section__cerrar,
+  .se-header__buscar {
     min-width: 44px;
     min-height: 44px;
   }
@@ -11419,8 +11396,8 @@ html {
   }
 }
 
-/* —— Revisión del 23-oct-2026 (tarde) ——
-   La ficha nativa, plana: el recuadro con diagonales y un logotipo pequeño en medio se
+/* —— La ficha nativa, plana ——
+   el recuadro con diagonales y un logotipo pequeño en medio se
    veía como algo que no cargó. Fondo liso, el logotipo a dos tercios del ancho y nada
    más. */
 .se-ad__ficha-media {
@@ -11450,7 +11427,6 @@ html {
   }
 }
 
-/* La publicidad de Noticias, debajo de la lista como franja ancha. */
 
 .se-noticias__anuncio {
   margin-top: var(--se-space-lg);
@@ -11475,7 +11451,7 @@ html {
   margin-left: 0.35em;
 }
 
-/* ═══ La página de una pieza (23-oct-2026): la voz de la casa ═══
+/* ═══ La página de una pieza: la voz de la casa ═══
    Lo que la hacía «plantilla de blog»: titular de 40 px por debajo de la apertura de
    la portada, rótulo que repetía las migas, cinco botones de compartir con cinco
    colores ajenos, y un cuerpo sin sistema (párrafos, enlaces, citas y listas con los
@@ -11659,7 +11635,7 @@ html {
   font-size: 1.0625rem;
 }
 
-/* ═══ Salir del molde (23-oct-2026) ═══
+/* ═══ Rótulos, títulos de sección y tarjetas del sitio público ═══
    Lo que hacía que la web «se viera muy IA» no eran los colores ni la letra: eran los
    tics que comparte toda página generada. Rótulos en versalitas cobre encima de cada
    titular; el guion cobre bajo cada título de sección con un «VER TODAS →» en
@@ -11675,8 +11651,7 @@ html {
 .se-artcard__by,
 .se-doccard__kicker,
 .se-newsletter__kicker,
-.se-piece__tags-label,
-.se-footer__contact-title {
+.se-piece__tags-label {
   font-family: var(--se-font-ui);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -11763,7 +11738,7 @@ html {
   letter-spacing: 0;
 }
 
-/* ═══ Noticias y publicidad, rehechos (23-oct-2026, noche) ═══ */
+/* ═══ Noticias, «Lo más leído» y la publicidad ancha ═══ */
 
 /* Una regla y no dos: la del título de la sección ya separa. */
 .se-noticias__lista {
@@ -11892,7 +11867,7 @@ html {
   }
 }
 
-/* ═══ Noticias con imágenes (23-oct-2026, noche) ═══ */
+/* ═══ Noticias con imágenes ═══ */
 .se-noticias__principal {
   min-width: 0;
 }
@@ -12007,10 +11982,10 @@ html {
   }
 }
 
-/* ═══ La cinta con los mercados del mundo, en una línea (23-oct-2026, noche) ═══
-   Nuestras cifras a dos renglones (nombre arriba; cifra y variación abajo), el mismo
-   ritmo que el widget de TradingView, que se recorta a los 44 px de la cinta: su
-   contenido vive en los 44 de arriba de un marco de 84 que no se deja achicar. */
+/* —— Los mercados del mundo, en la cinta ——
+   El widget de TradingView pinta nombre y precio en los 44 px de arriba de un marco de
+   84 que no se deja achicar. A escala 0,8 caben en la cinta, y la caja se ensancha en
+   la misma proporción para que la escala no deje hueco a la derecha. */
 .se-ticker__fila {
   display: inline-flex;
   align-items: baseline;
@@ -12037,11 +12012,8 @@ html {
   align-items: stretch;
 }
 
-.se-ticker__stamp {
-  white-space: nowrap;
-}
-
 .se-ticker .se-ticker__mundo {
+  position: relative;
   flex: 1 1 48%;
   align-self: stretch;
   display: flex;
@@ -12052,9 +12024,6 @@ html {
   border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-/* El widget a escala 0,8: su contenido (nombre y precio, 44 px en un marco de 84 que
-   no se deja achicar) queda en 35 y cabe en la cinta de 36. Se ensancha en la misma
-   proporción para que la escala no deje un hueco a la derecha. */
 .se-ticker .se-ticker__mundo-caja {
   flex: 0 0 auto;
   width: calc((100% - 96px) / 0.8);
@@ -12066,10 +12035,7 @@ html {
   transform-origin: left top;
 }
 
-.se-ticker .se-ticker__mundo {
-  position: relative;
-}
-
+/* La atribución de TradingView, que sus condiciones exigen, encima del borde derecho. */
 .se-ticker .se-ticker__mundo-credito {
   position: absolute;
   right: 0;
@@ -12077,13 +12043,8 @@ html {
   bottom: 0;
   display: flex;
   align-items: center;
-  background: #02150c;
-}
-
-.se-ticker .se-ticker__mundo-credito {
-  flex: 0 0 auto;
-  align-self: center;
   padding: 0 12px;
+  background: #02150c;
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -12096,8 +12057,23 @@ html {
   color: rgba(255, 255, 255, 0.85);
 }
 
-@media (max-width: 1599px) {
+/* De dónde salen las cifras: recortado donde no cabe entero, oculto solo donde ya no
+   queda sitio (sin él, una fila de cierres se leería como datos en directo). */
+.se-ticker__stamp {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1279px) {
   .se-ticker__stamp {
+    display: none;
+  }
+}
+
+/* Sin cifras nuestras la cinta solo trae el mundo, que en el teléfono va en la franja. */
+@media (max-width: 860px) {
+  .se-ticker--solo-mundo {
     display: none;
   }
 }
@@ -12108,16 +12084,16 @@ html {
   }
 }
 
-/* En escritorio el mundo va en la cinta: la fila de la franja solo en el teléfono. */
+/* En escritorio el mundo va en la cinta: la fila de la franja solo en el teléfono, y
+   una franja que solo tendría esa fila no se pinta. */
 @media (min-width: 861px) {
-  .se-franja__mundo {
+  .se-franja__mundo,
+  .se-franja--solo-mundo {
     display: none;
   }
 }
 
-/* ═══ Tanda J (23-oct-2026, noche) ═══ */
-
-/* ═══ El pie en verde intenso (23-oct-2026, noche) ═══
+/* ═══ El pie en verde intenso ═══
    Como la maqueta de la redacción: verde Cardin de borde a borde, letra blanca, la
    marca en dos columnas, el descargo en su recuadro y una barra final con el copyright
    y las ciudades del grupo. El sitio queda entre dos verdes: el mástil y el pie. */
@@ -12273,10 +12249,6 @@ html {
 }
 
 /* La barra final: copyright a la izquierda, ciudades a la derecha. */
-.se-footer__divider {
-  display: none;
-}
-
 .se-footer__bottom {
   margin-top: var(--se-space-md);
   flex-direction: column;
@@ -12331,7 +12303,7 @@ html {
   }
 }
 
-/* ═══ Cuatro por fila en la portada (23-oct-2026, noche) ═══
+/* ═══ Cuatro por fila en la portada ═══
    Artículos, Editorial y Al punto llevan cuatro piezas: cuatro columnas de 1200 px
    arriba, tres (y la cuarta oculta) entre 900 y 1199, dos filas de dos en tableta, y
    tres en el teléfono, que ya es largo. */
@@ -12345,22 +12317,12 @@ html {
   .se-portada .se-format .se-alpunto__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-
-  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
-  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
-    display: none;
-  }
 }
 
 @media (max-width: 899px) {
   .se-portada .se-format .se-artgrid,
   .se-portada .se-format .se-alpunto__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
-  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
-    display: revert;
   }
 }
 
@@ -12369,7 +12331,10 @@ html {
   .se-portada .se-format .se-alpunto__grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
 
+/* Cuatro piezas en tres columnas, o en una, dejan una suelta: la cuarta se oculta. */
+@media (min-width: 900px) and (max-width: 1199px), (max-width: 599px) {
   .se-portada .se-format .se-artgrid > :nth-child(n + 4),
   .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
     display: none;

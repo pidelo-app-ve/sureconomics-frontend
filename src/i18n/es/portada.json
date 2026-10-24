@@ -18,15 +18,17 @@
       "apertura": "Apertura",
       "loMasReciente": "Lo más reciente",
       "otrasNoticias": "Otras noticias recientes",
-      "pausar": "Detener el cambio de noticia",
-      "reanudar": "Reanudar el cambio de noticia"
+      "pausar": "Detener el cambio de noticia"
     },
     "masLeido": {
       "titulo": "Lo más leído",
       "nota": "Lo que más leyeron los lectores en los últimos siete días."
     },
+    "pausa": {
+      "region": "Béisbol y juegos"
+    },
     "franja": {
-      "region": "Últimas noticias, análisis y monedas",
+      "region": "Análisis y monedas",
       "analisis": "Análisis",
       "monedas": "Monedas de la región",
       "todasLasMonedas": "Todas las monedas y su variación",

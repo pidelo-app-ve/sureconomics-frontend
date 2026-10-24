@@ -12,27 +12,16 @@ import { TituloDePieza } from "../content/TituloDePieza";
 /**
  * La editorial más reciente, en su propio bloque alto en la portada.
  *
- * Es la única pieza de la página que habla *por* el medio en vez de informar, y
- * ninguna lista lo decía: una editorial quedaba en una sección más abajo, en una
- * tarjeta del mismo tamaño que una nota sobre las noticias de otro. El filo verde
- * y la escala son lo que lo dicen antes de leer una palabra.
+ * Es la única pieza de la página que habla *por* el medio en vez de informar. Por eso
+ * no es una tarjeta: es una sección del periódico, entre la regla de tinta y el filete,
+ * firmada por la casa con su isotipo, como en la página de la editorial.
  *
- * Con imagen visible, que es lo que se pidió. Antes la fotografía estaba ahí y no
- * se veía nunca: iba en `position: absolute; inset: 0` y el cuerpo le pintaba
- * encima un blanco opaco. Ahora la imagen tiene su propia columna -- al lado del
- * texto en pantalla ancha, encima en el teléfono -- y el papel blanco con el filo
- * verde se queda tal cual, que así se pidió en su momento.
+ * Con foto, la foto tiene su columna (al lado del texto en pantalla ancha, encima en el
+ * teléfono). Sin foto no hay columna: un recuadro de color del tamaño de una foto se
+ * leía como algo que no cargó.
  *
- * No pinta nada cuando no hay editorial. Un bloque que anuncia la posición de la
- * casa con un marco vacío dentro es peor que no tener bloque: anuncia que el medio
- * no tiene nada que decir.
- *
- * Desde el 23-oct-2026 ya no es una tarjeta con filete verde: es una sección del
- * periódico, entre la regla de tinta y el filete que usan la franja y la LVBP, y la
- * firma la casa con su isotipo (la misma firma que lleva una editorial en su página),
- * en vez de un rótulo en versalitas igual al de cualquier tarjeta. Sin foto no hay
- * columna de imagen: antes pintaba 600 × 320 px de verde plano, el objeto más pesado
- * de la portada sin nada dentro.
+ * No pinta nada cuando no hay editorial: anunciar la posición de la casa con un marco
+ * vacío dentro es peor que no tener bloque.
  */
 /** La columna de la imagen: todo el ancho en telefono, el 44% al lado del texto. */
 const ANCHOS = [600, 900, 1200, 1600];
@@ -42,8 +31,7 @@ export const EditorialDelDia = ({ pieza }) => {
   const { t } = useIdioma();
   const [fallo, setFallo] = useState(false);
   // Al asomarse en pantalla, la regla de tinta de arriba se dibuja de izquierda a
-  // derecha (`se-reveal--in` + CSS): el único movimiento al hacer scroll que queda en
-  // la portada, y es el de la casa anunciándose.
+  // derecha (`se-reveal--in` + CSS): la casa anunciándose.
   const seccion = useRef(null);
   useRevealOnScroll(seccion);
   if (!pieza) return null;

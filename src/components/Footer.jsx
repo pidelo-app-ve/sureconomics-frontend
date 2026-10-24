@@ -241,7 +241,6 @@ export const Footer = () => {
           </div>
         </div>
 
-        <hr className="se-divider se-footer__divider" />
         {/* El descargo de un medio económico, en su recuadro: lo que se publica es
             periodismo, no asesoría. Va en todas las páginas porque toda pieza puede
             leerse suelta. */}

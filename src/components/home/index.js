@@ -14,5 +14,5 @@ export { ListingPagination } from "./ListingPagination";
 export { AperturaPortada } from "./AperturaPortada";
 export { FranjaPortada } from "./FranjaPortada";
 export { NoticiasDensas } from "./NoticiasDensas";
-export { MasLeido } from "./MasLeido";
+export { MasLeido, MINIMO_MAS_LEIDAS } from "./MasLeido";
 export { TarjetaPausa, InvitacionPausa } from "./TarjetaPausa";

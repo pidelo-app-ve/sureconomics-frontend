@@ -13,17 +13,17 @@ import { getMasLeidas } from "../services/publicContentService";
 const GUARDADO_MS = 60_000;
 let guardado = null;
 
-const fresco = () => guardado && Date.now() - guardado.en < GUARDADO_MS;
+const fresco = (dias) => guardado && guardado.dias === dias && Date.now() - guardado.en < GUARDADO_MS;
 
 export const useMasLeidas = (dias = 7) => {
   const { lang } = useIdioma();
   const [state, setState] = useState(() =>
-    fresco() ? { status: "success", filas: guardado.filas } : { status: "loading", filas: [] }
+    fresco(dias) ? { status: "success", filas: guardado.filas } : { status: "loading", filas: [] }
   );
 
   useEffect(() => {
     let vivo = true;
-    if (fresco()) {
+    if (fresco(dias)) {
       setState({ status: "success", filas: guardado.filas });
       return () => {
         vivo = false;
@@ -31,7 +31,7 @@ export const useMasLeidas = (dias = 7) => {
     }
     getMasLeidas(dias)
       .then((filas) => {
-        guardado = { filas, en: Date.now() };
+        guardado = { dias, filas, en: Date.now() };
         if (vivo) setState({ status: "success", filas });
       })
       .catch(() => {

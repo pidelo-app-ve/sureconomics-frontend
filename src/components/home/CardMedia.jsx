@@ -44,7 +44,7 @@ import { piezaShape } from "./piezaShape";
  * forma y no hay petición de más: el fondo usa la misma dirección, ya en caché.
  */
 /** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x. */
-const ANCHOS = [400, 640, 800, 1100, 1400];
+export const ANCHOS = [400, 640, 800, 1100, 1400];
 /** Una columna en telefono, dos en tablet, tres en escritorio. */
 const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
 

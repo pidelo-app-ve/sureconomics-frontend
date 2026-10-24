@@ -1,23 +1,23 @@
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { rutaDePieza } from "../../lib/pieza";
-import { useMasLeidas } from "../../hooks/useMasLeidas";
+import PropTypes from "prop-types";
 import { TituloDePieza } from "../content/TituloDePieza";
 
 /**
  * «Lo más leído»: las piezas con más lectores distintos en los últimos siete días,
  * según la medición propia del sitio (`AnaliticaLectura`). No es una lista a mano ni
- * un número inventado: sale de `/analitica/mas-leidas`, y con menos de tres piezas no
- * se pinta, porque una lista de una o dos no es un ranking.
+ * un número inventado: sale de `/analitica/mas-leidas` (la portada la pide con
+ * `useMasLeidas` y decide si hay carril), y con menos de tres piezas no se pinta,
+ * porque una lista de una o dos no es un ranking.
  *
  * Los números van porque aquí el orden sí dice algo: el 1 es el más leído.
  */
-const MINIMO = 3;
+export const MINIMO_MAS_LEIDAS = 3;
 
-export const MasLeido = () => {
+export const MasLeido = ({ piezas }) => {
   const { t } = useIdioma();
-  const { status, piezas } = useMasLeidas();
-  if (status !== "success" || piezas.length < MINIMO) return null;
+  if (piezas.length < MINIMO_MAS_LEIDAS) return null;
 
   return (
     <section className="se-masleido" aria-labelledby="masleido-titulo">
@@ -40,5 +40,7 @@ export const MasLeido = () => {
     </section>
   );
 };
+
+MasLeido.propTypes = { piezas: PropTypes.arrayOf(PropTypes.object).isRequired };
 
 export default MasLeido;

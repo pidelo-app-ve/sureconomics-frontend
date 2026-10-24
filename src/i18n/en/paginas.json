@@ -312,6 +312,9 @@
       "enviarCorreoA": "Email {nombre}",
       "cvPerfil": "CV / Profile",
       "perfilLinkedin": "{nombre}'s LinkedIn profile",
+      "arbol": {
+        "pista": "Point to a name to see every role they hold."
+      },
       "aliadosRegion": "Partners and allies",
       "aliados": "Institutional partners",
       "aliadosTexto": "A network of brands connected to the research, investment and advisory ecosystem."

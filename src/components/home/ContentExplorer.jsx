@@ -38,6 +38,7 @@ export const ContentExplorer = ({
   total,
   scopeLabel,
   enfocarAlMontar = false,
+  rapidos = 0,
 }) => {
   const { t } = useIdioma();
   const [open, setOpen] = useState(null);
@@ -140,6 +141,19 @@ export const ContentExplorer = ({
   );
 
   const hasSelection = active.length > 0 || Boolean((query ?? "").trim());
+
+  // «Lo más tratado»: los temas con más piezas, contados sin filtro, para que el orden
+  // no salte mientras se escribe. La cifra que se ve sí es la de ahora: dice cuántas
+  // quedan de ese tema con lo escrito.
+  const sinFiltro = { temas: new Set(), geos: new Set(), query: "", tree: selection.tree };
+  const masTratados = rapidos
+    ? temasDisponibles
+        .map((v) => ({ value: v, base: countForOption(pieces, "tema", v, sinFiltro) }))
+        .filter((o) => o.base > 0)
+        .sort((a, b) => b.base - a.base)
+        .slice(0, rapidos)
+        .map((o) => ({ ...o, n: count("tema", o.value) }))
+    : [];
 
   // El alcance va dentro del campo y no en un rotulo aparte: "Filtros / en todo el
   // sitio" nombraba lo que los propios controles ya dicen, y dejaba la busqueda --
@@ -331,6 +345,29 @@ export const ContentExplorer = ({
         ) : null}
       </div>
 
+      {masTratados.length ? (
+        <div className="se-explorer__rapidos" role="group" aria-labelledby="explorer-rapidos">
+          <span id="explorer-rapidos" className="se-explorer__rapidos-rotulo">
+            {t("portada.explorador.masTratados")}
+          </span>
+          {masTratados.map((o, i) => (
+            <button
+              type="button"
+              key={o.value}
+              aria-pressed={temas.has(o.value)}
+              className={`se-explorer__rapido${temas.has(o.value) ? " se-explorer__rapido--on" : ""}${
+                o.n ? "" : " se-explorer__rapido--vacio"
+              }`}
+              style={{ "--i": i }}
+              onClick={() => toggle("tema", o.value)}
+            >
+              {o.value}
+              <span className="se-explorer__rapido-n">{o.n}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {active.length ? (
         <div className="se-explorer__active">
           {active.map(([axis, value]) => (
@@ -370,4 +407,6 @@ ContentExplorer.propTypes = {
   scopeLabel: PropTypes.string,
   /** Foco en el campo de búsqueda al montar (cuando lo abre la lupa de la cabecera). */
   enfocarAlMontar: PropTypes.bool,
+  /** Cuántos temas enseñar en «Lo más tratado», debajo de los filtros. 0, ninguno. */
+  rapidos: PropTypes.number,
 };

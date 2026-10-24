@@ -10223,8 +10223,11 @@ html {
    (el nombre sale igual al pasar el ratón), y los botones de la cabecera pierden un poco
    de relleno y de hueco entre ellos, que es invisible al lado de un enlace del menú
    cortado. Era hasta 1279; el conmutador de idioma («EN») pidió los 40 px de la palabra
-   también entre 1440 y 1599, donde además vuelve a verse el reloj. */
-@media (min-width: 1200px) and (max-width: 1599px) {
+   también entre 1440 y 1599, donde además vuelve a verse el reloj. Y llega hasta 1919:
+   el contenedor sigue en 1440 hasta 1920, así que de 1600 a 1919 la cabecera tiene el
+   mismo sitio que a 1599 (medido el 24-oct-2026: a «Quiénes somos» le faltaban 69 px
+   en todo ese tramo, que es donde cae una pantalla de 1920 con el zoom al 90 %). */
+@media (min-width: 1200px) and (max-width: 1919px) {
   .se-header .se-header__actions--desktop .se-btn {
     padding-inline: 0.75rem;
   }
@@ -10502,11 +10505,12 @@ html {
   margin-top: 0.6rem;
 }
 
-/* El botón de Juegos, solo con el mando hasta 1599 px (como ya hacía hasta 1439): entre
+/* El botón de Juegos, solo con el mando hasta 1919 px (como ya hacía hasta 1439; ver el
+   bloque de arriba para el tramo 1600-1919, que tiene el mismo contenedor): entre
    1500 y 1599 aparece el reloj de las ciudades, con su bandera, y al menú le faltaban
    22 px. Medido el 22-oct-2026, al quitar «Última hora» del menú y volver «Inicio»: es
    lo único que hizo falta de los ajustes que se pusieron para aquel enlace. */
-@media (min-width: 1440px) and (max-width: 1599px) {
+@media (min-width: 1440px) and (max-width: 1919px) {
   .se-header .se-header__actions--desktop .se-btn.se-header__juegos {
     padding-inline: 0.55rem;
   }
@@ -11533,14 +11537,16 @@ html {
    `Layout.jsx` envuelve la parte pública en `.se-publico`. Aquí los colores base pasan a
    los de la prensa, y todo lo que ya los usaba los hereda; el panel no cambia. */
 .se-publico {
-  --color-paper: var(--papel);
+  /* El papel lo lee de `--fondo-vivo`, que la portada cambia de tono con el scroll
+     (`useFondoQueCambia`). Fuera de la portada vale el papel de siempre. */
+  --color-paper: var(--fondo-vivo);
   --color-ink: var(--tinta);
   --color-cream: var(--tinta);
   --se-black: var(--tinta);
   --color-hairline: var(--filete);
   --color-hairline-dark: var(--filete-fuerte);
   min-height: 100vh;
-  background: var(--papel);
+  background: var(--fondo-vivo);
   color: var(--tinta);
 }
 
@@ -12924,7 +12930,7 @@ html {
 }
 
 .se-publico .se-edu__continuar .se-recorte__papel {
-  padding-top: calc(var(--rasgado) + 22px);
+  padding-top: 22px;
 }
 
 .se-publico .se-edu__continuar-titulo {
@@ -12975,11 +12981,10 @@ html {
   .se-edu__leyendo { display: none; }
 }
 
-/* ═══ Quiénes somos: la mancheta ═══
-   Como el recuadro de un diario donde figura quién lo hace: cada cargo con su nombre en
-   versalita de la serif, sobre un filete, y las personas debajo; los cargos corren en
-   columnas de periódico. El propósito, en un recorte; las ciudades, entre reglas como
-   la línea de fecha de una cabecera. */
+/* ═══ Quiénes somos ═══
+   El propósito, en un recorte; las ciudades, entre reglas como la línea de fecha de una
+   cabecera. El equipo es un organigrama con su propia hoja
+   (`components/institutional/arbolDelEquipo.css`). */
 .se-publico .se-about__intro {
   margin-top: 1rem;
   padding: 8px 0;
@@ -13014,64 +13019,6 @@ html {
   font-family: var(--se-font-ui);
   font-weight: 700;
   color: var(--marca-rojo);
-}
-
-.se-mancheta {
-  columns: 3 16rem;
-  column-gap: clamp(1.5rem, 3vw, 2.75rem);
-  column-rule: 1px solid var(--filete);
-}
-
-.se-mancheta__grupo {
-  break-inside: avoid;
-  margin: 0 0 clamp(1.5rem, 2.5vw, 2.25rem);
-  padding-top: 8px;
-  border-top: 2px solid var(--tinta);
-}
-
-.se-mancheta__cargo {
-  margin: 0 0 0.5rem;
-  font-family: var(--titular);
-  font-size: 1rem;
-  font-weight: 600;
-  font-variant: small-caps;
-  letter-spacing: 0.04em;
-  color: var(--tinta);
-}
-
-.se-mancheta__nombres {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.se-mancheta__nombres > li + li {
-  border-top: 1px solid var(--filete);
-}
-
-/* La persona, en un renglón: retrato pequeño, nombre y su enlace. */
-.se-publico .se-mancheta .se-member-card {
-  padding: 10px 0;
-  border: 0;
-}
-
-.se-publico .se-mancheta .se-member-card__top {
-  gap: 12px;
-}
-
-.se-publico .se-mancheta .se-member-card__avatar {
-  width: 36px;
-  height: 36px;
-  font-size: 0.75rem;
-}
-
-.se-publico .se-mancheta .se-member-card__name {
-  font-size: 1.0625rem;
-}
-
-.se-publico .se-mancheta .se-member-card__links {
-  margin: 2px 0 0 48px;
-  padding-top: 0;
 }
 
 /* ═══ La portada de la LVBP hacia abajo ═══ */
@@ -13143,7 +13090,7 @@ html {
 }
 
 .se-pausa-doble > .se-recorte .se-recorte__papel {
-  padding: calc(var(--rasgado) + 10px) 14px calc(var(--rasgado) + 12px);
+  padding: 12px 14px calc(var(--rasgado) + 12px);
 }
 
 .se-pausa-doble > .se-recorte .se-pausa-banner {
@@ -13161,5 +13108,544 @@ html {
 .se-publico .se-recorte.se-edu__continuar {
   padding: 0;
   border-top: 0;
+}
+
+/* ═══ Lo que aparece solo: el aviso de cookies y la invitación al boletín ═══
+   Las reglas de cuándo salen no cambian (`lib/invitacionBoletin.js`, `AvisoDeCookies`);
+   cambia cómo se ven, que era lo único que quedaba del sitio de antes. */
+
+/* —— El aviso de cookies: una franja al pie, a todo el ancho —— Filete de tinta arriba
+   y sube desde abajo. Los dos botones, del mismo tamaño y el mismo peso: rechazar no
+   puede costar más que aceptar. */
+.se-publico .se-cookies {
+  padding: 0;
+  animation-name: se-cookies-sube;
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes se-cookies-sube {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+
+.se-publico .se-cookies__caja {
+  max-width: none;
+  margin: 0;
+  gap: 12px clamp(1.5rem, 4vw, 3rem);
+  padding: 16px max(var(--se-content-gutter), calc((100% - var(--se-container-max)) / 2 + var(--se-content-gutter)))
+    max(16px, env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  background: var(--papel);
+  box-shadow: 0 -12px 32px rgba(17, 24, 39, 0.08);
+}
+
+.se-publico .se-cookies__titulo {
+  margin-bottom: 2px;
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--tinta);
+}
+
+.se-publico .se-cookies__cuerpo {
+  max-width: 78ch;
+  font-size: 0.875rem;
+  color: var(--color-slate);
+}
+
+.se-publico .se-cookies__enlace {
+  color: var(--tinta);
+  text-decoration-color: var(--filete-fuerte);
+  text-underline-offset: 3px;
+}
+
+.se-publico .se-cookies__enlace:hover {
+  color: var(--marca-verde);
+  text-decoration-color: currentColor;
+}
+
+.se-publico .se-cookies__btn {
+  min-width: 140px;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+
+.se-publico .se-cookies__btn:active {
+  transform: scale(0.97);
+}
+
+.se-publico .se-cookies__btn--no {
+  border: 1px solid var(--tinta);
+  background: transparent;
+  color: var(--tinta);
+}
+
+.se-publico .se-cookies__btn--no:hover {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.se-publico .se-cookies__btn--si {
+  border: 1px solid var(--marca-verde);
+}
+
+/* —— La invitación al boletín: un cupón de suscripción —— Como el que traía el
+   periódico para recortar: la línea de corte alrededor, la fecha sobre una regla
+   doble, el nombre del boletín en la serif y el correo escrito sobre una raya. Llega
+   un punto torcida y se asienta, como los recortes. */
+.se-publico .se-invitacion {
+  background: rgba(17, 24, 39, 0.56);
+}
+
+.se-publico .se-invitacion__caja {
+  width: min(480px, 100%);
+  padding: clamp(1.75rem, 4vw, 2.25rem) clamp(1.5rem, 4vw, 2.25rem) clamp(1.5rem, 3.5vw, 2rem);
+  border: 0;
+  background: #fdfbf7;
+  outline: 1px dashed rgba(17, 24, 39, 0.55);
+  outline-offset: -10px;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.08), 0 28px 60px rgba(17, 24, 39, 0.3);
+  animation: se-cupon-entra 380ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@keyframes se-cupon-entra {
+  from { opacity: 0; transform: translateY(14px) rotate(-1.4deg); }
+  to { opacity: 1; transform: none; }
+}
+
+.se-publico .se-invitacion__cerrar {
+  top: 14px;
+  right: 14px;
+  color: var(--tinta);
+}
+
+.se-publico .se-invitacion__cerrar:hover {
+  background: rgba(17, 24, 39, 0.06);
+}
+
+/* La fecha del boletín, sobre la regla doble de las cabeceras. */
+.se-publico .se-invitacion__kicker {
+  margin: 0;
+  padding: 0 2.75rem 8px 0;
+  border-bottom: 3px double var(--tinta);
+  font-family: var(--cifras);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--tinta);
+}
+
+.se-publico .se-invitacion__titulo {
+  margin: 14px 0 10px;
+  font-family: var(--titular);
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.625rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+.se-publico .se-invitacion__texto {
+  margin-bottom: 1.5rem;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--tinta);
+}
+
+.se-publico .se-invitacion__label {
+  margin-bottom: 2px;
+  font-family: var(--se-font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-slate);
+}
+
+/* El correo, escrito sobre una raya: como el buscador de los listados. */
+.se-publico .se-invitacion__input {
+  min-height: 48px;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 2px solid var(--tinta);
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.se-publico .se-invitacion__input:focus-visible {
+  border-color: var(--marca-verde);
+  box-shadow: 0 2px 0 var(--marca-verde);
+}
+
+.se-publico .se-invitacion__input[aria-invalid="true"] {
+  border-color: var(--marca-rojo);
+}
+
+.se-publico .se-invitacion__acciones {
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.se-publico .se-invitacion__btn {
+  min-height: 48px;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.se-publico .se-invitacion__luego {
+  color: var(--tinta);
+  text-decoration: underline;
+  text-decoration-color: var(--filete-fuerte);
+  text-underline-offset: 3px;
+}
+
+.se-publico .se-invitacion__error {
+  border: 0;
+  border-left: 0;
+  border-top: 1px solid var(--marca-rojo);
+  background: transparent;
+  padding: 8px 0 0;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-invitacion__exito .se-invitacion__titulo {
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem);
+}
+
+.se-publico .se-invitacion__texto--exito {
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+}
+
+.se-publico .se-invitacion__cuenta {
+  background: var(--marca-verde);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-publico .se-cookies { animation: none; }
+  .se-publico .se-invitacion__caja { animation: se-invitacion-fondo 160ms ease-out both; }
+}
+
+/* ═══ El cajón del buscador de la portada: el índice, en blanco sobre el verde ═══
+   La misma idea que el buscador de los listados -- se escribe en la serif, a tamaño
+   de titular, sobre una raya; los filtros se leen como una frase -- pero colgando
+   del mástil, a todo el ancho y en su verde. Debajo, «Lo más tratado»: los temas
+   con más piezas, para entrar de un toque. Al abrirse, la raya se dibuja de izquierda
+   a derecha y los temas caen uno detrás de otro. */
+.se-publico .se-explorer-section--primera {
+  background: var(--marca-verde);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.se-publico .se-explorer-section--primera .se-explorer {
+  padding: clamp(18px, 2.4vw, 28px) 0 clamp(16px, 2vw, 22px);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__bar {
+  gap: 6px 22px;
+  align-items: baseline;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__field {
+  flex: 1 1 100%;
+  /* El sitio del aspa, solo en el renglón de la búsqueda. */
+  padding-right: 60px;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__lupa {
+  left: 0;
+  width: 26px;
+  height: 26px;
+  margin-top: -3px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__search {
+  min-height: 0;
+  padding: 6px 0 12px 42px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(#ffffff, #ffffff) left bottom / 100% 2px no-repeat,
+    transparent;
+  color: #ffffff;
+  font-family: var(--titular);
+  font-size: clamp(1.625rem, 1.1rem + 1.8vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  box-shadow: none;
+  animation: se-cajon-raya 620ms cubic-bezier(0.23, 1, 0.32, 1) 120ms both;
+}
+
+@keyframes se-cajon-raya {
+  from { background-size: 0% 2px, auto; }
+  to { background-size: 100% 2px, auto; }
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__search::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+  font-style: italic;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__search:focus,
+.se-publico .se-explorer-section--primera .se-explorer__search:focus-visible {
+  outline: none;
+  border: 0;
+  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* Los filtros, en frase. */
+.se-publico .se-explorer-section--primera .se-explorer__btn {
+  min-width: 0;
+  min-height: 40px;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  font-family: var(--se-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__btn:hover,
+.se-publico .se-explorer-section--primera .se-explorer__btn--on,
+.se-publico .se-explorer-section--primera .se-explorer__btn--filled {
+  border: 0;
+  background: transparent;
+  text-decoration-color: #ffffff;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__caret {
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__btn--on .se-explorer__caret {
+  transform: rotate(180deg);
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__total {
+  margin-left: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9375rem;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__total::before {
+  content: "·";
+  margin-right: 22px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__total strong {
+  font-family: var(--cifras);
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__clear {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+  text-underline-offset: 4px;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__clear:hover {
+  background: transparent;
+  text-decoration-color: #ffffff;
+}
+
+/* —— Lo más tratado —— */
+.se-explorer__rapidos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.se-explorer__rapidos-rotulo {
+  font-family: var(--titular);
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.se-explorer__rapido {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  cursor: pointer;
+  transition: text-decoration-color 160ms ease, opacity 160ms ease;
+  animation: se-cajon-tema 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: calc(260ms + var(--i, 0) * 45ms);
+}
+
+@keyframes se-cajon-tema {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.se-explorer__rapido:hover {
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+.se-explorer__rapido--on {
+  text-decoration-color: #ffffff;
+}
+
+/* Sin piezas con lo escrito: atenuado por el color y no por la opacidad, que la
+   animación de entrada deja fijada. */
+.se-explorer__rapido--vacio:not(.se-explorer__rapido--on),
+.se-explorer__rapido--vacio:not(.se-explorer__rapido--on) .se-explorer__rapido-n {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.se-explorer__rapido:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.se-explorer__rapido-n {
+  font-family: var(--cifras);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Las fichas de lo elegido, en blanco hueco. */
+.se-publico .se-explorer-section--primera .se-explorer__active {
+  margin-top: 10px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.se-publico .se-explorer-section--primera .se-explorer__chip {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+}
+
+/* El aspa, arriba a la derecha, a la altura de la búsqueda. */
+.se-publico .se-explorer-section--primera .se-explorer-section__cerrar {
+  top: clamp(20px, 2.6vw, 34px);
+  right: var(--se-content-gutter);
+  transform: none;
+  width: 40px;
+  height: 40px;
+  border-color: rgba(255, 255, 255, 0.4);
+  border-radius: 0;
+}
+
+/* En el teléfono: la búsqueda a todo el ancho, los dos filtros en un renglón y lo más
+   tratado en una fila que se desliza, como la cinta. */
+@media (max-width: 640px) {
+  .se-publico .se-explorer-section--primera .se-explorer__field {
+    padding-right: 52px;
+  }
+
+  .se-publico .se-explorer-section--primera .se-explorer__bar {
+    gap: 4px 14px;
+  }
+
+  .se-publico .se-explorer-section--primera .se-explorer__total::before {
+    margin-right: 14px;
+  }
+
+  .se-publico .se-explorer-section--primera .se-explorer__sel {
+    flex: 0 0 auto;
+  }
+
+  .se-explorer__rapidos {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-right: calc(-1 * var(--se-content-gutter));
+    padding-right: var(--se-content-gutter);
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+
+  .se-explorer__rapidos::-webkit-scrollbar {
+    display: none;
+  }
+
+  .se-explorer__rapido,
+  .se-explorer__rapidos-rotulo {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-publico .se-explorer-section--primera .se-explorer__search,
+  .se-explorer__rapido {
+    animation: none;
+  }
+}
+
+/* ═══ El papel que cambia ═══
+   Registrado para que el navegador funda el color solo: quien lo usa -- el papel de
+   `.se-publico` y de cada sección -- cambia a la vez y despacio. Sin `@property` (un
+   navegador viejo) el tono salta, y al ser tan parecido tampoco se nota. El valor
+   inicial es el papel: fuera de la portada no cambia nunca. */
+@property --fondo-vivo {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f9f8f6;
+}
+
+:root {
+  transition: --fondo-vivo 1200ms ease;
 }
 

@@ -1,0 +1,42 @@
+/* ═══ LA TABLA DE MONEDAS ═══ Ver `TablaDeMonedas.jsx`. */
+
+.se-tabla-monedas {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-tabla-monedas tr + tr {
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-tabla-monedas th,
+.se-tabla-monedas td {
+  padding: 7px 0;
+}
+
+.se-tabla-monedas th {
+  text-align: left;
+  font-weight: 600;
+}
+
+.se-tabla-monedas abbr {
+  text-decoration: none;
+}
+
+.se-tabla-monedas__valor {
+  text-align: right;
+}
+
+.se-tabla-monedas__var {
+  width: 5.5em;
+  text-align: right;
+  color: var(--color-slate);
+}
+
+.se-tabla-monedas__var--up { color: var(--color-green); }
+.se-tabla-monedas__var--down { color: var(--color-red); }
+

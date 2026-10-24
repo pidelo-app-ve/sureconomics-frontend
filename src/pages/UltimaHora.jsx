@@ -2,6 +2,11 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
 import { Enlace } from "../components/Enlace";
+import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
+import { TablaDeMonedas, useMonedas } from "../components/monedas/TablaDeMonedas";
+import { useMasLeidas } from "../hooks/useMasLeidas";
+import { lineaDelPunto, rutaInterna } from "../lib/resumen";
+import { getResumen } from "../services/resumenService";
 import { BRAND } from "../data/surEconomicsMock";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { haceCuanto, useHeadlines } from "../hooks/useHeadlines";
@@ -147,9 +152,36 @@ Fuentes.propTypes = {
   t: PropTypes.func.isRequired,
 };
 
+/** Puntos del último resumen que caben en el lateral. */
+const PUNTOS_DEL_RESUMEN = 4;
+
+/**
+ * Los primeros puntos del último «Lo importante de hoy», de todas sus secciones. Si
+ * todavía no hay ninguno, o la petición falla, el lateral se queda con su línea fija.
+ */
+const usePuntosDelResumen = () => {
+  const [puntos, setPuntos] = useState([]);
+  useEffect(() => {
+    let vivo = true;
+    getResumen()
+      .then((r) => {
+        const datos = r?.data ?? r;
+        if (vivo) setPuntos((datos?.secciones ?? []).flatMap((s) => s.puntos ?? []).slice(0, PUNTOS_DEL_RESUMEN));
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, []);
+  return puntos;
+};
+
 export const UltimaHora = () => {
   const { t, lang } = useIdioma();
   const ahora = useAhora();
+  const monedas = useMonedas(6);
+  const puntosDelResumen = usePuntosDelResumen();
+  const masLeidas = useMasLeidas();
   const { status, items: todos, error } = useHeadlines();
   const lista = useRef(null);
   const { items, nuevos, llegados, ponerAlDia } = useListaEstable(todos, status, lista);
@@ -232,20 +264,40 @@ export const UltimaHora = () => {
           ) : null}
         </div>
 
-        {/* Lo que se busca después de la última hora: el resumen del día y las monedas. */}
+        {/* Lo que se busca después de la última hora: el resumen del día, las monedas en
+            vivo y lo más leído de la semana (si hay al menos tres piezas). */}
         <aside className="se-uh-lateral" aria-label={t("titulares.seccion.lateral.region")}>
           <section className="se-uh-lateral__bloque">
             <h2 className="se-uh-lateral__titulo">
               <Enlace to="/resumen">{t("titulares.seccion.lateral.resumen")}</Enlace>
             </h2>
-            <p>{t("titulares.seccion.lateral.resumenTexto")}</p>
+            {puntosDelResumen.length ? (
+              <ul className="se-uh-lateral__puntos">
+                {puntosDelResumen.map((p) => (
+                  <li key={p.url}>
+                    <Enlace to={rutaInterna(p.url)}>{lineaDelPunto(p, lang)}</Enlace>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>{t("titulares.seccion.lateral.resumenTexto")}</p>
+            )}
           </section>
           <section className="se-uh-lateral__bloque">
             <h2 className="se-uh-lateral__titulo">
               <Enlace to="/monedas">{t("titulares.seccion.lateral.monedas")}</Enlace>
             </h2>
-            <p>{t("titulares.seccion.lateral.monedasTexto")}</p>
+            {monedas.length ? (
+              <TablaDeMonedas monedas={monedas} />
+            ) : (
+              <p>{t("titulares.seccion.lateral.monedasTexto")}</p>
+            )}
           </section>
+          {masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? (
+            <div className="se-uh-lateral__bloque se-uh-lateral__bloque--sin-regla">
+              <MasLeido piezas={masLeidas.piezas} />
+            </div>
+          ) : null}
         </aside>
       </div>
     </main>

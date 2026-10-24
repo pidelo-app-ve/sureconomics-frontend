@@ -13,6 +13,7 @@ import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
 import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
+import { useFondoQueCambia } from "../hooks/useFondoQueCambia";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -305,8 +306,12 @@ export const Home = () => {
   const pausa =
     !cargando && status === "success" && pieces.length && !isFiltered ? <PausaPortada /> : null;
 
+  // El papel cambia de tono, casi sin notarse, con la sección que se está leyendo.
+  const portadaRef = useRef(null);
+  useFondoQueCambia(portadaRef, `${status}-${cargando}-${isFiltered}-${cajon}`);
+
   return (
-    <main className="se-blog se-portada" role="main">
+    <main ref={portadaRef} className="se-blog se-portada" role="main">
       {/* El encabezado de la pagina, sin verse. El logotipo grande se fue con el
           hero y con el el unico `h1`; una portada sin encabezado deja a los
           buscadores y a los lectores de pantalla sin saber que pagina es esta. */}
@@ -358,6 +363,7 @@ export const Home = () => {
               total={results.length}
               scopeLabel={t("portada.inicio.enTodoElSitio")}
               enfocarAlMontar={desdeLaLupa}
+              rapidos={6}
               key={aperturas}
             />
             <button

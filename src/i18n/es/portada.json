@@ -37,6 +37,7 @@
       "mundo": "Mercados del mundo"
     },
     "explorador": {
+      "masTratados": "Lo más tratado",
       "buscarEn": "Buscar {alcance}",
       "tema": "Tema",
       "temas": "Temas",

@@ -11,7 +11,7 @@ import "../../styles/recortes.css";
  * en cada visita haría que la página cambiara al recargar.
  */
 
-const GIROS = [-0.7, 0.5, -0.35, 0.8, -0.55, 0.3];
+const GIROS = [-0.4, 0.3, -0.2, 0.45, -0.3, 0.15];
 
 export const Recortes = ({ as: Etiqueta = "div", className = "", children, ...resto }) => {
   const ref = useRef(null);

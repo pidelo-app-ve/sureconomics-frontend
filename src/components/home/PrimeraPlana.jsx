@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { formatearFecha, formatearNumero } from "../../i18n/motor";
+import { formatearFecha } from "../../i18n/motor";
 import { temaPrincipal } from "../../lib/contentFilter";
-import { porDolar } from "../../lib/monedas";
 import { imagenAncho, imagenSrcSet, rutaDeFormato, rutaDePieza } from "../../lib/pieza";
-import { getMonedas } from "../../services/monedasService";
 import { useRotacion } from "../../hooks/useRotacion";
 import { LugarYFecha } from "./LugarYFecha";
 import { ANCHOS, CardMedia } from "./CardMedia";
 import { CintaMundial } from "./MarketTicker";
+import { TablaDeMonedas, useMonedas } from "../monedas/TablaDeMonedas";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { IconoPausa } from "../comun/IconoPausa";
@@ -82,53 +81,14 @@ export const elegirApertura = (piezas, noticias = null, ahora = Date.now()) => {
   return { principal, secundarias, fijada: false };
 };
 
-/** Las monedas con dato vigente. Si fallan, la columna sigue con la opinión. */
-const useMonedas = () => {
-  const [monedas, setMonedas] = useState([]);
-  useEffect(() => {
-    let vivo = true;
-    getMonedas()
-      .then((datos) => {
-        if (!vivo) return;
-        setMonedas((datos?.monedas ?? []).filter((m) => m.valor !== null && !m.vieja).slice(0, MONEDAS));
-      })
-      .catch(() => {});
-    return () => {
-      vivo = false;
-    };
-  }, []);
-  return monedas;
-};
-
 const Monedas = ({ monedas }) => {
-  const { t, lang } = useIdioma();
+  const { t } = useIdioma();
   return (
     <section className="se-plana__bloque se-plana__monedas" aria-labelledby="plana-monedas">
       <h2 id="plana-monedas" className="se-plana__cabeza">
         <Enlace to="/monedas">{t("portada.franja.monedas")}</Enlace>
       </h2>
-      {monedas.length ? (
-        <table className="se-plana__tabla">
-          <tbody>
-            {monedas.map((m) => (
-              <tr key={m.codigo}>
-                <th scope="row">
-                  <abbr title={t(`monedas.nombres.${m.codigo}`)}>{m.codigo}</abbr>
-                </th>
-                <td className="se-plana__valor">{porDolar(m.valor, lang)}</td>
-                <td className={`se-plana__var se-plana__var--${m.fija ? "fija" : m.direccion}`}>
-                  {typeof m.variacion === "number" && !m.fija
-                    ? `${m.variacion > 0 ? "+" : ""}${formatearNumero(m.variacion, lang, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}%`
-                    : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
+      <TablaDeMonedas monedas={monedas} />
       <Enlace className="se-plana__mas" to="/monedas">
         {t("portada.franja.todasLasMonedas")}
       </Enlace>
@@ -188,7 +148,7 @@ Opinion.propTypes = {
 export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial = null, analisis = [], recientes = [] }) => {
   const { t, lang } = useIdioma();
   const [hoyIso] = useState(() => new Date().toISOString());
-  const monedas = useMonedas();
+  const monedas = useMonedas(MONEDAS);
   const conjunto = principal ? [principal, ...secundarias] : [];
   const { indice, saliente, rota, pausado, alternarPausa, eventos } = useRotacion(conjunto, {
     activa: !fijada,

@@ -1,0 +1,546 @@
+/* ═══ EL ÁRBOL DEL EQUIPO ═══ Ver `ArbolDelEquipo.jsx`.
+   En escritorio, un organigrama centrado: tronco de tinta, cargos en rótulo negro,
+   llaves que abren a las personas y los Colaboradores en una rama discontinua. Por
+   debajo de 1200 px, una línea de tiempo a la izquierda: el mismo orden, sin llaves. */
+
+.se-arbol-equipo {
+  --tronco: 36px;
+  --diente: 16px;
+  --raya: 2px;
+  --sale: cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+.se-arbol,
+.se-arbol__personas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* —— El cargo: un rótulo de tinta —— */
+.se-arbol__cargo {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  margin: 0;
+  padding: 6px 14px 7px;
+  background: var(--tinta);
+  color: var(--papel);
+  font-family: var(--titular);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+/* Los Colaboradores no están en la redacción: rótulo hueco, trazo discontinuo. */
+.se-arbol__cargo--rama {
+  padding: 5px 13px 6px;
+  border: 1px dashed var(--tinta);
+  background: var(--fondo-vivo, var(--papel));
+  color: var(--tinta);
+}
+
+/* —— La persona —— */
+.se-publico .se-arbol .se-member-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.se-publico .se-arbol .se-member-card__avatar {
+  border: var(--raya) solid var(--tinta);
+  transition:
+    border-color 200ms ease,
+    transform 240ms var(--sale);
+}
+
+.se-publico .se-arbol .se-member-card__name {
+  font-size: 1rem;
+  line-height: 1.2;
+  transition: color 200ms ease;
+}
+
+.se-publico .se-arbol .se-member-card__links {
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.se-publico .se-arbol .se-member-card__bio {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* Encendida: la misma persona en todos sus cargos; las demás, al fondo. */
+.se-arbol-equipo--resaltando .se-arbol__persona .se-member-card > * {
+  transition: opacity 200ms ease;
+}
+
+.se-arbol-equipo--resaltando .se-arbol__persona:not(.es-resaltada) .se-member-card > * {
+  opacity: 0.22;
+}
+
+.se-publico .se-arbol .es-resaltada .se-member-card__avatar {
+  border-color: var(--marca-verde);
+  transform: scale(1.08);
+}
+
+.se-publico .se-arbol .es-resaltada .se-member-card__name {
+  color: var(--marca-verde);
+}
+
+/* La pista, arriba y quieta: dice qué hacer con el árbol. */
+.se-arbol-equipo__pista {
+  margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+  font-size: 0.875rem;
+  color: var(--color-slate);
+}
+
+@media (min-width: 1200px) {
+  .se-arbol-equipo__pista {
+    text-align: center;
+  }
+}
+
+/* —— La línea de lectura: quién es y qué cargos tiene —— Pegada al pie de la pantalla
+   mientras el árbol está a la vista, y solo con alguien encendido. */
+.se-arbol-equipo__lectura {
+  position: sticky;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  align-items: baseline;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 8px 16px 9px;
+  background: var(--tinta);
+  color: var(--papel);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease-out,
+    transform 240ms var(--sale);
+}
+
+.se-arbol-equipo__lectura:empty {
+  padding: 0;
+}
+
+.se-arbol-equipo__lectura.es-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.se-arbol-equipo__lectura strong {
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ═══ Escritorio: el organigrama ═══ */
+@media (min-width: 1200px) {
+  .se-arbol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .se-arbol__nivel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding-top: var(--tronco);
+  }
+
+  .se-arbol__nivel:first-child {
+    padding-top: 0;
+  }
+
+  /* El tronco, del nivel de arriba al cargo. */
+  .se-arbol__nivel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(50% - var(--raya) / 2);
+    width: var(--raya);
+    height: var(--tronco);
+    background: var(--tinta);
+    transform-origin: top;
+  }
+
+  .se-arbol__nivel:first-child::before {
+    display: none;
+  }
+
+  /* Del cargo a la llave. */
+  .se-arbol__nivel > .se-arbol__cargo::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: calc(50% - var(--raya) / 2);
+    width: var(--raya);
+    height: var(--diente);
+    background: var(--tinta);
+    transform-origin: top;
+  }
+
+  .se-arbol__personas {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--cuantos), minmax(0, 1fr));
+    width: min(100%, calc(var(--cuantos) * 11.5rem));
+    margin-top: var(--diente);
+  }
+
+  /* Las llaves, arriba y abajo, de la primera persona a la última. Con una sola
+     persona miden cero y solo queda el diente. */
+  .se-arbol__personas::before,
+  .se-arbol__personas::after {
+    content: "";
+    position: absolute;
+    left: calc(50% / var(--cuantos) - var(--raya) / 2);
+    right: calc(50% / var(--cuantos) - var(--raya) / 2);
+    height: var(--raya);
+    background: var(--tinta);
+  }
+
+  .se-arbol__personas::before {
+    top: 0;
+  }
+
+  .se-arbol__personas::after {
+    bottom: 0;
+  }
+
+  .se-arbol__persona {
+    position: relative;
+    padding: var(--diente) 8px;
+  }
+
+  /* Los dientes: de la llave a la persona, y de la persona a la llave de abajo. */
+  .se-arbol__persona::before,
+  .se-arbol__persona::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - var(--raya) / 2);
+    width: var(--raya);
+    height: var(--diente);
+    background: var(--tinta);
+    transform-origin: top;
+  }
+
+  .se-arbol__persona::before {
+    top: 0;
+  }
+
+  .se-arbol__persona::after {
+    bottom: 0;
+  }
+
+  .se-arbol__nivel:last-child > .se-arbol__personas::after,
+  .se-arbol__nivel:last-child > .se-arbol__personas > .se-arbol__persona::after {
+    display: none;
+  }
+
+  .se-arbol__nivel:last-child > .se-arbol__personas > .se-arbol__persona {
+    padding-bottom: 0;
+  }
+
+  .se-publico .se-arbol__personas:not(.se-arbol__personas--rama) .se-member-card__top {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .se-publico .se-arbol__personas:not(.se-arbol__personas--rama) .se-member-card__avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 0.875rem;
+  }
+
+  .se-publico .se-arbol__personas:not(.se-arbol__personas--rama) .se-member-card__links {
+    justify-content: center;
+  }
+
+  /* —— La rama: al costado del Director General, colgando junto al Editor en Jefe,
+     que son los dos niveles de una sola persona y dejan sitio a los lados. —— */
+  .se-arbol__rama {
+    position: absolute;
+    top: var(--tronco);
+    left: calc(50% + 9rem);
+    width: min(22rem, calc(50% - 10rem));
+  }
+
+  /* El trazo discontinuo, desde el tronco: pasa por detrás del rótulo del cargo. */
+  .se-arbol__rama::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    right: 100%;
+    width: 9rem;
+    border-top: var(--raya) dashed var(--tinta);
+    transform-origin: left;
+  }
+
+  .se-arbol__personas--rama {
+    display: block;
+    width: auto;
+    margin-top: 10px;
+  }
+
+  .se-arbol__personas--rama::before,
+  .se-arbol__personas--rama::after,
+  .se-arbol__personas--rama > .se-arbol__persona::before,
+  .se-arbol__personas--rama > .se-arbol__persona::after {
+    display: none;
+  }
+
+  .se-arbol__personas--rama > .se-arbol__persona {
+    padding: 9px 0;
+  }
+
+  .se-arbol__personas--rama > .se-arbol__persona + .se-arbol__persona {
+    border-top: 1px solid var(--filete);
+  }
+}
+
+/* —— La persona de la rama, y todas en la línea de tiempo: retrato a la izquierda —— */
+.se-publico .se-arbol__personas--rama .se-member-card__avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 0.75rem;
+}
+
+.se-publico .se-arbol__personas--rama .se-member-card__top {
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.se-publico .se-arbol__personas--rama .se-member-card__links {
+  margin-left: 52px;
+}
+
+/* ═══ Tableta y teléfono: la línea de tiempo ═══ */
+@media (max-width: 1199px) {
+  .se-arbol {
+    padding-left: 30px;
+  }
+
+  .se-arbol__nivel {
+    position: relative;
+    padding-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  /* El tronco, de este cargo al siguiente. */
+  .se-arbol__nivel::before {
+    content: "";
+    position: absolute;
+    top: 16px;
+    bottom: -16px;
+    left: -21px;
+    width: var(--raya);
+    background: var(--tinta);
+    transform-origin: top;
+  }
+
+  .se-arbol__nivel:last-child::before {
+    display: none;
+  }
+
+  /* El nudo: un punto de tinta sobre el tronco. */
+  .se-arbol__nivel > .se-arbol__cargo::before {
+    content: "";
+    position: absolute;
+    top: calc(50% - 7px);
+    left: -29px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--tinta);
+    box-shadow: 0 0 0 4px var(--fondo-vivo, var(--papel));
+  }
+
+  .se-arbol__personas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: 4px 24px;
+    margin-top: 12px;
+  }
+
+  .se-arbol__persona {
+    padding: 0;
+  }
+
+  /* El filete, en la ficha y no en el renglón: así aparece con la persona. */
+  .se-publico .se-arbol .se-member-card {
+    padding: 8px 0;
+    border-top: 1px solid var(--filete);
+  }
+
+  .se-publico .se-arbol .se-member-card__avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 0.75rem;
+  }
+
+  .se-publico .se-arbol .se-member-card__links {
+    margin-left: 56px;
+  }
+
+  .se-publico .se-arbol__personas--rama .se-member-card__links {
+    margin-left: 56px;
+  }
+
+  /* La rama, hacia dentro y con su trazo discontinuo desde el tronco. */
+  .se-arbol__rama {
+    position: relative;
+    margin: 1.5rem 0 0 22px;
+  }
+
+  .se-arbol__rama::before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: -42px;
+    width: 42px;
+    border-top: var(--raya) dashed var(--tinta);
+    transform-origin: left;
+  }
+}
+
+@media (max-width: 759px) {
+  /* Encima de la barra inferior del teléfono. */
+  .se-arbol-equipo__lectura {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    margin-left: 0;
+  }
+}
+
+/* ═══ El árbol crece al asomarse cada nivel ═══
+   Baja el tronco, aparece el cargo, se abre la llave y caen las personas, una tras
+   otra. Solo con movimiento permitido; sin él, todo está ahí desde el principio. */
+@media (prefers-reduced-motion: no-preference) {
+  .se-arbol__nivel::before,
+  .se-arbol__nivel > .se-arbol__cargo::after,
+  .se-arbol__persona::before {
+    transform: scaleY(0);
+    transition: transform 320ms var(--sale);
+  }
+
+  .se-arbol__persona::after {
+    transform: scaleY(0);
+    transition: transform 260ms var(--sale);
+  }
+
+  .se-arbol__personas::before,
+  .se-arbol__personas::after,
+  .se-arbol__rama::before {
+    transform: scaleX(0);
+    transition: transform 380ms var(--sale);
+  }
+
+  .se-arbol__nivel > .se-arbol__cargo,
+  .se-arbol__nivel > .se-arbol__cargo::before,
+  .se-arbol__cargo--rama {
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 260ms ease-out,
+      transform 360ms var(--sale);
+  }
+
+  .se-arbol__nivel > .se-arbol__cargo::before {
+    transform: scale(0.6);
+  }
+
+  .se-arbol__persona .se-member-card {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 300ms ease-out,
+      transform 420ms var(--sale);
+  }
+
+  /* Dentro: cada pieza con su turno. */
+  .se-reveal--in::before,
+  .se-reveal--in > .se-arbol__cargo::after,
+  .se-reveal--in .se-arbol__persona::before,
+  .se-reveal--in .se-arbol__persona::after {
+    transform: scaleY(1);
+  }
+
+  .se-reveal--in .se-arbol__personas::before,
+  .se-reveal--in .se-arbol__personas::after,
+  .se-reveal--in .se-arbol__rama::before {
+    transform: scaleX(1);
+  }
+
+  .se-reveal--in > .se-arbol__cargo,
+  .se-reveal--in .se-arbol__cargo--rama,
+  .se-reveal--in .se-arbol__persona .se-member-card {
+    opacity: 1;
+    transform: none;
+  }
+
+  .se-reveal--in > .se-arbol__cargo::before {
+    opacity: 1;
+    transform: none;
+  }
+
+  .se-reveal--in > .se-arbol__cargo {
+    transition-delay: 120ms;
+  }
+
+  .se-reveal--in > .se-arbol__cargo::before {
+    transition-delay: 150ms;
+  }
+
+  .se-reveal--in > .se-arbol__cargo::after {
+    transition-delay: 260ms;
+  }
+
+  .se-reveal--in > .se-arbol__personas::before {
+    transition-delay: 340ms;
+  }
+
+  .se-reveal--in > .se-arbol__personas > .se-arbol__persona::before {
+    transition-delay: calc(460ms + var(--i) * 35ms);
+  }
+
+  .se-reveal--in .se-arbol__persona .se-member-card {
+    transition-delay: calc(500ms + var(--i) * 45ms);
+  }
+
+  .se-reveal--in > .se-arbol__personas > .se-arbol__persona::after {
+    transition-delay: calc(720ms + var(--i) * 25ms);
+  }
+
+  .se-reveal--in > .se-arbol__personas::after {
+    transition-delay: 820ms;
+  }
+
+  .se-reveal--in .se-arbol__rama::before {
+    transition-delay: 560ms;
+  }
+
+  .se-reveal--in .se-arbol__cargo--rama {
+    transition-delay: 800ms;
+  }
+
+  .se-reveal--in .se-arbol__personas--rama .se-member-card {
+    transition-delay: calc(900ms + var(--i) * 60ms);
+  }
+}

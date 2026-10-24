@@ -1,12 +1,11 @@
-import { BRAND, TEAM, claveDeFoto } from "../data/surEconomicsMock";
+import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getFotosDelEquipo } from "../services/publicContentService";
 import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
-import { TeamMemberCard } from "../components/institutional/TeamMemberCard";
+import { ArbolDelEquipo } from "../components/institutional/ArbolDelEquipo";
 import { Recorte, Recortes } from "../components/comun/Recorte";
 import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 
 /**
  * El logotipo, del archivo del brandbook y no dibujado a mano.
@@ -50,34 +49,6 @@ const useFotosDelEquipo = () => {
     };
   }, []);
   return fotos;
-};
-
-/**
- * Un cargo de la mancheta: su nombre y, debajo, quienes lo ocupan. Como en la mancheta
- * de un diario, todo a la vista: eran acordeones con tarjetas dentro, y la página se
- * leía como una presentación.
- */
-const TeamSection = ({ title, members, fotos }) => {
-  if (!members?.length) return null;
-  return (
-    <section className="se-mancheta__grupo">
-      <h3 className="se-mancheta__cargo">{title}</h3>
-      <ul className="se-mancheta__nombres">
-        {members.map((m) => (
-          <li key={m.id}>
-            <TeamMemberCard member={m} foto={fotos?.[claveDeFoto(m)] || ""} />
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-};
-
-TeamSection.propTypes = {
-  title: PropTypes.string.isRequired,
-  members: PropTypes.arrayOf(PropTypes.object),
-  /** `{ id de persona: direccion }`. Quien no este, sale con sus iniciales. */
-  fotos: PropTypes.objectOf(PropTypes.string),
 };
 
 export const QuienesSomos = () => {
@@ -139,45 +110,11 @@ export const QuienesSomos = () => {
             <p className="se-text-body se-about__team-lead">{t("paginas.quienesSomos.equipoLead")}</p>
           </header>
 
-          <div className="se-mancheta">
-            {/* Seis grupos, calcados del documento del cliente ("Quiénes Somos - SurE",
-                15/09/2026) y en su mismo orden. Antes eran tres: Director General y
-                Editor en Jefe vivian fusionados con Comite Editorial, y no habia ni
-                Equipo ni Colaboradores. La misma persona puede estar en mas de un
-                grupo -- ver el comentario de `TEAM` en los datos --, que es como el
-                documento lo tiene: cada bloque es un cargo o un comite, no una
-                casilla exclusiva. */}
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.junta")}
-              members={TEAM.board}
-              fotos={fotos}
-            />
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.directorGeneral")}
-              members={TEAM.directorGeneral}
-              fotos={fotos}
-            />
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.editorEnJefe")}
-              members={TEAM.editorEnJefe}
-              fotos={fotos}
-            />
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.comiteEditorial")}
-              members={TEAM.editorialCommittee}
-              fotos={fotos}
-            />
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.equipo")}
-              members={TEAM.team}
-              fotos={fotos}
-            />
-            <TeamSection
-              title={t("paginas.quienesSomos.secciones.colaboradores")}
-              members={TEAM.collaborators}
-              fotos={fotos}
-            />
-          </div>
+          {/* Seis grupos, calcados del documento del cliente ("Quiénes Somos - SurE",
+              15/09/2026) y en su mismo orden, ahora como organigrama. La misma persona
+              puede estar en más de un grupo -- ver el comentario de `TEAM` --: cada
+              bloque es un cargo o un comité, no una casilla exclusiva. */}
+          <ArbolDelEquipo fotos={fotos} />
         </div>
       </section>
     </main>

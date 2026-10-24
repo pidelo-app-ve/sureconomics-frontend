@@ -305,3 +305,41 @@
 .se-uh-nuevos__boton .se-uh__punto {
   background: #ffffff;
 }
+
+/* Lo más leído en el lateral: su título ya lleva la regla de sección. */
+.se-uh-lateral__bloque--sin-regla {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Los puntos del último resumen: renglones entre filetes, en la serif de los titulares. */
+.se-uh-lateral__puntos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-uh-lateral__puntos li {
+  padding: 9px 0;
+  border-top: 1px solid var(--filete);
+}
+
+.se-uh-lateral__puntos li:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+
+.se-uh-lateral__puntos a {
+  font-family: var(--titular);
+  font-size: 1rem;
+  line-height: 1.3;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-uh-lateral__puntos a:hover {
+  color: var(--marca-verde);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+

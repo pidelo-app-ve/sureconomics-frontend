@@ -37,6 +37,7 @@
       "mundo": "World markets"
     },
     "explorador": {
+      "masTratados": "Most covered",
       "buscarEn": "Search {alcance}",
       "tema": "Topic",
       "temas": "Topics",

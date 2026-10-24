@@ -7,6 +7,7 @@ import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getResumen } from "../services/resumenService";
+import { lineaDelPunto, rutaInterna } from "../lib/resumen";
 import "../styles/resumen.css";
 
 /**
@@ -17,16 +18,6 @@ import "../styles/resumen.css";
  * punto enlaza a su pieza o a su titular de «Última hora», dentro del sitio y en el
  * idioma de la página; los titulares llevan su fuente. Todo se pinta como texto.
  */
-
-/** La dirección del backend es absoluta; dentro del sitio se navega con la ruta. */
-const rutaInterna = (url) => {
-  try {
-    const u = new URL(url);
-    return `${u.pathname}${u.hash}`;
-  } catch {
-    return url;
-  }
-};
 
 const fechaLarga = (fecha, lang) =>
   new Intl.DateTimeFormat(lang === "en" ? "en-US" : "es-VE", {
@@ -43,7 +34,7 @@ const variacion = (v, lang) => {
 const Punto = ({ punto, lang }) => (
   <li className="se-res-punto">
     <Enlace to={rutaInterna(punto.url)} className="se-res-punto__enlace">
-      {lang === "en" ? punto.linea_en || punto.linea : punto.linea}
+      {lineaDelPunto(punto, lang)}
     </Enlace>
     {punto.fuente ? <span className="se-res-punto__fuente"> · {punto.fuente}</span> : null}
   </li>

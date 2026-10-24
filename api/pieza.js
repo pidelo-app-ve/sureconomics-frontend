@@ -368,7 +368,9 @@ export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
   const fotoAbsoluta = foto ? (foto.startsWith("/") ? `${SITIO}${foto}` : foto) : null;
   const partes = [
     `<main class="se-blog se-articles se-previa"><section class="se-section"><div class="se-container"><article class="se-piece">`,
-    kicker ? `<p class="se-piece__kicker">${escapar(kicker)}</p>` : "",
+    // El formato como las migas de la página, que es donde lo pinta React: sin el
+    // rótulo encima del titular, la pieza no salta al hidratarse.
+    kicker ? `<p class="se-piece__crumbs">${escapar(kicker)}</p>` : "",
     `<h1 class="se-piece__title">${escapar(pieza.title)}</h1>`,
     entradilla ? `<p class="se-piece__lead">${escapar(entradilla)}</p>` : "",
     `<p class="se-piece__meta">${en ? "By" : "Por"} ${escapar(firma)}${fecha ? ` · <time datetime="${escapar(pieza.published_at)}">${escapar(fecha)}</time>` : ""}</p>`,

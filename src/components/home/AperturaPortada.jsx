@@ -32,11 +32,13 @@ import { IconoPausa, UltimaHoraTarjeta } from "../titulares/UltimaHoraTarjeta";
  * La columna es sólo texto a propósito: al lado de una imagen grande, tres miniaturas
  * compiten con ella y no se lee ninguna. Lo que se compara ahí son titulares.
  *
+ * Es la parte de arriba de la portada y se ve como una emisión: un solo bloque verde
+ * con la cabecera, el titular grande en blanco y la foto a sangre hasta el borde. Las
+ * otras tres noticias van debajo, y Última hora como el rótulo inferior de un canal.
+ *
  * **Rota** cuando la principal la elige la regla y no la redacción: pasa por las cuatro
- * noticias con `useRotacion`, el mismo motor que la tarjeta de Última hora. La foto que
- * sale se desvanece sobre la que entra y el texto sube con ella. La columna enseña las
- * otras tres, así que el titular grande nunca se repite debajo. La pieza fijada no
- * rota: fijar es decir «esta manda».
+ * noticias con `useRotacion`. La foto nueva barre a la anterior de izquierda a derecha
+ * y el titular entra con ella. La pieza fijada no rota: fijar es decir «esta manda».
  */
 
 /** Cuántas noticias acompañan a la principal en la columna. */
@@ -46,10 +48,8 @@ export const EN_LA_COLUMNA = 3;
 const DESVANECE_MS = 700;
 
 /** El `sizes` de la foto de la apertura: la mitad de la pantalla, no un tercio. */
-const SIZES_APERTURA = "(max-width: 899px) 92vw, 56vw";
+const SIZES_APERTURA = "(max-width: 899px) 100vw, 60vw";
 
-/** A partir de cuántos caracteres la entradilla se parte en dos columnas. */
-const ENTRADILLA_DOBLE = 260;
 
 /**
  * Si una pieza está fijada **ahora**. `enPortada` lo dice el servidor; la fecha se
@@ -124,101 +124,82 @@ export const AperturaPortada = ({ principal, secundarias, fijada = false }) => {
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
   const columna = rota ? conjunto.filter((n) => n.id !== actual.id) : secundarias;
   const cruzando = Boolean(saliente && saliente.id !== actual.id);
-  const entradillaDoble = (actual.resumen?.length ?? 0) > ENTRADILLA_DOBLE;
 
   return (
-    <section className="se-section se-apertura" aria-labelledby="apertura-titulo" {...eventos}>
-      <div className="se-container">
-        {/* Fijada a mano no es «lo más reciente»: puede ser un informe de hace una
-            semana, y el encabezado oculto tiene que decir la verdad al lector de
-            pantalla. */}
-        <h2 id="apertura-titulo" className="se-sr-only">
-          {fijada ? t("portada.apertura.apertura") : t("portada.apertura.loMasReciente")}
-        </h2>
-        <div className={`se-apertura__rejilla${columna.length ? "" : " se-apertura__rejilla--sola"}`}>
-          <article className="se-apertura__principal">
-            <div className="se-apertura__escena">
-              {/* La foto que se va, encima de la que entra y fuera del flujo, para que
-                  la escena mida lo mismo durante el cruce. */}
-              {cruzando ? (
-                <div
-                  key={`sale-${saliente.id}`}
-                  className="se-apertura__media se-apertura__media--sale"
-                  aria-hidden="true"
-                >
-                  <CardMedia
-                    pieza={saliente}
-                    ancho={1400}
-                    etiqueta={temaPrincipal(saliente)}
-                    sizes={SIZES_APERTURA}
-                  />
-                </div>
-              ) : null}
-              <Enlace
-                key={actual.id}
-                to={rutaDePieza(actual)}
-                className={`se-apertura__media${cruzando ? " se-apertura__media--entra" : ""}`}
-                aria-hidden="true"
-                tabIndex={-1}
-              >
-                {/* Su propio `sizes`: con el de las tarjetas (un tercio de pantalla) el
-                    navegador pedía la talla pequeña para una imagen que ocupa la mitad,
-                    y en la apertura se veía blanda. */}
-                <CardMedia
-                  pieza={actual}
-                  ancho={1400}
-                  etiqueta={temaPrincipal(actual)}
-                  sizes={SIZES_APERTURA}
-                />
-              </Enlace>
-            </div>
-            <div
-              key={actual.id}
-              className={`se-apertura__cuerpo${cruzando ? " se-apertura__cuerpo--entra" : ""}`}
-            >
-              <div className="se-apertura__linea">
-                <LugarYFecha pieza={actual} clase="se-apertura__meta" />
-                {rota ? (
-                  <button
-                    type="button"
-                    className="se-apertura__pausa"
-                    aria-pressed={pausado}
-                    aria-label={t("portada.apertura.pausar")}
-                    onClick={alternarPausa}
-                  >
-                    <IconoPausa pausado={pausado} />
-                  </button>
-                ) : null}
-              </div>
-              <h3 className="se-apertura__titulo">
-                <Enlace to={rutaDePieza(actual)}><TituloDePieza pieza={actual} /></Enlace>
-              </h3>
-              {actual.resumen ? (
-                <p className={`se-apertura__resumen${entradillaDoble ? " se-apertura__resumen--doble" : ""}`}>
-                  {actual.resumen}
-                </p>
-              ) : null}
-            </div>
-          </article>
+    <section className="se-apertura" aria-labelledby="apertura-titulo" {...eventos}>
+      {/* Fijada a mano no es «lo más reciente»: puede ser un informe de hace una
+          semana, y el encabezado oculto tiene que decir la verdad al lector de pantalla. */}
+      <h2 id="apertura-titulo" className="se-sr-only">
+        {fijada ? t("portada.apertura.apertura") : t("portada.apertura.loMasReciente")}
+      </h2>
+      <div className="se-container se-apertura__marco">
+        <article className="se-apertura__principal">
+          <div
+            key={actual.id}
+            className={`se-apertura__cuerpo${cruzando ? " se-apertura__cuerpo--entra" : ""}`}
+          >
+            <LugarYFecha pieza={actual} clase="se-apertura__meta" />
+            <h3 className="se-apertura__titulo">
+              <Enlace to={rutaDePieza(actual)}><TituloDePieza pieza={actual} /></Enlace>
+            </h3>
+            {actual.resumen ? <p className="se-apertura__resumen">{actual.resumen}</p> : null}
+          </div>
 
-          {columna.length ? (
-            <div className="se-apertura__lado">
-              {/* Última hora encima de los titulares; no pinta nada sin titulares recientes. */}
-              <UltimaHoraTarjeta />
-              <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
-                {columna.map((n) => (
-                  <li key={n.id} className="se-apertura__item">
-                    <LugarYFecha pieza={n} clase="se-apertura__meta" />
-                    <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
-                      <TituloDePieza pieza={n} />
-                    </Enlace>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
-        </div>
+          {/* La foto, a sangre hasta el borde derecho. La que entra barre a la que sale. */}
+          <div className="se-apertura__escena">
+            {cruzando ? (
+              <div key={`sale-${saliente.id}`} className="se-apertura__media se-apertura__media--sale" aria-hidden="true">
+                <CardMedia pieza={saliente} ancho={1400} etiqueta={temaPrincipal(saliente)} sizes={SIZES_APERTURA} />
+              </div>
+            ) : null}
+            <Enlace
+              key={actual.id}
+              to={rutaDePieza(actual)}
+              className={`se-apertura__media${cruzando ? " se-apertura__media--entra" : ""}`}
+              aria-hidden="true"
+              tabIndex={-1}
+            >
+              <CardMedia pieza={actual} ancho={1400} etiqueta={temaPrincipal(actual)} sizes={SIZES_APERTURA} />
+            </Enlace>
+            {rota ? (
+              <div className="se-apertura__mando">
+                {/* Qué noticia de las cuatro está en pantalla, y la pausa. */}
+                <ol className="se-apertura__puntos" aria-hidden="true">
+                  {conjunto.map((n, i) => (
+                    <li key={n.id} className={i === indice ? "se-apertura__punto--actual" : undefined} />
+                  ))}
+                </ol>
+                <button
+                  type="button"
+                  className="se-apertura__pausa"
+                  aria-pressed={pausado}
+                  aria-label={t("portada.apertura.pausar")}
+                  onClick={alternarPausa}
+                >
+                  <IconoPausa pausado={pausado} />
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </article>
+
+        {columna.length ? (
+          <ol className="se-apertura__columna" aria-label={t("portada.apertura.otrasNoticias")}>
+            {columna.map((n) => (
+              <li key={n.id} className="se-apertura__item">
+                <LugarYFecha pieza={n} clase="se-apertura__meta" />
+                <Enlace className="se-apertura__enlace" to={rutaDePieza(n)}>
+                  <TituloDePieza pieza={n} />
+                </Enlace>
+              </li>
+            ))}
+          </ol>
+        ) : null}
       </div>
+
+      {/* Última hora, como el rótulo inferior de un canal: no pinta nada sin titulares
+          recientes. */}
+      <UltimaHoraTarjeta variante="rotulo" />
     </section>
   );
 };

@@ -9730,60 +9730,123 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* ═══ Portada: la apertura ═════════════════════════════════════════════
-   La noticia principal en grande y una columna de titulares al lado. Es lo que le
-   da jerarquía a la portada: sin ella, la primera noticia medía lo mismo que la
-   sexta. Ver `components/home/AperturaPortada.jsx`. */
-/* Con las dos clases: la regla global `.se-section + .se-section { padding-top: 0 }`
-   pegaba la apertura al filtro y el bloque de Noticias a la apertura. */
-.se-section.se-apertura {
-  padding-top: var(--se-space-lg);
-  padding-bottom: var(--se-space-2xl);
+/* ═══ Portada: la apertura, como una emisión ═════════════════════════════
+   El mismo verde de la cabecera sigue hacia abajo: mástil, noticia principal y el
+   rótulo de Última hora son un solo bloque, como la pantalla de un canal. El titular
+   grande en blanco a la izquierda; la foto a sangre hasta el borde derecho de la
+   pantalla. Sin filetes ni cajas: separa el aire. Ver `AperturaPortada.jsx`. */
+.se-apertura {
+  --apertura-borde: max(var(--se-content-gutter), calc((100vw - var(--se-container-max)) / 2 + var(--se-content-gutter)));
+  position: relative;
+  overflow-x: clip;
+  background: var(--marca-verde);
+  color: #ffffff;
 }
 
-.se-apertura__rejilla {
-  display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr);
-  gap: var(--se-space-xl);
-  align-items: start;
-}
-
-.se-apertura__rejilla--sola {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 900px;
+.se-apertura__marco {
+  padding-top: clamp(20px, 3vw, 40px);
+  padding-bottom: clamp(28px, 3.5vw, 48px);
 }
 
 .se-apertura__principal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-space-lg);
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .se-apertura__principal {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 7fr);
+    align-items: end;
+    gap: clamp(32px, 4vw, 64px);
+  }
+}
+
+.se-apertura__cuerpo {
   display: flex;
   flex-direction: column;
-  gap: var(--se-space-md);
+  gap: 18px;
   min-width: 0;
-  /* La llegada de la página: la principal sube y las de la columna detrás,
-     escalonadas 60 ms; cuando la apertura rota, la que vuelve a la columna entra igual.
-     Nunca al hacer scroll. */
-  animation: se-apertura-sube 480ms cubic-bezier(0.2, 0.9, 0.25, 1) 80ms both;
+  padding-bottom: 8px;
 }
 
-.se-apertura__lado .se-apertura__item {
-  animation: se-apertura-sube 420ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+.se-apertura .se-apertura__meta {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.se-apertura__lado .se-apertura__item:nth-child(1) { animation-delay: 200ms; }
-.se-apertura__lado .se-apertura__item:nth-child(2) { animation-delay: 260ms; }
-.se-apertura__lado .se-apertura__item:nth-child(3) { animation-delay: 320ms; }
-.se-apertura__lado .se-apertura__item:nth-child(4) { animation-delay: 380ms; }
+.se-apertura .se-meta__lugar {
+  color: #ffffff;
+}
 
-@media (prefers-reduced-motion: reduce) {
-  .se-apertura__principal,
-  .se-apertura__lado .se-apertura__item {
-    animation: none;
+.se-apertura__titulo {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(2.25rem, 1.2rem + 2.7vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.se-apertura__titulo a,
+.se-apertura__enlace {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.se-apertura__titulo a:hover,
+.se-apertura__enlace:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 0.12em;
+}
+
+.se-apertura__titulo a:focus-visible,
+.se-apertura__enlace:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.se-apertura__resumen {
+  margin: 0;
+  max-width: 46ch;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* La foto a sangre: llega hasta el borde derecho de la pantalla. */
+.se-apertura__escena {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 16 / 10;
+}
+
+@media (min-width: 960px) {
+  .se-apertura__escena {
+    margin-right: calc(-1 * var(--apertura-borde));
+    aspect-ratio: auto;
+    min-height: clamp(360px, 34vw, 520px);
+  }
+}
+
+@media (max-width: 959px) {
+  .se-apertura__escena {
+    order: -1;
+    margin-inline: calc(-1 * var(--se-content-gutter));
   }
 }
 
 .se-apertura__media {
-  position: relative;
+  position: absolute;
+  inset: 0;
   display: block;
-  aspect-ratio: 16 / 9;
   overflow: hidden;
   color: #ffffff;
   text-decoration: none;
@@ -9794,158 +9857,147 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   height: 100%;
 }
 
-.se-apertura__media .se-artcard__img {
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.se-apertura__principal:hover .se-apertura__media .se-artcard__img {
-  transform: scale(1.02);
-}
-
-.se-apertura__cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.se-apertura__meta {
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
-
-.se-apertura__titulo {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.7rem, 3vw, 2.6rem);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.se-apertura__titulo a,
-.se-apertura__enlace {
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.se-apertura__titulo a:hover,
-.se-apertura__titulo a:focus-visible,
-.se-apertura__enlace:hover,
-.se-apertura__enlace:focus-visible {
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-}
-
-.se-apertura__titulo a:focus-visible,
-.se-apertura__enlace:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-.se-apertura__resumen {
-  margin: 0;
-  max-width: 34em;
-  font-family: var(--se-font-reading);
-  font-size: 1.0625rem;
-  line-height: 1.55;
-  color: var(--color-slate);
-}
-
-/* La entradilla larga, a dos columnas de periódico. Sólo si hay texto
-   para las dos (lo decide el componente por longitud): una frase partida en dos
-   columnas deja una huérfana. */
-@media (min-width: 900px) {
-  .se-apertura__resumen--doble {
-    max-width: 58em;
-    columns: 2;
-    column-gap: 2.25rem;
-    font-size: 1rem;
-  }
-}
-
-/* —— La apertura rota ——
-   La foto que se va se desvanece encima de la que entra, que se asienta desde un poco
-   más grande; el cuerpo sube con ella. Es el único movimiento autorizado en la
-   apertura además de Última hora, y para con el ratón encima, con el botón de pausa
-   y con movimiento reducido (entonces no rota: lo decide el componente). */
-.se-apertura__escena {
-  position: relative;
-}
-
+/* El cambio de noticia: la foto nueva barre a la anterior de izquierda a derecha, como
+   el corte de un canal, y el titular entra con ella. */
 .se-apertura__media--sale {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
-  animation: se-apertura-sale 700ms ease both;
 }
 
-.se-apertura__media--entra .se-artcard__img,
-.se-apertura__media--entra .se-cardfill {
-  animation: se-apertura-asienta 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+.se-apertura__media--entra {
+  z-index: 1;
+  animation: se-apertura-barre 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .se-apertura__cuerpo--entra {
-  animation: se-apertura-sube 480ms cubic-bezier(0.2, 0.9, 0.25, 1) 120ms both;
+  animation: se-apertura-sube 620ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
 }
 
-@keyframes se-apertura-sale {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes se-apertura-asienta {
-  from { transform: scale(1.04); }
-  to { transform: scale(1); }
+@keyframes se-apertura-barre {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 
 @keyframes se-apertura-sube {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
 }
 
-.se-apertura__linea {
+/* La llegada de la página: el titular sube y la foto se descubre una vez. */
+.se-apertura__principal .se-apertura__cuerpo {
+  animation: se-apertura-sube 700ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
+}
+
+.se-apertura__principal .se-apertura__media:not(.se-apertura__media--sale) {
+  animation: se-apertura-barre 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Cuál de las cuatro está en pantalla, y la pausa: sobre la foto, abajo a la derecha. */
+.se-apertura__mando {
+  position: absolute;
+  right: max(20px, var(--apertura-borde));
+  bottom: 18px;
+  z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 14px;
+}
+
+.se-apertura__puntos {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-apertura__puntos li {
+  width: 22px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), background-color 300ms ease;
+}
+
+.se-apertura__puntos .se-apertura__punto--actual {
+  width: 40px;
+  background: #ffffff;
 }
 
 .se-apertura__pausa {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border: 1px solid var(--color-hairline-dark);
+  border: 0;
   border-radius: 999px;
-  background: transparent;
-  color: var(--color-ink);
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
   cursor: pointer;
 }
 
 .se-apertura__pausa:hover {
-  background: var(--color-hairline);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .se-apertura__pausa:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid #ffffff;
   outline-offset: 2px;
 }
 
+/* Las otras tres, debajo y en fila: titular en blanco, sin filetes. */
+.se-apertura__columna {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  margin: clamp(28px, 3vw, 44px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 760px) {
+  .se-apertura__columna {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 48px);
+  }
+}
+
+.se-apertura__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.se-apertura__enlace {
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.0625rem, 0.95rem + 0.4vw, 1.3125rem);
+  font-weight: 650;
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+
+.se-apertura__columna .se-apertura__item {
+  animation: se-apertura-sube 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.se-apertura__columna .se-apertura__item:nth-child(1) { animation-delay: 220ms; }
+.se-apertura__columna .se-apertura__item:nth-child(2) { animation-delay: 290ms; }
+.se-apertura__columna .se-apertura__item:nth-child(3) { animation-delay: 360ms; }
+
 @media (prefers-reduced-motion: reduce) {
-  .se-apertura__media--sale,
-  .se-apertura__media--entra .se-artcard__img,
-  .se-apertura__media--entra .se-cardfill,
-  .se-apertura__cuerpo--entra {
+  .se-apertura__media--entra,
+  .se-apertura__cuerpo--entra,
+  .se-apertura__principal .se-apertura__cuerpo,
+  .se-apertura__principal .se-apertura__media:not(.se-apertura__media--sale),
+  .se-apertura__columna .se-apertura__item {
     animation: none;
+  }
+
+  .se-apertura__puntos li {
+    transition: none;
   }
 }
 
@@ -10317,48 +10369,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-/* La columna: titulares entre reglas finas, como la segunda columna de un diario. */
-.se-apertura__columna {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 2px solid var(--color-ink);
-}
-
-.se-apertura__item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: var(--se-space-md) 0;
-  border-bottom: 1px solid var(--color-hairline);
-}
-
-.se-apertura__enlace {
-  font-family: var(--se-font-heading);
-  font-size: 1.2rem;
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  text-wrap: pretty;
-}
-
-@media (max-width: 900px) {
-  .se-apertura__rejilla {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--se-space-lg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-apertura__media .se-artcard__img {
-    transition: none;
-  }
-
-  .se-apertura__principal:hover .se-apertura__media .se-artcard__img {
-    transform: none;
-  }
-}
-
 /* —— El filtro de la portada, en franja ——
    Sigue siendo lo primero bajo la cabecera, como pidió el socio, pero delgado: la
    caja alta con sombra grande y filo cobrizo pesaba más que la noticia de debajo,
@@ -10540,14 +10550,7 @@ html {
    titular caía dos pantallas más abajo. Foto y texto lado a lado, como en el
    escritorio, y la foto con techo por si la columna sale ancha. */
 @media (orientation: landscape) and (max-height: 500px) {
-  .se-apertura__principal {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--se-space-md);
-    align-items: start;
-  }
-
-  .se-apertura__media {
+  .se-apertura__escena {
     max-height: 60svh;
   }
 
@@ -11646,7 +11649,6 @@ html {
 
 /* —— 1. Rótulos en frase —— */
 .se-blog .se-meta,
-.se-apertura__meta,
 .se-noticias__meta,
 .se-artcard__by,
 .se-doccard__kicker,

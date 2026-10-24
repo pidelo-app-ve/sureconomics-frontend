@@ -241,13 +241,6 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* El descargo de un medio económico, en su recuadro: lo que se publica es
-            periodismo, no asesoría. Va en todas las páginas porque toda pieza puede
-            leerse suelta. */}
-        <div className="se-footer__aviso">
-          <p className="se-footer__aviso-titulo">{t("pie.descargoTitulo")}</p>
-          <p className="se-footer__descargo">{t("pie.descargo")}</p>
-        </div>
         <div className="se-footer__bottom">
           <p className="se-footer__copy">
             © {new Date().getFullYear()} {BRAND.name}. {t("pie.derechos")}

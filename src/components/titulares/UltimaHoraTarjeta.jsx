@@ -57,7 +57,7 @@ export const IconoPausa = ({ pausado }) =>
 
 IconoPausa.propTypes = { pausado: PropTypes.bool };
 
-export const UltimaHoraTarjeta = () => {
+export const UltimaHoraTarjeta = ({ variante = "tarjeta" }) => {
   const { t } = useIdioma();
   const { items } = useHeadlines();
   const ahora = useAhora(30_000);
@@ -71,7 +71,11 @@ export const UltimaHoraTarjeta = () => {
 
   const actual = seis[indice];
   return (
-    <section className="se-uh" aria-label={t("titulares.tarjeta.region")} {...eventos}>
+    <section
+      className={`se-uh${variante === "rotulo" ? " se-uh--rotulo" : ""}`}
+      aria-label={t("titulares.tarjeta.region")}
+      {...eventos}
+    >
       <div className="se-uh__cabeza">
         <span className="se-uh__etiqueta">
           <span
@@ -139,4 +143,9 @@ export const UltimaHoraTarjeta = () => {
       ) : null}
     </section>
   );
+};
+
+UltimaHoraTarjeta.propTypes = {
+  /** «tarjeta» (la caja verde) o «rotulo» (una línea a lo ancho, como el rótulo de un canal). */
+  variante: PropTypes.oneOf(["tarjeta", "rotulo"]),
 };

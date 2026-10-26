@@ -26,7 +26,7 @@ import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from ".
  */
 
 /** Fecha de la última revisión del texto. Se formatea en el idioma de la página. */
-const ACTUALIZADO = "2026-10-02";
+const ACTUALIZADO = "2026-10-26";
 
 /* Las cinco cookies. Tipo, finalidad, duración y base viven en `paginas.json`
    (`paginas.cookies.tabla.<nombre>`), para los dos idiomas. */
@@ -278,6 +278,18 @@ export const Cookies = () => {
               seccion de los datos, y no escondido: la promesa de que un no no deja rastro
               se sostiene porque lo que se manda es un uno sin nadie detras. */}
           <p>{t("paginas.cookies.datos4")}</p>
+        </section>
+
+        {/* Los videos de YouTube: lo único de un tercero que puede cargarse en la página, y
+            cuándo. Las vistas previas que arrancan solas dependen del mismo «Aceptar», así
+            que se dice aquí y en la barra (`paginas.cookies.aviso.cuerpo`). */}
+        <section className="se-legal__bloque" aria-labelledby="cookies-videos">
+          <h2 id="cookies-videos" className="se-legal__h2">
+            {t("paginas.cookies.videos")}
+          </h2>
+          <p>{t("paginas.cookies.videos1")}</p>
+          <p>{t("paginas.cookies.videos2", { fuerte: <strong>{t("paginas.cookies.videos2Fuerte")}</strong> })}</p>
+          <p>{t("paginas.cookies.videos3")}</p>
         </section>
 
         <section className="se-legal__bloque" aria-labelledby="cookies-conservacion">

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
-import { urlVisor, vistasCortas } from "../../lib/youtube";
+import { avisarMedio, urlVisor, vistasCortas } from "../../lib/youtube";
 
 /**
  * El visor de «En la calle»: un short a pantalla completa, con sonido, y los demás a un
@@ -67,6 +67,7 @@ export const VisorDeShorts = ({ shorts, inicio, canal, origen, onCerrar }) => {
 
   // Foco dentro al abrir, la página quieta detrás, y el foco de vuelta al cerrar.
   useEffect(() => {
+    avisarMedio("visor-shorts");
     activoAntes.current = document.activeElement;
     document.body.style.overflow = "hidden";
     const cuadro = requestAnimationFrame(() => {

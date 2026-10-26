@@ -96,6 +96,15 @@
       "growth": "Growth",
       "articulo": "Article"
     },
+    "canal": {
+      "titulo": "Our channel",
+      "video": "Video: {titulo}",
+      "reproducir": "Play: {titulo}",
+      "reproducirConDuracion": "Play: {titulo} ({duracion})",
+      "anterior": "Previous video",
+      "siguiente": "Next video",
+      "volver": "Back to the video in its place"
+    },
     "calle": {
       "titulo": "On the street",
       "verCanal": "See the channel",

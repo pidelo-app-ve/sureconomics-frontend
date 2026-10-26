@@ -4,7 +4,7 @@
       "aviso": {
         "region": "Aviso de cookies",
         "titulo": "Medimos cuánta gente nos lee",
-        "cuerpo": "Con su permiso usamos cuatro cookies propias para saber cuántas personas nos leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten con nadie y no le siguen fuera de este sitio.",
+        "cuerpo": "Con su permiso usamos cuatro cookies propias para saber cuántas personas nos leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten con nadie y no le siguen fuera de este sitio. Si acepta, algunos videos de YouTube de la portada podrán además empezar solos, sin sonido.",
         "enlace": "Qué guarda cada una",
         "rechazar": "Rechazar",
         "aceptar": "Aceptar"
@@ -109,6 +109,11 @@
       "noGuardamos": "Y esto es lo que no guardamos, en ningún caso:",
       "datos3": "El identificador tampoco se cruza con su cuenta si usted tiene una en este sitio. Son dos sistemas separados a propósito: quien lee los números de audiencia no puede saber qué leyó una persona con nombre y apellidos, porque ese vínculo no existe en ninguna parte.",
       "datos4": "Hay una cosa más que conviene decir, porque ocurre también si usted rechaza. Cuando responde al aviso —en un sentido o en otro— sumamos uno a un contador diario de «aceptaron» o «rechazaron». Ese contador no lleva identificador, ni cookie, ni dirección IP, ni la página en la que usted estaba: es un número por día, y sirve para saber qué parte de los lectores acepta la medición. Es lo único que un «no» envía a nuestro servidor, y no hay manera de saber que ese uno fue usted.",
+      "videos": "Los videos de YouTube",
+      "videos1": "En la portada hay videos de nuestro canal de YouTube —la fila «En la calle» y la ventana «Nuestro canal»—, y algunas piezas llevan un video de YouTube. Las fotos de esos videos son copias que guardamos nosotros: verlas no conecta su navegador con YouTube.",
+      "videos2": "{fuerte} Cuando se carga, su navegador habla directamente con YouTube, que es de Google: YouTube recibe su dirección IP y puede guardar o leer información en su navegador, según su propia política de privacidad. Nosotros no recibimos nada de eso. Usamos siempre el modo de privacidad mejorada de YouTube (youtube-nocookie.com), que no guarda nada antes de que el video empiece.",
+      "videos2Fuerte": "El reproductor de YouTube solo se carga en dos casos: cuando usted pulsa un video, o cuando aceptó las cookies y un video de la portada empieza a moverse solo, sin sonido, como vista previa.",
+      "videos3": "Si rechaza las cookies, ningún video empieza solo: las fotos se quedan quietas y cada video se carga únicamente si usted lo pulsa. Las vistas previas tampoco empiezan si su sistema pide reducir el movimiento o tiene activado el ahorro de datos, y se pueden pausar con el botón «Pausar vistas previas».",
       "conservacion": "Cuánto lo conservamos",
       "conservacion1": "{fuerte} Es el plazo que permite comparar un mes con el mismo mes del año anterior, y ni un día más. Pasado ese tiempo, los registros se borran de forma automática; no es una promesa de buena voluntad, es una tarea programada que corre sola.",
       "conservacion1Fuerte": "Catorce meses.",
@@ -119,7 +124,7 @@
       "derechos2": "Le asisten los derechos de acceso, rectificación, cancelación y oposición (derechos ARCO) que reconocen el artículo 28 de la Constitución de la República Bolivariana de Venezuela y la Ley de Protección de Datos Personales. Si nos lee desde la Unión Europea o Brasil, le asisten además los derechos de limitación y portabilidad que reconocen el Reglamento (UE) 2016/679 (RGPD) y la Lei 13.709/2018 (LGPD), según la norma que le resulte aplicable.",
       "derechos3": "Hay un detalle honesto que conviene explicar: como no guardamos su nombre ni su correo junto a estos datos, {fuerte} — no tenemos forma de saber cuál de los identificadores es el suyo, y pedirle datos personales para averiguarlo sería recopilar más información de la que queríamos evitar. Por eso el ejercicio de esos derechos está puesto donde sí funciona: en el botón de esta página, que actúa sobre el identificador que tiene su navegador delante.",
       "derechos3Fuerte": "no podemos localizar «sus» registros si usted nos escribe",
-      "derechos4": "También puede borrar las cookies desde la configuración de su navegador, o navegar en una ventana privada. Si rechaza la medición, el sitio funciona exactamente igual: no hay ningún contenido que dependa de que usted acepte.",
+      "derechos4": "También puede borrar las cookies desde la configuración de su navegador, o navegar en una ventana privada. Si rechaza la medición, todo el contenido sigue a su alcance: lo único que cambia es que los videos no empiezan solos, y cada uno se ve al pulsarlo.",
       "derechos5": "Para cualquier consulta sobre este aviso puede escribir a {correo}. Si considera que no hemos atendido su solicitud, puede reclamar ante la Superintendencia Nacional de Protección de Datos de Venezuela o, si nos lee desde otro país, ante la autoridad de control que le corresponda — en España, la Agencia Española de Protección de Datos; en Brasil, la ANPD.",
       "pie": "¿Prefiere leer cómo tratamos el resto de sus datos? Escríbanos a {correo} o vuelva a la {portada}.",
       "piePortada": "portada"

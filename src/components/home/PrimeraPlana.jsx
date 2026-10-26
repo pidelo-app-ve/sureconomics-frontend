@@ -14,6 +14,9 @@ import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { IconoPausa } from "../comun/IconoPausa";
 import { UltimaHoraColumna } from "../titulares/UltimaHoraColumna";
+import { NuestroCanal } from "../canal/NuestroCanal";
+import { AperturaShort } from "../canal/AperturaShort";
+import { esShort, idDeYoutube } from "../../lib/youtube";
 import "./primeraPlana.css";
 
 /**
@@ -26,6 +29,8 @@ import "./primeraPlana.css";
  *   foto nueva barre a la anterior. La fijada por la redacción no rota.
  * - **Derecha, opinión e indicadores**: la editorial del día, dos análisis con firma y
  *   las monedas de la región.
+ * - **«Nuestro canal»**, el último video del canal de YouTube: bajo Última hora en
+ *   escritorio, detrás de la apertura en el teléfono.
  *
  * En el teléfono se apilan: Última hora (tres titulares), la que manda con las otras
  * debajo, la opinión y las monedas. En escritorio la rejilla las coloca por áreas.
@@ -174,6 +179,10 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
   const debajo = rota ? conjunto.filter((n) => n.id !== actual.id) : secundarias;
   const cruzando = Boolean(saliente && saliente.id !== actual.id);
+  // Una apertura cuyo video es un short abre en vertical (`AperturaShort`). Solo quieta:
+  // un video que se mueve en medio de la rotación de cuatro piezas sería un mareo, así
+  // que para salir así la redacción la fija.
+  const short = !rota && esShort(actual.videoUrl) ? idDeYoutube(actual.videoUrl) : null;
 
   return (
     <section className="se-plana" aria-labelledby="plana-titulo">
@@ -190,7 +199,8 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
         <UltimaHoraColumna recientes={recientes} />
 
         <div className="se-plana__centro" {...eventos}>
-          <article className="se-plana__principal">
+          <article className={`se-plana__principal${short ? " se-plana__principal--short" : ""}`}>
+            {short ? <AperturaShort pieza={actual} id={short} /> : (
             <div className="se-plana__foto">
               {cruzando ? (
                 <div key={`sale-${saliente.id}`} className="se-plana__media se-plana__media--sale" aria-hidden="true">
@@ -207,6 +217,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
                 <CardMedia pieza={actual} ancho={1200} etiqueta={temaPrincipal(actual)} sizes={SIZES_PRINCIPAL} />
               </Enlace>
             </div>
+            )}
             <div key={actual.id} className={`se-plana__texto${cruzando ? " se-plana__texto--entra" : ""}`}>
               <h3 className={`se-plana__titulo${actual.formatoApi === "informe" ? " se-plana__titulo--a-fondo" : ""}`}>
                 <Enlace to={rutaDePieza(actual)}>
@@ -255,6 +266,10 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
           ) : null}
         </div>
 
+        {/* El último video del canal: en escritorio, bajo Última hora (la columna derecha
+            sigue siendo de la opinión); en el teléfono, detrás de la apertura, para no
+            empujarla hacia abajo. Sin canal, no pinta nada. */}
+        <NuestroCanal />
         <Opinion editorial={editorial} analisis={analisis} />
         <Monedas monedas={monedas} />
       </div>
@@ -262,7 +277,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
   );
 };
 
-const CAMPOS = { imagenUrl: PropTypes.string, resumen: PropTypes.string, entrada: PropTypes.string, autor: PropTypes.string };
+const CAMPOS = { imagenUrl: PropTypes.string, resumen: PropTypes.string, entrada: PropTypes.string, autor: PropTypes.string, videoUrl: PropTypes.string };
 
 PrimeraPlana.propTypes = {
   principal: piezaShape(CAMPOS),

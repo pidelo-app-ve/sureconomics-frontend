@@ -53,6 +53,8 @@ jobs:
         run: npm run test:og
       - name: Enlaces que se pintan
         run: npm run test:enlaces
+      - name: Enlaces de YouTube (shorts incluidos) y duraciones
+        run: npm run test:youtube
       - name: Mapa del sitio
         run: npm run test:sitemap
       - name: Motor de idiomas

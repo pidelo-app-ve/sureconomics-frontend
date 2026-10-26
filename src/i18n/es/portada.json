@@ -96,6 +96,15 @@
       "growth": "Crecimiento",
       "articulo": "Artículo"
     },
+    "canal": {
+      "titulo": "Nuestro canal",
+      "video": "Video: {titulo}",
+      "reproducir": "Reproducir: {titulo}",
+      "reproducirConDuracion": "Reproducir: {titulo} ({duracion})",
+      "anterior": "Video anterior",
+      "siguiente": "Video siguiente",
+      "volver": "Volver al video en su sitio"
+    },
     "calle": {
       "titulo": "En la calle",
       "verCanal": "Ver el canal",

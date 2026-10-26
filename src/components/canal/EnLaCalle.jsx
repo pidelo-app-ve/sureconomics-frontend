@@ -1,11 +1,12 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanal } from "../../hooks/useCanal";
+import { consulta, usePuedePrevisualizar } from "../../hooks/useVistaPrevia";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { EVENTO_CONSENTIMIENTO, consentimiento } from "../../lib/analitica";
-import { duracionReloj, urlVistaPrevia } from "../../lib/youtube";
+import { duracionReloj } from "../../lib/youtube";
 import { IconoPausa } from "../comun/IconoPausa";
 import { VisorDeShorts } from "./VisorDeShorts";
+import { IconoPlay, VistaPrevia } from "./VistaPrevia";
 import "./enLaCalle.css";
 
 /**
@@ -28,11 +29,6 @@ import "./enLaCalle.css";
 const SIN_PREVIAS = "se_calle_previas";
 const ESPERA_RATON = 350;
 const ESPERA_TACTIL = 500;
-/** YouTube enseña su carátula, su rueda y sus mandos al arrancar: se espera a que ya
- *  corra limpio para fundirlo sobre la portada. */
-const ESPERA_LIMPIO = 2600;
-/** Una vista previa es un asomo, no el video: a los 20 s vuelve la portada. */
-const DURA_PREVIA = 20000;
 
 const esClicSencillo = (e) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 
@@ -44,41 +40,8 @@ const leerPausa = () => {
   }
 };
 
-const consulta = (q) => (typeof window !== "undefined" && window.matchMedia ? window.matchMedia(q) : null);
-
-/** Si este lector puede ver vistas previas: cookies aceptadas, movimiento y datos. */
-const usePuedePrevisualizar = () => {
-  const [acepto, setAcepto] = useState(() => consentimiento() === "si");
-  const [quieto, setQuieto] = useState(() => Boolean(consulta("(prefers-reduced-motion: reduce)")?.matches));
-  useEffect(() => {
-    const mirar = () => setAcepto(consentimiento() === "si");
-    window.addEventListener(EVENTO_CONSENTIMIENTO, mirar);
-    const mq = consulta("(prefers-reduced-motion: reduce)");
-    const alCambiar = () => setQuieto(Boolean(mq?.matches));
-    mq?.addEventListener?.("change", alCambiar);
-    return () => {
-      window.removeEventListener(EVENTO_CONSENTIMIENTO, mirar);
-      mq?.removeEventListener?.("change", alCambiar);
-    };
-  }, []);
-  const ahorro = typeof navigator !== "undefined" && navigator.connection?.saveData === true;
-  return acepto && !quieto && !ahorro;
-};
-
 const Tarjeta = ({ v, indice, previa, onAbrir, onAsomar, onRetirar, onAgotada }) => {
   const { t } = useIdioma();
-  const [lista, setLista] = useState(false);
-  const relojes = useRef([]);
-  useEffect(() => {
-    if (!previa) setLista(false);
-    return () => relojes.current.forEach((r) => window.clearTimeout(r));
-  }, [previa]);
-  const alCargar = () => {
-    relojes.current = [
-      window.setTimeout(() => setLista(true), ESPERA_LIMPIO),
-      window.setTimeout(() => onAgotada(indice), ESPERA_LIMPIO + DURA_PREVIA),
-    ];
-  };
   const dura = duracionReloj(v.duracion);
   return (
     <li className="se-calle__item">
@@ -98,23 +61,11 @@ const Tarjeta = ({ v, indice, previa, onAbrir, onAsomar, onRetirar, onAgotada })
       >
         <img className="se-calle__foto" src={v.portada} alt="" width="640" height="1138" loading="lazy" decoding="async" />
         {previa ? (
-          <iframe
-            className={`se-calle__previa${lista ? " is-lista" : ""}`}
-            src={urlVistaPrevia(v.id)}
-            title={t("portada.calle.vistaPrevia", { titulo: v.titulo })}
-            tabIndex={-1}
-            aria-hidden="true"
-            allow="autoplay; encrypted-media"
-            referrerPolicy="strict-origin-when-cross-origin"
-            onLoad={alCargar}
-          />
+          <VistaPrevia id={v.id} titulo={v.titulo} className="se-calle__previa" onAgotada={() => onAgotada(indice)} />
         ) : null}
         <span className="se-calle__texto">
           <span className="se-calle__dura">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-              <circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M10 8.2l6 3.8-6 3.8Z" fill="currentColor" />
-            </svg>
+            <IconoPlay />
             {dura}
           </span>
           <span className="se-calle__titulo">{v.titulo}</span>

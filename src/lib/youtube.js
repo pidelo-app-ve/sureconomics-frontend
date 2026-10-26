@@ -23,6 +23,52 @@ export const urlVistaPrevia = (id) =>
     fs: "0",
   })}`;
 
+/** El id de un video en cualquier enlace de YouTube: watch, youtu.be, embed, shorts o live. */
+const ID = /(?:youtube(?:-nocookie)?\.com\/(?:.*[?&]v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/;
+export const idDeYoutube = (url) => ID.exec(url || "")?.[1] ?? null;
+
+/** Si el enlace es de un short: vertical, y así se enseña. */
+export const esShort = (url) => /youtube\.com\/shorts\/[\w-]{11}/.test(url || "");
+
+/**
+ * El reproductor de la ventana «Nuestro canal»: con sonido y controles, y con la API de
+ * mensajes encendida (`enablejsapi`) para poder pausarlo cuando otro video arranca.
+ */
+export const urlReproductor = (id) =>
+  `${BASE}${encodeURIComponent(id)}?${new URLSearchParams({
+    autoplay: "1",
+    playsinline: "1",
+    rel: "0",
+    modestbranding: "1",
+    iv_load_policy: "3",
+    enablejsapi: "1",
+  })}`;
+
+/** Le pide a un reproductor de YouTube que se pause, sin cargar su script. */
+export const pausar = (iframe) => {
+  try {
+    iframe?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func: "pauseVideo", args: [] }),
+      "https://www.youtube-nocookie.com"
+    );
+  } catch {
+    /* si el reproductor aún no está, no hay nada que pausar */
+  }
+};
+
+/**
+ * Un solo video sonando a la vez. Quien arranca uno lo avisa con su nombre; los demás
+ * se pausan o se cierran (la ventana «Nuestro canal» y el visor de «En la calle»).
+ */
+export const EVENTO_MEDIO = "sureconomics:medio";
+export const avisarMedio = (quien) => {
+  try {
+    window.dispatchEvent(new CustomEvent(EVENTO_MEDIO, { detail: quien }));
+  } catch {
+    /* sin eventos personalizados, cada uno suena por su cuenta */
+  }
+};
+
 export const urlVisor = (id) =>
   `${BASE}${encodeURIComponent(id)}?${new URLSearchParams({
     autoplay: "1",

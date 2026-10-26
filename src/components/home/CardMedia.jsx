@@ -4,6 +4,8 @@ import { temaPrincipal } from "../../lib/contentFilter";
 import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
+import { IconoPlay } from "../canal/VistaPrevia";
+import { duracionReloj } from "../../lib/youtube";
 import { piezaShape } from "./piezaShape";
 
 /**
@@ -50,6 +52,22 @@ const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
 
 /** Cuánto puede apartarse una foto de 16:9 antes de mostrarla entera en vez de recortarla. */
 const TOLERANCIA = 0.08;
+
+/**
+ * Que la pieza tiene video: ▶ y su duración («3:08») en la esquina de abajo a la derecha,
+ * como un reproductor. Arriba a la izquierda va el sello educativo y abajo a la izquierda
+ * el tema del relleno: las tres esquinas no se pisan. Solo se ve; quien lee con lector de
+ * pantalla ya oye el formato en la tarjeta.
+ */
+const MarcaDeVideo = ({ pieza }) =>
+  pieza.videoUrl ? (
+    <span className="se-marca-video" aria-hidden="true">
+      <IconoPlay tamano={20} />
+      {duracionReloj(pieza.duracionSegundos)}
+    </span>
+  ) : null;
+
+MarcaDeVideo.propTypes = { pieza: PropTypes.object.isRequired };
 
 export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
   const [fallo, setFallo] = useState(false);
@@ -98,6 +116,7 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
           onError={() => setFallo(true)}
         />
         <SelloEducativo pieza={pieza} />
+        <MarcaDeVideo pieza={pieza} />
       </>
     );
   }
@@ -113,6 +132,7 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
       </div>
       {/* Fuera del relleno, que puede llevar `aria-hidden`: el sello sí se anuncia. */}
       <SelloEducativo pieza={pieza} />
+      <MarcaDeVideo pieza={pieza} />
     </>
   );
 };

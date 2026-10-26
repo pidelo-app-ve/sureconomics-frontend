@@ -78,6 +78,25 @@ Tres matices, todos a favor:
 **Qué queda por decidir:** declarar los iframes de vídeo en la tabla de cookies, o pedir
 un clic previo con aviso. Puede esperar, porque hoy ninguno se carga solo.
 
+**Cambió el 26/10/2026: ahora uno sí puede cargarse solo, y solo con el «Aceptar».** La
+portada tiene videos del canal de YouTube de la casa (la fila «En la calle», la ventana
+«Nuestro canal» y, si la redacción la fija, una apertura con un short). Las fotos son
+copias nuestras; el reproductor de YouTube (`youtube-nocookie.com`) se carga si el lector
+pulsa, **o si aceptó las cookies**: entonces el video que tiene delante arranca solo y mudo
+como vista previa (20 s, uno a la vez, nunca con «movimiento reducido» ni ahorro de datos,
+con botón de pausa). Ver `hooks/useVistaPrevia.js`.
+
+Se dijo en los dos sitios donde el lector decide: una frase al final de la barra
+(`paginas.cookies.aviso.cuerpo`) y una sección nueva, «Los videos de YouTube», en
+`/cookies` (qué recibe Google, que nosotros no recibimos nada, qué pasa si rechaza).
+También se corrigió «si rechaza, el sitio funciona exactamente igual»: ahora cambia una
+cosa, que los videos no empiezan solos.
+
+**Para el abogado:** el mismo «Aceptar» cubre dos finalidades, la medición propia y las
+vistas previas de YouTube. Está dicho en la barra, pero si se prefiere el consentimiento
+separado por finalidad, el cambio es pequeño: un segundo interruptor en `/cookies`
+(«Vistas previas de video») que `usePuedePrevisualizar` leería en lugar del general.
+
 ## 3. La publicidad ya existe
 
 Cuando se escribió la primera versión del aviso, el sitio no tenía publicidad. Ahora sí:

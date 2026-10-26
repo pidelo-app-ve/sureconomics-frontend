@@ -14274,3 +14274,52 @@ html {
   font-weight: 400;
   letter-spacing: -0.02em;
 }
+
+/* ═══ ▶ y duración sobre la foto de una pieza con video ═══ En una pastilla oscura para
+   que se lea sobre cualquier foto y sobre el relleno de color. */
+.se-marca-video {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 5px;
+  border-radius: 999px;
+  background: rgba(8, 10, 12, 0.72);
+  color: #ffffff;
+  font-family: var(--cifras);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Las cajas de imagen estiran a 100 % a todo hijo directo para que la foto las llene
+   (`> *`). La marca y el sello son hermanos de la foto y caían en la misma regla: se
+   estiraban hasta cubrir la tarjeta. El sello solo tenía la excepción en dos de las cinco. */
+.se-artcard__media > :is(.se-marca-video, .se-sello-edu),
+.se-doccard__media > :is(.se-marca-video, .se-sello-edu),
+.se-noticias__foto > :is(.se-marca-video, .se-sello-edu),
+.se-noticias__mini > :is(.se-marca-video, .se-sello-edu),
+.se-plana__media > :is(.se-marca-video, .se-sello-edu) {
+  width: auto;
+  height: auto;
+}
+
+/* En la miniatura de las noticias (128 px) no cabe la duración: solo el ▶. */
+.se-noticias__mini .se-marca-video {
+  right: 6px;
+  bottom: 6px;
+  padding: 3px;
+  font-size: 0;
+  gap: 0;
+}
+
+/* Un short en la pieza: vertical y centrado, del alto que cabe en la pantalla. */
+.se-videostage--vertical {
+  width: min(100%, calc(78vh * 9 / 16), 420px);
+  margin-inline: auto;
+  aspect-ratio: 9 / 16;
+}

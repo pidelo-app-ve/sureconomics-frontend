@@ -4,7 +4,7 @@
       "aviso": {
         "region": "Cookie notice",
         "titulo": "We measure how many people read us",
-        "cuerpo": "With your permission we use four first-party cookies to know how many people read us, whether they come back and what actually gets read. They don't carry your name, aren't shared with anyone and don't follow you off this site.",
+        "cuerpo": "With your permission we use four first-party cookies to know how many people read us, whether they come back and what actually gets read. They don't carry your name, aren't shared with anyone and don't follow you off this site. If you accept, some YouTube videos on the front page may also start on their own, muted.",
         "enlace": "What each one stores",
         "rechazar": "Decline",
         "aceptar": "Accept"
@@ -109,6 +109,11 @@
       "noGuardamos": "And this is what we never store, under any circumstances:",
       "datos3": "Nor is the identifier matched with your account if you have one on this site. They are two separate systems on purpose: whoever reads the audience numbers cannot know what a named person read, because that link doesn't exist anywhere.",
       "datos4": "One more thing is worth saying, because it also happens if you decline. When you answer the notice —one way or the other— we add one to a daily counter of «accepted» or «declined». That counter carries no identifier, no cookie, no IP address and no record of the page you were on: it is one number per day, and it tells us what share of readers accept measurement. It is the only thing a «no» sends to our server, and there is no way to know that one was you.",
+      "videos": "YouTube videos",
+      "videos1": "The front page carries videos from our YouTube channel —the «On the street» row and the «Our channel» window—, and some pieces include a YouTube video. The pictures on those videos are copies we keep ourselves: seeing them does not connect your browser to YouTube.",
+      "videos2": "{fuerte} When it loads, your browser talks directly to YouTube, which belongs to Google: YouTube receives your IP address and may store or read information in your browser, under its own privacy policy. We receive none of that. We always use YouTube's privacy-enhanced mode (youtube-nocookie.com), which stores nothing before the video starts.",
+      "videos2Fuerte": "The YouTube player only loads in two cases: when you press a video, or when you accepted cookies and a video on the front page starts moving on its own, muted, as a preview.",
+      "videos3": "If you decline cookies, no video starts on its own: the pictures stay still and each video loads only when you press it. Previews also do not start if your system asks for reduced motion or has data saver on, and they can be paused with the «Pause previews» button.",
       "conservacion": "How long we keep it",
       "conservacion1": "{fuerte} It is the period that lets us compare a month with the same month of the previous year, and not a day more. After that, records are deleted automatically; it isn't a goodwill promise, it is a scheduled task that runs on its own.",
       "conservacion1Fuerte": "Fourteen months.",
@@ -119,7 +124,7 @@
       "derechos2": "You have the rights of access, rectification, cancellation and objection (ARCO rights) recognized by article 28 of the Constitution of the Bolivarian Republic of Venezuela and the Personal Data Protection Law. If you read us from the European Union or Brazil, you also have the rights to restriction and portability recognized by Regulation (EU) 2016/679 (GDPR) and Lei 13.709/2018 (LGPD), under whichever rule applies to you.",
       "derechos3": "There is an honest detail worth explaining: since we don't store your name or email alongside this data, {fuerte} — we have no way of knowing which identifier is yours, and asking you for personal data to find out would mean collecting more information than we set out to avoid. That is why these rights are exercised where they actually work: through the button on this page, which acts on the identifier your browser has in front of it.",
       "derechos3Fuerte": "we cannot locate «your» records if you write to us",
-      "derechos4": "You can also delete cookies from your browser settings, or browse in a private window. If you decline measurement, the site works exactly the same: no content depends on your accepting.",
+      "derechos4": "You can also delete cookies from your browser settings, or browse in a private window. If you decline measurement, all the content stays within your reach: the only change is that videos do not start on their own, and each one plays when you press it.",
       "derechos5": "For any question about this notice you can write to {correo}. If you believe we have not addressed your request, you can file a complaint with Venezuela's National Superintendency for Data Protection or, if you read us from another country, with the supervisory authority that applies to you — in Spain, the Agencia Española de Protección de Datos; in Brazil, the ANPD.",
       "pie": "Would you rather read how we handle the rest of your data? Write to us at {correo} or go back to the {portada}.",
       "piePortada": "front page"

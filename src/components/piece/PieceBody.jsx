@@ -9,6 +9,7 @@ import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
 import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { enlaceWeb, esDeDominio } from "../../lib/enlaces";
+import { esShort, idDeYoutube } from "../../lib/youtube";
 
 /** Las mismas tallas que las tarjetas: las que genera el backend al subir. */
 const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
@@ -117,9 +118,12 @@ const embedDe = (valor) => {
   // Google hasta que alguien le da a reproducir. El aviso de cookies promete que ningun
   // tercero perfila al lector, y `youtube.com` a secas lo desmentia en cada entrevista
   // -- por una linea, y sin que nadie ganara nada a cambio.
-  const youtube = /(?:youtube\.com\/.*[?&]v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/.exec(url);
+  //
+  // Un short (`youtube.com/shorts/…`) también: antes no se reconocía y la pieza enseñaba
+  // un enlace suelto en lugar del video. Ese va en vertical (`vertical`).
+  const youtube = idDeYoutube(url);
   if (youtube) {
-    return { tipo: "iframe", src: `https://www.youtube-nocookie.com/embed/${youtube[1]}` };
+    return { tipo: "iframe", src: `https://www.youtube-nocookie.com/embed/${youtube}`, vertical: esShort(url) };
   }
   const vimeo = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url);
   if (vimeo) return { tipo: "iframe", src: `https://player.vimeo.com/video/${vimeo[1]}` };
@@ -149,7 +153,7 @@ const VideoStage = ({ url, duracion, titulo }) => {
 
   if (embed.tipo === "iframe") {
     return (
-      <div className="se-videostage se-videostage--live">
+      <div className={`se-videostage se-videostage--live${embed.vertical ? " se-videostage--vertical" : ""}`}>
         <iframe
           className="se-videostage__frame"
           src={embed.src}

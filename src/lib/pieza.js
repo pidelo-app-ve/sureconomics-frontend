@@ -363,6 +363,9 @@ export const piezaFromApi = (row) => {
     duracion: duracionCorta(
       row.video_asset?.duration_seconds ?? row.audio_asset?.duration_seconds
     ),
+    // La del video en segundos, para marcarla como un reproductor («3:08») sobre la foto
+    // de la tarjeta y de la apertura. Solo la del video: un audio no lleva ▶.
+    duracionSegundos: row.video_asset?.duration_seconds ?? null,
     // Present means "there is a report to offer"; the URL is handed out by
     // `documentService`, and quién puede pedirla lo decide el servidor.
     tieneDocumento: Boolean(row.document_asset),

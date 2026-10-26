@@ -64,8 +64,10 @@ const minutosDeLectura = (html) => {
  * Compartir está en un solo sitio por pantalla: en escritorio ancho, el carril que baja
  * con el texto; por debajo, la fila de la firma, con la hoja del sistema delante.
  */
-const REDES_CARRIL = ["whatsapp", "x", "linkedin", "telegram", "copiar"];
-const REDES_CABECERA = ["nativo", "whatsapp", "x", "linkedin", "copiar"];
+const REDES_CARRIL = ["whatsapp", "instagram", "x", "linkedin", "telegram", "copiar"];
+// En el teléfono el botón de Instagram ya abre la hoja del sistema (Instagram no acepta
+// enlaces desde la web), así que la fila no lleva además el botón genérico.
+const REDES_CABECERA = ["whatsapp", "instagram", "x", "linkedin", "copiar"];
 
 const NoEncontrada = () => {
   const { t } = useIdioma();

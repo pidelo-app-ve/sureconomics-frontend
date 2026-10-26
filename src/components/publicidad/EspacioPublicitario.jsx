@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import PropTypes from "prop-types";
 import { tActual } from "../../i18n/motor";
 
@@ -323,8 +324,14 @@ FilaDeAnuncio.propTypes = { espacio: PropTypes.string.isRequired };
 
 /* -------------------------------------------------------------------- público */
 
-export const EspacioPublicitario = ({ espacio, variante = "tarjeta", className }) => {
-  const ciclo = useCiclo(espacio);
+export const EspacioPublicitario = ({ espacio, variante = "tarjeta", className, desde = null }) => {
+  const completo = useCiclo(espacio);
+  // Con `desde`, solo esa pieza del ciclo y quieta: es una copia más del hueco (ver
+  // `AnuncioEntreTandas`) y, si rotara, acabaría enseñando lo mismo que el original.
+  const ciclo = useMemo(
+    () => (desde === null ? completo : completo.slice(desde, desde + 1)),
+    [completo, desde]
+  );
   const { contenedor, indice, entrando, pausa, saliente, pieza } = useRotacion(ciclo);
 
   if (!pieza) return null;
@@ -365,4 +372,31 @@ EspacioPublicitario.propTypes = {
   espacio: PropTypes.string.isRequired,
   variante: PropTypes.oneOf(["tarjeta", "lista", "cuerpo"]),
   className: PropTypes.string,
+  /** Solo la pieza N del ciclo, sin rotar. Lo usa `AnuncioEntreTandas`. */
+  desde: PropTypes.number,
+};
+
+/**
+ * El anuncio de cada tanda que trae «Cargar más», en franja, entre una tanda y la
+ * siguiente: la publicidad crece con lo que se lee.
+ *
+ * Toma la pieza `desde` del ciclo del hueco: la 0 ya la enseña el hueco de siempre, así
+ * que la primera tanda nueva lleva la 1, la siguiente la 2... El servidor manda el
+ * ciclo sin repetir anunciante, de modo que estas franjas tampoco lo repiten. Cuando
+ * el ciclo se acaba, no sale nada: un mismo anuncio dos veces en la página no es más
+ * publicidad, es un error. Y la impresión, como todas, solo cuenta si se ve.
+ */
+export const AnuncioEntreTandas = ({ espacio, desde }) => {
+  const pieza = useCiclo(espacio)[desde] ?? null;
+  if (!pintaAlgo(pieza, "lista")) return null;
+  return (
+    <div className="se-ad-tanda">
+      <EspacioPublicitario espacio={espacio} variante="lista" desde={desde} />
+    </div>
+  );
+};
+
+AnuncioEntreTandas.propTypes = {
+  espacio: PropTypes.string.isRequired,
+  desde: PropTypes.number.isRequired,
 };

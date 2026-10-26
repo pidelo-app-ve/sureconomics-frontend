@@ -19,11 +19,13 @@ import { FORMATO_META, FORMATO_POR_RUTA, nombreDeFormato, nombreTraducido } from
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePagedList } from "../hooks/usePagedList";
 import { CargarMas } from "../components/comun/CargarMas";
+import { enTandas } from "../lib/tandas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
 import {
+  AnuncioEntreTandas,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
   useEspacios,
@@ -175,7 +177,13 @@ export const FormatListing = ({ formatoApi }) => {
                 {t("listados.formato.todasLasPiezas", { titulo: titulo.toLowerCase() })}
               </h2>
               {visible.length ? (
-                LAYOUTS[formatoApi](visible)
+                // Cada tanda de «Cargar más» con su anuncio delante.
+                enTandas(visible, meta.porPagina, meta.porPagina).map((tanda, i) => (
+                  <div key={tanda[0].id} className={i ? "se-tanda" : undefined}>
+                    {i ? <AnuncioEntreTandas espacio={ESPACIOS.LISTADO_NATIVO} desde={i} /> : null}
+                    {LAYOUTS[formatoApi](tanda)}
+                  </div>
+                ))
               ) : (
                 <EmptyState
                   title={
@@ -206,7 +214,6 @@ export const FormatListing = ({ formatoApi }) => {
             <CargarMas
               mostradas={to}
               total={total}
-              paso={meta.porPagina}
               unidad={titulo.toLowerCase()}
               onCargar={cargarMas}
             />

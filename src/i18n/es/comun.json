@@ -128,7 +128,7 @@
     "volverInicio": "Volver al inicio",
     "cargarMas": {
       "cuenta": "{mostradas} de {total} {unidad}",
-      "boton": "Cargar {n} más"
+      "boton": "Cargar más"
     },
     "cargando": "Cargando…",
     "reintentar": "Reintentar",

@@ -1,5 +1,6 @@
 export { BarraPublicitaria } from "./BarraPublicitaria";
 export {
+  AnuncioEntreTandas,
   EspacioPublicitario,
   FilaDeAnuncio,
   useHayAnuncio,

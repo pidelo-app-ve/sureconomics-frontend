@@ -128,7 +128,7 @@
     "volverInicio": "Back to home",
     "cargarMas": {
       "cuenta": "{mostradas} of {total} {unidad}",
-      "boton": "Load {n} more"
+      "boton": "Load more"
     },
     "cargando": "Loading…",
     "reintentar": "Try again",

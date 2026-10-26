@@ -6,6 +6,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { ContentExplorer } from "../components/home";
 import { CargarMas } from "../components/comun/CargarMas";
+import { enTandas } from "../lib/tandas";
 import { AudiovisualGrid, AudiovisualHero } from "../components/home/AudiovisualGrid";
 import { nombreTraducido } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
@@ -15,6 +16,7 @@ import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { ESPACIOS } from "../services/publicidadService";
 import {
+  AnuncioEntreTandas,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
   useEspacios,
@@ -288,7 +290,13 @@ export const Audiovisual = () => {
                   {tituloLista}
                 </h2>
                 {visible.length ? (
-                  <AudiovisualGrid items={visible} />
+                  // Cada tanda de «Cargar más» con su anuncio delante.
+                  enTandas(visible, POR_PAGINA, POR_PAGINA).map((tanda, i) => (
+                    <div key={tanda[0].id} className={i ? "se-tanda" : undefined}>
+                      {i ? <AnuncioEntreTandas espacio={ESPACIOS.LISTADO_NATIVO} desde={i} /> : null}
+                      <AudiovisualGrid items={tanda} />
+                    </div>
+                  ))
                 ) : principal ? (
                   // Hay hero pero nada más debajo: no es un vacío, es que sólo hay
                   // una pieza de cada.
@@ -315,7 +323,6 @@ export const Audiovisual = () => {
               <CargarMas
                 mostradas={to}
                 total={total}
-                paso={POR_PAGINA}
                 unidad={textoDeVista("unidad")}
                 onCargar={cargarMas}
               />

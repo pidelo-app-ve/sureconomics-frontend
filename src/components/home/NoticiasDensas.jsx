@@ -38,16 +38,18 @@ const Meta = ({ pieza }) => (
 );
 Meta.propTypes = { pieza: PropTypes.object.isRequired };
 
-export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
+export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null, sinApertura = false }) => {
   const hay = useHayAnuncio(espacioDeAnuncio, "lista");
   const hayCarril = Boolean(carril);
-  const [lead, ...resto] = items;
-  if (!lead) return null;
+  // `sinApertura`: las tandas de «Cargar más», que siguen la lista sin otra principal.
+  const [lead, ...resto] = sinApertura ? [null, ...items] : items;
+  if (!lead && !resto.length) return null;
 
   return (
     <div className={`se-noticias${hayCarril ? " se-noticias--con-carril" : ""}`}>
       <div className="se-noticias__principal">
         {/* La que manda: foto grande al lado del titular y la entradilla. */}
+        {lead ? (
         <article className="se-noticias__lead">
           <Enlace to={rutaDePieza(lead)} className="se-noticias__foto" aria-hidden="true" tabIndex={-1}>
             <CardMedia pieza={lead} ancho={1100} etiqueta={temaPrincipal(lead)} sizes="(max-width: 899px) 92vw, 34vw" />
@@ -62,6 +64,7 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
             {lead.resumen ? <p className="se-noticias__resumen">{lead.resumen}</p> : null}
           </div>
         </article>
+        ) : null}
 
         {/* Las demás, a dos columnas, cada una con su miniatura: el lugar primero,
             que para este medio es lo primero por lo que un lector ordena. */}
@@ -99,6 +102,8 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null }) => {
 };
 
 NoticiasDensas.propTypes = {
+  /** Sin la principal: las tandas de «Cargar más» siguen la lista. */
+  sinApertura: PropTypes.bool,
   items: listaDePiezas({ resumen: PropTypes.string, imagenUrl: PropTypes.string }),
   /** La clave del hueco de publicidad del final de la columna. */
   espacioDeAnuncio: PropTypes.string,

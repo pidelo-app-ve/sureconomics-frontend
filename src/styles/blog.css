@@ -14165,3 +14165,17 @@ html {
   transform: none;
 }
 
+/* ═══ Las tandas de «Cargar más» ═══ Cada una con su anuncio en franja: detrás en la
+   portada, delante en los listados (donde el de siempre cierra la lista). */
+.se-tanda {
+  margin-top: clamp(24px, 3vw, 36px);
+}
+
+.se-ad-tanda:first-child {
+  margin-bottom: clamp(24px, 3vw, 36px);
+}
+
+.se-ad-tanda:last-child {
+  margin-top: clamp(24px, 3vw, 36px);
+}
+

@@ -15,11 +15,12 @@ import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from ".
 import { useContentFilter } from "../hooks/useContentFilter";
 import { useFondoQueCambia } from "../hooks/useFondoQueCambia";
 import { CargarMas } from "../components/comun/CargarMas";
+import { enTandas } from "../lib/tandas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { ESPACIOS } from "../services/publicidadService";
-import { ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
+import { AnuncioEntreTandas, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
 
 /**
  * Homepage.
@@ -121,6 +122,24 @@ const LAYOUTS = {
   // Entrevistas y podcast juntos (ver `AL_PUNTO`), con la tarjeta de /audiovisual.
   alpunto: (items) => <AudiovisualGrid items={items} />,
 };
+
+/**
+ * Las tandas que trae «Cargar más», pintadas como sigue cada sección: sin otra
+ * principal ni otra tarjeta de anuncio dentro (el anuncio va delante, en franja).
+ */
+const CONTINUACION = {
+  noticia: (items) => <NoticiasDensas items={items} sinApertura />,
+  articulo: (items) => <ArticleCardGrid items={items} columnas={4} />,
+  editorial: (items) => <EditorialList items={items} />,
+  entrevista: (items) => <InterviewGrid items={items} />,
+  informe: (items) => <ReportGrid items={items} />,
+  podcast: (items) => <PodcastGrid items={items} />,
+  alpunto: (items) => <AudiovisualGrid items={items} />,
+};
+
+/** El hueco de cuyo ciclo salen los anuncios de las tandas de cada sección. */
+const espacioDeTanda = (formatoApi) =>
+  formatoApi === "articulo" ? ESPACIOS.PORTADA_NATIVO_ARTICULOS : ESPACIOS.PORTADA_NATIVO;
 
 /**
  * «Al punto» en la portada: Entrevistas y Podcast en una sola sección,
@@ -277,8 +296,26 @@ export const Home = () => {
     .map((b) => {
       const entrada = b.formatoApi === "alpunto" ? AL_PUNTO.cuantas : PREVIEW[b.formatoApi];
       const cuantas = isFiltered ? b.todos.length : entrada + (cargadas[b.formatoApi] ?? 0);
-      return { ...b, items: b.todos.slice(0, cuantas), expandido: Boolean(cargadas[b.formatoApi]) };
+      const items = b.todos.slice(0, cuantas);
+      // Con filtro es una sola tanda (son resultados); sin él, la entrada y lo cargado.
+      const tandas = isFiltered ? [items] : enTandas(items, entrada, PASO[b.formatoApi]);
+      return { ...b, items, tandas, expandido: Boolean(cargadas[b.formatoApi]) };
     });
+
+  // Qué pieza de su ciclo lleva el anuncio de cada tanda nueva. Por hueco y en el orden
+  // de la página: la 0 la enseña el hueco de siempre, y dos secciones que comparten
+  // hueco no repiten pieza entre ellas.
+  const siguienteDe = {};
+  const anunciosDeTanda = Object.fromEntries(
+    blocks.map((b) => {
+      const espacio = espacioDeTanda(b.formatoApi);
+      const desdes = b.tandas.slice(1).map(() => {
+        siguienteDe[espacio] = (siguienteDe[espacio] ?? 0) + 1;
+        return siguienteDe[espacio];
+      });
+      return [b.formatoApi, { espacio, desdes }];
+    })
+  );
 
   // El nombre que la redacción puso en el panel manda en español; en inglés sale el
   // del diccionario, porque el panel sólo guarda el nombre en español.
@@ -439,7 +476,7 @@ export const Home = () => {
           primera plana; si lo hay, van detrás de él. */}
       {hayNoticias ? null : pausa}
 
-      {(cargando ? [] : blocks).map(({ formatoApi, items, todos, total, expandido }) => (
+      {(cargando ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}
@@ -451,7 +488,6 @@ export const Home = () => {
                 <CargarMas
                   mostradas={items.length}
                   total={todos.length}
-                  paso={PASO[formatoApi]}
                   unidad={(formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)).toLowerCase()}
                   onCargar={() =>
                     setCargadas((antes) => ({ ...antes, [formatoApi]: (antes[formatoApi] ?? 0) + PASO[formatoApi] }))
@@ -460,7 +496,19 @@ export const Home = () => {
               )
             }
           >
-            {LAYOUTS[formatoApi](items, { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
+            {LAYOUTS[formatoApi](tandas[0], { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
+            {/* Lo que trajo «Cargar más»: cada tanda con su anuncio detrás, como la
+                primera de Noticias, que ya cierra con el suyo. Delante, quedaban dos
+                anuncios seguidos. */}
+            {tandas.slice(1).map((tanda, i) => (
+              <div key={tanda[0].id} className="se-tanda">
+                {CONTINUACION[formatoApi](tanda)}
+                <AnuncioEntreTandas
+                  espacio={anunciosDeTanda[formatoApi].espacio}
+                  desde={anunciosDeTanda[formatoApi].desdes[i]}
+                />
+              </div>
+            ))}
           </FormatSection>
           {/* La franja nativa ancha que iba aqui se movio **dentro** de la rejilla
               -- ver LAYOUTS. Iba detras de las noticias, a lo ancho del contenedor,

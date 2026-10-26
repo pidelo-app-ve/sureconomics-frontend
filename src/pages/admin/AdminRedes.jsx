@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { haceCuanto } from "../../lib/haceCuanto";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
 import {
   autorizarTiktok,
@@ -152,17 +153,6 @@ Publicacion.propTypes = {
   onQuitar: PropTypes.func.isRequired,
   onMover: PropTypes.func.isRequired,
   onSubir: PropTypes.func.isRequired,
-};
-
-/** «hace 12 minutos», «hace 3 horas»: cuándo llegó lo último de Instagram. */
-const haceCuanto = (iso) => {
-  if (!iso) return "nunca";
-  const min = Math.round((Date.now() - Date.parse(iso)) / 60000);
-  if (min < 1) return "hace un momento";
-  if (min < 60) return `hace ${min} ${min === 1 ? "minuto" : "minutos"}`;
-  const h = Math.round(min / 60);
-  if (h < 48) return `hace ${h} ${h === 1 ? "hora" : "horas"}`;
-  return `hace ${Math.round(h / 24)} días`;
 };
 
 const TIPO = { VIDEO: "Reel", CAROUSEL_ALBUM: "Carrusel", IMAGE: "Foto" };

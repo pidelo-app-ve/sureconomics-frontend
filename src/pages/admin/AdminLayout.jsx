@@ -154,6 +154,9 @@ const AdminShell = () => {
               <NavLink to="/admin/redes" className={linkClass} end onClick={closeMenu}>
                 En redes
               </NavLink>
+              <NavLink to="/admin/canal" className={linkClass} end onClick={closeMenu}>
+                Canal de YouTube
+              </NavLink>
               <NavLink to="/admin/educacion" className={linkClass} end onClick={closeMenu}>
                 Educación
               </NavLink>

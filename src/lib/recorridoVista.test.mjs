@@ -14,6 +14,7 @@ window.localStorage = {
 const { crearRecorrido } = await import("./recorridoVista.js");
 const { PASOS_TITULARES, recorridoTitulares } = await import("./guias/guiaTitulares.js");
 const { PASOS_RESUMEN, recorridoResumen } = await import("./guias/guiaResumen.js");
+const { PASOS_CANAL, recorridoCanal } = await import("./guias/guiaCanal.js");
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -57,6 +58,12 @@ check("empieza sin anclaje y acaba en «Guía»", PASOS_RESUMEN[0].clave === und
 check("todos con título y texto", PASOS_RESUMEN.every((p) => p.titulo && (p.texto || p.puntos?.length)));
 check("puntos con la forma «Nombre: qué es»", PASOS_RESUMEN.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
 check("anclaje data-tour-resumen", recorridoResumen.atributo === "data-tour-resumen");
+
+console.log("guía del Canal de YouTube");
+check("empieza sin anclaje y acaba en «Guía»", PASOS_CANAL[0].clave === undefined && PASOS_CANAL.at(-1).clave === "guia");
+check("todos con título y texto", PASOS_CANAL.every((p) => p.titulo && (p.texto || p.puntos?.length)));
+check("puntos con la forma «Nombre: qué es»", PASOS_CANAL.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
+check("anclaje data-tour-canal", recorridoCanal.atributo === "data-tour-canal");
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

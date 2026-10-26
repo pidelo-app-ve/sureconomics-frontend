@@ -7659,3 +7659,45 @@
   color: var(--adm-text-muted);
 }
 
+
+/* —— Admin: Canal de YouTube ——
+   La portada de cada video con su forma real: el short vertical, el largo apaisado. */
+.se-admin-app .se-admin-canal__canal {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  overflow: visible;
+}
+
+.se-admin-app .se-admin-canal__canal .se-admin-redes__red-cabeza {
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.se-admin-app .se-admin-canal__elegir {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.se-admin-app .se-admin-canal__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.se-admin-app .se-admin-canal__fila .se-form-control {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.se-admin-app .se-admin-canal__lista--short {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.se-admin-app .se-admin-canal__foto--short {
+  aspect-ratio: 9 / 16;
+}
+
+.se-admin-app .se-admin-canal__foto--largo {
+  aspect-ratio: 16 / 9;
+}

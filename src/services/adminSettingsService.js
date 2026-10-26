@@ -93,3 +93,21 @@ export const ocultarTiktok = async (ids) =>
 /** Olvida la conexión: «En redes» vuelve a la lista manual de TikTok. */
 export const desconectarTiktok = async () =>
   unwrapEntity(await adminRequest("/admin/settings/social/tiktok", { method: "DELETE" }));
+
+/* —— El canal de YouTube ——
+   Se elige con su @nombre o su enlace; el servidor trae solo los últimos shorts y videos
+   cada hora y copia las portadas. Ver `youtube_service.py`. */
+export const getYoutube = async () => unwrapEntity(await adminRequest("/admin/settings/youtube"));
+
+export const fijarCanalYoutube = async (canal) =>
+  unwrapEntity(await adminRequest("/admin/settings/youtube", { method: "PUT", json: { canal } }));
+
+export const sincronizarYoutube = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/youtube/sincronizar", { method: "POST" }));
+
+/** Los videos que no salen en el sitio (lista completa de ids). */
+export const ocultarYoutube = async (ids) =>
+  unwrapEntity(await adminRequest("/admin/settings/youtube/ocultos", { method: "PUT", json: { ids } }));
+
+export const quitarYoutube = async () =>
+  unwrapEntity(await adminRequest("/admin/settings/youtube", { method: "DELETE" }));

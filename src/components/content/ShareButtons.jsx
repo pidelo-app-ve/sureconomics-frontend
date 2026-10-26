@@ -1,6 +1,15 @@
 import PropTypes from "prop-types";
-import { useCallback, useMemo, useState } from "react";
-import { IconFacebook, IconInstagram, IconTelegram, IconWhatsApp, IconX } from "../icons/social";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  IconCompartir,
+  IconEnlace,
+  IconFacebook,
+  IconInstagram,
+  IconLinkedIn,
+  IconTelegram,
+  IconWhatsApp,
+  IconX,
+} from "../icons/social";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 
 /** Las redes que enseñan las piezas: las de siempre, en su orden. */
@@ -94,6 +103,18 @@ export const ShareButtons = ({ url, title = "", className = "", redes = REDES_DE
     return title ? `${base}&text=${encodedText}` : base;
   }, [encodedUrl, encodedText, title]);
 
+  const linkedinHref = useMemo(
+    () => `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+    [encodedUrl]
+  );
+
+  // La hoja de compartir del sistema existe en el teléfono (y en algunos escritorios).
+  // Se mira después de montar: en el servidor no hay `navigator`.
+  const [hayHoja, setHayHoja] = useState(false);
+  useEffect(() => {
+    setHayHoja(typeof navigator !== "undefined" && typeof navigator.share === "function");
+  }, []);
+
   const whatsappHref = useMemo(() => {
     const text = title ? `${title} ${absoluteUrl}` : absoluteUrl;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -162,81 +183,61 @@ export const ShareButtons = ({ url, title = "", className = "", redes = REDES_DE
     openCenteredPopup(href);
   }, []);
 
+  /** Copiar el enlace, sin más: lo que se pega en un correo o en un chat de trabajo. */
+  const handleCopiar = useCallback(async () => {
+    let copiado = copyToClipboardLegacy(absoluteUrl);
+    if (!copiado) copiado = await copyToClipboardApi(absoluteUrl);
+    showToast(copiado ? t("piezas.compartir.copiado") : t("piezas.compartir.noCopiado"));
+  }, [absoluteUrl, showToast, t]);
+
+  /** La hoja del sistema. Cerrarla es una decisión, no un fallo: no se avisa de nada. */
+  const handleHoja = useCallback(async () => {
+    try {
+      await navigator.share({ title: title || document.title, text: title || undefined, url: absoluteUrl });
+    } catch (error) {
+      if (error?.name !== "AbortError") handleCopiar();
+    }
+  }, [absoluteUrl, title, handleCopiar]);
+
   if (!absoluteUrl) return null;
+
+  // Cada red: su icono, su nombre (para el lector de pantalla) y qué hace al pulsarla.
+  const BOTONES = {
+    instagram: { Icono: IconInstagram, nombre: "Instagram", etiqueta: t("piezas.compartir.instagram"), accion: handleInstagram },
+    whatsapp: { Icono: IconWhatsApp, nombre: "WhatsApp", etiqueta: t("piezas.compartir.whatsapp"), accion: () => handlePopup(whatsappHref) },
+    x: { Icono: IconX, nombre: "X", etiqueta: t("piezas.compartir.x"), accion: () => handlePopup(xHref) },
+    facebook: { Icono: IconFacebook, nombre: "Facebook", etiqueta: t("piezas.compartir.facebook"), accion: () => handlePopup(facebookHref) },
+    telegram: { Icono: IconTelegram, nombre: "Telegram", etiqueta: t("piezas.compartir.telegram"), accion: () => handlePopup(telegramHref) },
+    linkedin: { Icono: IconLinkedIn, nombre: "LinkedIn", etiqueta: t("piezas.compartir.linkedin"), accion: () => handlePopup(linkedinHref) },
+    copiar: { Icono: IconEnlace, nombre: t("piezas.compartir.copiarCorto"), etiqueta: t("piezas.compartir.copiar"), accion: handleCopiar },
+    nativo: { Icono: IconCompartir, nombre: t("comun.compartir"), etiqueta: t("piezas.compartir.nativo"), accion: handleHoja },
+  };
+  const CLASE = { instagram: "ig", whatsapp: "wa", x: "x", facebook: "fb", telegram: "tg", linkedin: "li", copiar: "copiar", nativo: "nativo" };
 
   return (
     // `group` para que "Compartir" se oiga al entrar en los botones: sin papel, el
     // `aria-label` de un `div` no lo lee ningun lector de pantalla.
     <div className={`se-share ${className}`.trim()} role="group" aria-label={t("comun.compartir")}>
-      {redes.includes("instagram") ? (
-      <button
-        type="button"
-        className="se-share__btn se-share__btn--ig"
-        onClick={handleInstagram}
-        aria-label={t("piezas.compartir.instagram")}
-      >
-        <span className="se-share__ico" aria-hidden="true">
-          <IconInstagram className="se-share__svg" />
-        </span>
-        <span className="se-sr-only">Instagram</span>
-      </button>
-      ) : null}
-
-      {redes.includes("whatsapp") ? (
-      <button
-        type="button"
-        className="se-share__btn se-share__btn--wa"
-        onClick={() => handlePopup(whatsappHref)}
-        aria-label={t("piezas.compartir.whatsapp")}
-      >
-        <span className="se-share__ico" aria-hidden="true">
-          <IconWhatsApp className="se-share__svg" />
-        </span>
-        <span className="se-sr-only">WhatsApp</span>
-      </button>
-      ) : null}
-
-      {redes.includes("x") ? (
-      <button
-        type="button"
-        className="se-share__btn se-share__btn--x"
-        onClick={() => handlePopup(xHref)}
-        aria-label={t("piezas.compartir.x")}
-      >
-        <span className="se-share__ico" aria-hidden="true">
-          <IconX className="se-share__svg" />
-        </span>
-        <span className="se-sr-only">X</span>
-      </button>
-      ) : null}
-
-      {redes.includes("facebook") ? (
-        <button
-          type="button"
-          className="se-share__btn se-share__btn--fb"
-          onClick={() => handlePopup(facebookHref)}
-          aria-label={t("piezas.compartir.facebook")}
-        >
-          <span className="se-share__ico" aria-hidden="true">
-            <IconFacebook className="se-share__svg" />
-          </span>
-          <span className="se-sr-only">Facebook</span>
-        </button>
-      ) : null}
-
-      {redes.includes("telegram") ? (
-        <button
-          type="button"
-          className="se-share__btn se-share__btn--tg"
-          onClick={() => handlePopup(telegramHref)}
-          aria-label={t("piezas.compartir.telegram")}
-        >
-          <span className="se-share__ico" aria-hidden="true">
-            <IconTelegram className="se-share__svg" />
-          </span>
-          <span className="se-sr-only">Telegram</span>
-        </button>
-      ) : null}
+      {redes
+        // La hoja del sistema solo donde existe: un botón que no hace nada no se enseña.
+        .filter((red) => BOTONES[red] && (red !== "nativo" || hayHoja))
+        .map((red) => {
+          const { Icono, nombre, etiqueta, accion } = BOTONES[red];
+          return (
+            <button
+              key={red}
+              type="button"
+              className={`se-share__btn se-share__btn--${CLASE[red]}`}
+              onClick={accion}
+              aria-label={etiqueta}
+            >
+              <span className="se-share__ico" aria-hidden="true">
+                <Icono className="se-share__svg" />
+              </span>
+              <span className="se-sr-only">{nombre}</span>
+            </button>
+          );
+        })}
 
       {toast ? (
         <div className="se-share__toast" role="status" aria-live="polite">
@@ -251,6 +252,11 @@ ShareButtons.propTypes = {
   url: PropTypes.string.isRequired,
   title: PropTypes.string,
   className: PropTypes.string,
-  /** Qué redes se ofrecen, en el orden de la fila. Las piezas usan las de siempre. */
-  redes: PropTypes.arrayOf(PropTypes.oneOf(["instagram", "whatsapp", "x", "facebook", "telegram"])),
+  /**
+   * Qué se ofrece, en el orden de la fila. `copiar` copia el enlace; `nativo` abre la
+   * hoja de compartir del sistema y solo sale donde existe.
+   */
+  redes: PropTypes.arrayOf(
+    PropTypes.oneOf(["instagram", "whatsapp", "x", "facebook", "telegram", "linkedin", "copiar", "nativo"])
+  ),
 };

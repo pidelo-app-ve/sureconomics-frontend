@@ -336,7 +336,7 @@
 /* ═══ Tableta y teléfono: la línea de tiempo ═══ */
 @media (max-width: 1199px) {
   .se-arbol {
-    padding-left: 30px;
+    padding-left: 38px;
   }
 
   .se-arbol__nivel {
@@ -350,7 +350,7 @@
     position: absolute;
     top: 16px;
     bottom: -16px;
-    left: -21px;
+    left: -29px;
     width: var(--raya);
     background: var(--tinta);
     transform-origin: top;
@@ -365,7 +365,7 @@
     content: "";
     position: absolute;
     top: calc(50% - 7px);
-    left: -29px;
+    left: -37px;
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -375,9 +375,13 @@
 
   .se-arbol__personas {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
-    gap: 4px 24px;
-    margin-top: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+    margin-top: 10px;
+  }
+
+  .se-arbol__personas--rama {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .se-arbol__persona {
@@ -391,9 +395,23 @@
   }
 
   .se-publico .se-arbol .se-member-card__avatar {
-    width: 44px;
-    height: 44px;
-    font-size: 0.75rem;
+    width: 38px;
+    height: 38px;
+    font-size: 0.6875rem;
+  }
+
+  .se-publico .se-arbol .se-member-card__top {
+    gap: 10px;
+    align-items: center;
+  }
+
+  .se-publico .se-arbol .se-member-card__name {
+    font-size: 0.9375rem;
+    line-height: 1.2;
+  }
+
+  .se-publico .se-arbol__personas--rama .se-member-card__top {
+    align-items: flex-start;
   }
 
   .se-publico .se-arbol .se-member-card__links {
@@ -414,8 +432,8 @@
     content: "";
     position: absolute;
     top: 15px;
-    left: -42px;
-    width: 42px;
+    left: -50px;
+    width: 50px;
     border-top: var(--raya) dashed var(--tinta);
     transform-origin: left;
   }
@@ -544,3 +562,58 @@
     transition-delay: calc(900ms + var(--i) * 60ms);
   }
 }
+
+@media (min-width: 640px) and (max-width: 1199px) {
+  .se-arbol__personas:not(.se-arbol__personas--rama) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* —— El perfil, un icono junto al nombre —— */
+.se-member-card__nombre-fila {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.se-member-card__in {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: -4px -4px -4px 0;
+  color: var(--color-slate);
+  transition: color 160ms ease;
+}
+
+.se-member-card__in:hover,
+.se-member-card__in:focus-visible {
+  color: var(--marca-verde);
+}
+
+.se-member-card__in:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 1px;
+}
+
+.se-member-card__in-svg {
+  width: 14px;
+  height: 14px;
+  transform: translateY(1px);
+}
+
+@media (pointer: coarse) {
+  .se-member-card__in {
+    width: 32px;
+    height: 32px;
+    margin: -8px -8px -8px -2px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .se-publico .se-arbol__personas:not(.se-arbol__personas--rama) .se-member-card__nombre-fila {
+    justify-content: center;
+  }
+}
+

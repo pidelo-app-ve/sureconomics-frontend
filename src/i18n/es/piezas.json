@@ -72,6 +72,7 @@
       "verificarCorreo": "Verificar mi correo"
     },
     "firma": {
+      "lectura": "{n} min de lectura",
       "redaccion": "Redacción SurEconomics",
       "por": "Por",
       "investigacionDe": "Investigación de {unidad}"
@@ -79,6 +80,9 @@
     "etiquetas": {
       "seguirLeyendo": "Seguir leyendo sobre",
       "incluyeTodo": "Incluye todo {nombre}"
+    },
+    "siguiente": {
+      "rotulo": "Siguiente lectura"
     },
     "relacionadas": {
       "titulo": "También te puede interesar"
@@ -105,6 +109,11 @@
       "publicar": "Publicar comentario"
     },
     "compartir": {
+      "linkedin": "Compartir en LinkedIn",
+      "copiar": "Copiar el enlace",
+      "copiarCorto": "Copiar enlace",
+      "copiado": "Enlace copiado.",
+      "nativo": "Compartir con otra aplicación",
       "instagram": "Compartir en Instagram",
       "whatsapp": "Compartir por WhatsApp",
       "x": "Compartir en X",

@@ -14,6 +14,7 @@ import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, Intervi
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { useFondoQueCambia } from "../hooks/useFondoQueCambia";
+import { CargarMas } from "../components/comun/CargarMas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -77,6 +78,20 @@ const PREVIEW = {
   podcast: 3,
 };
 
+/**
+ * Cuántas trae cada «Cargar más», por sección: una fila más de la rejilla de cada una
+ * (diez noticias son cinco por columna).
+ */
+const PASO = {
+  noticia: 10,
+  articulo: 4,
+  editorial: 4,
+  entrevista: 3,
+  informe: 4,
+  podcast: 3,
+  alpunto: 4,
+};
+
 /* Las dos rejillas de tarjetas de la portada llevan dentro su tarjeta nativa. Los
    demas formatos no: editorial es una lista, y entrevista, informe y podcast tienen
    retícula propia -- meter ahi una tarjeta de anuncio obligaria a un pintor por
@@ -117,6 +132,8 @@ const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 4 };
 
 export const Home = () => {
   const { t, lang } = useIdioma();
+  // Lo que el lector cargó de más en cada sección, sobre la entrada de `PREVIEW`.
+  const [cargadas, setCargadas] = useState({});
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error } = usePieces();
 
@@ -231,32 +248,37 @@ export const Home = () => {
           ? sinApertura.filter((p) => p.id !== editorialDelDia.id)
           : sinApertura;
 
-      const items = isFiltered ? visibles : visibles.slice(0, PREVIEW[formatoApi]);
-
       // `total` cuenta `all` y no `visibles`: es la cifra del enlace "Ver los N", y la
       // editorial de arriba tambien esta en esa lista. Restarla ahi seria mentir sobre
-      // cuantas hay.
-      return { formatoApi, items, total: all.length };
+      // cuantas hay. `todos` son las que se pueden ir cargando; el recorte, abajo.
+      return { formatoApi, todos: visibles, total: all.length };
     })
-    .filter((b) => b.items.length > 0)
+    .filter((b) => b.todos.length > 0)
     .reduce((acc, b) => {
       if (isFiltered || !AL_PUNTO.formatos.includes(b.formatoApi)) return [...acc, b];
       const previo = acc.find((x) => x.formatoApi === "alpunto");
       if (previo) {
         // Intercaladas y no por fecha: por fecha salían tres episodios de podcast y
         // ninguna entrevista, y la sección se llama «Al punto» por las dos.
-        const [x, y] = [previo.items, b.items];
+        const [x, y] = [previo.todos, b.todos];
         const mezcla = [];
         for (let k = 0; k < Math.max(x.length, y.length); k += 1) {
           if (x[k]) mezcla.push(x[k]);
           if (y[k]) mezcla.push(y[k]);
         }
-        previo.items = mezcla.slice(0, AL_PUNTO.cuantas);
+        previo.todos = mezcla;
         previo.total += b.total;
         return acc;
       }
-      return [...acc, { formatoApi: "alpunto", items: b.items.slice(0, AL_PUNTO.cuantas), total: b.total }];
-    }, []);
+      return [...acc, { formatoApi: "alpunto", todos: b.todos, total: b.total }];
+    }, [])
+    // Lo que se ve: con filtro, todo (son resultados); sin él, la entrada de cada sección
+    // y lo que el lector haya pedido con «Cargar más».
+    .map((b) => {
+      const entrada = b.formatoApi === "alpunto" ? AL_PUNTO.cuantas : PREVIEW[b.formatoApi];
+      const cuantas = isFiltered ? b.todos.length : entrada + (cargadas[b.formatoApi] ?? 0);
+      return { ...b, items: b.todos.slice(0, cuantas), expandido: Boolean(cargadas[b.formatoApi]) };
+    });
 
   // El nombre que la redacción puso en el panel manda en español; en inglés sale el
   // del diccionario, porque el panel sólo guarda el nombre en español.
@@ -417,12 +439,26 @@ export const Home = () => {
           primera plana; si lo hay, van detrás de él. */}
       {hayNoticias ? null : pausa}
 
-      {(cargando ? [] : blocks).map(({ formatoApi, items, total }) => (
+      {(cargando ? [] : blocks).map(({ formatoApi, items, todos, total, expandido }) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}
             to={formatoApi === "alpunto" ? "/audiovisual" : rutaDeFormato(formatoApi)}
             linkLabel={isFiltered ? t("portada.inicio.verLos", { n: total }) : t("comun.verTodas")}
+            expandido={expandido}
+            pie={
+              isFiltered ? null : (
+                <CargarMas
+                  mostradas={items.length}
+                  total={todos.length}
+                  paso={PASO[formatoApi]}
+                  unidad={(formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)).toLowerCase()}
+                  onCargar={() =>
+                    setCargadas((antes) => ({ ...antes, [formatoApi]: (antes[formatoApi] ?? 0) + PASO[formatoApi] }))
+                  }
+                />
+              )
+            }
           >
             {LAYOUTS[formatoApi](items, { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
           </FormatSection>

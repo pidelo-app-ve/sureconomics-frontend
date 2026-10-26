@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { IconLinkedIn } from "../icons/social";
 
 const getInitials = (name) => {
   const parts = String(name ?? "")
@@ -12,7 +13,7 @@ const getInitials = (name) => {
   return initials || "SE";
 };
 
-export const TeamMemberCard = ({ member, foto }) => {
+export const TeamMemberCard = ({ member, foto, compacta }) => {
   const { t } = useIdioma();
   const initials = getInitials(member?.name);
 
@@ -47,7 +48,26 @@ export const TeamMemberCard = ({ member, foto }) => {
           </div>
         )}
         <div className="se-member-card__identity">
-          <h3 className="se-member-card__name">{member.name}</h3>
+          {/* Compacta (el árbol del equipo): el perfil es un icono junto al nombre, y la
+              ficha mide un renglón en vez de tres. */}
+          {compacta ? (
+            <div className="se-member-card__nombre-fila">
+              <h3 className="se-member-card__name">{member.name}</h3>
+              {hasLinkedin ? (
+                <a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="se-member-card__in"
+                  aria-label={t("paginas.quienesSomos.perfilLinkedin", { nombre: member.name })}
+                >
+                  <IconLinkedIn className="se-member-card__in-svg" />
+                </a>
+              ) : null}
+            </div>
+          ) : (
+            <h3 className="se-member-card__name">{member.name}</h3>
+          )}
           {/* El cargo se quito de todas las fichas a pedido del cliente (15/09/2026):
               solo Colaboradores lleva algo debajo del nombre, y es su credencial
               (`bio`), no un cargo -- de donde viene la persona, no que hace aqui. */}
@@ -55,7 +75,7 @@ export const TeamMemberCard = ({ member, foto }) => {
         </div>
       </div>
 
-      {(hasEmail || hasExternalCv || hasLinkedin) && (
+      {(hasEmail || hasExternalCv || (hasLinkedin && !compacta)) && (
         <div className="se-member-card__links">
           {hasEmail && (
             <a
@@ -84,7 +104,7 @@ export const TeamMemberCard = ({ member, foto }) => {
 
               El nombre va en el `aria-label` porque en una rejilla de veinte tarjetas
               un lector de pantalla leería «LinkedIn» veinte veces sin decir de quién. */}
-          {hasLinkedin && (
+          {hasLinkedin && !compacta && (
             <a
               href={member.linkedin}
               target="_blank"
@@ -113,7 +133,9 @@ TeamMemberCard.propTypes = {
   }).isRequired,
   /** La dirección de su foto, si alguien la subió desde el panel. */
   foto: PropTypes.string,
+  /** Un renglón: el perfil como icono al lado del nombre (el árbol del equipo). */
+  compacta: PropTypes.bool,
 };
 
-TeamMemberCard.defaultProps = { foto: "" };
+TeamMemberCard.defaultProps = { foto: "", compacta: false };
 

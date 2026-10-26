@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { BRAND } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { formatearFecha } from "../../i18n/motor";
 
 /**
  * La firma de una pieza, como la define el brandbook.
@@ -67,8 +68,8 @@ const IconoPersona = () => (
   </svg>
 );
 
-export const PieceByline = ({ autor, autorFoto, fecha, unidad, esEditorial }) => {
-  const { t } = useIdioma();
+export const PieceByline = ({ autor, autorFoto, fecha, fechaIso, minutos, unidad, esEditorial }) => {
+  const { t, lang } = useIdioma();
   // Una foto que no carga dejaría el hueco vacío y la firma descuadrada. Al fallar se
   // cae a la silueta, que es justamente el estado previsto para "no hay retrato".
   //
@@ -130,9 +131,15 @@ export const PieceByline = ({ autor, autorFoto, fecha, unidad, esEditorial }) =>
       {fecha ? (
         <div className="se-firma__cuando">
           <IconoFecha />
-          <time>{fecha}</time>
+          {/* La fecha y, con ella, la hora: en un diario la hora es parte de la noticia. */}
+          <time dateTime={fechaIso ?? undefined}>
+            {fecha}
+            {fechaIso ? <span className="se-firma__hora"> · {formatearFecha(fechaIso, "hora", lang)}</span> : null}
+          </time>
         </div>
       ) : null}
+
+      {minutos ? <span className="se-firma__lectura">{t("piezas.firma.lectura", { n: minutos })}</span> : null}
     </div>
   );
 };
@@ -142,6 +149,10 @@ PieceByline.propTypes = {
   /** La dirección del retrato. Nulo es el caso normal: entonces va la silueta. */
   autorFoto: PropTypes.string,
   fecha: PropTypes.string,
+  /** La fecha completa (con hora) de la que sale `fecha`. */
+  fechaIso: PropTypes.string,
+  /** Minutos de lectura; sin ellos no se dice nada. */
+  minutos: PropTypes.number,
   unidad: PropTypes.string,
   esEditorial: PropTypes.bool,
 };
@@ -150,6 +161,8 @@ PieceByline.defaultProps = {
   autor: null,
   autorFoto: null,
   fecha: null,
+  fechaIso: null,
+  minutos: null,
   unidad: null,
   esEditorial: false,
 };

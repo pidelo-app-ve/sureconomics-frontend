@@ -51,6 +51,42 @@ export const IconTelegram = (props) => (
   </svg>
 );
 
+export const IconLinkedIn = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      fill="currentColor"
+      d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.05c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.67 4.8 6.13V21h-4v-5.07c0-1.21-.02-2.77-1.69-2.77-1.69 0-1.95 1.32-1.95 2.68V21h-4V9.75Z"
+    />
+  </svg>
+);
+
+/** Un eslabón: copiar el enlace. De trazo, como los iconos de la interfaz. */
+export const IconEnlace = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M10 14a4.5 4.5 0 0 0 6.36 0l2.83-2.83a4.5 4.5 0 0 0-6.36-6.36l-1.06 1.06M14 10a4.5 4.5 0 0 0-6.36 0l-2.83 2.83a4.5 4.5 0 0 0 6.36 6.36l1.06-1.06"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+/** Una flecha que sale de la bandeja: la hoja de compartir del teléfono. */
+export const IconCompartir = (props) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M12 3.5v11.5M7.75 7.75 12 3.5l4.25 4.25M5 12.5v7.5h14v-7.5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export const IconTikTok = (props) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
     <path

@@ -10553,7 +10553,7 @@ html {
    todas» lleva al resto. */
 @media (max-width: 700px) {
 
-  .se-noticias__nota:nth-child(n + 6) {
+  .se-format:not(.se-format--expandido) .se-noticias__nota:nth-child(n + 6) {
     display: none;
   }
 }
@@ -11527,8 +11527,8 @@ html {
 
 /* Cuatro piezas en tres columnas, o en una, dejan una suelta: la cuarta se oculta. */
 @media (min-width: 900px) and (max-width: 1199px), (max-width: 599px) {
-  .se-portada .se-format .se-artgrid > :nth-child(n + 4),
-  .se-portada .se-format .se-alpunto__grid > :nth-child(n + 4) {
+  .se-portada .se-format:not(.se-format--expandido) .se-artgrid > :nth-child(n + 4),
+  .se-portada .se-format:not(.se-format--expandido) .se-alpunto__grid > :nth-child(n + 4) {
     display: none;
   }
 }
@@ -12953,13 +12953,16 @@ html {
   border-bottom: 0;
 }
 
-/* La barra de lectura: se llena con el desplazamiento, sin JavaScript. */
-.se-edu__leyendo {
+/* La barra de lectura: se llena con el desplazamiento, sin JavaScript. La usan las
+   clases de Educación y las piezas que se leen (`.se-leyendo`). */
+.se-edu__leyendo,
+.se-leyendo {
   display: none;
 }
 
 @supports (animation-timeline: scroll()) {
-  .se-edu__leyendo {
+  .se-edu__leyendo,
+  .se-leyendo {
     position: fixed;
     inset: 0 0 auto;
     z-index: 70;
@@ -12978,7 +12981,8 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-edu__leyendo { display: none; }
+  .se-edu__leyendo,
+  .se-leyendo { display: none; }
 }
 
 /* ═══ Quiénes somos ═══
@@ -13032,11 +13036,12 @@ html {
 
 @media (min-width: 900px) {
   .se-portada .se-format .se-artgrid--principal {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: clamp(20px, 2.2vw, 32px);
   }
 
   .se-portada .se-format .se-artgrid--principal > :first-child {
+    grid-column: span 2;
     grid-row: span 2;
   }
 }
@@ -13048,7 +13053,7 @@ html {
 }
 
 @media (max-width: 599px) {
-  .se-portada .se-format .se-artgrid--principal > :nth-child(n + 4) {
+  .se-portada .se-format:not(.se-format--expandido) .se-artgrid--principal > :nth-child(n + 4) {
     display: none;
   }
 }
@@ -13647,5 +13652,516 @@ html {
 
 :root {
   transition: --fondo-vivo 1200ms ease;
+}
+
+/* ═══ La pieza: una lectura de prensa ═══
+   Tres columnas en escritorio ancho: el carril de compartir pegado al texto, la
+   columna de lectura y el lateral. El texto va a unos 68 caracteres por renglón y las
+   imágenes, citas y tablas se salen hasta el ancho de la columna: el margen que queda
+   a la derecha del texto es para ellas, no un hueco. Debajo de 1200 px no hay carril y
+   compartir va en la fila de la firma; en el teléfono, primero la hoja del sistema. */
+
+.se-publico .se-piece__carril {
+  display: none;
+}
+
+@media (min-width: 1000px) {
+  .se-publico .se-piece__cols {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    column-gap: 48px;
+    align-items: stretch;
+  }
+
+  /* El lateral ya no se recorta al largo del texto: tiene más que ofrecer, y lo último
+     se queda pegado mientras se lee. */
+  .se-publico .se-piece__aside {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .se-publico .se-piece__aside .se-piece__related {
+    display: block;
+    height: auto;
+  }
+
+  .se-publico .se-piece__aside .se-newslist {
+    display: block;
+    overflow: visible;
+  }
+
+  .se-publico .se-piece__monedas {
+    position: sticky;
+    top: 104px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .se-publico .se-piece__cols {
+    grid-template-columns: 52px minmax(0, 1fr) 340px;
+    column-gap: 56px;
+  }
+
+  /* La regla del carril corre todo el largo del texto; los botones bajan por ella. */
+  .se-publico .se-piece__carril {
+    display: block;
+    border-right: 1px solid var(--filete-fuerte);
+  }
+
+  .se-publico .se-piece__share--cabecera {
+    display: none;
+  }
+}
+
+.se-publico .se-piece__carril-pegado {
+  position: sticky;
+  top: 112px;
+}
+
+.se-publico .se-piece__share--carril {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* Botones de compartir de la pieza: cuadrados de tinta, sin sombra; al pasar, se
+   rellenan. El orden es el que pide cada sitio (WhatsApp ya no se adelanta solo). */
+.se-publico .se-piece__share .se-share__btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  box-shadow: none;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+
+.se-publico .se-piece__share .se-share__btn--wa {
+  order: 0;
+}
+
+.se-publico .se-piece__share .se-share__btn:hover,
+.se-publico .se-piece__share .se-share__btn:focus-visible {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--papel);
+  transform: none;
+  box-shadow: none;
+}
+
+.se-publico .se-piece__share .se-share__btn:active {
+  transform: scale(0.96);
+}
+
+.se-publico .se-piece__share--carril .se-share__toast {
+  top: auto;
+  bottom: 0;
+  left: calc(100% + 12px);
+  white-space: nowrap;
+}
+
+/* —— La firma: la hora y los minutos de lectura —— */
+.se-publico .se-firma__hora {
+  color: var(--color-slate);
+}
+
+.se-publico .se-firma__lectura {
+  padding-left: 14px;
+  border-left: 1px solid var(--filete-fuerte);
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+/* —— El texto —— */
+.se-publico .se-piece__main .se-piece__body {
+  max-width: none;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+
+@media (min-width: 1000px) {
+  .se-publico .se-piece__main .se-piece__body {
+    font-size: 1.1875rem;
+    line-height: 1.66;
+  }
+}
+
+.se-publico .se-piece__main .se-piece__body > * {
+  max-width: 34em;
+}
+
+/* Lo que se sale de la columna del texto, hasta el ancho entero. */
+.se-publico .se-piece__main .se-piece__body > :is(figure, blockquote, table, iframe, video, img) {
+  max-width: none;
+}
+
+.se-publico .se-piece__main .se-piece__body > p:first-of-type {
+  font-size: 1.1em;
+}
+
+/* La capitular, en la serif: solo en textos con cuerpo (tres párrafos o más). */
+.se-publico .se-piece__main .se-piece__body:has(> p:nth-of-type(3)) > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-family: var(--titular);
+  font-size: 3.3em;
+  font-weight: 600;
+  line-height: 0.82;
+  color: var(--tinta);
+}
+
+.se-publico .se-piece__main .se-piece__body blockquote {
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  line-height: 1.22;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* —— Siguiente lectura: un recorte —— */
+.se-publico .se-siguiente {
+  margin-top: 48px;
+}
+
+.se-siguiente__enlace {
+  display: grid;
+  gap: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (min-width: 700px) {
+  .se-siguiente__enlace:has(.se-siguiente__foto) {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    align-items: start;
+  }
+}
+
+.se-siguiente__rotulo {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-slate);
+}
+
+.se-siguiente__rotulo::after {
+  content: " →";
+  font-style: normal;
+}
+
+.se-siguiente__titulo {
+  display: block;
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--tinta);
+  text-wrap: balance;
+}
+
+.se-siguiente__enlace:hover .se-siguiente__titulo,
+.se-siguiente__enlace:focus-visible .se-siguiente__titulo {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.se-siguiente__resumen {
+  display: block;
+  margin-top: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-siguiente__meta {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-siguiente__foto {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+/* —— El lateral —— */
+.se-publico .se-piece__monedas {
+  padding-top: 10px;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-piece__aside-titulo {
+  margin: 0 0 6px;
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.se-piece__aside-titulo a {
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.se-piece__aside-titulo a::after {
+  content: " →";
+  font-family: var(--se-font-ui);
+  font-size: 0.875em;
+}
+
+.se-piece__aside-titulo a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* En el teléfono el lateral va debajo, con aire entre bloques. */
+@media (max-width: 999px) {
+  .se-publico .se-piece__aside {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    margin-top: 16px;
+  }
+}
+
+/* Un cuerpo que llega sin párrafos (texto suelto): la medida va en el cuerpo entero. */
+.se-publico .se-piece__main .se-piece__body:not(:has(> :is(p, div, h2, h3, ul, ol, figure, blockquote, table))) {
+  max-width: 34em;
+}
+
+/* ═══ «Cargar más» ═══
+   Una regla que se llena con lo que ya está a la vista, la cuenta en cifras y el
+   botón de tinta. Ver `components/comun/CargarMas.jsx`. */
+.se-cargar-mas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: clamp(28px, 4vw, 40px);
+}
+
+.se-cargar-mas__regla {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  display: block;
+  height: 2px;
+  overflow: hidden;
+  background: var(--filete);
+}
+
+.se-cargar-mas__regla > span {
+  display: block;
+  height: 100%;
+  background: var(--tinta);
+  transform-origin: left;
+  transition: transform 520ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-cargar-mas__cuenta {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--color-slate);
+}
+
+.se-cargar-mas__cuenta strong {
+  font-family: var(--cifras);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+}
+
+.se-cargar-mas__boton {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+
+.se-cargar-mas__boton:hover {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.se-cargar-mas__boton:active {
+  transform: scale(0.97);
+}
+
+.se-cargar-mas__boton:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+/* En escritorio: la cuenta y el botón en un renglón, la regla debajo. En el teléfono,
+   la cuenta, la regla y el botón a todo el ancho, bajo el pulgar. */
+.se-cargar-mas__cuenta,
+.se-cargar-mas__boton {
+  grid-row: 1;
+}
+
+@media (max-width: 599px) {
+  .se-cargar-mas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-cargar-mas__boton {
+    grid-row: 3;
+    width: 100%;
+  }
+}
+
+/* Las noticias de la portada, por filas y no por columnas: con columnas de periódico,
+   cargar más hacía saltar las notas de una columna a otra. Por filas, lo nuevo llega
+   debajo y lo que ya se leyó no se mueve. */
+.se-publico .se-noticias__lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--se-space-xl);
+  columns: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-cargar-mas__regla > span {
+    transition: none;
+  }
+}
+
+/* ═══ La página que no está ═══ */
+.se-404__rejilla {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+@media (min-width: 900px) {
+  .se-404__rejilla {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    align-items: start;
+  }
+}
+
+.se-404__aviso {
+  padding-top: 12px;
+  border-top: 3px double var(--tinta);
+}
+
+.se-404__cifra {
+  margin: 0;
+  font-family: var(--cifras);
+  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--filete-fuerte);
+}
+
+.se-404__titulo {
+  margin: 8px 0 12px;
+  font-family: var(--titular);
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+}
+
+.se-404__texto {
+  max-width: 34em;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+.se-404__salidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.se-404__pausa {
+  padding-top: 0;
+}
+
+.se-404__pausa-caja {
+  max-width: 560px;
+}
+
+.se-404__pausa-texto {
+  margin: 0 0 1rem;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--color-slate);
+}
+
+@media (max-width: 700px) {
+  .se-publico .se-noticias__lista {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* El anuncio del lateral de la pieza: caja recta de filete, sin sombra. Sigue diciendo
+   «Publicidad»: lo que lo separa de la redacción no depende de la forma. */
+.se-publico .se-piece__aside .se-ad--rail {
+  padding: 14px;
+  border: 1px solid var(--filete);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-piece__aside .se-ad__media--rail {
+  border-radius: 0;
+  border-color: var(--filete);
+}
+
+/* El perfil del árbol, pegado al nombre y no al borde de la casilla. */
+.se-publico .se-member-card__nombre-fila {
+  display: block;
+  line-height: 1.2;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__name {
+  display: inline;
+}
+
+/* Del tamaño del icono, para no estirar el renglón; el área que responde al dedo la
+   da una capa invisible alrededor. */
+.se-publico .se-member-card__nombre-fila .se-member-card__in {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 0 5px;
+  vertical-align: -1px;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__in::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__in-svg {
+  display: block;
+  transform: none;
 }
 

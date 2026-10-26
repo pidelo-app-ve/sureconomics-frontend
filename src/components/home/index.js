@@ -9,7 +9,6 @@ export { EditorialList } from "./EditorialList";
 export { InterviewGrid } from "./InterviewGrid";
 export { ReportGrid } from "./ReportGrid";
 export { PodcastGrid } from "./PodcastGrid";
-export { ListingPagination } from "./ListingPagination";
 export { PrimeraPlana } from "./PrimeraPlana";
 export { PausaPortada } from "./PausaPortada";
 export { NoticiasDensas } from "./NoticiasDensas";

@@ -16,7 +16,12 @@ import {
   PieceComments,
   PieceTags,
   RelatedPieces,
+  SiguienteLectura,
 } from "../components/piece";
+import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
+import { UltimaHoraColumna } from "../components/titulares/UltimaHoraColumna";
+import { TablaDeMonedas, useMonedas } from "../components/monedas/TablaDeMonedas";
+import { useMasLeidas } from "../hooks/useMasLeidas";
 import { temaPrincipal } from "../lib/contentFilter";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import { getPieceFila, getRelatedFilas } from "../services/publicContentService";
@@ -39,6 +44,28 @@ import {
  * headline, byline, tags and related module do the same job whatever the format,
  * and five near-identical pages would drift apart on the first change.
  */
+
+/** Formatos que se leen: los demás se ven o se escuchan, y sus minutos son otros. */
+const SE_LEEN = new Set(["noticia", "articulo", "editorial", "informe"]);
+
+/**
+ * Minutos de lectura, a 220 palabras por minuto (un lector de prensa en pantalla). Del
+ * cuerpo tal como llega, sin etiquetas. Menos de un minuto se dice como uno.
+ */
+const minutosDeLectura = (html) => {
+  const palabras = String(html || "")
+    .replace(/<[^>]+>/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  return palabras ? Math.max(1, Math.round(palabras / 220)) : null;
+};
+
+/**
+ * Compartir está en un solo sitio por pantalla: en escritorio ancho, el carril que baja
+ * con el texto; por debajo, la fila de la firma, con la hoja del sistema delante.
+ */
+const REDES_CARRIL = ["whatsapp", "x", "linkedin", "telegram", "copiar"];
+const REDES_CABECERA = ["nativo", "whatsapp", "x", "linkedin", "copiar"];
 
 const NoEncontrada = () => {
   const { t } = useIdioma();
@@ -164,6 +191,9 @@ export const Pieza = () => {
     return fila ? { status: "success", fila, delHtml: true } : { status: "loading", fila: null };
   });
   const [relacionadasFilas, setRelacionadasFilas] = useState([]);
+  // El lateral: lo más leído de la semana y las monedas en vivo, como en la portada.
+  const masLeidas = useMasLeidas();
+  const monedas = useMonedas(6);
 
   useEffect(() => {
     let alive = true;
@@ -301,9 +331,16 @@ export const Pieza = () => {
   // fotografía tampoco: la cabecera de dos columnas dejaba la de la derecha vacía y el
   // titular encajonado en la mitad del ancho.
   const conPortada = pieza.formatoApi !== "entrevista" && Boolean(pieza.imagenUrl);
+  const minutos = SE_LEEN.has(pieza.formatoApi) ? minutosDeLectura(pieza.cuerpo) : null;
+  const enlaceCompartir = enlaceParaCompartir(canonica, pieza.version);
+  // La primera relacionada va en grande al final del texto; el lateral sigue con el resto.
+  const [siguiente, ...otrasRelacionadas] = relacionadas;
+  const masLeidasSinEsta = masLeidas.piezas.filter((p) => p.id !== pieza.id);
 
   return (
     <main className="se-blog se-articles" role="main">
+      {/* Cuánto queda: una línea fina bajo la cabecera, sin JavaScript. */}
+      {SE_LEEN.has(pieza.formatoApi) ? <div className="se-leyendo" aria-hidden="true" /> : null}
       <section className="se-section">
         <div className="se-container">
           <article className="se-piece">
@@ -357,6 +394,8 @@ export const Pieza = () => {
                 autor={pieza.autor}
                 autorFoto={pieza.autorFoto}
                 fecha={pieza.fecha}
+                fechaIso={pieza.fechaIso}
+                minutos={minutos}
                 unidad={pieza.unidad}
                 esEditorial={pieza.formatoApi === "editorial"}
               />
@@ -367,10 +406,13 @@ export const Pieza = () => {
                     nada la alimentaba, así que no podía tener nada dentro. */}
                 <BotonDeIdioma pieza={pieza} />
                 <BotonDeMarcador postId={pieza.id} />
+                {/* Solo donde no está el carril (por debajo de 1200 px): en el teléfono,
+                    primero la hoja del sistema, que lleva a cualquier app. */}
                 <ShareButtons
-                  url={enlaceParaCompartir(canonica, pieza.version)}
+                  url={enlaceCompartir}
                   title={pieza.titulo}
-                  className="se-piece__share"
+                  className="se-piece__share se-piece__share--cabecera"
+                  redes={REDES_CABECERA}
                 />
               </div>
             </div>
@@ -379,6 +421,19 @@ export const Pieza = () => {
                 lectura se estrecha a propósito: un párrafo que cruza la pantalla
                 entera cansa, y el brandbook lo maqueta así. */}
             <div className="se-piece__cols">
+              {/* El carril de compartir, pegado al texto y no al borde de la pantalla:
+                  baja con la lectura y se queda a mano. Solo en escritorio ancho. */}
+              <aside className="se-piece__carril" aria-label={t("comun.compartir")}>
+                <div className="se-piece__carril-pegado">
+                  <ShareButtons
+                    url={enlaceCompartir}
+                    title={pieza.titulo}
+                    className="se-piece__share se-piece__share--carril"
+                    redes={REDES_CARRIL}
+                  />
+                </div>
+              </aside>
+
               <div className="se-piece__main">
                 {/* El texto en español dentro de una página en inglés va marcado como
                     tal, para los lectores de pantalla. `display: contents`: la caja no
@@ -387,6 +442,8 @@ export const Pieza = () => {
                   <PieceBody pieza={pieza} enCabecera={conPortada} />
                 </div>
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
+
+                <SiguienteLectura pieza={siguiente} />
 
                 {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
                     conversación es sobre lo que se acaba de leer.
@@ -421,7 +478,18 @@ export const Pieza = () => {
                     y es el sitio que se vende. Si no hay campaña que encaje no pinta
                     nada y la columna arranca directamente en las relacionadas. */}
                 <EspacioPublicitario espacio={ESPACIOS.ARTICULO_RAIL} />
-                {relacionadas.length ? <RelatedPieces items={relacionadas} /> : null}
+                {otrasRelacionadas.length ? <RelatedPieces items={otrasRelacionadas} /> : null}
+                <UltimaHoraColumna />
+                {masLeidasSinEsta.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidasSinEsta} /> : null}
+                {/* Lo último del lateral se queda a la vista hasta el final del texto. */}
+                {monedas.length ? (
+                  <section className="se-piece__monedas" aria-labelledby="pieza-monedas">
+                    <h2 id="pieza-monedas" className="se-piece__aside-titulo">
+                      <Enlace to="/monedas">{t("titulares.seccion.lateral.monedas")}</Enlace>
+                    </h2>
+                    <TablaDeMonedas monedas={monedas} />
+                  </section>
+                ) : null}
               </aside>
             </div>
           </article>

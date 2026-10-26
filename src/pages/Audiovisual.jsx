@@ -4,7 +4,8 @@ import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
-import { ContentExplorer, ListingPagination } from "../components/home";
+import { ContentExplorer } from "../components/home";
+import { CargarMas } from "../components/comun/CargarMas";
 import { AudiovisualGrid, AudiovisualHero } from "../components/home/AudiovisualGrid";
 import { nombreTraducido } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
@@ -130,11 +131,10 @@ export const Audiovisual = () => {
   }, [results, principal, laterales]);
 
   const listingRef = useRef(null);
-  const { page, totalPages, visible, goTo, resetPage, from, to, total } = usePagedList(
-    resto,
-    POR_PAGINA,
-    { scrollTo: listingRef }
-  );
+  const { visible, cargarMas, resetPage, to, total } = usePagedList(resto, POR_PAGINA, {
+    scrollTo: listingRef,
+    acumulado: true,
+  });
 
   useMetaPagina({
     title: t("listados.alPunto.meta.titulo", { marca: BRAND.name }),
@@ -312,14 +312,12 @@ export const Audiovisual = () => {
                 <p className="se-text-body se-listing__note">{t("listados.listado.soloRecientes")}</p>
               ) : null}
 
-              <ListingPagination
-                page={page}
-                totalPages={totalPages}
-                from={from}
-                to={to}
+              <CargarMas
+                mostradas={to}
                 total={total}
-                unit={textoDeVista("unidad")}
-                onPageChange={goTo}
+                paso={POR_PAGINA}
+                unidad={textoDeVista("unidad")}
+                onCargar={cargarMas}
               />
             </>
           ) : null}

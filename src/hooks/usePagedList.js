@@ -15,11 +15,14 @@ const PARAM = "pagina";
  *
  * @param {Array<object>} items full result set, already filtered
  * @param {number} perPage how many to show per page
- * @param {{ scrollTo?: React.RefObject<HTMLElement> }} [options]
+ * @param {{ scrollTo?: React.RefObject<HTMLElement>, acumulado?: boolean }} [options]
  *   `scrollTo` is brought back into view whenever the page changes, so paging
  *   does not leave the reader stranded halfway down the previous page.
+ *   `acumulado`: «Cargar más». La página N enseña las N primeras tandas seguidas, y
+ *   `cargarMas` suma una sin mover la pantalla. La URL guarda cuántas: al volver de
+ *   una pieza, la lista está tan larga como se dejó.
  */
-export const usePagedList = (items, perPage, { scrollTo } = {}) => {
+export const usePagedList = (items, perPage, { scrollTo, acumulado = false } = {}) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const total = items.length;
@@ -76,9 +79,13 @@ export const usePagedList = (items, perPage, { scrollTo } = {}) => {
   }, [page, scrollTo]);
 
   const visible = useMemo(
-    () => items.slice((page - 1) * perPage, page * perPage),
-    [items, page, perPage]
+    () => items.slice(acumulado ? 0 : (page - 1) * perPage, page * perPage),
+    [items, page, perPage, acumulado]
   );
+
+  // Sin intención de desplazar: lo nuevo llega debajo y la lectura sigue donde estaba.
+  // `replace`: el botón «atrás» no recorre cada tanda, sale del listado.
+  const cargarMas = useCallback(() => write(page + 1, true), [write, page]);
 
   return {
     page,
@@ -86,8 +93,9 @@ export const usePagedList = (items, perPage, { scrollTo } = {}) => {
     visible,
     goTo,
     resetPage,
+    cargarMas,
     total,
-    from: total === 0 ? 0 : (page - 1) * perPage + 1,
+    from: total === 0 ? 0 : acumulado ? 1 : (page - 1) * perPage + 1,
     to: Math.min(page * perPage, total),
   };
 };

@@ -71,10 +71,6 @@
     "alPunto": {
       "episodio": "Episodio"
     },
-    "paginador": {
-      "cuenta": "{rango} de {total} {unidad}",
-      "irALaPagina": "Ir a la página {n}"
-    },
     "cinta": {
       "cifrasDeMercado": "Cifras de mercado",
       "mercados": "Mercados",

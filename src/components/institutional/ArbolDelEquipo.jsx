@@ -45,7 +45,7 @@ const Personas = ({ miembros, fotos, quien, onResaltar, className }) => (
           onFocus={() => onResaltar(clave)}
           onBlur={() => onResaltar(null)}
         >
-          <TeamMemberCard member={m} foto={fotos?.[clave] || ""} />
+          <TeamMemberCard member={m} foto={fotos?.[clave] || ""} compacta />
         </li>
       );
     })}

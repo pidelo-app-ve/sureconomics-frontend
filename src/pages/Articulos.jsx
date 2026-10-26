@@ -11,7 +11,6 @@ import {
   ContentExplorer,
   EditorialList,
   InterviewGrid,
-  ListingPagination,
   NewsList,
   PodcastGrid,
   ReportGrid,
@@ -19,6 +18,7 @@ import {
 import { FORMATO_META, FORMATO_POR_RUTA, nombreDeFormato, nombreTraducido } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePagedList } from "../hooks/usePagedList";
+import { CargarMas } from "../components/comun/CargarMas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
@@ -74,11 +74,10 @@ export const FormatListing = ({ formatoApi }) => {
     useContentFilter(pieces, tree);
 
   const listingRef = useRef(null);
-  const { page, totalPages, visible, goTo, resetPage, from, to, total } = usePagedList(
-    results,
-    meta.porPagina,
-    { scrollTo: listingRef }
-  );
+  const { visible, cargarMas, resetPage, to, total } = usePagedList(results, meta.porPagina, {
+    scrollTo: listingRef,
+    acumulado: true,
+  });
 
   // Every format shares the `/articulos` path, so the app's ScrollToTop — which
   // watches the pathname — never fires when the reader moves between them. This
@@ -204,14 +203,12 @@ export const FormatListing = ({ formatoApi }) => {
               <p className="se-text-body se-listing__note">{t("listados.listado.soloRecientes")}</p>
             ) : null}
 
-            <ListingPagination
-              page={page}
-              totalPages={totalPages}
-              from={from}
-              to={to}
+            <CargarMas
+              mostradas={to}
               total={total}
-              unit={titulo.toLowerCase()}
-              onPageChange={goTo}
+              paso={meta.porPagina}
+              unidad={titulo.toLowerCase()}
+              onCargar={cargarMas}
             />
           </>
         ) : null}

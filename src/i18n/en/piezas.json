@@ -72,6 +72,7 @@
       "verificarCorreo": "Verify my email"
     },
     "firma": {
+      "lectura": "{n} min read",
       "redaccion": "SurEconomics Newsroom",
       "por": "By",
       "investigacionDe": "Research by {unidad}"
@@ -79,6 +80,9 @@
     "etiquetas": {
       "seguirLeyendo": "Keep reading about",
       "incluyeTodo": "Includes all of {nombre}"
+    },
+    "siguiente": {
+      "rotulo": "Read next"
     },
     "relacionadas": {
       "titulo": "You may also be interested in"
@@ -105,6 +109,11 @@
       "publicar": "Post comment"
     },
     "compartir": {
+      "linkedin": "Share on LinkedIn",
+      "copiar": "Copy the link",
+      "copiarCorto": "Copy link",
+      "copiado": "Link copied.",
+      "nativo": "Share with another app",
       "instagram": "Share on Instagram",
       "whatsapp": "Share on WhatsApp",
       "x": "Share on X",

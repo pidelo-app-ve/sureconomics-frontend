@@ -126,6 +126,10 @@
       "recargar": "Recargar la página"
     },
     "volverInicio": "Volver al inicio",
+    "cargarMas": {
+      "cuenta": "{mostradas} de {total} {unidad}",
+      "boton": "Cargar {n} más"
+    },
     "cargando": "Cargando…",
     "reintentar": "Reintentar",
     "cerrar": "Cerrar",

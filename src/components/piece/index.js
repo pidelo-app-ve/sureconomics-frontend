@@ -3,3 +3,4 @@ export { PieceByline } from "./PieceByline";
 export { PieceTags } from "./PieceTags";
 export { PieceComments } from "./PieceComments";
 export { RelatedPieces } from "./RelatedPieces";
+export { SiguienteLectura } from "./SiguienteLectura";

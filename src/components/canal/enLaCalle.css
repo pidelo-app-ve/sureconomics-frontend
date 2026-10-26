@@ -1,0 +1,486 @@
+/* ═══ «En la calle» ═══ La fila de shorts del canal y su visor. Tarjetas verticales,
+   oscuras como una pantalla, con el titular en la serif de la casa y la duración en la
+   mono de las cifras: el único sitio de la portada donde el papel se vuelve pantalla. */
+
+.se-calle {
+  --calle-hueco: 12px;
+  --calle-curva: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Menos aire debajo que encima: la fila cierra las noticias y abre la pausa de béisbol y
+   juegos, que ya trae su propio filete. */
+.se-section.se-calle {
+  padding-bottom: clamp(24px, 3vw, 40px);
+}
+
+.se-calle__cabeza {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.se-calle__mandos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.se-calle__pausa {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--color-slate);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.se-calle__pausa:hover {
+  color: var(--tinta);
+}
+
+.se-calle__flecha {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--tinta);
+  background: transparent;
+  color: var(--tinta);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+
+.se-calle__flecha:hover:not(:disabled) {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.se-calle__flecha:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.se-calle__flecha:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.se-calle :is(.se-calle__pausa, .se-calle__flecha, .se-calle__tarjeta, .se-calle__suscribir):focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+/* La pista: en el teléfono corre hasta el borde de la pantalla (la tarjeta siguiente
+   asomando es la invitación a deslizar); en escritorio, dentro de la retícula. */
+.se-calle__pista {
+  /* `relative`: lo posicionado de dentro (el texto oculto «se abre en una pestaña
+     nueva», que es `absolute`) se recorta con la pista. Sin esto escapaba por la
+     derecha, la página medía 2.313 px en el teléfono y Chrome agrandaba la vista
+     hasta 4 veces: todo lo fijo -- el visor, la barra de abajo -- quedaba fuera. */
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 44vw;
+  gap: var(--calle-hueco);
+  margin: 0 calc(-1 * var(--se-content-gutter));
+  padding: 4px var(--se-content-gutter) 8px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--se-content-gutter);
+  scrollbar-width: none;
+}
+
+.se-calle__pista::-webkit-scrollbar {
+  display: none;
+}
+
+.se-calle__item {
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.se-calle__tarjeta {
+  position: relative;
+  display: block;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  isolation: isolate;
+  background: #15181b;
+  color: #ffffff;
+  text-decoration: none;
+  transition: transform 160ms ease-out;
+}
+
+.se-calle__tarjeta:active {
+  transform: scale(0.98);
+}
+
+.se-calle__foto,
+.se-calle__previa {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.se-calle__foto {
+  object-fit: cover;
+}
+
+/* El video se funde sobre la portada con un desenfoque leve, para que no se vean dos
+   imágenes cruzándose; mientras YouTube arranca, no se ve. */
+.se-calle__previa {
+  border: 0;
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  transition: opacity 240ms var(--calle-curva), filter 240ms var(--calle-curva);
+}
+
+.se-calle__previa.is-lista {
+  opacity: 1;
+  filter: none;
+}
+
+.se-calle__tarjeta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(8, 10, 12, 0.88) 0%, rgba(8, 10, 12, 0.4) 36%, rgba(8, 10, 12, 0) 60%);
+  pointer-events: none;
+}
+
+.se-calle__texto {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  padding: 12px 12px 14px;
+}
+
+.se-calle__dura {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--cifras);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-calle__titulo {
+  display: -webkit-box;
+  overflow: hidden;
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.18;
+  text-wrap: pretty;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* La última: el canal entero, en papel. */
+.se-calle__fin {
+  display: grid;
+  align-content: end;
+  gap: 8px;
+  aspect-ratio: 9 / 16;
+  padding: 16px;
+  border: 1px solid var(--color-hairline);
+  background: var(--color-paper);
+}
+
+.se-calle__fin-titulo {
+  margin: 0;
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--tinta);
+}
+
+.se-calle__fin-texto {
+  margin: 0 0 6px;
+  color: var(--color-slate);
+  font-size: 0.875rem;
+}
+
+.se-calle__suscribir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--tinta);
+  color: var(--tinta);
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.se-calle__suscribir:hover {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+@media (min-width: 600px) {
+  .se-calle__pista {
+    grid-auto-columns: 30%;
+  }
+}
+
+@media (min-width: 900px) {
+  .se-calle {
+    --calle-hueco: 14px;
+  }
+
+  .se-calle__flecha {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .se-calle__pista {
+    grid-auto-columns: calc((100% - 4 * var(--calle-hueco)) / 5);
+    margin: 0;
+    padding: 4px 0 8px;
+    scroll-padding-inline: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .se-calle {
+    --calle-hueco: 16px;
+  }
+
+  .se-calle__pista {
+    grid-auto-columns: calc((100% - 5 * var(--calle-hueco)) / 6);
+  }
+}
+
+/* ═══ El visor ═══ */
+
+.se-visor {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  touch-action: none;
+}
+
+.se-visor__fondo {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 10, 12, 0.97);
+}
+
+.se-visor__escena {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transition: opacity 280ms cubic-bezier(0.23, 1, 0.32, 1), transform 280ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-visor__escena[data-montado="no"] {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.se-visor__superficie {
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 12px;
+  width: min(100vw, 460px);
+  max-height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  color: #ffffff;
+  pointer-events: auto;
+  outline: none;
+}
+
+.se-visor__cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.se-visor__cuenta {
+  margin: 0;
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.se-visor__mandos {
+  display: flex;
+  gap: 6px;
+}
+
+.se-visor__boton {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease-out;
+}
+
+.se-visor__boton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.se-visor__boton:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.se-visor__boton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.se-visor :is(.se-visor__boton, .se-visor__suscribir, .se-visor__youtube):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+/* El cuadro del video: lo más alto que quepa dejando sitio a la cabecera y al pie, y
+   nunca más ancho que la pantalla. */
+.se-visor__marco {
+  justify-self: center;
+  height: min(calc(100dvh - 262px), calc((100vw - 32px) * 16 / 9), 760px);
+  aspect-ratio: 9 / 16;
+  background: #000000;
+}
+
+.se-visor__marco iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.se-visor__marco--siguiente {
+  animation: se-visor-desde-abajo 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-visor__marco--anterior {
+  animation: se-visor-desde-arriba 220ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes se-visor-desde-abajo {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+@keyframes se-visor-desde-arriba {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+}
+
+.se-visor__pie {
+  display: grid;
+  gap: 8px;
+}
+
+.se-visor__titulo {
+  margin: 0;
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.se-visor__meta {
+  margin: 0;
+  font-family: var(--cifras);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.se-visor__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.se-visor__suscribir,
+.se-visor__youtube {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.se-visor__suscribir {
+  background: #ffffff;
+  color: var(--tinta);
+}
+
+.se-visor__youtube {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.se-visor__ayuda {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-calle__tarjeta,
+  .se-calle__flecha,
+  .se-visor__boton {
+    transition: none;
+  }
+
+  .se-calle__tarjeta:active,
+  .se-visor__boton:active:not(:disabled) {
+    transform: none;
+  }
+
+  .se-visor__escena {
+    transition: opacity 200ms ease;
+  }
+
+  .se-visor__escena[data-montado="no"] {
+    transform: none;
+  }
+
+  .se-visor__marco--siguiente,
+  .se-visor__marco--anterior {
+    animation-name: se-visor-funde;
+  }
+
+  @keyframes se-visor-funde {
+    from {
+      opacity: 0;
+    }
+  }
+}

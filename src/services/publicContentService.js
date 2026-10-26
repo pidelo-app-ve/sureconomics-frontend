@@ -70,6 +70,25 @@ export const getRedes = async () => {
   }
 };
 
+/**
+ * El canal de YouTube de la casa: `{ canal, shorts, largos }`, con las portadas ya en
+ * nuestro almacenamiento (ver `youtube_service.py`). Sin canal elegido, `canal` es nulo.
+ * Como las redes, un fallo no se propaga: «En la calle» y «Nuestro canal» no se pintan.
+ */
+export const getCanal = async () => {
+  try {
+    const payload = await client().request("/canal");
+    const d = payload?.data ?? payload ?? {};
+    return {
+      canal: d.canal && typeof d.canal === "object" ? d.canal : null,
+      shorts: Array.isArray(d.shorts) ? d.shorts : [],
+      largos: Array.isArray(d.largos) ? d.largos : [],
+    };
+  } catch {
+    return { canal: null, shorts: [], largos: [] };
+  }
+};
+
 /** The fourteen topics with their published counts. */
 export const getTopics = async () => listOf(await client().request("/topics"));
 

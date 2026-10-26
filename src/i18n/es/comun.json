@@ -130,10 +130,10 @@
       "cuenta": "{mostradas} de {total} {unidad}",
       "boton": "Cargar más"
     },
+    "nuevaPestana": "(se abre en una pestaña nueva)",
     "fuenteGoogle": {
       "boton": "Añádanos en Google",
-      "nota": "Márquenos como fuente preferida y verá más de SurEconomics cuando busque noticias en Google.",
-      "nuevaPestana": "(se abre en una pestaña nueva)"
+      "nota": "Márquenos como fuente preferida y verá más de SurEconomics cuando busque noticias en Google."
     },
     "cargando": "Cargando…",
     "reintentar": "Reintentar",

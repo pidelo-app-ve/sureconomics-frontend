@@ -96,6 +96,28 @@
       "growth": "Growth",
       "articulo": "Article"
     },
+    "calle": {
+      "titulo": "On the street",
+      "verCanal": "See the channel",
+      "abrir": "Watch the video: {titulo}",
+      "abrirConDuracion": "Watch the video: {titulo} ({duracion})",
+      "vistaPrevia": "Preview: {titulo}",
+      "vistas": "{n} views",
+      "pausar": "Pause previews",
+      "reanudar": "Resume previews",
+      "anteriores": "Previous videos",
+      "siguientes": "Next videos",
+      "finTitulo": "There is more on the channel",
+      "suscribirse": "Subscribe on YouTube",
+      "visor": {
+        "cuenta": "{n} of {total}",
+        "anterior": "Previous video",
+        "siguiente": "Next video",
+        "video": "Video: {titulo}",
+        "verEnYoutube": "Watch on YouTube",
+        "ayuda": "Swipe up for the next one."
+      }
+    },
     "redes": {
       "titulo": "On social media",
       "publicacionesEn": "Posts on {red}. Use the arrow keys to scroll.",

@@ -9,6 +9,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { PrimeraPlana, elegirApertura } from "../components/home/PrimeraPlana";
 import { PausaPortada } from "../components/home/PausaPortada";
+import { EnLaCalle } from "../components/canal/EnLaCalle";
 import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
 import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
@@ -472,8 +473,10 @@ export const Home = () => {
         />
       )}
 
-      {/* Si no hay bloque de noticias, el béisbol y los juegos van aquí, bajo la
-          primera plana; si lo hay, van detrás de él. */}
+      {/* Si no hay bloque de noticias, «En la calle», el béisbol y los juegos van aquí,
+          bajo la primera plana; si lo hay, van detrás de él. Con filtros, «En la calle»
+          no sale: no es contenido que se filtre. */}
+      {hayNoticias || isFiltered ? null : <EnLaCalle />}
       {hayNoticias ? null : pausa}
 
       {(cargando ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
@@ -517,6 +520,9 @@ export const Home = () => {
               tarjeta en la rejilla ocupa el hueco que ya habia. */}
           {/* El béisbol y los juegos, detrás de las noticias: un juego delante hacía
               que el sitio pareciera de juegos antes que de prensa. */}
+          {/* Los shorts del canal, detrás de las noticias y antes de la pausa: la calle
+              después de la última hora. Ver `EnLaCalle`. */}
+          {formatoApi === "noticia" && !isFiltered ? <EnLaCalle /> : null}
           {formatoApi === "noticia" ? pausa : null}
           {/* La banda grande, detrás de Editorial (o de Artículos si no hay
               Editorial): detrás de Artículos, que ya lleva su ficha, eran dos anuncios

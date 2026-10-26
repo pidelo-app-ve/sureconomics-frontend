@@ -130,10 +130,10 @@
       "cuenta": "{mostradas} of {total} {unidad}",
       "boton": "Load more"
     },
+    "nuevaPestana": "(opens in a new tab)",
     "fuenteGoogle": {
       "boton": "Add us on Google",
-      "nota": "Make us a preferred source and you will see more SurEconomics when you search for news on Google.",
-      "nuevaPestana": "(opens in a new tab)"
+      "nota": "Make us a preferred source and you will see more SurEconomics when you search for news on Google."
     },
     "cargando": "Loading…",
     "reintentar": "Try again",

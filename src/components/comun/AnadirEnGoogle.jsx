@@ -26,7 +26,7 @@ export const AnadirEnGoogle = ({ variante }) => {
     <a className={`se-fuente-google__boton se-fuente-google__boton--${variante}`} href={FUENTE_PREFERIDA} target="_blank" rel="noopener noreferrer">
       <IconoEstrella />
       {t("comun.fuenteGoogle.boton")}
-      <span className="se-sr-only"> {t("comun.fuenteGoogle.nuevaPestana")}</span>
+      <span className="se-sr-only"> {t("comun.nuevaPestana")}</span>
     </a>
   );
   if (variante === "pie") return boton;

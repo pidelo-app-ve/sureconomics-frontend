@@ -96,6 +96,28 @@
       "growth": "Crecimiento",
       "articulo": "Artículo"
     },
+    "calle": {
+      "titulo": "En la calle",
+      "verCanal": "Ver el canal",
+      "abrir": "Ver el video: {titulo}",
+      "abrirConDuracion": "Ver el video: {titulo} ({duracion})",
+      "vistaPrevia": "Vista previa: {titulo}",
+      "vistas": "{n} vistas",
+      "pausar": "Pausar vistas previas",
+      "reanudar": "Reanudar vistas previas",
+      "anteriores": "Videos anteriores",
+      "siguientes": "Videos siguientes",
+      "finTitulo": "Hay más en el canal",
+      "suscribirse": "Suscribirse en YouTube",
+      "visor": {
+        "cuenta": "{n} de {total}",
+        "anterior": "Video anterior",
+        "siguiente": "Video siguiente",
+        "video": "Video: {titulo}",
+        "verEnYoutube": "Ver en YouTube",
+        "ayuda": "Deslice hacia arriba para ver el siguiente."
+      }
+    },
     "redes": {
       "titulo": "En redes",
       "publicacionesEn": "Publicaciones en {red}. Use las flechas para desplazarse.",

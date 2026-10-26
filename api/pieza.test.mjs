@@ -95,6 +95,7 @@ await conFetch(fetchNormal(PIEZA), async () => {
   check("canonical presente", h.includes('rel="canonical" href="https://www.sureconomics.com/articulos/concertacion-tripartita"'));
   check("fecha de publicación", h.includes('article:published_time" content="2026-08-25T15:00:00+00:00"'));
   check("sección tomada del tema", h.includes('article:section" content="Trabajo y Migración"'));
+  check("sin firma, firma la casa (para el modo lectura)", h.includes('<meta name="author" content="SurEconomics" />'));
   check("el bundle sigue intacto", h.includes('src="/assets/index-abc123.js"'));
   check("una sola etiqueta title", (h.match(/<title>/g) || []).length === 1);
   check("se cachea en el borde", /s-maxage=600/.test(res.headers["Cache-Control"]));

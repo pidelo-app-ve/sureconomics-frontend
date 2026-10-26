@@ -256,8 +256,13 @@
   font-family: var(--cifras);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
-  color: var(--marca-rojo);
+  color: var(--color-slate);
   white-space: nowrap;
+}
+
+/* Lo de la última media hora, en rojo: el color avisa de que acaba de pasar. */
+.se-plana__uh-hora--fresca {
+  color: var(--marca-rojo);
 }
 
 .se-plana__uh-titulo {

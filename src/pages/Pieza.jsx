@@ -8,6 +8,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
+import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
 import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
 import {
   Media,
@@ -264,6 +265,8 @@ export const Pieza = () => {
             title: t("piezas.pieza.meta.titulo", { titulo: pieza.titulo, marca: BRAND.name }),
             description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
             soloEspanol: !pieza.tieneIngles,
+            tipo: "article",
+            autor: pieza.formatoApi === "editorial" ? BRAND.name : pieza.autor || BRAND.name,
           }
         : { soloEspanol: true }
   );
@@ -345,7 +348,7 @@ export const Pieza = () => {
       {SE_LEEN.has(pieza.formatoApi) ? <div className="se-leyendo" aria-hidden="true" /> : null}
       <section className="se-section">
         <div className="se-container">
-          <article className="se-piece">
+          <article className={`se-piece${pieza.formatoApi === "informe" ? " se-piece--a-fondo" : ""}`}>
             <nav className="se-piece__crumbs" aria-label={t("piezas.pieza.ubicacion")}>
               <Enlace to="/">{t("nav.inicio")}</Enlace>
               <span aria-hidden="true"> › </span>
@@ -424,8 +427,14 @@ export const Pieza = () => {
                 entera cansa, y el brandbook lo maqueta así. */}
             <div className="se-piece__cols">
               {/* El carril de compartir, pegado al texto y no al borde de la pantalla:
-                  baja con la lectura y se queda a mano. Solo en escritorio ancho. */}
-              <aside className="se-piece__carril" aria-label={t("comun.compartir")}>
+                  baja con la lectura y se queda a mano. Solo en escritorio ancho.
+
+                  `role="complementary"` escrito, aunque `<aside>` ya lo sea: el modo
+                  lectura de los navegadores (Readability en Firefox, el de Edge) solo
+                  descarta lo que lleva el rol puesto a mano. Sin él, en una pieza corta
+                  el lector no sabía dónde acababa la noticia y se llevaba la cinta de
+                  monedas y el menú. Lo mismo en el lateral y en «después de leer». */}
+              <aside className="se-piece__carril" role="complementary" aria-label={t("comun.compartir")}>
                 <div className="se-piece__carril-pegado">
                   <ShareButtons
                     url={enlaceCompartir}
@@ -445,36 +454,42 @@ export const Pieza = () => {
                 </div>
                 <PieceTags temas={pieza.temas} geos={pieza.geos} />
 
-                <SiguienteLectura pieza={siguiente} />
+                {/* Lo que viene después del texto no es la noticia: el modo lectura del
+                    navegador lo deja fuera (ver el carril). */}
+                <div className="se-piece__despues" role="complementary" aria-label={t("piezas.pieza.despues")}>
+                  <AnadirEnGoogle />
 
-                {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
-                    conversación es sobre lo que se acaba de leer.
+                  <SiguienteLectura pieza={siguiente} />
 
-                    Sólo donde la sección los admite -- hoy artículo, editorial,
-                    entrevista y podcast. La decisión viaja en la pieza porque es una
-                    política del formato, editable desde el panel, y no una lista de
-                    formatos escrita aquí: la página de detalle es una sola para los
-                    seis, así que sin esta condición aparecerían en todos. */}
-                {pieza.admiteComentarios ? (
-                  <PieceComments pieza={{ slug: pieza.slug, rutaCanonica: canonica }} />
-                ) : null}
+                  {/* Debajo del cuerpo y las etiquetas, en la columna de lectura: la
+                      conversación es sobre lo que se acaba de leer.
 
-                {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
-                    dejó) y un minuto de pausa. Detrás de los comentarios, para que lo
-                    primero después del texto sea la conversación y no un juego. */}
-                <ClaveDeLaPieza pieza={pieza} />
-                <InvitacionPausa />
+                      Sólo donde la sección los admite -- hoy artículo, editorial,
+                      entrevista y podcast. La decisión viaja en la pieza porque es una
+                      política del formato, editable desde el panel, y no una lista de
+                      formatos escrita aquí: la página de detalle es una sola para los
+                      seis, así que sin esta condición aparecerían en todos. */}
+                  {pieza.admiteComentarios ? (
+                    <PieceComments pieza={{ slug: pieza.slug, rutaCanonica: canonica }} />
+                  ) : null}
 
-                {/* La tarjeta nativa del cuerpo, al final. Se probó a mitad del cuerpo,
-                    partiendo los párrafos, y el cliente lo descartó: en una pieza corta
-                    el corte llega enseguida y la lectura se parte antes de haber dicho
-                    nada. Lleva la misma etiqueta de publicidad que en la portada: lo
-                    que la separa de una pieza de la redacción no puede depender de
-                    dónde esté. */}
-                <EspacioPublicitario espacio={ESPACIOS.ARTICULO_NATIVO} variante="cuerpo" />
+                  {/* Para quien llegó al final: la palabra de esta pieza (si la redacción la
+                      dejó) y un minuto de pausa. Detrás de los comentarios, para que lo
+                      primero después del texto sea la conversación y no un juego. */}
+                  <ClaveDeLaPieza pieza={pieza} />
+                  <InvitacionPausa />
+
+                  {/* La tarjeta nativa del cuerpo, al final. Se probó a mitad del cuerpo,
+                      partiendo los párrafos, y el cliente lo descartó: en una pieza corta
+                      el corte llega enseguida y la lectura se parte antes de haber dicho
+                      nada. Lleva la misma etiqueta de publicidad que en la portada: lo
+                      que la separa de una pieza de la redacción no puede depender de
+                      dónde esté. */}
+                  <EspacioPublicitario espacio={ESPACIOS.ARTICULO_NATIVO} variante="cuerpo" />
+                </div>
               </div>
 
-              <aside className="se-piece__aside" aria-label={t("piezas.pieza.masContenido")}>
+              <aside className="se-piece__aside" role="complementary" aria-label={t("piezas.pieza.masContenido")}>
                 {/* El rail va **encima** de «También te puede interesar», como en la
                     maqueta: es la primera cosa que ve quien levanta la vista del texto,
                     y es el sitio que se vende. Si no hay campaña que encaje no pinta

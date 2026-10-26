@@ -471,11 +471,15 @@ export const EnRedes = () => {
   const tiktok = datos.tiktok || [];
   if (!instagram.length && !x.length && !tiktok.length) return null;
 
+  // `complementary`: lo de redes acompaña a cualquier página y no es su contenido. Con
+  // el rol escrito, el modo lectura del navegador lo deja fuera; sin él, en una pieza
+  // corta el lector se iba hasta la raíz y se llevaba la cinta y el menú con la noticia.
   return (
     <>
       <section
         ref={bloque}
         className={`se-redes${dentro ? " se-redes--dentro" : ""}`}
+        role="complementary"
         aria-labelledby="se-redes-rotulo"
       >
         <div className="se-container">

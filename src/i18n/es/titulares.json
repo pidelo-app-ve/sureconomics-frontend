@@ -32,6 +32,7 @@
     },
     "hace": {
       "ahora": "Ahora",
+      "corto": "{n} min",
       "minutos": "Hace {n} min",
       "horas": "Hace {n} h"
     }

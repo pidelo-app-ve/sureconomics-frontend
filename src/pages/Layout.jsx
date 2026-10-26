@@ -55,8 +55,12 @@ export const Layout = () => {
                 {/* Un `div` y no `main`: cada vista pinta ya su propio `main`, y dos
                     anidados son dos regiones principales para un lector de pantalla.
                     `tabIndex={-1}` lo deja recibir el foco por programa sin meterlo en
-                    el orden del tabulador. */}
-                <div className="se-page" id={CONTENIDO_ID} tabIndex={-1}>
+                    el orden del tabulador.
+
+                    Se llamaba `se-page`, y esa palabra le daba puntos de «artículo» en el
+                    modo lectura del navegador: en una pieza corta, el lector se quedaba
+                    con la página entera (cinta y menú incluidos) en vez de con el texto. */}
+                <div className="se-contenido" id={CONTENIDO_ID} tabIndex={-1}>
                     <Outlet />
                 </div>
                 {/* Lo ultimo en redes, curado desde el panel, encima del pie y por

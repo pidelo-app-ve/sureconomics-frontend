@@ -208,7 +208,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
               </Enlace>
             </div>
             <div key={actual.id} className={`se-plana__texto${cruzando ? " se-plana__texto--entra" : ""}`}>
-              <h3 className="se-plana__titulo">
+              <h3 className={`se-plana__titulo${actual.formatoApi === "informe" ? " se-plana__titulo--a-fondo" : ""}`}>
                 <Enlace to={rutaDePieza(actual)}>
                   <TituloDePieza pieza={actual} />
                 </Enlace>

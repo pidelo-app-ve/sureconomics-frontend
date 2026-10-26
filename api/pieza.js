@@ -190,6 +190,7 @@ const etiquetas = ({
   tipo = "article",
   locale = "es_LA",
   alternativas = null,
+  autor = null,
 }) => {
   const filas = [
     `<meta property="og:type" content="${escapar(tipo)}" />`,
@@ -243,6 +244,11 @@ const etiquetas = ({
   }
   if (seccion) {
     filas.push(`<meta property="article:section" content="${escapar(seccion)}" />`);
+  }
+  // La firma, para el modo lectura del navegador: es de donde saca el nombre que pone
+  // debajo del titular (la ficha JSON-LD solo la leen algunos).
+  if (autor) {
+    filas.push(`<meta name="author" content="${escapar(autor)}" />`);
   }
   return filas.join("\n    ");
 };
@@ -569,6 +575,8 @@ export default async function handler(req, res) {
     url,
     publicado: pieza.published_at || null,
     seccion: pieza.topics?.[0]?.name || null,
+    // El editorial firma como la casa, igual que en la página.
+    autor: pieza.format === "editorial" ? "SurEconomics" : String(pieza.byline || "").trim() || "SurEconomics",
     html: piezaEnHtml(leida, { imagen, idioma }),
     ficha: fichaDeNoticia(leida, { url, imagen, idioma }),
     // La pieza tal cual la da la API: la página elige el idioma al convertirla.

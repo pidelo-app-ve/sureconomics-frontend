@@ -33,12 +33,26 @@ const useAhora = (cada) => {
   return ahora;
 };
 
-/** «9:21» si es de hoy; «4 ago» si no. */
-const sello = (iso, lang, ahora) => {
+const MEDIA_HORA_MS = 30 * 60 * 1000;
+
+/**
+ * «12 min» durante la primera hora, «9:21» el resto del día y «4 ago» si no es de hoy.
+ * En rojo solo lo de la última media hora: el color dice «acaba de pasar», y si todo
+ * va en rojo no dice nada. Los minutos se leen enteros para el lector de pantalla
+ * («Hace 12 min»); a la vista, sin el «hace», caben en la columna de la hora.
+ */
+const sello = (iso, lang, ahora, t) => {
   const ms = Date.parse(iso || "");
-  if (!ms) return "";
+  if (!ms) return { visible: "" };
+  const pasado = Math.max(0, ahora - ms);
+  if (pasado < UNA_HORA_MS) {
+    const n = Math.floor(pasado / 60_000);
+    return n < 1
+      ? { visible: t("titulares.hace.ahora"), fresca: true }
+      : { visible: t("titulares.hace.corto", { n }), leido: t("titulares.hace.minutos", { n }), fresca: pasado < MEDIA_HORA_MS };
+  }
   const hoy = new Date(ahora).toDateString() === new Date(ms).toDateString();
-  return formatearFecha(iso, hoy ? "hora" : "diaMes", lang);
+  return { visible: formatearFecha(iso, hoy ? "hora" : "diaMes", lang) };
 };
 
 export const UltimaHoraColumna = ({ recientes = [] }) => {
@@ -66,16 +80,26 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
         </Enlace>
       </h2>
       <ol className="se-plana__uh-lista">
-        {filas.map((f) => (
+        {filas.map((f) => {
+          const s = sello(f.iso, lang, ahora, t);
+          return (
           <li key={f.id} className="se-plana__uh-item">
-            <time className="se-plana__uh-hora" dateTime={f.iso ?? undefined}>
-              {sello(f.iso, lang, ahora)}
+            <time className={`se-plana__uh-hora${s.fresca ? " se-plana__uh-hora--fresca" : ""}`} dateTime={f.iso ?? undefined}>
+              {s.leido ? (
+                <>
+                  <span className="se-sr-only">{s.leido}</span>
+                  <span aria-hidden="true">{s.visible}</span>
+                </>
+              ) : (
+                s.visible
+              )}
             </time>
             <Enlace className="se-plana__uh-titulo" to={f.ruta}>
               {f.titulo}
             </Enlace>
           </li>
-        ))}
+          );
+        })}
       </ol>
       <Enlace className="se-plana__mas" to="/ultima-hora">
         {t("portada.plana.todaLaUltimaHora")}

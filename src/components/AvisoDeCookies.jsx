@@ -114,7 +114,10 @@ export const AvisoDeCookies = () => {
   return (
     <aside
       ref={barra}
-      className="se-cookies"
+      // `se-aviso-gdpr`: la palabra con la que el modo lectura de los navegadores
+      // reconoce un aviso de cookies y lo deja fuera. Sin ella, su párrafo competía con
+      // el de una pieza corta y el lector se llevaba la página entera.
+      className="se-cookies se-aviso-gdpr"
       // `region` y no `dialog`: un dialogo se lleva el foco y atrapa el teclado, y esto
       // no debe interrumpir la lectura. Se anuncia, y quien quiera llega tabulando.
       role="region"

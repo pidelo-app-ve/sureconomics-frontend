@@ -19,7 +19,14 @@ import { useIdioma } from "./ProveedorIdioma";
  * Las claves `title`/`description` se llaman como en `applyPageMeta` para que el cambio
  * en cada página sea mover la llamada, no reescribirla.
  */
-export const useMetaPagina = ({ title, description, noindex = false, soloEspanol = false } = {}) => {
+export const useMetaPagina = ({
+  title,
+  description,
+  noindex = false,
+  soloEspanol = false,
+  tipo = "website",
+  autor = null,
+} = {}) => {
   const { lang } = useIdioma();
   const { pathname, search } = useLocation();
   const base = sinPrefijo(pathname) + search;
@@ -36,6 +43,8 @@ export const useMetaPagina = ({ title, description, noindex = false, soloEspanol
       noindex: noindex || sinVersionPropia,
       canonicalUrl: sinVersionPropia ? enEspanol : propia,
       alternates: noindex || soloEspanol ? null : { es: enEspanol, en: enIngles, "x-default": enEspanol },
+      tipo,
+      autor,
     });
-  }, [title, description, noindex, soloEspanol, lang, base]);
+  }, [title, description, noindex, soloEspanol, tipo, autor, lang, base]);
 };

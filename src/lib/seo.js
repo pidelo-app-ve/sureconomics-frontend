@@ -30,6 +30,8 @@ const upsertMeta = (nameOrProperty, value, isProperty = false) => {
   tag.setAttribute("content", value);
 };
 
+const quitarMeta = (nombre) => document.head.querySelector(`meta[name="${nombre}"]`)?.remove();
+
 const upsertLink = (rel, href) => {
   if (!href) return;
   const selector = `link[rel="${rel}"]`;
@@ -54,8 +56,19 @@ export const applyPageMeta = ({
   noindex = false,
   lang,
   alternates,
+  tipo,
+  autor,
 } = {}) => {
   if (title) document.title = title;
+  // `og:type` y la firma, que es de lo que tira el modo lectura del navegador para
+  // reconocer un artículo y poner el nombre debajo del titular. Solo si la página los
+  // pasa (las bilingües, vía `useMetaPagina`); al salir de una pieza la firma se quita
+  // para que no se quede pegada a la portada.
+  if (tipo) upsertMeta("og:type", tipo, true);
+  if (autor !== undefined) {
+    if (autor) upsertMeta("author", autor);
+    else quitarMeta("author");
+  }
   if (description) upsertMeta("description", description);
   if (canonicalUrl) upsertLink("canonical", canonicalUrl);
   if (lang) {

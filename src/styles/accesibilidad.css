@@ -42,7 +42,7 @@
 /* El envoltorio del contenido recibe el foco por programa -- al saltar y al cambiar
    de ruta --, nunca tabulando. Un recuadro alrededor de la pagina entera no le dice
    nada a nadie, asi que solo aqui se quita el contorno. */
-#contenido.se-page:focus {
+#contenido.se-contenido:focus {
   outline: none;
 }
 

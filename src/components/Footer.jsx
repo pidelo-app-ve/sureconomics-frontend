@@ -9,6 +9,7 @@ import { useState } from "react";
 import { subscribeToNewsletter } from "../services/newsletterService";
 import { marcarSuscrito } from "../lib/invitacionBoletin";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
+import { AnadirEnGoogle } from "./comun/AnadirEnGoogle";
 
 /** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
  *  salga un hueco con el nombre suelto rompiendo la fila. */
@@ -170,6 +171,7 @@ export const Footer = () => {
                 })}
               </ul>
             </div>
+            <AnadirEnGoogle variante="pie" />
           </div>
 
           <div className="se-footer__newsletter">

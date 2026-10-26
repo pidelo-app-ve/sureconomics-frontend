@@ -32,6 +32,7 @@
     },
     "hace": {
       "ahora": "Just now",
+      "corto": "{n} min",
       "minutos": "{n} min ago",
       "horas": "{n} h ago"
     }

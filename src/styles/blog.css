@@ -664,7 +664,7 @@
   box-shadow: 0 8px 24px rgba(0, 51, 24, 0.22);
 }
 
-.se-page {
+.se-contenido {
   padding-top: 0;
 }
 
@@ -14185,3 +14185,92 @@ html {
   margin-top: clamp(24px, 3vw, 36px);
 }
 
+
+/* ═══ «Añádanos en Google» ═══ El botón de fuente preferida de Google, con la letra y el
+   filete del periódico. Al final de la pieza, una línea que dice qué gana el lector y
+   el botón; en el pie, solo el botón, sobre el verde. */
+.se-fuente-google {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: 28px;
+}
+
+.se-fuente-google__nota {
+  flex: 1 1 22rem;
+  margin: 0;
+  color: var(--color-slate);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.se-fuente-google__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--tinta);
+  color: var(--tinta);
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease-out;
+}
+
+.se-fuente-google__boton:hover {
+  background: var(--tinta);
+  color: var(--papel);
+}
+
+.se-fuente-google__boton:active {
+  transform: scale(0.97);
+}
+
+.se-fuente-google__boton:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+.se-fuente-google__boton--pie {
+  margin-top: 18px;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+.se-fuente-google__boton--pie:hover {
+  background: #ffffff;
+  color: var(--marca-verde);
+}
+
+.se-fuente-google__boton--pie:focus-visible {
+  outline-color: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-fuente-google__boton {
+    transition: background 160ms ease, color 160ms ease;
+  }
+
+  .se-fuente-google__boton:active {
+    transform: none;
+  }
+}
+
+/* ═══ El grosor dice el género ═══ El informe -- la pieza de fondo, la que se trabajó
+   semanas -- titula en redonda de peso normal; la noticia, en seminegrita. Es el gesto
+   de los diarios financieros para separar el reportaje de la última hora sin poner un
+   rótulo encima: la diferencia se ve antes de leerla. */
+.se-publico .se-plana__titulo--a-fondo,
+.se-publico .se-blog .se-doccard__title,
+/* El titular de la página del informe es un h1, y la regla general de los titulares de
+   prensa (`.se-publico main :is(h1, h2)…`, más arriba) lo pondría a 600: este selector es
+   esa misma regla con la clase del informe delante, para ganarle sin `!important`. */
+.se-publico main .se-piece--a-fondo :is(h1, h2).se-piece__title:not(.se-sr-only):not([class*="pausa-"]):not([class*="clave"]):not([class*="guacamaya"]) {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}

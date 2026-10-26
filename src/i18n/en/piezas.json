@@ -5,7 +5,8 @@
         "titulo": "{titulo} — {marca}"
       },
       "ubicacion": "You are here",
-      "masContenido": "More to read"
+      "masContenido": "More to read",
+      "despues": "After reading"
     },
     "noEncontrada": {
       "meta": {

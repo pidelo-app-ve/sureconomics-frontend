@@ -13,18 +13,21 @@ import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/admin
 import { unwrapEntity } from "../../services/adminResponseUtils";
 
 /**
- * «Resumen diario» en el panel: revisar y aprobar «Lo importante de hoy».
+ * «Resumen diario» en el panel: revisar y aprobar las tres ediciones del día.
  *
- * A las 6:00 el backend arma solo un borrador (ver `services/resumen_service.py`); aquí
- * el editor quita, reordena, mueve de sección y reescribe los puntos, añade cifras a
- * mano y la frase del día, y lo **aprueba**. A las 7:00 sale en la web, en Telegram y en
- * WhatsApp (o en el minuto, si se aprueba después). Sin aprobación no sale.
+ * Una hora antes de cada salida (6:00, 12:00 y 18:00) el backend arma solo un borrador
+ * con lo nuevo desde la edición anterior (ver `services/resumen_service.py`); aquí el
+ * editor quita, reordena, mueve de sección y reescribe los puntos, añade cifras a mano,
+ * la frase y cambia la foto, y lo **aprueba**. Sale a las 7:00, 13:00 o 19:00 en la web,
+ * en Telegram y en WhatsApp (o en el minuto, si se aprueba después). Sin aprobación no
+ * sale. Una edición con casi nada nuevo queda «sin contenido nuevo» y no sale.
  *
  * Los cambios se guardan con «Guardar cambios»: el borrador se edita aquí, en el
  * navegador, y solo se manda entero al guardar. Aprobar pide que no haya nada sin guardar.
  */
 
 const ESTADO = {
+  vacio: { texto: "Sin contenido nuevo", clase: "se-res-adm-chip--vacio" },
   borrador: { texto: "Borrador", clase: "se-res-adm-chip--borrador" },
   aprobado: { texto: "Aprobado", clase: "se-res-adm-chip--aprobado" },
   publicado: { texto: "Publicado", clase: "se-res-adm-chip--publicado" },
@@ -36,6 +39,7 @@ const CANAL = {
   enviado: "enviado",
   fallo: "falló",
 };
+const MOMENTO = { manana: "Mañana", tarde: "Tarde", noche: "Noche" };
 const ancla = (clave) => ({ [recorridoResumen.atributo]: clave });
 const zona = { timeZone: "America/Caracas" };
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }) : "—");
@@ -62,6 +66,8 @@ const editable = (r) => ({
  */
 const ImagenDelDia = ({ resumen, imagenId, elegida, bloqueado, onCambio }) => {
   const guardada = imagenId && imagenId === resumen.imagen_id ? resumen.imagen : null;
+  // La que se eligió sola (la de la pieza más importante) hasta que el editor la cambie.
+  const automatica = Boolean(resumen.imagen_auto && imagenId && imagenId === resumen.imagen_id);
   const url = elegida?.url ?? guardada?.url ?? null;
   const asset = imagenId
     ? { id: imagenId, url, original_filename: elegida?.original_filename || guardada?.alt || "Imagen del día" }
@@ -69,13 +75,16 @@ const ImagenDelDia = ({ resumen, imagenId, elegida, bloqueado, onCambio }) => {
   return (
     <div className="se-res-adm-imagen">
       {url ? <img src={url} alt="" className="se-res-adm-imagen__vista" /> : null}
+      {automatica ? (
+        <p className="se-admin-meta-hint">Elegida sola: la de la pieza más importante de esta edición. Cámbiala si quieres.</p>
+      ) : null}
       {bloqueado ? (
-        <p className="se-admin-meta-hint">{url ? "Imagen del día." : "Sin imagen del día."}</p>
+        <p className="se-admin-meta-hint">{url ? "Foto de la edición." : "Sin foto."}</p>
       ) : (
         <AssetField
           id={`res-${resumen.id}-imagen`}
-          label="Imagen del día (opcional)"
-          hint="Sale primero en WhatsApp y en Telegram, antes del texto, y arriba en la web. Tiene que ser pública."
+          label="Foto de la edición"
+          hint="Sale primero en WhatsApp y en Telegram, antes del texto, y arriba en la web. Tiene que ser pública. Si ninguna pieza de la edición tiene foto, elige una o sale sin ella."
           kind="image"
           value={imagenId}
           asset={asset}
@@ -92,6 +101,7 @@ ImagenDelDia.propTypes = {
   resumen: PropTypes.shape({
     id: PropTypes.number.isRequired,
     imagen_id: PropTypes.number,
+    imagen_auto: PropTypes.bool,
     imagen: PropTypes.shape({ url: PropTypes.string, alt: PropTypes.string }),
   }).isRequired,
   imagenId: PropTypes.number,
@@ -160,7 +170,7 @@ export const AdminResumen = () => {
   const [anadir, setAnadir] = useState({ id: "", seccion: "importante" });
 
   useEffect(() => {
-    applyPageMeta({ title: "Admin — Resumen diario", description: "Revisar y aprobar el resumen de la mañana." });
+    applyPageMeta({ title: "Admin — Resumen diario", description: "Revisar y aprobar las tres ediciones del resumen." });
   }, []);
 
   const abrir = useCallback(async (id) => {
@@ -175,8 +185,9 @@ export const AdminResumen = () => {
     try {
       const d = unwrapEntity(await adminRequest("/admin/resumen"));
       setLista({ status: "success", datos: d, error: null });
-      const hoy = d.resumenes.find((r) => r.fecha === d.hoy);
-      const id = elegir ?? hoy?.id ?? null;
+      const deHoy = d.resumenes.filter((r) => r.fecha === d.hoy);
+      const enCurso = deHoy.find((r) => r.edicion === d.en_curso) ?? deHoy[0];
+      const id = elegir ?? enCurso?.id ?? null;
       if (id) await abrir(id);
       else {
         setActual(null);
@@ -219,13 +230,13 @@ export const AdminResumen = () => {
 
   const aprobar = () =>
     hacer(() => adminRequest(`/admin/resumen/${actual.id}/aprobar`, { method: "POST" }),
-      `Aprobado. Sale a las ${lista.datos?.hora_de_salida ?? "7:00"} (o en el minuto, si ya pasó la hora).`,
+      `Aprobado. Sale a las ${hora(actual.sale_a_las)} (o en el minuto, si ya pasó la hora).`,
       "No se pudo aprobar.");
 
   const rehacer = async () => {
     const ok = await confirm({
-      title: "Rehacer el resumen",
-      description: "Se arma otra vez desde cero con lo último publicado. Se pierden los cambios a las líneas; la frase y las cifras a mano se conservan.",
+      title: "Rehacer esta edición",
+      description: "Se arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan.",
       confirmLabel: "Rehacer",
     });
     if (ok) await hacer(() => adminRequest(`/admin/resumen/${actual.id}/rehacer`, { method: "POST" }), "Rehecho.", "No se pudo rehacer.");
@@ -277,8 +288,15 @@ export const AdminResumen = () => {
 
   const datos = lista.datos;
   const esHoy = actual?.fecha === datos.hoy;
-  const bloqueado = !actual || actual.estado === "publicado" || ocupado;
-  const tieneHoy = datos.resumenes.some((r) => r.fecha === datos.hoy);
+  const bloqueado = !actual || ["publicado", "vacio"].includes(actual.estado) || ocupado;
+  const deHoy = new Map(datos.resumenes.filter((r) => r.fecha === datos.hoy).map((r) => [r.edicion, r]));
+  const armar = (clave) =>
+    hacer(() => adminRequest("/admin/resumen/armar", { method: "POST", json: { edicion: clave } }),
+      "Armado.", "No se pudo armar.");
+  const abrirOtra = async (id) => {
+    if (sucio && !(await confirm({ title: "Cambios sin guardar", description: "Se pierden si abres otra edición.", confirmLabel: "Abrir igual" }))) return;
+    abrir(id);
+  };
 
   return (
     <main role="main">
@@ -286,40 +304,63 @@ export const AdminResumen = () => {
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>Resumen diario</h1>
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-            «Lo importante de hoy». Se arma solo a las {datos.hora_de_armar} y sale a las {datos.hora_de_salida} en la web,
-            Telegram y WhatsApp, cuando lo apruebas. Sin aprobación no sale.
-            {datos.reloj_encendido ? "" : " (El reloj está apagado en este entorno: ármalo con el botón.)"}
+            Tres ediciones al día, cada una con lo nuevo desde la anterior: salen a las{" "}
+            {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y WhatsApp, cuando las apruebas.
+            Cada una se arma sola una hora antes. Sin aprobación no sale.
+            {datos.reloj_encendido ? "" : " (El reloj está apagado en este entorno: ármalas con los botones.)"}
           </p>
         </div>
         <BotonGuia recorrido={recorridoResumen} className="se-btn se-btn--secondary se-tit-guia" />
       </header>
       <RecorridoVista recorrido={recorridoResumen} />
 
-      {!tieneHoy ? (
-        <section className="se-admin-table-wrap se-res-adm-bloque">
-          <p style={{ margin: 0 }}>
-            El de hoy todavía no está armado: se arma solo a las {datos.hora_de_armar}.
-          </p>
-          <button type="button" className="se-btn se-btn--primary" style={{ marginTop: "0.75rem" }} disabled={ocupado}
-            onClick={() => hacer(() => adminRequest("/admin/resumen/armar", { method: "POST" }), "Armado.", "No se pudo armar.")}>
-            Armar ahora
-          </button>
-        </section>
-      ) : null}
+      {/* Las tres de hoy: su estado de un vistazo, y abrir o armar cada una. */}
+      <section className="se-admin-table-wrap se-res-adm-bloque se-res-adm-jornada" {...ancla("hoy")}>
+        {datos.ediciones.map((e) => {
+          const r = deHoy.get(e.clave);
+          const abierta = r && r.id === actual?.id;
+          return (
+            <div key={e.clave} className={`se-res-adm-jornada__edicion${abierta ? " is-abierta" : ""}`}>
+              <strong>{MOMENTO[e.clave]} · {e.sale}</strong>
+              {r ? (
+                <>
+                  <span className={`se-res-adm-chip ${ESTADO[r.estado]?.clase ?? ""}`}>{ESTADO[r.estado]?.texto}</span>
+                  <button type="button" className="se-btn se-btn--secondary" disabled={abierta || ocupado}
+                    onClick={() => abrirOtra(r.id)}>
+                    {abierta ? "Abierta" : "Abrir"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="se-admin-meta-hint">Se arma a las {e.arma}</span>
+                  <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={() => armar(e.clave)}>
+                    Armar ahora
+                  </button>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </section>
 
       {actual ? (
         <>
           <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("estado")}>
             <div className="se-res-adm-estado">
               <span className={`se-res-adm-chip ${ESTADO[actual.estado]?.clase ?? ""}`}>{ESTADO[actual.estado]?.texto}</span>
-              <strong>{actual.fecha_larga}{esHoy ? " · hoy" : ""}</strong>
+              <strong>{MOMENTO[actual.edicion]} · {actual.fecha_larga}{esHoy ? " · hoy" : ""}</strong>
               <span className="se-admin-meta-hint">
                 {actual.estado === "aprobado" ? `sale a las ${hora(actual.sale_a_las)} · ` : ""}
                 {actual.estado === "publicado" ? `salió a las ${hora(actual.publicado_en)} · ` : ""}
                 armado {actual.armado_con === "ia" ? "con IA" : "por reglas"} a las {hora(actual.armado_en)}
               </span>
             </div>
-            {actual.armado_con !== "ia" && actual.estado !== "publicado" ? (
+            {actual.estado === "vacio" ? (
+              <p className="se-admin-meta-hint" role="status">
+                No sale: {actual.motivo_vacio ?? "no había bastante nuevo"}. Si después llega algo, pulse «Rehacer».
+              </p>
+            ) : null}
+            {actual.armado_con !== "ia" && !["publicado", "vacio"].includes(actual.estado) ? (
               <p className="se-tit-aviso" role="alert">
                 Este borrador salió por reglas, no por la IA
                 {actual.motivo_reglas ? ` (${actual.motivo_reglas})` : ""}: es un reparto mecánico, sin
@@ -498,13 +539,14 @@ export const AdminResumen = () => {
       ) : null}
 
       <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("historial")}>
-        <h2 className="se-form-label">Días anteriores</h2>
+        <h2 className="se-form-label">Ediciones anteriores</h2>
         {datos.resumenes.length ? (
           <div className="se-tit-fuentes__tabla">
             <table className="se-admin-table">
               <thead>
                 <tr>
                   <th scope="col">Día</th>
+                  <th scope="col">Edición</th>
                   <th scope="col">Estado</th>
                   <th scope="col" className="se-tit-num">Puntos</th>
                   <th scope="col">Telegram</th>
@@ -516,16 +558,14 @@ export const AdminResumen = () => {
                 {datos.resumenes.map((r) => (
                   <tr key={r.id}>
                     <td>{r.fecha_larga}</td>
+                    <td>{MOMENTO[r.edicion]}</td>
                     <td>{ESTADO[r.estado]?.texto}</td>
                     <td className="se-tit-num">{r.puntos}</td>
                     <td>{r.estado === "publicado" ? CANAL[r.telegram] : "—"}</td>
                     <td>{r.estado === "publicado" ? CANAL[r.whatsapp] : "—"}</td>
                     <td className="se-admin-table__actions">
                       <button type="button" className="se-btn se-btn--secondary" disabled={r.id === actual?.id || ocupado}
-                        onClick={async () => {
-                          if (sucio && !(await confirm({ title: "Cambios sin guardar", description: "Se pierden si abres otro día.", confirmLabel: "Abrir igual" }))) return;
-                          abrir(r.id);
-                        }}>
+                        onClick={() => abrirOtra(r.id)}>
                         {r.id === actual?.id ? "Abierto" : "Ver"}
                       </button>
                     </td>

@@ -7627,3 +7627,35 @@
 .se-admin-app .se-tit-ciclo .se-tit-aviso {
   margin-top: 0.4rem;
 }
+
+/* —— Resumen diario: las tres ediciones de hoy, en una franja —— */
+.se-admin-app .se-res-adm-jornada {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.se-admin-app .se-res-adm-jornada__edicion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+}
+
+.se-admin-app .se-res-adm-jornada__edicion.is-abierta {
+  border-color: var(--adm-accent);
+  box-shadow: inset 0 0 0 1px var(--adm-accent);
+}
+
+.se-admin-app .se-res-adm-jornada__edicion strong {
+  flex: 1 1 100%;
+}
+
+.se-admin-app .se-res-adm-chip--vacio {
+  background: var(--adm-surface-2);
+  color: var(--adm-text-muted);
+}
+

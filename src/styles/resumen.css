@@ -185,3 +185,51 @@
   font-size: 0.9rem;
   color: var(--color-slate);
 }
+
+/* —— Las ediciones de un día ——
+   En /resumen/<fecha> van una debajo de otra, la más reciente arriba: cada una abre con
+   una regla doble y su hora en cifras, como una nueva edición del periódico. */
+.se-res__hora {
+  font-family: var(--cifras, var(--se-font-ui));
+  font-size: 0.9375rem;
+}
+
+.se-res-edicion {
+  margin-top: clamp(2rem, 5vw, 3rem);
+  padding-top: 0.85rem;
+  border-top: 3px double var(--color-ink);
+}
+
+.se-res-edicion:first-of-type {
+  margin-top: 0.5rem;
+}
+
+.se-res-edicion__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-display, var(--se-font-ui));
+  font-size: clamp(1.4rem, 3vw, 1.75rem);
+  line-height: 1.15;
+}
+
+.se-res-edicion__titulo a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.se-res-edicion__titulo a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.se-res-edicion__hora {
+  font-family: var(--cifras, var(--se-font-ui));
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+

@@ -1,12 +1,19 @@
 {
   "resumen": {
-    "meta": "Today's essentials — {marca}",
-    "descripcion": "The SurEconomics morning briefing: the most important stories of the last 24 hours, today's figures and the Venezuelan baseball league.",
+    "meta": "{titulo} — {marca}",
+    "descripcion": "The SurEconomics daily briefing, three times a day: the most important stories since the previous edition, the figures and, in the morning, Venezuelan baseball.",
     "titulo": "Today's essentials",
-    "sale": "Out every morning at 7:00 a.m., Caracas time.",
+    "tituloDia": "The day's essentials",
+    "titulos": {
+      "manana": "This morning's essentials",
+      "tarde": "This afternoon's essentials",
+      "noche": "Tonight's essentials"
+    },
+    "todasDelDia": "All of this day's editions",
+    "sale": "Out three times a day: at 7:00 a.m., 1:00 p.m. and 7:00 p.m., Caracas time.",
     "cargando": "Loading the briefing…",
     "vacioTitulo": "No briefing yet",
-    "vacio": "The briefing comes out every morning at 7:00 a.m., Caracas time.",
+    "vacio": "The briefing comes out three times a day: at 7:00 a.m., 1:00 p.m. and 7:00 p.m., Caracas time.",
     "noEseDia": "There is no briefing for that day.",
     "error": "The briefing could not be loaded.",
     "secciones": {

@@ -8,17 +8,27 @@ export const PASOS_RESUMEN = [
   {
     titulo: "Qué hay en esta página",
     texto:
-      "El resumen de la mañana, «Lo importante de hoy». A las 6:00 se arma solo un borrador con lo más " +
-      "importante de las últimas 24 horas: nuestras piezas, los titulares de Última hora, las cifras y la " +
-      "LVBP. Aquí lo revisas y lo apruebas, y a las 7:00 sale en la web, en Telegram y en WhatsApp. " +
-      "Si nadie lo aprueba, no sale.",
+      "El resumen diario sale tres veces: a las 7:00, a las 13:00 y a las 19:00. Una hora antes de cada " +
+      "una se arma solo un borrador con lo nuevo desde la edición anterior: nuestras piezas, los titulares " +
+      "de Última hora, las cifras y, por la mañana, la LVBP. Lo que ya salió no se repite. Aquí lo revisas " +
+      "y lo apruebas, y a su hora sale en la web, en Telegram y en WhatsApp. Si nadie lo aprueba, no sale.",
+  },
+  {
+    clave: "hoy",
+    titulo: "Las tres de hoy",
+    puntos: [
+      "Cada edición: mañana, tarde y noche, con su hora de salida y cómo va.",
+      "Abrir: la trae abajo para revisarla.",
+      "Armar ahora: arma una que todavía no está (por ejemplo, si el reloj está apagado).",
+      "Sin contenido nuevo: en su franja hubo casi nada que no hubiera salido ya, así que no sale. Si después llega algo, ábrela y pulsa «Rehacer».",
+    ],
   },
   {
     clave: "estado",
-    titulo: "Cómo va el de hoy",
+    titulo: "Cómo va la edición abierta",
     puntos: [
-      "Borrador: armado, esperando que alguien lo revise y lo apruebe.",
-      "Aprobado: sale a las 7:00. Si lo apruebas después de las 7:00, sale en el minuto.",
+      "Borrador: armada, esperando que alguien la revise y la apruebe.",
+      "Aprobado: sale a su hora. Si la apruebas después, sale en el minuto. Una que no se aprobó antes de que se arme la siguiente ya no sale: lo suyo entra en la siguiente.",
       "Publicado: ya salió. Ya no se puede cambiar.",
       "Telegram y WhatsApp: si el mensaje llegó a cada canal. Si WhatsApp falla tres veces, aparece el botón para reintentarlo.",
     ],
@@ -29,7 +39,7 @@ export const PASOS_RESUMEN = [
     puntos: [
       "Aprobar: lo deja listo para salir. Cualquier cambio después lo devuelve a borrador.",
       "Volver a borrador: deshace la aprobación si todavía no salió.",
-      "Rehacer: lo arma otra vez desde cero con lo último publicado. Se pierden los cambios a las líneas; la frase y las cifras a mano se conservan.",
+      "Rehacer: la arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan.",
       "Copiar el texto: el mensaje tal cual sale en WhatsApp, por si hace falta pegarlo a mano en otro sitio.",
     ],
   },
@@ -60,11 +70,11 @@ export const PASOS_RESUMEN = [
   },
   {
     clave: "imagen",
-    titulo: "La imagen del día",
+    titulo: "La foto de la edición",
     texto:
-      "Opcional. Si eliges una, en WhatsApp y en Telegram sale primero la imagen y enseguida el resumen, y en " +
-      "la web va arriba. Puedes subirla o elegirla de la biblioteca; tiene que ser pública. Se guarda con " +
-      "«Guardar cambios».",
+      "Se elige sola: la de la pieza más importante de la edición que tenga foto. Puedes cambiarla, subir " +
+      "otra o quitarla; tiene que ser pública y se guarda con «Guardar cambios». En WhatsApp y en Telegram " +
+      "sale primero la foto y enseguida el resumen, y en la web va arriba.",
   },
   {
     clave: "vista",
@@ -75,8 +85,8 @@ export const PASOS_RESUMEN = [
   },
   {
     clave: "historial",
-    titulo: "Los días anteriores",
-    texto: "Los últimos 30 resúmenes, con su estado y si llegaron a cada canal. Pulsa uno para verlo.",
+    titulo: "Las ediciones anteriores",
+    texto: "Las ediciones de los últimos días, con su estado y si llegaron a cada canal. Pulsa una para verla.",
   },
   {
     clave: "guia",

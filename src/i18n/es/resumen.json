@@ -1,12 +1,19 @@
 {
   "resumen": {
-    "meta": "Lo importante de hoy — {marca}",
-    "descripcion": "El resumen de la mañana de SurEconomics: lo más trascendente de las últimas 24 horas, las cifras del día y la LVBP.",
+    "meta": "{titulo} — {marca}",
+    "descripcion": "El resumen diario de SurEconomics, tres veces al día: lo más trascendente desde la edición anterior, las cifras y, por la mañana, la LVBP.",
     "titulo": "Lo importante de hoy",
-    "sale": "Sale cada mañana a las 7:00, hora de Caracas.",
+    "tituloDia": "Lo importante del día",
+    "titulos": {
+      "manana": "Lo importante de esta mañana",
+      "tarde": "Lo importante de esta tarde",
+      "noche": "Lo importante de esta noche"
+    },
+    "todasDelDia": "Todas las ediciones de este día",
+    "sale": "Sale tres veces al día: a las 7:00, a las 13:00 y a las 19:00, hora de Caracas.",
     "cargando": "Cargando el resumen…",
     "vacioTitulo": "Todavía no hay resumen",
-    "vacio": "El resumen sale cada mañana a las 7:00, hora de Caracas.",
+    "vacio": "El resumen sale tres veces al día: a las 7:00, a las 13:00 y a las 19:00, hora de Caracas.",
     "noEseDia": "No hay resumen de ese día.",
     "error": "No se pudo cargar el resumen.",
     "secciones": {

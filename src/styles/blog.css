@@ -12396,7 +12396,13 @@ html {
   box-shadow: none;
 }
 
-/* —— Lo importante de hoy: rótulos de sección en la serif —— */
+/* —— Lo importante de hoy: rótulos de sección en la serif —— La regla la lleva el
+   rótulo; la sección ya no, o salían dos líneas seguidas. */
+.se-publico .se-res-seccion {
+  padding-top: 0;
+  border-top: 0;
+}
+
 .se-publico .se-res-seccion__titulo {
   padding-top: 10px;
   border-top: 2px solid var(--tinta);

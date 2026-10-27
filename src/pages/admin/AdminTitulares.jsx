@@ -59,6 +59,10 @@ const resumenDelCiclo = (c) => {
     [n("sumadas") + n("grupos_nuevos") + n("absorbidas"), "notas agrupadas"],
     [n("descartadas"), "descartadas por el filtro"],
     [n("redactados"), "redactados"],
+    // Los dos que explican un «0 redactados»: sin ellos, el 27-oct la sección pasó un día
+    // vacía y el panel solo decía «notas agrupadas… caducados».
+    [n("redacciones_fallidas"), "redacciones fallidas (el motivo, en el registro de Render: «sin redactar»)"],
+    [n("errores_ia"), "consultas a la IA con error"],
     [n("publicados"), "publicados"],
     [n("sin_cupo"), "sin presupuesto"],
     [n("zona_gris_sin_saldo"), "dudosas sin consultar (día gastado)"],

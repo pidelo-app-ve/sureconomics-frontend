@@ -2,6 +2,14 @@
 
 This is the Sur Economics single-page app. The editorial/blog experience is backed by a Flask API (published posts, categories and tags).
 
+## Documentos
+
+- `DESIGN.md` y `PRODUCT.md`: el sistema de diseño y el producto (en la raíz porque las herramientas de diseño los leen ahí).
+- `docs/POLITICA-COOKIES-PENDIENTE.md` y `docs/LEGAL-PENDIENTE.md`: lo que falta en `/cookies` y en las páginas legales.
+- `docs/EL-ANALISTA.md`: cómo se trae el juego de El Analista desde su repositorio.
+- `docs/marca/`: los logos originales del manual de marca (los que sirve el sitio están en `public/brand/`).
+- Planes, revisiones y guías que cruzan los dos repositorios: en `docs/` de la carpeta que contiene este repo.
+
 ## Local development
 
 ### Prerequisites

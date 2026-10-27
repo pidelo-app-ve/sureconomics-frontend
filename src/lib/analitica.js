@@ -45,7 +45,7 @@
  * Lo que este interruptor **no** gobierna son los terceros que el sitio carga por otros
  * motivos -- el guion de TradingView en la cinta de mercado, los iframes de video de
  * TikTok, YouTube y Vimeo --, que siguen cargandose se acepte o no. Ver
- * `POLITICA-COOKIES-PENDIENTE.md`, en la raiz de este repositorio.
+ * `docs/POLITICA-COOKIES-PENDIENTE.md` de este repositorio.
  */
 export const MEDICION_HABILITADA = true;
 

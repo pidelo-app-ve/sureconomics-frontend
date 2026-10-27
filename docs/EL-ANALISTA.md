@@ -59,7 +59,7 @@ npm run dev                   # probar localhost:3000/el-analista
 git add src/juegos/el-analista && git commit -m "El Analista: trae <commit> de main"
 ```
 
-- Con `-- --desde ../../analista/el-analista` se trae desde un clon local; tiene que estar
+- Con `-- --desde ../../proyectos-externos/analista/el-analista` se trae desde un clon local; tiene que estar
   guardado en un commit.
 - Con `-- --ref otra-rama` se trae otra rama. Lo normal es `main`.
 

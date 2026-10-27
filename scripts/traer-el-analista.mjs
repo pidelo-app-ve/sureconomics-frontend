@@ -3,7 +3,7 @@
  *
  *   npm run traer-analista                    (la rama main de su repo, por HTTPS)
  *   npm run traer-analista -- --ref otra-rama
- *   npm run traer-analista -- --desde ../../analista/el-analista   (un clon local)
+ *   npm run traer-analista -- --desde ../../proyectos-externos/analista/el-analista   (un clon local)
  *
  * El juego lo hace el equipo de Alessandro en `juega-el-analista/el-analista`. Aquí no
  * se edita: se trae su `src/el-analista.jsx` tal cual, con un aviso encima, y se anota

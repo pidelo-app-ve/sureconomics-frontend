@@ -319,8 +319,8 @@ export const RecorteDeAvatar = ({ archivo, nombre, onCancelar, onListo }) => {
   };
 
   return (
-    <div className="se-recorte" role="group" aria-label={`Encuadrar la foto de ${nombre}`}>
-      <p className="se-recorte__titulo">Encuadre la foto de {nombre}</p>
+    <div className="se-encuadre" role="group" aria-label={`Encuadrar la foto de ${nombre}`}>
+      <p className="se-encuadre__titulo">Encuadre la foto de {nombre}</p>
 
       {estado.status === "cargando" ? (
         <p className="se-admin-meta-hint">Preparando la imagen…</p>
@@ -334,7 +334,7 @@ export const RecorteDeAvatar = ({ archivo, nombre, onCancelar, onListo }) => {
 
       {estado.status === "listo" ? (
         <>
-          <p className="se-admin-meta-hint se-recorte__ayuda">
+          <p className="se-admin-meta-hint se-encuadre__ayuda">
             {rostro.current
               ? "Encuadrado en la cara automáticamente. "
               : "No se detectó una cara, así que empieza centrado. "}
@@ -344,7 +344,7 @@ export const RecorteDeAvatar = ({ archivo, nombre, onCancelar, onListo }) => {
 
           <canvas
             ref={lienzo}
-            className="se-recorte__lienzo"
+            className="se-encuadre__lienzo"
             style={{ width: VISTA, height: VISTA }}
             tabIndex={0}
             role="application"
@@ -356,7 +356,7 @@ export const RecorteDeAvatar = ({ archivo, nombre, onCancelar, onListo }) => {
             onKeyDown={alTeclado}
           />
 
-          <label className="se-recorte__zoom">
+          <label className="se-encuadre__zoom">
             <span className="se-form-label">Acercar</span>
             <input
               type="range"
@@ -370,7 +370,7 @@ export const RecorteDeAvatar = ({ archivo, nombre, onCancelar, onListo }) => {
         </>
       ) : null}
 
-      <div className="se-recorte__acciones">
+      <div className="se-encuadre__acciones">
         <button
           type="button"
           className="se-btn"

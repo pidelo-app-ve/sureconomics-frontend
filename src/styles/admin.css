@@ -3743,7 +3743,7 @@
    El circulo de la vista previa es el mismo recorte que va a salir publicado: lo que
    se ve aqui es lo que se sube, sin sorpresas al guardar. */
 
-.se-recorte {
+.se-encuadre {
   margin: 1rem 0 1.5rem;
   padding: 1rem;
   border: 1px solid var(--color-accent);
@@ -3755,7 +3755,7 @@
    en el panel salia oscuro y en el area de cuenta -- donde el recorte se reusa
    desde que el lector sube su retrato -- salia en crema sobre blanco, es decir,
    invisible. Un titulo sin color propio es un titulo que funciona por suerte. */
-.se-recorte__titulo {
+.se-encuadre__titulo {
   margin: 0 0 0.35rem;
   font-family: var(--se-font-heading);
   font-size: 0.95rem;
@@ -3764,10 +3764,10 @@
 }
 
 /* El deslizador, en el cobre de la marca y no en el azul del navegador. */
-.se-recorte__zoom input[type="range"] {
+.se-encuadre__zoom input[type="range"] {
   accent-color: var(--color-accent);
 }
-.se-recorte__zoom {
+.se-encuadre__zoom {
   font-family: var(--se-font-label);
   font-size: 0.75rem;
   letter-spacing: 0.02em;
@@ -3776,7 +3776,7 @@
 
 /* Lleva `se-admin-meta-hint`, que es una clase del panel. Fuera de el no pinta
    nada, asi que el color va aqui para que el texto se lea en los dos sitios. */
-.se-recorte__ayuda {
+.se-encuadre__ayuda {
   margin: 0 0 0.75rem;
   max-width: 52ch;
   font-family: var(--se-font-ui);
@@ -3786,7 +3786,7 @@
 }
 
 /* `touch-action: none` para que arrastrar en un movil mueva la foto y no la pagina. */
-.se-recorte__lienzo {
+.se-encuadre__lienzo {
   display: block;
   border-radius: 50%;
   background: rgba(var(--se-tinte), 0.06);
@@ -3795,16 +3795,16 @@
   box-shadow: 0 0 0 1px rgba(var(--se-tinte), 0.15);
 }
 
-.se-recorte__lienzo:active {
+.se-encuadre__lienzo:active {
   cursor: grabbing;
 }
 
-.se-recorte__lienzo:focus-visible {
+.se-encuadre__lienzo:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 4px;
 }
 
-.se-recorte__zoom {
+.se-encuadre__zoom {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -3812,7 +3812,7 @@
   margin-top: 0.85rem;
 }
 
-.se-recorte__acciones {
+.se-encuadre__acciones {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;

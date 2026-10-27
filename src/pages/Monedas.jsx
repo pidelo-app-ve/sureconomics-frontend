@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import { BRAND } from "../data/surEconomicsMock";
-import { formatearFecha, formatearNumero } from "../i18n/motor";
+import { formatearFecha } from "../i18n/motor";
 import { porDolar } from "../lib/monedas";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getMonedas } from "../services/monedasService";
+import { useHistoriaMoneda } from "../hooks/useMonedas";
+import { GraficaDeMoneda } from "../components/monedas/GraficaDeMoneda";
+import { Flecha, variacionTexto } from "../components/monedas/FichaDeMoneda";
 import "./monedas.css";
 
 /**
@@ -14,12 +18,31 @@ import "./monedas.css";
  * fecha del dato. Las cifras son las que guarda el recolector cada hora
  * (`monedas_service.py`); la misma regla del cintillo manda aquí: un dato viejo se
  * enseña como «sin dato reciente», nunca como una cifra con fecha de hoy.
+ *
+ * Cada fila se abre con la gráfica de sus últimos 30 días (`GraficaDeMoneda`): el
+ * nombre de la moneda es el botón. Las de paridad fija no tienen gráfica.
  */
+
+/** La fila desplegada bajo una moneda: pide su historia al abrirse. */
+const FilaGrafica = ({ codigo }) => {
+  const { t } = useIdioma();
+  const puntos = useHistoriaMoneda(codigo);
+  return (
+    <tr className="se-monedas__grafica">
+      <td colSpan={5}>
+        {puntos === null ? <p className="se-monedas__nota">{t("monedas.grafica.cargando")}</p> : <GraficaDeMoneda codigo={codigo} puntos={puntos} />}
+      </td>
+    </tr>
+  );
+};
+
+FilaGrafica.propTypes = { codigo: PropTypes.string.isRequired };
 
 
 export const Monedas = () => {
   const { t, lang } = useIdioma();
   const [state, setState] = useState({ status: "loading", datos: null });
+  const [abierta, setAbierta] = useState(null);
 
   useMetaPagina({
     title: t("monedas.meta.titulo", { marca: BRAND.name }),
@@ -65,14 +88,40 @@ export const Monedas = () => {
                 <tbody>
                   {monedas.map((m) => {
                     const sinDato = m.valor === null || m.vieja;
+                    const conGrafica = !m.fija && !sinDato;
+                    const estaAbierta = abierta === m.codigo;
+                    const nombre = t(`monedas.nombres.${m.codigo}`);
+                    const clases = [sinDato ? "se-monedas__fila--sin-dato" : "", estaAbierta ? "se-monedas__fila--abierta" : ""].filter(Boolean).join(" ");
                     return (
-                      <tr key={m.codigo} className={sinDato ? "se-monedas__fila--sin-dato" : undefined}>
+                      <Fragment key={m.codigo}>
+                      <tr className={clases || undefined}>
                         <th scope="row" className="se-monedas__col-moneda">
-                          <span className="se-monedas__codigo">{m.codigo}</span>
-                          <span className="se-monedas__nombre">
-                            {t(`monedas.nombres.${m.codigo}`)}
-                            <span className="se-monedas__pais"> · {t(`monedas.paises.${m.codigo}`)}</span>
-                          </span>
+                          {conGrafica ? (
+                            <button
+                              type="button"
+                              className="se-monedas__abrir"
+                              aria-expanded={estaAbierta}
+                              aria-label={estaAbierta ? t("monedas.grafica.cerrar", { nombre }) : t("monedas.grafica.abrir", { nombre })}
+                              onClick={() => setAbierta(estaAbierta ? null : m.codigo)}
+                            >
+                              <span className="se-monedas__codigo">{m.codigo}</span>
+                              <span className="se-monedas__nombre">
+                                {nombre}
+                                <span className="se-monedas__pais"> · {t(`monedas.paises.${m.codigo}`)}</span>
+                              </span>
+                              <svg className="se-monedas__flecha" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                                <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                          ) : (
+                            <>
+                              <span className="se-monedas__codigo">{m.codigo}</span>
+                              <span className="se-monedas__nombre">
+                                {nombre}
+                                <span className="se-monedas__pais"> · {t(`monedas.paises.${m.codigo}`)}</span>
+                              </span>
+                            </>
+                          )}
                         </th>
                         <td className="se-monedas__valor">
                           {m.valor !== null && !m.vieja ? porDolar(m.valor, lang) : <span className="se-monedas__sin">{t("monedas.sinDato")}</span>}
@@ -81,7 +130,9 @@ export const Monedas = () => {
                           {m.fija ? (
                             <span className="se-monedas__fija">{t("monedas.fija")}</span>
                           ) : typeof m.variacion === "number" && !sinDato ? (
-                            `${m.variacion > 0 ? "+" : ""}${formatearNumero(m.variacion, lang, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+                            <>
+                              <Flecha direccion={m.direccion} /> {variacionTexto(m, lang)}
+                            </>
                           ) : (
                             "—"
                           )}
@@ -94,6 +145,8 @@ export const Monedas = () => {
                           ) : null}
                         </td>
                       </tr>
+                      {estaAbierta ? <FilaGrafica codigo={m.codigo} /> : null}
+                      </Fragment>
                     );
                   })}
                 </tbody>

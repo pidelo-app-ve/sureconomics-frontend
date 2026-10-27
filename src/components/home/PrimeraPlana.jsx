@@ -10,6 +10,7 @@ import { LugarYFecha } from "./LugarYFecha";
 import { ANCHOS, CardMedia } from "./CardMedia";
 import { CintaMundial } from "./MarketTicker";
 import { TablaDeMonedas, useMonedas } from "../monedas/TablaDeMonedas";
+import { AperturaMoneda } from "../monedas/AperturaMoneda";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { IconoPausa } from "../comun/IconoPausa";
@@ -93,6 +94,7 @@ const Monedas = ({ monedas }) => {
       <h2 id="plana-monedas" className="se-plana__cabeza">
         <Enlace to="/monedas">{t("portada.franja.monedas")}</Enlace>
       </h2>
+      <p className="se-plana__monedas-nota">{t("monedas.masMovidas")}</p>
       <TablaDeMonedas monedas={monedas} />
       <Enlace className="se-plana__mas" to="/monedas">
         {t("portada.franja.todasLasMonedas")}
@@ -132,13 +134,18 @@ const Opinion = ({ editorial, analisis }) => {
         </article>
       ) : null}
       {analisis.map((a) => (
-        <article key={a.id} className="se-plana__analisis">
-          <h3 className="se-plana__titulo-analisis">
-            <Enlace to={rutaDePieza(a)}>
-              <TituloDePieza pieza={a} />
-            </Enlace>
-          </h3>
-          {a.autor ? <p className="se-plana__firma">{t("portada.tarjeta.por", { autor: a.autor })}</p> : null}
+        <article key={a.id} className={`se-plana__analisis${a.autorFoto ? " se-plana__analisis--con-retrato" : ""}`}>
+          {/* El retrato de quien firma, si la pieza lo trae: cuadrado y en gris, como
+              la columna de un diario. Sin retrato, el texto ocupa todo el ancho. */}
+          {a.autorFoto ? <img className="se-plana__retrato" src={a.autorFoto} alt="" width="44" height="44" loading="lazy" decoding="async" /> : null}
+          <div className="se-plana__analisis-texto">
+            <h3 className="se-plana__titulo-analisis">
+              <Enlace to={rutaDePieza(a)}>
+                <TituloDePieza pieza={a} />
+              </Enlace>
+            </h3>
+            {a.autor ? <p className="se-plana__firma">{t("portada.tarjeta.por", { autor: a.autor })}</p> : null}
+          </div>
         </article>
       ))}
     </section>
@@ -147,7 +154,7 @@ const Opinion = ({ editorial, analisis }) => {
 
 Opinion.propTypes = {
   editorial: piezaShape({ entrada: PropTypes.string, resumen: PropTypes.string }),
-  analisis: listaDePiezas({ autor: PropTypes.string }).isRequired,
+  analisis: listaDePiezas({ autor: PropTypes.string, autorFoto: PropTypes.string }).isRequired,
 };
 
 export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial = null, analisis = [], recientes = [] }) => {
@@ -179,6 +186,12 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
   const debajo = rota ? conjunto.filter((n) => n.id !== actual.id) : secundarias;
   const cruzando = Boolean(saliente && saliente.id !== actual.id);
+  // Bajo la apertura, una o dos piezas del mismo tema, elegidas entre lo que la
+  // portada ya cargó: el contexto de la noticia, sin pedir nada más. Como el
+  // «Related» de Bloomberg, pero con un filete y no con una caja.
+  const contexto = actual.temaSlug
+    ? recientes.filter((p) => p.id !== actual.id && p.temaSlug === actual.temaSlug).slice(0, 2)
+    : [];
   // Una apertura cuyo video es un short abre en vertical (`AperturaShort`). Solo quieta:
   // un video que se mueve en medio de la rotación de cuatro piezas sería un mareo, así
   // que para salir así la redacción la fija.
@@ -227,10 +240,26 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
               {actual.entrada || actual.resumen ? (
                 <p className="se-plana__resumen">{actual.entrada || actual.resumen}</p>
               ) : null}
+              {/* Si la pieza habla de una moneda: su ficha de hoy y la gráfica de 30 días. */}
+              {actual.moneda ? <AperturaMoneda codigo={actual.moneda} /> : null}
               <p className="se-plana__meta">
                 <LugarYFecha pieza={actual} clase="se-plana__cuando" />
                 {actual.autor ? <span className="se-plana__autor">{t("portada.tarjeta.por", { autor: actual.autor })}</span> : null}
               </p>
+              {contexto.length ? (
+                <div className="se-plana__contexto">
+                  <span className="se-plana__contexto-rotulo">{t("portada.plana.contexto")}</span>
+                  <ul className="se-plana__contexto-lista">
+                    {contexto.map((p) => (
+                      <li key={p.id}>
+                        <Enlace to={rutaDePieza(p)}>
+                          <TituloDePieza pieza={p} />
+                        </Enlace>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
             {rota ? (
               <div className="se-plana__mando">
@@ -277,7 +306,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
   );
 };
 
-const CAMPOS = { imagenUrl: PropTypes.string, resumen: PropTypes.string, entrada: PropTypes.string, autor: PropTypes.string, videoUrl: PropTypes.string };
+const CAMPOS = { imagenUrl: PropTypes.string, resumen: PropTypes.string, entrada: PropTypes.string, autor: PropTypes.string, videoUrl: PropTypes.string, moneda: PropTypes.string };
 
 PrimeraPlana.propTypes = {
   principal: piezaShape(CAMPOS),
@@ -285,7 +314,7 @@ PrimeraPlana.propTypes = {
   fijada: PropTypes.bool,
   editorial: piezaShape({ entrada: PropTypes.string, resumen: PropTypes.string }),
   analisis: listaDePiezas({ autor: PropTypes.string }),
-  recientes: listaDePiezas({}),
+  recientes: listaDePiezas({ temaSlug: PropTypes.string }),
 };
 
 export default PrimeraPlana;

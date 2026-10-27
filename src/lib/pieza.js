@@ -388,6 +388,9 @@ export const piezaFromApi = (row) => {
     // publicitario no trae el campo, y el valor honesto para una pieza que no sabe
     // nada de esto es «sí lleva», que es lo que hace `Boolean(undefined)`.
     sinPublicidad: Boolean(row.sin_publicidad),
+    // La moneda de la que habla (código ISO), si la redacción la puso: ficha junto al
+    // titular y gráfica en la apertura. Nula es lo normal.
+    moneda: typeof row.moneda === "string" && row.moneda ? row.moneda : null,
     // La palabra de La Clave que la redacción dejó para esta pieza, y su pista. Nulas
     // cuando no hay juego al final: la tarjeta no se pinta.
     juegoPalabra: typeof row.juego_palabra === "string" && row.juego_palabra ? row.juego_palabra : null,

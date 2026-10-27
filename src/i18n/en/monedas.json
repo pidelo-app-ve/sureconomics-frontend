@@ -45,6 +45,23 @@
     "actualizado": "Last reading: {fecha} at {hora} (Caracas time).",
     "nota": "Official rates from each central bank (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay and the ECB). Where a bank publishes no API, the figure comes from open.er-api.com. The Cayman Islands dollar is pegged.",
     "aviso": "These are official closes and reference rates, not live quotes. To trade, check with your bank.",
-    "error": "The currencies couldn't be loaded. Try again in a moment."
+    "error": "The currencies couldn't be loaded. Try again in a moment.",
+    "grafica": {
+      "titulo": "{nombre} per dollar, last 30 days",
+      "abrir": "See the chart for {nombre}",
+      "cerrar": "Close the chart for {nombre}",
+      "cargando": "Loading the chart…",
+      "pocosDatos": "There is not enough data yet to draw the chart.",
+      "variacion": "{n} in 30 days",
+      "resumen": "From {desde} to {hasta}: {n}",
+      "datos": "See the data",
+      "colFecha": "Date",
+      "colValor": "Per 1 USD"
+    },
+    "ficha": {
+      "etiqueta": "{codigo}: {valor} per dollar, {variacion} today",
+      "sinVariacion": "no change"
+    },
+    "masMovidas": "The ones that moved most today"
   }
 }

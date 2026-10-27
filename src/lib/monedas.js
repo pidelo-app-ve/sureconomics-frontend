@@ -15,3 +15,6 @@ export const porDolar = (valor, lang) => {
     useGrouping: "always",
   });
 };
+
+/** Las monedas de la región, en el orden del servidor (`monedas_service.MONEDAS`). */
+export const CODIGOS_MONEDA = ["VES", "MXN", "BRL", "COP", "ARS", "PEN", "CLP", "PYG", "DOP", "KYD", "EUR"];

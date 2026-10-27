@@ -632,3 +632,159 @@
     animation: none;
   }
 }
+
+/* La moneda de la apertura: la ficha y la gráfica compacta bajo el titular. */
+.se-plana__moneda {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  margin: 14px 0 4px;
+}
+
+.se-plana__moneda .se-grafica {
+  width: 100%;
+  max-width: 560px;
+}
+
+.se-plana__monedas-nota {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: var(--color-slate);
+}
+
+/* Las pestañas de Última hora: «Todo» y «Mis temas», como dos rótulos subrayados. */
+.se-plana__uh-pestanas {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.se-plana__uh-pestana {
+  margin-bottom: -1px;
+  padding: 6px 0 7px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-slate);
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.se-plana__uh-pestana:hover {
+  color: var(--color-ink);
+}
+
+.se-plana__uh-pestana.is-activa {
+  border-bottom-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.se-plana__uh-pestana:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 2px;
+}
+
+.se-plana__uh-aviso {
+  margin: 12px 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-plana__uh-aviso a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ═══ Fase 8: la opinión en su papel, los retratos y el contexto ═══ */
+
+/* 8a. Opinión va sobre un papel un pelo más cálido, de borde a borde de su columna y
+   sin marco: es otro cuadernillo del diario, no una caja. */
+.se-plana__opinion {
+  --papel-opinion: #f4efe5;
+  background: var(--papel-opinion);
+  padding: 0 var(--se-content-gutter) 18px;
+  margin-inline: calc(-1 * var(--se-content-gutter));
+}
+
+.se-plana__opinion > .se-plana__cabeza {
+  padding-top: 14px;
+}
+
+@media (min-width: 960px) {
+  .se-plana__opinion {
+    margin-inline: 0 calc(-1 * var(--se-content-gutter));
+    padding: 0 var(--se-content-gutter) 18px 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .se-plana__opinion {
+    padding-left: clamp(20px, 1.8vw, 28px);
+  }
+}
+
+/* 8b. El retrato de quien firma: cuadrado, en gris, pequeño. */
+.se-plana__analisis--con-retrato {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.se-plana__retrato {
+  width: 44px;
+  height: 44px;
+  margin-top: 4px;
+  object-fit: cover;
+  filter: grayscale(1);
+  background: var(--color-hairline);
+}
+
+.se-plana__analisis-texto {
+  min-width: 0;
+}
+
+/* 8c. El contexto de la apertura: un filete, un rótulo en cursiva y uno o dos
+   titulares del mismo tema. */
+.se-plana__contexto {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-plana__contexto-rotulo {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--titular);
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--color-slate);
+}
+
+.se-plana__contexto-lista {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-plana__contexto-lista a {
+  font-family: var(--titular);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-plana__contexto-lista a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

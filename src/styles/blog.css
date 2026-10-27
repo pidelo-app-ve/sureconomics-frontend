@@ -14323,3 +14323,63 @@ html {
   margin-inline: auto;
   aspect-ratio: 9 / 16;
 }
+
+/* ═══ «Seguir» un tema ═══ Una pastilla pequeña junto a la etiqueta del tema, en la
+   línea del botón de guardar; llena cuando ya se sigue. */
+.se-piece__tag-con-seguir {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.se-seguir {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border: 1px solid var(--color-hairline-dark);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-slate);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 160ms ease-out;
+}
+
+.se-seguir:hover:not(:disabled) {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+}
+
+.se-seguir:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.se-seguir:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 2px;
+}
+
+.se-seguir--on {
+  border-color: var(--marca-verde);
+  background: var(--marca-verde);
+  color: #ffffff;
+}
+
+.se-seguir:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-seguir {
+    transition: none;
+  }
+
+  .se-seguir:active:not(:disabled) {
+    transform: none;
+  }
+}

@@ -1,0 +1,44 @@
+/* ═══ LA FICHA DE COTIZACIÓN ═══ «VES 886,23 ▲ +0,17 %» junto a un titular. Cifras en la
+   monoespaciada, en una pastilla de tinta como la que usan los diarios financieros. */
+
+.se-ficha-moneda {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-ink);
+  color: var(--color-ink);
+  font-family: var(--cifras);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.se-ficha-moneda:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.se-ficha-moneda:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+.se-ficha-moneda__codigo {
+  font-weight: 700;
+}
+
+.se-ficha-moneda__var {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.se-ficha-moneda__var--up { color: var(--color-green); }
+.se-ficha-moneda__var--down { color: var(--color-red); }
+
+.se-ficha-moneda:hover .se-ficha-moneda__var--up { color: #7fd9a2; }
+.se-ficha-moneda:hover .se-ficha-moneda__var--down { color: #ffa3a7; }

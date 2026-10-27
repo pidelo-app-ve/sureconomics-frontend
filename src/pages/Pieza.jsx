@@ -9,6 +9,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
+import { FichaDeMoneda } from "../components/monedas/FichaDeMoneda";
 import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
 import {
   Media,
@@ -405,6 +406,10 @@ export const Pieza = () => {
                 esEditorial={pieza.formatoApi === "editorial"}
               />
               <div className="se-piece__acciones">
+                {/* La cotización de la moneda de la que habla la pieza, si la redacción
+                    la puso: el dato del día al lado del titular, como en un diario
+                    financiero. Lleva a /monedas. */}
+                {pieza.moneda ? <FichaDeMoneda codigo={pieza.moneda} /> : null}
                 {/* Guardar, al lado de compartir: las dos son «qué hago con esto
                     después de leerlo». El botón faltaba por completo -- la sección de
                     marcadores de la cuenta existía con su pantalla y su endpoint, pero
@@ -452,7 +457,7 @@ export const Pieza = () => {
                 <div lang={enEspanolEnIngles ? "es" : undefined} style={{ display: "contents" }}>
                   <PieceBody pieza={pieza} enCabecera={conPortada} />
                 </div>
-                <PieceTags temas={pieza.temas} geos={pieza.geos} />
+                <PieceTags temas={pieza.temas} geos={pieza.geos} temaSlugs={pieza.temaSlugs} />
 
                 {/* Lo que viene después del texto no es la noticia: el modo lectura del
                     navegador lo deja fuera (ver el carril). */}

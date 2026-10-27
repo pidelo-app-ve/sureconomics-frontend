@@ -35,6 +35,15 @@
       "corto": "{n} min",
       "minutos": "{n} min ago",
       "horas": "{n} h ago"
+    },
+    "pestanas": {
+      "rotulo": "What to show",
+      "todo": "All",
+      "misTemas": "My topics",
+      "vacio": "You are not following any topic yet.",
+      "elegir": "Choose topics",
+      "sinNuevo": "Nothing new in your topics for now.",
+      "todoLoMio": "Everything in my topics"
     }
   }
 }

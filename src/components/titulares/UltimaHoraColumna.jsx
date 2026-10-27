@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Enlace } from "../Enlace";
+import { Enlace, useNavegar } from "../Enlace";
+import { useUserAuth } from "../../context/UserAuthContext";
+import { useTemasSeguidos } from "../../context/TemasSeguidosContext";
+import { getPiezasDeMisTemas } from "../../services/userMeService";
 import { useHeadlines } from "../../hooks/useHeadlines";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
@@ -18,7 +21,27 @@ import "../../styles/titulares.css";
  *
  * El punto verde late solo mientras lo primero de la lista tiene menos de una hora:
  * un «en vivo» que late con noticias de ayer miente. En el teléfono se ven tres.
+ *
+ * **Dos pestañas: «Todo» y «Mis temas».** La segunda enseña lo último publicado en los
+ * temas que sigue el lector («Siga este tema»). Sin cuenta se ve igual y, al pulsarla,
+ * explica que hay que entrar: seguir temas es de las razones para crear una cuenta.
  */
+
+/** Lo nuevo de los temas que sigue: se pide al abrir la pestaña, una vez por visita. */
+const useLoMio = (activa, puede) => {
+  const [estado, setEstado] = useState({ piezas: null });
+  useEffect(() => {
+    if (!activa || !puede || estado.piezas) return undefined;
+    let vivo = true;
+    getPiezasDeMisTemas({ page: 1, limit: CUANTOS })
+      .then((r) => vivo && setEstado({ piezas: r.piezas }))
+      .catch(() => vivo && setEstado({ piezas: [] }));
+    return () => {
+      vivo = false;
+    };
+  }, [activa, puede, estado.piezas]);
+  return estado.piezas;
+};
 
 const CUANTOS = 6;
 const UN_DIA_MS = 24 * 60 * 60 * 1000;
@@ -59,17 +82,43 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
   const { t, lang } = useIdioma();
   const { items } = useHeadlines();
   const ahora = useAhora(60_000);
+  const navigate = useNavegar();
+  const { isAuthenticated, isEmailVerified } = useUserAuth();
+  const { temas } = useTemasSeguidos();
+  const [pestana, setPestana] = useState("todo");
+  const puede = isAuthenticated && isEmailVerified;
+  const loMio = useLoMio(pestana === "mios", puede);
 
   const titulares = items.slice(0, CUANTOS);
   const masReciente = titulares.reduce((max, i) => Math.max(max, Date.parse(i.published_at || "") || 0), 0);
   const hayTitulares = titulares.length > 0 && ahora - masReciente < UN_DIA_MS;
 
-  const filas = hayTitulares
+  const dePieza = (p) => ({ id: p.id, iso: p.fechaIso, titulo: <TituloDePieza pieza={p} />, ruta: rutaDePieza(p) });
+  const todas = hayTitulares
     ? titulares.map((i) => ({ id: `t-${i.id}`, iso: i.published_at, titulo: i.title, ruta: `/ultima-hora#t-${i.id}` }))
-    : recientes.slice(0, CUANTOS).map((p) => ({ id: p.id, iso: p.fechaIso, titulo: <TituloDePieza pieza={p} />, ruta: rutaDePieza(p) }));
-  if (!filas.length) return null;
+    : recientes.slice(0, CUANTOS).map(dePieza);
+  if (!todas.length) return null;
 
-  const enVivo = ahora - (Date.parse(filas[0].iso || "") || 0) < UNA_HORA_MS;
+  const mios = pestana === "mios";
+  const filas = mios ? (loMio ?? []).map(dePieza) : todas;
+  const enVivo = !mios && ahora - (Date.parse(todas[0].iso || "") || 0) < UNA_HORA_MS;
+
+  const elegir = (cual) => {
+    if (cual === "mios" && !isAuthenticated) {
+      navigate("/cuenta/entrar", { state: { from: window.location.pathname } });
+      return;
+    }
+    if (cual === "mios" && !isEmailVerified) {
+      navigate("/cuenta/verificar-email");
+      return;
+    }
+    setPestana(cual);
+  };
+
+  // Qué decir cuando «Mis temas» no tiene lista que enseñar.
+  let aviso = null;
+  if (mios && !temas.length) aviso = "vacio";
+  else if (mios && loMio && !loMio.length) aviso = "sinNuevo";
 
   return (
     <section className="se-plana__uh" aria-labelledby="plana-uh">
@@ -79,6 +128,26 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
           {t("titulares.tarjeta.etiqueta")}
         </Enlace>
       </h2>
+      <div className="se-plana__uh-pestanas" role="group" aria-label={t("titulares.pestanas.rotulo")}>
+        {["todo", "mios"].map((cual) => (
+          <button
+            key={cual}
+            type="button"
+            className={`se-plana__uh-pestana${pestana === cual ? " is-activa" : ""}`}
+            aria-pressed={pestana === cual}
+            onClick={() => elegir(cual)}
+          >
+            {cual === "todo" ? t("titulares.pestanas.todo") : t("titulares.pestanas.misTemas")}
+          </button>
+        ))}
+      </div>
+      {aviso ? (
+        <p className="se-plana__uh-aviso">
+          {aviso === "vacio" ? t("titulares.pestanas.vacio") : t("titulares.pestanas.sinNuevo")}{" "}
+          <Enlace to="/cuenta/temas">{t("titulares.pestanas.elegir")}</Enlace>
+        </p>
+      ) : null}
+      {mios && loMio === null && !aviso ? <p className="se-plana__uh-aviso">{t("comun.cargando")}</p> : null}
       <ol className="se-plana__uh-lista">
         {filas.map((f) => {
           const s = sello(f.iso, lang, ahora, t);
@@ -101,9 +170,15 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
           );
         })}
       </ol>
-      <Enlace className="se-plana__mas" to="/ultima-hora">
-        {t("portada.plana.todaLaUltimaHora")}
-      </Enlace>
+      {mios ? (
+        <Enlace className="se-plana__mas" to="/cuenta/temas">
+          {t("titulares.pestanas.todoLoMio")}
+        </Enlace>
+      ) : (
+        <Enlace className="se-plana__mas" to="/ultima-hora">
+          {t("portada.plana.todaLaUltimaHora")}
+        </Enlace>
+      )}
     </section>
   );
 };

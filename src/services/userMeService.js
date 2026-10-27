@@ -1,5 +1,6 @@
 import { userRequest } from "../lib/userApi";
 import { normalizePaginatedPosts, normalizePaginatedSubmissions } from "./contentMappers";
+import { piezasFromApi } from "../lib/pieza";
 
 export const getMyBookmarks = async (params = {}) => {
   const data = await userRequest("/me/bookmarks", {
@@ -103,4 +104,24 @@ export const subirMiFoto = async (file) => {
   cuerpo.append("file", file);
   const datos = await userRequest("/me/foto", { method: "POST", body: cuerpo });
   return { fotoId: datos?.photo_id ?? null, fotoUrl: datos?.photo_url ?? null };
+};
+
+/* —— Los temas que sigue («Siga este tema») ——
+   Seguir y dejar devuelven la lista entera, que el proveedor guarda. */
+// `userRequest` ya devuelve el `data` cuando la respuesta no trae `meta`: aquí llega la
+// lista tal cual (o nada, si algo raro contestó).
+const comoLista = (r) => (Array.isArray(r) ? r : Array.isArray(r?.data) ? r.data : []);
+
+export const getMisTemas = async () => comoLista(await userRequest("/me/temas", { method: "GET" }));
+
+export const seguirTema = async (slug) =>
+  comoLista(await userRequest(`/me/temas/${encodeURIComponent(slug)}`, { method: "PUT" }));
+
+export const dejarTema = async (slug) =>
+  comoLista(await userRequest(`/me/temas/${encodeURIComponent(slug)}`, { method: "DELETE" }));
+
+/** Lo publicado en los temas que sigue, lo más reciente primero, como piezas del sitio. */
+export const getPiezasDeMisTemas = async (params = {}) => {
+  const data = await userRequest("/me/temas/piezas", { method: "GET", query: { page: params.page, limit: params.limit } });
+  return { piezas: piezasFromApi(Array.isArray(data?.data) ? data.data : []), total: data?.meta?.total ?? 0 };
 };

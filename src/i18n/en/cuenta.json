@@ -100,7 +100,8 @@
       "cerrarMenuLateral": "Close side menu",
       "abrirMenuLateral": "Open side menu",
       "suEspacio": "Your space",
-      "volverAlSitio": "Back to the site"
+      "volverAlSitio": "Back to the site",
+      "misTemas": "My topics"
     },
     "inicio": {
       "meta": {
@@ -386,6 +387,21 @@
       "debeIniciarSesion": "You need to sign in",
       "sesionExpirada": "Your session expired",
       "errorSolicitud": "Request error"
+    },
+    "temas": {
+      "meta": {
+        "titulo": "My topics — {marca}",
+        "descripcion": "The topics you follow and what is new in them."
+      },
+      "titulo": "My topics",
+      "lead": "Follow the topics you care about: what is new in them shows up here and in the «My topics» tab of Latest.",
+      "verifique": "Verify your email to follow topics.",
+      "cargando": "Loading your topics…",
+      "siguiendo": "Topics you follow",
+      "ninguno": "You are not following any topic yet. Pick one below, or press «Follow» next to the topics of any piece.",
+      "otros": "Other topics",
+      "loNuevo": "New in your topics",
+      "nadaNuevo": "There are no published pieces in your topics yet."
     }
   }
 }

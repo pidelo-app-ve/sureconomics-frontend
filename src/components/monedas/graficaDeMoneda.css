@@ -1,0 +1,130 @@
+/* ═══ LA GRÁFICA DE 30 DÍAS ═══ Ver `GraficaDeMoneda.jsx`. Línea de tinta, guías tenues,
+   cifras en la monoespaciada. */
+
+.se-grafica {
+  margin: 0;
+  max-width: 760px;
+}
+
+.se-grafica__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 8px;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-grafica__var {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--cifras);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-grafica__var--up { color: var(--color-green); }
+.se-grafica__var--down { color: var(--color-red); }
+
+.se-grafica__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+.se-grafica__svg:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+.se-grafica__guia {
+  stroke: var(--color-hairline);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.se-grafica__rotulo,
+.se-grafica__ultimo,
+.se-grafica__cursor text {
+  font-family: var(--cifras);
+  font-size: 11px;
+  fill: var(--color-slate);
+}
+
+.se-grafica__ultimo {
+  font-weight: 700;
+  fill: var(--color-ink);
+}
+
+.se-grafica__linea {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.se-grafica__punto {
+  fill: var(--color-ink);
+}
+
+.se-grafica__cursor line {
+  stroke: var(--color-slate);
+  stroke-width: 1;
+}
+
+.se-grafica__cursor circle {
+  fill: var(--color-paper);
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+
+.se-grafica__cursor text {
+  fill: var(--color-ink);
+  font-weight: 600;
+}
+
+.se-grafica__datos {
+  margin-top: 10px;
+  font-size: 0.8125rem;
+}
+
+.se-grafica__datos summary {
+  cursor: pointer;
+  color: var(--color-slate);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-grafica__datos table {
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-family: var(--cifras);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-grafica__datos th,
+.se-grafica__datos td {
+  padding: 4px 16px 4px 0;
+  text-align: left;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-grafica__nota {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+/* La versión de la apertura: más baja, sin rótulos de guía. */
+.se-grafica--compacta {
+  max-width: none;
+}
+
+.se-grafica--compacta .se-grafica__titulo {
+  font-size: 0.75rem;
+}

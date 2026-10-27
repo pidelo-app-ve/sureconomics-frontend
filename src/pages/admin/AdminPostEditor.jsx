@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { tActual } from "../../i18n/motor";
+import { CODIGOS_MONEDA } from "../../lib/monedas";
 import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
 import {
@@ -142,6 +144,7 @@ const emptyForm = () => ({
     // La Clave al final de la pieza: vacío, no hay juego.
     juego_palabra: "",
     juego_pista: "",
+    moneda: "",
     // La pieza en inglés, para /en. Vacía, la pieza sale en español con aviso.
     title_en: "",
     excerpt_en: "",
@@ -326,6 +329,7 @@ const postToForm = (post) => {
         sin_publicidad: Boolean(post.sin_publicidad),
         juego_palabra: pickStr(post, ["juego_palabra"]),
         juego_pista: pickStr(post, ["juego_pista"]),
+        moneda: pickStr(post, ["moneda"]),
         title_en: pickStr(post, ["title_en"]),
         excerpt_en: pickStr(post, ["excerpt_en"]),
         content_en: pickStr(post, ["content_en"]),
@@ -385,6 +389,7 @@ const formToPayload = (form) => {
     // Se mandan siempre: vacíos quitan el juego de la pieza (null en la API).
     payload.juego_palabra = (form.juego_palabra ?? "").trim() || null;
     payload.juego_pista = (form.juego_pista ?? "").trim() || null;
+    payload.moneda = (form.moneda ?? "").trim() || null;
     // La versión en inglés: vacía se manda como nulo, que es «sin inglés».
     payload.title_en = (form.title_en ?? "").trim() || null;
     payload.excerpt_en = (form.excerpt_en ?? "").trim() || null;
@@ -1337,6 +1342,26 @@ export const AdminPostEditor = () => {
                         {/* La Clave al final de la pieza: una palabra que tenga que ver con lo
                             que se acaba de leer. Solo en los formatos con cuerpo largo; en los
                             demás no hay «leíste completo» que premiar. */}
+                        <label className="se-form-field" htmlFor="post-moneda">
+                            <span className="se-form-label">Moneda de la que habla (opcional)</span>
+                            <select
+                                id="post-moneda"
+                                className="se-form-control"
+                                value={form.moneda ?? ""}
+                                onChange={(e) => setForm((prev) => ({ ...prev, moneda: e.target.value }))}
+                            >
+                                <option value="">Ninguna</option>
+                                {CODIGOS_MONEDA.map((codigo) => (
+                                    <option key={codigo} value={codigo}>
+                                        {codigo} · {tActual(`monedas.nombres.${codigo}`)}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="se-admin-meta-hint">
+                                Con ella, junto al titular sale la cotización del día y, si la pieza
+                                abre la portada, su gráfica de 30 días.
+                            </span>
+                        </label>
                         {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
                             <div className="se-form-field se-acceso se-acceso--clave">
                                 <span className="se-form-label se-acceso__titulo">La Clave de esta pieza</span>

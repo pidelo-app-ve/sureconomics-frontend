@@ -139,6 +139,11 @@
     "geo": {
       "mundo": "World",
       "americas": "The Americas"
+    },
+    "seguir": {
+      "seguir": "Follow",
+      "siguiendo": "Following",
+      "etiqueta": "Follow the topic {tema}"
     }
   }
 }

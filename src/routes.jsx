@@ -120,6 +120,8 @@ const rutasPublicas = () => [
             { path: "perfil", lazy: pagina(() => import("./pages/cuenta/CuentaPerfil"), "CuentaPerfil") },
             { path: "lo-mio", lazy: pagina(() => import("./pages/cuenta/CuentaLoMio"), "CuentaLoMio") },
             { path: "marcadores", lazy: pagina(() => import("./pages/cuenta/CuentaMarcadores"), "CuentaMarcadores") },
+            // Los temas que sigue y lo nuevo de ellos («Siga este tema»).
+            { path: "temas", lazy: pagina(() => import("./pages/cuenta/CuentaTemas"), "CuentaTemas") },
             { path: "envios", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosList"), "CuentaEnviosList") },
             { path: "envios/nuevo", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosNuevo"), "CuentaEnviosNuevo") },
             { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar") },

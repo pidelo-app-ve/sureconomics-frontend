@@ -11,6 +11,7 @@ import "./i18n/diccionarios";
 import { AuthProvider } from "./context/AuthContext";
 import { UserAuthProvider } from "./context/UserAuthContext";
 import { ProveedorDeMarcadores } from "./context/MarcadoresContext";
+import { ProveedorDeTemasSeguidos } from "./context/TemasSeguidosContext";
 
 import { recargarUnaVez } from "./lib/recargaTrasDespliegue";
 
@@ -27,7 +28,9 @@ const Main = () => {
             <AuthProvider>
                 <UserAuthProvider>
                     <ProveedorDeMarcadores>
-                        <RouterProvider router={router} />
+                        <ProveedorDeTemasSeguidos>
+                            <RouterProvider router={router} />
+                        </ProveedorDeTemasSeguidos>
                     </ProveedorDeMarcadores>
                 </UserAuthProvider>
             </AuthProvider>

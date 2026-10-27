@@ -22,7 +22,8 @@
     },
     "plana": {
       "opinion": "Opinión",
-      "todaLaUltimaHora": "Toda la última hora"
+      "todaLaUltimaHora": "Toda la última hora",
+      "contexto": "Contexto"
     },
     "masLeido": {
       "titulo": "Lo más leído",

@@ -45,6 +45,23 @@
     "actualizado": "Última lectura: {fecha} a las {hora} (hora de Caracas).",
     "nota": "Tasas oficiales de cada banco central (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay y BCE). Donde un banco no publica una API, el dato viene de open.er-api.com. La paridad del dólar de Islas Caimán es fija.",
     "aviso": "Son cierres y referencias oficiales, no cotizaciones en vivo. Para operar, consulte a su banco.",
-    "error": "No se pudieron cargar las monedas. Inténtalo de nuevo en un momento."
+    "error": "No se pudieron cargar las monedas. Inténtalo de nuevo en un momento.",
+    "grafica": {
+      "titulo": "{nombre} por dólar, últimos 30 días",
+      "abrir": "Ver la gráfica de {nombre}",
+      "cerrar": "Cerrar la gráfica de {nombre}",
+      "cargando": "Cargando la gráfica…",
+      "pocosDatos": "Todavía no hay suficientes datos para dibujar la gráfica.",
+      "variacion": "{n} en 30 días",
+      "resumen": "Del {desde} al {hasta}: {n}",
+      "datos": "Ver los datos",
+      "colFecha": "Fecha",
+      "colValor": "Por 1 USD"
+    },
+    "ficha": {
+      "etiqueta": "{codigo}: {valor} por dólar, {variacion} hoy",
+      "sinVariacion": "sin variación"
+    },
+    "masMovidas": "Las que más se movieron hoy"
   }
 }

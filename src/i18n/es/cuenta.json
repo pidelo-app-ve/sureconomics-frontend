@@ -100,7 +100,8 @@
       "cerrarMenuLateral": "Cerrar menú lateral",
       "abrirMenuLateral": "Abrir menú lateral",
       "suEspacio": "Su espacio",
-      "volverAlSitio": "Volver al sitio"
+      "volverAlSitio": "Volver al sitio",
+      "misTemas": "Mis temas"
     },
     "inicio": {
       "meta": {
@@ -386,6 +387,21 @@
       "debeIniciarSesion": "Debe iniciar sesión",
       "sesionExpirada": "Sesión expirada",
       "errorSolicitud": "Error en la solicitud"
+    },
+    "temas": {
+      "meta": {
+        "titulo": "Mis temas — {marca}",
+        "descripcion": "Los temas que sigue y lo nuevo de ellos."
+      },
+      "titulo": "Mis temas",
+      "lead": "Siga los temas que le interesan: lo nuevo de ellos aparece aquí y en la pestaña «Mis temas» de Última hora.",
+      "verifique": "Verifique su correo para seguir temas.",
+      "cargando": "Cargando sus temas…",
+      "siguiendo": "Temas que sigue",
+      "ninguno": "Todavía no sigue ningún tema. Elija alguno de abajo, o pulse «Seguir» junto a los temas de cualquier pieza.",
+      "otros": "Otros temas",
+      "loNuevo": "Lo nuevo en sus temas",
+      "nadaNuevo": "Todavía no hay piezas publicadas en sus temas."
     }
   }
 }

@@ -32,9 +32,16 @@
 }
 
 .se-tabla-monedas__var {
-  width: 5.5em;
+  width: 6em;
+  padding-left: 10px;
   text-align: right;
+  white-space: nowrap;
   color: var(--color-slate);
+}
+
+.se-tabla-monedas__var svg {
+  margin-right: 2px;
+  vertical-align: 0;
 }
 
 .se-tabla-monedas__var--up { color: var(--color-green); }

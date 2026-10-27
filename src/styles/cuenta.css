@@ -1660,3 +1660,61 @@
     min-height: 44px;
   }
 }
+
+/* —— Mis temas —— */
+.se-reader-temas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-reader-temas__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+}
+
+.se-reader-temas__bloque + .se-reader-temas__bloque {
+  margin-top: 28px;
+}
+
+.se-reader-temas__subtitulo {
+  margin: 0 0 12px;
+  font-size: 1.0625rem;
+}
+
+.se-reader-temas__piezas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-reader-temas__pieza {
+  padding: 12px 0;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.se-reader-temas__pieza a {
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.se-reader-temas__pieza a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-reader-temas__meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}

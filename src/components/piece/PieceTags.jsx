@@ -3,6 +3,7 @@ import { Enlace } from "../Enlace";
 import { conAncestros } from "../../lib/contentFilter";
 import { useTaxonomy } from "../../hooks/useTaxonomy";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { BotonDeSeguirTema } from "../content/BotonDeSeguirTema";
 
 /**
  * The piece's own topic and place tags, as links into the explorer.
@@ -18,8 +19,11 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
  * "Venezuela · Andina · Las Américas". Those are derived from the tree, not stored
  * on the piece — the filter already treats them as included, so writing them in
  * would be the same fact twice and would spend the piece's limited tag slots.
+ *
+ * Cada tema lleva al lado su «Seguir» (`BotonDeSeguirTema`): con cuenta, lo nuevo de
+ * ese tema entra en «Mis temas». `temaSlugs` va en el mismo orden que `temas`.
  */
-export const PieceTags = ({ temas, geos }) => {
+export const PieceTags = ({ temas, geos, temaSlugs = [] }) => {
   const { t } = useIdioma();
   const { geoTop, ancestros } = useTaxonomy();
   const lugares = conAncestros(geos, { geoTop, ancestros });
@@ -28,14 +32,13 @@ export const PieceTags = ({ temas, geos }) => {
     <div className="se-piece__tags">
       <span className="se-piece__tags-label">{t("piezas.etiquetas.seguirLeyendo")}</span>
       <div className="se-piece__tags-list">
-        {temas.map((tema) => (
-          <Enlace
-            key={`t-${tema}`}
-            to={`/explorar?tema=${encodeURIComponent(tema)}`}
-            className="se-piece__tag"
-          >
-            {tema}
-          </Enlace>
+        {temas.map((tema, i) => (
+          <span key={`t-${tema}`} className="se-piece__tag-con-seguir">
+            <Enlace to={`/explorar?tema=${encodeURIComponent(tema)}`} className="se-piece__tag">
+              {tema}
+            </Enlace>
+            {temaSlugs[i] ? <BotonDeSeguirTema slug={temaSlugs[i]} nombre={tema} /> : null}
+          </span>
         ))}
         {lugares.map(({ nombre, propio }) => (
           <Enlace
@@ -57,4 +60,6 @@ export const PieceTags = ({ temas, geos }) => {
 PieceTags.propTypes = {
   temas: PropTypes.arrayOf(PropTypes.string).isRequired,
   geos: PropTypes.arrayOf(PropTypes.string).isRequired,
+  /** Los slugs de `temas`, en el mismo orden: son lo que se sigue. */
+  temaSlugs: PropTypes.arrayOf(PropTypes.string),
 };

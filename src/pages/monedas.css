@@ -147,3 +147,57 @@
     display: none;
   }
 }
+
+/* —— La fila que se abre con su gráfica —— El nombre de la moneda es el botón. */
+.se-monedas__abrir {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.se-monedas__abrir:focus-visible {
+  outline: 2px solid var(--marca-verde);
+  outline-offset: 3px;
+}
+
+.se-monedas__flecha {
+  flex: 0 0 auto;
+  color: var(--color-slate);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.se-monedas__fila--abierta .se-monedas__flecha {
+  transform: rotate(180deg);
+}
+
+.se-monedas__grafica td {
+  padding: 8px 14px 22px;
+  text-align: left;
+  white-space: normal;
+}
+
+/* La tabla se desplaza a lo ancho en el teléfono; la gráfica no debe irse con ella:
+   se pega al borde izquierdo y mide lo que mide la pantalla. */
+.se-monedas__grafica .se-grafica {
+  position: sticky;
+  left: 14px;
+  max-width: min(760px, calc(100vw - 2 * var(--se-content-gutter) - 28px));
+}
+
+.se-monedas__var {
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-monedas__flecha {
+    transition: none;
+  }
+}

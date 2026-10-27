@@ -35,6 +35,15 @@
       "corto": "{n} min",
       "minutos": "Hace {n} min",
       "horas": "Hace {n} h"
+    },
+    "pestanas": {
+      "rotulo": "Qué enseñar",
+      "todo": "Todo",
+      "misTemas": "Mis temas",
+      "vacio": "Todavía no sigue ningún tema.",
+      "elegir": "Elegir temas",
+      "sinNuevo": "Nada nuevo en sus temas por ahora.",
+      "todoLoMio": "Todo lo de mis temas"
     }
   }
 }

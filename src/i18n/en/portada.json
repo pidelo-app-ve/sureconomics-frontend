@@ -139,6 +139,20 @@
       "hoy": "today",
       "ayer": "yesterday",
       "haceDias": "{n} days ago"
+    },
+    "comercial": {
+      "titulo": "Advertise with SurEconomics",
+      "bajada": "Reach the people making economic decisions in the region, with formats that accompany the news instead of interrupting it. Tell us what you want to advertise.",
+      "formatos": "See formats and placements",
+      "abrir": "Write to our sales team",
+      "empresa": "Company",
+      "empresaOpcional": "Company (optional)",
+      "mensaje": "What you want to advertise",
+      "enviar": "Send to the sales team",
+      "directo": "Or write to us at {correo}",
+      "gracias": "The sales team will reply within one business day.",
+      "asunto": "Advertising (from the home page)",
+      "asuntoConEmpresa": "Advertising · {empresa} (from the home page)"
     }
   }
 }

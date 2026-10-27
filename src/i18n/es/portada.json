@@ -139,6 +139,20 @@
       "hoy": "hoy",
       "ayer": "ayer",
       "haceDias": "hace {n} días"
+    },
+    "comercial": {
+      "titulo": "Anúnciese en SurEconomics",
+      "bajada": "Llegue a quienes toman decisiones económicas en la región, con formatos que acompañan la información en vez de interrumpirla. Cuéntenos qué quiere anunciar.",
+      "formatos": "Ver formatos y espacios",
+      "abrir": "Escribir al equipo comercial",
+      "empresa": "Empresa",
+      "empresaOpcional": "Empresa (opcional)",
+      "mensaje": "Qué quiere anunciar",
+      "enviar": "Enviar al equipo comercial",
+      "directo": "O escríbanos a {correo}",
+      "gracias": "El equipo comercial le responde en un día hábil.",
+      "asunto": "Publicidad (desde la portada)",
+      "asuntoConEmpresa": "Publicidad · {empresa} (desde la portada)"
     }
   }
 }

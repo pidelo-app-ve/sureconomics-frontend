@@ -16,8 +16,11 @@ const ensureClient = (client) => {
 
 export const contactService = {
   /**
-   * @param {{ name: string, email: string, subject: string, message: string }} form
-   * @param {{ client?: { request: Function }, idempotencyKey?: string }} [opts]
+   * `website` es la trampa para bots (un campo que la persona no ve) y `turnstile`, el
+   * token de Cloudflare; los dos como en el boletín. Ver `hooks/useVerificacionHumana`.
+   *
+   * @param {{ name: string, email: string, subject: string, message: string, website?: string }} form
+   * @param {{ client?: { request: Function }, idempotencyKey?: string, turnstile?: string }} [opts]
    */
   async submitContactMessage(form, opts = {}) {
     const client = ensureClient(opts.client);
@@ -28,6 +31,8 @@ export const contactService = {
         email: form.email,
         subject: form.subject,
         message: form.message,
+        website: form.website ?? "",
+        turnstile: opts.turnstile ?? "",
       },
       idempotencyKey: opts.idempotencyKey,
     });

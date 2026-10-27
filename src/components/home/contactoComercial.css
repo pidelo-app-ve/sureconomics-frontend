@@ -1,0 +1,136 @@
+/* ═══ «ANÚNCIESE EN SURECONOMICS» ═══ Ver `ContactoComercial.jsx`.
+   Bajo su filete, como la pausa de béisbol y juegos: un módulo más de la portada, sin
+   caja ni fondo propio. El texto a la izquierda y el formulario a la derecha; en el
+   teléfono, apilados y con el formulario cerrado hasta que se pide. */
+
+.se-section.se-comercial {
+  padding-top: var(--se-space-lg);
+  padding-bottom: var(--se-space-lg);
+}
+
+.se-comercial__marco {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--se-space-md, 1.5rem) clamp(2rem, 4vw, 4rem);
+  padding-top: 20px;
+  border-top: 1px solid var(--color-ink);
+}
+
+.se-comercial__titulo {
+  margin: 0;
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.15rem + 1vw, 2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+
+.se-comercial__bajada {
+  max-width: 38ch;
+  margin: 10px 0 12px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+/* Un enlace con flecha, como «Jugar el reto de hoy»: el botón es el de enviar. */
+.se-comercial__formatos {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--marca-verde);
+  text-decoration: none;
+}
+
+.se-comercial__formatos::after {
+  content: "→";
+  margin-left: 0.35em;
+}
+
+.se-comercial__formatos:hover {
+  color: var(--color-accent);
+}
+
+.se-comercial__abrir {
+  display: none;
+}
+
+.se-comercial__form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+/* Nombre, correo y empresa en una fila mientras quepan; si no, bajan solos. */
+.se-comercial__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 12px;
+}
+
+.se-comercial .se-form-field {
+  margin: 0;
+}
+
+/* Dos líneas para el mensaje y no las siete de /contacto: aquí basta con saber qué
+   quiere anunciar, y la franja no debe crecer hasta parecer otra página. */
+.se-comercial .se-form-control--textarea {
+  min-height: 0;
+}
+
+.se-comercial__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+}
+
+.se-comercial__directo {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-slate);
+}
+
+.se-comercial__correo {
+  color: var(--color-ink);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+/* El aviso del envío: vacío no ocupa sitio; con texto, una línea encima de los campos. */
+.se-comercial__estado:empty {
+  display: none;
+}
+
+.se-comercial__estado {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+
+.se-comercial__estado--error {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.se-comercial__estado--success {
+  color: var(--marca-verde);
+}
+
+@media (max-width: 760px) {
+  .se-comercial__marco {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .se-comercial__abrir {
+    display: inline-flex;
+    margin-top: 16px;
+  }
+
+  /* Cerrado hasta que se pide: cuatro campos a la vista partían la portada en dos. */
+  .se-comercial__form:not(.is-abierto) {
+    display: none;
+  }
+}

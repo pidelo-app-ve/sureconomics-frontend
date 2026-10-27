@@ -9,6 +9,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { PrimeraPlana, elegirApertura } from "../components/home/PrimeraPlana";
 import { PausaPortada } from "../components/home/PausaPortada";
+import { ContactoComercial } from "../components/home/ContactoComercial";
 import { EnLaCalle } from "../components/canal/EnLaCalle";
 import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
 import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
@@ -528,7 +529,13 @@ export const Home = () => {
               Editorial): detrás de Artículos, que ya lleva su ficha, eran dos anuncios
               en la misma pantalla. */}
           {formatoApi === (hayEditorial ? "editorial" : "articulo") ? (
-            <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
+            <>
+              <FilaDeAnuncio espacio={ESPACIOS.PORTADA_BANNER} />
+              {/* «Anúnciese en SurEconomics», debajo del anuncio: ahí se lee como «este
+                  espacio puede ser suyo». No con la portada filtrada: quien busca algo
+                  no viene a anunciarse. Ver `ContactoComercial`. */}
+              {isFiltered ? null : <ContactoComercial />}
+            </>
           ) : null}
         </Fragment>
       ))}

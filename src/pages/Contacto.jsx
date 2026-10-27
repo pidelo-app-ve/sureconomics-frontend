@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import { useState } from "react";
 import { BRAND, CONTACT } from "../data/surEconomicsMock";
 import { useSearchParams } from "react-router-dom";
@@ -7,73 +6,9 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { contactService } from "../services/contactService";
 import { useClaveIdempotente } from "../hooks/useClaveIdempotente";
-
-/**
- * Un campo con su aviso debajo.
- *
- * El aviso vive pegado al control y no en una lista arriba: un resumen general dice
- * que algo falla y deja a la persona buscando cuál. Y va atado con `aria-describedby`,
- * que es lo que hace que un lector de pantalla lo lea al entrar en el campo en vez de
- * tener que salir a buscarlo.
- */
-const Campo = ({
-  id,
-  etiqueta,
-  valor,
-  error,
-  onChange,
-  onBlur,
-  bloqueado,
-  tipo = "text",
-  multilinea = false,
-  autoComplete,
-}) => {
-  const idDelError = `${id}-error`;
-  const Control = multilinea ? "textarea" : "input";
-  return (
-    <div className={`se-form-field${error ? " se-form-field--mal" : ""}`}>
-      <label className="se-form-label" htmlFor={id}>
-        {etiqueta}
-      </label>
-      <Control
-        id={id}
-        className={`se-form-control${multilinea ? " se-form-control--textarea" : ""}`}
-        type={multilinea ? undefined : tipo}
-        rows={multilinea ? 6 : undefined}
-        value={valor}
-        onChange={onChange}
-        onBlur={onBlur}
-        disabled={bloqueado}
-        autoComplete={autoComplete}
-        // Los cuatro son obligatorios, y eso se dice antes de fallar, no despues. El
-        // formulario va con `noValidate`, asi que esto anuncia "obligatorio" sin que
-        // salte el globo del navegador por encima de nuestros avisos.
-        required
-        // `aria-invalid` y no solo el borde rojo: el color no llega a quien no lo ve.
-        aria-invalid={error ? "true" : undefined}
-        aria-describedby={error ? idDelError : undefined}
-      />
-      {error ? (
-        <p className="se-form-error" id={idDelError}>
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-};
-
-Campo.propTypes = {
-  id: PropTypes.string.isRequired,
-  etiqueta: PropTypes.string.isRequired,
-  valor: PropTypes.string,
-  error: PropTypes.string,
-  onChange: PropTypes.func,
-  onBlur: PropTypes.func,
-  bloqueado: PropTypes.bool,
-  tipo: PropTypes.string,
-  multilinea: PropTypes.bool,
-  autoComplete: PropTypes.string,
-};
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
+import { CampoDeFormulario as Campo } from "../components/comun/CampoDeFormulario";
+import { errorDeContacto } from "../lib/formularioDeContacto";
 
 /** El id de cada control, para llevar el foco al primero que falle. */
 const ID_DE_CAMPO = {
@@ -104,6 +39,11 @@ export const Contacto = () => {
   // vuelve a pulsar, el servidor devuelve la de la primera vez en lugar de guardar el
   // mensaje dos veces. Ver `lib/idempotencia.js`.
   const { clave, renovar } = useClaveIdempotente();
+  // Contra el spam, las dos defensas del boletín: Cloudflare Turnstile (ver
+  // `hooks/useVerificacionHumana`) y el campo trampa, que una persona no ve y los
+  // rastreadores rellenan; si llega con algo, el servidor no lo manda a info@.
+  const humano = useVerificacionHumana();
+  const [trampa, setTrampa] = useState("");
 
   // Los errores por campo, y **solo de los campos que la persona ya tocó**. Validar
   // en cada tecla riñe con quien todavía está escribiendo su correo; validar solo al
@@ -111,25 +51,7 @@ export const Contacto = () => {
   // cuando ya terminó con él.
   const [tocado, setTocado] = useState({});
 
-  const revisar = (key, valor) => {
-    const v = String(valor ?? "").trim();
-    if (!v) {
-      return {
-        name: t("paginas.contacto.errores.nombre"),
-        email: t("paginas.contacto.errores.correo"),
-        subject: t("paginas.contacto.errores.asunto"),
-        message: t("paginas.contacto.errores.mensaje"),
-      }[key];
-    }
-    // Comprobación mínima a propósito: la buena la hace el servidor, y una expresión
-    // estricta aquí rechaza direcciones válidas raras y deja pasar las inventadas
-    // igual. Lo que se quiere atajar es la errata, no validar el correo.
-    if (key === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
-      return t("paginas.contacto.errores.correoIncompleto");
-    }
-    if (key === "message" && v.length < 10) return t("paginas.contacto.errores.mensajeCorto");
-    return null;
-  };
+  const revisar = (key, valor) => errorDeContacto(key, valor, t);
 
   const errores = Object.fromEntries(
     Object.keys(form).map((k) => [k, tocado[k] ? revisar(k, form[k]) : null])
@@ -158,17 +80,27 @@ export const Contacto = () => {
     }
     setSubmitState({ status: "loading", message: "" });
     try {
-      await contactService.submitContactMessage(form, { idempotencyKey: clave() });
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await contactService.submitContactMessage({ ...form, website: trampa }, { idempotencyKey: clave(), turnstile });
+      humano.reiniciar();
       setSubmitState({ status: "success", message: t("paginas.contacto.gracias") });
       setForm({ name: "", email: "", subject: "", message: "" });
       setTocado({});
       // Cuajó: lo que venga después es un mensaje nuevo, no un reintento.
       renovar();
     } catch (err) {
+      // Cada token vale una vez: el siguiente intento necesita otro.
+      humano.reiniciar();
       const tooMany = err?.status === 429;
       setSubmitState({
         status: "error",
-        message: tooMany ? t("paginas.contacto.errores.demasiadas") : t("paginas.contacto.errores.fallo"),
+        message:
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : tooMany
+              ? t("paginas.contacto.errores.demasiadas")
+              : t("paginas.contacto.errores.fallo"),
       });
     }
   };
@@ -195,6 +127,7 @@ export const Contacto = () => {
               <form
                 className="se-contact-form se-contact__form"
                 onSubmit={handleSubmit}
+                onFocus={humano.activar}
                 aria-describedby="contact-submit-status"
                 noValidate
               >
@@ -263,6 +196,11 @@ export const Contacto = () => {
                   onBlur={alSalir("message")}
                   bloqueado={submitState.status === "loading"}
                 />
+                {/* La trampa: fuera del tabulador y de los lectores de pantalla, porque
+                    si una persona la rellenara sin querer su mensaje no llegaría. */}
+                <input type="text" name="website" className="se-sr-only" tabIndex={-1} aria-hidden="true"
+                  autoComplete="off" value={trampa} onChange={(e) => setTrampa(e.target.value)} />
+                {humano.control}
                 <button type="submit" className="se-btn" aria-label={t("paginas.contacto.enviarFormulario")} disabled={submitState.status === "loading"}
                 >
                   {submitState.status === "loading" ? t("paginas.contacto.enviando") : t("paginas.contacto.enviar")}

@@ -46,7 +46,11 @@ const Lista = ({ titulo, tipo, videos, mostrar, ocupado, onOcultar, ...resto }) 
             return (
               <li key={v.id} className={`se-admin-redes__auto-pub${sale ? "" : " se-admin-redes__auto-pub--fuera"}`}>
                 <a href={v.enlace} target="_blank" rel="noreferrer" className={`se-admin-redes__auto-foto se-admin-canal__foto--${tipo}`}>
-                  <img src={v.portada} alt="" loading="lazy" />
+                  {/* Si la copia de la portada no está (p. ej. una sincronización que no
+                      llegó a subirla), queda el recuadro gris y no el icono roto del
+                      navegador. «Actualizar ahora» no la rehace: hay que quitar el canal y
+                      volver a ponerlo. */}
+                  <img src={v.portada} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />
                   {dura ? <span className="se-admin-redes__auto-tipo">{dura}</span> : null}
                 </a>
                 <div className="se-admin-redes__auto-texto">

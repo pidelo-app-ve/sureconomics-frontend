@@ -703,31 +703,8 @@
 
 /* ═══ Fase 8: la opinión en su papel, los retratos y el contexto ═══ */
 
-/* 8a. Opinión va sobre un papel un pelo más cálido, de borde a borde de su columna y
-   sin marco: es otro cuadernillo del diario, no una caja. */
-.se-plana__opinion {
-  --papel-opinion: #f4efe5;
-  background: var(--papel-opinion);
-  padding: 0 var(--se-content-gutter) 18px;
-  margin-inline: calc(-1 * var(--se-content-gutter));
-}
-
-.se-plana__opinion > .se-plana__cabeza {
-  padding-top: 14px;
-}
-
-@media (min-width: 960px) {
-  .se-plana__opinion {
-    margin-inline: 0 calc(-1 * var(--se-content-gutter));
-    padding: 0 var(--se-content-gutter) 18px 20px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .se-plana__opinion {
-    padding-left: clamp(20px, 1.8vw, 28px);
-  }
-}
+/* Opinión va sobre el papel de siempre: se probó un tono cálido propio y Ramón lo
+   descartó (27-oct-2026). */
 
 /* 8b. El retrato de quien firma: cuadrado, en gris, pequeño. */
 .se-plana__analisis--con-retrato {

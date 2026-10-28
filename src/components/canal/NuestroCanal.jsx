@@ -181,7 +181,7 @@ export const NuestroCanal = () => {
             v.vistas != null ? t("portada.calle.vistas", { n: vistasCortas(v.vistas, lang) }) : null,
           ].filter(Boolean);
           return (
-            <li key={v.id} className="se-canal__item" aria-hidden={i !== visible && sonando !== i ? "true" : undefined}>
+            <li key={v.id} className={`se-canal__item${v.tipo === "short" ? " se-canal__item--vertical" : ""}`} aria-hidden={i !== visible && sonando !== i ? "true" : undefined}>
               {sonando === i ? (
                 <Reproductor v={v} onCerrar={() => setSonando(null)} />
               ) : (
@@ -192,7 +192,11 @@ export const NuestroCanal = () => {
                   onClick={() => setSonando(i)}
                   aria-label={dura ? t("portada.canal.reproducirConDuracion", { titulo: v.titulo, duracion: dura }) : t("portada.canal.reproducir", { titulo: v.titulo })}
                 >
-                  <img src={v.portada} alt="" width="640" height="360" loading="lazy" decoding="async" />
+                  {v.tipo === "short" ? (
+                    <img src={v.portada} alt="" width="360" height="640" loading="lazy" decoding="async" />
+                  ) : (
+                    <img src={v.portada} alt="" width="640" height="360" loading="lazy" decoding="async" />
+                  )}
                   <span className="se-canal__play">
                     <IconoPlay tamano={22} />
                     {dura}

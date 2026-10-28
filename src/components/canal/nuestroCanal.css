@@ -270,3 +270,27 @@
     animation: none;
   }
 }
+
+/* —— Un short en la ventana (el canal aún no tiene videos largos, ver `useCanal`) ——
+   Vertical y acotado de alto, centrado en la columna: a todo el ancho mediría más de
+   medio metro de pantalla. Flotando, la esquina también va en vertical y más estrecha. */
+.se-canal__item--vertical .se-canal__portada,
+.se-canal__item--vertical .se-canal__hueco {
+  aspect-ratio: 9 / 16;
+  width: min(100%, 240px);
+  margin-inline: auto;
+}
+
+.se-canal__item--vertical .se-canal__caja.is-flotante {
+  width: min(200px, calc(100vw - 32px));
+}
+
+.se-canal__item--vertical .se-canal__caja.is-flotante iframe {
+  aspect-ratio: 9 / 16;
+}
+
+.se-canal__item--vertical .se-canal__titulo,
+.se-canal__item--vertical .se-canal__meta {
+  max-width: 240px;
+  margin-inline: auto;
+}

@@ -1,7 +1,10 @@
-/* ═══ LA GRÁFICA DE 30 DÍAS ═══ Ver `GraficaDeMoneda.jsx`. Línea de tinta, guías tenues,
-   cifras en la monoespaciada. */
+/* ═══ LA GRÁFICA DE 30 DÍAS ═══ Ver `GraficaDeMoneda.jsx`. Una línea de color por
+   moneda, guías tenues, cifras en la monoespaciada. Los dos colores se comprobaron para
+   daltonismo (ΔE en OKLab ≥ 14 en las tres formas) y contra el papel (contraste ≥ 4,5). */
 
 .se-grafica {
+  --grafica-a: #1f6f8b;
+  --grafica-b: #b9532a;
   margin: 0;
   max-width: 760px;
 }
@@ -27,6 +30,35 @@
 
 .se-grafica__var--up { color: var(--color-green); }
 .se-grafica__var--down { color: var(--color-red); }
+
+.se-grafica__leyenda {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.se-grafica__serie {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.se-grafica__nombre {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* La muestra de la leyenda: un trazo corto como la línea, no un cuadrado. */
+.se-grafica__muestra {
+  width: 16px;
+  height: 0;
+  border-top: 3px solid var(--grafica-a);
+  border-radius: 2px;
+}
+
+.se-grafica__serie--b .se-grafica__muestra {
+  border-top-color: var(--grafica-b);
+}
 
 .se-grafica__svg {
   display: block;
@@ -62,13 +94,30 @@
 
 .se-grafica__linea {
   fill: none;
-  stroke: var(--color-ink);
+  stroke: var(--grafica-a);
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
 .se-grafica__punto {
+  fill: var(--grafica-a);
+}
+
+.se-grafica__serie--b .se-grafica__linea { stroke: var(--grafica-b); }
+.se-grafica__serie--b .se-grafica__punto { fill: var(--grafica-b); }
+
+/* Comparando: la raya del 0 %, el día de partida de las dos. */
+.se-grafica__cero {
+  stroke: var(--color-slate);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.se-grafica__final {
+  font-family: var(--cifras);
+  font-size: 11px;
+  font-weight: 700;
   fill: var(--color-ink);
 }
 
@@ -79,8 +128,12 @@
 
 .se-grafica__cursor circle {
   fill: var(--color-paper);
-  stroke: var(--color-ink);
+  stroke: var(--grafica-a);
   stroke-width: 2;
+}
+
+.se-grafica__cursor circle.se-grafica__serie--b {
+  stroke: var(--grafica-b);
 }
 
 .se-grafica__cursor text {
@@ -127,4 +180,16 @@
 
 .se-grafica--compacta .se-grafica__titulo {
   font-size: 0.75rem;
+}
+
+/* En el teléfono el dibujo se encoge a la mitad y con él sus letras: los nombres del
+   final se quitan (la leyenda dice lo mismo, con su variación) y el cursor se agranda. */
+@media (max-width: 600px) {
+  .se-grafica__final {
+    display: none;
+  }
+
+  .se-grafica__cursor text {
+    font-size: 20px;
+  }
 }

@@ -201,3 +201,22 @@
     transition: none;
   }
 }
+
+/* «Comparar con»: una línea encima de la gráfica, pegada a la izquierda como ella. */
+.se-monedas__comparar {
+  position: sticky;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-monedas__comparar .se-form-control {
+  width: auto;
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 0.875rem;
+}

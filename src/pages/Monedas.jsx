@@ -23,20 +23,44 @@ import "./monedas.css";
  * nombre de la moneda es el botón. Las de paridad fija no tienen gráfica.
  */
 
-/** La fila desplegada bajo una moneda: pide su historia al abrirse. */
-const FilaGrafica = ({ codigo }) => {
+/**
+ * La fila desplegada bajo una moneda: pide su historia al abrirse y deja compararla con
+ * otra (las dos en % frente al dólar desde el mismo día, ver `GraficaDeMoneda`).
+ * Solo 30 días: la historia empezó el 14-oct-2026, y un selector de 3 meses o un año
+ * enseñaría lo mismo. Cuando haya historia, el periodo va junto a «Comparar con».
+ */
+const FilaGrafica = ({ codigo, opciones }) => {
   const { t } = useIdioma();
+  const [comparar, setComparar] = useState("");
   const puntos = useHistoriaMoneda(codigo);
+  const puntosComparar = useHistoriaMoneda(comparar || null);
+  const idSelector = `comparar-${codigo}`;
+  const cargando = puntos === null || (comparar && puntosComparar === null);
   return (
     <tr className="se-monedas__grafica">
       <td colSpan={5}>
-        {puntos === null ? <p className="se-monedas__nota">{t("monedas.grafica.cargando")}</p> : <GraficaDeMoneda codigo={codigo} puntos={puntos} />}
+        {opciones.length ? (
+          <div className="se-monedas__comparar">
+            <label htmlFor={idSelector}>{t("monedas.grafica.comparar")}</label>
+            <select id={idSelector} className="se-form-control" value={comparar} onChange={(e) => setComparar(e.target.value)}>
+              <option value="">{t("monedas.grafica.ninguna")}</option>
+              {opciones.map((c) => (
+                <option key={c} value={c}>{t(`monedas.nombres.${c}`)}</option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+        {cargando ? (
+          <p className="se-monedas__nota">{t("monedas.grafica.cargando")}</p>
+        ) : (
+          <GraficaDeMoneda codigo={codigo} puntos={puntos} comparar={comparar || null} puntosComparar={puntosComparar} />
+        )}
       </td>
     </tr>
   );
 };
 
-FilaGrafica.propTypes = { codigo: PropTypes.string.isRequired };
+FilaGrafica.propTypes = { codigo: PropTypes.string.isRequired, opciones: PropTypes.arrayOf(PropTypes.string).isRequired };
 
 
 export const Monedas = () => {
@@ -60,6 +84,9 @@ export const Monedas = () => {
   }, []);
 
   const monedas = state.datos?.monedas ?? [];
+  // Con qué se puede comparar: las que flotan y tienen dato (las de paridad fija serían
+  // una raya en el 0 %).
+  const comparables = monedas.filter((m) => !m.fija && m.valor !== null).map((m) => m.codigo);
   const actualizado = state.datos?.actualizado ? new Date(state.datos.actualizado) : null;
 
   return (
@@ -145,7 +172,7 @@ export const Monedas = () => {
                           ) : null}
                         </td>
                       </tr>
-                      {estaAbierta ? <FilaGrafica codigo={m.codigo} /> : null}
+                      {estaAbierta ? <FilaGrafica codigo={m.codigo} opciones={comparables.filter((c) => c !== m.codigo)} /> : null}
                       </Fragment>
                     );
                   })}

@@ -56,7 +56,13 @@
       "resumen": "Del {desde} al {hasta}: {n}",
       "datos": "Ver los datos",
       "colFecha": "Fecha",
-      "colValor": "Por 1 USD"
+      "colValor": "Por 1 USD",
+      "comparar": "Comparar con",
+      "ninguna": "Ninguna",
+      "tituloComparar": "Variación frente al dólar desde el {desde}",
+      "resumenComparar": "Del {desde} al {hasta}, variación frente al dólar: {a} {na}, {b} {nb}",
+      "lectura": "Subir es que hace falta más moneda para comprar un dólar: la moneda se debilita. No es la inflación, aunque suelen ir juntas.",
+      "colMoneda": "{codigo} por 1 USD"
     },
     "ficha": {
       "etiqueta": "{codigo}: {valor} por dólar, {variacion} hoy",

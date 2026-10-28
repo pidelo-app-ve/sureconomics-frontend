@@ -56,7 +56,13 @@
       "resumen": "From {desde} to {hasta}: {n}",
       "datos": "See the data",
       "colFecha": "Date",
-      "colValor": "Per 1 USD"
+      "colValor": "Per 1 USD",
+      "comparar": "Compare with",
+      "ninguna": "None",
+      "tituloComparar": "Change against the dollar since {desde}",
+      "resumenComparar": "From {desde} to {hasta}, change against the dollar: {a} {na}, {b} {nb}",
+      "lectura": "Going up means it takes more of the currency to buy one dollar: the currency is weakening. This is not inflation, though the two often move together.",
+      "colMoneda": "{codigo} per 1 USD"
     },
     "ficha": {
       "etiqueta": "{codigo}: {valor} per dollar, {variacion} today",

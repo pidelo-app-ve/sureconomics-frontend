@@ -706,7 +706,9 @@
 /* Opinión va sobre el papel de siempre: se probó un tono cálido propio y Ramón lo
    descartó (27-oct-2026). */
 
-/* 8b. El retrato de quien firma: cuadrado, en gris, pequeño. */
+/* 8b. El retrato de quien firma: cuadrado, pequeño y en color (en gris, como en la
+   prensa financiera, no gustó: 28-oct-2026). El recorte se sube un poco: en un
+   cuadrado de 44 px el centro cortaba la frente o dejaba la cara a medias. */
 .se-plana__analisis--con-retrato {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
@@ -719,7 +721,7 @@
   height: 44px;
   margin-top: 4px;
   object-fit: cover;
-  filter: grayscale(1);
+  object-position: 50% 25%;
   background: var(--color-hairline);
 }
 

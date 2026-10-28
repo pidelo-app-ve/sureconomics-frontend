@@ -141,15 +141,15 @@
       "haceDias": "{n} days ago"
     },
     "comercial": {
-      "titulo": "Advertise with SurEconomics",
-      "bajada": "Reach the people making economic decisions in the region, with formats that accompany the news instead of interrupting it. Tell us what you want to advertise.",
-      "formatos": "See formats and placements",
-      "abrir": "Write to our sales team",
+      "titulo": "Your brand, on the front page",
+      "bajada": "This is where the people who move the region's economy get their news: investors, executives and readers who follow it closely. Our placements sit alongside the news without covering it, with no third-party code and no reader tracking.",
+      "formatos": "See the formats",
+      "abrir": "Request a proposal",
       "empresa": "Company",
       "empresaOpcional": "Company (optional)",
-      "mensaje": "What you want to advertise",
-      "enviar": "Send to the sales team",
-      "directo": "Or write to us at {correo}",
+      "mensaje": "What you want to advertise, and when",
+      "enviar": "Request a proposal",
+      "directo": "Prefer email? Write to us at {correo}",
       "gracias": "The sales team will reply within one business day.",
       "asunto": "Advertising (from the home page)",
       "asuntoConEmpresa": "Advertising · {empresa} (from the home page)"

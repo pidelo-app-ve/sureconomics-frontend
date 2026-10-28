@@ -7826,6 +7826,14 @@ a.se-ad:focus-visible {
   overflow: hidden;
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
+/* En la rejilla, la ficha llena su celda como las piezas de al lado. La celda es flex
+   (`.se-artgrid--principal > *`) y la ficha, sin esto, encogía a su contenido: 290 px
+   en una columna de 313. */
+.se-ad-hueco > .se-ad--ficha {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
 a.se-ad--ficha:hover {
   transform: translateY(-2px);
   border-color: rgba(var(--se-tinte), 0.28);
@@ -11672,8 +11680,11 @@ html {
     align-items: start;
   }
 
+  /* 16:9, la forma de las portadas de los informes: en 4:3 la imagen se recortaba por
+     los lados y el título de la portada salía mochado («nsumo Masivo»). Al lado del
+     texto, además, queda más baja (~130 px en vez de 176). */
   .se-blog .se-doccard__media {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
   }
 
   .se-blog .se-doccard__body {

@@ -5,7 +5,7 @@
       "titulo": "Latin American currencies today: dollar, bolívar, peso, real and more — {marca}",
       "descripcion": "What a dollar is worth today in bolívars, Mexican pesos, reais, soles, Colombian, Chilean, Argentine and Dominican pesos, guaraníes and euros, according to each central bank."
     },
-    "entrada": "What a dollar is worth in each currency, according to its central bank. Updated hourly; a rate that isn't recent is not published.",
+    "entrada": "What one US dollar is worth in each currency, according to its central bank.",
     "columnas": {
       "moneda": "Currency",
       "porDolar": "Per 1 USD",

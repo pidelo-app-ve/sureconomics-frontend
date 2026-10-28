@@ -5,7 +5,7 @@
       "titulo": "Monedas de América Latina hoy: dólar, bolívar, peso, real y más — {marca}",
       "descripcion": "Cuánto vale un dólar hoy en bolívares, pesos mexicanos, reales, soles, pesos colombianos, chilenos, argentinos y dominicanos, guaraníes y euros, según cada banco central."
     },
-    "entrada": "Cuánto vale un dólar en cada moneda, según su banco central. Se actualiza cada hora; un dato que no sea reciente no se publica.",
+    "entrada": "Cuánto vale un dólar en cada moneda, según su banco central.",
     "columnas": {
       "moneda": "Moneda",
       "porDolar": "Por 1 USD",

@@ -1046,6 +1046,14 @@
   border-left: 1px solid rgba(var(--se-tinte), 0.08);
 }
 
+/* Abierta, la cabecera sube por encima de la barra de abajo del teléfono (60) y del aviso
+   de cookies (950): el cajón vive dentro de ella y no puede pasar de su nivel (50), así
+   que los dos se pintaban encima y tapaban «Entrar» y «Registrarse», que van al final
+   (29-oct-2026). */
+.se-header.se-header--menu-open {
+  z-index: 1001;
+}
+
 .se-header--menu-open .se-header__menu-panel {
   transform: translateX(0);
 }

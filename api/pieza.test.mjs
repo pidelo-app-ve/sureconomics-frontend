@@ -288,6 +288,19 @@ const sucio = inyectar(SHELL, {
 check("no se puede cerrar el title desde el contenido", !sucio.includes("<script>alert(1)"));
 check("no se puede escapar de un atributo", !sucio.includes('onload="alert(2)"'));
 
+// Los símbolos que `String.prototype.replace` interpreta en una cadena de sustitución
+// («$&», «$'», «$`», «$$»): en producción «US$&nbsp;36,5» llegaba como «USnbsp;36,5».
+const conDolares = inyectar(SHELL, {
+  titulo: "El dólar: US$& y $' en el titular",
+  html: "<p>Cuesta US$&nbsp;36,5 y $$ de más.</p>",
+  datos: { titulo: "a$`b" },
+});
+check("«$&» y «$'» del título llegan tal cual",
+  conDolares.includes("<title>El dólar: US$&amp; y $' en el titular — SurEconomics</title>"));
+check("«$&nbsp;» y «$$» del cuerpo llegan tal cual",
+  conDolares.includes("<p>Cuesta US$&nbsp;36,5 y $$ de más.</p>"));
+check("«$`» del JSON de la pieza llega tal cual", conDolares.includes('"titulo":"a$`b"'));
+
 // --- 6. La imagen: absoluta siempre ---
 //
 // El fallo que tuvo esto en produccion. La API devuelve `/media/image/...` para lo

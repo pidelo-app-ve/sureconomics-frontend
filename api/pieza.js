@@ -421,19 +421,25 @@ export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, i
   // El shell dice «indexar» para todo el sitio; una pieza que no existe lo cambia por
   // «no indexar», en vez de dejar las dos y que cada buscador elija.
   if (noindex) sinGenerico = sinGenerico.replace(/\s*<meta name="robots"[^>]*>/i, "");
+  // Lo que viene de la pieza (título, cabecera con su JSON, cuerpo) entra como FUNCIÓN
+  // de reemplazo, nunca como cadena: en una cadena `replace` interpreta `$&`, `$'`,
+  // `` $` `` y `$$`, y «US$&nbsp;36,5» llegaba al lector y a Google como «USnbsp;36,5».
+  const tal = (texto) => () => texto;
   const conTitulo = sinGenerico.replace(
     /<title>[\s\S]*?<\/title>/i,
-    titulo.includes("SurEconomics")
-      ? `<title>${escapar(titulo)}</title>`
-      : `<title>${escapar(titulo)} — SurEconomics</title>`
+    tal(
+      titulo.includes("SurEconomics")
+        ? `<title>${escapar(titulo)}</title>`
+        : `<title>${escapar(titulo)} — SurEconomics</title>`
+    )
   );
   // El shell dice `<html lang="es">`; una pieza leída en inglés lo dice en inglés.
   const conIdioma =
     idioma === "es" ? conTitulo : conTitulo.replace(/<html lang="[^"]*">/i, `<html lang="${idioma}">`);
-  const conCabecera = conIdioma.replace(/<\/head>/i, `  ${bloque}\n  </head>`);
+  const conCabecera = conIdioma.replace(/<\/head>/i, tal(`  ${bloque}\n  </head>`));
   if (!html) return conCabecera;
   // El shell trae `<div id="root"></div>` vacío: la pieza va dentro.
-  return conCabecera.replace(/<div id="root"><\/div>/i, `<div id="root">${html}</div>`);
+  return conCabecera.replace(/<div id="root"><\/div>/i, tal(`<div id="root">${html}</div>`));
 };
 
 const conDeadline = async (url, ms) => {

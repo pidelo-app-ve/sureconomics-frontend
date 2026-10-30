@@ -740,7 +740,7 @@ const TarjetaDeCampana = ({
                     await crearPieza(campana.id, { formato: formatoNuevo });
                     return actualizarCampana(campana.id, {});
                   },
-                  `${nombreDeFormato(formatoNuevo, ajustes?.formatos)} añadido — ábralo para ponerle el arte`,
+                  `${nombreDeFormato(formatoNuevo, ajustes?.formatos)} añadido, apagado — ábralo para ponerle el arte y encenderlo`,
                 ).then(onCambio)
               }
             >

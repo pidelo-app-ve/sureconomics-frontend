@@ -47,6 +47,10 @@ const ESTADOS = {
   activa: { texto: "Al aire", clase: "se-mural__sello--activa" },
   tope: { texto: "Tope alcanzado", clase: "se-mural__sello--tope" },
   fecha: { texto: "Fuera de fecha", clase: "se-mural__sello--tope" },
+  // El servidor tampoco la sirve si el anunciante está desactivado o si ninguna pieza
+  // está lista (con arte o titular, y destino): antes el mural decía «Al aire» igual.
+  anunciante: { texto: "Anunciante apagado", clase: "se-mural__sello--pausada" },
+  sin_pieza: { texto: "Sin pieza lista", clase: "se-mural__sello--borrador" },
   pausada: { texto: "En pausa", clase: "se-mural__sello--pausada" },
   borrador: { texto: "Borrador", clase: "se-mural__sello--borrador" },
   terminada: { texto: "Terminada", clase: "se-mural__sello--terminada" },
@@ -57,6 +61,8 @@ const ORDEN_DE_ESTADO = [
   "activa",
   "tope",
   "fecha",
+  "sin_pieza",
+  "anunciante",
   "pausada",
   "borrador",
   "terminada",

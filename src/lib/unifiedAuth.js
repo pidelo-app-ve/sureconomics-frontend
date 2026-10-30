@@ -20,7 +20,10 @@ const ensureClient = (client) => {
  *
  * @param {string} email
  * @param {string} password
- * @param {{ client?: { request: Function } }} [opts]
+ * @param {{ client?: { request: Function }, turnstile?: string }} [opts]
+ *   `turnstile`: el token de «¿es una persona?» que el servidor pide (429 con
+ *   `details.pide_turnstile`) cuando una cuenta lleva demasiados intentos fallidos; sin
+ *   él, el dueño quedaría fuera de su propia cuenta mientras un tercero la machaca.
  * @returns {Promise<{
  *   actor: "admin" | "user",
  *   role: string,
@@ -31,7 +34,7 @@ export const loginUnified = async (email, password, opts = {}) => {
   const client = ensureClient(opts.client);
   const data = await client.request("/auth/login", {
     method: "POST",
-    json: { email, password },
+    json: opts.turnstile ? { email, password, turnstile: opts.turnstile } : { email, password },
   });
   return {
     actor: data.actor,

@@ -116,10 +116,10 @@ export const verifyUserEmail = async ({ email, code }) => {
   return { data, tokens: pickTokens(data) };
 };
 
-export const resendVerificationCode = async ({ email }) =>
+export const resendVerificationCode = async ({ email, website = "", turnstile = "" }) =>
   userPublicRequest("/user-auth/resend-verification-code", {
     method: "POST",
-    json: { email },
+    json: { email, website, turnstile },
   });
 
 export const fetchMe = async () => {

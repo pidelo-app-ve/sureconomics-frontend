@@ -9,6 +9,7 @@ import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 import { loginUnified } from "../../lib/unifiedAuth";
 import { persistAuth } from "../../lib/authStorage";
 import { dispatchAdminAuthSync } from "../../lib/api";
@@ -89,6 +90,11 @@ export const CuentaEntrar = () => {
   // A donde va el foco tras un intento fallido. Un objeto nuevo en cada intento, para
   // que dos fallos seguidos en el mismo campo vuelvan a llevar el foco alli.
   const [enfocar, setEnfocar] = useState(null);
+  // Cuando una cuenta lleva demasiados intentos fallidos, el servidor no la cierra: pide
+  // la comprobación de persona (Turnstile) y deja entrar a quien la pasa con la
+  // contraseña buena. Así un tercero no puede dejar fuera a la redacción a voluntad.
+  const [pideTurnstile, setPideTurnstile] = useState(false);
+  const humano = useVerificacionHumana();
 
   useEffect(() => {
     if (!enfocar) return;
@@ -143,7 +149,12 @@ export const CuentaEntrar = () => {
 
     setIsSubmitting(true);
     try {
-      const result = await loginUnified(email, password);
+      let turnstile = "";
+      if (pideTurnstile) {
+        turnstile = await humano.pedirToken();
+        if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      }
+      const result = await loginUnified(email, password, turnstile ? { turnstile } : {});
 
       if (result.actor === "admin") {
         persistAuth({ ...result.tokens, role: result.role });
@@ -167,6 +178,19 @@ export const CuentaEntrar = () => {
         navigate("/cuenta/verificar-email", { replace: true, state: { email, volver: leerVolver(location) } });
       }
     } catch (err) {
+      humano.reiniciar();
+      if (err?.code === NO_PARECE_PERSONA) {
+        setErrorMessage(t("comun.antiBots.noPaso"));
+        setEnfocar({ id: ID_ERROR });
+        return;
+      }
+      if (err?.status === 429 && err?.details?.pide_turnstile) {
+        setPideTurnstile(true);
+        humano.activar();
+        setErrorMessage(t("cuenta.entrar.compruebePersona"));
+        setEnfocar({ id: ID_ERROR });
+        return;
+      }
       const { general, campos } = traducirError(err, t);
       if (campos) setErrores(campos);
       setErrorMessage(general);
@@ -215,6 +239,7 @@ export const CuentaEntrar = () => {
               {errorMessage}
             </p>
           ) : null}
+          {pideTurnstile ? humano.control : null}
 
           {/* `aria-disabled` y no `disabled` mientras se envia: un boton deshabilitado
               suelta el foco, que caia al `body`, y quien usa teclado tenia que volver a

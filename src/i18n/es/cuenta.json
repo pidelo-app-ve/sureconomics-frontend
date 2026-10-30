@@ -29,6 +29,7 @@
       "reviseDatos": "Revise los datos e inténtelo de nuevo.",
       "credenciales": "El correo o la contraseña no son correctos.",
       "demasiadosIntentos": "Demasiados intentos seguidos. Espere unos minutos y vuelva a probar.",
+      "compruebePersona": "Esta cuenta lleva demasiados intentos fallidos. Confirme que es una persona y vuelva a entrar con su contraseña.",
       "cuentaDesactivada": "Esta cuenta está desactivada. Escríbanos si cree que es un error.",
       "sinConexion": "No se pudo conectar. Revise su conexión e inténtelo de nuevo.",
       "fallo": "No se pudo iniciar sesión. Inténtelo de nuevo en un momento.",

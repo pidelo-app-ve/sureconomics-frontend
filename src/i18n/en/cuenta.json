@@ -29,6 +29,7 @@
       "reviseDatos": "Check your details and try again.",
       "credenciales": "The email or password is incorrect.",
       "demasiadosIntentos": "Too many attempts in a row. Wait a few minutes and try again.",
+      "compruebePersona": "This account has had too many failed attempts. Confirm you are a person and sign in again with your password.",
       "cuentaDesactivada": "This account has been deactivated. Contact us if you think this is a mistake.",
       "sinConexion": "Couldn't connect. Check your connection and try again.",
       "fallo": "Couldn't sign in. Please try again in a moment.",

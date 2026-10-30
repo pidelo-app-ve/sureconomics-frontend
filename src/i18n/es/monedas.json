@@ -60,6 +60,7 @@
       "comparar": "Comparar con",
       "ninguna": "Ninguna",
       "tituloComparar": "Variación frente al dólar desde el {desde}",
+      "sinComparar": "No hay datos suficientes de {nombre} para compararla; se muestra solo la moneda elegida.",
       "resumenComparar": "Del {desde} al {hasta}, variación frente al dólar: {a} {na}, {b} {nb}",
       "lectura": "Subir es que hace falta más moneda para comprar un dólar: la moneda se debilita. No es la inflación, aunque suelen ir juntas.",
       "colMoneda": "{codigo} por 1 USD"

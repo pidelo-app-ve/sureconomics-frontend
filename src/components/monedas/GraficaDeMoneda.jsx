@@ -39,6 +39,9 @@ const anclaDe = (posicion) => {
   return "middle";
 };
 
+/** Cuánto puede «arrastrarse» un dato hasta la fecha del cursor: un fin de semana largo. */
+const ARRASTRE = 4 * 864e5;
+
 const limpiar = (puntos) =>
   (puntos ?? [])
     .map((p) => ({ fecha: p.fecha, valor: Number(p.valor), t: Date.parse(p.fecha) }))
@@ -77,24 +80,29 @@ export const GraficaDeMoneda = ({ codigo, puntos, compacta = false, comparar = n
   const [activo, setActivo] = useState(null);
   const principal = useMemo(() => limpiar(puntos), [puntos]);
   const otra = useMemo(() => limpiar(puntosComparar), [puntosComparar]);
-  const comparando = Boolean(comparar) && otra.length >= 2 && principal.length >= 2;
 
-  // Las series que se dibujan. Comparando, cada una desde el primer día que tienen las
-  // dos y en % sobre su valor de ese día.
-  const series = useMemo(() => {
+  // Las series que se dibujan. Comparando, las dos parten del mismo día (el primero que
+  // tienen ambas) y van en % sobre el valor VIGENTE ese día: si un banco no publicó
+  // justo esa fecha, vale su último dato anterior, no el siguiente (la TRM de Colombia
+  // se guarda por «vigencia desde»: hay fila el sábado y ninguna el lunes). Si la otra
+  // serie no da para comparar, se dibuja la principal sola y se avisa.
+  const { series, comparando } = useMemo(() => {
     const base = [{ codigo, puntos: principal, clase: "a" }];
-    if (!comparando) return base.map((s) => ({ ...s, y: s.puntos.map((p) => p.valor) }));
+    const sola = { series: base.map((s) => ({ ...s, y: s.puntos.map((p) => p.valor) })), comparando: false };
+    if (!comparar || 2 > principal.length || 2 > otra.length) return sola;
     const desde = Math.max(principal[0].t, otra[0].t);
-    return [...base, { codigo: comparar, puntos: otra, clase: "b" }].map((s) => {
-      const tramo = s.puntos.filter((p) => p.t >= desde);
-      const inicial = tramo[0]?.valor;
-      return { ...s, puntos: tramo, y: tramo.map((p) => (p.valor / inicial - 1) * 100) };
+    const fechaDesde = new Date(desde).toISOString().slice(0, 10);
+    const comparadas = [...base, { codigo: comparar, puntos: otra, clase: "b" }].map((s) => {
+      const vigente = valorEn(s.puntos, desde); // nunca nulo: `desde` no es anterior a su primer punto
+      const tramo = [{ ...vigente, t: desde, fecha: fechaDesde }, ...s.puntos.filter((p) => p.t > desde)];
+      return { ...s, puntos: tramo, y: tramo.map((p) => (p.valor / vigente.valor - 1) * 100) };
     });
-  }, [codigo, comparar, comparando, principal, otra]);
+    if (comparadas.some((s) => 2 > s.puntos.length)) return sola;
+    return { series: comparadas, comparando: true };
+  }, [codigo, comparar, principal, otra]);
+  const sinComparar = Boolean(comparar) && !comparando;
 
-  const corta = (s) => 2 > s.puntos.length;
-  const faltanDatos = 2 > principal.length || series.some(corta);
-  if (faltanDatos) {
+  if (2 > principal.length) {
     return <p className="se-grafica__nota">{t("monedas.grafica.pocosDatos")}</p>;
   }
 
@@ -143,9 +151,11 @@ export const GraficaDeMoneda = ({ codigo, puntos, compacta = false, comparar = n
   };
 
   const tActivo = activo === null ? null : dias[activo];
+  // El último dato de cada serie hasta ese día, pero no más viejo que un fin de semana
+  // largo: un dato de hace una semana no se enseña junto a la fecha del cursor.
   const enCursor = tActivo === null ? [] : series.map((s) => {
     const p = valorEn(s.puntos, tActivo);
-    return p ? { ...s, p, v: s.y[s.puntos.indexOf(p)] } : null;
+    return p && ARRASTRE >= tActivo - p.t ? { ...s, p, v: s.y[s.puntos.indexOf(p)] } : null;
   }).filter(Boolean);
   const fechaCursor = tActivo === null ? null : new Date(tActivo).toISOString().slice(0, 10);
   const anclaCursor = anclaDe(tActivo === null ? null : (tActivo - tInicio) / Math.max(1, tFin - tInicio));
@@ -183,6 +193,9 @@ export const GraficaDeMoneda = ({ codigo, puntos, compacta = false, comparar = n
           ))}
         </span>
       </figcaption>
+      {sinComparar ? (
+        <p className="se-grafica__nota" role="status">{t("monedas.grafica.sinComparar", { nombre: nombreDe(comparar) })}</p>
+      ) : null}
       <svg
         className="se-grafica__svg"
         viewBox={`0 0 ${ANCHO} ${alto}`}

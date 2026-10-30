@@ -60,6 +60,7 @@
       "comparar": "Compare with",
       "ninguna": "None",
       "tituloComparar": "Change against the dollar since {desde}",
+      "sinComparar": "There is not enough data for {nombre} to compare it; only the selected currency is shown.",
       "resumenComparar": "From {desde} to {hasta}, change against the dollar: {a} {na}, {b} {nb}",
       "lectura": "Going up means it takes more of the currency to buy one dollar: the currency is weakening. This is not inflation, though the two often move together.",
       "colMoneda": "{codigo} per 1 USD"

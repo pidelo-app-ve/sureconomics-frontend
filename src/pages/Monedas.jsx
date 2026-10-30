@@ -86,7 +86,9 @@ export const Monedas = () => {
   const monedas = state.datos?.monedas ?? [];
   // Con qué se puede comparar: las que flotan y tienen dato (las de paridad fija serían
   // una raya en el 0 %).
-  const comparables = monedas.filter((m) => !m.fija && m.valor !== null).map((m) => m.codigo);
+  // Las mismas que pueden abrir su gráfica: una con el dato viejo saldría comparada con
+  // la fecha de hoy, justo lo que la regla de arriba prohíbe.
+  const comparables = monedas.filter((m) => !m.fija && m.valor !== null && !m.vieja).map((m) => m.codigo);
   const actualizado = state.datos?.actualizado ? new Date(state.datos.actualizado) : null;
 
   return (

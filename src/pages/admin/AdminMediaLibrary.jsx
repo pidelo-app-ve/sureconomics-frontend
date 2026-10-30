@@ -171,7 +171,7 @@ export const AdminMediaLibrary = () => {
     const handleDelete = async (row) => {
         await confirm({
             title: "Eliminar archivo",
-            description: `¿Eliminar «${row.original_filename || row.url || row.id}»? Solo se puede si ninguna pieza lo usa.`,
+            description: `¿Eliminar «${row.original_filename || row.url || row.id}»? Solo se puede si nada lo usa: ni una pieza, ni un anuncio, ni el boletín, ni un retrato. Se borra de verdad, con sus tallas.`,
             confirmLabel: "Eliminar",
             onConfirm: async () => {
                 await deleteAdminMedia(row.id);

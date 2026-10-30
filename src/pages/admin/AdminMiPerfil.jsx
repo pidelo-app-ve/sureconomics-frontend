@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { changeAdminMyPassword, getAdminMe, updateAdminMe } from "../../services/adminMeService";
 import { ErrorState, LoadingState } from "../../components/content";
+import { dispatchAdminAuthSync } from "../../lib/api";
+import { persistAuth } from "../../lib/authStorage";
 import { applyPageMeta } from "../../lib/seo";
 
 const ROLE_LABELS = {
@@ -59,10 +61,21 @@ export const AdminMiPerfil = () => {
     }
     setPasswordState({ status: "loading", error: null, message: "" });
     try {
-      await changeAdminMyPassword({
+      const respuesta = await changeAdminMyPassword({
         current_password: passwordForm.current_password,
         new_password: passwordForm.new_password,
       });
+      // Cambiar la contraseña cierra todas las sesiones, también esta: el servidor
+      // devuelve un par de tokens nuevo y se guarda, o la siguiente petición daría 401.
+      const tokens = respuesta?.data ?? respuesta;
+      if (tokens?.access_token && tokens?.refresh_token) {
+        persistAuth({
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          expiresIn: tokens.expires_in,
+        });
+        dispatchAdminAuthSync();
+      }
       setPasswordForm({ current_password: "", new_password: "", confirm_password: "" });
       setPasswordState({ status: "success", error: null, message: "Contraseña actualizada correctamente." });
     } catch (err) {

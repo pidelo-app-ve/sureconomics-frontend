@@ -74,6 +74,8 @@
       "trasVerificar": "Tras verificar, puede {enlace}.",
       "entrar": "entrar",
       "codigo": "Código de verificación",
+      "contrasena": "Su contraseña",
+      "contrasenaAyuda": "La que eligió al registrarse. Si no la recuerda, vuelva a registrarse con el mismo correo: le llegará un código nuevo.",
       "verificando": "Verificando…",
       "verificar": "Verificar",
       "solicitarNuevo": "Solicitar un nuevo código"

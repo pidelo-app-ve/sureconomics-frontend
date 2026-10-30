@@ -108,10 +108,12 @@ export const loginUser = async (email, password) => {
   return { data, tokens: pickTokens(data) };
 };
 
-export const verifyUserEmail = async ({ email, code }) => {
+export const verifyUserEmail = async ({ email, code, password = "" }) => {
+  // `password`: la cuenta la pide además del código, para que verificar no abra la
+  // cuenta a quien registró el correo de otro (el servidor la exige si la cuenta la tiene).
   const data = await userPublicRequest("/user-auth/verify-email", {
     method: "POST",
-    json: { email, code },
+    json: password ? { email, code, password } : { email, code },
   });
   return { data, tokens: pickTokens(data) };
 };

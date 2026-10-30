@@ -121,8 +121,8 @@ export const UserAuthProvider = ({ children }) => {
   );
 
   const verifyEmail = useCallback(
-    async ({ email, code }) => {
-      const { tokens } = await userAuthService.verifyUserEmail({ email, code });
+    async ({ email, code, password = "" }) => {
+      const { tokens } = await userAuthService.verifyUserEmail({ email, code, password });
       if (!tokens?.accessToken) {
         return { authenticated: false };
       }

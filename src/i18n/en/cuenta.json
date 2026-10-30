@@ -74,6 +74,8 @@
       "trasVerificar": "Once verified, you can {enlace}.",
       "entrar": "sign in",
       "codigo": "Verification code",
+      "contrasena": "Your password",
+      "contrasenaAyuda": "The one you chose when signing up. If you don't remember it, sign up again with the same email: you'll get a new code.",
       "verificando": "Verifying…",
       "verificar": "Verify",
       "solicitarNuevo": "Request a new code"

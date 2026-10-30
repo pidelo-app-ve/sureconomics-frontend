@@ -17,6 +17,10 @@ export const CuentaVerificarEmail = () => {
   // Quien venía de algo concreto (anotar su carrera en El Analista) vuelve ahí.
   const volver = leerVolver(location);
   const [code, setCode] = useState("");
+  // La contraseña con la que se registró: el código prueba que el correo es suyo y la
+  // contraseña que la cuenta también. Así verificar no le abre la cuenta a quien haya
+  // registrado el correo de otro; quien no la sepa, vuelve a registrarse.
+  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +37,7 @@ export const CuentaVerificarEmail = () => {
     setInfoMessage("");
     setIsSubmitting(true);
     try {
-      const result = await verifyEmail({ email, code });
+      const result = await verifyEmail({ email, code, password });
       if (result.authenticated) {
         setInfoMessage(t("cuenta.verificar.verificadoRedirigiendo"));
         navigate(volver ?? "/cuenta", { replace: true });
@@ -122,6 +126,22 @@ export const CuentaVerificarEmail = () => {
                 aria-invalid={Boolean(errorMessage)}
                 aria-describedby={errorMessage ? "verify-error" : undefined}
               />
+            </label>
+
+            <label className="se-form-field" htmlFor="verify-password">
+              <span className="se-form-label">{t("cuenta.verificar.contrasena")}</span>
+              <input
+                id="verify-password"
+                type="password"
+                name="password"
+                autoComplete="current-password"
+                className="se-form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isSubmitting}
+                aria-describedby="verify-password-help"
+              />
+              <span id="verify-password-help" className="se-text-small">{t("cuenta.verificar.contrasenaAyuda")}</span>
             </label>
 
             <button type="submit" className="se-btn" disabled={isSubmitting}>

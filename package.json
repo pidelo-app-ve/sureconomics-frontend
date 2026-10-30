@@ -3,6 +3,9 @@
     "private": true,
     "version": "0.0.0",
     "type": "module",
+    "overrides": {
+        "prosemirror-view": "^1.42.8"
+    },
     "scripts": {
         "dev": "vite",
         "start": "vite",
@@ -24,11 +27,11 @@
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },
     "dependencies": {
-        "@tiptap/extension-link": "^3.28.0",
-        "@tiptap/extension-placeholder": "^3.28.0",
-        "@tiptap/pm": "^3.28.0",
-        "@tiptap/react": "^3.28.0",
-        "@tiptap/starter-kit": "^3.28.0",
+        "@tiptap/extension-link": "^3.32.2",
+        "@tiptap/extension-placeholder": "^3.32.2",
+        "@tiptap/pm": "^3.32.2",
+        "@tiptap/react": "^3.32.2",
+        "@tiptap/starter-kit": "^3.32.2",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

@@ -160,9 +160,13 @@ const AdminShell = () => {
               <NavLink to="/admin/educacion" className={linkClass} end onClick={closeMenu}>
                 Educación
               </NavLink>
-              <NavLink to="/admin/publicidad" className={linkClass} end onClick={closeMenu}>
-                Publicidad
-              </NavLink>
+              {/* Información comercial: contactos, notas y contratos de los anunciantes.
+                  Solo para quien vende y administra, como las escrituras del backend. */}
+              {canSeeEditorial ? (
+                <NavLink to="/admin/publicidad" className={linkClass} end onClick={closeMenu}>
+                  Publicidad
+                </NavLink>
+              ) : null}
             </NavGroup>
 
             {/* Estuvo oculto mientras el aviso de cookies estaba en revision legal: no

@@ -40,6 +40,9 @@ const yaCerrada = () => {
   }
 };
 
+/** Un ciclo vacío con identidad fija: `useRotacion` lo compara por identidad. */
+const SIN_NADA = [];
+
 export const BarraPublicitaria = () => {
   // Por `useRotacion` aunque **no rote**: con un solo turno el reloj ni arranca, y lo
   // que se aprovecha es el contador. La impresion la reporta el navegador al verse
@@ -50,12 +53,6 @@ export const BarraPublicitaria = () => {
   // texto. Cambiarlo cada siete segundos delante de quien lee es exactamente el
   // comportamiento que hace que la gente instale bloqueadores.
   const todos = useCiclo(ESPACIOS.BARRA_INFERIOR);
-  // Memorizado: `slice` devuelve un array nuevo en cada render, y `useRotacion` usa la
-  // identidad del ciclo para saber cuando empieza uno nuevo. Sin esto reiniciaria el
-  // registro de "ya contadas" en cada repintado y la misma impresion se reportaria una
-  // y otra vez -- un contador que se dispara solo, del lado que factura.
-  const ciclo = useMemo(() => todos.slice(0, 1), [todos]);
-  const { contenedor, pieza: hueco } = useRotacion(ciclo.slice(0, 1));
   const [cerrada, setCerrada] = useState(true);
 
   // En un efecto y no en el valor inicial del estado: leer el almacenamiento durante el
@@ -76,6 +73,16 @@ export const BarraPublicitaria = () => {
     window.addEventListener(EVENTO_CONSENTIMIENTO, mirar);
     return () => window.removeEventListener(EVENTO_CONSENTIMIENTO, mirar);
   }, []);
+
+  // El ciclo solo existe cuando la barra se pinta: cerrada o detras del aviso no hay
+  // nodo, y `useRotacion` no cuenta lo que no tiene caja. Memorizado, y con la misma
+  // identidad hasta que cambie algo: `useRotacion` usa la identidad del ciclo para saber
+  // cuando empieza uno nuevo, y un `slice` en cada render reiniciaba el registro de "ya
+  // contadas" y reportaba la misma impresion en cada repintado (auditoría, oct-2026).
+  const visible = Boolean(todos[0]) && !cerrada && !esperandoAviso;
+  const ciclo = useMemo(() => (visible ? todos.slice(0, 1) : SIN_NADA), [todos, visible]);
+  const { contenedor } = useRotacion(ciclo);
+  const hueco = todos[0] ?? null;
 
   if (!hueco || cerrada || esperandoAviso) return null;
 

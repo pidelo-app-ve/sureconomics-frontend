@@ -1,5 +1,6 @@
 {
   "piezas": {
+    "errorCarga": "No se pudo cargar esta pieza ahora mismo. Vuelva a intentarlo en unos segundos.",
     "pieza": {
       "meta": {
         "titulo": "{titulo} — {marca}"

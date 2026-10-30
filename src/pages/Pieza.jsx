@@ -6,7 +6,7 @@ import { Enlace, Redirigir } from "../components/Enlace";
 import { sinPrefijo } from "../i18n/motor";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
-import { LoadingState } from "../components/content";
+import { ErrorState, LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
 import { FichaDeMoneda } from "../components/monedas/FichaDeMoneda";
@@ -233,17 +233,21 @@ export const Pieza = () => {
         setState({ status: valida ? "success" : "missing", fila: valida });
         if (valida) cargarRelacionadas(valida);
       })
-      .catch(() => {
-        if (alive) setState({ status: "missing", fila: null });
+      .catch((err) => {
+        if (!alive) return;
+        // Solo un 404 es «no existe». Lo demás (sin red, 429, 502 mientras Render
+        // reinicia) es pasajero: se dice así, con reintento, y sin `noindex`. Es el
+        // mismo criterio que api/pieza.js; antes todo caía en «no encontrada».
+        setState(err?.status === 404 ? { status: "missing", fila: null } : { status: "error", fila: null, error: err });
       });
     return () => {
       alive = false;
     };
     // `state` no va en las dependencias a propósito: solo se mira para saber si la
     // pieza del primer render vino con el HTML, y volver a correr con cada cambio de
-    // estado pediría la pieza en bucle.
+    // estado pediría la pieza en bucle. `intento` sí: es el botón de reintentar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [slug, intento]);
 
   // `lang` en las dependencias: `piezaFromApi` lee el idioma del motor, y es lo que hace
   // que la pieza cambie de idioma sin volver a pedirla.
@@ -252,6 +256,8 @@ export const Pieza = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const relacionadas = useMemo(() => piezasFromApi(relacionadasFilas), [relacionadasFilas, lang]);
   const cargando = useDelayedFlag(state.status === "loading");
+  // Cuántas veces se pulsó «Reintentar» tras un fallo pasajero: vuelve a pedir la pieza.
+  const [intento, setIntento] = useState(0);
 
   // El título, la descripción y las señales para Google, en su idioma. Una pieza sin
   // versión en inglés (`soloEspanol`) sale en `/en` con `noindex` y el canónico
@@ -315,6 +321,18 @@ export const Pieza = () => {
       <main className="se-blog se-articles" role="main">
         <section className="se-section">
           <div className="se-container">{cargando ? <LoadingState title={t("comun.cargando")} /> : null}</div>
+        </section>
+      </main>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <main className="se-blog se-articles" role="main">
+        <section className="se-section">
+          <div className="se-container">
+            <ErrorState title={t("piezas.errorCarga")} error={state.error} onRetry={() => setIntento((n) => n + 1)} />
+          </div>
         </section>
       </main>
     );

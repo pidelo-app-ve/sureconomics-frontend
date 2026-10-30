@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Enlace, Redirigir } from "../components/Enlace";
-import { LoadingState } from "../components/content";
+import { ErrorState, LoadingState } from "../components/content";
 import { rutaDePieza } from "../lib/pieza";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { useIdioma } from "../i18n/ProveedorIdioma";
@@ -24,6 +24,7 @@ export const PiezaRedirect = () => {
   const { slug } = useParams();
   const { t } = useIdioma();
   const [state, setState] = useState({ status: "loading", destino: null });
+  const [intento, setIntento] = useState(0);
   const cargando = useDelayedFlag(state.status === "loading");
 
   useEffect(() => {
@@ -36,13 +37,15 @@ export const PiezaRedirect = () => {
           destino: pieza ? rutaDePieza(pieza) : null,
         });
       })
-      .catch(() => {
-        if (alive) setState({ status: "missing", destino: null });
+      .catch((err) => {
+        // Solo un 404 es «no existe»; un fallo pasajero no debe mandar al lector a
+        // «no encontrada» (mismo criterio que `Pieza.jsx`).
+        if (alive) setState({ status: err?.status === 404 ? "missing" : "error", destino: null, error: err });
       });
     return () => {
       alive = false;
     };
-  }, [slug]);
+  }, [slug, intento]);
 
   if (state.status === "loading") {
     return (
@@ -50,6 +53,18 @@ export const PiezaRedirect = () => {
         <section className="se-section">
           <div className="se-container">
             {cargando ? <LoadingState title={t("piezas.redireccion.buscando")} /> : null}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <main className="se-blog se-articles" role="main">
+        <section className="se-section">
+          <div className="se-container">
+            <ErrorState title={t("piezas.errorCarga")} error={state.error} onRetry={() => setIntento((n) => n + 1)} />
           </div>
         </section>
       </main>

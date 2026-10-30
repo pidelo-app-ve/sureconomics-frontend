@@ -1,0 +1,16 @@
+# Avisos y PR de dependencias (auditoría de oct-2026: 47 avisos de npm llegaron sin que
+# nada avisara). Activar también «Dependabot alerts» en Settings → Code security.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      tiptap:
+        patterns: ["@tiptap/*", "prosemirror-*"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly

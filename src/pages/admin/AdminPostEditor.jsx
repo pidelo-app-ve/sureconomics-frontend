@@ -5,7 +5,7 @@ import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
 import {
     Link,
-    unstable_useBlocker as useBlocker,
+    useBlocker,
     useLocation,
     useNavigate,
     useParams,

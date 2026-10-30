@@ -49,15 +49,12 @@ jobs:
       # Las etiquetas meta de una pieza las genera una función de Vercel, y tiene su
       # propia prueba. Si se rompe, WhatsApp y X dejan de mostrar la vista previa al
       # compartir un artículo, que es de las cosas que nadie nota hasta que importa.
-      - name: Prueba de las vistas previas
-        run: npm run test:og
-      - name: Enlaces que se pintan
-        run: npm run test:enlaces
-      - name: Enlaces de YouTube (shorts incluidos) y duraciones
-        run: npm run test:youtube
-      - name: Mapa del sitio
-        run: npm run test:sitemap
-      - name: Motor de idiomas
-        run: npm run test:i18n
-      - name: Juegos (guacamaya y La Clave)
-        run: npm run test:guacamaya && npm run test:clave
+      # Un solo paso que encuentra todos los `*.test.mjs`: cuatro suites (recorridos,
+      # relojes, última hora y la regresión del «[object Object]» de la publicidad)
+      # se habían quedado fuera por enumerarlas una a una (auditoría, oct-2026).
+      - name: Pruebas
+        run: npm test
+
+      # Lo que llega al navegador, sin los avisos que solo afectan al desarrollo.
+      - name: Dependencias con avisos
+        run: npm audit --omit=dev --audit-level=high

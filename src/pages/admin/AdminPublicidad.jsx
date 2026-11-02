@@ -15,7 +15,7 @@ import {
   uploadAdminMediaImage,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { arteTelefonoDesdeUrl } from "../../lib/arteTelefono";
+import { arteTelefonoDesdeUrl, esArteAutomaticoViejo } from "../../lib/arteTelefono";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
@@ -77,19 +77,27 @@ import {
 /** Si el formato publica una tira (y por tanto necesita su arte de teléfono). */
 const usaTira = (formato) => (GUIA_DE_FORMATO[formato]?.arte ?? []).some((a) => a.campo === "cinta");
 
-/** Las piezas de tira sin arte de teléfono, con su anunciante. */
+/**
+ * Las piezas de tira sin arte de teléfono, con su anunciante. También las que lo tienen
+ * hecho por la primera versión del arte automático, que salía deshecho con fotos y
+ * logos: esas se rehacen. Las subidas a mano no.
+ */
 const piezasSinArteTelefono = (anunciantes) =>
   (anunciantes ?? []).flatMap((a) =>
     (a.campanas ?? []).flatMap((c) =>
       (c.creatividades ?? [])
-        .filter((p) => usaTira(p.formato) && p.cinta_asset?.url && !p.cinta_movil_id)
+        .filter(
+          (p) =>
+            usaTira(p.formato) &&
+            p.cinta_asset?.url &&
+            (!p.cinta_movil_id || esArteAutomaticoViejo(p.cinta_movil_asset)),
+        )
         .map((p) => ({ pieza: p, anunciante: a })),
     ),
   );
 
-/** Lo que se dice cuando una tira no se deja partir sola. */
-const NO_SE_PARTE =
-  "Esta tira no se deja partir sola (por ejemplo, lleva una foto de fondo). Suba el arte de teléfono a mano.";
+/** Lo que se dice cuando la tira no se pudo leer para hacer su arte de teléfono. */
+const NO_SE_PARTE = "No se pudo leer la tira para hacer su arte de teléfono. Suba uno a mano.";
 
 const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
   const [abierta, setAbierta] = useState(false);
@@ -319,7 +327,7 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
             <AssetField
               id={`p-${pieza.id}-cinta-movil`}
               label="Arte para teléfono — 1200 × 600 px"
-              hint="Lo mismo que la tira, con el logo, la frase y el botón apilados. Se hace solo al subir la tira; si no le gusta, suba el suyo. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto que la tira."
+              hint="La misma tira en dos pisos (la mitad izquierda arriba, la derecha debajo); un logo, entero y grande. Se hace sola al subir la tira; si no le gusta, suba la suya. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto que la tira."
               forma={{ ancho: 2, alto: 1 }}
               kind="image"
               value={borrador.cinta_movil_id ?? null}
@@ -1221,7 +1229,7 @@ export const AdminPublicidad = () => {
     if (hechas) toastSuccess(`${hechas} ${hechas === 1 ? "arte de teléfono hecho" : "artes de teléfono hechos"}`);
     if (sinHacer.length) {
       setError(
-        `Sin hacer: ${[...new Set(sinHacer)].join(", ")}. Su tira no se deja partir sola; súbales el arte de teléfono a mano.`,
+        `Sin hacer: ${[...new Set(sinHacer)].join(", ")}. No se pudo leer su tira; súbales el arte de teléfono a mano.`,
       );
     }
     cargar();
@@ -1339,11 +1347,12 @@ export const AdminPublicidad = () => {
               <p>
                 <b>
                   {sinArteTelefono.length}{" "}
-                  {sinArteTelefono.length === 1 ? "pieza no tiene" : "piezas no tienen"} arte de
-                  teléfono.
+                  {sinArteTelefono.length === 1 ? "pieza tiene" : "piezas tienen"} el arte de
+                  teléfono por hacer o por rehacer.
                 </b>{" "}
-                En el teléfono salen como una tira de unos 48 px de alto y casi no se ven. Se
-                puede hacer solo, desde la tira de cada una.
+                Sin él, en el teléfono salen como una tira de unos 48 px de alto. Se hace solo,
+                desde la tira de cada una: la misma tira en dos pisos. Los subidos a mano no se
+                tocan.
               </p>
               <div className="se-admin-pub__acciones">
                 <button

@@ -14446,25 +14446,6 @@ html {
   }
 }
 
-/* La tira entre las noticias pequeñas: ocupa el sitio de una nota, sin el margen que
-   trae la franja (ya lo da la nota). */
-.se-noticias__nota--anuncio {
-  display: block;
-}
-
-.se-noticias__nota--anuncio .se-ad--franja-lista {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-/* En el teléfono no va (ver `DOS_COLUMNAS` en la portada): si se gira la tableta
-   después de cargar, se esconde. */
-@media (max-width: 700px) {
-  .se-noticias__nota--anuncio {
-    display: none;
-  }
-}
-
 /* La tarjeta bajo las monedas de la primera plana. Llena el blanco que queda hasta el
    final de la columna: la columna de las monedas va en flex y la tarjeta crece; dentro,
    el logo en una placa que se lleva el alto que sobre, y debajo la etiqueta, la frase y

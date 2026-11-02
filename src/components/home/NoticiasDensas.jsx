@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
@@ -39,12 +38,8 @@ const Meta = ({ pieza }) => (
 );
 Meta.propTypes = { pieza: PropTypes.object.isRequired };
 
-/** Detrás de cuántas notas pequeñas va la tira de `espacioEntreNotas`. */
-const NOTAS_ANTES_DE_LA_TIRA = 4;
-
-export const NoticiasDensas = ({ items, espacioDeAnuncio, espacioEntreNotas = null, carril = null, sinApertura = false }) => {
+export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null, sinApertura = false }) => {
   const hay = useHayAnuncio(espacioDeAnuncio, "lista");
-  const hayEntreNotas = useHayAnuncio(espacioEntreNotas, "lista");
   const hayCarril = Boolean(carril);
   // `sinApertura`: las tandas de «Cargar más», que siguen la lista sin otra principal.
   const [lead, ...resto] = sinApertura ? [null, ...items] : items;
@@ -75,16 +70,8 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, espacioEntreNotas = nu
             que para este medio es lo primero por lo que un lector ordena. */}
         {resto.length ? (
           <ol className="se-noticias__lista">
-            {resto.map((n, i) => (
-              <Fragment key={n.id}>
-              {/* Una tira larga en el sitio de una nota: cabe en la columna como una
-                  noticia más y lleva su etiqueta de publicidad. */}
-              {hayEntreNotas && i === NOTAS_ANTES_DE_LA_TIRA ? (
-                <li className="se-noticias__nota se-noticias__nota--anuncio">
-                  <EspacioPublicitario espacio={espacioEntreNotas} variante="lista" />
-                </li>
-              ) : null}
-              <li className="se-noticias__nota">
+            {resto.map((n) => (
+              <li key={n.id} className="se-noticias__nota">
                 <Enlace to={rutaDePieza(n)} className="se-noticias__mini" aria-hidden="true" tabIndex={-1}>
                   <CardMedia pieza={n} ancho={400} etiqueta={null} sizes="128px" />
                 </Enlace>
@@ -97,7 +84,6 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, espacioEntreNotas = nu
                   </h3>
                 </div>
               </li>
-              </Fragment>
             ))}
           </ol>
         ) : null}
@@ -119,8 +105,6 @@ NoticiasDensas.propTypes = {
   /** Sin la principal: las tandas de «Cargar más» siguen la lista. */
   sinApertura: PropTypes.bool,
   items: listaDePiezas({ resumen: PropTypes.string, imagenUrl: PropTypes.string }),
-  /** La clave del hueco de la tira que va entre las notas pequeñas. */
-  espacioEntreNotas: PropTypes.string,
   /** La clave del hueco de publicidad del final de la columna. */
   espacioDeAnuncio: PropTypes.string,
   /** Lo que va en el carril de la derecha («Lo más leído»); sin él, la lista ocupa todo. */

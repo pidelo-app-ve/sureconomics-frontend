@@ -14465,43 +14465,72 @@ html {
   }
 }
 
-/* La tarjeta chica bajo las monedas de la primera plana: el logo a la izquierda y el
-   texto a la derecha, en una caja de filete como la del lateral de la pieza. */
-.se-plana__tarjeta-ad {
-  margin-top: var(--se-space-lg);
-}
+/* La tarjeta bajo las monedas de la primera plana. Llena el blanco que queda hasta el
+   final de la columna: la columna de las monedas va en flex y la tarjeta crece; dentro,
+   el logo en una placa que se lleva el alto que sobre, y debajo la etiqueta, la frase y
+   «Conocer más». Caja de filete, como la del lateral de la pieza. */
+@media (min-width: 960px) {
+  .se-plana__monedas {
+    display: flex;
+    flex-direction: column;
+  }
 
-.se-plana__tarjeta-ad .se-ad--rail {
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  column-gap: 14px;
-  row-gap: 2px;
-  align-items: center;
-  margin: 0;
-  padding: 12px;
-  text-align: left;
-  border: 1px solid var(--filete, var(--color-hairline));
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
+  .se-plana__tarjeta-ad {
+    display: flex;
+    flex: 1 1 auto;
+    margin-top: var(--se-space-lg);
+  }
 
-.se-plana__tarjeta-ad .se-ad__media--rail {
-  grid-row: 1 / span 3;
-  aspect-ratio: 2 / 1;
-  margin: 0;
-  padding: 6px 8px;
-  border-radius: 0;
-}
+  .se-plana__tarjeta-ad .se-ad--rail {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 14px;
+    text-align: left;
+    border: 1px solid var(--filete, var(--color-hairline));
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: border-color 160ms ease-out;
+  }
 
-.se-plana__tarjeta-ad .se-ad__titular {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.3;
-}
+  .se-plana__tarjeta-ad a.se-ad--rail:hover {
+    border-color: var(--color-ink);
+  }
 
-.se-plana__tarjeta-ad .se-ad__cta {
-  font-size: 0.8125rem;
+  .se-plana__tarjeta-ad .se-ad__media--rail {
+    flex: 1 1 auto;
+    min-height: 110px;
+    max-height: 220px;
+    aspect-ratio: auto;
+    margin: 0 0 8px;
+    padding: 14px 18px;
+    border-radius: 0;
+    border-color: var(--filete, var(--color-hairline));
+  }
+
+  .se-plana__tarjeta-ad .se-ad__media--rail .se-ad__logo {
+    width: auto;
+    max-width: 90%;
+    max-height: 120px;
+    object-fit: contain;
+  }
+
+  .se-plana__tarjeta-ad .se-ad__titular {
+    margin: 0;
+    font-family: var(--titular);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+  }
+
+  .se-plana__tarjeta-ad .se-ad__cta {
+    margin-top: 2px;
+    font-size: 0.875rem;
+  }
 }
 
 @media (max-width: 959px) {

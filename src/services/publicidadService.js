@@ -35,6 +35,8 @@ export const ESPACIOS = {
   PORTADA_NATIVO_ARTICULOS: "portada-nativo-articulos",
   // La tira entre las noticias pequeñas de la portada, en el sitio de una nota.
   PORTADA_NOTICIAS: "portada-noticias",
+  // La tarjeta nativa dentro de la rejilla de Editorial de la portada.
+  PORTADA_NATIVO_EDITORIAL: "portada-nativo-editorial",
   PORTADA_BANNER: "portada-banner",
   // El banner de debajo de la primera plana: el primero que se ve al bajar.
   PORTADA_APERTURA: "portada-apertura",

@@ -14509,3 +14509,24 @@ html {
     display: none;
   }
 }
+
+/* En el teléfono la portada enseña tres tarjetas de Artículos y de Editorial, y la de
+   publicidad caía más abajo, entre las ocultas: no se veía nunca. Ahí va la segunda,
+   detrás de la primera pieza (lejos del banner que sigue a Editorial). */
+@media (max-width: 599px) {
+  .se-portada .se-format .se-artgrid > * {
+    order: 2;
+  }
+
+  .se-portada .se-format .se-artgrid > :first-child {
+    order: 0;
+  }
+
+  .se-portada .se-format .se-artgrid > .se-ad-hueco {
+    order: 1;
+  }
+
+  .se-portada .se-format:not(.se-format--expandido) .se-artgrid > .se-ad-hueco {
+    display: flex;
+  }
+}

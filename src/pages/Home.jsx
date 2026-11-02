@@ -95,8 +95,8 @@ const PASO = {
   alpunto: 4,
 };
 
-/* Las dos rejillas de tarjetas de la portada llevan dentro su tarjeta nativa. Los
-   demas formatos no: editorial es una lista, y entrevista, informe y podcast tienen
+/* Las rejillas de tarjetas de la portada (Artículos y, desde nov-2026, Editorial)
+   llevan dentro su tarjeta nativa. Los demas formatos no: editorial era una lista, y entrevista, informe y podcast tienen
    retícula propia -- meter ahi una tarjeta de anuncio obligaria a un pintor por
    formato para que no desentonara, y la portada acabaria siendo mas anuncio que
    portada. Con dos basta. */
@@ -127,7 +127,7 @@ const LAYOUTS = {
       principal
     />
   ),
-  editorial: (items) => <EditorialList items={items} />,
+  editorial: (items) => <EditorialList items={items} espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO_EDITORIAL} />,
   entrevista: (items) => <InterviewGrid items={items} />,
   informe: (items) => <ReportGrid items={items} />,
   podcast: (items) => <PodcastGrid items={items} />,
@@ -362,7 +362,7 @@ export const Home = () => {
   // El bloque del boletin (`ESPACIOS.BOLETIN`) lo pinta esta misma vista, asi que su
   // hueco se pide aqui: es la pagina la que declara, no el componente.
   useEspacios({
-    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ...(tiraEntreNotas ? [ESPACIOS.PORTADA_NOTICIAS] : []), ...(tarjetaBajoMonedas ? [ESPACIOS.PORTADA_TARJETA] : []), ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ...(tiraEntreNotas ? [ESPACIOS.PORTADA_NOTICIAS] : []), ...(tarjetaBajoMonedas ? [ESPACIOS.PORTADA_TARJETA] : []), ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.PORTADA_NATIVO_EDITORIAL, ESPACIOS.BOLETIN],
     contexto: { seccion: "portada" },
   });
 

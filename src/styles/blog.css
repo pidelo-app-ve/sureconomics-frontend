@@ -14445,3 +14445,22 @@ html {
     padding-right: 0;
   }
 }
+
+/* La tira entre las noticias pequeñas: ocupa el sitio de una nota, sin el margen que
+   trae la franja (ya lo da la nota). */
+.se-noticias__nota--anuncio {
+  display: block;
+}
+
+.se-noticias__nota--anuncio .se-ad--franja-lista {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* En el teléfono se ven cinco notas antes de «Cargar más»; con la tira dentro de la
+   lista, cinco notas y la tira, no cuatro. */
+@media (max-width: 700px) {
+  .se-format:not(.se-format--expandido) .se-noticias__lista:has(.se-noticias__nota--anuncio) .se-noticias__nota:nth-child(6) {
+    display: grid;
+  }
+}

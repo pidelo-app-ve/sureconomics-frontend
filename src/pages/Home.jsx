@@ -106,6 +106,7 @@ const LAYOUTS = {
     <NoticiasDensas
       items={items}
       espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO}
+      espacioEntreNotas={ESPACIOS.PORTADA_NOTICIAS}
       carril={carril}
     />
   ),
@@ -345,7 +346,7 @@ export const Home = () => {
   // El bloque del boletin (`ESPACIOS.BOLETIN`) lo pinta esta misma vista, asi que su
   // hueco se pide aqui: es la pagina la que declara, no el componente.
   useEspacios({
-    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NOTICIAS, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
     contexto: { seccion: "portada" },
   });
 

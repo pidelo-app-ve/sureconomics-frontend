@@ -33,6 +33,8 @@ export const ESPACIOS = {
   CINTILLO: "cintillo",
   PORTADA_NATIVO: "portada-nativo",
   PORTADA_NATIVO_ARTICULOS: "portada-nativo-articulos",
+  // La tira entre las noticias pequeñas de la portada, en el sitio de una nota.
+  PORTADA_NOTICIAS: "portada-noticias",
   PORTADA_BANNER: "portada-banner",
   // El banner de debajo de la primera plana: el primero que se ve al bajar.
   PORTADA_APERTURA: "portada-apertura",

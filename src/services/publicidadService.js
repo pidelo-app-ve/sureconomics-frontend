@@ -34,6 +34,8 @@ export const ESPACIOS = {
   PORTADA_NATIVO: "portada-nativo",
   PORTADA_NATIVO_ARTICULOS: "portada-nativo-articulos",
   PORTADA_BANNER: "portada-banner",
+  // El banner de debajo de la primera plana: el primero que se ve al bajar.
+  PORTADA_APERTURA: "portada-apertura",
   LISTADO_PATROCINIO: "listado-patrocinio",
   // «Patrocinado por» del juego de /pausa. Formato C, como la franja de los listados:
   // se vende igual, apuntando la campaña a la sección `pausa`.
@@ -43,6 +45,8 @@ export const ESPACIOS = {
   LISTADO_NATIVO: "listado-nativo",
   ARTICULO_NATIVO: "articulo-nativo",
   ARTICULO_RAIL: "articulo-rail",
+  // El banner de debajo de la foto de una pieza, donde la foto va bajo el titular.
+  ARTICULO_APERTURA: "articulo-apertura",
   BOLETIN: "boletin",
   BARRA_INFERIOR: "barra-inferior",
   PREROLL: "preroll",

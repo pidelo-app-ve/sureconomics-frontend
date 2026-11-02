@@ -160,6 +160,18 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
           </span>
         </button>
         {!pieza.activa ? <span className="se-admin-pub__sello">Apagada</span> : null}
+        {/* Sin arte de teléfono, la tira sale ahí de unos 45 px de alto y el equipo la
+            daba por invisible. A la vista en la lista, sin abrir la pieza, para que
+            comercial sepa a qué anunciante pedírselo. */}
+        {(GUIA_DE_FORMATO[pieza.formato]?.arte ?? []).some((a) => a.campo === "cinta") &&
+        !pieza.cinta_movil_id ? (
+          <span
+            className="se-admin-pub__sello"
+            title="En el teléfono sale la tira entera, muy fina. Suba un arte de 1200 × 600 px."
+          >
+            Sin arte de teléfono
+          </span>
+        ) : null}
         <button
           type="button"
           className="se-btn se-btn--secondary"
@@ -258,8 +270,8 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
           {usaCinta ? (
             <AssetField
               id={`p-${pieza.id}-cinta-movil`}
-              label="Arte para teléfono — 1200 × 600 px (opcional)"
-              hint="Lo mismo que la tira, pero con el logo, la frase y el botón apilados. Se usa en pantallas de menos de 640 px. Sin él, en el teléfono sale la tira entera, más pequeña."
+              label="Arte para teléfono — 1200 × 600 px (recomendado)"
+              hint="Lo mismo que la tira, pero con el logo, la frase y el botón apilados. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto. Sin él, en el teléfono sale la tira entera, de unos 45 px de alto: casi no se ve."
               forma={{ ancho: 2, alto: 1 }}
               kind="image"
               value={borrador.cinta_movil_id ?? null}

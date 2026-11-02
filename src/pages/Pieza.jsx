@@ -71,6 +71,9 @@ const REDES_CARRIL = ["whatsapp", "instagram", "x", "linkedin", "telegram", "cop
 // enlaces desde la web), así que la fila no lleva además el botón genérico.
 const REDES_CABECERA = ["whatsapp", "instagram", "x", "linkedin", "copiar"];
 
+/** Donde la foto de cabecera va bajo el titular: el mismo corte de 900 px que la hoja. */
+const FOTO_DEBAJO = "(max-width: 899px)";
+
 const NoEncontrada = () => {
   const { t } = useIdioma();
   return (
@@ -198,6 +201,10 @@ export const Pieza = () => {
   // El lateral: lo más leído de la semana y las monedas en vivo, como en la portada.
   const masLeidas = useMasLeidas();
   const monedas = useMonedas(6);
+  // Cuántas veces se pulsó «Reintentar» tras un fallo pasajero: vuelve a pedir la pieza.
+  // Declarado **antes** del efecto que lo lleva en sus dependencias: después, el primer
+  // render leía la variable sin inicializar y ninguna pieza llegaba a abrirse.
+  const [intento, setIntento] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -256,8 +263,6 @@ export const Pieza = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const relacionadas = useMemo(() => piezasFromApi(relacionadasFilas), [relacionadasFilas, lang]);
   const cargando = useDelayedFlag(state.status === "loading");
-  // Cuántas veces se pulsó «Reintentar» tras un fallo pasajero: vuelve a pedir la pieza.
-  const [intento, setIntento] = useState(0);
 
   // El título, la descripción y las señales para Google, en su idioma. Una pieza sin
   // versión en inglés (`soloEspanol`) sale en `/en` con `noindex` y el canónico
@@ -303,8 +308,20 @@ export const Pieza = () => {
   // peor, contaría esa impresión. Y se apaga entero si la redacción marcó la pieza
   // como «sin publicidad»: no se piden espacios, así que no hay nada que ocultar
   // después.
+  //
+  // El banner de debajo de la foto solo se pide donde la foto va bajo el titular
+  // (`FOTO_DEBAJO`): pedirlo en escritorio le daría un anunciante a un hueco que no se
+  // pinta, y la regla de no repetir se lo quitaría a uno que sí.
+  const [fotoDebajo] = useState(
+    () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(FOTO_DEBAJO).matches
+  );
   useEspacios({
-    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.ARTICULO_NATIVO, ESPACIOS.ARTICULO_RAIL],
+    espacios: [
+      ...ESPACIOS_DE_SITIO,
+      ESPACIOS.ARTICULO_NATIVO,
+      ESPACIOS.ARTICULO_RAIL,
+      ...(fotoDebajo ? [ESPACIOS.ARTICULO_APERTURA] : []),
+    ],
     contexto: {
       seccion: pieza?.formatoApi ?? null,
       formato: pieza?.formatoApi ?? null,
@@ -412,6 +429,14 @@ export const Pieza = () => {
                 </div>
               ) : null}
             </header>
+
+            {/* El banner, debajo de la foto (o del titular, si la pieza no lleva foto) y
+                antes de la firma: en el teléfono era lo primero que faltaba, con el único
+                anuncio al final del todo. Solo se pide donde la foto va debajo del
+                titular (ver arriba). */}
+            {fotoDebajo ? (
+              <EspacioPublicitario espacio={ESPACIOS.ARTICULO_APERTURA} className="se-piece__apertura-ad" />
+            ) : null}
 
             <div className="se-piece__meta">
               <PieceByline

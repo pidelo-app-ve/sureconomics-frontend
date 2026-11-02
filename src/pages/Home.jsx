@@ -345,7 +345,7 @@ export const Home = () => {
   // El bloque del boletin (`ESPACIOS.BOLETIN`) lo pinta esta misma vista, asi que su
   // hueco se pide aqui: es la pagina la que declara, no el componente.
   useEspacios({
-    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
     contexto: { seccion: "portada" },
   });
 
@@ -473,6 +473,10 @@ export const Home = () => {
           recientes={pieces.filter((p) => !enApertura.has(p.id))}
         />
       )}
+
+      {/* El banner de debajo de la principal: lo primero que se ve al bajar, en el
+          teléfono y en escritorio. Sin campaña, la fila no se pinta. */}
+      {cargando ? null : <FilaDeAnuncio espacio={ESPACIOS.PORTADA_APERTURA} />}
 
       {/* Si no hay bloque de noticias, «En la calle», el béisbol y los juegos van aquí,
           bajo la primera plana; si lo hay, van detrás de él. Con filtros, «En la calle»

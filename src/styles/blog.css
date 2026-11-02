@@ -14402,3 +14402,46 @@ html {
     transform: none;
   }
 }
+
+/* ═══ Publicidad más visible en el teléfono (nov-2026) ═══ */
+
+/* El banner de debajo de la foto de la pieza: con aire, que no se lea como pie de foto. */
+.se-piece__apertura-ad {
+  margin: var(--se-space-md) 0 var(--se-space-lg);
+}
+
+/* Si se gira la tableta y la foto pasa al lado del titular, el banner se va con ella. */
+@media (min-width: 900px) {
+  .se-piece__apertura-ad {
+    display: none;
+  }
+}
+
+/* En el teléfono, las tiras de banner y de franja a todo el ancho de la pantalla, sin
+   el margen lateral: una tira de 8:1 mide de alto lo que mide de ancho entre ocho, y
+   cada píxel de ancho cuenta. La etiqueta se queda alineada con el texto. Solo en las
+   páginas del sitio (`.se-blog`): la vista previa del panel conserva su lienzo. */
+@media (max-width: 640px) {
+  .se-blog .se-ad--banner,
+  .se-blog .se-ad--franja {
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  .se-blog .se-ad--banner .se-ad__cinta-sello,
+  .se-blog .se-ad--franja .se-ad__cinta-sello {
+    padding-left: var(--se-content-gutter);
+    padding-right: var(--se-content-gutter);
+  }
+
+  /* La de solo logotipo no gana nada a sangre: es una banda con el logo a su tamaño. */
+  .se-blog .se-ad--solo-logo {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .se-blog .se-ad--solo-logo .se-ad__cinta-sello {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

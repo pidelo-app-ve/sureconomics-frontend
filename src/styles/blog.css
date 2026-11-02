@@ -14540,3 +14540,20 @@ html {
     display: flex;
   }
 }
+
+/* Una pieza que es solo un logo (sin tira ni arte de teléfono), en el teléfono: un
+   recuadro de 2:1 con el logo grande y centrado. En el de la tira, de 8:1, quedaba de
+   48 px de alto. En escritorio no cambia. */
+@media (max-width: 640px) {
+  .se-ad--logo .se-ad__cinta,
+  .se-ad--logo.se-ad--franja .se-ad__cinta,
+  .se-ad--logo.se-ad--banner .se-ad__cinta {
+    aspect-ratio: 2 / 1;
+    height: auto;
+  }
+
+  .se-ad--logo .se-ad__cinta-img {
+    padding: 22px 32px;
+    object-fit: contain;
+  }
+}

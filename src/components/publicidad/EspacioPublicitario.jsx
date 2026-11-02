@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { tActual } from "../../i18n/motor";
 
 import { enlaceDeClic } from "../../services/publicidadService";
+import { esArteTelefonoAutomatico } from "../../lib/arteTelefono";
 import { useCiclo, useHueco } from "./ProveedorDePublicidad";
 import { useRotacion } from "./useRotacion";
 
@@ -105,21 +106,28 @@ const Montaje = ({ hueco, modificador }) => {
   // blanco mientras la redacción sube los artes nuevos.
   const arte = hueco.cinta || hueco.imagen;
   if (!arte) return null;
+  // El arte de teléfono, salvo los que armó el panel solo el 2-nov (salían deshechos;
+  // ver `lib/arteTelefono`): con esos, en el teléfono sale la tira como antes.
+  const movil = esArteTelefonoAutomatico(hueco.cinta_movil) ? null : hueco.cinta_movil;
+  // Una pieza que es solo un logo: el servidor pone el logotipo donde iría la tira. En
+  // el teléfono se le da su propio recuadro (ver `.se-ad--logo` en la hoja): en el de la
+  // tira, de 8:1, el logo quedaba de 48 px de alto.
+  const esLogo = !movil && (!hueco.cinta || hueco.cinta === hueco.imagen);
 
   return (
     <Envoltorio
       hueco={hueco}
-      className={`se-ad se-ad--montaje se-ad--${modificador}${hueco.cinta_movil ? " se-ad--con-movil" : ""}${
+      className={`se-ad se-ad--montaje se-ad--${modificador}${movil ? " se-ad--con-movil" : ""}${
         hueco.cinta ? "" : " se-ad--solo-logo"
-      }`}
+      }${esLogo ? " se-ad--logo" : ""}`}
     >
       <div className="se-ad__cinta">
         {/* En el teléfono, su propia composición si la hay. El corte de 640 px tiene
             que ser el mismo que el de la hoja (`.se-ad--con-movil`), que es la que
             cambia la forma del recuadro. */}
         <picture>
-          {hueco.cinta_movil ? (
-            <source media="(max-width: 640px)" srcSet={hueco.cinta_movil} />
+          {movil ? (
+            <source media="(max-width: 640px)" srcSet={movil} />
           ) : null}
           <img
             className="se-ad__cinta-img"

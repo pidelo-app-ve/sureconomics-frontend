@@ -15,7 +15,7 @@ import {
   uploadAdminMediaImage,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { arteTelefonoDesdeUrl, esArteAutomaticoViejo } from "../../lib/arteTelefono";
+import { esArteTelefonoAutomatico } from "../../lib/arteTelefono";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
@@ -74,30 +74,16 @@ import {
 
 /* ─── Piezas ─────────────────────────────────────────────────────────────── */
 
-/** Si el formato publica una tira (y por tanto necesita su arte de teléfono). */
-const usaTira = (formato) => (GUIA_DE_FORMATO[formato]?.arte ?? []).some((a) => a.campo === "cinta");
+/** Si el arte de teléfono de una pieza lo armó el panel solo (2-nov, retirado). */
+const conArteAutomatico = (pieza) =>
+  Boolean(pieza.cinta_movil_id) &&
+  esArteTelefonoAutomatico(pieza.cinta_movil_asset?.original_filename || pieza.cinta_movil_asset?.url);
 
-/**
- * Las piezas de tira sin arte de teléfono, con su anunciante. También las que lo tienen
- * hecho por la primera versión del arte automático, que salía deshecho con fotos y
- * logos: esas se rehacen. Las subidas a mano no.
- */
-const piezasSinArteTelefono = (anunciantes) =>
+/** Las piezas con un arte de teléfono hecho solo, para quitárselo. */
+const piezasConArteAutomatico = (anunciantes) =>
   (anunciantes ?? []).flatMap((a) =>
-    (a.campanas ?? []).flatMap((c) =>
-      (c.creatividades ?? [])
-        .filter(
-          (p) =>
-            usaTira(p.formato) &&
-            p.cinta_asset?.url &&
-            (!p.cinta_movil_id || esArteAutomaticoViejo(p.cinta_movil_asset)),
-        )
-        .map((p) => ({ pieza: p, anunciante: a })),
-    ),
+    (a.campanas ?? []).flatMap((c) => (c.creatividades ?? []).filter(conArteAutomatico)),
   );
-
-/** Lo que se dice cuando la tira no se pudo leer para hacer su arte de teléfono. */
-const NO_SE_PARTE = "No se pudo leer la tira para hacer su arte de teléfono. Suba uno a mano.";
 
 const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
   const [abierta, setAbierta] = useState(false);
@@ -108,34 +94,6 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
   const [cinta, setCinta] = useState(pieza.cinta_asset ?? null);
   const [movil, setMovil] = useState(pieza.cinta_movil_asset ?? null);
   const [variante, setVariante] = useState("tarjeta");
-  // El arte de teléfono hecho desde la tira (ver `lib/arteTelefono`).
-  const [haciendoMovil, setHaciendoMovil] = useState(false);
-  const [avisoMovil, setAvisoMovil] = useState("");
-
-  /**
-   * Arma el arte de teléfono desde la tira, lo sube y lo deja en el borrador: se ve en
-   * su campo antes de guardar, y si no gusta se cambia por otro.
-   */
-  const hacerMovil = async (desde = cinta) => {
-    if (!desde?.url) return;
-    setHaciendoMovil(true);
-    setAvisoMovil("");
-    try {
-      const archivo = await arteTelefonoDesdeUrl(desde.url, anunciante?.slug || "anuncio");
-      if (!archivo) {
-        setAvisoMovil(NO_SE_PARTE);
-        return;
-      }
-      const subido = await uploadAdminMediaImage(archivo);
-      setBorrador((b) => ({ ...b, cinta_movil_id: subido.id }));
-      setMovil(subido);
-      setAvisoMovil("Hecho desde la tira. Revíselo y guarde la pieza.");
-    } catch (err) {
-      setAvisoMovil(adminErrorMessage(err, "No se pudo hacer el arte de teléfono."));
-    } finally {
-      setHaciendoMovil(false);
-    }
-  };
 
   useEffect(() => {
     setBorrador(pieza);
@@ -180,9 +138,6 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
         onChange={(idNuevo, objeto) => {
           setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
           (esCinta ? setCinta : setImagen)(objeto ?? null);
-          // Una tira nueva en una pieza sin arte de teléfono: se hace sola. Con un solo
-          // archivo vale para los dos.
-          if (esCinta && objeto?.url && !borrador.cinta_movil_id) hacerMovil(objeto);
         }}
         onUpload={uploadAdminMediaImage}
         accept={ACCEPTED_IMAGE_MIME}
@@ -220,10 +175,11 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
         {/* Sin arte de teléfono, la tira sale ahí de unos 45 px de alto y el equipo la
             daba por invisible. A la vista en la lista, sin abrir la pieza, para que
             comercial sepa a qué anunciante pedírselo. */}
-        {usaTira(pieza.formato) && !pieza.cinta_movil_id ? (
+        {(GUIA_DE_FORMATO[pieza.formato]?.arte ?? []).some((a) => a.campo === "cinta") &&
+        (!pieza.cinta_movil_id || conArteAutomatico(pieza)) ? (
           <span
             className="se-admin-pub__sello"
-            title="En el teléfono sale la tira entera, muy fina. Suba un arte de 1200 × 600 px."
+            title="En el teléfono sale la tira entera, muy fina. Pídale al anunciante su arte de 1200 × 600 px."
           >
             Sin arte de teléfono
           </span>
@@ -326,8 +282,8 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
           {usaCinta ? (
             <AssetField
               id={`p-${pieza.id}-cinta-movil`}
-              label="Arte para teléfono — 1200 × 600 px"
-              hint="La misma tira en dos pisos (la mitad izquierda arriba, la derecha debajo); un logo, entero y grande. Se hace sola al subir la tira; si no le gusta, suba la suya. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto que la tira."
+              label="Arte para teléfono — 1200 × 600 px (recomendado)"
+              hint="Lo hace el anunciante: 1200 × 600 px (PNG, JPG, WebP o SVG), con el logo, la frase y el botón apilados y centrados, nada importante a menos de 60 px del borde y letra grande. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto. Sin él, en el teléfono sale la tira entera, de unos 45 px de alto."
               forma={{ ancho: 2, alto: 1 }}
               kind="image"
               value={borrador.cinta_movil_id ?? null}
@@ -339,19 +295,6 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
               onUpload={uploadAdminMediaImage}
               accept={ACCEPTED_IMAGE_MIME}
             />
-          ) : null}
-          {usaCinta ? (
-            <div className="se-admin-pub__acciones">
-              <button
-                type="button"
-                className="se-btn se-btn--secondary"
-                disabled={!cinta?.url || haciendoMovil || ocupado}
-                onClick={() => hacerMovil()}
-              >
-                {haciendoMovil ? "Haciéndolo…" : "Hacerlo desde la tira"}
-              </button>
-              {avisoMovil ? <p className="se-admin-meta-hint">{avisoMovil}</p> : null}
-            </div>
           ) : null}
 
           {imagenPerdida || cintaPerdida ? (
@@ -1178,8 +1121,6 @@ export const AdminPublicidad = () => {
   const { confirm: preguntar, ConfirmDialog } = useAdminConfirm();
   const [ocupado, setOcupado] = useState(false);
   const [nombreNuevo, setNombreNuevo] = useState("");
-  // «Hacerlos desde su tira»: por dónde va, mientras va.
-  const [masivo, setMasivo] = useState(null);
 
   const cargar = useCallback(async () => {
     setCarga({ estado: "cargando", error: "" });
@@ -1197,43 +1138,14 @@ export const AdminPublicidad = () => {
     cargar();
   }, [cargar]);
 
-  const sinArteTelefono = useMemo(() => piezasSinArteTelefono(datos.anunciantes), [datos.anunciantes]);
-
-  /**
-   * El arte de teléfono de todas las piezas de tira que no lo tienen, de una vez: se
-   * arma desde su tira en este navegador, se sube y se guarda en la pieza. Las que no se
-   * dejan partir (una foto de fondo) se nombran al final para subirlas a mano.
-   */
-  const hacerArtesTelefono = async () => {
-    setOcupado(true);
-    setError("");
-    let hechas = 0;
-    const sinHacer = [];
-    for (const [k, { pieza, anunciante }] of sinArteTelefono.entries()) {
-      setMasivo({ en: k + 1, total: sinArteTelefono.length });
-      try {
-        const archivo = await arteTelefonoDesdeUrl(pieza.cinta_asset.url, anunciante.slug || "anuncio");
-        if (!archivo) {
-          sinHacer.push(anunciante.nombre);
-          continue;
-        }
-        const subido = await uploadAdminMediaImage(archivo);
-        await actualizarPieza(pieza.id, { cinta_movil_id: subido.id });
-        hechas += 1;
-      } catch {
-        sinHacer.push(anunciante.nombre);
-      }
-    }
-    setMasivo(null);
-    setOcupado(false);
-    if (hechas) toastSuccess(`${hechas} ${hechas === 1 ? "arte de teléfono hecho" : "artes de teléfono hechos"}`);
-    if (sinHacer.length) {
-      setError(
-        `Sin hacer: ${[...new Set(sinHacer)].join(", ")}. No se pudo leer su tira; súbales el arte de teléfono a mano.`,
-      );
-    }
-    cargar();
-  };
+  // Los artes de teléfono que armó el panel solo el 2-nov: el sitio ya no los usa, y
+  // aquí se ofrecen quitar para que la pieza diga otra vez «Sin arte de teléfono».
+  const conAutomatico = useMemo(() => piezasConArteAutomatico(datos.anunciantes), [datos.anunciantes]);
+  const quitarArtesAutomaticos = () =>
+    correr(async () => {
+      for (const pieza of conAutomatico) await actualizarPieza(pieza.id, { cinta_movil_id: null });
+      return listar();
+    }, "Artes de teléfono automáticos quitados").then((d) => d && setDatos(d));
 
   /**
    * Ejecuta, avisa de cómo fue, y devuelve lo que salió (o `undefined`).
@@ -1340,28 +1252,26 @@ export const AdminPublicidad = () => {
             </div>
           </section>
 
-          {/* Las piezas de tira sin arte de teléfono: en el teléfono salen como una tira
-              de unos 48 px. Un botón las hace todas desde su tira. */}
-          {sinArteTelefono.length ? (
+          {conAutomatico.length ? (
             <div className="se-admin-pub__rescate">
               <p>
                 <b>
-                  {sinArteTelefono.length}{" "}
-                  {sinArteTelefono.length === 1 ? "pieza tiene" : "piezas tienen"} el arte de
-                  teléfono por hacer o por rehacer.
+                  {conAutomatico.length}{" "}
+                  {conAutomatico.length === 1 ? "pieza tiene" : "piezas tienen"} un arte de
+                  teléfono hecho solo por el panel.
                 </b>{" "}
-                Sin él, en el teléfono salen como una tira de unos 48 px de alto. Se hace solo,
-                desde la tira de cada una: la misma tira en dos pisos. Los subidos a mano no se
-                tocan.
+                Esa prueba se retiró: el sitio ya no los usa y en el teléfono sale la tira.
+                Quítelos para que cada pieza vuelva a marcar «Sin arte de teléfono» hasta que
+                el anunciante mande el suyo.
               </p>
               <div className="se-admin-pub__acciones">
                 <button
                   type="button"
                   className="se-btn se-btn--primary"
                   disabled={ocupado}
-                  onClick={hacerArtesTelefono}
+                  onClick={quitarArtesAutomaticos}
                 >
-                  {masivo ? `Haciendo ${masivo.en} de ${masivo.total}…` : "Hacerlos desde su tira"}
+                  Quitarlos
                 </button>
               </div>
             </div>

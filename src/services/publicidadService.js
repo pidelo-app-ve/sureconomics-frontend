@@ -47,6 +47,8 @@ export const ESPACIOS = {
   LISTADO_NATIVO: "listado-nativo",
   ARTICULO_NATIVO: "articulo-nativo",
   ARTICULO_RAIL: "articulo-rail",
+  // La tarjeta chica bajo las monedas de la primera plana, solo en escritorio.
+  PORTADA_TARJETA: "portada-tarjeta",
   // El banner de debajo de la foto de una pieza, donde la foto va bajo el titular.
   ARTICULO_APERTURA: "articulo-apertura",
   BOLETIN: "boletin",

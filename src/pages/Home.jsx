@@ -100,13 +100,22 @@ const PASO = {
    retícula propia -- meter ahi una tarjeta de anuncio obligaria a un pintor por
    formato para que no desentonara, y la portada acabaria siendo mas anuncio que
    portada. Con dos basta. */
+/** Donde la lista de noticias pequeñas va a dos columnas: el mismo corte que la hoja. */
+const DOS_COLUMNAS = "(min-width: 701px)";
+
+/** Donde la primera plana va a tres columnas y hay sitio bajo las monedas. */
+const TRES_COLUMNAS = "(min-width: 960px)";
+
+const coincide = (consulta) =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(consulta).matches;
+
 const LAYOUTS = {
   // Noticias con el carril de «Lo más leído» al lado, si hay datos para él.
-  noticia: (items, { carril } = {}) => (
+  noticia: (items, { carril, tiraEntreNotas } = {}) => (
     <NoticiasDensas
       items={items}
       espacioDeAnuncio={ESPACIOS.PORTADA_NATIVO}
-      espacioEntreNotas={ESPACIOS.PORTADA_NOTICIAS}
+      espacioEntreNotas={tiraEntreNotas ? ESPACIOS.PORTADA_NOTICIAS : null}
       carril={carril}
     />
   ),
@@ -156,6 +165,13 @@ export const Home = () => {
   const { t, lang } = useIdioma();
   // Lo que el lector cargó de más en cada sección, sobre la entrada de `PREVIEW`.
   const [cargadas, setCargadas] = useState({});
+  // La tira entre las notas pequeñas, solo donde la lista va a dos columnas
+  // (`DOS_COLUMNAS`): en el teléfono quedaba a una nota del anuncio que cierra la lista
+  // y eran dos seguidos. Se decide al cargar y ni se pide en el teléfono, para no darle
+  // un anunciante a un hueco que no se pinta.
+  const [tiraEntreNotas] = useState(() => coincide(DOS_COLUMNAS));
+  // La tarjeta bajo las monedas, igual: solo donde la primera plana va a tres columnas.
+  const [tarjetaBajoMonedas] = useState(() => coincide(TRES_COLUMNAS));
   const taxonomy = useTaxonomy();
   const { items: pieces, status, error } = usePieces();
 
@@ -346,7 +362,7 @@ export const Home = () => {
   // El bloque del boletin (`ESPACIOS.BOLETIN`) lo pinta esta misma vista, asi que su
   // hueco se pide aqui: es la pagina la que declara, no el componente.
   useEspacios({
-    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ESPACIOS.PORTADA_NOTICIAS, ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
+    espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.PORTADA_BANNER, ESPACIOS.PORTADA_APERTURA, ESPACIOS.PORTADA_NATIVO, ...(tiraEntreNotas ? [ESPACIOS.PORTADA_NOTICIAS] : []), ...(tarjetaBajoMonedas ? [ESPACIOS.PORTADA_TARJETA] : []), ESPACIOS.PORTADA_NATIVO_ARTICULOS, ESPACIOS.BOLETIN],
     contexto: { seccion: "portada" },
   });
 
@@ -505,7 +521,7 @@ export const Home = () => {
               )
             }
           >
-            {LAYOUTS[formatoApi](tandas[0], { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null })}
+            {LAYOUTS[formatoApi](tandas[0], { carril: masLeidas.piezas.length >= MINIMO_MAS_LEIDAS ? <MasLeido piezas={masLeidas.piezas} /> : null, tiraEntreNotas })}
             {/* Lo que trajo «Cargar más»: cada tanda con su anuncio detrás, como la
                 primera de Noticias, que ya cierra con el suyo. Delante, quedaban dos
                 anuncios seguidos. */}

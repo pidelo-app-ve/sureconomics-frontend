@@ -18,6 +18,8 @@ import { UltimaHoraColumna } from "../titulares/UltimaHoraColumna";
 import { NuestroCanal } from "../canal/NuestroCanal";
 import { AperturaShort } from "../canal/AperturaShort";
 import { esShort, idDeYoutube } from "../../lib/youtube";
+import { EspacioPublicitario } from "../publicidad";
+import { ESPACIOS } from "../../services/publicidadService";
 import "./primeraPlana.css";
 
 /**
@@ -99,6 +101,9 @@ const Monedas = ({ monedas }) => {
       <Enlace className="se-plana__mas" to="/monedas">
         {t("portada.franja.todasLasMonedas")}
       </Enlace>
+      {/* Una tarjeta chica de publicidad, en el blanco que queda bajo las monedas. Solo
+          la pide la portada en escritorio; sin campaña no pinta nada. */}
+      <EspacioPublicitario espacio={ESPACIOS.PORTADA_TARJETA} className="se-plana__tarjeta-ad" />
       {/* Los índices del mundo: en escritorio van en la cinta; aquí solo en el teléfono. */}
       <div className="se-plana__mundo">
         <span className="se-plana__mundo-rotulo">{t("portada.franja.mundo")}</span>

@@ -1,0 +1,112 @@
+/* «Al punto» con los videos del canal. El reproductor y la portada son los de
+   «Nuestro canal» (nuestroCanal.css); aquí solo la maqueta de la página. */
+
+/* El video elegido: grande a la izquierda, el título y las acciones a la derecha. */
+.se-alvideo__principal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--se-space-lg);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .se-alvideo__principal {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--se-space-xl);
+  }
+}
+
+/* Un short (canal sin videos largos): vertical y más estrecho, que no ocupe la página. */
+.se-alvideo__principal--vertical .se-alvideo__marco {
+  max-width: 360px;
+}
+
+.se-alvideo__principal--vertical .se-canal__portada,
+.se-alvideo__principal--vertical .se-canal__hueco {
+  aspect-ratio: 9 / 16;
+}
+
+.se-alvideo__texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-space-sm);
+}
+
+.se-alvideo__titulo {
+  margin: 0;
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: balance;
+  /* Los títulos del canal traen etiquetas largas (#ElLadoBDeLaTransición…): que partan. */
+  overflow-wrap: anywhere;
+}
+
+.se-alvideo__meta {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+.se-alvideo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--se-space-md);
+  margin-top: var(--se-space-sm);
+}
+
+.se-alvideo__enlace {
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-underline-offset: 3px;
+}
+
+/* Todos los videos: rejilla de tres (dos en tableta, uno en teléfono). */
+.se-alvideo__lista {
+  margin-top: var(--se-space-2xl);
+}
+
+.se-alvideo__rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--se-space-xl) var(--se-space-lg);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-alvideo__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.se-alvideo__item-titulo {
+  margin: 4px 0 0;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+/* El que está arriba se marca con un filete verde, sin quitarlo de la lista. */
+.se-alvideo__item.is-actual .se-alvideo__mini {
+  outline: 3px solid var(--marca-verde);
+  outline-offset: 0;
+}
+
+/* En la rejilla, los shorts también en 16:9: la portada vertical, recortada al centro. */
+.se-alvideo__mini {
+  aspect-ratio: 16 / 9;
+}

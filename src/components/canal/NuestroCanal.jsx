@@ -28,7 +28,8 @@ const QUIEN = "nuestro-canal";
 const DISTANCIA = 80;
 const VELOCIDAD = 0.11;
 
-const Reproductor = ({ v, onCerrar }) => {
+// Exportado para «Al punto» (`VideosDelCanal`): el mismo reproductor, con su esquina.
+export const Reproductor = ({ v, onCerrar }) => {
   const { t } = useIdioma();
   const hueco = useRef(null);
   const caja = useRef(null);

@@ -14,6 +14,9 @@ import { usePagedList } from "../hooks/usePagedList";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import { useCanal } from "../hooks/useCanal";
+import { VideosDelCanal } from "../components/canal/VideosDelCanal";
+import { EnLaCalle } from "../components/canal/EnLaCalle";
 import { ESPACIOS } from "../services/publicidadService";
 import {
   AnuncioEntreTandas,
@@ -23,7 +26,14 @@ import {
 } from "../components/publicidad";
 
 /**
- * «Al punto»: entrevistas y podcast en una sola página.
+ * «Al punto»: los videos del canal de YouTube (nov-2026) y, si la redacción publica
+ * alguna, las entrevistas y los podcast del panel debajo.
+ *
+ * Lo que se sube al canal es lo que sale aquí, igual que en la portada: el último video
+ * en grande, todos los videos debajo (`VideosDelCanal`) y la fila de shorts
+ * (`EnLaCalle`). Sin piezas del panel no salen ni las pestañas ni el «todavía no hay».
+ *
+ * Lo que sigue es de cuando la página eran solo entrevistas y podcast:
  *
  * Hasta ahora ninguno de los dos tenía página propia -- el menú los mandaba al
  * listado genérico de `/articulos?formato=` -- y son los dos formatos que se ven o se
@@ -73,6 +83,11 @@ export const Audiovisual = () => {
 
   const taxonomy = useTaxonomy();
 
+  // El canal de YouTube: lo primero de la página. `null` mientras llega.
+  const datosCanal = useCanal();
+  const videos = datosCanal?.canal ? datosCanal.largos : [];
+  const hayCanal = videos.length > 0;
+
   // `usePieces` trae un formato; aquí hacen falta dos. Dos peticiones en paralelo y
   // se juntan: es más simple que pedir todo el sitio y tirar cuatro formatos de seis.
   const entrevistas = usePieces({ format: "entrevista" });
@@ -116,14 +131,16 @@ export const Audiovisual = () => {
   // Con un filtro puesto todo esto se retira: entonces el lector busca, y lo que pide
   // es la lista de lo que coincide, no una portada.
   const { principal, laterales } = useMemo(() => {
-    if (isFiltered || !alcance.length) return { principal: null, laterales: [] };
+    // Con el canal arriba, las piezas del panel van solo en rejilla: dos «Lo último»
+    // en la misma página no dicen cuál es lo último.
+    if (hayCanal || isFiltered || !alcance.length) return { principal: null, laterales: [] };
     const primera =
       alcance.find((p) => p.formatoApi === (vista.formatoApi ?? "entrevista")) ?? alcance[0];
     const columna = vista.formatoApi
       ? alcance.filter((p) => p.id !== primera.id)
       : alcance.filter((p) => p.formatoApi === "podcast" && p.id !== primera.id);
     return { principal: primera, laterales: columna.slice(0, EN_LA_COLUMNA) };
-  }, [alcance, isFiltered, vista.formatoApi]);
+  }, [alcance, isFiltered, vista.formatoApi, hayCanal]);
 
   // Lo que ya está arriba no se repite en la rejilla.
   const resto = useMemo(() => {
@@ -193,6 +210,8 @@ export const Audiovisual = () => {
   });
 
   const tituloLista = isFiltered ? t("listados.alPunto.resultados") : textoDeVista("lista");
+  // Piezas del panel (entrevistas o podcast) publicadas: sin ellas, ni pestañas ni lista.
+  const hayPiezas = todas.length > 0;
 
   return (
     <main className="se-blog se-articles se-alpunto" role="main">
@@ -209,6 +228,7 @@ export const Audiovisual = () => {
             <p className="se-text-body se-articles__lead">{t("listados.alPunto.kicker")}</p>
           </div>
 
+          {hayPiezas ? (
           <div className="se-alpunto__seg" role="group" aria-label={t("listados.alPunto.queVer")}>
             {Object.keys(VISTAS).map((clave) => (
               <button
@@ -222,6 +242,7 @@ export const Audiovisual = () => {
               </button>
             ))}
           </div>
+          ) : null}
         </div>
 
         <div className="se-container">
@@ -261,6 +282,8 @@ export const Audiovisual = () => {
                   los listados por formato. */}
               <EspacioPublicitario espacio={ESPACIOS.LISTADO_PATROCINIO} />
 
+              {hayCanal ? <VideosDelCanal canal={datosCanal.canal} videos={videos} /> : null}
+
               {principal ? (
                 <section className="se-alpunto__ultimo" aria-labelledby="alpunto-ultimo">
                   <h2 id="alpunto-ultimo" className="se-alpunto__h2">
@@ -281,6 +304,7 @@ export const Audiovisual = () => {
                 </section>
               ) : null}
 
+              {hayPiezas || !hayCanal ? (
               <section
                 className="se-listing se-alpunto__lista"
                 aria-labelledby="alpunto-lista"
@@ -312,6 +336,7 @@ export const Audiovisual = () => {
                   />
                 )}
               </section>
+              ) : null}
 
               {/* Formato A: la tarjeta nativa, entre la rejilla y la paginación. */}
               <EspacioPublicitario espacio={ESPACIOS.LISTADO_NATIVO} variante="lista" />
@@ -320,16 +345,21 @@ export const Audiovisual = () => {
                 <p className="se-text-body se-listing__note">{t("listados.listado.soloRecientes")}</p>
               ) : null}
 
-              <CargarMas
-                mostradas={to}
-                total={total}
-                unidad={textoDeVista("unidad")}
-                onCargar={cargarMas}
-              />
+              {hayPiezas ? (
+                <CargarMas
+                  mostradas={to}
+                  total={total}
+                  unidad={textoDeVista("unidad")}
+                  onCargar={cargarMas}
+                />
+              ) : null}
             </>
           ) : null}
         </div>
       </section>
+
+      {/* Los shorts del canal, como en la portada. Sin canal no pinta nada. */}
+      {hayCanal ? <EnLaCalle /> : null}
     </main>
   );
 };

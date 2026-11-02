@@ -46,11 +46,11 @@
     "alPunto": {
       "meta": {
         "titulo": "Al punto — {marca}",
-        "descripcion": "Las entrevistas en video y los episodios del podcast de {marca}, en un solo lugar."
+        "descripcion": "Los videos del canal de YouTube de {marca}: entrevistas, análisis y lo que dice la calle."
       },
-      "kicker": "Entrevistas y podcast",
+      "kicker": "Los videos de nuestro canal: entrevistas, análisis y lo que dice la calle",
       "queVer": "Qué ver",
-      "cargando": "Cargando entrevistas y podcast…",
+      "cargando": "Cargando los videos…",
       "loUltimo": "Lo último",
       "verTodosEpisodios": "Ver todos los episodios",
       "resultados": "Resultados",
@@ -77,7 +77,10 @@
           "unidad": "episodios",
           "vacio": "Todavía no hay episodios"
         }
-      }
+      },
+      "suscribirse": "Suscribirse al canal",
+      "verEnYoutube": "Ver en YouTube",
+      "todosLosVideos": "Todos los videos"
     },
     "estados": {
       "vacioTitulo": "No hay resultados",

@@ -1337,12 +1337,12 @@ export const AdminPublicidad = () => {
                   correr(
                     () => fijarAjustes({ repetir_anunciante: e.target.checked }),
                     e.target.checked
-                      ? "Un anunciante ya puede ocupar varios espacios de la misma página"
-                      : "Vuelve a repartirse: un anunciante, un espacio por página",
+                      ? "Sorteo libre: cada espacio sortea sin mirar a los demás"
+                      : "Vuelve el orden distinto entre espacios",
                   ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
                 }
               />
-              Un anunciante puede repetir en la misma página
+              Sorteo libre entre espacios
             </label>
             <p className="se-admin-meta-hint">
               La barra nace apagada: es el formato que más molesta y en móvil se come la
@@ -1350,10 +1350,11 @@ export const AdminPublicidad = () => {
               de golpe, que es lo que hace falta el día de una noticia delicada.
             </p>
             <p className="se-admin-meta-hint">
-              <b>Repetir</b> está pensado para cuando hay poco inventario. Apagado, cada
-              marca ocupa un solo espacio por página y el resto queda libre para otras —
-              con pocos anunciantes eso deja huecos vacíos. Encendido, una misma marca
-              puede llevarse el banner, el boletín y la tarjeta de la misma portada.
+              Cada espacio rota hasta <b>tres marcas</b>, una cada siete segundos, y una
+              marca puede estar en varios espacios de la misma página. Apagado (lo normal),
+              cada espacio las pasa en un orden distinto: lo que abre un espacio no es lo
+              que abre el de al lado. Encendido, cada espacio sortea por su cuenta y a
+              veces coincide la misma marca en dos sitios a la vez.
             </p>
           </section>
 

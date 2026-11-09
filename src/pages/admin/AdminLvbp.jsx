@@ -48,7 +48,7 @@ export const AdminLvbp = () => {
     const [edicion, setEdicion] = useState(null);
 
     useEffect(() => {
-        applyPageMeta({ title: "Admin — LVBP", description: "Los juegos del béisbol venezolano." });
+        applyPageMeta({ title: "Admin — Béisbol LVBP", description: "Los juegos del béisbol venezolano." });
     }, []);
 
     const cargar = useCallback(async () => {
@@ -138,7 +138,7 @@ export const AdminLvbp = () => {
             <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
                 <div>
                     <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        LVBP: los juegos
+                        Béisbol LVBP
                     </h1>
                     <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
                         Los marcadores llegan solos de API-Sports mientras hay juego, y la tabla de

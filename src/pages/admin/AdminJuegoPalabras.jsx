@@ -128,7 +128,7 @@ export const AdminJuegoPalabras = () => {
             <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
                 <div>
                     <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        La Clave: las palabras
+                        La Clave
                     </h1>
                     <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
                         De aquí sale la palabra del día de cada categoría: el servidor elige una entre

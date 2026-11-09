@@ -165,7 +165,7 @@ export const AdminCanal = () => {
             canal». Llegan solos cada hora.
           </p>
         </div>
-        <BotonGuia recorrido={recorridoCanal} className="se-btn se-btn--secondary se-tit-guia" />
+        <BotonGuia recorrido={recorridoCanal} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
       <RecorridoVista recorrido={recorridoCanal} />
 

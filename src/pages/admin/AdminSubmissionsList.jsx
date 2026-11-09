@@ -67,7 +67,7 @@ export const AdminSubmissionsList = () => {
   }, [page, submissionStatus]);
 
   useEffect(() => {
-    applyPageMeta({ title: "Admin — Envíos colaborativos", description: "Revisiones de propuestas.", noindex: true });
+    applyPageMeta({ title: "Admin — Propuestas de lectores", description: "Revisiones de propuestas.", noindex: true });
   }, []);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export const AdminSubmissionsList = () => {
       <header className="se-admin-shell__header" style={{ marginBottom: "0.5rem", alignItems: "flex-start" }}>
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Envíos colaborativos
+            Propuestas de lectores
           </h1>
           <p className="se-admin-submissions__intro">
             Revise propuestas de lectores, deje notas por envío y actualice el estado del flujo editorial desde el detalle

@@ -1,10 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../../context/AuthContext";
 import { AdminToastProvider } from "../../context/AdminToastContext";
 import { AdminToastViewport } from "../../components/admin/AdminToastViewport";
+import { BuscadorDelPanel } from "../../components/admin/BuscadorDelPanel";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
+import { menuPara, nombreDeRuta } from "../../lib/menuDelPanel";
+import { recorridoPanelPara } from "../../lib/guias/guiaPanel";
+import { getAdminMe, marcarRecorridoVisto } from "../../services/adminMeService";
 import "../../styles/admin.css";
 
 const RAIL_MENU_ID = "se-admin-rail-menu";
@@ -12,8 +17,8 @@ const RAIL_MENU_ID = "se-admin-rail-menu";
 const linkClass = ({ isActive }) =>
   `se-admin-nav-link${isActive ? " se-admin-nav-link--active" : ""}`;
 
-const NavGroup = ({ label, children }) => (
-  <div className="se-admin-nav-group">
+const NavGroup = ({ label, children, ...resto }) => (
+  <div className="se-admin-nav-group" {...resto}>
     <p className="se-admin-nav-group__label">{label}</p>
     <div className="se-admin-nav-group__links">{children}</div>
   </div>
@@ -24,13 +29,33 @@ NavGroup.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
+/** El menú del panel se pliega por debajo de este ancho (igual que `admin.css`). */
+const MENU_PLEGADO = "(max-width: 959.98px)";
+
+const IconoAyuda = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4" fill="none" stroke="currentColor"
+          strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="12" cy="16.9" r="1.05" fill="currentColor" />
+  </svg>
+);
+
+const IconoBuscar = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <path d="m16 16 4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
+
 const AdminShell = () => {
   const { logout, role } = useAuth();
-  const canCreateArticle = role === "escritor" || role === "admin";
-  const canSeeEditorial = role === "publicador" || role === "admin";
-  const canManageUsers = role === "admin";
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [buscando, setBuscando] = useState(false);
+  const menu = useMemo(() => menuPara(role), [role]);
+  const recorrido = useMemo(() => recorridoPanelPara(role), [role]);
+  const ancla = (clave) => ({ [recorrido.atributo]: clave });
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const handleToggleMenu = useCallback(() => setMenuOpen((o) => !o), []);
@@ -43,6 +68,56 @@ const AdminShell = () => {
   useEffect(() => {
     closeMenu();
   }, [location.pathname, closeMenu]);
+
+  // El título de la pestaña: el de la página, si la página no puso el suyo. Ocho
+  // pantallas dejaban el del sitio público («Sur Economics — Economía, mercados…»), y
+  // con varias pestañas abiertas no se sabía cuál era cuál. Los efectos de las páginas
+  // corren antes que este: si ya pusieron «Admin — …», se respeta.
+  useEffect(() => {
+    const nombre = nombreDeRuta(location.pathname);
+    if (nombre && !document.title.startsWith("Admin —")) document.title = `Admin — ${nombre}`;
+  }, [location.pathname]);
+
+  // Ctrl+K (⌘K en Mac): el buscador, desde cualquier pantalla del panel.
+  useEffect(() => {
+    const alPulsar = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        setBuscando((b) => !b);
+      }
+    };
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
+
+  // La bienvenida: salta sola la primera vez y se apunta en el servidor al empezar
+  // (aunque se omita, no vuelve a saltar sola). Se repite desde el botón «?».
+  const bienvenidaLanzada = useRef(false);
+  useEffect(() => {
+    if (bienvenidaLanzada.current) return undefined;
+    let vivo = true;
+    getAdminMe()
+      .then((yo) => {
+        if (!vivo || bienvenidaLanzada.current) return;
+        if ((yo?.recorridos_vistos ?? []).includes("panel")) return;
+        bienvenidaLanzada.current = true;
+        recorrido.iniciar();
+        marcarRecorridoVisto("panel").catch(() => {});
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, [recorrido]);
+
+  // En el teléfono el menú va plegado: los pasos que lo enseñan lo abren.
+  const [pasoGuia, setPasoGuia] = useState(() => recorrido.pasoActivo());
+  useEffect(() => recorrido.suscribir(() => setPasoGuia(recorrido.pasoActivo())), [recorrido]);
+  const guiaPideMenu = pasoGuia !== null && Boolean(recorrido.pasos[pasoGuia]?.abrirMenu);
+  useEffect(() => {
+    if (!window.matchMedia?.(MENU_PLEGADO).matches) return;
+    setMenuOpen(guiaPideMenu);
+  }, [guiaPideMenu]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -116,121 +191,44 @@ const AdminShell = () => {
             <span className="se-admin-rail__badge">Admin</span>
           </div>
 
+          <div className="se-admin-rail__herramientas">
+            <button
+              type="button"
+              className="se-admin-rail__buscar"
+              onClick={() => {
+                closeMenu();
+                setBuscando(true);
+              }}
+              {...ancla("buscar")}
+            >
+              <IconoBuscar />
+              <span>Buscar</span>
+              <kbd>Ctrl K</kbd>
+            </button>
+            <button
+              type="button"
+              className="se-admin-rail__ayuda"
+              onClick={recorrido.iniciar}
+              aria-label="Repetir la visita guiada del panel"
+              title="Repetir la visita guiada del panel"
+              {...ancla("ayuda")}
+            >
+              <IconoAyuda />
+            </button>
+          </div>
+
+          {/* Agrupado por tarea, desde `lib/menuDelPanel.js`: el mismo nombre aquí, en el
+              título de cada página, en el buscador y en la bienvenida. */}
           <nav className="se-admin-rail__nav">
-            <NavGroup label="Contenido">
-              <NavLink to="/admin/posts" className={linkClass} end onClick={closeMenu}>
-                Todo el contenido
-              </NavLink>
-              {canCreateArticle ? (
-                <NavLink to="/admin/posts/new" className={linkClass} onClick={closeMenu}>
-                  Crear
-                </NavLink>
-              ) : null}
-              <NavLink to="/admin/media" className={linkClass} end onClick={closeMenu}>
-                Archivos
-              </NavLink>
-              <NavLink to="/admin/cinta" className={linkClass} end onClick={closeMenu}>
-                Cinta de mercado
-              </NavLink>
-              <NavLink to="/admin/lvbp" className={linkClass} end onClick={closeMenu}>
-                Béisbol LVBP
-              </NavLink>
-              <NavLink to="/admin/traducciones" className={linkClass} end onClick={closeMenu}>
-                Traducciones
-              </NavLink>
-              {canSeeEditorial ? (
-                <NavLink to="/admin/titulares" className={linkClass} end onClick={closeMenu}>
-                  Titulares
-                </NavLink>
-              ) : null}
-              {canSeeEditorial ? (
-                <NavLink to="/admin/resumen" className={linkClass} end onClick={closeMenu}>
-                  Resumen diario
-                </NavLink>
-              ) : null}
-              <NavLink to="/admin/equipo" className={linkClass} end onClick={closeMenu}>
-                Fotos del equipo
-              </NavLink>
-              <NavLink to="/admin/redes" className={linkClass} end onClick={closeMenu}>
-                En redes
-              </NavLink>
-              <NavLink to="/admin/canal" className={linkClass} end onClick={closeMenu}>
-                Canal de YouTube
-              </NavLink>
-              <NavLink to="/admin/educacion" className={linkClass} end onClick={closeMenu}>
-                Educación
-              </NavLink>
-              {/* Información comercial: contactos, notas y contratos de los anunciantes.
-                  Solo para quien vende y administra, como las escrituras del backend. */}
-              {canSeeEditorial ? (
-                <NavLink to="/admin/publicidad" className={linkClass} end onClick={closeMenu}>
-                  Publicidad
-                </NavLink>
-              ) : null}
-            </NavGroup>
-
-            {/* Estuvo oculto mientras el aviso de cookies estaba en revision legal: no
-                se pedia permiso a nadie, asi que no habia ningun numero que enseñar y un
-                panel de audiencia en blanco solo genera la duda de si esta roto. El aviso
-                se activo el 22/09/2026 y el enlace vuelve con el. */}
-            <NavGroup label="Audiencia">
-              <NavLink to="/admin/analitica" className={linkClass} end onClick={closeMenu}>
-                Lectores
-              </NavLink>
-            </NavGroup>
-
-            {/* Two axes, not a flat list of tags: see the Temas screen for why
-                there is no "new topic" here. */}
-            <NavGroup label="Clasificación">
-              <NavLink to="/admin/topics" className={linkClass} end onClick={closeMenu}>
-                Temas
-              </NavLink>
-              <NavLink to="/admin/places" className={linkClass} end onClick={closeMenu}>
-                Lugares
-              </NavLink>
-            </NavGroup>
-
-            {canSeeEditorial ? (
-              <NavGroup label="Editorial">
-                <NavLink to="/admin/comments" className={linkClass} end onClick={closeMenu}>
-                  Comentarios
-                </NavLink>
-                <NavLink to="/admin/analista" className={linkClass} end onClick={closeMenu}>
-                  Ranking de El Analista
-                </NavLink>
-                <NavLink to="/admin/juegos/palabras" className={linkClass} end onClick={closeMenu}>
-                  La Clave
-                </NavLink>
-                <NavLink to="/admin/submissions" className={linkClass} end onClick={closeMenu}>
-                  Envíos
-                </NavLink>
-                <NavLink to="/admin/boletin/numeros" className={linkClass} end onClick={closeMenu}>
-                  Boletín
-                </NavLink>
-                <NavLink to="/admin/boletin" className={linkClass} end onClick={closeMenu}>
-                  Suscriptores
-                </NavLink>
+            {menu.map((grupo) => (
+              <NavGroup key={grupo.clave} label={grupo.nombre} {...ancla(`grupo-${grupo.clave}`)}>
+                {grupo.items.map((item) => (
+                  <NavLink key={item.to} to={item.to} className={linkClass} end={item.fin !== false} onClick={closeMenu}>
+                    {item.nombre}
+                  </NavLink>
+                ))}
               </NavGroup>
-            ) : null}
-
-            <NavGroup label="Sistema">
-              {canManageUsers ? (
-                <NavLink to="/admin/users" className={linkClass} end onClick={closeMenu}>
-                  Usuarios
-                </NavLink>
-              ) : null}
-              <NavLink to="/admin/settings/collaboration" className={linkClass} end onClick={closeMenu}>
-                Colaboración
-              </NavLink>
-              {canManageUsers ? (
-                <NavLink to="/admin/staff" className={linkClass} end onClick={closeMenu}>
-                  Personal
-                </NavLink>
-              ) : null}
-              <NavLink to="/admin/perfil" className={linkClass} end onClick={closeMenu}>
-                Mi perfil
-              </NavLink>
-            </NavGroup>
+            ))}
           </nav>
 
           <div className="se-admin-rail__footer">
@@ -253,6 +251,8 @@ const AdminShell = () => {
       </div>
 
       <AdminToastViewport />
+      <BuscadorDelPanel abierto={buscando} onCerrar={() => setBuscando(false)} menu={menu} />
+      <RecorridoVista recorrido={recorrido} />
     </div>
   );
 };

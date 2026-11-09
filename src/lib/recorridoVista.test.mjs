@@ -19,6 +19,9 @@ const { PASOS_CUENTA, recorridoCuenta } = await import("./guias/guiaCuenta.js");
 const { PASOS_EDITOR, recorridoEditor } = await import("./guias/guiaEditor.js");
 const { PASOS_CONTENIDO, recorridoContenido } = await import("./guias/guiaContenido.js");
 const { PASOS_PUBLICIDAD, recorridoPublicidad } = await import("./guias/guiaPublicidad.js");
+const { PASOS_ARCHIVOS, recorridoArchivos } = await import("./guias/guiaArchivos.js");
+const { PASOS_BOLETIN, recorridoBoletin } = await import("./guias/guiaBoletin.js");
+const { recorridoPanelPara } = await import("./guias/guiaPanel.js");
 const { PASOS_PROPUESTA, recorridoPropuesta } = await import("./guias/guiaPropuesta.js");
 const { PASOS_PERFIL, recorridoPerfil } = await import("./guias/guiaPerfil.js");
 const { readFileSync } = await import("node:fs");
@@ -83,6 +86,8 @@ for (const [nombre, pasos, recorrido, atributo] of [
   ["del editor de piezas", PASOS_EDITOR, recorridoEditor, "data-tour-editor"],
   ["de Contenido", PASOS_CONTENIDO, recorridoContenido, "data-tour-contenido"],
   ["de Publicidad", PASOS_PUBLICIDAD, recorridoPublicidad, "data-tour-publicidad"],
+  ["de Archivos", PASOS_ARCHIVOS, recorridoArchivos, "data-tour-archivos"],
+  ["del boletín", PASOS_BOLETIN, recorridoBoletin, "data-tour-boletin"],
 ]) {
   console.log(`guía ${nombre}`);
   check("empieza sin anclaje y acaba en «Guía»", pasos[0].clave === undefined && pasos.at(-1).clave === "guia");
@@ -111,6 +116,21 @@ for (const [nombre, pasos, recorrido, ultimo] of [
   check("puntos con la forma «Nombre: qué es» (es)", puntos.every((c) => buscar(DIC.es, c)?.includes(": ")));
 }
 check("los pasos del menú lo abren en el teléfono", PASOS_CUENTA.filter((p) => p.abrirMenu).length === 6);
+
+console.log("bienvenida del panel");
+{
+  const admin = recorridoPanelPara("admin");
+  const escritor = recorridoPanelPara("escritor");
+  check("empieza sin anclaje y acaba en la ayuda", admin.pasos[0].clave === undefined && admin.pasos.at(-1).clave === "ayuda");
+  check("un paso por grupo del menú (admin ve los cinco)", admin.pasos.filter((p) => p.clave?.startsWith("grupo-")).length === 5);
+  const { menuPara } = await import("./menuDelPanel.js");
+  const rutasDe = (role) => menuPara(role).flatMap((g) => g.items.map((i) => i.to));
+  check("el escritor no ve Publicidad ni Usuarios", !rutasDe("escritor").includes("/admin/publicidad") && !rutasDe("escritor").includes("/admin/users"));
+  check("el publicador no puede crear piezas desde el menú", !rutasDe("publicador").includes("/admin/posts/new"));
+  check("pasos del escritor = sus grupos", escritor.pasos.filter((p) => p.clave?.startsWith("grupo-")).length === menuPara("escritor").length);
+  check("una guía por rol, la misma cada vez", recorridoPanelPara("admin") === admin);
+  check("anclaje data-tour-panel", admin.atributo === "data-tour-panel");
+}
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

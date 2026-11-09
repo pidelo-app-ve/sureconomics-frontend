@@ -59,7 +59,7 @@ export const AdminNewsletterList = () => {
 
   useEffect(() => {
     applyPageMeta({
-      title: "Admin — Boletín",
+      title: "Admin — Suscriptores del boletín",
       description: "Quién pidió recibir el boletín.",
       noindex: true,
     });
@@ -90,7 +90,7 @@ export const AdminNewsletterList = () => {
     <main role="main">
       <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
         <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>Boletín</h1>
+          <h1 className="se-heading-section" style={{ margin: 0 }}>Suscriptores del boletín</h1>
           <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
             {state.meta?.total != null
               ? `${state.meta.total} ${estado === "unsubscribed" ? "bajas" : "en la lista"}`

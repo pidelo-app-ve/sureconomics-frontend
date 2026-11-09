@@ -7203,11 +7203,148 @@
   color: var(--adm-err);
 }
 
-.se-admin-app .se-res-adm-chip--aprobado,
 .se-admin-app .se-res-adm-chip--publicado {
   border-color: var(--adm-ok-border);
   background: var(--adm-ok-bg);
   color: var(--adm-ok);
+}
+
+/* Retenida: el editor pidió que esta no salga. */
+.se-admin-app .se-res-adm-chip--retenido {
+  border-color: var(--adm-err-border);
+  background: var(--adm-surface-2);
+  color: var(--adm-err);
+}
+
+/* Las fotos de las noticias del mensaje: la que acompaña al mensaje se elige con un clic. */
+.se-admin-app .se-res-adm-fotos__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.9rem;
+  padding: 0;
+  list-style: none;
+}
+
+.se-admin-app .se-res-adm-fotos__foto {
+  display: grid;
+  gap: 0.3rem;
+  width: 128px;
+  padding: 0.3rem;
+  border: 2px solid var(--adm-border);
+  border-radius: 8px;
+  background: var(--adm-surface-2);
+  color: var(--adm-text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+}
+
+.se-admin-app .se-res-adm-fotos__foto img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.se-admin-app .se-res-adm-fotos__foto span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.se-admin-app .se-res-adm-fotos__foto--sin {
+  align-content: center;
+  justify-items: center;
+  min-height: 96px;
+}
+
+.se-admin-app .se-res-adm-fotos__foto.is-elegida {
+  border-color: var(--adm-ok);
+  color: var(--adm-text);
+}
+
+/* La maqueta del canal de WhatsApp: el fondo del chat, la burbuja de la foto y la del
+   texto con la tarjeta del enlace. Colores de WhatsApp, fijos a propósito: es lo que
+   verá el lector, no el panel. */
+.se-admin-app .se-res-adm-wa {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0.9rem;
+  max-height: 75vh;
+  overflow: auto;
+  border-radius: 10px;
+  background: #e5ddd5;
+}
+
+.se-admin-app .se-res-adm-wa__burbuja {
+  position: relative;
+  width: min(100%, 330px);
+  margin: 0;
+  padding: 0.35rem 0.45rem 1.15rem;
+  border-radius: 8px;
+  background: #fff;
+  color: #111b21;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.se-admin-app .se-res-adm-wa__burbuja--foto {
+  padding: 0.25rem 0.25rem 1.15rem;
+}
+
+.se-admin-app .se-res-adm-wa__burbuja--foto img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.se-admin-app .se-res-adm-wa__hora {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.25rem;
+  font-size: 0.68rem;
+  color: #667781;
+}
+
+.se-admin-app .se-res-adm-wa__tarjeta {
+  margin-bottom: 0.4rem;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f0f2f5;
+}
+
+.se-admin-app .se-res-adm-wa__tarjeta img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1200 / 630;
+  object-fit: cover;
+}
+
+.se-admin-app .se-res-adm-wa__tarjeta-texto {
+  display: grid;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.se-admin-app .se-res-adm-wa__tarjeta-texto span {
+  color: #667781;
+}
+
+.se-admin-app .se-res-adm-wa__texto {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .se-admin-app .se-res-adm-canales {
@@ -7865,4 +8002,157 @@
   margin-left: 1.6rem;
   font-size: 0.78rem;
   color: var(--adm-text-muted);
+}
+
+/* ===========================================================================
+   Ola 4 (nov-2026): buscar (Ctrl+K) y la ayuda en el menú, y el buscador.
+   =========================================================================== */
+.se-admin-rail__herramientas {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0 0.75rem 0.75rem;
+}
+
+.se-admin-rail__buscar,
+.se-admin-rail__ayuda {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.86);
+  cursor: pointer;
+}
+
+.se-admin-rail__buscar {
+  flex: 1 1 auto;
+}
+
+.se-admin-rail__buscar kbd {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.se-admin-rail__buscar:hover,
+.se-admin-rail__ayuda:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.se-admin-rail__buscar:focus-visible,
+.se-admin-rail__ayuda:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Los rótulos de los grupos, legibles: estaban a 0,65 rem (10 px). */
+.se-admin-nav-group__label {
+  font-size: 0.75rem;
+}
+
+.se-buscador {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 1rem 1rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.se-buscador__caja {
+  width: min(40rem, 100%);
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--adm-text);
+}
+
+.se-buscador__entrada {
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--adm-border);
+  font: inherit;
+  font-size: 1.05rem;
+  outline: none;
+}
+
+.se-buscador__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.se-buscador__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.se-buscador__item.is-activo {
+  background: var(--adm-err-bg);
+}
+
+.se-buscador__nombre {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.se-buscador__tipo {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  color: var(--adm-text-muted);
+}
+
+.se-buscador__vacio {
+  padding: 0.75rem;
+  color: var(--adm-text-muted);
+}
+
+.se-buscador__pie {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--adm-border);
+  font-size: 0.8rem;
+  color: var(--adm-text-muted);
+}
+
+.se-buscador__pie kbd {
+  padding: 0 0.3rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+/* «Publicación» en la columna derecha del editor: sin el aire de una tarjeta de la
+   izquierda, que en 17,5 rem se comía el ancho de los campos. */
+.se-editor-rejilla__estado .se-editor-group {
+  margin: 0;
+  padding: 0.9rem 1rem;
+}
+
+.se-editor-rejilla__estado .se-editor-group .se-plegable {
+  margin-bottom: 0;
+}
+
+.se-editor-rejilla__estado .se-plegable__cuerpo {
+  padding: 0.75rem;
 }

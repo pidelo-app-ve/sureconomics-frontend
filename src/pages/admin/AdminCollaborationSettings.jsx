@@ -33,7 +33,7 @@ export const AdminCollaborationSettings = () => {
   }, []);
 
   useEffect(() => {
-    applyPageMeta({ title: "Admin — Colaboración", description: "Ajustes de envíos colaborativos.", noindex: true });
+    applyPageMeta({ title: "Admin — Ajustes de propuestas", description: "Ajustes de envíos colaborativos.", noindex: true });
   }, []);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export const AdminCollaborationSettings = () => {
 
   return (
     <main role="main">
-      <h1 className="se-heading-section">Envíos colaborativos</h1>
+      <h1 className="se-heading-section">Ajustes de propuestas</h1>
       <p className="se-text-body">Active o desactive la posibilidad de que lectores verificados envíen propuestas.</p>
 
       <form className="se-contact-form" onSubmit={handleSubmit} style={{ maxWidth: "28rem", marginTop: "1rem" }}>

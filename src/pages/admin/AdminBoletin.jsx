@@ -24,6 +24,10 @@ import {
   verNumero,
 } from "../../services/adminBoletinService";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoBoletin } from "../../lib/guias/guiaBoletin";
+
+const anclaBoletin = (clave) => ({ [recorridoBoletin.atributo]: clave });
 
 /**
  * Los números de "Entorno en Viñetas".
@@ -98,7 +102,7 @@ const Listado = ({ numeros, onAbrir, onNuevo }) => {
     );
   }
   return (
-    <ul className="se-bol__lista">
+    <ul className="se-bol__lista" {...anclaBoletin("lista")}>
       {numeros.map((n) => (
         <li key={n.id}>
           <button type="button" className="se-bol__fila" onClick={() => onAbrir(n.id)}>
@@ -863,11 +867,14 @@ export const AdminBoletin = () => {
             queda y se activa: ese lunes a las 9:00 sale solo a todos los suscriptores.
           </p>
         </div>
-        {!abierto ? (
-          <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo}>
-            Nuevo número
-          </button>
-        ) : null}
+        <div className="se-editor-cabecera__acciones">
+          {!abierto ? (
+            <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo} {...anclaBoletin("nuevo")}>
+              Nuevo número
+            </button>
+          ) : null}
+          <BotonGuia recorrido={recorridoBoletin} className="se-btn se-btn--secondary se-boton-guia" />
+        </div>
       </header>
 
       {error ? <p className="se-admin-form-error">{error}</p> : null}
@@ -973,6 +980,7 @@ export const AdminBoletin = () => {
       </ModalDelPanel>
 
       <ConfirmDialog />
+      <RecorridoVista recorrido={recorridoBoletin} />
     </div>
   );
 };

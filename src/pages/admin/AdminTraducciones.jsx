@@ -123,7 +123,7 @@ export const AdminTraducciones = () => {
       <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Traducir el archivo al inglés
+            Traducciones
           </h1>
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
             Traduce con Claude todas las piezas publicadas que todavía no tienen versión en inglés. Las

@@ -20,6 +20,10 @@ import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoArchivos } from "../../lib/guias/guiaArchivos";
+
+const ancla = (clave) => ({ [recorridoArchivos.atributo]: clave });
 
 const KINDS = [
     { value: "", label: "Todos" },
@@ -211,7 +215,7 @@ export const AdminMediaLibrary = () => {
                     </p>
                 </div>
                 {canUpload ? (
-                    <div className="se-admin-create">
+                    <div className="se-admin-create" {...ancla("subir")}>
                         {/* Un solo botón: el tipo lo dice el archivo. Tres botones rellenos
                             iguales («Subir imagen», «Subir PDF», «Subir audio») eran tres
                             acciones principales para una sola tarea. */}
@@ -228,9 +232,10 @@ export const AdminMediaLibrary = () => {
                         <span className="se-admin-meta-hint">Imagen, PDF o audio (MP3, M4A).</span>
                     </div>
                 ) : null}
+                <BotonGuia recorrido={recorridoArchivos} className="se-btn se-btn--secondary se-boton-guia" />
             </header>
 
-            <div className="se-admin-filters">
+            <div className="se-admin-filters" {...ancla("filtros")}>
                 <label className="se-admin-filters__field">
                     <span className="se-form-label">Tipo</span>
                     <select
@@ -277,7 +282,7 @@ export const AdminMediaLibrary = () => {
 
             {state.status === "success" && state.items.length > 0 ? (
                 <>
-                    <div className="se-admin-table-wrap">
+                    <div className="se-admin-table-wrap" {...ancla("tabla")}>
                         <table className="se-admin-table">
                             <thead>
                                 <tr>
@@ -372,6 +377,7 @@ export const AdminMediaLibrary = () => {
             ) : null}
 
             <ConfirmDialog />
+            <RecorridoVista recorrido={recorridoArchivos} />
         </main>
     );
 };

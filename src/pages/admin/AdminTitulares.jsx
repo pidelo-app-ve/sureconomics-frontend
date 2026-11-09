@@ -267,7 +267,7 @@ export const AdminTitulares = () => {
             Si uno tiene un error, corríjalo o bórrelo aquí: la web lo cambia en menos de dos minutos.
           </p>
         </div>
-        <BotonGuia recorrido={recorridoTitulares} className="se-btn se-btn--secondary se-tit-guia" />
+        <BotonGuia recorrido={recorridoTitulares} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
       <RecorridoVista recorrido={recorridoTitulares} />
 

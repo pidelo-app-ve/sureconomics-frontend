@@ -11,3 +11,7 @@ export const updateAdminMe = async (body) =>
 /** @param {{ current_password: string, new_password: string }} body */
 export const changeAdminMyPassword = async (body) =>
   adminRequest("/admin/me/password", { method: "PATCH", json: body });
+
+/** Apunta en el servidor que esta persona ya vio la guía `nombre` (p. ej. «panel»). */
+export const marcarRecorridoVisto = async (nombre) =>
+  adminRequest(`/admin/me/recorridos/${encodeURIComponent(nombre)}`, { method: "PUT", json: {} });

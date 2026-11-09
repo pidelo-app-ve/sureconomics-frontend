@@ -1,7 +1,14 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { MuralDeAnunciantes } from "../../components/admin/MuralDeAnunciantes";
+import {
+  ESTADOS_DE_CAMPANA,
+  MuralDeAnunciantes,
+  estadoDeCampana,
+} from "../../components/admin/MuralDeAnunciantes";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoPublicidad } from "../../lib/guias/guiaPublicidad";
+import { applyPageMeta } from "../../lib/seo";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useConfirmacionDeGuardado } from "../../hooks/useConfirmacionDeGuardado";
@@ -28,8 +35,6 @@ import {
   borrarAnunciante,
   borrarCampana,
   borrarPieza,
-  crearAnunciante,
-  crearCampana,
   crearPieza,
   fijarAjustes,
   getResumen,
@@ -451,6 +456,137 @@ FilaDePieza.propTypes = {
 
 /* ─── Campañas ───────────────────────────────────────────────────────────── */
 
+const ancla = (clave) => ({ [recorridoPublicidad.atributo]: clave });
+
+/**
+ * «Al aire»: encender o pausar una campaña con un clic, sin abrir su ficha. Antes el
+ * estado solo se cambiaba dentro del modal de la campaña, en un desplegable al pie.
+ * Activar una campaña sin pieza lo rechaza el servidor, y se dice.
+ */
+const InterruptorAlAire = ({ campana, ocupado, correr, onCambio }) => {
+  const encendida = campana.estado === "activa";
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={encendida}
+      aria-label={`Al aire: ${campana.nombre}`}
+      className={`se-alaire${encendida ? " is-on" : ""}`}
+      disabled={ocupado || campana.estado === "terminada"}
+      title={campana.estado === "terminada" ? "Terminada: se reabre desde su ficha" : undefined}
+      onClick={() =>
+        correr(
+          async () => {
+            await actualizarCampana(campana.id, { estado: encendida ? "pausada" : "activa" });
+            return listar();
+          },
+          encendida ? `«${campana.nombre}» en pausa: deja de salir` : `«${campana.nombre}» al aire`,
+        ).then(onCambio)
+      }
+    >
+      <span className="se-alaire__pista" aria-hidden="true" />
+      <span className="se-alaire__texto">{encendida ? "Al aire" : "Apagada"}</span>
+    </button>
+  );
+};
+
+InterruptorAlAire.propTypes = {
+  campana: PropTypes.object.isRequired,
+  ocupado: PropTypes.bool,
+  correr: PropTypes.func.isRequired,
+  onCambio: PropTypes.func.isRequired,
+};
+
+const ORDEN_EN_LA_TABLA = ["activa", "tope", "fecha", "sin_pieza", "anunciante", "pausada", "borrador", "terminada"];
+
+/**
+ * Todas las campañas en una tabla: qué se vende, de quién, si sale y hasta cuándo.
+ * Antes había que abrir cada anunciante (acordeón) y cada campaña (modal) para saberlo.
+ * Las fichas siguen abajo para el detalle: piezas, artes, segmentos.
+ */
+const TablaDeCampanas = ({ anunciantes, cifras, ocupado, correr, onCambio, onAbrir }) => {
+  const filas = anunciantes
+    .flatMap((a) => (a.campanas ?? []).map((c) => ({ a, c, estado: estadoDeCampana(c) })))
+    .sort(
+      (x, y) =>
+        ORDEN_EN_LA_TABLA.indexOf(x.estado) - ORDEN_EN_LA_TABLA.indexOf(y.estado) ||
+        x.a.nombre.localeCompare(y.a.nombre, "es"),
+    );
+  if (!filas.length) return null;
+  return (
+    <section className="se-admin-pub__tabla" {...ancla("campanas")}>
+      <h2 className="se-admin-pub__sub">Campañas</h2>
+      <div className="se-admin-table-wrap">
+        <table className="se-admin-table">
+          <thead>
+            <tr>
+              <th scope="col">Campaña</th>
+              <th scope="col">Cómo va</th>
+              <th scope="col">Al aire</th>
+              <th scope="col">Fechas</th>
+              <th scope="col">Piezas</th>
+              <th scope="col">Impresiones · clics</th>
+              <th scope="col"><span className="se-sr-only">Ficha</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map(({ a, c, estado }) => {
+              const sello = ESTADOS_DE_CAMPANA[estado] ?? { texto: estado, clase: "" };
+              const tot = (c.creatividades ?? []).reduce(
+                (acc, cr) => ({
+                  impresiones: acc.impresiones + (cifras?.[cr.id]?.impresiones ?? 0),
+                  clics: acc.clics + (cifras?.[cr.id]?.clics ?? 0),
+                }),
+                { impresiones: 0, clics: 0 },
+              );
+              return (
+                <tr key={c.id}>
+                  <td>
+                    <span className="se-admin-pub__tabla-campana">{c.nombre}</span>
+                    <span className="se-admin-pub__tabla-marca">{a.nombre}</span>
+                  </td>
+                  <td>
+                    <span className={`se-mural__sello ${sello.clase}`}>{sello.texto}</span>
+                  </td>
+                  <td>
+                    <InterruptorAlAire campana={c} ocupado={ocupado} correr={correr} onCambio={onCambio} />
+                  </td>
+                  <td className="se-admin-pub__tabla-fechas">
+                    {c.desde || c.hasta ? `${c.desde ?? "…"} → ${c.hasta ?? "sin fin"}` : "Sin fechas"}
+                  </td>
+                  <td>{c.creatividades?.length ?? 0}</td>
+                  <td>
+                    {tot.impresiones.toLocaleString("es")} · {tot.clics.toLocaleString("es")}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="se-link se-header__nav-link--button"
+                      onClick={() => onAbrir(a.id)}
+                      aria-label={`Abrir la ficha de ${a.nombre}`}
+                    >
+                      Ficha
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+};
+
+TablaDeCampanas.propTypes = {
+  anunciantes: PropTypes.array.isRequired,
+  cifras: PropTypes.object,
+  ocupado: PropTypes.bool,
+  correr: PropTypes.func.isRequired,
+  onCambio: PropTypes.func.isRequired,
+  onAbrir: PropTypes.func.isRequired,
+};
+
 const TarjetaDeCampana = ({
   campana,
   anunciante,
@@ -528,6 +664,7 @@ const TarjetaDeCampana = ({
         >
           {campana.estado}
         </span>
+        <InterruptorAlAire campana={campana} ocupado={ocupado} correr={correr} onCambio={onCambio} />
       </div>
 
       {/* Los ajustes de la campana, en modal. La lista de piezas se queda fuera --
@@ -800,6 +937,7 @@ const TarjetaDeAnunciante = ({
   preguntar,
   onCambio,
   destacada,
+  onNuevaCampana,
 }) => {
   const [abierta, setAbierta] = useState(false);
   const [ficha, setFicha] = useState({
@@ -838,7 +976,6 @@ const TarjetaDeAnunciante = ({
   useEffect(() => {
     if (destacada) setAbierta(true);
   }, [destacada]);
-  const [nombreCampana, setNombreCampana] = useState("");
 
   // Sin aviso: releer la lista después de un cambio no es un suceso propio, y avisarlo
   // tapaba el mensaje del cambio que acababa de producirlo.
@@ -1005,31 +1142,17 @@ const TarjetaDeAnunciante = ({
             ))}
           </ul>
 
+          {/* Una campaña nueva se hace con el asistente, con este anunciante ya
+              elegido: así nace con fechas, pieza y al aire, y no en un borrador vacío
+              que luego había que ir a activar dentro de su ficha. */}
           <div className="se-admin-pub__nueva">
-            <input
-              className="se-form-control"
-              placeholder="Nombre de la nueva campaña"
-              value={nombreCampana}
-              onChange={(e) => setNombreCampana(e.target.value)}
-            />
             <button
               type="button"
               className="se-btn se-btn--secondary"
-              disabled={ocupado || !nombreCampana.trim()}
-              onClick={() =>
-                correr(
-                  async () => {
-                    await crearCampana(anunciante.id, { nombre: nombreCampana.trim() });
-                    setNombreCampana("");
-                    return listar();
-                  },
-                  // Nace en borrador, y eso decide si sale publicada. Decirlo aquí
-                  // evita la pregunta de por qué no se ve nada en el sitio.
-                  `Campaña «${nombreCampana.trim()}» creada en borrador`,
-                ).then(onCambio)
-              }
+              disabled={ocupado}
+              onClick={() => onNuevaCampana(anunciante.id)}
             >
-              Nueva campaña
+              Nueva campaña para {anunciante.nombre}
             </button>
           </div>
 
@@ -1098,6 +1221,8 @@ TarjetaDeAnunciante.propTypes = {
   /** Abre el dialogo del panel y resuelve a `true` si se confirmo. */
   preguntar: PropTypes.func.isRequired,
   onCambio: PropTypes.func.isRequired,
+  /** «Nueva campaña»: abre el asistente con este anunciante elegido. */
+  onNuevaCampana: PropTypes.func.isRequired,
 };
 
 /* ─── La pantalla ────────────────────────────────────────────────────────── */
@@ -1120,7 +1245,21 @@ export const AdminPublicidad = () => {
   // qué se lleva por delante, y en el móvil sale donde el navegador quiera.
   const { confirm: preguntar, ConfirmDialog } = useAdminConfirm();
   const [ocupado, setOcupado] = useState(false);
-  const [nombreNuevo, setNombreNuevo] = useState("");
+  // El anunciante con el que abre el asistente («Nueva campaña» desde una ficha).
+  const [asistenteCon, setAsistenteCon] = useState(null);
+
+  useEffect(() => {
+    applyPageMeta({ title: "Admin — Publicidad", description: "Publicidad (SurEconomics)." });
+  }, []);
+
+  const abrirFicha = (id) => {
+    setDestacado((d) => ({ id, n: d.n + 1 }));
+    // El desplazamiento espera un cuadro: la ficha se despliega en este mismo render y
+    // su altura final no existe todavía.
+    requestAnimationFrame(() =>
+      document.getElementById(`anunciante-${id}`)?.scrollIntoView({ block: "start", behavior: "smooth" }),
+    );
+  };
 
   const cargar = useCallback(async () => {
     setCarga({ estado: "cargando", error: "" });
@@ -1205,23 +1344,27 @@ export const AdminPublicidad = () => {
             {guardado ? <span className="se-guardado">Guardado ✓</span> : null}
           </h1>
           <p className="se-admin-shell__subtitle">
-            Los ocho formatos del documento comercial, repartidos en diez espacios del
-            sitio. Decide el servidor y se rota por carga de página, no por reloj: un
-            anuncio que cambia solo mientras alguien lee es lo que hace que la gente
-            instale bloqueadores.
+            Quién anuncia, qué campañas están al aire y cómo rinden.
           </p>
         </div>
+        <div className="se-editor-cabecera__acciones">
         {/* El camino guiado, arriba y destacado. La lista de abajo sigue haciendo lo
             mismo para quien ya sabe cómo encajan los tres niveles; esto existe para
             quien no, que antes se encontraba una lista vacía y ninguna pista. */}
         <button
           type="button"
           className="se-btn se-btn--primary"
-          onClick={() => setAsistente(true)}
+          onClick={() => {
+            setAsistenteCon(null);
+            setAsistente(true);
+          }}
           disabled={carga.estado !== "listo"}
+          {...ancla("publicar")}
         >
           Publicar un anuncio
         </button>
+        <BotonGuia recorrido={recorridoPublicidad} className="se-btn se-btn--secondary se-boton-guia" />
+        </div>
       </header>
 
       {carga.estado === "error" ? (
@@ -1231,7 +1374,7 @@ export const AdminPublicidad = () => {
 
       {carga.estado === "listo" ? (
         <>
-          <section className="se-admin-pub__cifras">
+          <section className="se-admin-pub__cifras" {...ancla("cifras")}>
             <div className="se-admin-pub__cifra">
               <span className="se-admin-pub__cifra-n">
                 {(resumen?.impresiones ?? 0).toLocaleString("es")}
@@ -1280,35 +1423,50 @@ export const AdminPublicidad = () => {
           {/* El mosaico de marcas, detrás de las cifras totales y delante de la lista:
               las cifras dicen cuánto se sirvió y el mosaico, a quién. Con el orden al
               revés habría que bajar hasta la lista para saber quién está al aire. */}
-          <MuralDeAnunciantes
+          <TablaDeCampanas
             anunciantes={datos.anunciantes}
-            cifrasPorPieza={cifrasPorPieza}
-            onAbrir={(id) => {
-              setDestacado((d) => ({ id, n: d.n + 1 }));
-              // El desplazamiento espera un cuadro: la ficha se despliega en este
-              // mismo render y su altura final no existe todavía.
-              requestAnimationFrame(() =>
-                document
-                  .getElementById(`anunciante-${id}`)
-                  ?.scrollIntoView({ block: "start", behavior: "smooth" }),
-              );
-            }}
+            cifras={cifrasPorPieza}
+            ocupado={ocupado}
+            correr={correr}
+            onCambio={aplicar}
+            onAbrir={abrirFicha}
           />
 
-          <section className="se-admin-pub__interruptores">
+          <div {...ancla("mural")}>
+            <MuralDeAnunciantes
+              anunciantes={datos.anunciantes}
+              cifrasPorPieza={cifrasPorPieza}
+              onAbrir={abrirFicha}
+            />
+          </div>
+
+          <section className="se-admin-pub__interruptores" {...ancla("interruptores")}>
             <label className="se-admin-pub__casilla">
               <input
                 type="checkbox"
                 checked={ajustes.activa !== false}
                 disabled={ocupado}
-                onChange={(e) =>
+                onChange={async (e) => {
+                  const encender = e.target.checked;
+                  if (!encender) {
+                    const apagar = await preguntar({
+                      title: "Apagar la publicidad",
+                      description:
+                        "Los diez espacios del sitio dejan de servir anuncios ahora mismo, para todas las marcas. " +
+                        "Es lo que se hace el día de una noticia delicada. Se vuelve a encender con la misma casilla.",
+                      confirmLabel: "Apagar la publicidad",
+                      cancelLabel: "Dejarla encendida",
+                      warning: null,
+                    });
+                    if (!apagar) return;
+                  }
                   correr(
-                    () => fijarAjustes({ activa: e.target.checked }),
-                    e.target.checked
+                    () => fijarAjustes({ activa: encender }),
+                    encender
                       ? "Publicidad encendida en todo el sitio"
                       : "Publicidad apagada — los diez espacios dejan de servir",
-                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
-                }
+                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null));
+                }}
               />
               Publicidad encendida
             </label>
@@ -1358,32 +1516,9 @@ export const AdminPublicidad = () => {
             </p>
           </section>
 
-          <div className="se-admin-pub__nueva se-admin-pub__nueva--alta">
-            <input
-              className="se-form-control"
-              placeholder="Nombre del nuevo anunciante"
-              value={nombreNuevo}
-              onChange={(e) => setNombreNuevo(e.target.value)}
-            />
-            <button
-              type="button"
-              className="se-btn se-btn--primary"
-              disabled={ocupado || !nombreNuevo.trim()}
-              onClick={() =>
-                correr(
-                  async () => {
-                    await crearAnunciante({ nombre: nombreNuevo.trim() });
-                    setNombreNuevo("");
-                    return listar();
-                  },
-                  `Anunciante «${nombreNuevo.trim()}» creado — ahora hace falta una campaña`,
-                ).then(aplicar)
-              }
-            >
-              Nuevo anunciante
-            </button>
-          </div>
-
+          <h2 className="se-admin-pub__sub" {...ancla("fichas")}>
+            Anunciantes
+          </h2>
           {datos.anunciantes.length ? (
             datos.anunciantes.map((a) => (
               <TarjetaDeAnunciante
@@ -1396,6 +1531,10 @@ export const AdminPublicidad = () => {
                 correr={correr}
                 preguntar={preguntar}
                 onCambio={aplicar}
+                onNuevaCampana={(id) => {
+                  setAsistenteCon(id);
+                  setAsistente(true);
+                }}
               />
             ))
           ) : (
@@ -1412,6 +1551,7 @@ export const AdminPublicidad = () => {
         abierto={asistente}
         anunciantes={datos.anunciantes ?? []}
         formatos={ajustes?.formatos}
+        anuncianteInicial={asistenteCon}
         correr={correr}
         onCerrar={() => setAsistente(false)}
         onListo={() => {
@@ -1423,6 +1563,7 @@ export const AdminPublicidad = () => {
       {/* Uno solo para toda la pantalla: lo abre quien lo necesite a través de
           `preguntar`, que viaja por props igual que `correr`. */}
       <ConfirmDialog />
+      <RecorridoVista recorrido={recorridoPublicidad} />
     </div>
   );
 };

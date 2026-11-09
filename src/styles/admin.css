@@ -7700,3 +7700,119 @@
 .se-admin-tarjeta__ver {
   font-size: 0.875rem;
 }
+
+/* ===========================================================================
+   Ola 3 (nov-2026): Publicidad. El interruptor «Al aire» y la tabla de campañas.
+   =========================================================================== */
+.se-alaire {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.1rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--adm-text-muted);
+  cursor: pointer;
+}
+
+.se-alaire__pista {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  transition: background-color var(--adm-dur) var(--adm-ease);
+}
+
+.se-alaire__pista::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.25rem - 4px);
+  height: calc(1.25rem - 4px);
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--adm-dur) var(--adm-ease);
+}
+
+.se-alaire.is-on {
+  color: var(--adm-ok);
+  font-weight: 700;
+}
+
+.se-alaire.is-on .se-alaire__pista {
+  background: var(--adm-ok);
+}
+
+.se-alaire.is-on .se-alaire__pista::after {
+  transform: translateX(1rem);
+}
+
+.se-alaire:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.se-alaire:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-alaire__pista,
+  .se-alaire__pista::after {
+    transition: none;
+  }
+}
+
+.se-admin-pub__tabla {
+  margin: 0 0 1.5rem;
+}
+
+.se-admin-pub__tabla-campana {
+  display: block;
+  font-weight: 600;
+  color: var(--adm-text);
+}
+
+.se-admin-pub__tabla-marca {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--adm-text-muted);
+}
+
+.se-admin-pub__tabla-fechas {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-admin-pub__campana-cabeza .se-alaire {
+  flex-shrink: 0;
+}
+
+/* El asistente avisa de un nombre que ya existe. */
+.se-asis__repetido {
+  margin: 0.5rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--adm-err-border);
+  border-radius: 8px;
+  background: var(--adm-err-bg);
+  font-size: 0.9rem;
+}
+
+.se-asis__usar {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--adm-err);
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -18,6 +18,7 @@ const { PASOS_CANAL, recorridoCanal } = await import("./guias/guiaCanal.js");
 const { PASOS_CUENTA, recorridoCuenta } = await import("./guias/guiaCuenta.js");
 const { PASOS_EDITOR, recorridoEditor } = await import("./guias/guiaEditor.js");
 const { PASOS_CONTENIDO, recorridoContenido } = await import("./guias/guiaContenido.js");
+const { PASOS_PUBLICIDAD, recorridoPublicidad } = await import("./guias/guiaPublicidad.js");
 const { PASOS_PROPUESTA, recorridoPropuesta } = await import("./guias/guiaPropuesta.js");
 const { PASOS_PERFIL, recorridoPerfil } = await import("./guias/guiaPerfil.js");
 const { readFileSync } = await import("node:fs");
@@ -81,6 +82,7 @@ check("anclaje data-tour-canal", recorridoCanal.atributo === "data-tour-canal");
 for (const [nombre, pasos, recorrido, atributo] of [
   ["del editor de piezas", PASOS_EDITOR, recorridoEditor, "data-tour-editor"],
   ["de Contenido", PASOS_CONTENIDO, recorridoContenido, "data-tour-contenido"],
+  ["de Publicidad", PASOS_PUBLICIDAD, recorridoPublicidad, "data-tour-publicidad"],
 ]) {
   console.log(`guía ${nombre}`);
   check("empieza sin anclaje y acaba en «Guía»", pasos[0].clave === undefined && pasos.at(-1).clave === "guia");

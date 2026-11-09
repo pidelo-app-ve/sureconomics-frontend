@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AssetField } from "./AssetField";
 import { DondeSale } from "./DondeSale";
@@ -61,10 +61,14 @@ const PASOS = [
 /** Los formatos que hoy se publican. E y H no tienen dónde pintarse todavía. */
 const FORMATOS_UTILES = ["B", "A", "C", "D", "I", "F"];
 
+/** El nombre para compararlo: sin mayúsculas ni espacios de más (igual que el servidor). */
+const comparable = (nombre) => String(nombre ?? "").split(/\s+/).filter(Boolean).join(" ").toLowerCase();
+
 export const AsistenteDeAnuncio = ({
   abierto,
   anunciantes,
   formatos,
+  anuncianteInicial,
   onCerrar,
   onListo,
   correr,
@@ -121,6 +125,16 @@ export const AsistenteDeAnuncio = ({
     reiniciar();
     onCerrar();
   };
+
+  // «Nueva campaña» desde la ficha de un anunciante: el asistente abre con él elegido.
+  useEffect(() => {
+    if (abierto && anuncianteInicial) setAnuncianteId(String(anuncianteInicial));
+  }, [abierto, anuncianteInicial]);
+
+  // Un nombre nuevo que ya existe: se ofrece el que hay en vez de crear un duplicado.
+  const yaExiste = !anuncianteId && nombreNuevo.trim()
+    ? anunciantes.find((a) => comparable(a.nombre) === comparable(nombreNuevo))
+    : null;
 
   const paso1 = async () => {
     // Ya pasamos por aquí y volvimos: el anunciante existe, no se crea otro.
@@ -188,7 +202,7 @@ export const AsistenteDeAnuncio = ({
     onListo();
   };
 
-  const puedeSeguir1 = anuncianteId || nombreNuevo.trim().length > 1;
+  const puedeSeguir1 = anuncianteId || (nombreNuevo.trim().length > 1 && !yaExiste);
   const puedeTerminar =
     enlace.trim() && (!artes.length || imagenId || cintaId) && (!guia.titular || titular.trim());
 
@@ -316,6 +330,21 @@ export const AsistenteDeAnuncio = ({
                 Tal y como quiere que se lea en la etiqueta «Publicidad · …» que acompaña
                 a cada anuncio.
               </p>
+              {yaExiste ? (
+                <p className="se-asis__repetido" role="status">
+                  Ya hay un anunciante que se llama «{yaExiste.nombre}».{" "}
+                  <button
+                    type="button"
+                    className="se-asis__usar"
+                    onClick={() => {
+                      setAnuncianteId(String(yaExiste.id));
+                      setNombreNuevo("");
+                    }}
+                  >
+                    Usar ese
+                  </button>
+                </p>
+              ) : null}
             </>
           ) : null}
         </section>
@@ -509,6 +538,8 @@ AsistenteDeAnuncio.propTypes = {
   abierto: PropTypes.bool.isRequired,
   anunciantes: PropTypes.array,
   formatos: PropTypes.object,
+  /** Abre con este anunciante elegido (id). */
+  anuncianteInicial: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onCerrar: PropTypes.func.isRequired,
   /** Se llama al terminar, para que la página recargue la lista. */
   onListo: PropTypes.func.isRequired,

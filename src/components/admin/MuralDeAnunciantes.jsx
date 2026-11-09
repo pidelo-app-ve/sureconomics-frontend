@@ -43,7 +43,7 @@ import {
  * Quién lo decide no es esta pantalla: el servidor manda `freno` en cada campaña,
  * calculado con las mismas funciones que reparten los espacios de verdad.
  */
-const ESTADOS = {
+export const ESTADOS_DE_CAMPANA = {
   activa: { texto: "Al aire", clase: "se-mural__sello--activa" },
   tope: { texto: "Tope alcanzado", clase: "se-mural__sello--tope" },
   fecha: { texto: "Fuera de fecha", clase: "se-mural__sello--tope" },
@@ -70,12 +70,11 @@ const ORDEN_DE_ESTADO = [
 ];
 
 /** El estado que mejor describe al anunciante: el más "encendido" de sus campañas. */
+/** Cómo va una campaña: su estado, o por qué no sale aunque esté activa (`freno`). */
+export const estadoDeCampana = (c) => (c.estado !== "activa" ? c.estado : c.freno ?? "activa");
+
 const estadoDe = (anunciante) => {
-  const estados = (anunciante.campanas ?? []).map((c) => {
-    if (c.estado !== "activa") return c.estado;
-    // Activa, pero el servidor puede no estar sirviéndola. `freno` dice por qué.
-    return c.freno ?? "activa";
-  });
+  const estados = (anunciante.campanas ?? []).map(estadoDeCampana);
   return ORDEN_DE_ESTADO.find((e) => estados.includes(e)) ?? "ninguna";
 };
 
@@ -207,7 +206,7 @@ export const MuralDeAnunciantes = ({ anunciantes, cifrasPorPieza, onAbrir }) => 
           const destino = destinoDe(pieza);
           const web = anunciante.sitio_web ? dominio(anunciante.sitio_web) : null;
           const aviso = avisoDe(anunciante);
-          const estado = ESTADOS[estadoDe(anunciante)];
+          const estado = ESTADOS_DE_CAMPANA[estadoDe(anunciante)];
           const { impresiones, clics } = cifrasDe(anunciante, cifrasPorPieza);
           const piezas = cuentaDePiezas(anunciante);
 

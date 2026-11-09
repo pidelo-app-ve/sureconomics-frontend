@@ -231,6 +231,12 @@ export const CuentaEntrar = () => {
             error={errores.password}
             autoComplete="current-password"
           />
+          {/* Lleva el correo escrito, para no pedirlo dos veces. */}
+          <p className="se-entrada__olvido">
+            <Enlace to="/cuenta/recuperar" state={{ email: email.trim(), volver: leerVolver(location) }}>
+              {t("cuenta.entrar.olvido")}
+            </Enlace>
+          </p>
 
           {/* Sin `role="alert"`: el foco llega aqui en cuanto aparece, y eso ya hace
               que se lea. Con los dos, el lector lo diria dos veces. */}

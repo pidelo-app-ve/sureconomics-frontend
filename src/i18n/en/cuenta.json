@@ -38,7 +38,8 @@
       "entrando": "Signing in…",
       "entrar": "Sign in",
       "sinCuenta": "Don't have an account? {enlace}",
-      "crearUna": "Create one"
+      "crearUna": "Create one",
+      "olvido": "Forgot your password?"
     },
     "registro": {
       "meta": {
@@ -92,6 +93,28 @@
       "entrar": "Sign in",
       "enviarCodigo": "Send code",
       "volverAVerificacion": "Back to verification"
+    },
+    "recuperar": {
+      "meta": {
+        "titulo": "Reset your password — {marca}",
+        "descripcion": "Get a code by email and set a new password."
+      },
+      "titulo": "Reset your password",
+      "leadCorreo": "Enter your account email and we'll send you a six-digit code to set a new password.",
+      "leadCodigo": "Enter the code we sent to {correo} and your new password.",
+      "enviarCodigo": "Send the code",
+      "enviado": "If that email has an account, a code will arrive shortly. Check your spam folder too. The code expires in 15 minutes.",
+      "codigo": "Six-digit code",
+      "escribaCodigo": "Enter the code you received by email.",
+      "codigoIncompleto": "The code has six digits.",
+      "nueva": "New password",
+      "guardar": "Save and sign in",
+      "guardando": "Saving…",
+      "codigoMalo": "The code is wrong or has expired. Check it or request a new one.",
+      "pedirOtro": "Didn't get it? Request another code",
+      "otroCorreo": "Use a different email",
+      "volverAEntrar": "Back to sign in",
+      "fallo": "Couldn't complete this. Please try again in a moment."
     },
     "panel": {
       "inicio": "{marca} — home",

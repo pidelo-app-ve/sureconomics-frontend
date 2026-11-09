@@ -1139,6 +1139,43 @@
   color: var(--color-slate-2);
 }
 .se-entrada__pie { margin-top: 1.25rem; text-align: center; }
+/* «¿Olvidó su contraseña?», pegado a su campo: es ahí donde se da cuenta. */
+.se-entrada__olvido {
+  margin: -0.5rem 0 0;
+  text-align: right;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+}
+.se-entrada__olvido a {
+  color: var(--se-accent-hover);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+/* El aviso de que el código salió: el mismo sitio que el error, en verde. */
+.se-entrada__aviso {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 2px;
+  background: #e8f1ec;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #003318;
+}
+.se-entrada__vuelta {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--se-accent-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
 .se-entrada__pie a {
   color: var(--se-accent-hover);
   font-weight: 600;

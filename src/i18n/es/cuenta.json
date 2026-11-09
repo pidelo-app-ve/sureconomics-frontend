@@ -38,7 +38,8 @@
       "entrando": "Entrando…",
       "entrar": "Entrar",
       "sinCuenta": "¿No tiene cuenta? {enlace}",
-      "crearUna": "Crear una"
+      "crearUna": "Crear una",
+      "olvido": "¿Olvidó su contraseña?"
     },
     "registro": {
       "meta": {
@@ -92,6 +93,28 @@
       "entrar": "Entrar",
       "enviarCodigo": "Enviar código",
       "volverAVerificacion": "Volver a verificación"
+    },
+    "recuperar": {
+      "meta": {
+        "titulo": "Recuperar la contraseña — {marca}",
+        "descripcion": "Reciba un código por correo y ponga una contraseña nueva."
+      },
+      "titulo": "Recuperar la contraseña",
+      "leadCorreo": "Escriba el correo de su cuenta y le enviaremos un código de seis cifras para poner una contraseña nueva.",
+      "leadCodigo": "Escriba el código que le enviamos a {correo} y su contraseña nueva.",
+      "enviarCodigo": "Enviar el código",
+      "enviado": "Si ese correo tiene una cuenta, le llegará un código en un momento. Revise también la carpeta de correo no deseado. El código vence en 15 minutos.",
+      "codigo": "Código de seis cifras",
+      "escribaCodigo": "Escriba el código que le llegó por correo.",
+      "codigoIncompleto": "El código tiene seis cifras.",
+      "nueva": "Contraseña nueva",
+      "guardar": "Guardar y entrar",
+      "guardando": "Guardando…",
+      "codigoMalo": "El código no es correcto o ya venció. Revíselo o pida uno nuevo.",
+      "pedirOtro": "No me llegó: pedir otro código",
+      "otroCorreo": "Usar otro correo",
+      "volverAEntrar": "Volver a entrar",
+      "fallo": "No se pudo completar. Inténtelo de nuevo en un momento."
     },
     "panel": {
       "inicio": "{marca} — inicio",

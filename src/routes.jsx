@@ -109,6 +109,8 @@ const rutasPublicas = () => [
             { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro") },
             { path: "cuenta/verificar-email", lazy: pagina(() => import("./pages/cuenta/CuentaVerificarEmail"), "CuentaVerificarEmail") },
             { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./pages/cuenta/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo") },
+            // «¿Olvidó su contraseña?»: código por correo y contraseña nueva (equipo y lectores).
+            { path: "cuenta/recuperar", lazy: pagina(() => import("./pages/cuenta/CuentaRecuperar"), "CuentaRecuperar") },
             { path: "*", element: <NotFound /> },
         ],
     },

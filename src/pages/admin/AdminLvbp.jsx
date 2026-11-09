@@ -7,6 +7,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { applyPageMeta } from "../../lib/seo";
 import { adminRequest } from "../../lib/api";
 import { unwrapEntity } from "../../services/adminResponseUtils";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 /**
  * Los juegos de la LVBP en el panel.
@@ -36,6 +37,7 @@ export const AdminLvbp = () => {
     const { role } = useAuth();
     const puedeEditar = role === "publicador" || role === "admin";
     const { toastSuccess, toastError } = useAdminToast();
+    const { confirm, ConfirmDialog } = useAdminConfirm();
     const [rango, setRango] = useState(() => {
         const hoy = new Date();
         return { desde: fechaIso(new Date(hoy.getTime() - 14 * 86400000)), hasta: fechaIso(new Date(hoy.getTime() + 7 * 86400000)) };
@@ -279,8 +281,13 @@ export const AdminLvbp = () => {
                                                 type="button"
                                                 className="se-link se-header__nav-link--button"
                                                 disabled={ocupado === j.id}
-                                                onClick={() => {
-                                                    if (window.confirm("¿Borrar este juego? Si la API lo trae, volverá a aparecer en la próxima sincronización.")) {
+                                                onClick={async () => {
+                                                    const borrar = await confirm({
+                                                        title: "Borrar el juego",
+                                                        description: "¿Borrar este juego? Si la API lo trae, volverá a aparecer en la próxima sincronización.",
+                                                        confirmLabel: "Borrar",
+                                                    });
+                                                    if (borrar) {
                                                         correr(j.id, () => adminRequest(`/admin/lvbp/juegos/${j.id}`, { method: "DELETE" }), "Juego borrado.");
                                                     }
                                                 }}
@@ -362,6 +369,7 @@ export const AdminLvbp = () => {
                     </form>
                 ) : null}
             </ModalDelPanel>
+            <ConfirmDialog />
         </main>
     );
 };

@@ -160,6 +160,20 @@ export const AdminMediaLibrary = () => {
         }
     };
 
+    /** Una imagen, un PDF o un audio: cada uno va a su subida. */
+    const subirSegunElTipo = (event) => {
+        const file = event.target.files?.[0];
+        const tipo = file?.type ?? "";
+        const nombre = (file?.name ?? "").toLowerCase();
+        if (tipo === "application/pdf" || nombre.endsWith(".pdf")) {
+            return handleUpload(uploadAdminMediaDocument, "Documento")(event);
+        }
+        if (tipo.startsWith("audio/") || nombre.endsWith(".mp3") || nombre.endsWith(".m4a")) {
+            return handleUpload(uploadAdminMediaAudio, "Audio")(event);
+        }
+        return handleUpload(uploadAdminMediaImage, "Imagen")(event);
+    };
+
     // Sustituye una fila con la versión que devolvió el PATCH. Recargar la tabla
     // entera devolvería a quien etiqueta al principio de la lista.
     const reemplazarFila = (actualizada) =>
@@ -198,36 +212,20 @@ export const AdminMediaLibrary = () => {
                 </div>
                 {canUpload ? (
                     <div className="se-admin-create">
-                        <label className="se-btn se-btn--small">
-                            Subir imagen
+                        {/* Un solo botón: el tipo lo dice el archivo. Tres botones rellenos
+                            iguales («Subir imagen», «Subir PDF», «Subir audio») eran tres
+                            acciones principales para una sola tarea. */}
+                        <label className={`se-btn${busy ? " is-busy" : ""}`}>
+                            {busy ? "Subiendo…" : "Subir archivo"}
                             <input
                                 type="file"
-                                accept={ACCEPTED_IMAGE_MIME}
-                                onChange={handleUpload(uploadAdminMediaImage, "Imagen")}
+                                accept={`${ACCEPTED_IMAGE_MIME},${ACCEPTED_DOCUMENT_MIME},${ACCEPTED_AUDIO_MIME}`}
+                                onChange={subirSegunElTipo}
                                 disabled={busy}
-                                style={{ display: "none" }}
+                                className="se-sr-only"
                             />
                         </label>
-                        <label className="se-btn se-btn--small">
-                            Subir PDF
-                            <input
-                                type="file"
-                                accept={ACCEPTED_DOCUMENT_MIME}
-                                onChange={handleUpload(uploadAdminMediaDocument, "Documento")}
-                                disabled={busy}
-                                style={{ display: "none" }}
-                            />
-                        </label>
-                        <label className="se-btn se-btn--small">
-                            Subir audio
-                            <input
-                                type="file"
-                                accept={ACCEPTED_AUDIO_MIME}
-                                onChange={handleUpload(uploadAdminMediaAudio, "Audio")}
-                                disabled={busy}
-                                style={{ display: "none" }}
-                            />
-                        </label>
+                        <span className="se-admin-meta-hint">Imagen, PDF o audio (MP3, M4A).</span>
                     </div>
                 ) : null}
             </header>

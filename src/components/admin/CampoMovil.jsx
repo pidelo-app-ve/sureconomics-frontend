@@ -24,8 +24,13 @@ import { createPortal } from "react-dom";
  *
  * Cerrar la hoja no pierde nada: lo escrito ya está en el editor. Lo que guarda es el
  * botón «Guardar» de la barra fija de abajo, igual que en el computador.
+ *
+ * **En el computador, con `plegable`**, el campo va en un `<details>` cuya cabecera dice
+ * lo mismo que la fila del teléfono (qué es, qué tiene, si falta). Así el editor de
+ * escritorio enseña abierto lo que se escribe siempre y plegado lo que se toca de vez
+ * en cuando, sin una segunda versión del campo. Se abre solo si le falta algo.
  */
-export const CampoMovil = ({ movil, titulo, resumen, estado, miniatura, children }) => {
+export const CampoMovil = ({ movil, plegable, abierto, titulo, resumen, estado, miniatura, children }) => {
   const [abierta, setAbierta] = useState(false);
   const fila = useRef(null);
   const hoja = useRef(null);
@@ -51,6 +56,18 @@ export const CampoMovil = ({ movil, titulo, resumen, estado, miniatura, children
     };
   }, [abierta]);
 
+  if (!movil && plegable) {
+    return (
+      <details className="se-plegable" open={abierto || estado === "falta" || undefined}>
+        <summary className="se-plegable__cabeza">
+          <span className="se-plegable__titulo">{titulo}</span>
+          <span className="se-plegable__resumen">{resumen}</span>
+          {estado === "falta" ? <span className="se-plegable__falta">Falta</span> : null}
+        </summary>
+        <div className="se-plegable__cuerpo">{children}</div>
+      </details>
+    );
+  }
   if (!movil) return children;
 
   const cerrar = () => setAbierta(false);
@@ -131,8 +148,12 @@ export const CampoMovil = ({ movil, titulo, resumen, estado, miniatura, children
 };
 
 CampoMovil.propTypes = {
-  /** En el computador, `false`: el campo sale tal cual. */
+  /** En el computador, `false`: el campo sale tal cual (o plegado, con `plegable`). */
   movil: PropTypes.bool,
+  /** En el computador: el campo va plegado, con su resumen en la cabecera. */
+  plegable: PropTypes.bool,
+  /** Plegable que abre desplegado. */
+  abierto: PropTypes.bool,
   titulo: PropTypes.node.isRequired,
   /** Lo que tiene el campo, en una línea: «Borrador», «842 palabras», «Falta». */
   resumen: PropTypes.node,

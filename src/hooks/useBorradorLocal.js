@@ -10,7 +10,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *   salir?»: no hace falta, porque nada se pierde.
  * - Al abrir, si hay un borrador distinto de lo que trae el formulario, lo pone y
  *   avisa (`recuperadoEn`); `descartar()` vuelve a lo de partida.
- * - Tras enviar con éxito, `borrar()` lo quita y deja de guardar.
+ * - Tras enviar con éxito, `borrar()` lo quita y deja de guardar. Si el formulario
+ *   sigue abierto (se guardó en el servidor y se sigue editando), `limpiar()` lo quita
+ *   pero sigue guardando lo que venga.
  *
  * `clave` en `null` lo apaga (p. ej. mientras el formulario aún carga del servidor).
  * `base` es con lo que se abrió el formulario: igual a eso, no hay nada que guardar.
@@ -67,9 +69,12 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
       setRecuperadoEn(guardado.guardadoEn ?? null);
       setGuardadoEn(guardado.guardadoEn ?? null);
     }
-    // Solo al cambiar de formulario: `aplicar` es el `setState` del padre.
+    // Al cambiar de formulario y cada vez que llega una base nueva: si la pieza se carga
+    // dos veces (en desarrollo React lo hace; o se recarga del servidor), la segunda
+    // carga pisaba la copia recién recuperada. Tras guardar no hay copia (`limpiar`), así
+    // que no se vuelve a aplicar nada. `aplicar` es el `setState` del padre.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clave]);
+  }, [clave, base]);
 
   const guardarAhora = useCallback(() => {
     if (!clave || cerrado.current) return false;
@@ -80,12 +85,16 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
     return true;
   }, [clave, igual]);
 
-  // Mientras se escribe.
+  // Mientras se escribe. Depende del contenido y no del objeto: los editores de texto
+  // reemiten lo mismo a menudo, y cada copia nueva del objeto reiniciaba la espera, así
+  // que la copia no llegaba a guardarse nunca mientras el editor estuviera abierto.
+  const firma = JSON.stringify(comoNorma.current(valores));
+  const firmaBase = JSON.stringify(comoNorma.current(base));
   useEffect(() => {
-    if (!clave || igual(valores, base)) return undefined;
+    if (!clave || firma === firmaBase) return undefined;
     const id = window.setTimeout(guardarAhora, 800);
     return () => window.clearTimeout(id);
-  }, [clave, valores, base, guardarAhora, igual]);
+  }, [clave, firma, firmaBase, guardarAhora]);
 
   // Al irse: otra página del sitio, cerrar la pestaña o pasar a otra aplicación.
   useEffect(() => {
@@ -107,10 +116,16 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
     setGuardadoEn(null);
   }, [clave, aplicar]);
 
+  const limpiar = useCallback(() => {
+    if (clave) escribir(clave, null);
+    setRecuperadoEn(null);
+    setGuardadoEn(null);
+  }, [clave]);
+
   const borrar = useCallback(() => {
     cerrado.current = true;
     if (clave) escribir(clave, null);
   }, [clave]);
 
-  return { guardadoEn, recuperadoEn, guardarAhora, descartar, borrar };
+  return { guardadoEn, recuperadoEn, guardarAhora, descartar, limpiar, borrar };
 };

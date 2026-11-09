@@ -16,6 +16,8 @@ const { PASOS_TITULARES, recorridoTitulares } = await import("./guias/guiaTitula
 const { PASOS_RESUMEN, recorridoResumen } = await import("./guias/guiaResumen.js");
 const { PASOS_CANAL, recorridoCanal } = await import("./guias/guiaCanal.js");
 const { PASOS_CUENTA, recorridoCuenta } = await import("./guias/guiaCuenta.js");
+const { PASOS_EDITOR, recorridoEditor } = await import("./guias/guiaEditor.js");
+const { PASOS_CONTENIDO, recorridoContenido } = await import("./guias/guiaContenido.js");
 const { PASOS_PROPUESTA, recorridoPropuesta } = await import("./guias/guiaPropuesta.js");
 const { PASOS_PERFIL, recorridoPerfil } = await import("./guias/guiaPerfil.js");
 const { readFileSync } = await import("node:fs");
@@ -75,6 +77,17 @@ check("empieza sin anclaje y acaba en «Guía»", PASOS_CANAL[0].clave === undef
 check("todos con título y texto", PASOS_CANAL.every((p) => p.titulo && (p.texto || p.puntos?.length)));
 check("puntos con la forma «Nombre: qué es»", PASOS_CANAL.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
 check("anclaje data-tour-canal", recorridoCanal.atributo === "data-tour-canal");
+
+for (const [nombre, pasos, recorrido, atributo] of [
+  ["del editor de piezas", PASOS_EDITOR, recorridoEditor, "data-tour-editor"],
+  ["de Contenido", PASOS_CONTENIDO, recorridoContenido, "data-tour-contenido"],
+]) {
+  console.log(`guía ${nombre}`);
+  check("empieza sin anclaje y acaba en «Guía»", pasos[0].clave === undefined && pasos.at(-1).clave === "guia");
+  check("todos con título y texto", pasos.every((p) => p.titulo && (p.texto || p.puntos?.length)));
+  check("puntos con la forma «Nombre: qué es»", pasos.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
+  check(`anclaje ${atributo}`, recorrido.atributo === atributo);
+}
 
 // Las guías de la cuenta: los textos son claves, y tienen que existir en los dos idiomas.
 const DIC = { es: diccionario("es"), en: diccionario("en") };

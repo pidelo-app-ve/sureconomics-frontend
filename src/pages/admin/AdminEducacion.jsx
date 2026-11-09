@@ -20,6 +20,7 @@ import {
 } from "../../services/adminMediaService";
 import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
   getResumenEducacion,
@@ -409,6 +410,7 @@ FilaDeLeccion.propTypes = {
 
 const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
   const [abierto, setAbierto] = useState(false);
+  const { confirm, ConfirmDialog } = useAdminConfirm();
   // Una clave por módulo: dos pestañas abiertas en módulos distintos son subidas
   // distintas, y compartirla haría que la segunda recibiera la respuesta de la primera.
   const { clave: claveDeVideo, renovar: renovarClaveDeVideo } = useClaveIdempotente();
@@ -671,8 +673,13 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
               type="button"
               className="se-btn se-btn--secondary"
               disabled={ocupado}
-              onClick={() => {
-                if (!window.confirm(`¿Borrar «${modulo.titulo}» y todas sus lecciones?`)) return;
+              onClick={async () => {
+                const borrar = await confirm({
+                  title: "Borrar el módulo",
+                  description: `¿Borrar «${modulo.titulo}» y todas sus lecciones? No se puede deshacer.`,
+                  confirmLabel: "Borrar el módulo",
+                });
+                if (!borrar) return;
                 correr(async () => {
                   await borrarModulo(modulo.id);
                   return null;
@@ -706,8 +713,13 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
                   }
                   subirVideo={subirVideoDeLaClase}
                   onMover={(salto) => correr(() => moverLeccion(leccion.id, salto))}
-                  onBorrar={() => {
-                    if (!window.confirm(`¿Quitar «${leccion.titulo}»?`)) return;
+                  onBorrar={async () => {
+                    const quitar = await confirm({
+                      title: "Quitar la lección",
+                      description: `¿Quitar «${leccion.titulo}» del módulo? No se puede deshacer.`,
+                      confirmLabel: "Quitar",
+                    });
+                    if (!quitar) return;
                     correr(() => borrarLeccion(leccion.id));
                   }}
                 />
@@ -745,6 +757,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
           {modulo.compras ? <ComprasDelModulo moduloId={modulo.id} total={modulo.compras} /> : null}
         </div>
       ) : null}
+      <ConfirmDialog />
     </section>
   );
 };
@@ -758,6 +771,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
  */
 const ComprasDelModulo = ({ moduloId, total }) => {
   const { role } = useAuth();
+  const { confirm, ConfirmDialog } = useAdminConfirm();
   const [compras, setCompras] = useState(null);
   const [error, setError] = useState("");
   const [ocupada, setOcupada] = useState(null);
@@ -775,8 +789,13 @@ const ComprasDelModulo = ({ moduloId, total }) => {
 
   const cambiar = async (compra) => {
     const dar = compra.estado === "revocada";
-    if (!dar && !window.confirm(`¿Quitar el acceso a ${compra.correo || "esta compra"}? Deja de poder abrir las lecciones de pago.`)) {
-      return;
+    if (!dar) {
+      const quitar = await confirm({
+        title: "Quitar el acceso",
+        description: `¿Quitar el acceso a ${compra.correo || "esta compra"}? Deja de poder abrir las lecciones de pago. Se puede devolver después.`,
+        confirmLabel: "Quitar el acceso",
+      });
+      if (!quitar) return;
     }
     setOcupada(compra.id);
     setError("");
@@ -845,6 +864,7 @@ const ComprasDelModulo = ({ moduloId, total }) => {
           {error}
         </p>
       ) : null}
+      <ConfirmDialog />
     </div>
   );
 };

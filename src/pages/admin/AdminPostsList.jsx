@@ -9,6 +9,14 @@ import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
+import { rutaDePieza } from "../../lib/pieza";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoContenido } from "../../lib/guias/guiaContenido";
+
+const ancla = (clave) => ({ [recorridoContenido.atributo]: clave });
+
+/** La pieza en el sitio, para abrirla desde la lista. */
+const enElSitio = (row) => rutaDePieza({ formatoApi: row?.format, slug: row?.slug });
 
 const NOMBRE_DE_ESTADO = { draft: "Borrador", scheduled: "Programado", published: "Publicado" };
 
@@ -176,27 +184,17 @@ export const AdminPostsList = () => {
                 <h1 className="se-heading-section" style={{ margin: 0 }}>
                     Contenido
                 </h1>
-                {canCreate ? (
-                    <CampoMovil movil={esMovil} titulo="Crear contenido" resumen="Elija el formato">
-                    <nav className="se-admin-create" aria-label="Crear contenido">
-                        {formats.map((f) => (
-                            <Link
-                                key={f.slug}
-                                to={`/admin/posts/new?format=${encodeURIComponent(f.slug)}`}
-                                className="se-btn se-btn--small"
-                            >
-                                {/* "Crear" avoids the gender agreement that
-                                    "nueva noticia" / "nuevo informe" would need,
-                                    and the format names come from the database. */}
-                                Crear {f.name.toLowerCase()}
-                            </Link>
-                        ))}
-                    </nav>
-                    </CampoMovil>
-                ) : null}
+                <div className="se-editor-cabecera__acciones">
+                    {canCreate ? (
+                        <Link to="/admin/posts/new" className="se-btn" {...ancla("crear")}>
+                            Crear pieza
+                        </Link>
+                    ) : null}
+                    <BotonGuia recorrido={recorridoContenido} className="se-btn se-btn--secondary se-boton-guia" />
+                </div>
             </header>
 
-            <div className="se-admin-filters">
+            <div className="se-admin-filters" {...ancla("filtros")}>
                 {esMovil ? (
                     <>
                         <label className="se-admin-filters__field se-admin-filters__field--grow">
@@ -341,7 +339,7 @@ export const AdminPostsList = () => {
                         />
                     </div>
                     {esMovil ? (
-                        <ul className="se-admin-tarjetas">
+                        <ul className="se-admin-tarjetas" {...ancla("lista")}>
                             {state.items.map((row) => {
                                 const d = describir(row);
                                 return (
@@ -376,6 +374,17 @@ export const AdminPostsList = () => {
                                             {d.missing ? (
                                                 <em className="se-admin-table__note">{d.missing}</em>
                                             ) : null}
+                                            {d.status === "published" && d.slug ? (
+                                                <a
+                                                    href={enElSitio(row)}
+                                                    className="se-link se-admin-tarjeta__ver"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    aria-label={`Ver «${d.title}» en el sitio (se abre en otra pestaña)`}
+                                                >
+                                                    Ver
+                                                </a>
+                                            ) : null}
                                             {canPublish ? (
                                                 <span className="se-admin-tarjeta__acciones">
                                                     {d.status !== "published" ? (
@@ -409,11 +418,10 @@ export const AdminPostsList = () => {
                             })}
                         </ul>
                     ) : (
-                    <div className="se-admin-table-wrap">
+                    <div className="se-admin-table-wrap" {...ancla("lista")}>
                         <table className="se-admin-table">
                             <thead>
                                 <tr>
-                                    <th scope="col">ID</th>
                                     <th scope="col">Formato</th>
                                     <th scope="col">Título</th>
                                     <th scope="col">Tema · Lugar</th>
@@ -427,12 +435,11 @@ export const AdminPostsList = () => {
                                         describir(row);
                                     return (
                                         <tr key={id || slug || title}>
-                                            <td>{id}</td>
                                             <td>{formatName(row.format)}</td>
                                             <td>
-                                                {title}
-                                                <br />
-                                                <code style={{ fontSize: "0.8em", opacity: 0.7 }}>{slug}</code>
+                                                <Link to={`/admin/posts/${id}`} className="se-admin-table__titulo">
+                                                    {title}
+                                                </Link>
                                             </td>
                                             <td>
                                                 {tema ? (
@@ -488,9 +495,23 @@ export const AdminPostsList = () => {
                                                 ) : null}
                                             </td>
                                             <td className="se-admin-table__actions">
-                                                <Link to={`/admin/posts/${id}`} className="se-link">
+                                                <Link to={`/admin/posts/${id}`} className="se-link" aria-label={`Editar «${title}»`}>
                                                     Editar
                                                 </Link>
+                                                {status === "published" && slug ? (
+                                                    <>
+                                                        {" · "}
+                                                        <a
+                                                            href={enElSitio(row)}
+                                                            className="se-link"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            aria-label={`Ver «${title}» en el sitio (se abre en otra pestaña)`}
+                                                        >
+                                                            Ver
+                                                        </a>
+                                                    </>
+                                                ) : null}
                                                 {status !== "published" && canPublish ? (
                                                     <>
                                                         {" · "}
@@ -499,6 +520,7 @@ export const AdminPostsList = () => {
                                                             className="se-link se-header__nav-link--button"
                                                             disabled={busy}
                                                             onClick={() => handlePublish(id, title)}
+                                                            aria-label={`Publicar «${title}»`}
                                                         >
                                                             {busy
                                                                 ? "Publicando…"
@@ -516,6 +538,7 @@ export const AdminPostsList = () => {
                                                             className="se-link se-header__nav-link--button"
                                                             disabled={busy}
                                                             onClick={() => handleDelete(id, title)}
+                                                            aria-label={`Eliminar «${title}»`}
                                                         >
                                                             Eliminar
                                                         </button>
@@ -542,6 +565,7 @@ export const AdminPostsList = () => {
             ) : null}
 
             <ConfirmDialog />
+            <RecorridoVista recorrido={recorridoContenido} />
         </main>
     );
 };

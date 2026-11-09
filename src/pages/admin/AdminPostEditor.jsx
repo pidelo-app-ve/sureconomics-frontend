@@ -55,6 +55,10 @@ import { VistaPreviaDePieza } from "../../components/admin/VistaPreviaDePieza";
 import { IconoOjo } from "../../components/admin/cuerpo/iconos";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { enlaceWeb } from "../../lib/enlaces";
+import { rutaDePieza } from "../../lib/pieza";
+import { useBorradorLocal } from "../../hooks/useBorradorLocal";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoEditor } from "../../lib/guias/guiaEditor";
 
 /**
  * Which extra fields each format asks for.
@@ -267,13 +271,27 @@ const textoPlano = (html) =>
         .trim();
 
 /** El formulario, listo para comparar. El editor de texto devuelve `<p></p>` por un
-    campo vacío: sin esto, abrir una pieza y no tocar nada ya contaría como cambio. */
+    campo vacío: sin esto, abrir una pieza y no tocar nada ya contaría como cambio. Los
+    cuatro campos con editor, también los de inglés (se olvidaban, y abrir el editor ya
+    contaba como «sin guardar»). */
+const sinParrafosVacios = (html) => String(html ?? "").replace(/<p><\/p>/g, "").trim();
 const comparable = (f) =>
     JSON.stringify({
         ...f,
-        content: String(f?.content ?? "").replace(/<p><\/p>/g, "").trim(),
-        excerpt: String(f?.excerpt ?? "").replace(/<p><\/p>/g, "").trim(),
+        content: sinParrafosVacios(f?.content),
+        excerpt: sinParrafosVacios(f?.excerpt),
+        content_en: sinParrafosVacios(f?.content_en),
+        excerpt_en: sinParrafosVacios(f?.excerpt_en),
     });
+
+/** Lo mismo que `comparable`, como objeto: el borrador local compara con esto. */
+const normalizarPieza = (f) => (f ? JSON.parse(comparable(f)) : f);
+
+const ancla = (clave) => ({ [recorridoEditor.atributo]: clave });
+
+/** «14:32», para decir cuándo se guardó la copia en este equipo. */
+const horaCorta = (marca) =>
+    new Date(marca).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
 
 const recortar = (texto, max = 48) =>
     texto.length > max ? `${texto.slice(0, max - 1).trimEnd()}…` : texto;
@@ -549,7 +567,16 @@ export const AdminPostEditor = () => {
         }
         const yaHayIngles =
             form.title_en.trim() || textoPlano(form.excerpt_en) || textoPlano(form.content_en);
-        if (yaHayIngles && !window.confirm("Esto reemplaza lo que hay escrito en inglés. ¿Seguir?")) return;
+        if (yaHayIngles) {
+            const seguir = await confirm({
+                title: "Reemplazar la traducción",
+                description: "Esto reemplaza lo que hay escrito en inglés por una traducción nueva.",
+                confirmLabel: "Reemplazar",
+                cancelLabel: "Dejarla como está",
+                warning: null,
+            });
+            if (!seguir) return;
+        }
         setTraduciendo(true);
         try {
             const r = await traducirTextos({
@@ -662,6 +689,7 @@ export const AdminPostEditor = () => {
                 // Same reason: no gendered adjective on a name that comes from data.
                 const label = currentFormat?.name ?? "La pieza";
                 saltarGuarda.current = true;
+                borrador.borrar();
                 if (newId != null) {
                     navigate(`/admin/posts/${newId}`, {
                         replace: true,
@@ -678,6 +706,7 @@ export const AdminPostEditor = () => {
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
             setBase(postToForm(updated));
+            borrador.limpiar();
             setAssets((prev) => ({
                 ...prev,
                 image: updated.image_asset ?? null,
@@ -713,6 +742,7 @@ export const AdminPostEditor = () => {
             const updated = await fn(numericPostId);
             setForm(postToForm(updated));
             setBase(postToForm(updated));
+            borrador.limpiar();
             setActionState({ status: "success", message: successMessage, kind });
             toastSuccess(successMessage, toastTitle);
         } catch (err) {
@@ -722,9 +752,18 @@ export const AdminPostEditor = () => {
         }
     };
 
+    // Publicar con cambios sin guardar los guarda antes: «Publicar» es la acción
+    // principal de un borrador listo, y publicar la versión de antes sería una trampa.
+    const guardarYPublicar = async (id) => {
+        if (base && comparable(form) !== comparable(base)) {
+            await patchAdminPost(id, formToPayload(form));
+        }
+        return publishAdminPost(id);
+    };
+
     const handlePublish = runAction(
         "publish",
-        publishAdminPost,
+        guardarYPublicar,
         "Quedó publicada y ya es visible en el sitio.",
         "No se pudo publicar.",
         "Publicar"
@@ -748,7 +787,9 @@ export const AdminPostEditor = () => {
         setActionState({ status: "idle", message: "", kind: "" });
         await confirm({
             title: "Eliminar pieza",
-            description: `¿Eliminar esta pieza (ID ${numericPostId}) de forma permanente?`,
+            description: form.title.trim()
+                ? `¿Eliminar «${form.title.trim()}» de forma permanente? No se puede deshacer.`
+                : `¿Eliminar esta pieza de forma permanente? No se puede deshacer.`,
             confirmLabel: "Eliminar",
             onConfirm: async () => {
                 await deleteAdminPost(numericPostId);
@@ -761,10 +802,10 @@ export const AdminPostEditor = () => {
         });
     };
 
-    // Salir con cambios sin guardar, en el teléfono: allí un toque de más en «Volver»
-    // o en el menú se lleva lo escrito, así que se pregunta antes. Cerrar una hoja no
+    // Salir con cambios sin guardar: un clic de más en el menú o en «Volver» se llevaba
+    // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
-    const sinGuardar = esMovil && base !== null && comparable(form) !== comparable(base);
+    const sinGuardar = base !== null && comparable(form) !== comparable(base);
     const blocker = useBlocker(
         ({ currentLocation, nextLocation }) =>
             sinGuardar && !saltarGuarda.current && currentLocation.pathname !== nextLocation.pathname,
@@ -788,6 +829,22 @@ export const AdminPostEditor = () => {
         window.addEventListener("beforeunload", alSalir);
         return () => window.removeEventListener("beforeunload", alSalir);
     }, [sinGuardar]);
+
+    // Copia en este equipo de lo que no se ha guardado, por si se cierra la pestaña o se
+    // cae el navegador: vuelve al abrir la pieza otra vez. No sustituye a «Guardar».
+    const claveDelBorrador =
+        loadState.status === "success" && base
+            ? isCreate
+                ? `pieza-nueva-${base.format || "sin-formato"}`
+                : `pieza-${postId}`
+            : null;
+    const borrador = useBorradorLocal({
+        clave: claveDelBorrador,
+        valores: form,
+        base,
+        aplicar: setForm,
+        normalizar: normalizarPieza,
+    });
 
     const feedback = (() => {
         for (const state of [actionState, saveState]) {
@@ -875,8 +932,10 @@ export const AdminPostEditor = () => {
         faltaFechaDePortada ? "hasta cuándo abre la portada" : null,
     ].filter(Boolean);
 
+    const publicarEsPrincipal = !isCreate && canPublish && form.status === "draft" && !faltas.length;
+
     return (
-        <main role="main" className={esMovil ? "se-editor-movil" : undefined}>
+        <main role="main" className={esMovil ? "se-editor-movil" : "se-editor-escritorio"}>
             <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
                 <div>
                     <h1 className="se-heading-section" style={{ margin: 0 }}>
@@ -895,12 +954,28 @@ export const AdminPostEditor = () => {
                               : "borrador"}
                     </p>
                 </div>
-                <Link to="/admin/posts" className="se-link">
-                    ← Volver al listado
-                </Link>
+                <div className="se-editor-cabecera__acciones">
+                    <Link to="/admin/posts" className="se-link">
+                        Volver al listado
+                    </Link>
+                    <BotonGuia recorrido={recorridoEditor} className="se-btn se-btn--secondary se-boton-guia" />
+                </div>
             </header>
 
-            <div className="se-editor-group">
+            {borrador.recuperadoEn ? (
+                <p className="se-editor-recuperado" role="status">
+                    Recuperamos lo que estaba sin guardar (copia de las {horaCorta(borrador.recuperadoEn)}).
+                    Revíselo y guarde, o{" "}
+                    <button type="button" className="se-editor-recuperado__descartar" onClick={borrador.descartar}>
+                        descártelo
+                    </button>
+                    .
+                </p>
+            ) : null}
+
+            <div className="se-editor-rejilla">
+            <div className="se-editor-rejilla__pieza">
+            <div className="se-editor-group" {...ancla("formato")}>
                 <p className="se-editor-group__title">Formato</p>
                 <CampoMovil
                     movil={esMovil}
@@ -908,6 +983,29 @@ export const AdminPostEditor = () => {
                     resumen={currentFormat?.name || "Elija un formato"}
                     estado={form.format ? "ok" : "falta"}
                 >
+                {/* Al crear sin formato, los formatos a la vista con lo que es cada uno: un
+                    desplegable solo, en una página vacía, no decía qué elegir ni por qué. */}
+                {isCreate && !form.format ? (
+                    <div className="se-formatos" role="group" aria-label="Qué es esta pieza">
+                        {formats.map((f) => (
+                            <button
+                                key={f.slug}
+                                type="button"
+                                className="se-formatos__opcion"
+                                onClick={() => {
+                                    // Elegir el formato es el punto de partida, no un cambio:
+                                    // sin esto, salir justo después ya preguntaba «¿salir sin
+                                    // guardar?». La copia local pasa a ser la de ese formato.
+                                    setForm((prev) => ({ ...prev, format: f.slug }));
+                                    setBase((prev) => (prev ? { ...prev, format: f.slug } : prev));
+                                }}
+                            >
+                                <strong className="se-formatos__nombre">{f.name}</strong>
+                                {f.lede ? <span className="se-formatos__lede">{f.lede}</span> : null}
+                            </button>
+                        ))}
+                    </div>
+                ) : (
                 <label className="se-form-field" htmlFor="post-format">
                     <span className="se-form-label">Qué es esta pieza</span>
                     <select
@@ -924,13 +1022,14 @@ export const AdminPostEditor = () => {
                         ))}
                     </select>
                 </label>
+                )}
                 {form.format && currentFormat?.lede ? (
                     <p className="se-admin-meta-hint">{currentFormat.lede}</p>
                 ) : null}
                 {!form.format ? (
                     <p className="se-admin-meta-hint">
                         El formato decide qué pide el formulario y cómo se ve la pieza en el
-                        sitio. Elíjalo para continuar.
+                        sitio. Elija uno para continuar; se puede cambiar después.
                     </p>
                 ) : null}
                 </CampoMovil>
@@ -938,7 +1037,7 @@ export const AdminPostEditor = () => {
 
             {form.format ? (
                 <>
-                    <div className="se-editor-group">
+                    <div className="se-editor-group" {...ancla("pieza")}>
                         <p className="se-editor-group__title">La pieza</p>
                         <CampoMovil
                             movil={esMovil}
@@ -1026,6 +1125,7 @@ export const AdminPostEditor = () => {
 
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="Fuentes"
                             resumen={nFuentes ? `${nFuentes} ${nFuentes === 1 ? "fuente" : "fuentes"}` : "Ninguna"}
                         >
@@ -1092,7 +1192,7 @@ export const AdminPostEditor = () => {
                         ) : null}
                     </div>
 
-                    <div className="se-editor-group">
+                    <div className="se-editor-group" {...ancla("cuerpo")}>
                         <p className="se-editor-group__title">Cuerpo</p>
                         <CampoMovil
                             movil={esMovil}
@@ -1130,6 +1230,7 @@ export const AdminPostEditor = () => {
                             la clave (ver `traduccion_service.py`). */}
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="En inglés"
                             resumen={estadoIngles.resumen}
                             estado={estadoIngles.estado}
@@ -1228,10 +1329,11 @@ export const AdminPostEditor = () => {
 
                     </div>
 
-                    <div className="se-editor-group">
+                    <div className="se-editor-group" {...ancla("clasificacion")}>
                         <p className="se-editor-group__title">Clasificación</p>
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="Temas"
                             resumen={listaCorta(temasElegidos, "Ninguno")}
                             estado={temasElegidos.length ? "ok" : undefined}
@@ -1248,6 +1350,7 @@ export const AdminPostEditor = () => {
                         </CampoMovil>
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="Lugares"
                             resumen={listaCorta(lugaresElegidos, "Ninguno")}
                             estado={lugaresElegidos.length ? "ok" : undefined}
@@ -1270,6 +1373,7 @@ export const AdminPostEditor = () => {
                             principal, para decir algo que no descarta ningun tema. */}
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="Sello y publicidad"
                             resumen={[
                                 form.is_educational ? "Educativo" : null,
@@ -1589,10 +1693,11 @@ export const AdminPostEditor = () => {
                         </CampoMovil>
                         </div>
 
-                    <div className="se-editor-group">
+                    <div className="se-editor-group" {...ancla("publicacion")}>
                         <p className="se-editor-group__title">Publicación</p>
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo="Estado y fecha"
                             resumen={resumenDeEstado}
                             estado={(programada && !form.published_at) || faltaFechaDePortada ? "falta" : undefined}
@@ -1796,6 +1901,43 @@ export const AdminPostEditor = () => {
                     </details>
                     </CampoMovil>
                     </div>
+                </>
+            ) : null}
+            </div>
+
+            {form.format ? (
+                <aside className="se-editor-rejilla__estado" aria-label="Estado y acciones de la pieza">
+                    {!esMovil ? (
+                        <section className="se-editor-estado" {...ancla("estado")}>
+                            <p className="se-editor-estado__rotulo">Estado</p>
+                            <p className="se-editor-estado__valor">{resumenDeEstado}</p>
+                            {form.status === "published" && form.slug ? (
+                                <a
+                                    href={rutaDePieza({ formatoApi: form.format, slug: form.slug })}
+                                    className="se-link se-editor-estado__ver"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Ver en el sitio
+                                </a>
+                            ) : null}
+                            <p
+                                className={`se-editor-estado__guardado${sinGuardar ? " is-pendiente" : ""}`}
+                                role="status"
+                            >
+                                {sinGuardar
+                                    ? borrador.guardadoEn
+                                        ? `Sin guardar · copia en este equipo a las ${horaCorta(borrador.guardadoEn)}`
+                                        : "Hay cambios sin guardar"
+                                    : isCreate
+                                      ? "Todavía no se ha creado"
+                                      : "Todo guardado"}
+                            </p>
+                            {faltas.length ? (
+                                <p className="se-editor-estado__faltas">Para publicar falta: {faltas.join(", ")}.</p>
+                            ) : null}
+                        </section>
+                    ) : null}
 
                     <VistaPreviaDePieza
                         abierta={vistaPrevia}
@@ -1808,7 +1950,10 @@ export const AdminPostEditor = () => {
 
                     <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
 
-                    <div className={`se-admin-form-actions${esMovil ? " se-admin-form-actions--movil" : ""}`}>
+                    <div
+                        className={`se-admin-form-actions${esMovil ? " se-admin-form-actions--movil" : ""}`}
+                        {...ancla("acciones")}
+                    >
                         {esMovil && faltas.length ? (
                             <p className="se-admin-form-actions__faltas">Falta: {faltas.join(", ")}</p>
                         ) : null}
@@ -1824,7 +1969,7 @@ export const AdminPostEditor = () => {
                         </button>
                         <button
                             type="button"
-                            className="se-btn"
+                            className={publicarEsPrincipal ? "se-btn se-btn--secondary" : "se-btn"}
                             onClick={handleSave}
                             disabled={saveState.status === "loading"}
                         >
@@ -1840,9 +1985,10 @@ export const AdminPostEditor = () => {
                         </button>
                         {!isCreate && canPublish ? (
                             <>
+                                {form.status !== "published" ? (
                                 <button
                                     type="button"
-                                    className="se-btn se-btn--secondary"
+                                    className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
                                     onClick={handlePublish}
                                     disabled={actionState.status === "loading"}
                                 >
@@ -1851,8 +1997,12 @@ export const AdminPostEditor = () => {
                                         ? "Publicando…"
                                         : programada
                                           ? "Publicar ya"
-                                          : "Publicar"}
+                                          : sinGuardar
+                                            ? "Guardar y publicar"
+                                            : "Publicar"}
                                 </button>
+                                ) : null}
+                                {form.status !== "draft" ? (
                                 <button
                                     type="button"
                                     className="se-btn se-btn--secondary"
@@ -1866,20 +2016,23 @@ export const AdminPostEditor = () => {
                                           ? "Volver a borrador"
                                           : "Despublicar"}
                                 </button>
+                                ) : null}
                                 <button
                                     type="button"
-                                    className="se-btn se-btn--secondary"
+                                    className="se-editor-eliminar"
                                     onClick={handleDelete}
                                 >
-                                    Eliminar
+                                    Eliminar la pieza
                                 </button>
                             </>
                         ) : null}
                     </div>
-                </>
+                </aside>
             ) : null}
+            </div>
 
             <ConfirmDialog />
+            <RecorridoVista recorrido={recorridoEditor} />
         </main>
     );
 };

@@ -12,6 +12,7 @@ import {
     listAdminPalabras,
     patchAdminPalabra,
 } from "../../services/adminClaveService";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 
 /**
  * El catálogo de «La Clave»: las palabras de las que sale la del día, por categoría.
@@ -42,6 +43,7 @@ export const AdminJuegoPalabras = () => {
     const { role } = useAuth();
     const puedeEditar = role === "publicador" || role === "admin";
     const { toastSuccess, toastError } = useAdminToast();
+    const { confirm, ConfirmDialog } = useAdminConfirm();
 
     const [filtros, setFiltros] = useState({ categoria: "", q: "", activa: "" });
     const [busqueda, setBusqueda] = useState("");
@@ -336,8 +338,13 @@ export const AdminJuegoPalabras = () => {
                                                         type="button"
                                                         className="se-link se-header__nav-link--button"
                                                         disabled={busy}
-                                                        onClick={() => {
-                                                            if (window.confirm(`¿Borrar «${row.palabra}»? Si solo quiere sacarla del sorteo, retírela.`)) {
+                                                        onClick={async () => {
+                                                            const borrar = await confirm({
+                                                                title: "Borrar la palabra",
+                                                                description: `¿Borrar «${row.palabra}»? Si solo quiere sacarla del sorteo, retírela.`,
+                                                                confirmLabel: "Borrar",
+                                                            });
+                                                            if (borrar) {
                                                                 correr(row.id, () => deleteAdminPalabra(row.id), `«${row.palabra}» borrada.`);
                                                             }
                                                         }}
@@ -478,6 +485,7 @@ export const AdminJuegoPalabras = () => {
                     </form>
                 ) : null}
             </ModalDelPanel>
+            <ConfirmDialog />
         </main>
     );
 };

@@ -7422,3 +7422,281 @@
 .se-admin-app .se-admin-canal__foto--largo {
   aspect-ratio: 16 / 9;
 }
+
+/* ===========================================================================
+   Ola 2 de la crítica (nov-2026): el editor de piezas en el computador.
+   A la izquierda la pieza; a la derecha, pegada al desplazarse, cómo va y los
+   botones. Lo que se toca de vez en cuando va plegado con su resumen en la
+   cabecera (`CampoMovil` con `plegable`).
+   =========================================================================== */
+
+/* El editor pide algo más de ancho que una tabla: la columna de estado no debe
+   robarle medida al texto. */
+.se-admin-main__surface:has(.se-editor-escritorio) {
+  max-width: 1240px;
+}
+
+.se-editor-cabecera__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+@media (min-width: 1100px) {
+  .se-editor-escritorio .se-editor-rejilla {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17.5rem;
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .se-editor-escritorio .se-editor-rejilla__estado {
+    position: sticky;
+    top: 1rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  /* Los botones, en columna y a todo el ancho; el principal, primero. */
+  .se-editor-escritorio .se-editor-rejilla__estado .se-admin-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 0;
+  }
+
+  .se-editor-escritorio .se-editor-rejilla__estado .se-admin-form-actions > .se-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .se-editor-escritorio .se-editor-rejilla__estado .se-admin-form-actions > .se-btn:not(.se-btn--secondary) {
+    order: -1;
+  }
+}
+
+/* —— Cómo va la pieza —— */
+.se-editor-estado {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-surface);
+}
+
+.se-editor-estado__rotulo {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--adm-text-muted);
+}
+
+.se-editor-estado__valor {
+  margin: 0.2rem 0 0.6rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--adm-text);
+}
+
+.se-editor-estado__ver {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.se-editor-estado__guardado {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--adm-ok);
+}
+
+.se-editor-estado__guardado.is-pendiente {
+  color: var(--adm-err);
+  font-weight: 600;
+}
+
+.se-editor-estado__faltas {
+  margin: 0.6rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--adm-border);
+  font-size: 0.875rem;
+  color: var(--adm-err);
+}
+
+/* Eliminar: no es un botón más de la fila; está, pero sin pedir atención. */
+.se-editor-eliminar {
+  align-self: flex-start;
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--adm-err);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.se-editor-eliminar:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 2px;
+}
+
+/* La copia recuperada de este equipo. */
+.se-editor-recuperado {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--adm-err-border);
+  border-radius: var(--adm-radius-md);
+  background: var(--adm-err-bg);
+  font-size: 0.9rem;
+  color: var(--adm-text);
+}
+
+.se-editor-recuperado__descartar {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--adm-err);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* —— Lo plegado: la cabecera dice qué es y qué tiene —— */
+.se-plegable {
+  margin: 0 0 0.75rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  background: var(--adm-surface);
+}
+
+.se-plegable__cabeza {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.se-plegable__cabeza::-webkit-details-marker {
+  display: none;
+}
+
+.se-plegable__cabeza::before {
+  content: "›";
+  flex: 0 0 auto;
+  width: 0.8rem;
+  color: var(--adm-text-muted);
+  transition: transform var(--adm-dur) var(--adm-ease);
+}
+
+.se-plegable[open] > .se-plegable__cabeza::before {
+  transform: rotate(90deg);
+}
+
+.se-plegable__titulo {
+  font-weight: 700;
+  color: var(--adm-text);
+}
+
+.se-plegable__resumen {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  color: var(--adm-text-muted);
+}
+
+.se-plegable__falta {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--adm-err);
+}
+
+.se-plegable__cabeza:hover .se-plegable__titulo {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-plegable__cabeza:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: -2px;
+}
+
+.se-plegable[open] > .se-plegable__cabeza {
+  border-bottom: 1px solid var(--adm-border);
+}
+
+.se-plegable__cuerpo {
+  padding: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-plegable__cabeza::before {
+    transition: none;
+  }
+}
+
+/* —— Crear: los formatos a la vista —— */
+.se-formatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.75rem;
+}
+
+.se-formatos__opcion {
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  background: var(--adm-surface);
+  font: inherit;
+  text-align: left;
+  color: var(--adm-text);
+  cursor: pointer;
+  transition: border-color var(--adm-dur) var(--adm-ease), background-color var(--adm-dur) var(--adm-ease);
+}
+
+.se-formatos__opcion:hover {
+  border-color: var(--adm-accent);
+  background: var(--adm-err-bg);
+}
+
+.se-formatos__opcion:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 2px;
+}
+
+.se-formatos__nombre {
+  font-size: 1rem;
+}
+
+.se-formatos__lede {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--adm-text-muted);
+}
+
+/* —— Contenido: el título lleva al editor —— */
+.se-admin-table__titulo {
+  color: var(--adm-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.se-admin-table__titulo:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-admin-tarjeta__ver {
+  font-size: 0.875rem;
+}

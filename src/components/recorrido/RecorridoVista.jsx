@@ -105,6 +105,8 @@ export const RecorridoVista = ({ recorrido }) => {
   if (paso === null || !definicion) return null;
 
   const esUltimo = paso === recorrido.pasos.length - 1;
+  // Guías de la parte pública: los textos son claves de idioma (ver `crearRecorrido`).
+  const tx = recorrido.traducir ? (clave) => t(clave) : (texto) => texto;
 
   return createPortal(
     <div className="se-recorrido" role="dialog" aria-modal="true" aria-labelledby={tituloId} aria-roledescription={t("comun.recorrido.region")}>
@@ -120,18 +122,18 @@ export const RecorridoVista = ({ recorrido }) => {
       <div className="se-recorrido__tarjeta" ref={tarjeta}>
         <div className="se-recorrido__cabeza">
           <h2 id={tituloId} className="se-recorrido__titulo">
-            {definicion.titulo}
+            {tx(definicion.titulo)}
           </h2>
           <span className="se-recorrido__cuenta">
             {t("comun.recorrido.cuenta", { n: paso + 1, total: recorrido.pasos.length })}
           </span>
         </div>
         <div className="se-recorrido__cuerpo">
-          {definicion.texto ? <p>{definicion.texto}</p> : null}
+          {definicion.texto ? <p>{tx(definicion.texto)}</p> : null}
           {definicion.puntos?.length ? (
             <ul>
               {definicion.puntos.map((p) => (
-                <Punto key={p} texto={p} />
+                <Punto key={p} texto={tx(p)} />
               ))}
             </ul>
           ) : null}

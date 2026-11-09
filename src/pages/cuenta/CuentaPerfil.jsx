@@ -6,7 +6,11 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { actualizarMiPerfil } from "../../services/userAuthService";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoPerfil } from "../../lib/guias/guiaPerfil";
 import "../../styles/cuenta.css";
+
+const ancla = (clave) => ({ [recorridoPerfil.atributo]: clave });
 
 /**
  * Mi perfil: editable, con retrato.
@@ -137,14 +141,19 @@ export const CuentaPerfil = () => {
 
   return (
     <div className="se-cuenta__pagina">
-      <header className="se-cuenta__cabecera">
-        <h1 className="se-cuenta__titulo">{t("cuenta.perfil.titulo")}</h1>
-        <p className="se-cuenta__lead">
-          {t("cuenta.perfil.lead")}
-        </p>
+      <header className="se-cuenta__cabecera se-cuenta__cabecera--con-guia">
+        <div>
+          <h1 className="se-cuenta__titulo">{t("cuenta.perfil.titulo")}</h1>
+          <p className="se-cuenta__lead">
+            {t("cuenta.perfil.lead")}
+          </p>
+        </div>
+        <BotonGuia recorrido={recorridoPerfil} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
 
-      <RetratoDelLector />
+      <div {...ancla("retrato")}>
+        <RetratoDelLector />
+      </div>
 
       <form className="se-cuenta__form" onSubmit={guardar} noValidate>
         <h2 className="se-cuenta__h2">
@@ -156,7 +165,7 @@ export const CuentaPerfil = () => {
           ) : null}
         </h2>
 
-        <div className="se-cuenta__fila">
+        <div className="se-cuenta__fila" {...ancla("nombre")}>
           <CampoDeTexto
             id="p-nombre"
             etiqueta={t("cuenta.comun.nombre")}
@@ -186,7 +195,7 @@ export const CuentaPerfil = () => {
           ayuda={t("cuenta.perfil.ayudaCorreo")}
         />
 
-        <div className="se-cuenta__fila">
+        <div className="se-cuenta__fila" {...ancla("datos")}>
           <CampoDeTexto
             id="p-edad"
             etiqueta={t("cuenta.perfil.edad")}
@@ -269,7 +278,7 @@ export const CuentaPerfil = () => {
           </p>
         ) : null}
 
-        <div className="se-cuenta__acciones">
+        <div className="se-cuenta__acciones" {...ancla("guardar")}>
           <button type="submit" className="se-btn" disabled={estado.guardando}>
             {estado.guardando ? t("cuenta.comun.guardando") : t("cuenta.comun.guardarCambios")}
           </button>
@@ -280,6 +289,7 @@ export const CuentaPerfil = () => {
           ) : null}
         </div>
       </form>
+      <RecorridoVista recorrido={recorridoPerfil} />
     </div>
   );
 };

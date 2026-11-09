@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import { Enlace, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { ErrorState, LoadingState } from "../../components/content";
-import { SubmissionForm } from "../../components/submissions/SubmissionForm";
+import { SubmissionForm, normalizarPropuesta } from "../../components/submissions/SubmissionForm";
 import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
+import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import "../../styles/cuenta.css";
 
 export const CuentaEnvioEditar = () => {
@@ -18,10 +19,19 @@ export const CuentaEnvioEditar = () => {
 
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
   const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
+  // Lo que trajo el servidor: el borrador local solo se guarda si se aparta de esto.
+  const [base, setBase] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const safeId = useMemo(() => (id ? String(id) : null), [id]);
+  const borrador = useBorradorLocal({
+    clave: base && safeId ? `propuesta-${safeId}` : null,
+    valores: values,
+    base,
+    aplicar: setValues,
+    normalizar: normalizarPropuesta,
+  });
 
   useMetaPagina({
     title: t("cuenta.envioEditar.meta.titulo", { marca: BRAND.name }),
@@ -39,13 +49,15 @@ export const CuentaEnvioEditar = () => {
         setLoadState({ status: "error", error: new Error(t("cuenta.envioEditar.noEncontrado")) });
         return;
       }
-      setValues({
+      const delServidor = {
         format: submission.format ?? "articulo",
         title: submission.title ?? "",
         excerpt: submission.excerpt ?? "",
         content: submission.content ?? "",
         featuredImageUrl: submission.featuredImageUrl ?? "",
-      });
+      };
+      setValues(delServidor);
+      setBase(delServidor);
       setLoadState({ status: "success", error: null });
     } catch (err) {
       setLoadState({ status: "error", error: err });
@@ -70,6 +82,7 @@ export const CuentaEnvioEditar = () => {
         content: values.content,
         featured_image_url: values.featuredImageUrl ? values.featuredImageUrl : null,
       });
+      borrador.borrar();
       navigate(`/cuenta/envios/${encodeURIComponent(safeId)}`, {
         replace: true,
         state: { flash: t("cuenta.envioEditar.actualizado") },
@@ -135,6 +148,7 @@ export const CuentaEnvioEditar = () => {
       submitLabel={t("cuenta.comun.guardarCambios")}
       isSubmitting={isSubmitting}
       errorMessage={errorMessage}
+      borrador={borrador}
     />
   );
 };

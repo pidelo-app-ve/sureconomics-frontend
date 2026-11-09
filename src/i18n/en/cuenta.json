@@ -104,7 +104,8 @@
       "abrirMenuLateral": "Open side menu",
       "suEspacio": "Your space",
       "volverAlSitio": "Back to the site",
-      "misTemas": "My topics"
+      "misTemas": "My topics",
+      "misPropuestas": "My proposals"
     },
     "inicio": {
       "meta": {
@@ -217,18 +218,18 @@
     },
     "envios": {
       "meta": {
-        "titulo": "My submissions — {marca}",
-        "descripcion": "Editorial proposals submitted."
+        "titulo": "My proposals — {marca}",
+        "descripcion": "What you've proposed to the newsroom."
       },
-      "titulo": "My submissions",
-      "cargando": "Loading submissions…",
-      "noPudimosCargar": "We couldn't load your submissions",
-      "lead": "Editorial proposals and their status.",
-      "nuevo": "New submission",
-      "vacioTitulo": "No submissions yet",
-      "vacioTexto": "Share an idea or a draft with the editorial team.",
-      "crearPrimero": "Create your first submission",
-      "sinTitulo": "Submission {id}"
+      "titulo": "My proposals",
+      "cargando": "Loading your proposals…",
+      "noPudimosCargar": "We couldn't load your proposals",
+      "lead": "What you've proposed to the newsroom and where each piece stands.",
+      "nuevo": "Propose a piece",
+      "vacioTitulo": "No proposals yet",
+      "vacioTexto": "Propose an analysis or a news item: the newsroom reads it and replies here.",
+      "crearPrimero": "Propose your first one",
+      "sinTitulo": "Proposal {id}"
     },
     "envio": {
       "meta": {
@@ -237,7 +238,7 @@
       },
       "titulo": "Submission",
       "volverAEnvios": "Back to submissions",
-      "misEnvios": "My submissions",
+      "misEnvios": "My proposals",
       "editarEnvio": "Edit submission",
       "editar": "Edit",
       "imagenDestacada": "Featured image",
@@ -259,25 +260,25 @@
     },
     "envioEditar": {
       "meta": {
-        "titulo": "Edit submission — {marca}",
-        "descripcion": "Edit an editorial proposal."
+        "titulo": "Edit the proposal — {marca}",
+        "descripcion": "Edit a proposal you sent."
       },
       "noEncontrado": "Not found.",
-      "actualizado": "Submission updated.",
-      "yaNoEditable": "This submission can no longer be edited because its status changed.",
-      "fallo": "Couldn't update the submission.",
-      "titulo": "Edit submission"
+      "actualizado": "Proposal updated.",
+      "yaNoEditable": "This proposal can no longer be edited: the newsroom has already taken it.",
+      "fallo": "Couldn't save your changes.",
+      "titulo": "Edit the proposal"
     },
     "envioNuevo": {
       "meta": {
-        "titulo": "New submission — {marca}",
-        "descripcion": "Submit an editorial proposal."
+        "titulo": "Propose a piece — {marca}",
+        "descripcion": "Propose a piece to the newsroom."
       },
-      "creado": "Submission created. It's now awaiting review.",
-      "fallo": "Couldn't create the submission.",
-      "titulo": "New submission",
-      "volverALaLista": "Back to the list",
-      "enviarARevision": "Submit for review"
+      "creado": "Proposal sent. The newsroom will review it and reply here.",
+      "fallo": "Couldn't send the proposal.",
+      "titulo": "Propose a piece",
+      "volverALaLista": "Back to my proposals",
+      "enviarARevision": "Send to the newsroom"
     },
     "formularioEnvio": {
       "articulo": "Article",
@@ -289,7 +290,24 @@
       "resumen": "Summary",
       "resumenMarcador": "Two or three lines summarizing what you're submitting…",
       "contenido": "Content",
-      "imagenDestacada": "Featured image URL"
+      "imagenDestacada": "Photo (optional)",
+      "imagenAyuda": "If you have your own photo published online, paste its address here. If not, leave it empty: the newsroom will add one.",
+      "tituloAyuda": "As you'd headline it in the paper. The newsroom may adjust it.",
+      "contenidoMarcador": "Write the full piece here…",
+      "contenidoAyuda": "Cite your sources in the text, with a link if you have one.",
+      "faltaTitulo": "The title is missing.",
+      "faltaResumen": "The summary is missing: two or three lines are enough.",
+      "faltaContenido": "The text of the piece is missing.",
+      "avisoTitulo": "What we look for and what happens next",
+      "avisoQue": "Analysis and news about the region's economy, written by you, with your sources cited.",
+      "avisoDespues": "The newsroom reads it and replies in this same account: you'll see its status and any notes left for you.",
+      "avisoCorregir": "Until the newsroom takes it, you can edit it. What you write is saved on this device as you go, in case you close the page halfway.",
+      "guardarBorrador": "Save draft",
+      "borradorExplica": "What you write is saved on this device as you type.",
+      "borradorSolo": "Draft saved on this device at {hora}.",
+      "borradorGuardado": "Saved on this device at {hora}.",
+      "recuperado": "We restored what you were writing (saved at {hora}).",
+      "descartar": "Discard and start over"
     },
     "estadoEnvio": {
       "submitted": "Submitted",
@@ -405,6 +423,110 @@
       "otros": "Other topics",
       "loNuevo": "New in your topics",
       "nadaNuevo": "There are no published pieces in your topics yet."
+    },
+    "guias": {
+      "cuenta": {
+        "boton": "Replay the guided tour",
+        "bienvenida": {
+          "titulo": "Welcome to your account",
+          "texto": "Here's everything that's yours on SurEconomics: what you bought, what you saved to read later, the topics you follow and the pieces you propose to the newsroom. We'll show you where everything is in a minute."
+        },
+        "inicio": {
+          "titulo": "Home",
+          "texto": "A summary of your account: what you have, what's left to complete and what you can do."
+        },
+        "loMio": {
+          "titulo": "My purchases",
+          "texto": "The courses and materials you bought, with your receipt and a link to pick up where you left off."
+        },
+        "marcadores": {
+          "titulo": "Bookmarks",
+          "texto": "The pieces you saved with the bookmark to read later."
+        },
+        "temas": {
+          "titulo": "My topics",
+          "texto": "Follow the topics you care about and see the latest from each one here."
+        },
+        "propuestas": {
+          "titulo": "My proposals",
+          "texto": "Propose an analysis or a news item to the newsroom and follow its progress: the newsroom replies here."
+        },
+        "perfil": {
+          "titulo": "My profile",
+          "texto": "Your name, your photo and your details. Only first and last name are required."
+        },
+        "ayuda": {
+          "titulo": "Come back whenever you like",
+          "texto": "This button replays this tour. On the busier pages, the «Guide» button explains each one."
+        }
+      },
+      "propuesta": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The form to propose a piece to the SurEconomics newsroom: an analysis or a news item written by you."
+        },
+        "aviso": {
+          "titulo": "Before you start",
+          "texto": "What kind of pieces we look for and what happens when you send yours."
+        },
+        "formato": {
+          "titulo": "What you're sending",
+          "p1": "Article: an analysis with its context.",
+          "p2": "News item: a recent event, with the source cited."
+        },
+        "titulo": {
+          "titulo": "The title",
+          "texto": "As you'd headline it in the paper. The newsroom may adjust it."
+        },
+        "resumen": {
+          "titulo": "The summary",
+          "texto": "Two or three lines about what the piece covers. It's the first thing the newsroom reads."
+        },
+        "contenido": {
+          "titulo": "The text",
+          "texto": "The full piece. The buttons above add bold, subheadings, lists, quotes and links."
+        },
+        "foto": {
+          "titulo": "The photo",
+          "texto": "Optional. If you have your own photo published online, paste its address; if not, the newsroom adds one."
+        },
+        "acciones": {
+          "titulo": "Send or save",
+          "p1": "Main button: sends the proposal to the newsroom (or saves your changes, if you're editing one).",
+          "p2": "Save draft: keeps it on this device so you can continue later. It also saves itself as you type.",
+          "p3": "If something's missing: we tell you right next to that field."
+        },
+        "guia": {
+          "titulo": "Come back whenever you like",
+          "texto": "This button opens this guide again."
+        }
+      },
+      "perfil": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "Your details on SurEconomics. Only first and last name are required; the rest is up to you."
+        },
+        "retrato": {
+          "titulo": "Your photo",
+          "texto": "Your profile photo. Upload it here; you can change or remove it whenever you like."
+        },
+        "nombre": {
+          "titulo": "First and last name",
+          "texto": "They sign your comments and your proposals. They can't be left empty."
+        },
+        "datos": {
+          "titulo": "Optional details",
+          "texto": "Age, sex, country, city, occupation and phone. They help us know who reads us; you can leave them empty or delete them."
+        },
+        "guardar": {
+          "titulo": "Save",
+          "texto": "Changes apply when you press «Save changes»."
+        },
+        "guia": {
+          "titulo": "Come back whenever you like",
+          "texto": "This button opens this guide again."
+        }
+      }
     }
   }
 }

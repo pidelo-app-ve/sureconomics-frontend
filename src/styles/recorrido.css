@@ -144,3 +144,11 @@
 @media (prefers-reduced-motion: reduce) {
   .se-recorrido__foco { transition: none; }
 }
+
+/* El botón «Guía» de la cabecera de una página: icono y texto, sin encogerse. */
+.se-boton-guia {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}

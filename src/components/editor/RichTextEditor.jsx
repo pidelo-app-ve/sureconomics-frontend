@@ -6,6 +6,7 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { LinkDialog } from "./LinkDialog";
+import "../../styles/editor.css";
 
 const ToolbarButton = ({ label, title, isActive, onClick, disabled }) => (
   <button

@@ -30,6 +30,7 @@ const normalizeProfile = (raw) => {
     };
   }
   return {
+    id: raw.id ?? null,
     firstName: String(raw.first_name ?? raw.firstName ?? ""),
     lastName: String(raw.last_name ?? raw.lastName ?? ""),
     email: String(raw.email ?? ""),
@@ -42,6 +43,8 @@ const normalizeProfile = (raw) => {
     phoneNumber: String(raw.phone_number ?? raw.phoneNumber ?? ""),
     photoId: raw.photo_id ?? null,
     photoUrl: raw.photo_url ?? null,
+    // Las guías de bienvenida que ya vio (en el servidor: sobrevive al cierre de sesión).
+    recorridosVistos: Array.isArray(raw.recorridos_vistos) ? raw.recorridos_vistos : [],
   };
 };
 
@@ -128,6 +131,10 @@ export const fetchMe = async () => {
   const data = await userRequest("/user-auth/me", { method: "GET" });
   return normalizeProfile(data);
 };
+
+/** Apunta en el servidor que esta persona ya vio la guía `nombre` (p. ej. «cuenta»). */
+export const marcarRecorridoVisto = (nombre) =>
+  userRequest(`/user-auth/me/recorridos/${encodeURIComponent(nombre)}`, { method: "PUT", json: {} });
 
 export const logoutUserRemote = async () => {
   try {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Enlace, EnlaceNav } from "../../components/Enlace";
 import { RequireUserAuth } from "../../components/cuenta/RequireUserAuth";
@@ -6,6 +6,9 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { BRAND } from "../../data/surEconomicsMock";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoCuenta } from "../../lib/guias/guiaCuenta";
+import { marcarRecorridoVisto } from "../../services/userAuthService";
 import "../../styles/cuenta.css";
 
 const IconGrid = () => (
@@ -72,14 +75,27 @@ const IconTemas = () => (
   </svg>
 );
 
+/** `guia`: el anclaje de la bienvenida (`lib/guias/guiaCuenta.js`). */
 const RAIL_NAV = [
-  { to: "/cuenta", end: true, labelKey: "nav.inicio", icon: IconGrid },
-  { to: "/cuenta/perfil", labelKey: "cuenta.panel.miPerfil", icon: IconUser },
-  { to: "/cuenta/lo-mio", labelKey: "cuenta.panel.loMio", icon: IconCompras },
-  { to: "/cuenta/marcadores", labelKey: "nav.marcadores", icon: IconBookmark },
-  { to: "/cuenta/temas", labelKey: "cuenta.panel.misTemas", icon: IconTemas },
-  { to: "/cuenta/envios", labelKey: "nav.envios", icon: IconSend },
+  { to: "/cuenta", end: true, labelKey: "nav.inicio", icon: IconGrid, guia: "inicio" },
+  { to: "/cuenta/perfil", labelKey: "cuenta.panel.miPerfil", icon: IconUser, guia: "perfil" },
+  { to: "/cuenta/lo-mio", labelKey: "cuenta.panel.loMio", icon: IconCompras, guia: "lo-mio" },
+  { to: "/cuenta/marcadores", labelKey: "nav.marcadores", icon: IconBookmark, guia: "marcadores" },
+  { to: "/cuenta/temas", labelKey: "cuenta.panel.misTemas", icon: IconTemas, guia: "temas" },
+  { to: "/cuenta/envios", labelKey: "cuenta.panel.misPropuestas", icon: IconSend, guia: "propuestas" },
 ];
+
+/** Por debajo de esto el menú lateral va plegado (cajón). Igual que `cuenta.css`. */
+const MENU_PLEGADO = "(max-width: 959px)";
+
+const IconAyuda = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    <path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.4" fill="none" stroke="currentColor"
+          strokeWidth="1.8" strokeLinecap="round" />
+    <circle cx="12" cy="16.9" r="1.05" fill="currentColor" />
+  </svg>
+);
 
 const DashboardShell = () => {
   const { t } = useIdioma();
@@ -92,6 +108,37 @@ const DashboardShell = () => {
   useEffect(() => {
     handleCloseRail();
   }, [location.pathname, handleCloseRail]);
+
+  // Escape cierra el cajón, como cualquier otro panel que se abre encima.
+  useEffect(() => {
+    if (!railOpen) return undefined;
+    const alPulsar = (e) => {
+      if (e.key === "Escape") handleCloseRail();
+    };
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, [railOpen, handleCloseRail]);
+
+  // La bienvenida: salta sola la primera vez que se entra con el correo confirmado, y
+  // se apunta en el servidor al empezar (aunque se omita, no vuelve a saltar sola).
+  const bienvenidaLanzada = useRef(false);
+  useEffect(() => {
+    if (!profile || bienvenidaLanzada.current) return;
+    if (profile.recorridosVistos?.includes("cuenta")) return;
+    bienvenidaLanzada.current = true;
+    recorridoCuenta.iniciar();
+    marcarRecorridoVisto("cuenta").catch(() => {});
+  }, [profile]);
+
+  // En el teléfono el menú va plegado: los pasos que lo enseñan lo abren, y al
+  // terminar la guía se vuelve a plegar.
+  const [pasoGuia, setPasoGuia] = useState(() => recorridoCuenta.pasoActivo());
+  useEffect(() => recorridoCuenta.suscribir(() => setPasoGuia(recorridoCuenta.pasoActivo())), []);
+  const guiaPideMenu = pasoGuia !== null && Boolean(recorridoCuenta.pasos[pasoGuia]?.abrirMenu);
+  useEffect(() => {
+    if (!window.matchMedia?.(MENU_PLEGADO).matches) return;
+    setRailOpen(guiaPideMenu);
+  }, [guiaPideMenu]);
 
   useEffect(() => {
     if (!railOpen) return;
@@ -112,7 +159,6 @@ const DashboardShell = () => {
 
   return (
     <div className="se-reader-dash">
-      <div className="se-reader-dash__aurora" aria-hidden="true" />
       {railOpen ? (
         <button
           type="button"
@@ -144,13 +190,14 @@ const DashboardShell = () => {
         </div>
 
         <nav className="se-reader-dash__nav" aria-label={t("cuenta.panel.areaDeLector")}>
-          {RAIL_NAV.map(({ to, labelKey, icon: Icon, end }) => (
+          {RAIL_NAV.map(({ to, labelKey, icon: Icon, end, guia }) => (
             <EnlaceNav
               key={to}
               to={to}
               end={Boolean(end)}
               className={navClass}
               onClick={handleCloseRail}
+              {...{ [recorridoCuenta.atributo]: guia }}
             >
               <span className="se-reader-dash__nav-ico" aria-hidden="true">
                 <Icon />
@@ -205,6 +252,16 @@ const DashboardShell = () => {
               <span className="se-reader-dash__topbar-sub">{profile.email}</span>
             ) : null}
           </div>
+          <button
+            type="button"
+            className="se-reader-dash__ayuda"
+            onClick={recorridoCuenta.iniciar}
+            aria-label={t("cuenta.guias.cuenta.boton")}
+            title={t("cuenta.guias.cuenta.boton")}
+            {...{ [recorridoCuenta.atributo]: "ayuda" }}
+          >
+            <IconAyuda />
+          </button>
           <Enlace to="/" className="se-reader-dash__topbar-site" onClick={handleCloseRail}>
             {t("cuenta.panel.volverAlSitio")}
           </Enlace>
@@ -213,6 +270,7 @@ const DashboardShell = () => {
         <main className="se-reader-dash__main" id="reader-dashboard-main">
           <Outlet />
         </main>
+        <RecorridoVista recorrido={recorridoCuenta} />
       </div>
     </div>
   );

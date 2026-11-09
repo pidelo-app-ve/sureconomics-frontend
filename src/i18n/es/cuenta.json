@@ -104,7 +104,8 @@
       "abrirMenuLateral": "Abrir menú lateral",
       "suEspacio": "Su espacio",
       "volverAlSitio": "Volver al sitio",
-      "misTemas": "Mis temas"
+      "misTemas": "Mis temas",
+      "misPropuestas": "Mis propuestas"
     },
     "inicio": {
       "meta": {
@@ -217,18 +218,18 @@
     },
     "envios": {
       "meta": {
-        "titulo": "Mis envíos — {marca}",
-        "descripcion": "Propuestas editoriales enviadas."
+        "titulo": "Mis propuestas — {marca}",
+        "descripcion": "Lo que ha propuesto a la redacción."
       },
-      "titulo": "Mis envíos",
-      "cargando": "Cargando envíos…",
-      "noPudimosCargar": "No pudimos cargar los envíos",
-      "lead": "Propuestas editoriales y su estado.",
-      "nuevo": "Nuevo envío",
-      "vacioTitulo": "Sin envíos todavía",
-      "vacioTexto": "Comparta una idea o borrador con el equipo editorial.",
-      "crearPrimero": "Crear primer envío",
-      "sinTitulo": "Envío {id}"
+      "titulo": "Mis propuestas",
+      "cargando": "Cargando sus propuestas…",
+      "noPudimosCargar": "No pudimos cargar sus propuestas",
+      "lead": "Lo que ha propuesto a la redacción y en qué va cada pieza.",
+      "nuevo": "Proponer una pieza",
+      "vacioTitulo": "Sin propuestas todavía",
+      "vacioTexto": "Proponga un análisis o una noticia: la redacción la lee y le contesta aquí.",
+      "crearPrimero": "Proponer la primera",
+      "sinTitulo": "Propuesta {id}"
     },
     "envio": {
       "meta": {
@@ -237,7 +238,7 @@
       },
       "titulo": "Envío",
       "volverAEnvios": "Volver a envíos",
-      "misEnvios": "Mis envíos",
+      "misEnvios": "Mis propuestas",
       "editarEnvio": "Editar envío",
       "editar": "Editar",
       "imagenDestacada": "Imagen destacada",
@@ -259,25 +260,25 @@
     },
     "envioEditar": {
       "meta": {
-        "titulo": "Editar envío — {marca}",
-        "descripcion": "Editar propuesta editorial."
+        "titulo": "Corregir la propuesta — {marca}",
+        "descripcion": "Corregir una propuesta enviada."
       },
       "noEncontrado": "No encontrado.",
-      "actualizado": "Envío actualizado correctamente.",
-      "yaNoEditable": "Este envío ya no se puede editar porque cambió de estado.",
-      "fallo": "No se pudo actualizar el envío.",
-      "titulo": "Editar envío"
+      "actualizado": "Propuesta corregida.",
+      "yaNoEditable": "Esta propuesta ya no se puede corregir: la redacción ya la tomó.",
+      "fallo": "No se pudo guardar la corrección.",
+      "titulo": "Corregir la propuesta"
     },
     "envioNuevo": {
       "meta": {
-        "titulo": "Nuevo envío — {marca}",
-        "descripcion": "Enviar propuesta editorial."
+        "titulo": "Proponer una pieza — {marca}",
+        "descripcion": "Proponer una pieza a la redacción."
       },
-      "creado": "Envío creado correctamente. Quedó a la espera de revisión.",
-      "fallo": "No se pudo crear el envío.",
-      "titulo": "Nuevo envío",
-      "volverALaLista": "Volver a la lista",
-      "enviarARevision": "Enviar a revisión"
+      "creado": "Propuesta enviada. La redacción la revisará y le contestará aquí.",
+      "fallo": "No se pudo enviar la propuesta.",
+      "titulo": "Proponer una pieza",
+      "volverALaLista": "Volver a mis propuestas",
+      "enviarARevision": "Enviar a la redacción"
     },
     "formularioEnvio": {
       "articulo": "Artículo",
@@ -289,7 +290,24 @@
       "resumen": "Resumen",
       "resumenMarcador": "Dos o tres líneas que resuman lo que envía…",
       "contenido": "Contenido",
-      "imagenDestacada": "URL de imagen destacada"
+      "imagenDestacada": "Foto (opcional)",
+      "imagenAyuda": "Si tiene una foto propia publicada en internet, pegue aquí su dirección. Si no, déjelo vacío: la redacción le pondrá una.",
+      "tituloAyuda": "Como lo titularía en el periódico. La redacción puede ajustarlo.",
+      "contenidoMarcador": "Escriba aquí la pieza completa…",
+      "contenidoAyuda": "Cite sus fuentes en el texto, con un enlace si lo tiene.",
+      "faltaTitulo": "Falta el título.",
+      "faltaResumen": "Falta el resumen: dos o tres líneas bastan.",
+      "faltaContenido": "Falta el texto de la pieza.",
+      "avisoTitulo": "Qué buscamos y qué pasa después",
+      "avisoQue": "Análisis y noticias sobre la economía de la región, escritos por usted y con las fuentes citadas.",
+      "avisoDespues": "La redacción la lee y le contesta en esta misma cuenta: verá en qué estado está y las notas que le deje.",
+      "avisoCorregir": "Mientras la redacción no la tome, puede corregirla. Lo que escribe se guarda solo en este equipo, por si cierra la página a medias.",
+      "guardarBorrador": "Guardar borrador",
+      "borradorExplica": "Lo que escribe se guarda solo en este equipo mientras escribe.",
+      "borradorSolo": "Borrador guardado en este equipo a las {hora}.",
+      "borradorGuardado": "Guardado en este equipo a las {hora}.",
+      "recuperado": "Recuperamos lo que estaba escribiendo (guardado a las {hora}).",
+      "descartar": "Descartar y volver a empezar"
     },
     "estadoEnvio": {
       "submitted": "Enviado",
@@ -405,6 +423,110 @@
       "otros": "Otros temas",
       "loNuevo": "Lo nuevo en sus temas",
       "nadaNuevo": "Todavía no hay piezas publicadas en sus temas."
+    },
+    "guias": {
+      "cuenta": {
+        "boton": "Repetir la visita guiada",
+        "bienvenida": {
+          "titulo": "Le damos la bienvenida a su cuenta",
+          "texto": "Aquí está lo suyo en SurEconomics: lo que compró, lo que guardó para leer después, los temas que sigue y las piezas que propone a la redacción. Le enseñamos dónde está cada cosa en un minuto."
+        },
+        "inicio": {
+          "titulo": "Inicio",
+          "texto": "Un resumen de su cuenta: qué tiene, qué le falta por completar y qué puede hacer."
+        },
+        "loMio": {
+          "titulo": "Lo mío",
+          "texto": "Los cursos y materiales que compró, con su recibo y el enlace para seguir donde lo dejó."
+        },
+        "marcadores": {
+          "titulo": "Marcadores",
+          "texto": "Las piezas que guardó con el marcador para leerlas más tarde."
+        },
+        "temas": {
+          "titulo": "Mis temas",
+          "texto": "Siga los temas que le interesan y vea aquí lo último que se publicó de cada uno."
+        },
+        "propuestas": {
+          "titulo": "Mis propuestas",
+          "texto": "Proponga un análisis o una noticia a la redacción y siga en qué va: la redacción le contesta aquí."
+        },
+        "perfil": {
+          "titulo": "Mi perfil",
+          "texto": "Su nombre, su foto y sus datos. Solo el nombre y el apellido son obligatorios."
+        },
+        "ayuda": {
+          "titulo": "Vuelva aquí cuando quiera",
+          "texto": "Este botón repite esta visita. En las páginas con más cosas, el botón «Guía» le explica cada una."
+        }
+      },
+      "propuesta": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "El formulario para proponer una pieza a la redacción de SurEconomics: un análisis o una noticia escritos por usted."
+        },
+        "aviso": {
+          "titulo": "Antes de empezar",
+          "texto": "Qué tipo de piezas buscamos y qué pasa cuando la envía."
+        },
+        "formato": {
+          "titulo": "Qué está enviando",
+          "p1": "Artículo: un análisis con su contexto.",
+          "p2": "Noticia: un hecho reciente, con la fuente citada."
+        },
+        "titulo": {
+          "titulo": "El título",
+          "texto": "Como lo titularía en el periódico. La redacción puede ajustarlo."
+        },
+        "resumen": {
+          "titulo": "El resumen",
+          "texto": "Dos o tres líneas que cuenten de qué va la pieza. Es lo primero que lee la redacción."
+        },
+        "contenido": {
+          "titulo": "El texto",
+          "texto": "La pieza completa. Los botones de arriba ponen negrita, subtítulos, listas, citas y enlaces."
+        },
+        "foto": {
+          "titulo": "La foto",
+          "texto": "Opcional. Si tiene una foto propia publicada en internet, pegue su dirección; si no, la redacción le pone una."
+        },
+        "acciones": {
+          "titulo": "Enviar o guardar",
+          "p1": "Botón principal: manda la propuesta a la redacción (o guarda la corrección, si está corrigiendo una).",
+          "p2": "Guardar borrador: la guarda en este equipo para seguir después. También se guarda sola mientras escribe.",
+          "p3": "Si falta algo: se lo decimos junto al campo que falta."
+        },
+        "guia": {
+          "titulo": "Vuelva aquí cuando quiera",
+          "texto": "Este botón abre esta guía otra vez."
+        }
+      },
+      "perfil": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Sus datos en SurEconomics. Solo el nombre y el apellido son obligatorios; el resto, si quiere."
+        },
+        "retrato": {
+          "titulo": "Su foto",
+          "texto": "La foto de su perfil. Súbala desde aquí; puede cambiarla o quitarla cuando quiera."
+        },
+        "nombre": {
+          "titulo": "Nombre y apellido",
+          "texto": "Con ellos firma sus comentarios y sus propuestas. No pueden quedar vacíos."
+        },
+        "datos": {
+          "titulo": "Datos opcionales",
+          "texto": "Edad, sexo, país, ciudad, ocupación y teléfono. Nos ayudan a conocer a quién nos lee; puede dejarlos vacíos o borrarlos."
+        },
+        "guardar": {
+          "titulo": "Guardar",
+          "texto": "Los cambios se aplican al pulsar «Guardar cambios»."
+        },
+        "guia": {
+          "titulo": "Vuelva aquí cuando quiera",
+          "texto": "Este botón abre esta guía otra vez."
+        }
+      }
     }
   }
 }

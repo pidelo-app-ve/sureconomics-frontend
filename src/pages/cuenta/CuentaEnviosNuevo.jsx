@@ -5,20 +5,32 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
-import { SubmissionForm } from "../../components/submissions/SubmissionForm";
+import { SubmissionForm, normalizarPropuesta } from "../../components/submissions/SubmissionForm";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
+import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import "../../styles/cuenta.css";
+
+/** Con lo que abre el formulario. Fuera del componente: el borrador compara contra esto. */
+const VACIO = { format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" };
 
 export const CuentaEnviosNuevo = () => {
   const { t } = useIdioma();
   const navigate = useNavegar();
-  const { isEmailVerified } = useUserAuth();
-  const [values, setValues] = useState({ format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" });
+  const { isEmailVerified, profile } = useUserAuth();
+  const [values, setValues] = useState(VACIO);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   // La misma clave mientras el envío no cuaje: si la respuesta se pierde por el camino
   // y la persona vuelve a pulsar, no acaba con dos propuestas iguales a revisión.
   const { clave } = useClaveIdempotente();
+  // Lo escrito se guarda solo en este equipo y vuelve si se cierra la página a medias.
+  const borrador = useBorradorLocal({
+    clave: isEmailVerified && profile?.id ? `propuesta-nueva-${profile.id}` : null,
+    valores: values,
+    base: VACIO,
+    aplicar: setValues,
+    normalizar: normalizarPropuesta,
+  });
 
   useMetaPagina({
     title: t("cuenta.envioNuevo.meta.titulo", { marca: BRAND.name }),
@@ -37,7 +49,8 @@ export const CuentaEnviosNuevo = () => {
           title: values.title,
           excerpt: values.excerpt,
           content: values.content,
-          featured_image_url: values.featuredImageUrl,
+          // Opcional: vacía no se manda (la API la rechazaría como dirección no válida).
+          featured_image_url: values.featuredImageUrl.trim() || null,
         },
         clave(),
       );
@@ -45,6 +58,7 @@ export const CuentaEnviosNuevo = () => {
         created?.id ??
         created?.submission_id ??
         (created && typeof created === "object" && created.data && created.data.id);
+      borrador.borrar();
       const flashState = { flash: t("cuenta.envioNuevo.creado") };
       if (id) {
         navigate(`/cuenta/envios/${encodeURIComponent(id)}`, { replace: true, state: flashState });
@@ -89,6 +103,7 @@ export const CuentaEnviosNuevo = () => {
       submitLabel={t("cuenta.envioNuevo.enviarARevision")}
       isSubmitting={isSubmitting}
       errorMessage={errorMessage}
+      borrador={borrador}
     />
   );
 };

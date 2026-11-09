@@ -15,6 +15,12 @@ const { crearRecorrido } = await import("./recorridoVista.js");
 const { PASOS_TITULARES, recorridoTitulares } = await import("./guias/guiaTitulares.js");
 const { PASOS_RESUMEN, recorridoResumen } = await import("./guias/guiaResumen.js");
 const { PASOS_CANAL, recorridoCanal } = await import("./guias/guiaCanal.js");
+const { PASOS_CUENTA, recorridoCuenta } = await import("./guias/guiaCuenta.js");
+const { PASOS_PROPUESTA, recorridoPropuesta } = await import("./guias/guiaPropuesta.js");
+const { PASOS_PERFIL, recorridoPerfil } = await import("./guias/guiaPerfil.js");
+const { readFileSync } = await import("node:fs");
+const diccionario = (lang) => JSON.parse(readFileSync(new URL(`../i18n/${lang}/cuenta.json`, import.meta.url), "utf8"));
+const buscar = (dic, clave) => clave.split(".").reduce((nodo, parte) => (nodo == null ? undefined : nodo[parte]), dic);
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -46,6 +52,11 @@ check("su atributo de anclaje", a.atributo === "data-tour-prueba-a");
 a.irAPaso(null);
 check("cerrar borra el paso", !almacen.has("sureconomics_recorrido_prueba-a"));
 
+a.iniciar();
+b.iniciar();
+check("abrir una guía cierra la otra", a.pasoActivo() === null && b.pasoActivo() === 0);
+b.irAPaso(null);
+
 console.log("guía de Titulares");
 check("el primer paso explica la página, sin anclaje", PASOS_TITULARES[0].clave === undefined);
 check("el último vuelve al botón «Guía»", PASOS_TITULARES.at(-1).clave === "guia");
@@ -64,6 +75,27 @@ check("empieza sin anclaje y acaba en «Guía»", PASOS_CANAL[0].clave === undef
 check("todos con título y texto", PASOS_CANAL.every((p) => p.titulo && (p.texto || p.puntos?.length)));
 check("puntos con la forma «Nombre: qué es»", PASOS_CANAL.every((p) => (p.puntos ?? []).every((t) => t.includes(": "))));
 check("anclaje data-tour-canal", recorridoCanal.atributo === "data-tour-canal");
+
+// Las guías de la cuenta: los textos son claves, y tienen que existir en los dos idiomas.
+const DIC = { es: diccionario("es"), en: diccionario("en") };
+for (const [nombre, pasos, recorrido, ultimo] of [
+  ["la bienvenida a la cuenta", PASOS_CUENTA, recorridoCuenta, "ayuda"],
+  ["«Proponer una pieza»", PASOS_PROPUESTA, recorridoPropuesta, "guia"],
+  ["«Mi perfil»", PASOS_PERFIL, recorridoPerfil, "guia"],
+]) {
+  console.log(`guía de ${nombre}`);
+  check("se traduce", recorrido.traducir === true);
+  check(`empieza sin anclaje y acaba en «${ultimo}»`, pasos[0].clave === undefined && pasos.at(-1).clave === ultimo);
+  check("todos con título y texto", pasos.every((p) => p.titulo && (p.texto || p.puntos?.length)));
+  const claves = pasos.flatMap((p) => [p.titulo, p.texto, ...(p.puntos ?? [])]).filter(Boolean);
+  for (const lang of ["es", "en"]) {
+    const faltan = claves.filter((c) => typeof buscar(DIC[lang], c) !== "string");
+    check(`todas las claves existen en ${lang}`, faltan.length === 0, faltan);
+  }
+  const puntos = pasos.flatMap((p) => p.puntos ?? []);
+  check("puntos con la forma «Nombre: qué es» (es)", puntos.every((c) => buscar(DIC.es, c)?.includes(": ")));
+}
+check("los pasos del menú lo abren en el teléfono", PASOS_CUENTA.filter((p) => p.abrirMenu).length === 6);
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

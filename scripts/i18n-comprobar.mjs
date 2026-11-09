@@ -98,6 +98,15 @@ for (const archivo of publicos) {
   for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*"([^"]+)"/g)) usadas.add(m[1]);
   for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*`([^`$]+)\$\{/g)) prefijosDinamicos.add(m[1]);
   for (const m of codigo.matchAll(/labelKey:\s*"([^"]+)"/g)) usadas.add(m[1]);
+  // Guías traducibles (`crearRecorrido(…, { traducir: true })`): `titulo`, `texto` y
+  // `puntos` son claves. Solo cuenta lo que parece una clave (palabras con puntos, sin
+  // espacios): las guías del panel llevan el texto tal cual y no entran aquí.
+  if (codigo.includes("traducir: true")) {
+    for (const m of codigo.matchAll(/(?:titulo|texto):\s*"([a-z]\w*(?:\.\w+)+)"/g)) usadas.add(m[1]);
+    for (const lista of codigo.matchAll(/puntos:\s*\[([^\]]*)\]/g)) {
+      for (const m of lista[1].matchAll(/"([a-z]\w*(?:\.\w+)+)"/g)) usadas.add(m[1]);
+    }
+  }
 }
 let usoMal = 0;
 for (const clave of usadas) if (!(clave in es)) { fallo(`se usa t("${clave}") y no existe en el diccionario`); usoMal++; }

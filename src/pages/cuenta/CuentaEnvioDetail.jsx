@@ -150,7 +150,7 @@ export const CuentaEnvioDetail = () => {
     <div className="se-reader-dash__page">
       <p className="se-reader-page-lead" style={{ marginTop: 0 }}>
         <Enlace to="/cuenta/envios" className="se-link se-reader-backlink">
-          ← {t("cuenta.envio.misEnvios")}
+          {t("cuenta.envio.misEnvios")}
         </Enlace>
       </p>
       {flash ? (

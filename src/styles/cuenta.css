@@ -48,10 +48,17 @@
   --rd-hairline: rgba(255, 255, 255, 0.14);
   /* El filete del area de contenido si es oscuro: ahi el fondo es claro. */
   --rd-borde: rgba(var(--se-tinte), 0.12);
-  --rd-stage: #fafaf9;
+  /* Papel y tinta, como el sitio del que viene el lector (DESIGN.md): la cuenta es
+     cara pública, y pasar del papel con filetes al cartón con sombras al iniciar
+     sesión era cambiar de periódico. Los mismos nombres que redefine `.se-publico`. */
+  --rd-stage: var(--papel);
   --rd-card: #ffffff;
-  --rd-shadow: 0 18px 46px rgba(0, 0, 0, 0.1);
-  --rd-ink: var(--color-ink);
+  --rd-shadow: none;
+  --rd-ink: var(--tinta);
+  --color-paper: var(--papel);
+  --color-ink: var(--tinta);
+  --color-hairline: var(--filete);
+  --color-hairline-dark: var(--filete-fuerte);
   position: relative;
   display: block;
   min-height: 100dvh;
@@ -63,18 +70,9 @@
   .se-reader-dash {
     display: grid;
     grid-template-columns: 16.75rem 1fr;
-    border-radius: 0 0 20px 20px;
   }
 }
 
-
-.se-reader-dash__aurora {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: none;
-  z-index: 0;
-}
 
 .se-reader-dash__scrim {
   position: fixed;
@@ -123,7 +121,7 @@
     max-width: 100%;
     transform: translateX(-102%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 8px 0 40px rgba(0, 0, 0, 0.35);
+    border-right: 1px solid var(--rd-hairline);
     pointer-events: none;
   }
 
@@ -166,14 +164,14 @@
 
 .se-reader-dash__rail-tag {
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--rd-text);
   align-self: flex-start;
   padding: 0.22rem 0.5rem;
-  border-radius: 6px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--rd-ui-accent-soft);
 }
@@ -190,7 +188,7 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.65rem 0.75rem;
-  border-radius: 10px;
+  border-radius: 2px;
   color: var(--rd-muted);
   text-decoration: none;
   font-family: var(--se-font-ui);
@@ -242,7 +240,7 @@
 .se-reader-dash__logout {
   width: 100%;
   padding: 0.5rem 0.65rem;
-  border-radius: 8px;
+  border-radius: 2px;
   border: 1px solid rgba(var(--se-tinte), 0.28);
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -294,7 +292,7 @@
   height: 42px;
   padding: 0;
   border: none;
-  border-radius: 10px;
+  border-radius: 2px;
   background: rgba(0, 0, 0, 0.06);
   cursor: pointer;
 }
@@ -326,7 +324,7 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: 2px;
   border: 1px solid rgba(26, 26, 26, 0.1);
   background: rgba(26, 26, 26, 0.03);
   line-height: 0;
@@ -375,7 +373,7 @@
 
 .se-reader-dash__topbar-title {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -399,7 +397,7 @@
   color: var(--rd-ink);
   text-decoration: none;
   padding: 0.4rem 0.65rem;
-  border-radius: 8px;
+  border-radius: 2px;
   border: 1px solid rgba(26, 26, 26, 0.18);
 }
 
@@ -418,7 +416,7 @@
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: #fff;
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--color-accent) 35%, transparent);
+  box-shadow: none;
 }
 
 .se-reader-dash .se-btn:not(.se-btn--secondary):hover {
@@ -493,28 +491,18 @@
   text-decoration: none;
   color: inherit;
   background: var(--rd-card);
-  border-radius: 14px;
-  border: 1px solid rgba(26, 26, 26, 0.08);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 2px;
+  border: 1px solid var(--filete);
   overflow: hidden;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 
 .se-reader-marks__link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+  border-color: var(--filete-fuerte);
 }
 
 .se-reader-marks__accent {
-  width: 5px;
-  flex-shrink: 0;
-  background: linear-gradient(
-    180deg,
-    var(--color-accent),
-    color-mix(in srgb, var(--color-accent) 55%, #f2f2f0)
-  );
+  display: none;
 }
 
 .se-reader-marks__body {
@@ -573,14 +561,13 @@
   text-decoration: none;
   color: inherit;
   background: var(--rd-card);
-  border-radius: 14px;
-  border: 1px solid rgba(26, 26, 26, 0.08);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s ease;
+  border-radius: 2px;
+  border: 1px solid var(--filete);
+  transition: border-color 0.15s ease;
 }
 
 .se-reader-subs__link:hover {
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.09);
+  border-color: var(--filete-fuerte);
 }
 
 .se-reader-subs__dot {
@@ -780,7 +767,7 @@
   width: 100%;
   max-width: min(320px, 100%);
   aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  border-radius: 2px;
   overflow: hidden;
   border: 1px solid rgba(26, 26, 26, 0.1);
   background: rgba(26, 26, 26, 0.04);
@@ -814,7 +801,7 @@
   color: rgba(26, 26, 26, 0.78);
   background: color-mix(in srgb, var(--color-accent) 9%, #fffbeb);
   border: 1px solid color-mix(in srgb, var(--color-accent) 28%, #fde68a);
-  border-radius: 12px;
+  border-radius: 2px;
   border-left: 4px solid var(--color-accent);
   max-width: none;
 }
@@ -826,7 +813,7 @@
   color: rgba(26, 26, 26, 0.58);
   background: rgba(26, 26, 26, 0.03);
   border: 1px dashed rgba(26, 26, 26, 0.18);
-  border-radius: 12px;
+  border-radius: 2px;
   max-width: none;
 }
 
@@ -868,19 +855,16 @@
   color: rgba(26, 26, 26, 0.55);
   background: rgba(26, 26, 26, 0.03);
   border: 1px dashed rgba(26, 26, 26, 0.16);
-  border-radius: 12px;
+  border-radius: 2px;
 }
 
 .se-submission-detail__notes {
   margin-top: 1.25rem;
   padding: 1.35rem 1.4rem 1.5rem;
-  border-radius: 16px;
-  border: 1px solid rgba(26, 26, 26, 0.08);
-  border-left: 4px solid var(--color-accent);
-  background:
-    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 55%),
-    linear-gradient(180deg, #fff 0%, #fafafa 100%);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+  border: 1px solid var(--filete);
+  border-top: 2px solid var(--tinta);
+  background: #fff;
 }
 
 .se-submission-detail__notes-title {
@@ -915,8 +899,7 @@
   padding: 1rem 1.1rem;
   background: #fff;
   border: 1px solid rgba(26, 26, 26, 0.08);
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border-radius: 2px;
 }
 
 .se-submission-detail__note-item .se-meta {
@@ -1002,7 +985,7 @@
   width: 100%;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--color-hairline);
-  border-radius: 10px;
+  border-radius: 2px;
   background: #fff;
   font-family: var(--se-font-ui);
   font-size: 0.95rem;
@@ -1029,7 +1012,7 @@
   transform: translateY(-50%);
   padding: 0.35rem 0.6rem;
   border: 0;
-  border-radius: 7px;
+  border-radius: 2px;
   background: transparent;
   font-family: var(--se-font-label);
   font-size: 0.75rem;
@@ -1103,7 +1086,7 @@
   max-width: 30rem;
   padding: clamp(1.5rem, 4vw, 2.25rem);
   border: 1px solid var(--color-hairline);
-  border-radius: 14px;
+  border-radius: 2px;
   background: #fff;
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.07);
 }
@@ -1141,7 +1124,7 @@
 .se-entrada__error {
   margin: 0;
   padding: 0.7rem 0.85rem;
-  border-radius: 9px;
+  border-radius: 2px;
   background: #fbeae5;
   font-family: var(--se-font-ui);
   font-size: 0.85rem;
@@ -1299,7 +1282,7 @@
   max-width: 44rem;
   padding: 1.75rem;
   border: 1px dashed rgba(var(--se-tinte), 0.18);
-  border-radius: 14px;
+  border-radius: 2px;
   background: #fff;
 }
 .se-cuenta__vacio h1,
@@ -1326,7 +1309,7 @@
   gap: 0.7rem;
   padding: 0.85rem 1rem;
   border: 1px solid var(--color-hairline);
-  border-radius: 11px;
+  border-radius: 2px;
   background: #fff;
 }
 .se-guia__punto--falta { border-left: 3px solid var(--color-accent); }
@@ -1369,7 +1352,7 @@
 .se-guia__uso {
   padding: 1rem 1.1rem;
   border: 1px solid var(--color-hairline);
-  border-radius: 11px;
+  border-radius: 2px;
   background: #fff;
 }
 .se-guia__uso h3 {
@@ -1408,14 +1391,13 @@
   gap: 0.2rem;
   padding: 1rem 1.1rem;
   border: 1px solid var(--color-hairline);
-  border-radius: 12px;
+  border-radius: 2px;
   background: #fff;
   text-decoration: none;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 .se-resumen__ficha:hover {
-  border-color: rgba(var(--se-tinte), 0.26);
-  transform: translateY(-2px);
+  border-color: var(--filete-fuerte);
 }
 .se-resumen__n {
   font-family: var(--mono);
@@ -1512,12 +1494,12 @@
   align-items: center;
   padding: 1rem;
   border: 1px solid var(--color-hairline);
-  border-radius: 12px;
+  border-radius: 2px;
   background: #fff;
 }
 .se-mio__portada {
   aspect-ratio: 16 / 10;
-  border-radius: 8px;
+  border-radius: 2px;
   overflow: hidden;
   background: var(--se-offwhite);
 }
@@ -1526,7 +1508,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(140deg, var(--marca-verde), #0a4a26);
+  background: var(--marca-verde);
 }
 .se-mio__kicker {
   margin: 0 0 0.2rem;
@@ -1596,7 +1578,7 @@
   padding: 0.9rem 1rem;
   border: 1px solid var(--color-hairline);
   border-left: 3px solid #c47a1c;
-  border-radius: 11px;
+  border-radius: 2px;
   background: #fff;
 }
 .se-mio__pendientes strong {
@@ -1677,7 +1659,7 @@
   gap: 8px;
   padding: 6px 10px;
   border: 1px solid var(--color-hairline);
-  border-radius: 8px;
+  border-radius: 2px;
   font-size: 0.9375rem;
 }
 
@@ -1717,4 +1699,157 @@
   margin-top: 4px;
   font-size: 0.8125rem;
   color: var(--color-slate);
+}
+
+
+/* —— Papel y tinta: lo que la cuenta comparte con blog.css ——
+   Las tarjetas, el título y el formulario de «Proponer una pieza» se definen en
+   blog.css para todas las zonas; dentro de la cuenta se ven como el sitio público:
+   filete de 1 px, esquinas de 2 px, sin sombra, titulares en Newsreader. */
+.se-reader-dash .se-reader-card,
+.se-reader-dash .se-reader-card:focus-within {
+  border-color: var(--filete);
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.se-reader-dash :is(.se-submission-format, .se-reader-subs__pill, .se-form-control, .se-btn, .se-retrato, .se-compra, .se-temario) {
+  border-radius: 2px;
+}
+
+.se-reader-dash :is(h1, h2):not(.se-sr-only) {
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* El desplegable con el mismo aspecto que los campos de texto (antes, el del sistema). */
+select.se-campo__input {
+  appearance: none;
+  padding-right: 2.2rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--tinta) 50%),
+    linear-gradient(135deg, var(--tinta) 50%, transparent 50%);
+  background-repeat: no-repeat;
+  background-position:
+    calc(100% - 1.1rem) calc(50% - 2px),
+    calc(100% - 0.8rem) calc(50% - 2px);
+  background-size: 5px 5px;
+  cursor: pointer;
+}
+
+/* —— La ayuda «?» de la barra de arriba: repite la bienvenida —— */
+.se-reader-dash__ayuda {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--filete-fuerte);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--rd-ink);
+  cursor: pointer;
+}
+.se-reader-dash__ayuda:hover { border-color: var(--tinta); }
+.se-reader-dash__ayuda:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Perfil: título a la izquierda, «Guía» a la derecha. */
+.se-cuenta__cabecera--con-guia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* —— Proponer una pieza —— */
+.se-propuesta__aviso {
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--filete);
+  border-top: 2px solid var(--tinta);
+  background: #fff;
+}
+.se-propuesta__aviso-titulo {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--tinta);
+}
+.se-propuesta__aviso ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.se-propuesta__recuperado {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--filete);
+  background: #fff;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  color: var(--tinta);
+}
+.se-propuesta__descartar {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Un editor con falta: el borde dice dónde, el texto de abajo dice qué. */
+.se-propuesta__campo--mal .se-richtext {
+  border-color: #b4381c;
+}
+
+.se-propuesta__acciones {
+  display: grid;
+  gap: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--filete);
+}
+.se-propuesta__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.se-propuesta__estado {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  color: var(--color-slate);
+}
+.se-propuesta__error { margin: 0; }
+
+/* El editor de texto, en papel dentro de la cuenta. */
+.se-reader-dash .se-richtext,
+.se-reader-dash .se-image-preview,
+.se-reader-dash .se-image-preview__img,
+.se-reader-dash .se-richtext__btn {
+  border-radius: 2px;
+}
+.se-reader-dash .se-richtext {
+  border: 1px solid var(--filete-fuerte);
+}
+.se-reader-dash .se-richtext:focus-within {
+  border-color: var(--tinta);
+}
+.se-reader-dash .se-richtext__toolbar {
+  border-bottom: 1px solid var(--filete);
+  background: var(--papel);
 }

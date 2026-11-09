@@ -16,6 +16,10 @@
  *
  * Por convención el primer paso no lleva clave (qué hay en la página) y el último se
  * ancla al propio botón «Guía» («vuelve aquí cuando quieras»).
+ *
+ * Con `{ traducir: true }`, `titulo`, `texto` y cada punto son claves de los JSON de
+ * idioma y no el texto: así van las guías de la parte pública (la cuenta del lector),
+ * que se lee en español y en inglés. Las del panel van escritas tal cual.
  */
 
 const leer = (clave) => {
@@ -36,7 +40,12 @@ const escribir = (clave, valor) => {
   }
 };
 
-export const crearRecorrido = (nombre, pasos) => {
+/** Todas las guías creadas: al abrir una se cierran las demás (dos superposiciones a
+ *  la vez se tapaban). Pasa si se deja una a medias y se abre otra, p. ej. la
+ *  bienvenida de la cuenta con la guía de una página. */
+const todas = new Set();
+
+export const crearRecorrido = (nombre, pasos, { traducir = false } = {}) => {
   const CLAVE = `sureconomics_recorrido_${nombre}`;
   const EVENTO = `sureconomics:recorrido-${nombre}`;
 
@@ -52,8 +61,10 @@ export const crearRecorrido = (nombre, pasos) => {
     window.dispatchEvent(new Event(EVENTO));
   };
 
-  return {
+  const recorrido = {
     pasos,
+    nombre,
+    traducir,
     atributo: `data-tour-${nombre}`,
     pasoActivo,
     definicionActual: () => {
@@ -61,10 +72,15 @@ export const crearRecorrido = (nombre, pasos) => {
       return n === null ? null : pasos[n] ?? null;
     },
     irAPaso,
-    iniciar: () => irAPaso(0),
+    iniciar: () => {
+      for (const otra of todas) if (otra !== recorrido && otra.pasoActivo() !== null) otra.irAPaso(null);
+      irAPaso(0);
+    },
     suscribir: (alCambiar) => {
       window.addEventListener(EVENTO, alCambiar);
       return () => window.removeEventListener(EVENTO, alCambiar);
     },
   };
+  todas.add(recorrido);
+  return recorrido;
 };

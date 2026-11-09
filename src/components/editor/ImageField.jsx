@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { ACCEPTED_IMAGE_MIME, MAX_IMAGE_BYTES } from "../../services/adminUploadsService";
+import "../../styles/editor.css";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
 

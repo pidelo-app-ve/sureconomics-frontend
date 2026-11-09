@@ -12232,7 +12232,8 @@ html {
 }
 
 .se-publico .se-contact__tarjeta-titulo,
-.se-publico .se-contact-form fieldset.se-form-field legend {
+.se-publico .se-contact-form fieldset.se-form-field legend,
+.se-reader-dash .se-contact-form fieldset.se-form-field legend {
   font-family: var(--titular);
   font-size: 1.125rem;
   font-weight: 600;
@@ -12242,7 +12243,9 @@ html {
   background: transparent;
 }
 
-.se-publico .se-contact-form fieldset.se-form-field {
+/* La cuenta del lector también es papel (ver cuenta.css). */
+.se-publico .se-contact-form fieldset.se-form-field,
+.se-reader-dash .se-contact-form fieldset.se-form-field {
   border-radius: 0;
   background: transparent;
   box-shadow: none;

@@ -1,0 +1,291 @@
+/*
+ * El editor de texto (RichTextEditor) y el campo de imagen (ImageField).
+ *
+ * Los usan el panel (/admin) y la cuenta del lector (/cuenta, «Proponer una pieza»).
+ * Vivían en admin.css, que solo importa el panel: en la cuenta el editor salía sin
+ * estilos (botones nativos y ninguna caja donde escribir). Ahora los importa cada
+ * componente, así que van con él a donde vaya. Los ajustes propios del panel
+ * (`.se-form-field--brief`, el editor del teléfono) siguen en admin.css y ganan por
+ * ser más específicos.
+ */
+/* Rich text editor (post content) -- theme-agnostic: reads the same
+   --se-form-* tokens the surrounding form already sets, so it looks right
+   in both the dark admin panel and the light reader ("Envíos") dashboard. */
+.se-richtext {
+  --rte-hover-bg: color-mix(in srgb, var(--se-form-text) 8%, transparent);
+  --rte-active-bg: color-mix(in srgb, var(--se-form-focus) 16%, transparent);
+  --rte-divider: color-mix(in srgb, var(--se-form-text) 14%, transparent);
+  --rte-toolbar-bg: color-mix(in srgb, var(--se-form-surface) 92%, var(--se-form-text) 4%);
+
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 12px;
+  background: var(--se-form-surface);
+  overflow: hidden;
+}
+
+.se-richtext__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1.5px solid var(--se-form-border);
+  background: var(--rte-toolbar-bg);
+}
+
+.se-richtext__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--se-form-muted, var(--se-form-text));
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.se-richtext__btn:hover:not(:disabled) {
+  background: var(--rte-hover-bg);
+}
+
+.se-richtext__btn--active {
+  background: var(--rte-active-bg);
+  border-color: var(--se-form-focus);
+  color: var(--se-form-text);
+}
+
+.se-richtext__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.se-richtext__divider {
+  width: 1px;
+  height: 1.4rem;
+  margin: 0 0.15rem;
+  background: var(--rte-divider);
+}
+
+.se-richtext__content {
+  padding: 0.85rem 1rem;
+  min-height: 16rem;
+  max-height: 32rem;
+  overflow-y: auto;
+  color: var(--se-form-text);
+}
+
+.se-richtext__content .ProseMirror {
+  outline: none;
+  min-height: 15rem;
+}
+
+.se-richtext__content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--se-form-placeholder);
+  pointer-events: none;
+}
+
+.se-richtext__content .ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+.se-richtext__content .ProseMirror ul,
+.se-richtext__content .ProseMirror ol {
+  padding-left: 1.4rem;
+}
+
+.se-richtext__content .ProseMirror blockquote {
+  border-left: 3px solid var(--se-form-focus);
+  padding-left: 1rem;
+  color: var(--se-form-muted);
+}
+
+.se-richtext__content .ProseMirror a {
+  color: var(--se-form-focus);
+  text-decoration: underline;
+}
+
+/* Featured image URL + preview */
+.se-image-preview {
+  margin-top: 0.6rem;
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 12px;
+  padding: 0.6rem;
+  background: color-mix(in srgb, var(--se-form-surface) 96%, var(--se-form-text) 3%);
+}
+
+.se-image-preview__img {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.se-image-preview__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--se-form-muted);
+}
+
+.se-image-preview__hint--error {
+  color: var(--se-form-invalid, #8f3a17);
+}
+
+/* —— Featured image: URL vs. upload —— */
+.se-image-field__modes {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 0.55rem;
+  border: 1.5px solid var(--se-form-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--se-form-surface) 92%, var(--se-form-text) 6%);
+}
+
+.se-image-field__mode {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0.34rem 0.9rem;
+  border-radius: 999px;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--se-form-muted);
+  transition: background var(--adm-dur, 0.18s) ease, color var(--adm-dur, 0.18s) ease;
+}
+
+.se-image-field__mode:hover:not(:disabled) {
+  color: var(--se-form-text);
+}
+
+.se-image-field__mode--active {
+  background: var(--se-form-focus, #b9532a);
+  color: #fff;
+}
+
+.se-image-field__mode:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.se-image-field__drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  border: 1.5px dashed var(--se-form-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--se-form-surface) 96%, var(--se-form-text) 3%);
+  text-align: center;
+  transition: border-color var(--adm-dur, 0.18s) ease, background var(--adm-dur, 0.18s) ease;
+}
+
+.se-image-field__drop--over {
+  border-color: var(--se-form-focus, #b9532a);
+  border-style: solid;
+  background: color-mix(in srgb, var(--se-form-surface) 86%, var(--se-form-focus, #b9532a) 12%);
+}
+
+.se-image-field__drop--busy {
+  opacity: 0.9;
+}
+
+.se-image-field__drop-text {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  color: var(--se-form-text);
+}
+
+.se-image-field__drop-hint {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.78rem;
+  color: var(--se-form-muted);
+}
+
+.se-image-field__pick {
+  flex: 0 0 auto;
+}
+
+.se-image-field__spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--se-form-border);
+  border-top-color: var(--se-form-focus, #b9532a);
+  animation: se-image-field-spin 0.7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-image-field__spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+
+.se-image-field__alert {
+  margin: 0.55rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.se-image-field__alert--error {
+  color: var(--se-form-invalid, #8f3a17);
+}
+
+.se-image-field__alert--ok {
+  color: var(--se-form-muted);
+}
+
+.se-image-field__current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+/* The Cloudinary URL is long; let it shrink and ellipsize rather than push the
+   "Quitar imagen" button out of the card. */
+.se-image-field__url {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--mono, monospace);
+  font-size: 0.74rem;
+  color: var(--se-form-muted);
+}
+
+.se-image-field__clear {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--se-form-invalid, #8f3a17);
+  text-decoration: underline;
+}
+
+.se-image-field__clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

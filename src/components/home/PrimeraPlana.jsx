@@ -159,7 +159,9 @@ const Opinion = ({ editorial, analisis }) => {
 
 Opinion.propTypes = {
   editorial: piezaShape({ entrada: PropTypes.string, resumen: PropTypes.string }),
-  analisis: listaDePiezas({ autor: PropTypes.string, autorFoto: PropTypes.string }).isRequired,
+  // `listaDePiezas` ya es obligatoria; con otro `.isRequired` encima el validador era
+  // `undefined` y React lo avisaba en la consola de cada visitante.
+  analisis: listaDePiezas({ autor: PropTypes.string, autorFoto: PropTypes.string }),
 };
 
 export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial = null, analisis = [], recientes = [] }) => {

@@ -53,12 +53,14 @@ const comoSesion = (data) => ({
 /**
  * «¿Olvidó su contraseña?», primer paso: el código por correo. Contesta lo mismo tenga
  * o no cuenta ese correo, así que aquí no hay nada que leer de la respuesta. Lleva las
- * defensas del registro: la trampa (`website`) y el token de Turnstile.
+ * defensas del registro: la trampa (`website`) y el token de Turnstile. Con
+ * `opts.idempotencyKey`, repetir el envío no manda un segundo correo (como Contacto).
  */
 export const pedirCodigoDeRecuperacion = async ({ email, website = "", turnstile = "" }, opts = {}) => {
   await ensureClient(opts.client).request("/auth/password-reset/request", {
     method: "POST",
     json: { email, website, turnstile },
+    idempotencyKey: opts.idempotencyKey,
   });
 };
 

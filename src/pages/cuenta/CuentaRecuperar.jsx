@@ -5,6 +5,7 @@ import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { BRAND } from "../../data/surEconomicsMock";
+import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
@@ -53,6 +54,8 @@ export const CuentaRecuperar = () => {
   // Las defensas del registro: pedir el código manda un correo a quien se diga.
   const [trampa, setTrampa] = useState("");
   const humano = useVerificacionHumana();
+  // Como en Contacto: un reintento del mismo envío no manda un segundo correo.
+  const { clave: claveIdempotente, renovar } = useClaveIdempotente();
 
   useMetaPagina({
     title: t("cuenta.recuperar.meta.titulo", { marca: BRAND.name }),
@@ -92,7 +95,12 @@ export const CuentaRecuperar = () => {
     try {
       const turnstile = await humano.pedirToken();
       if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
-      await pedirCodigoDeRecuperacion({ email: email.trim(), website: trampa, turnstile });
+      await pedirCodigoDeRecuperacion(
+        { email: email.trim(), website: trampa, turnstile },
+        { idempotencyKey: claveIdempotente() },
+      );
+      // Cuajó: «pedir otro código» es un envío nuevo, no un reintento.
+      renovar();
       setCodigo("");
       setPaso("codigo");
       setAviso(t("cuenta.recuperar.enviado"));

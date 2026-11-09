@@ -13,23 +13,27 @@ import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/admin
 import { unwrapEntity } from "../../services/adminResponseUtils";
 
 /**
- * «Resumen diario» en el panel: revisar y aprobar las tres ediciones del día.
+ * «Resumen diario» en el panel: ver cómo va a llegar al canal cada edición y ajustarla.
  *
  * Una hora antes de cada salida (6:00, 12:00 y 18:00) el backend arma solo un borrador
- * con lo nuevo desde la edición anterior (ver `services/resumen_service.py`); aquí el
- * editor quita, reordena, mueve de sección y reescribe los puntos, añade cifras a mano,
- * la frase y cambia la foto, y lo **aprueba**. Sale a las 7:00, 13:00 o 19:00 en la web,
- * en Telegram y en WhatsApp (o en el minuto, si se aprueba después). Sin aprobación no
- * sale. Una edición con casi nada nuevo queda «sin contenido nuevo» y no sale.
+ * con lo nuevo desde la edición anterior (ver `services/resumen_service.py`), y **a su
+ * hora sale solo** (7:00, 13:00 o 19:00) en la web, en Telegram y en el canal de
+ * WhatsApp: nadie tiene que aprobarlo (lo pidió Ramón el 9-nov-2026). Hasta esa hora el
+ * editor puede cambiar la **foto** que acompaña al mensaje -- la de otra noticia del
+ * mensaje, una de la biblioteca o ninguna --, retocar los puntos, las cifras y la frase,
+ * y ve el resultado en la maqueta del canal (`VistaPreviaWhatsApp`). Si lo cambia, sale
+ * cambiado; si no lo toca, sale tal cual. «No mandar esta edición» frena una concreta.
+ * Una edición con casi nada nuevo queda «sin contenido nuevo» y no sale.
  *
  * Los cambios se guardan con «Guardar cambios»: el borrador se edita aquí, en el
- * navegador, y solo se manda entero al guardar. Aprobar pide que no haya nada sin guardar.
+ * navegador, y solo se manda entero al guardar. La foto se ve en la maqueta al elegirla;
+ * el texto, al guardar (lo arma el servidor, y es el mismo que se manda).
  */
 
 const ESTADO = {
   vacio: { texto: "Sin contenido nuevo", clase: "se-res-adm-chip--vacio" },
   borrador: { texto: "Borrador", clase: "se-res-adm-chip--borrador" },
-  aprobado: { texto: "Aprobado", clase: "se-res-adm-chip--aprobado" },
+  retenido: { texto: "Retenida", clase: "se-res-adm-chip--retenido" },
   publicado: { texto: "Publicado", clase: "se-res-adm-chip--publicado" },
 };
 const CANAL = {
@@ -43,6 +47,12 @@ const MOMENTO = { manana: "Mañana", tarde: "Tarde", noche: "Noche" };
 const ancla = (clave) => ({ [recorridoResumen.atributo]: clave });
 const zona = { timeZone: "America/Caracas" };
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }) : "—");
+/** El chip de una edición: un borrador dice a qué hora sale solo o, si ya no va a salir, que no salió. */
+const chipDe = (r) => {
+  if (r.estado !== "borrador") return ESTADO[r.estado] ?? { texto: r.estado, clase: "" };
+  if (r.sale_sola_a_las) return { texto: `Sale sola · ${hora(r.sale_sola_a_las)}`, clase: "se-res-adm-chip--borrador" };
+  return { texto: r.pasa_a ? "No salió: pasó a la siguiente" : "No salió", clase: "se-res-adm-chip--vacio" };
+};
 const conVariacion = (c) =>
   typeof c.variacion === "number" && Math.abs(c.variacion) >= 0.005
     ? `${c.valor} (${c.variacion > 0 ? "+" : "−"}${Math.abs(c.variacion).toFixed(2).replace(".", ",")} %)`
@@ -59,10 +69,18 @@ const editable = (r) => ({
   imagen_id: r?.imagen_id ?? null,
 });
 
+/** La foto de una pieza del mensaje, en la forma en que `AssetField` describe un adjunto. */
+const comoAdjunto = (f) => ({
+  id: f.id, url: f.url, original_filename: f.titulo || f.alt || "Foto", width: f.ancho, height: f.alto, credit: f.credito,
+});
+
 /**
- * La imagen del día (opcional): sale primero en WhatsApp y en Telegram, antes del texto,
- * y arriba en la web. Se sube o se elige de la biblioteca como la portada del boletín, y
- * se guarda con el resto («Guardar cambios»). Sur la manda en JPG de 1600 px como mucho.
+ * La foto que acompaña al mensaje (opcional): sale primero en WhatsApp y en Telegram,
+ * antes del texto, y arriba en la web. Se elige sola -- la de la noticia más importante
+ * del mensaje que tenga foto -- y el editor la cambia con un clic por la de otra noticia
+ * del mensaje, o la sube o la elige de la biblioteca como la portada del boletín, o la
+ * quita. Se guarda con el resto («Guardar cambios»). Sur la manda en JPG de 1600 px como
+ * mucho, sin recortarla.
  */
 const ImagenDelDia = ({ resumen, imagenId, elegida, bloqueado, onCambio }) => {
   const guardada = imagenId && imagenId === resumen.imagen_id ? resumen.imagen : null;
@@ -72,42 +90,127 @@ const ImagenDelDia = ({ resumen, imagenId, elegida, bloqueado, onCambio }) => {
   const asset = imagenId
     ? { id: imagenId, url, original_filename: elegida?.original_filename || guardada?.alt || "Imagen del día" }
     : null;
+  const fotos = resumen.fotos_de_las_piezas ?? [];
   return (
     <div className="se-res-adm-imagen">
-      {url ? <img src={url} alt="" className="se-res-adm-imagen__vista" /> : null}
+      <h2 className="se-form-label">La foto del mensaje</h2>
       {automatica ? (
-        <p className="se-admin-meta-hint">Elegida sola: la de la pieza más importante de esta edición. Cámbiala si quieres.</p>
+        <p className="se-admin-meta-hint">Elegida sola: la de la noticia más importante del mensaje. Cámbiala si quieres; la ves al momento en la maqueta de al lado.</p>
       ) : null}
       {bloqueado ? (
-        <p className="se-admin-meta-hint">{url ? "Foto de la edición." : "Sin foto."}</p>
+        <>
+          {url ? <img src={url} alt="" className="se-res-adm-imagen__vista" /> : null}
+          <p className="se-admin-meta-hint">{url ? "Foto de la edición." : "Sin foto."}</p>
+        </>
       ) : (
-        <AssetField
-          id={`res-${resumen.id}-imagen`}
-          label="Foto de la edición"
-          hint="Sale primero en WhatsApp y en Telegram, antes del texto, y arriba en la web. Tiene que ser pública. Si ninguna pieza de la edición tiene foto, elige una o sale sin ella."
-          kind="image"
-          value={imagenId}
-          asset={asset}
-          onChange={onCambio}
-          onUpload={uploadAdminMediaImage}
-          accept={ACCEPTED_IMAGE_MIME}
-        />
+        <>
+          {fotos.length ? (
+            <div className="se-res-adm-fotos" role="group" aria-label="Fotos de las noticias del mensaje">
+              <p className="se-admin-meta-hint">Las fotos de las noticias del mensaje: pulsa la que debe acompañarlo.</p>
+              <ul className="se-res-adm-fotos__lista">
+                {fotos.map((f) => (
+                  <li key={f.id}>
+                    <button type="button" className={`se-res-adm-fotos__foto${imagenId === f.id ? " is-elegida" : ""}`}
+                      aria-pressed={imagenId === f.id} title={f.titulo} onClick={() => onCambio(f.id, comoAdjunto(f))}>
+                      <img src={f.url} alt="" loading="lazy" />
+                      <span>{f.titulo}</span>
+                    </button>
+                  </li>
+                ))}
+                <li>
+                  <button type="button" className={`se-res-adm-fotos__foto se-res-adm-fotos__foto--sin${imagenId ? "" : " is-elegida"}`}
+                    aria-pressed={!imagenId} onClick={() => onCambio(null, null)}>
+                    <span>Sin foto</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <p className="se-admin-meta-hint">Ninguna noticia del mensaje tiene foto: elige una de la biblioteca, súbela, o sale sin foto.</p>
+          )}
+          <AssetField
+            id={`res-${resumen.id}-imagen`}
+            label="Otra foto"
+            hint="De la biblioteca o subida ahora. Tiene que ser pública. En WhatsApp sale primero la foto y enseguida el mensaje; en la web va arriba."
+            kind="image"
+            value={imagenId}
+            asset={asset}
+            onChange={onCambio}
+            onUpload={uploadAdminMediaImage}
+            accept={ACCEPTED_IMAGE_MIME}
+          />
+        </>
       )}
     </div>
   );
 };
+
+const FOTO = PropTypes.shape({
+  id: PropTypes.number, url: PropTypes.string, alt: PropTypes.string, titulo: PropTypes.string,
+  ancho: PropTypes.number, alto: PropTypes.number, credito: PropTypes.string,
+});
 
 ImagenDelDia.propTypes = {
   resumen: PropTypes.shape({
     id: PropTypes.number.isRequired,
     imagen_id: PropTypes.number,
     imagen_auto: PropTypes.bool,
-    imagen: PropTypes.shape({ url: PropTypes.string, alt: PropTypes.string }),
+    imagen: FOTO,
+    fotos_de_las_piezas: PropTypes.arrayOf(FOTO),
   }).isRequired,
   imagenId: PropTypes.number,
-  elegida: PropTypes.shape({ url: PropTypes.string, original_filename: PropTypes.string }),
+  elegida: PropTypes.shape({ url: PropTypes.string, original_filename: PropTypes.string, width: PropTypes.number, height: PropTypes.number }),
   bloqueado: PropTypes.bool.isRequired,
   onCambio: PropTypes.func.isRequired,
+};
+
+/** Las negritas y cursivas de WhatsApp (*así* y _así_), como las pinta el teléfono. */
+const conFormatoDeWhatsApp = (linea) =>
+  linea.split(/(\*[^*\n]+\*|_[^_\n]+_)/g).map((trozo, i) => {
+    if (trozo.length > 2 && trozo.startsWith("*") && trozo.endsWith("*")) return <strong key={i}>{trozo.slice(1, -1)}</strong>;
+    if (trozo.length > 2 && trozo.startsWith("_") && trozo.endsWith("_")) return <em key={i}>{trozo.slice(1, -1)}</em>;
+    return trozo;
+  });
+
+/**
+ * El mensaje como lo ve quien abre el canal: primero la foto, en su proporción (Sur la
+ * manda en JPG de hasta 1600 px, sin recortarla), y enseguida el texto, que WhatsApp
+ * remata con la **tarjeta del enlace**: la arma él solo con la foto (recortada a lo
+ * ancho) y el título de la página del resumen, que `api/pieza.js` le da. Es una maqueta
+ * fiel con los colores del chat de WhatsApp, no una captura.
+ */
+const VistaPreviaWhatsApp = ({ texto, foto, nombre, cuando }) => {
+  const marca = cuando ? hora(cuando) : "";
+  return (
+    <div className="se-res-adm-wa" aria-label="Así se ve en el canal de WhatsApp">
+      {foto?.url ? (
+        <figure className="se-res-adm-wa__burbuja se-res-adm-wa__burbuja--foto">
+          <img src={foto.url} alt="" style={foto.ancho && foto.alto ? { aspectRatio: `${foto.ancho} / ${foto.alto}` } : undefined} />
+          <figcaption className="se-res-adm-wa__hora">{marca}</figcaption>
+        </figure>
+      ) : null}
+      <div className="se-res-adm-wa__burbuja">
+        <div className="se-res-adm-wa__tarjeta" aria-label="Tarjeta del enlace">
+          {foto?.url ? <img src={foto.url} alt="" /> : <img src="/brand/og-default.jpg" alt="" />}
+          <div className="se-res-adm-wa__tarjeta-texto">
+            <strong>{nombre}</strong>
+            <span>sureconomics.com</span>
+          </div>
+        </div>
+        <p className="se-res-adm-wa__texto">
+          {texto.split("\n").map((linea, i) => <span key={i}>{conFormatoDeWhatsApp(linea)}{"\n"}</span>)}
+        </p>
+        <span className="se-res-adm-wa__hora">{marca}</span>
+      </div>
+    </div>
+  );
+};
+
+VistaPreviaWhatsApp.propTypes = {
+  texto: PropTypes.string.isRequired,
+  foto: PropTypes.shape({ url: PropTypes.string, ancho: PropTypes.number, alto: PropTypes.number }),
+  nombre: PropTypes.string.isRequired,
+  cuando: PropTypes.string,
 };
 
 const Punto = ({ punto, info, secciones, clave, primero, ultimo, bloqueado, onCambio, onMover, onQuitar, onSubir, onBajar }) => (
@@ -170,7 +273,7 @@ export const AdminResumen = () => {
   const [anadir, setAnadir] = useState({ id: "", seccion: "importante" });
 
   useEffect(() => {
-    applyPageMeta({ title: "Admin — Resumen diario", description: "Revisar y aprobar las tres ediciones del resumen." });
+    applyPageMeta({ title: "Admin — Resumen diario", description: "Ver cómo sale cada edición del resumen y ajustarla antes de la hora." });
   }, []);
 
   const abrir = useCallback(async (id) => {
@@ -225,13 +328,18 @@ export const AdminResumen = () => {
 
   const guardar = () =>
     hacer(() => adminRequest(`/admin/resumen/${actual.id}`, { method: "PATCH", json: edicion }),
-      actual.estado === "aprobado" ? "Guardado. Volvió a borrador: apruébalo otra vez." : "Guardado.",
+      actual.sale_sola_a_las ? `Guardado. Así sale a las ${hora(actual.sale_sola_a_las)}.` : "Guardado.",
       "No se pudo guardar.");
 
-  const aprobar = () =>
-    hacer(() => adminRequest(`/admin/resumen/${actual.id}/aprobar`, { method: "POST" }),
-      `Aprobado. Sale a las ${hora(actual.sale_a_las)} (o en el minuto, si ya pasó la hora).`,
-      "No se pudo aprobar.");
+  const retener = () =>
+    hacer(() => adminRequest(`/admin/resumen/${actual.id}/retener`, { method: "POST" }),
+      "Retenida: esta edición no sale. Si cambias de idea, pulsa «Dejar que salga».",
+      "No se pudo retener.");
+
+  const soltar = () =>
+    hacer(() => adminRequest(`/admin/resumen/${actual.id}/soltar`, { method: "POST" }),
+      "Vuelve a salir sola: a su hora o, si ya pasó, en el próximo minuto.",
+      "No se pudo.");
 
   const rehacer = async () => {
     const ok = await confirm({
@@ -288,6 +396,14 @@ export const AdminResumen = () => {
 
   const datos = lista.datos;
   const esHoy = actual?.fecha === datos.hoy;
+  // La foto que va en la maqueta: la recién elegida (aún sin guardar) o la guardada; ninguna si se quitó.
+  const fotoDelMensaje = !edicion?.imagen_id
+    ? null
+    : imagenElegida?.url
+      ? { url: imagenElegida.url, ancho: imagenElegida.width ?? null, alto: imagenElegida.height ?? null }
+      : edicion.imagen_id === actual?.imagen_id
+        ? actual.imagen
+        : null;
   const bloqueado = !actual || ["publicado", "vacio"].includes(actual.estado) || ocupado;
   const deHoy = new Map(datos.resumenes.filter((r) => r.fecha === datos.hoy).map((r) => [r.edicion, r]));
   const armar = (clave) =>
@@ -304,9 +420,10 @@ export const AdminResumen = () => {
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>Resumen diario</h1>
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-            Tres ediciones al día, cada una con lo nuevo desde la anterior: salen a las{" "}
-            {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y WhatsApp, cuando las apruebas.
-            Cada una se arma sola una hora antes. Sin aprobación no sale.
+            Tres ediciones al día, cada una con lo nuevo desde la anterior: salen solas a las{" "}
+            {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y el canal de WhatsApp; nadie tiene que
+            aprobarlas. Cada una se arma sola una hora antes: hasta su hora puedes cambiar la foto y ajustar el texto
+            (si lo cambias, sale cambiado) o frenarla con «No mandar esta edición».
             {datos.reloj_encendido ? "" : " (El reloj está apagado en este entorno: ármalas con los botones.)"}
           </p>
         </div>
@@ -324,7 +441,7 @@ export const AdminResumen = () => {
               <strong>{MOMENTO[e.clave]} · {e.sale}</strong>
               {r ? (
                 <>
-                  <span className={`se-res-adm-chip ${ESTADO[r.estado]?.clase ?? ""}`}>{ESTADO[r.estado]?.texto}</span>
+                  <span className={`se-res-adm-chip ${chipDe(r).clase}`}>{chipDe(r).texto}</span>
                   <button type="button" className="se-btn se-btn--secondary" disabled={abierta || ocupado}
                     onClick={() => abrirOtra(r.id)}>
                     {abierta ? "Abierta" : "Abrir"}
@@ -347,14 +464,22 @@ export const AdminResumen = () => {
         <>
           <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("estado")}>
             <div className="se-res-adm-estado">
-              <span className={`se-res-adm-chip ${ESTADO[actual.estado]?.clase ?? ""}`}>{ESTADO[actual.estado]?.texto}</span>
+              <span className={`se-res-adm-chip ${chipDe(actual).clase}`}>{chipDe(actual).texto}</span>
               <strong>{MOMENTO[actual.edicion]} · {actual.fecha_larga}{esHoy ? " · hoy" : ""}</strong>
               <span className="se-admin-meta-hint">
-                {actual.estado === "aprobado" ? `sale a las ${hora(actual.sale_a_las)} · ` : ""}
+                {actual.estado === "borrador" && actual.sale_sola_a_las ? `sale sola a las ${hora(actual.sale_sola_a_las)} · ` : ""}
+                {actual.estado === "borrador" && !actual.sale_sola_a_las && actual.pasa_a ? `ya no sale: lo suyo entra en la de ${actual.pasa_a} · ` : ""}
+                {actual.estado === "retenido" ? "retenida: no sale · " : ""}
                 {actual.estado === "publicado" ? `salió a las ${hora(actual.publicado_en)} · ` : ""}
                 armado {actual.armado_con === "ia" ? "con IA" : "por reglas"} a las {hora(actual.armado_en)}
               </span>
             </div>
+            {actual.estado === "borrador" && actual.sale_sola_a_las ? (
+              <p className="se-admin-meta-hint" role="status">
+                Sale sola a las {hora(actual.sale_sola_a_las)} en la web, Telegram y el canal de WhatsApp, tal como la ves en
+                la maqueta. Si cambias la foto o el texto antes y guardas, sale cambiada.
+              </p>
+            ) : null}
             {actual.estado === "vacio" ? (
               <p className="se-admin-meta-hint" role="status">
                 No sale: {actual.motivo_vacio ?? "no había bastante nuevo"}. Si después llega algo, pulse «Rehacer».
@@ -364,7 +489,7 @@ export const AdminResumen = () => {
               <p className="se-tit-aviso" role="alert">
                 Este borrador salió por reglas, no por la IA
                 {actual.motivo_reglas ? ` (${actual.motivo_reglas})` : ""}: es un reparto mecánico, sin
-                redactar y con huecos. Antes de aprobarlo, pulse «Rehacer» para que lo arme la IA.
+                redactar y con huecos. Pulse «Rehacer» para que lo arme la IA antes de que salga, o «No mandar esta edición».
               </p>
             ) : null}
             {actual.estado === "publicado" ? (
@@ -376,16 +501,15 @@ export const AdminResumen = () => {
               </p>
             ) : null}
             <div className="se-tit-acciones" {...ancla("acciones")}>
-              {actual.estado === "borrador" ? (
-                <button type="button" className="se-btn se-btn--primary" disabled={ocupado || sucio || !esHoy} onClick={aprobar}
-                  title={sucio ? "Guarda los cambios antes de aprobar" : undefined}>
-                  Aprobar
+              {actual.estado === "borrador" && esHoy && actual.sale_sola_a_las ? (
+                <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={retener}>
+                  No mandar esta edición
                 </button>
               ) : null}
-              {actual.estado === "aprobado" ? (
-                <button type="button" className="se-btn se-btn--secondary" disabled={ocupado}
-                  onClick={() => hacer(() => adminRequest(`/admin/resumen/${actual.id}/borrador`, { method: "POST" }), "Vuelve a borrador.", "No se pudo.")}>
-                  Volver a borrador
+              {actual.estado === "retenido" && esHoy ? (
+                <button type="button" className="se-btn se-btn--primary" disabled={ocupado || sucio} onClick={soltar}
+                  title={sucio ? "Guarda los cambios antes" : undefined}>
+                  Dejar que salga
                 </button>
               ) : null}
               {actual.estado !== "publicado" ? (
@@ -403,14 +527,32 @@ export const AdminResumen = () => {
                 </button>
               ) : null}
             </div>
-            {sucio ? <p className="se-tit-aviso" role="status">Hay cambios sin guardar.</p> : null}
-            {actual.estado === "borrador" && !esHoy ? (
-              <p className="se-admin-meta-hint">Es de un día que ya pasó: no se puede aprobar.</p>
+            {sucio ? (
+              <p className="se-tit-aviso" role="status">
+                Hay cambios sin guardar{actual.sale_sola_a_las ? `: si no los guardas antes de las ${hora(actual.sale_sola_a_las)}, sale sin ellos` : ""}.
+              </p>
+            ) : null}
+            {["borrador", "retenido"].includes(actual.estado) && !esHoy ? (
+              <p className="se-admin-meta-hint">Es de un día que ya pasó: no salió y ya no sale.</p>
             ) : null}
           </section>
 
           <div className="se-res-adm-rejilla">
             <div className="se-res-adm-col">
+              <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("imagen")}>
+                <ImagenDelDia
+                  resumen={actual}
+                  imagenId={edicion.imagen_id}
+                  elegida={imagenElegida}
+                  bloqueado={bloqueado}
+                  onCambio={(id, row) => {
+                    setEdicion((x) => ({ ...x, imagen_id: id ?? null }));
+                    setImagenElegida(row ?? null);
+                    setSucio(true);
+                  }}
+                />
+              </section>
+
               <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("secciones")}>
                 {edicion.secciones.map((s) => {
                   const meta = actual.secciones.find((x) => x.clave === s.clave);
@@ -501,20 +643,6 @@ export const AdminResumen = () => {
                   onChange={(e) => { setEdicion((x) => ({ ...x, frase: e.target.value })); setSucio(true); }} />
               </section>
 
-              <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("imagen")}>
-                <ImagenDelDia
-                  resumen={actual}
-                  imagenId={edicion.imagen_id}
-                  elegida={imagenElegida}
-                  bloqueado={bloqueado}
-                  onCambio={(id, row) => {
-                    setEdicion((x) => ({ ...x, imagen_id: id ?? null }));
-                    setImagenElegida(row ?? null);
-                    setSucio(true);
-                  }}
-                />
-              </section>
-
               {!bloqueado ? (
                 <div className="se-tit-acciones se-res-adm-guardar">
                   <button type="button" className="se-btn se-btn--primary" disabled={!sucio || ocupado} onClick={guardar}>Guardar cambios</button>
@@ -527,12 +655,18 @@ export const AdminResumen = () => {
             </div>
 
             <section className="se-admin-table-wrap se-res-adm-bloque se-res-adm-vista" {...ancla("vista")}>
-              <h2 className="se-form-label">Así sale en WhatsApp</h2>
-              {actual.imagen ? (
-                <p className="se-admin-meta-hint">Primero sale la imagen del día y, enseguida, este texto.</p>
-              ) : null}
-              <pre className="se-res-adm-texto">{actual.texto_whatsapp}</pre>
-              {sucio ? <p className="se-admin-meta-hint">La vista previa se actualiza al guardar.</p> : null}
+              <h2 className="se-form-label">Así llega al canal de WhatsApp</h2>
+              <p className="se-admin-meta-hint">
+                Lo que ve quien abre el canal: primero la foto, en su proporción, y enseguida el mensaje con la tarjeta del
+                enlace, que WhatsApp arma con la foto y el título de la página. La foto cambia al elegirla; el texto, al guardar.
+              </p>
+              <VistaPreviaWhatsApp texto={actual.texto_whatsapp} foto={fotoDelMensaje} nombre={actual.nombre}
+                cuando={actual.sale_sola_a_las ?? actual.publicado_en ?? actual.sale_a_las} />
+              {sucio ? <p className="se-admin-meta-hint">El texto de la maqueta se actualiza al guardar.</p> : null}
+              <details className="se-res-adm-punto__en">
+                <summary className="se-admin-meta-hint">El texto tal cual, sin formato</summary>
+                <pre className="se-res-adm-texto">{actual.texto_whatsapp}</pre>
+              </details>
             </section>
           </div>
         </>
@@ -559,7 +693,7 @@ export const AdminResumen = () => {
                   <tr key={r.id}>
                     <td>{r.fecha_larga}</td>
                     <td>{MOMENTO[r.edicion]}</td>
-                    <td>{ESTADO[r.estado]?.texto}</td>
+                    <td>{chipDe(r).texto}</td>
                     <td className="se-tit-num">{r.puntos}</td>
                     <td>{r.estado === "publicado" ? CANAL[r.telegram] : "—"}</td>
                     <td>{r.estado === "publicado" ? CANAL[r.whatsapp] : "—"}</td>

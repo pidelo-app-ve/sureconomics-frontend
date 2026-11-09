@@ -13,6 +13,7 @@ import handler, {
   ENTORNO,
   IMAGEN_DE_MARCA,
   descripcionDe,
+  descripcionDelResumen,
   esNuestroShell,
   imagenParaCompartir,
   inyectar,
@@ -355,6 +356,68 @@ await conFetch(async (url) => {
   check("entorno es un sitio, no un artículo", res.body.includes('og:type" content="website"'));
   check("entorno con una sola og:image", (res.body.match(/property="og:image"/g) || []).length === 1);
   check("entorno se cachea", /s-maxage=3600/.test(res.headers["Cache-Control"]));
+});
+
+// —— 9. El resumen diario: la tarjeta que WhatsApp pinta bajo el mensaje del canal ——
+const RESUMEN = {
+  fecha: "2026-11-09",
+  edicion: "manana",
+  nombre: "SurEconomics · Lo importante de esta mañana",
+  fecha_larga: "Lunes 9 de noviembre",
+  secciones: [
+    { clave: "importante", puntos: [{ linea: "PDVSA designa juntas para Citgo" }, { linea: "El BCV sube la tasa" }] },
+    { clave: "region", puntos: [{ linea: "Chile investiga a las AFP" }, { linea: "Un cuarto que no entra" }] },
+  ],
+  imagen: { url: "/media/image/2026/11/puerto-a1b2c3d4.png", alt: "Puerto", credito: null },
+  publicado_en: "2026-11-09T11:00:00+00:00",
+};
+check("resumen: la descripción son los tres primeros puntos",
+  descripcionDelResumen(RESUMEN) === "PDVSA designa juntas para Citgo · El BCV sube la tasa · Chile investiga a las AFP");
+check("resumen sin puntos: sin descripción", descripcionDelResumen({ secciones: [] }) === null);
+await conFetch(fetchNormal(RESUMEN), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "manana" } }, res);
+  const h = res.body;
+  check("resumen: 200 con la app intacta", res.code === 200 && h.includes('id="root"') && res.headers["X-Pieza-Meta"] === "resumen",
+    res.headers["X-Pieza-Meta"]);
+  check("resumen: el nombre de la edición y el día",
+    h.includes('property="og:title" content="SurEconomics · Lo importante de esta mañana · Lunes 9 de noviembre"'));
+  check("resumen: la foto del día, en su versión para compartir",
+    h.includes('property="og:image" content="https://www.sureconomics.com/media/image/2026/11/puerto-a1b2c3d4-og.jpg"'));
+  check("resumen: una sola og:image", (h.match(/property="og:image"/g) || []).length === 1);
+  check("resumen: los primeros puntos como descripción",
+    h.includes('property="og:description" content="PDVSA designa juntas para Citgo · El BCV sube la tasa · Chile investiga a las AFP"'));
+  check("resumen: la dirección del canal como canónica",
+    h.includes('rel="canonical" href="https://www.sureconomics.com/resumen/2026-11-09/manana"'));
+  check("resumen: se cachea", /s-maxage=600/.test(res.headers["Cache-Control"]));
+});
+await conFetch(fetchNormal({ ...RESUMEN, imagen: null }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "tarde" } }, res);
+  check("resumen sin foto: la tarjeta de marca", res.body.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
+});
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  return { ok: false, status: 404 };
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "noche" } }, res);
+  check("resumen que no salió: 404 con noindex y la app intacta",
+    res.code === 404 && res.body.includes('name="robots" content="noindex, follow"') && res.body.includes('id="root"'));
+});
+await conFetch(fetchNormal(RESUMEN), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "ayer", edicion: "manana" } }, res);
+  check("resumen con fecha rara: la tarjeta genérica, sin preguntar a la API",
+    res.code === 200 && res.headers["X-Pieza-Meta"] === "ruta-desconocida", res.headers["X-Pieza-Meta"]);
+});
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => "no es nuestro" };
+  return { ok: true, status: 200, json: async () => ({ data: RESUMEN }) };
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "manana" } }, res);
+  check("resumen: si el shell falla, vuelve a su dirección", res.location === "/resumen/2026-11-09/manana?_s=1", res.location);
 });
 
 // —— 7. Las piezas en inglés ——

@@ -94,6 +94,24 @@ export const ENTORNO = {
   tipo: "website",
 };
 
+/**
+ * El resumen diario, `/resumen/<AAAA-MM-DD>/<manana|tarde|noche>`: es el enlace que va al
+ * canal de WhatsApp y a Telegram, y la tarjeta que WhatsApp pinta debajo del mensaje sale
+ * de estas etiquetas: la foto del día (en su versión para compartir) y el nombre de la
+ * edición. Sin esto, la tarjeta llevaba la imagen genérica del sitio.
+ */
+const EDICIONES_DEL_RESUMEN = new Set(["manana", "tarde", "noche"]);
+const FECHA_DEL_RESUMEN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Los primeros puntos del resumen, en una línea: lo que la tarjeta dice bajo el título. */
+export const descripcionDelResumen = (resumen) => {
+  const lineas = (resumen?.secciones ?? [])
+    .flatMap((s) => s?.puntos ?? [])
+    .map((p) => (p?.linea || "").trim())
+    .filter(Boolean);
+  return lineas.length ? lineas.slice(0, 3).join(" · ") : null;
+};
+
 /** What a page says about itself when there is no piece to describe. */
 const GENERICO = {
   titulo: "SurEconomics — Economía, mercados e inversión",
@@ -461,18 +479,24 @@ export const esNuestroShell = (html) =>
   html.includes("/assets/");
 
 export default async function handler(req, res) {
-  const { seccion, slug, lang } = req.query ?? {};
+  const { seccion, slug, lang, fecha, edicion } = req.query ?? {};
   // `/en/noticias/x` llega aquí con `lang=en` (ver `vercel.json`).
   const pideIngles = lang === "en";
   const prefijo = pideIngles ? "/en" : "";
+  /** La dirección propia de lo pedido, para volver a ella o declararla como canónica. */
+  const rutaPropia =
+    seccion === "entorno"
+      ? "/entorno"
+      : seccion === "resumen"
+        ? `/resumen/${fecha ?? ""}/${edicion ?? ""}`
+        : `${prefijo}/${seccion ?? ""}${slug ? `/${slug}` : ""}`;
 
   /** Hand the request back to the static file. Used whenever we cannot produce
    *  the application's own HTML: one redirect, and the reader gets the page. */
   const alEstatico = (motivo) => {
     res.setHeader("X-Pieza-Meta", motivo);
     res.setHeader("Cache-Control", "public, s-maxage=30");
-    const ruta = seccion === "entorno" ? "/entorno" : `${prefijo}/${seccion}/${slug}`;
-    res.redirect(307, `${ruta}?${SIN_META}=1`);
+    res.redirect(307, `${rutaPropia}?${SIN_META}=1`);
   };
 
   let shell = "";
@@ -502,7 +526,7 @@ export default async function handler(req, res) {
       inyectar(shell, {
         ...GENERICO,
         imagen: IMAGEN_DE_MARCA,
-        url: `${SITIO}${prefijo}/${seccion ?? ""}${slug ? `/${slug}` : ""}`,
+        url: `${SITIO}${rutaPropia}`,
       })
     );
   };
@@ -513,6 +537,62 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
     res.setHeader("X-Pieza-Meta", "entorno");
     res.status(200).send(inyectar(shell, ENTORNO));
+    return;
+  }
+
+  // Una edición del resumen diario: el enlace del canal. La tarjeta lleva la foto del
+  // día y el nombre de la edición; una que no salió es un 404, como una pieza que no existe.
+  if (seccion === "resumen") {
+    if (!FECHA_DEL_RESUMEN.test(fecha ?? "") || !EDICIONES_DEL_RESUMEN.has(edicion ?? "")) {
+      seco("ruta-desconocida");
+      return;
+    }
+    const url = `${SITIO}${rutaPropia}`;
+    let resumen = null;
+    try {
+      const respuesta = await conDeadline(`${API}/resumen/${fecha}/${edicion}`, LIMITE_MS);
+      if (respuesta.status === 404) {
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("Cache-Control", "public, s-maxage=60");
+        res.setHeader("X-Pieza-Meta", "resumen-inexistente");
+        res.status(404).send(
+          inyectar(shell, {
+            ...GENERICO,
+            titulo: "Resumen no encontrado — SurEconomics",
+            imagen: IMAGEN_DE_MARCA,
+            url,
+            noindex: true,
+          })
+        );
+        return;
+      }
+      if (!respuesta.ok) {
+        seco(`api-${respuesta.status}`);
+        return;
+      }
+      const cuerpo = await respuesta.json();
+      resumen = cuerpo?.data ?? cuerpo;
+    } catch {
+      seco("api-sin-respuesta");
+      return;
+    }
+    if (!resumen?.nombre) {
+      seco("resumen-sin-nombre");
+      return;
+    }
+    const imagen = imagenParaCompartir(resumen.imagen?.url) ?? IMAGEN_DE_MARCA;
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=86400");
+    res.setHeader("X-Pieza-Meta", "resumen");
+    res.status(200).send(
+      inyectar(shell, {
+        titulo: resumen.fecha_larga ? `${resumen.nombre} · ${resumen.fecha_larga}` : resumen.nombre,
+        descripcion: descripcionDelResumen(resumen),
+        imagen,
+        url,
+        publicado: resumen.publicado_en || null,
+      })
+    );
     return;
   }
 

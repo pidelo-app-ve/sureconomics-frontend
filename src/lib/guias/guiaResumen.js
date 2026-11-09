@@ -8,10 +8,11 @@ export const PASOS_RESUMEN = [
   {
     titulo: "Qué hay en esta página",
     texto:
-      "El resumen diario sale tres veces: a las 7:00, a las 13:00 y a las 19:00. Una hora antes de cada " +
-      "una se arma solo un borrador con lo nuevo desde la edición anterior: nuestras piezas, los titulares " +
-      "de Última hora, las cifras y, por la mañana, la LVBP. Lo que ya salió no se repite. Aquí lo revisas " +
-      "y lo apruebas, y a su hora sale en la web, en Telegram y en WhatsApp. Si nadie lo aprueba, no sale.",
+      "El resumen diario sale solo tres veces: a las 7:00, a las 13:00 y a las 19:00, en la web, en Telegram " +
+      "y en el canal de WhatsApp. Nadie tiene que aprobarlo. Una hora antes de cada una se arma solo con lo " +
+      "nuevo desde la edición anterior: nuestras piezas, los titulares de Última hora, las cifras y, por la " +
+      "mañana, la LVBP; lo que ya salió no se repite. Aquí ves cómo va a llegar al canal, la foto y el " +
+      "mensaje, y si quieres lo ajustas antes de la hora: si lo cambias, sale cambiado; si no lo tocas, sale tal cual.",
   },
   {
     clave: "hoy",
@@ -19,7 +20,7 @@ export const PASOS_RESUMEN = [
     puntos: [
       "Cada edición: mañana, tarde y noche, con su hora de salida y cómo va.",
       "Abrir: la trae abajo para revisarla.",
-      "Armar ahora: arma una que todavía no está (por ejemplo, si el reloj está apagado).",
+      "Armar ahora: arma una que todavía no está (por ejemplo, si el reloj está apagado). Una armada tarde sale diez minutos después, para que te dé tiempo a mirarla.",
       "Sin contenido nuevo: en su franja hubo casi nada que no hubiera salido ya, así que no sale. Si después llega algo, ábrela y pulsa «Rehacer».",
     ],
   },
@@ -27,8 +28,8 @@ export const PASOS_RESUMEN = [
     clave: "estado",
     titulo: "Cómo va la edición abierta",
     puntos: [
-      "Borrador: armada, esperando que alguien la revise y la apruebe.",
-      "Aprobado: sale a su hora. Si la apruebas después, sale en el minuto. Una que no se aprobó antes de que se arme la siguiente ya no sale: lo suyo entra en la siguiente.",
+      "Sale sola: armada; a la hora que dice sale tal como la ves, sin que nadie haga nada. Una que no salió antes de que se arme la siguiente ya no sale: lo suyo entra en la siguiente.",
+      "Retenida: alguien pulsó «No mandar esta edición», así que no sale. Se puede seguir retocando y, con «Dejar que salga», vuelve a salir.",
       "Publicado: ya salió. Ya no se puede cambiar.",
       "Telegram y WhatsApp: si el mensaje llegó a cada canal. Si WhatsApp falla tres veces, aparece el botón para reintentarlo.",
     ],
@@ -37,11 +38,28 @@ export const PASOS_RESUMEN = [
     clave: "acciones",
     titulo: "Los botones",
     puntos: [
-      "Aprobar: lo deja listo para salir. Cualquier cambio después lo devuelve a borrador.",
-      "Volver a borrador: deshace la aprobación si todavía no salió.",
-      "Rehacer: la arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan.",
+      "No mandar esta edición: la frena; no sale a su hora ni después. Para un caso puntual, no hace falta para lo normal.",
+      "Dejar que salga: deshace lo anterior. Sale a su hora o, si ya pasó, en el próximo minuto.",
+      "Rehacer: la arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan. Corre la salida diez minutos, para que te dé tiempo a mirarla.",
       "Copiar el texto: el mensaje tal cual sale en WhatsApp, por si hace falta pegarlo a mano en otro sitio.",
     ],
+  },
+  {
+    clave: "imagen",
+    titulo: "La foto del mensaje",
+    texto:
+      "La foto que sale antes del mensaje en WhatsApp y en Telegram, y arriba en la web. Se elige sola: la de la noticia " +
+      "más importante del mensaje que tenga foto. Puedes pulsar la de otra noticia del mensaje, elegir una de la " +
+      "biblioteca o subirla, o quitarla; la ves al momento en la maqueta y se guarda con «Guardar cambios». Si nadie la " +
+      "toca, sale la que se eligió sola.",
+  },
+  {
+    clave: "vista",
+    titulo: "Así llega al canal",
+    texto:
+      "El mensaje como lo ve quien abre el canal de WhatsApp: primero la foto, en su proporción, y enseguida el texto " +
+      "con la tarjeta del enlace, que WhatsApp arma con la foto y el título de la página. La foto cambia al elegirla; " +
+      "el texto, al guardar. En Telegram es igual, pero cada punto lleva su enlace.",
   },
   {
     clave: "secciones",
@@ -67,21 +85,6 @@ export const PASOS_RESUMEN = [
     clave: "frase",
     titulo: "La frase del día",
     texto: "Opcional. Si la escribes, sale al final del mensaje en cursiva. Si la dejas vacía, no sale nada.",
-  },
-  {
-    clave: "imagen",
-    titulo: "La foto de la edición",
-    texto:
-      "Se elige sola: la de la pieza más importante de la edición que tenga foto. Puedes cambiarla, subir " +
-      "otra o quitarla; tiene que ser pública y se guarda con «Guardar cambios». En WhatsApp y en Telegram " +
-      "sale primero la foto y enseguida el resumen, y en la web va arriba.",
-  },
-  {
-    clave: "vista",
-    titulo: "Así sale",
-    texto:
-      "El mensaje tal como llega a WhatsApp, con lo último que guardaste. En Telegram es igual, pero cada " +
-      "punto lleva su enlace.",
   },
   {
     clave: "historial",

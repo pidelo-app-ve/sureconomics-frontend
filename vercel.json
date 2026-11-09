@@ -61,6 +61,20 @@
             "destination": "/api/pieza?seccion=entorno"
         },
         {
+            "source": "/resumen/:fecha/:edicion",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/index.html"
+        },
+        {
+            "source": "/resumen/:fecha/:edicion",
+            "destination": "/api/pieza?seccion=resumen&fecha=:fecha&edicion=:edicion"
+        },
+        {
             "source": "/sitemap.xml",
             "destination": "/api/sitemap"
         },

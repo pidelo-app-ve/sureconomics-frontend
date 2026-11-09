@@ -1,5 +1,6 @@
 import { listaDeQuery } from "../lib/listaDeQuery";
 import { userPublicRequest } from "../lib/userApi";
+import { siguienteRecarga } from "../lib/recargaDePublicidad";
 
 /**
  * La publicidad, desde el lado del navegador.
@@ -71,7 +72,9 @@ export const getEspacios = async (espacios, contexto = {}) => {
   const pedidos = (espacios || []).filter(Boolean);
   if (!pedidos.length) return { activa: true, espacios: {} };
 
-  const query = { espacios: pedidos.join(",") };
+  // La recarga de quien mira: con ella la escalera del servidor baja un peldaño (ver
+  // `lib/recargaDePublicidad`).
+  const query = { espacios: pedidos.join(","), recarga: siguienteRecarga() };
   if (contexto.seccion) query.seccion = String(contexto.seccion);
   if (contexto.formato) query.formato = String(contexto.formato);
   const tema = listaDeQuery(contexto.tema);

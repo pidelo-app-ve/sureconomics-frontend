@@ -12,10 +12,14 @@ import {
 } from "../../services/adminMediaService";
 import {
   actualizarCampana,
+  actualizarPieza,
   crearAnunciante,
   crearCampana,
   crearPieza,
+  getEscalera,
+  getOcupacion,
 } from "../../services/adminPublicidadService";
+import { MapaDelSitio } from "./mapa/MapaDelSitio";
 
 /**
  * Publicar un anuncio de principio a fin, explicando cada paso.
@@ -47,15 +51,24 @@ import {
  *
  * ## La campaña nace activa
  *
- * Al revés que desde la lista, donde nace en borrador. Quien recorre un asistente
- * entero llamado «publicar un anuncio» quiere que salga publicado; terminar con un
- * «ahora búsquelo en la lista y cámbielo a activa» sería un cuarto paso escondido.
+ * Quien recorre un asistente entero llamado «publicar un anuncio» quiere que salga
+ * publicado; terminar con un «ahora búsquelo en la lista y cámbielo a activa» sería un
+ * paso escondido. Se activa al final, en «Afinar».
+ *
+ * ## Dónde sale (nov-2026)
+ *
+ * El paso «Dónde» enseña el mapa del sitio con la escalera: en qué hueco cae este arte
+ * en cada recarga, y permite fijarle una plaza. La simulación corre en el servidor con
+ * la campaña incluida como si ya estuviera activa (`incluir`), así que lo que se ve es
+ * lo que pasará al publicar.
  */
 
 const PASOS = [
   { n: 1, corto: "Quién" },
   { n: 2, corto: "Cuándo" },
-  { n: 3, corto: "Qué se ve" },
+  { n: 3, corto: "Arte" },
+  { n: 4, corto: "Dónde" },
+  { n: 5, corto: "Afinar" },
 ];
 
 /** Los formatos que hoy se publican. E y H no tienen dónde pintarse todavía. */
@@ -98,6 +111,14 @@ export const AsistenteDeAnuncio = ({
   const [cintaId, setCintaId] = useState(null);
   const [titular, setTitular] = useState("");
 
+  // Paso 4: la pieza ya creada, sus plazas fijas y lo que enseña el mapa.
+  const [pieza, setPieza] = useState(null);
+  const [espaciosFijos, setEspaciosFijos] = useState([]);
+  const [recargas, setRecargas] = useState([]);
+  const [fechaSimulada, setFechaSimulada] = useState(null);
+  const [ocupacion, setOcupacion] = useState(null);
+  const [cargandoMapa, setCargandoMapa] = useState(false);
+
   const guia = GUIA_DE_FORMATO[formato] ?? {};
   const artes = guia.arte ?? [];
 
@@ -119,6 +140,10 @@ export const AsistenteDeAnuncio = ({
     setImagenId(null);
     setCintaId(null);
     setTitular("");
+    setPieza(null);
+    setEspaciosFijos([]);
+    setRecargas([]);
+    setOcupacion(null);
   };
 
   const cerrar = () => {
@@ -165,7 +190,6 @@ export const AsistenteDeAnuncio = ({
       nombre,
       desde: conFechas ? desde || null : null,
       hasta: conFechas ? hasta || null : null,
-      segmentos,
     };
     setOcupado(true);
     const hecha = await correr(
@@ -181,21 +205,76 @@ export const AsistenteDeAnuncio = ({
     setPaso(3);
   };
 
-  const terminar = async () => {
+  const cargarMapa = async (campanaId) => {
+    setCargandoMapa(true);
+    try {
+      const [r, o] = await Promise.all([
+        getEscalera({ recargas: 6, seccion: "portada", incluir: campanaId }),
+        getOcupacion({
+          desde: conFechas && desde ? desde : undefined,
+          hasta: conFechas && hasta ? hasta : undefined,
+        }),
+      ]);
+      setRecargas(r.recargas);
+      setFechaSimulada(r.fecha);
+      setOcupacion(o);
+    } catch {
+      setRecargas([]);
+      setOcupacion({});
+    } finally {
+      setCargandoMapa(false);
+    }
+  };
+
+  // El arte se guarda al avanzar (y se actualiza si se vuelve atrás y se cambia), para
+  // que el mapa del paso siguiente pueda enseñar esta pieza de verdad.
+  const paso3 = async () => {
+    const datos = {
+      formato,
+      enlace: enlace.trim(),
+      titular: guia.titular ? titular.trim() : "",
+      imagen_id: imagenId,
+      cinta_id: cintaId,
+      activa: true,
+    };
     setOcupado(true);
-    const hecho = await correr(async () => {
-      await crearPieza(campana.id, {
-        formato,
-        enlace: enlace.trim(),
-        titular: guia.titular ? titular.trim() : "",
-        imagen_id: imagenId,
-        cinta_id: cintaId,
-        activa: true,
-      });
-      // Activarla es lo último: el servidor rechaza activar una campaña sin ninguna
-      // pieza activa, así que en cualquier otro orden esto daría 422.
-      return actualizarCampana(campana.id, { estado: "activa" });
-    }, "Anuncio publicado — ya está saliendo en el sitio");
+    const hecha = await correr(
+      () => (pieza ? actualizarPieza(pieza.id, datos) : crearPieza(campana.id, datos)),
+      pieza ? "Arte actualizado" : "Arte guardado",
+    );
+    setOcupado(false);
+    if (!hecha) return;
+    setPieza(hecha);
+    setEspaciosFijos(hecha.espacios_fijos ?? []);
+    setPaso(4);
+    cargarMapa(campana.id);
+  };
+
+  // Fijar una plaza exige fecha de fin: sin ella la plaza quedaría tomada para siempre.
+  const necesitaFechaDeFin = espaciosFijos.length > 0 && !(conFechas && hasta);
+
+  const paso4 = async () => {
+    const antes = pieza?.espacios_fijos ?? [];
+    const igual = antes.length === espaciosFijos.length && antes.every((e) => espaciosFijos.includes(e));
+    if (!igual) {
+      setOcupado(true);
+      const hecha = await correr(
+        () => actualizarPieza(pieza.id, { espacios_fijos: espaciosFijos }),
+        espaciosFijos.length ? "Plaza fija guardada" : "Sin plaza fija: va por la escalera",
+      );
+      setOcupado(false);
+      if (!hecha) return;
+      setPieza(hecha);
+    }
+    setPaso(5);
+  };
+
+  const publicar = async () => {
+    setOcupado(true);
+    const hecho = await correr(
+      () => actualizarCampana(campana.id, { segmentos, estado: "activa" }),
+      "Anuncio publicado — ya está saliendo en el sitio",
+    );
     setOcupado(false);
     if (!hecho) return;
     reiniciar();
@@ -203,7 +282,7 @@ export const AsistenteDeAnuncio = ({
   };
 
   const puedeSeguir1 = anuncianteId || (nombreNuevo.trim().length > 1 && !yaExiste);
-  const puedeTerminar =
+  const puedeSeguir3 =
     enlace.trim() && (!artes.length || imagenId || cintaId) && (!guia.titular || titular.trim());
 
   return (
@@ -271,8 +350,28 @@ export const AsistenteDeAnuncio = ({
             <button
               type="button"
               className="se-btn se-btn--primary"
-              onClick={terminar}
-              disabled={ocupado || !puedeTerminar}
+              onClick={paso3}
+              disabled={ocupado || !puedeSeguir3}
+            >
+              {ocupado ? "Un momento…" : "Siguiente"}
+            </button>
+          ) : null}
+          {paso === 4 ? (
+            <button
+              type="button"
+              className="se-btn se-btn--primary"
+              onClick={paso4}
+              disabled={ocupado || necesitaFechaDeFin}
+            >
+              {ocupado ? "Un momento…" : "Siguiente"}
+            </button>
+          ) : null}
+          {paso === 5 ? (
+            <button
+              type="button"
+              className="se-btn se-btn--primary"
+              onClick={publicar}
+              disabled={ocupado}
             >
               {ocupado ? "Publicando…" : "Publicar"}
             </button>
@@ -352,7 +451,7 @@ export const AsistenteDeAnuncio = ({
 
       {paso === 2 ? (
         <section className="se-asis__cuerpo">
-          <h3 className="se-asis__titulo">¿Cuándo y dónde sale?</h3>
+          <h3 className="se-asis__titulo">¿Cuándo sale?</h3>
           <p className="se-asis__lede">
             Una <b>campaña</b> es un periodo de pauta. Agrupa las piezas que comparten
             fechas y condiciones, para que renovar o parar sea una sola acción y no una
@@ -427,9 +526,10 @@ export const AsistenteDeAnuncio = ({
               </div>
             ) : null}
           </fieldset>
-
-          <h4 className="se-admin-pub__sub">En qué páginas</h4>
-          <DondeSale valor={segmentos} onChange={setSegmentos} />
+          <p className="se-admin-meta-hint">
+            Con fecha de fin, más adelante podrá fijarle una plaza en un hueco; sin ella,
+            el anuncio va solo por la escalera.
+          </p>
         </section>
       ) : null}
 
@@ -524,9 +624,51 @@ export const AsistenteDeAnuncio = ({
             usaTitular={!!guia.titular}
           />
 
+        </section>
+      ) : null}
+
+      {paso === 4 ? (
+        <section className="se-asis__cuerpo">
+          <h3 className="se-asis__titulo">¿Dónde sale?</h3>
+          <p className="se-asis__lede">
+            Este arte va por la <b>escalera</b>: cada hueco rota hasta tres marcas, y en cada
+            recarga del lector la escalera baja un peldaño. El mapa enseña dónde cae en cada
+            recarga, con las marcas que ya están. Si quiere que salga <b>siempre</b> en un
+            hueco, púlselo: toma una de sus tres plazas durante las fechas de la campaña.
+          </p>
+          {necesitaFechaDeFin ? (
+            <p className="se-asis__repetido" role="status">
+              Para fijar una plaza, la campaña necesita fecha de fin. Vuelva a «Cuándo» y
+              elija «Entre dos fechas», o quite la plaza.
+            </p>
+          ) : null}
+          <MapaDelSitio
+            recargas={recargas}
+            fecha={fechaSimulada}
+            ocupacion={ocupacion}
+            destacada={pieza?.id}
+            cargando={cargandoMapa}
+            fijar={{
+              formato,
+              elegidos: espaciosFijos,
+              onElegir: (e) =>
+                setEspaciosFijos((v) => (v.includes(e) ? v.filter((x) => x !== e) : [...v, e])),
+            }}
+          />
+        </section>
+      ) : null}
+
+      {paso === 5 ? (
+        <section className="se-asis__cuerpo">
+          <h3 className="se-asis__titulo">Afinar (opcional)</h3>
+          <p className="se-asis__lede">
+            Sin tocar nada, el anuncio sale en todo el sitio. Aquí se puede limitar a
+            unas secciones, temas o países: donde no encajen, la escalera lo salta.
+          </p>
+          <DondeSale valor={segmentos} onChange={setSegmentos} />
           <p className="se-asis__final">
             Al publicar, la campaña queda <b>activa</b> y el anuncio empieza a salir.
-            Todo esto se puede cambiar después desde la lista.
+            Todo esto se puede cambiar después desde su ficha.
           </p>
         </section>
       ) : null}

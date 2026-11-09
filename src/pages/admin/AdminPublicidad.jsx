@@ -1,11 +1,9 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {
-  ESTADOS_DE_CAMPANA,
-  MuralDeAnunciantes,
-  estadoDeCampana,
-} from "../../components/admin/MuralDeAnunciantes";
+import { ESTADOS_DE_CAMPANA, estadoDeCampana } from "../../components/admin/MuralDeAnunciantes";
+import { MapaDelSitio } from "../../components/admin/mapa/MapaDelSitio";
+import { PlazasFijas } from "../../components/admin/PlazasFijas";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoPublicidad } from "../../lib/guias/guiaPublicidad";
 import { applyPageMeta } from "../../lib/seo";
@@ -32,6 +30,8 @@ import {
   actualizarAnunciante,
   actualizarCampana,
   actualizarPieza,
+  getEscalera,
+  getOcupacion,
   borrarAnunciante,
   borrarCampana,
   borrarPieza,
@@ -90,7 +90,7 @@ const piezasConArteAutomatico = (anunciantes) =>
     (a.campanas ?? []).flatMap((c) => (c.creatividades ?? []).filter(conArteAutomatico)),
   );
 
-const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
+const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
   const [abierta, setAbierta] = useState(false);
   const [borrador, setBorrador] = useState(pieza);
   // El archivo, aparte del borrador: no se guarda -- se manda el id --, es lo que el
@@ -244,6 +244,7 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
                   cinta_id: borrador.cinta_id === "" ? null : borrador.cinta_id,
                   cinta_movil_id: borrador.cinta_movil_id === "" ? null : borrador.cinta_movil_id ?? null,
                   activa: !!borrador.activa,
+                  espacios_fijos: borrador.espacios_fijos ?? [],
                 })
               }
             >
@@ -301,6 +302,14 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
               accept={ACCEPTED_IMAGE_MIME}
             />
           ) : null}
+
+          <PlazasFijas
+            formato={borrador.formato}
+            campana={campana}
+            valor={borrador.espacios_fijos ?? []}
+            onChange={(v) => setBorrador((b) => ({ ...b, espacios_fijos: v }))}
+            deshabilitado={ocupado}
+          />
 
           {imagenPerdida || cintaPerdida ? (
             <div className="se-admin-pub__rescate">
@@ -445,6 +454,8 @@ const FilaDePieza = ({ pieza, formatos, anunciante, ocupado, onGuardar, onBorrar
 };
 
 FilaDePieza.propTypes = {
+  /** La campaña de la pieza: sus fechas deciden qué plazas fijas están libres. */
+  campana: PropTypes.object,
   pieza: PropTypes.object.isRequired,
   /** Para poder pintar la etiqueta «Publicidad · [marca]» en la vista previa. */
   anunciante: PropTypes.object,
@@ -839,6 +850,7 @@ const TarjetaDeCampana = ({
                   pieza={pieza}
                   formatos={ajustes?.formatos}
                   anunciante={anunciante}
+                  campana={campana}
                   ocupado={ocupado}
                   onGuardar={(datos) =>
                     correr(
@@ -1230,6 +1242,9 @@ TarjetaDeAnunciante.propTypes = {
 export const AdminPublicidad = () => {
   const [datos, setDatos] = useState({ anunciantes: [], ajustes: {} });
   const [resumen, setResumen] = useState(null);
+  // El mapa: la escalera en las próximas recargas y las plazas fijas de hoy.
+  const [escalera, setEscalera] = useState([]);
+  const [ocupacionHoy, setOcupacionHoy] = useState(null);
   const [carga, setCarga] = useState({ estado: "cargando", error: "" });
   const [error, setError] = useState("");
   // Que anunciante pidio abrir el mural. Guarda el id **y un contador**: pulsar dos
@@ -1264,9 +1279,17 @@ export const AdminPublicidad = () => {
   const cargar = useCallback(async () => {
     setCarga({ estado: "cargando", error: "" });
     try {
-      const [lista, cifras] = await Promise.all([listar(), getResumen(30)]);
+      const [lista, cifras, recargas, ocupacion] = await Promise.all([
+        listar(),
+        getResumen(30),
+        // El mapa no puede tumbar la página: sin él, el resto sigue.
+        getEscalera({ recargas: 6, seccion: "portada" }).catch(() => ({ recargas: [] })),
+        getOcupacion().catch(() => ({})),
+      ]);
       setDatos(lista);
       setResumen(cifras);
+      setEscalera(recargas.recargas ?? []);
+      setOcupacionHoy(ocupacion);
       setCarga({ estado: "listo", error: "" });
     } catch (err) {
       setCarga({ estado: "error", error: adminErrorMessage(err) });
@@ -1423,6 +1446,17 @@ export const AdminPublicidad = () => {
           {/* El mosaico de marcas, detrás de las cifras totales y delante de la lista:
               las cifras dicen cuánto se sirvió y el mosaico, a quién. Con el orden al
               revés habría que bajar hasta la lista para saber quién está al aire. */}
+          {/* El mapa del sitio: cada página con sus huecos y, dentro, el carrusel que verá
+              el lector en cada recarga. Sustituye al mural: dice lo mismo (quién está al
+              aire) y además dónde y en qué orden. */}
+          <div {...ancla("mapa")}>
+            <MapaDelSitio
+              recargas={escalera}
+              ocupacion={ocupacionHoy}
+              titulo="Mapa del sitio: quién sale en cada hueco"
+            />
+          </div>
+
           <TablaDeCampanas
             anunciantes={datos.anunciantes}
             cifras={cifrasPorPieza}
@@ -1432,13 +1466,6 @@ export const AdminPublicidad = () => {
             onAbrir={abrirFicha}
           />
 
-          <div {...ancla("mural")}>
-            <MuralDeAnunciantes
-              anunciantes={datos.anunciantes}
-              cifrasPorPieza={cifrasPorPieza}
-              onAbrir={abrirFicha}
-            />
-          </div>
 
           <section className="se-admin-pub__interruptores" {...ancla("interruptores")}>
             <label className="se-admin-pub__casilla">
@@ -1486,33 +1513,16 @@ export const AdminPublicidad = () => {
               />
               Barra fija inferior
             </label>
-            <label className="se-admin-pub__casilla">
-              <input
-                type="checkbox"
-                checked={!!ajustes.repetir_anunciante}
-                disabled={ocupado}
-                onChange={(e) =>
-                  correr(
-                    () => fijarAjustes({ repetir_anunciante: e.target.checked }),
-                    e.target.checked
-                      ? "Sorteo libre: cada espacio sortea sin mirar a los demás"
-                      : "Vuelve el orden distinto entre espacios",
-                  ).then((a) => (a ? setDatos((d) => ({ ...d, ajustes: a })) : null))
-                }
-              />
-              Sorteo libre entre espacios
-            </label>
             <p className="se-admin-meta-hint">
               La barra nace apagada: es el formato que más molesta y en móvil se come la
               franja donde está el pulgar. El interruptor general apaga los diez espacios
               de golpe, que es lo que hace falta el día de una noticia delicada.
             </p>
             <p className="se-admin-meta-hint">
-              Cada espacio rota hasta <b>tres marcas</b>, una cada siete segundos, y una
-              marca puede estar en varios espacios de la misma página. Apagado (lo normal),
-              cada espacio las pasa en un orden distinto: lo que abre un espacio no es lo
-              que abre el de al lado. Encendido, cada espacio sortea por su cuenta y a
-              veces coincide la misma marca en dos sitios a la vez.
+              Cada hueco rota hasta <b>tres marcas</b>, una cada siete segundos. Quién va
+              en cada hueco lo decide la escalera (el mapa de arriba), no un sorteo: en cada
+              recarga del lector baja un peldaño, y el peso de una campaña son sus entradas
+              en la cola.
             </p>
           </section>
 

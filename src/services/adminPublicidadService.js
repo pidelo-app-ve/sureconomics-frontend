@@ -70,3 +70,28 @@ export const getResumen = async (dias = 30) =>
 
 export const fijarAjustes = async (datos) =>
   unwrapEntity(await adminRequest("/admin/publicidad/ajustes", { method: "PATCH", json: datos }));
+
+/**
+ * La escalera en las proximas `recargas` recargas, para el mapa. Corre la misma funcion
+ * que sirve al lector. `incluir`: una campana aun en borrador que se quiere ver como si
+ * estuviera activa (el asistente, antes de publicar).
+ */
+export const getEscalera = async ({ recargas = 6, seccion = "portada", incluir } = {}) => {
+  const query = { recargas, seccion };
+  if (incluir) query.incluir = incluir;
+  const datos = unwrapEntity(await adminRequest("/admin/publicidad/escalera", { query }));
+  return {
+    recargas: Array.isArray(datos?.recargas) ? datos.recargas : [],
+    // El día simulado: hoy, o el primer día de la campaña incluida si empieza después.
+    fecha: datos?.fecha ?? null,
+  };
+};
+
+/** Las plazas fijas de cada hueco en un periodo (`desde`, `hasta` en ISO; sin ellas, hoy). */
+export const getOcupacion = async ({ desde, hasta } = {}) => {
+  const query = {};
+  if (desde) query.desde = desde;
+  if (hasta) query.hasta = hasta;
+  const datos = unwrapEntity(await adminRequest("/admin/publicidad/ocupacion", { query }));
+  return datos?.huecos && typeof datos.huecos === "object" ? datos.huecos : {};
+};

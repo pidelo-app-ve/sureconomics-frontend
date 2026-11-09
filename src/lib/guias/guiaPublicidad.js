@@ -9,14 +9,16 @@ export const PASOS_PUBLICIDAD = [
     titulo: "Qué hay en esta página",
     texto:
       "Los anuncios del sitio. Funciona en tres niveles: el anunciante es la empresa que paga, la campaña es " +
-      "el periodo en que sale, y la pieza es lo que se ve (un banner, una tarjeta, una tira).",
+      "el periodo en que sale, y la pieza es lo que se ve (un banner, una tarjeta, una tira). Los huecos " +
+      "forman una escalera y cada uno rota hasta tres marcas; en cada recarga del lector la escalera baja " +
+      "un peldaño. El peso de una campaña son sus entradas en la cola.",
   },
   {
     clave: "publicar",
     titulo: "Publicar un anuncio",
     texto:
-      "La forma de dar de alta un anuncio: en tres pasos (quién, cuándo, qué se ve) crea lo que haga falta y " +
-      "termina con el anuncio al aire. Si el anunciante ya existe, se elige de la lista; no se puede crear dos veces.",
+      "La forma de dar de alta un anuncio: cinco pasos (quién, cuándo, arte, dónde y afinar). En «Dónde» el " +
+      "mapa enseña en qué hueco cae en cada recarga, y se le puede fijar una plaza. Termina con el anuncio al aire.",
   },
   {
     clave: "cifras",
@@ -42,9 +44,14 @@ export const PASOS_PUBLICIDAD = [
     ],
   },
   {
-    clave: "mural",
-    titulo: "Quién está al aire",
-    texto: "Las marcas de un vistazo, con su logotipo. Pulsar una abre su ficha.",
+    clave: "mapa",
+    titulo: "El mapa del sitio",
+    puntos: [
+      "Páginas y aparato: la portada, una pieza, un listado y los juegos, en computador o teléfono.",
+      "Cada hueco: pasa sus marcas cada siete segundos, en el orden en que lo verá el lector.",
+      "Siguiente recarga: la escalera baja un peldaño, como cuando alguien recarga.",
+      "Plaza fija: una marca con plaza fija en un hueco sale ahí siempre; la escalera llena las otras dos.",
+    ],
   },
   {
     clave: "fichas",

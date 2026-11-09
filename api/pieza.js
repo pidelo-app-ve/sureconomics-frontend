@@ -144,7 +144,7 @@ const textoLlano = (html, maximo = 200) => {
  * crawler a two-megabyte original it will refuse to fetch. A photograph hosted
  * anywhere else goes out untouched.
  */
-export const imagenParaCompartir = (url) => {
+export const imagenParaCompartir = (url, foco = null) => {
   if (!url) return null;
   if (/\.svg(\?|$)/i.test(url)) return IMAGEN_DE_MARCA;
 
@@ -163,7 +163,11 @@ export const imagenParaCompartir = (url) => {
     const sinConsulta = absoluta.split("?")[0];
     const punto = sinConsulta.lastIndexOf(".");
     const base = punto > sinConsulta.lastIndexOf("/") ? sinConsulta.slice(0, punto) : sinConsulta;
-    return { url: `${base}-og.jpg`, medido: true };
+    // Encuadrada: `foo-abc-og-30-70.jpg`, recortada por ese punto (ver `vista_previa.py`).
+    // Otro nombre y no el mismo archivo: las redes guardan la tarjeta por su dirección.
+    const enPasos = /^(100|[1-9]?[05]),(100|[1-9]?[05])$/.test(String(foco ?? "")) && foco !== "50,50";
+    const sufijo = enPasos ? `-og-${String(foco).replace(",", "-")}.jpg` : "-og.jpg";
+    return { url: `${base}${sufijo}`, medido: true };
   }
 
   const marca = "/image/upload/";
@@ -653,7 +657,7 @@ export default async function handler(req, res) {
   const leida = enIngles ? enSuIngles(pieza) : pieza;
   const url = enIngles ? urlEn : urlEs;
   const imagen =
-    imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url) ?? IMAGEN_DE_MARCA;
+    imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url, pieza.imagen_foco) ?? IMAGEN_DE_MARCA;
   const html = inyectar(shell, {
     titulo: leida.title,
     descripcion: descripcionDe(leida),

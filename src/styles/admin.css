@@ -8156,3 +8156,133 @@
 .se-editor-rejilla__estado .se-plegable__cuerpo {
   padding: 0.75rem;
 }
+
+/* —— El encuadre de la foto (editor de piezas) —— */
+.se-encuadre {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 10px;
+  background: var(--adm-surface);
+}
+
+.se-encuadre__cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.se-encuadre__centrar {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--adm-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.se-encuadre__cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .se-encuadre__cuerpo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.se-encuadre__foto {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.se-encuadre__foto img {
+  display: block;
+  max-width: 100%;
+  max-height: 22rem;
+  border-radius: 4px;
+}
+
+.se-encuadre__foto:focus-visible {
+  outline: 3px solid var(--adm-accent);
+  outline-offset: 3px;
+}
+
+.se-encuadre__punto {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.55), inset 0 0 0 2px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.se-encuadre__formas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.se-encuadre__forma {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.se-encuadre__marco {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #eee;
+}
+
+.se-encuadre__marco img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.se-encuadre__titulo-redes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.3rem 0.45rem;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #111;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.se-encuadre__nombre {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.se-encuadre__detalle {
+  font-size: 0.78rem;
+  color: var(--adm-text-muted);
+}

@@ -1,6 +1,6 @@
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { rutaDePieza } from "../../lib/pieza";
+import { estiloDeFoto, rutaDePieza } from "../../lib/pieza";
 import { piezaShape } from "../home/piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { Recorte, Recortes } from "../comun/Recorte";
@@ -31,7 +31,7 @@ export const SiguienteLectura = ({ pieza }) => {
             </span>
           </span>
           {pieza.imagenUrl ? (
-            <img className="se-siguiente__foto" src={pieza.imagenUrl} alt="" loading="lazy" decoding="async" />
+            <img className="se-siguiente__foto" src={pieza.imagenUrl} style={estiloDeFoto(pieza)} alt="" loading="lazy" decoding="async" />
           ) : null}
         </Enlace>
       </Recorte>

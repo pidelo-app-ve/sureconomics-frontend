@@ -7,7 +7,7 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
 import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
-import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
+import { estiloDeFoto, imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { enlaceWeb, esDeDominio } from "../../lib/enlaces";
 import { esShort, idDeYoutube } from "../../lib/youtube";
 
@@ -375,6 +375,7 @@ export const Media = ({ pieza, conMarcador = false }) => {
         <img
           className="se-piece__img"
           src={imagenAncho(pieza.imagenUrl, 1400)}
+          style={estiloDeFoto(pieza)}
           srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS_DE_PORTADA, pieza.imagenAnchoOriginal) ?? undefined}
           sizes="(max-width: 960px) 100vw, 1100px"
           alt={pieza.titulo}

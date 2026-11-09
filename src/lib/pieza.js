@@ -226,6 +226,25 @@ export const versionParaCompartir = (iso) => {
 export const enlaceParaCompartir = (ruta, version) =>
   version ? `${ruta}?v=${version}` : ruta;
 
+/**
+ * El encuadre de la foto («x,y» en por ciento) como `[x, y]`, o `null` si no hay o está
+ * al centro. Lo elige la redacción en el editor (`EncuadreDeFoto`).
+ */
+export const focoDelTexto = (texto) => {
+  const partes = String(texto ?? "").split(",").map((n) => Number(n));
+  if (partes.length !== 2 || partes.some((n) => !Number.isFinite(n) || n < 0 || n > 100)) return null;
+  return partes;
+};
+
+/** El `object-position` de una foto encuadrada, o `undefined` (el centro de siempre). */
+export const posicionDeFoco = (texto) => {
+  const foco = focoDelTexto(texto);
+  return foco && !(foco[0] === 50 && foco[1] === 50) ? `${foco[0]}% ${foco[1]}%` : undefined;
+};
+
+/** El `style` de la foto de una pieza: su encuadre, si lo tiene. */
+export const estiloDeFoto = (pieza) => (pieza?.imagenFoco ? { objectPosition: pieza.imagenFoco } : undefined);
+
 export const rutaDePieza = (pieza) => {
   if (!pieza) return "/";
   const meta =
@@ -351,6 +370,9 @@ export const piezaFromApi = (row) => {
     // la tarjeta sin foto. Nulo para lo que viene de Cloudinary, donde los anchos los
     // calcula el servidor al vuelo.
     imagenAnchoOriginal: row.image_asset?.width ?? null,
+    // Qué punto de la foto queda a la vista al recortarla (lo elige la redacción en el
+    // editor). `undefined` = el centro, que es lo que hace el navegador si no se dice nada.
+    imagenFoco: posicionDeFoco(row.imagen_foco),
     // On the asset, not on the post: the rights belong to the photograph. A piece
     // carrying a legacy `featured_image_url` has no asset behind it and so no
     // credit, which is accurate -- nobody ever recorded one for those.

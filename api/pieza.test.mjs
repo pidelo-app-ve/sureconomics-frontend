@@ -480,5 +480,15 @@ await conFetch(async (url) => {
   check("en: si falla, vuelve a la dirección en inglés", res.location === "/en/articulos/x?_s=1", res.location);
 });
 
+// —— El encuadre de la foto (9-nov-2026) ——
+{
+  const { imagenParaCompartir: ipc } = await import("./pieza.js");
+  const base = "/media/image/2026/11/foto-abc.png";
+  check("sin encuadre, la de siempre", ipc(base)?.url?.endsWith("/media/image/2026/11/foto-abc-og.jpg"));
+  check("con encuadre, su propio nombre", ipc(base, "30,70")?.url?.endsWith("/media/image/2026/11/foto-abc-og-30-70.jpg"));
+  check("al centro es la de siempre", ipc(base, "50,50")?.url?.endsWith("-og.jpg"));
+  check("fuera de los pasos de 5 se ignora", ipc(base, "33,70")?.url?.endsWith("-og.jpg"));
+}
+
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

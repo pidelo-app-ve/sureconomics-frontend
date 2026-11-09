@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
-import { FORMATO_META, imagenAncho, imagenSrcSet, nombreDeFormato, rutaDePieza } from "../../lib/pieza";
+import { FORMATO_META, estiloDeFoto, imagenAncho, imagenSrcSet, nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas, piezaShape } from "./piezaShape";
@@ -76,6 +76,7 @@ const Miniatura = ({ pieza, variante }) => {
         <img
           className="se-alpunto__img"
           src={imagenAncho(pieza.imagenUrl, ANCHO_BASE[variante])}
+          style={estiloDeFoto(pieza)}
           srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
           sizes={SIZES[variante]}
           alt=""

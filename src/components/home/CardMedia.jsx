@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { temaPrincipal } from "../../lib/contentFilter";
-import { imagenAncho, imagenSrcSet } from "../../lib/pieza";
+import { estiloDeFoto, imagenAncho, imagenSrcSet } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { IconoPlay } from "../canal/VistaPrevia";
@@ -95,6 +95,7 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
           <img
             className="se-artcard__fondo"
             src={imagenAncho(pieza.imagenUrl, ancho)}
+            style={estiloDeFoto(pieza)}
             srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
             sizes={sizes}
             alt=""
@@ -105,6 +106,7 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
         <img
           className={`se-artcard__img${entera ? " se-artcard__img--entera" : ""}`}
           src={imagenAncho(pieza.imagenUrl, ancho)}
+            style={estiloDeFoto(pieza)}
           // El ancho original decide qué tallas existen en nuestro bucket. Para
           // Cloudinary se ignora: allí los anchos los calcula el servidor.
           srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}

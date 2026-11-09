@@ -55,6 +55,7 @@ import { VistaPreviaDePieza } from "../../components/admin/VistaPreviaDePieza";
 import { IconoOjo } from "../../components/admin/cuerpo/iconos";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { enlaceWeb } from "../../lib/enlaces";
+import { EncuadreDeFoto } from "../../components/admin/EncuadreDeFoto";
 import { rutaDePieza } from "../../lib/pieza";
 import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
@@ -134,6 +135,8 @@ const emptyForm = () => ({
     interviewee_role: "",
     unit: "",
     image_asset_id: null,
+    // El encuadre de la foto: «x,y» o vacío (el centro). Ver `EncuadreDeFoto`.
+    imagen_foco: "",
     video_asset_id: null,
     document_asset_id: null,
     audio_asset_id: null,
@@ -348,6 +351,7 @@ const postToForm = (post) => {
         interviewee_role: pickStr(post, ["interviewee_role"]),
         unit: pickStr(post, ["unit"]),
         image_asset_id: post.image_asset_id ?? null,
+        imagen_foco: pickStr(post, ["imagen_foco"]),
         video_asset_id: post.video_asset_id ?? null,
         document_asset_id: post.document_asset_id ?? null,
         audio_asset_id: post.audio_asset_id ?? null,
@@ -400,6 +404,8 @@ const formToPayload = (form) => {
     payload.place_ids = form.place_ids;
     // Same for the three slots — null is how a file gets detached.
     payload.image_asset_id = form.image_asset_id ?? null;
+    // Vacío se manda como nulo: es «al centro».
+    payload.imagen_foco = (form.imagen_foco ?? "").trim() || null;
     payload.video_asset_id = form.video_asset_id ?? null;
     payload.document_asset_id = form.document_asset_id ?? null;
     payload.audio_asset_id = form.audio_asset_id ?? null;
@@ -1804,7 +1810,7 @@ export const AdminPostEditor = () => {
                             titulo="Imagen"
                             resumen={
                                 form.image_asset_id
-                                    ? nombreDeArchivo(assets.image)
+                                    ? `${nombreDeArchivo(assets.image)}${form.imagen_foco ? " · encuadrada" : ""}`
                                     : legacyImage
                                       ? "Imagen antigua por dirección"
                                       : "Sin imagen"
@@ -1823,6 +1829,15 @@ export const AdminPostEditor = () => {
                                     onUpload={uploadAdminMediaImage}
                                     accept={ACCEPTED_IMAGE_MIME}
                                 />
+                                {/* Qué punto de la foto queda a la vista en cada tarjeta. */}
+                                {enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url) ? (
+                                    <EncuadreDeFoto
+                                        url={enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url)}
+                                        valor={form.imagen_foco}
+                                        titulo={form.title}
+                                        onChange={(v) => setForm((prev) => ({ ...prev, imagen_foco: v }))}
+                                    />
+                                ) : null}
                                 {legacyImage ? (
                                     <p className="se-asset__legacy">
                                         Esta pieza trae una imagen por URL de antes de la

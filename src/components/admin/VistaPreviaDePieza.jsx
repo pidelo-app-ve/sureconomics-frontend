@@ -42,6 +42,7 @@ export const VistaPreviaDePieza = ({ abierta, onCerrar, form, assets, topics, fo
       byline: form.byline,
       featured_image_url: form.featured_image_url || null,
       image_asset: assets.image ?? null,
+      imagen_foco: form.imagen_foco || null,
       byline_photo: assets.bylinePhoto ?? null,
       video_asset: assets.video ?? null,
       audio_asset: assets.audio ?? null,

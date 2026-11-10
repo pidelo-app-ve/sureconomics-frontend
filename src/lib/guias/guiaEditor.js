@@ -8,8 +8,8 @@ export const PASOS_EDITOR = [
   {
     titulo: "Qué hay en esta página",
     texto:
-      "Aquí se escribe y se publica una pieza. A la izquierda va la pieza; a la derecha, cómo va y los " +
-      "botones para guardarla y publicarla. Lo que se toca de vez en cuando va plegado: se abre con un clic.",
+      "Aquí se escribe y se publica una pieza. Lo primero es el título, el texto y la foto; lo demás va " +
+      "plegado y se abre con un clic. A la derecha, qué falta para publicar y los botones.",
   },
   {
     clave: "formato",
@@ -23,8 +23,8 @@ export const PASOS_EDITOR = [
     titulo: "La pieza",
     puntos: [
       "Título: el que sale en la portada y en la pieza.",
-      "Resumen: dos o tres líneas bajo el título y en las tarjetas.",
-      "Firma y foto: el nombre con el que se publica. Vacía, la pieza sale sin firma.",
+      "Resumen: dos o tres líneas bajo el título y en las tarjetas. Va plegado.",
+      "Firma y foto: el nombre con el que se publica. Vacía, la pieza sale sin firma. Va plegado.",
       "Fuentes: de dónde sale lo que se cuenta. Va plegado; su cabecera dice cuántas hay.",
     ],
   },
@@ -39,7 +39,8 @@ export const PASOS_EDITOR = [
     clave: "clasificacion",
     titulo: "Temas, lugares y sello",
     texto:
-      "Los temas y lugares ordenan la pieza en el sitio; el primero de cada uno es el principal. En «Sello " +
+      "Los temas y lugares ordenan la pieza en el sitio; el primero de cada uno es el principal. Arriba salen " +
+      "los que el panel propone leyendo el texto: un toque los añade. Sin tema no se puede publicar. En «Sello " +
       "y publicidad» se marca si es educativa o si no debe llevar anuncios.",
   },
   {
@@ -55,7 +56,7 @@ export const PASOS_EDITOR = [
     puntos: [
       "Estado: borrador, programada o publicada, y si abre la portada.",
       "Guardado: dice si hay cambios sin guardar. Mientras tanto se guarda una copia en este equipo, por si se cierra la pestaña.",
-      "Para publicar falta: lo que impediría publicarla, antes de intentarlo.",
+      "Antes de publicar: qué falta (con una equis), qué conviene añadir y qué está listo.",
       "Ver en el sitio: abre la pieza publicada en otra pestaña.",
     ],
   },
@@ -64,6 +65,8 @@ export const PASOS_EDITOR = [
     titulo: "Guardar y publicar",
     puntos: [
       "El botón relleno: lo que toca ahora. En un borrador listo es «Publicar»; si no, «Guardar».",
+      "Al crear: «Guardar borrador» la deja para después; «Publicar» la saca ya.",
+      "Con el teclado: Ctrl+S guarda y Ctrl+Enter publica.",
       "Guardar y publicar: si hay cambios sin guardar, se guardan antes de publicar.",
       "Vista previa: la pieza como saldrá, sin publicarla.",
       "Eliminar la pieza: pide confirmación, con el título. No se puede deshacer.",

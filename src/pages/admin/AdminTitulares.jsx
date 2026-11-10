@@ -225,7 +225,7 @@ export const AdminTitulares = () => {
   };
 
   const restaurar = async (grupo) => {
-    const ok = await confirm({ title: "Restaurar el titular", description: `«${grupo.titulo}» vuelve a la web.`, confirmLabel: "Restaurar" });
+    const ok = await confirm({ title: "Restaurar el titular", description: `«${grupo.titulo}» vuelve a la web.`, confirmLabel: "Restaurar", warning: null });
     if (!ok) return;
     await hacer(() => adminRequest(`/admin/headlines/${grupo.id}/restore`, { method: "POST" }), "Restaurado.", "No se pudo restaurar.");
   };
@@ -241,7 +241,7 @@ export const AdminTitulares = () => {
     hacer(() => adminRequest(`/admin/headlines/${grupo.id}/pin`, { method: "DELETE" }), "Quitado de arriba.", "No se pudo quitar.");
 
   const cambiar = async (clave, valor, pregunta) => {
-    const ok = await confirm({ title: pregunta.titulo, description: pregunta.texto, confirmLabel: pregunta.boton });
+    const ok = await confirm({ title: pregunta.titulo, description: pregunta.texto, confirmLabel: pregunta.boton, warning: null });
     if (!ok) return;
     await hacer(() => adminRequest("/admin/headlines/settings", { method: "PUT", json: { [clave]: valor } }), "Hecho.", "No se pudo cambiar.");
   };

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { ErrorState, LoadingState } from "../../components/content";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
@@ -7,13 +8,14 @@ import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
-  accionesDe, estadoDeAviso, lineaDelDia, nombreDeMotivo, nombreDePais, pendientes, vistaInicial,
+  accionesDe, comprobacion, estadoDeAviso, lineaDelDia, nombreDeMotivo, nombreDePais, pendientes, vistaInicial,
 } from "../../lib/avisos";
 import { recorridoAvisos } from "../../lib/guias/guiaAvisos";
 import { applyPageMeta } from "../../lib/seo";
 import {
   descartarAviso,
   encenderAvisos,
+  redactarAviso,
   soltarAviso,
   tomarAviso,
   traerAvisos,
@@ -31,8 +33,13 @@ import "./adminAvisos.css";
  *
  * - **Mirar antes de encender**: «Lo que se avisaría ahora» enseña las noticias que el
  *   sistema tiene en la mira, sin crear nada. Es como se afina qué merece un aviso.
- * - **Llevar los de hoy**: cada aviso se toma («lo hago yo»), se suelta o se descarta con
- *   un motivo. Son las mismas tres cosas que hará el bot de Telegram de la redacción.
+ * - **Llevar los de hoy**: cada aviso se redacta, se toma («lo hago yo»), se suelta o se
+ *   descarta con un motivo. Es lo mismo que hará el bot de Telegram de la redacción.
+ *
+ * **«Redactar»** convierte el aviso en una pieza en borrador escrita por la IA con lo que
+ * cuentan los medios. El servidor comprueba lo escrito (ninguna cifra que no esté en las
+ * fuentes llega al borrador) y la tarjeta enseña el informe (`Comprobacion`) antes del
+ * botón de abrir el borrador: primero se lee qué se comprobó, después se revisa el texto.
  *
  * Se vuelve a cargar cada minuto. El botón «Guía» lo explica sobre la propia página.
  */
@@ -87,8 +94,69 @@ Fuentes.propTypes = {
     .isRequired,
 };
 
+/**
+ * Lo que se comprobó al redactar el aviso: quién la escribió, cada cifra con el medio que
+ * la da, las frases que se quitaron y los nombres por mirar. Va en la tarjeta, antes del
+ * botón de abrir el borrador: es lo que hay que leer primero.
+ */
+const Comprobacion = ({ revision }) => {
+  const resumen = comprobacion(revision);
+  if (!resumen) return null;
+  return (
+    <div className={`se-avisos__comprobacion${resumen.ojo ? " is-ojo" : ""}`}>
+      <p className="se-avisos__comprobacion-linea">{resumen.linea}</p>
+      {revision.cifras.length ? (
+        <>
+          <p className="se-avisos__comprobacion-rotulo">Cifras del borrador y quién las da</p>
+          <ul className="se-avisos__cifras">
+            {revision.cifras.map((c) => (
+              <li key={c.texto}>
+                <strong>{c.texto}</strong>
+                <span>{c.medios.join(", ")}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {revision.quitadas.length ? (
+        <>
+          <p className="se-avisos__comprobacion-rotulo">
+            {revision.quitadas.length === 1 ? "Se quitó una frase" : `Se quitaron ${revision.quitadas.length} frases`} porque
+            traían una cifra que no está en las fuentes
+          </p>
+          <ul className="se-avisos__quitadas">
+            {revision.quitadas.map((frase) => (
+              <li key={frase}>«{frase}»</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {revision.nombres.length ? (
+        <>
+          <p className="se-avisos__comprobacion-rotulo">Nombres que no se vieron escritos igual en las fuentes: compruébelos</p>
+          <p className="se-avisos__nombres">{revision.nombres.join(" · ")}</p>
+        </>
+      ) : null}
+      {revision.avisos.length ? (
+        <ul className="se-avisos__quitadas">
+          {revision.avisos.map((aviso) => (
+            <li key={aviso}>{aviso}</li>
+          ))}
+        </ul>
+      ) : null}
+      {revision.conIa ? (
+        <p className="se-admin-meta-hint se-avisos__comprobacion-pie">
+          Es un borrador: no se publica solo. Léalo entero y compárelo con las fuentes antes de publicar.
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+Comprobacion.propTypes = { revision: PropTypes.object };
+
 /** Un aviso de hoy: cómo está y lo que puede hacer con él quien lo mira. */
-const Aviso = ({ aviso, miId, motivos, ocupado, anclaje, onTomar, onSoltar, onDescartar }) => {
+const Aviso = ({ aviso, miId, motivos, ocupado, redactando, anclaje, onTomar, onSoltar, onDescartar, onRedactar }) => {
   const [descartando, setDescartando] = useState(false);
   const estado = estadoDeAviso(aviso, miId);
   const acciones = accionesDe(aviso, miId);
@@ -102,7 +170,18 @@ const Aviso = ({ aviso, miId, motivos, ocupado, anclaje, onTomar, onSoltar, onDe
         {nombreDePais(aviso.pais)} · puntaje {aviso.calor} · {medios(aviso.medios)} · avisado a las {hora(aviso.creado)}
       </p>
       <Fuentes fuentes={aviso.fuentes} />
-      {descartando ? (
+      <Comprobacion revision={aviso.revision} />
+      {redactando ? (
+        <p className="se-avisos__redactando" role="status">
+          Redactando con lo que cuentan los medios y comprobando las cifras… Tarda unos 15 segundos.
+        </p>
+      ) : acciones.includes("abrir") ? (
+        <div className="se-avisos__acciones">
+          <Link className="se-btn se-btn--primary" to={`/admin/posts/${aviso.piezaId}`}>
+            {aviso.estado === "publicado" ? "Abrir la pieza" : "Abrir el borrador"}
+          </Link>
+        </div>
+      ) : descartando ? (
         <div className="se-avisos__acciones" role="group" aria-label="Por qué se descarta">
           <span className="se-avisos__pregunta">¿Por qué no?</span>
           {motivos.map((m) => (
@@ -117,9 +196,19 @@ const Aviso = ({ aviso, miId, motivos, ocupado, anclaje, onTomar, onSoltar, onDe
         </div>
       ) : acciones.length ? (
         <div className="se-avisos__acciones">
+          {acciones.includes("redactar") ? (
+            <button type="button" className="se-btn se-btn--primary" disabled={ocupado} onClick={() => onRedactar(aviso, true)}>
+              Redactar
+            </button>
+          ) : null}
           {acciones.includes("tomar") ? (
-            <button type="button" className="se-btn se-btn--primary" disabled={ocupado} onClick={() => onTomar(aviso)}>
+            <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={() => onTomar(aviso)}>
               Lo hago yo
+            </button>
+          ) : null}
+          {acciones.includes("escribir") ? (
+            <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={() => onRedactar(aviso, false)}>
+              Escribirla yo
             </button>
           ) : null}
           {acciones.includes("soltar") ? (
@@ -141,11 +230,15 @@ Aviso.propTypes = {
   miId: PropTypes.number,
   motivos: PropTypes.arrayOf(PropTypes.string).isRequired,
   ocupado: PropTypes.bool,
+  /** Si es este el aviso que se está redactando ahora. */
+  redactando: PropTypes.bool,
   /** El anclaje de la guía: lo lleva la primera tarjeta de la lista. */
   anclaje: PropTypes.object,
   onTomar: PropTypes.func.isRequired,
   onSoltar: PropTypes.func.isRequired,
   onDescartar: PropTypes.func.isRequired,
+  /** `(aviso, conIa)`: con la IA, o un borrador vacío con el título y las fuentes. */
+  onRedactar: PropTypes.func.isRequired,
 };
 
 /** Una noticia que el sistema tiene en la mira: todavía no es un aviso. */
@@ -176,6 +269,8 @@ export const AdminAvisos = () => {
   const [state, setState] = useState({ status: "loading", dia: null, ahora: null, error: null });
   const [miId, setMiId] = useState(null);
   const [ocupado, setOcupado] = useState(false);
+  // El aviso que se está redactando: su tarjeta lo dice mientras dura (unos 15 segundos).
+  const [redactandoId, setRedactandoId] = useState(null);
   // La vista de entrada se elige una vez, con la primera carga: después manda quien mira.
   const vistaElegida = useRef(false);
 
@@ -243,6 +338,21 @@ export const AdminAvisos = () => {
 
   const descartar = (aviso, motivo) =>
     hacer(() => descartarAviso(aviso.id, motivo), `Descartado: ${nombreDeMotivo(motivo).toLowerCase()}.`, "No se pudo descartar.");
+
+  const redactar = async (aviso, conIa) => {
+    if (conIa) setRedactandoId(aviso.id);
+    try {
+      await hacer(
+        () => redactarAviso(aviso.id, { ia: conIa }),
+        conIa
+          ? "Borrador listo. Mire lo comprobado en la tarjeta y ábralo para revisarlo."
+          : "Borrador creado con el título y las fuentes. Ábralo para escribirla.",
+        "No se pudo redactar.",
+      );
+    } finally {
+      setRedactandoId(null);
+    }
+  };
 
   const alternar = async (dia) => {
     const encender = !dia.activos;
@@ -327,8 +437,8 @@ export const AdminAvisos = () => {
             <ul className="se-avisos__lista">
               {dia.avisos.map((a, k) => (
                 <Aviso key={a.id} aviso={a} miId={miId} motivos={dia.motivos} ocupado={ocupado}
-                  anclaje={k === 0 ? ancla("lista") : undefined}
-                  onTomar={tomar} onSoltar={soltar} onDescartar={descartar} />
+                  redactando={redactandoId === a.id} anclaje={k === 0 ? ancla("lista") : undefined}
+                  onTomar={tomar} onSoltar={soltar} onDescartar={descartar} onRedactar={redactar} />
               ))}
             </ul>
           ) : (

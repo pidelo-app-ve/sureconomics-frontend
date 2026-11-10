@@ -89,6 +89,9 @@ export const adminErrorMessage = (err, fallback = "No se pudo completar la acci�
   const code = typeof err.code === "string" ? err.code : "";
   const message = typeof err.message === "string" ? err.message.trim() : "";
   if (code.startsWith("translation_") && message) return message;
+  // Igual al redactar un aviso: «la IA no logró un texto que se pudiera comprobar» le
+  // dice a la persona que puede escribirla ella; «el servidor no respondió», no.
+  if (code.startsWith("redaccion_") && message) return message;
 
   if (ALWAYS_OVERRIDE.has(status)) return BY_STATUS[status];
 

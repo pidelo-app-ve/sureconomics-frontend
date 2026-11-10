@@ -43,10 +43,23 @@ export const PASOS_AVISOS = [
     puntos: [
       "País, puntaje y medios: de dónde es, cuánto importa y cuántos medios distintos la cuentan.",
       "Fuentes: lo que publicó cada medio, con su enlace para leerlo.",
+      "Redactar: la IA escribe un borrador con lo que cuentan esos medios y el aviso queda a su nombre. Tarda unos 15 segundos.",
       "Lo hago yo: el aviso queda a su nombre y nadie más lo toma. Si en dos horas no avanza, vuelve a quedar libre.",
+      "Escribirla yo: abre un borrador vacío con el título y las fuentes ya puestas.",
       "Soltar: lo devuelve para que lo tome otra persona.",
       "Descartar: pide un motivo (ya la dimos, no es nuestro tema o poca cosa). Con esos motivos se afina qué merece un aviso.",
       "Saldría en la próxima pasada: en la vista de ahora, las que se convertirían en aviso dentro de unos minutos.",
+    ],
+  },
+  {
+    titulo: "Lo que se comprueba del borrador",
+    texto:
+      "Cuando la IA redacta, el sistema revisa el texto antes de guardarlo y lo enseña en la tarjeta del aviso. " +
+      "Nada sale publicado desde aquí: siempre es un borrador que hay que leer.",
+    puntos: [
+      "Cifras: cada número del borrador, con el medio que lo da. Si una frase traía una cifra que no está en las fuentes, se quita y se dice cuál era.",
+      "Nombres: los que no se vieron escritos igual en las fuentes, para que los compruebe.",
+      "Abrir el borrador: lleva al editor, con el tema y el lugar sugeridos. Ahí se corrige, se pone la foto y se publica.",
     ],
   },
   {

@@ -60,8 +60,45 @@ export const leerAvisos = (data) => ({
     piezaId: a.post_id ?? null,
     creado: a.creado_en || null,
     fuentes: leerFuentes(a.fuentes),
+    revision: leerRevision(a.revision),
   })),
 });
+
+/**
+ * El informe de la redacción de un aviso (`services/avisos_redaccion.py`), o nada si el
+ * aviso todavía no tiene pieza. `cifras`: cada cifra del borrador con los medios que la
+ * dan. `quitadas`: las frases que se quitaron por traer una cifra que no está en las
+ * fuentes. `nombres`: los nombres propios que no se vieron escritos igual en las fuentes.
+ */
+export const leerRevision = (r) => {
+  if (!r || typeof r !== "object") return null;
+  return {
+    conIa: r.con_ia === true,
+    cifras: lista(r.cifras).map((c) => ({ texto: String(c?.texto ?? ""), medios: lista(c?.medios) })),
+    quitadas: lista(r.quitadas),
+    nombres: lista(r.nombres),
+    avisos: lista(r.avisos),
+    palabras: numero(r.palabras),
+    fuentes: numero(r.fuentes),
+  };
+};
+
+/**
+ * Lo que hay que decir de un borrador, en una línea, y si pide atención (`ojo`): se
+ * quitaron frases, hay nombres por comprobar o algún aviso. Que no pida atención no
+ * quiere decir que se publique sin leer: es un borrador.
+ */
+export const comprobacion = (revision) => {
+  if (!revision) return null;
+  if (!revision.conIa) {
+    return { ojo: false, linea: `Borrador vacío, con el título y ${revision.fuentes === 1 ? "la fuente puesta" : `las ${revision.fuentes} fuentes puestas`}. Falta escribirla.` };
+  }
+  const cosas = revision.quitadas.length + revision.nombres.length + revision.avisos.length;
+  const base = `Escrita por la IA con ${revision.fuentes === 1 ? "1 medio" : `${revision.fuentes} medios`}, ${revision.palabras} palabras.`;
+  return cosas
+    ? { ojo: true, linea: `${base} Hay ${cosas === 1 ? "1 cosa" : `${cosas} cosas`} que mirar antes de publicar.` }
+    : { ojo: false, linea: `${base} Todas las cifras están en las fuentes.` };
+};
 
 /** `GET /admin/avisos/candidatos`: lo que se avisaría ahora, sin crear nada. */
 export const leerCandidatos = (data) => ({
@@ -104,13 +141,17 @@ export const estadoDeAviso = (aviso, miId) => {
 };
 
 /**
- * Qué puede hacer con un aviso quien lo mira, como en el servidor: uno pendiente se toma
- * o se descarta; el que uno tomó se suelta o se descarta; con el de otra persona, o con
- * uno que ya terminó, nada.
+ * Qué puede hacer con un aviso quien lo mira, como en el servidor. Uno pendiente se
+ * redacta (que también lo aparta), se toma o se descarta; el que uno tomó se redacta, se
+ * escribe a mano, se suelta o se descarta; el que ya tiene pieza, se abre; con el de otra
+ * persona, o con uno que ya terminó, nada.
  */
 export const accionesDe = (aviso, miId) => {
-  if (aviso.estado === "pendiente") return ["tomar", "descartar"];
-  if (aviso.estado === "tomado" && miId != null && aviso.tomadoPorId === miId) return ["soltar", "descartar"];
+  if (aviso.estado === "pendiente") return ["redactar", "tomar", "descartar"];
+  if (aviso.estado === "tomado" && miId != null && aviso.tomadoPorId === miId) {
+    return ["redactar", "escribir", "soltar", "descartar"];
+  }
+  if ((aviso.estado === "redactado" || aviso.estado === "publicado") && aviso.piezaId != null) return ["abrir"];
   return [];
 };
 

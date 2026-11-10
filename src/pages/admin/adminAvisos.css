@@ -213,3 +213,92 @@
     flex: 1 1 100%;
   }
 }
+
+/* —— Lo comprobado al redactar: lo primero que se lee antes de abrir el borrador —— */
+.se-avisos__comprobacion {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--adm-ok-border);
+  border-radius: 10px;
+  background: var(--adm-ok-bg);
+  font-size: 0.875rem;
+}
+
+/* Hay algo que mirar: una frase quitada, un nombre por comprobar o un aviso. */
+.se-avisos__comprobacion.is-ojo {
+  border-color: var(--adm-err-border);
+  background: var(--adm-err-bg);
+}
+
+.se-avisos__comprobacion-linea {
+  margin: 0;
+  font-weight: 650;
+  color: var(--adm-ok);
+}
+
+.se-avisos__comprobacion.is-ojo .se-avisos__comprobacion-linea {
+  color: var(--adm-err);
+}
+
+.se-avisos__comprobacion-rotulo {
+  margin: 0.7rem 0 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--adm-text);
+}
+
+.se-avisos__cifras,
+.se-avisos__quitadas {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--adm-text);
+}
+
+.se-avisos__cifras li {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.se-avisos__cifras strong {
+  flex: 0 0 9.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-avisos__cifras span {
+  min-width: 0;
+  color: var(--adm-text-muted);
+}
+
+.se-avisos__quitadas {
+  margin-top: 0.25rem;
+}
+
+.se-avisos__nombres {
+  margin: 0;
+  color: var(--adm-text);
+}
+
+.se-avisos__comprobacion-pie {
+  margin: 0.7rem 0 0;
+}
+
+.se-avisos__redactando {
+  margin: 0.85rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--adm-text);
+}
+
+@media (max-width: 640px) {
+  .se-avisos__cifras li {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .se-avisos__cifras strong {
+    flex: 0 0 auto;
+  }
+}

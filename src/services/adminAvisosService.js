@@ -28,3 +28,14 @@ export const soltarAviso = async (id) => adminRequest(`/admin/avisos/${id}/solta
 /** «Esto no», con su motivo: `ya_la_dimos`, `no_es_nuestro_tema` o `poca_cosa`. */
 export const descartarAviso = async (id, motivo) =>
   adminRequest(`/admin/avisos/${id}/descartar`, { method: "POST", json: { motivo } });
+
+/**
+ * Convierte el aviso en una pieza en borrador y lo aparta para quien lo pide. Con `ia`,
+ * la escribe la IA con lo que cuentan los medios y el servidor comprueba las cifras
+ * (tarda unos 15 segundos); sin ella, nace vacía con el título y las fuentes puestas.
+ * Devuelve la clave de la pieza.
+ */
+export const redactarAviso = async (id, { ia = true } = {}) => {
+  const data = unwrapEntity(await adminRequest(`/admin/avisos/${id}/redactar`, { method: "POST", json: { ia } }));
+  return { piezaId: data?.post_id ?? null, yaExistia: data?.ya_existia === true };
+};

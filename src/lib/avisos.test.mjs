@@ -2,7 +2,8 @@
  * La lógica de «Avisos de noticias» del panel. `npm run test:avisos`.
  */
 import {
-  accionesDe, estadoDeAviso, leerAvisos, leerCandidatos, lineaDelDia, nombreDePais, pendientes, vistaInicial,
+  accionesDe, comprobacion, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
+  pendientes, vistaInicial,
 } from "./avisos.js";
 
 let fallos = 0;
@@ -48,12 +49,28 @@ check("sin país", nombreDePais(null) === "Sin país");
 check("un código que no es de un país no rompe", typeof nombreDePais("regional") === "string");
 
 console.log("qué se puede hacer");
-check("pendiente: tomar o descartar", accionesDe(pendiente, 7).join() === "tomar,descartar");
-check("el mío: soltar o descartar", accionesDe(tomado, 7).join() === "soltar,descartar");
+check("pendiente: redactar, tomar o descartar", accionesDe(pendiente, 7).join() === "redactar,tomar,descartar");
+check("el mío: redactar, escribirla, soltar o descartar",
+  accionesDe(tomado, 7).join() === "redactar,escribir,soltar,descartar");
+check("con borrador: abrirlo", accionesDe({ estado: "redactado", piezaId: 5 }, 7).join() === "abrir");
+check("publicado con pieza: abrirla", accionesDe({ estado: "publicado", piezaId: 5 }, 3).join() === "abrir");
 check("el de otra persona: nada", accionesDe(tomado, 3).length === 0);
-check("uno publicado: nada", accionesDe({ estado: "publicado" }, 7).length === 0);
+check("uno publicado sin pieza: nada", accionesDe({ estado: "publicado" }, 7).length === 0);
 check("uno vencido: nada", accionesDe({ estado: "vencido" }, 7).length === 0);
 check("cuenta los pendientes", pendientes(dia.avisos) === 1);
+
+console.log("lo comprobado al redactar");
+check("un aviso sin pieza no trae informe", dia.avisos[0].revision === null && leerRevision(undefined) === null);
+const limpia = leerRevision({ con_ia: true, fuentes: 2, palabras: 140, cifras: [{ texto: "11,25 %", medios: ["EFE"] }] });
+check("lee las cifras con sus medios", limpia.cifras[0].texto === "11,25 %" && limpia.cifras[0].medios[0] === "EFE");
+check("todo en las fuentes: no pide atención",
+  !comprobacion(limpia).ojo && comprobacion(limpia).linea.endsWith("Todas las cifras están en las fuentes."), comprobacion(limpia));
+const dudosa = leerRevision({ con_ia: true, fuentes: 3, palabras: 90, quitadas: ["Invertirá 5.000 millones."], nombres: ["Goldman"] });
+check("una frase quitada y un nombre: dos cosas que mirar",
+  comprobacion(dudosa).ojo && comprobacion(dudosa).linea.includes("Hay 2 cosas que mirar"), comprobacion(dudosa));
+check("sin IA: borrador vacío",
+  comprobacion(leerRevision({ con_ia: false, fuentes: 2 })).linea.startsWith("Borrador vacío, con el título y las 2 fuentes puestas"));
+check("sin informe no hay nada que decir", comprobacion(null) === null);
 
 console.log("la línea de la cabecera");
 check("apagados", lineaDelDia(vacio) === "Apagados: no se crea ningún aviso");

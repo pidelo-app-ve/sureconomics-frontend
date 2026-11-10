@@ -23,7 +23,7 @@ const QUE_PUEDE = {
   admin: "Podrá hacerlo todo, también crear, cambiar y eliminar cuentas del panel.",
 };
 
-const emptyForm = { name: "", email: "", password: "", role: "publicador" };
+const emptyForm = { name: "", email: "", password: "", role: "publicador", telefono: "" };
 
 export const AdminStaffList = () => {
   const { role } = useAuth();
@@ -76,6 +76,7 @@ export const AdminStaffList = () => {
         email: form.email.trim(),
         password: form.password,
         role: form.role,
+        telefono: form.telefono.trim() || undefined,
       });
       setForm(emptyForm);
       await load();
@@ -211,6 +212,19 @@ export const AdminStaffList = () => {
             disabled={isCreating}
           />
         </label>
+        <label className="se-form-field" htmlFor="staff-telefono">
+          <span className="se-form-label">Celular (opcional)</span>
+          <input
+            id="staff-telefono"
+            type="tel"
+            inputMode="tel"
+            className="se-form-control"
+            placeholder="+58 412 1234567"
+            value={form.telefono}
+            onChange={(e) => setForm((f) => ({ ...f, telefono: e.target.value }))}
+            disabled={isCreating}
+          />
+        </label>
         <label className="se-form-field" htmlFor="staff-role">
           <span className="se-form-label">Rol</span>
           <select
@@ -254,6 +268,7 @@ export const AdminStaffList = () => {
                 <th scope="col">ID</th>
                 <th scope="col">Nombre</th>
                 <th scope="col">Correo</th>
+                <th scope="col">Celular</th>
                 <th scope="col">Rol</th>
                 <th scope="col">Acciones</th>
               </tr>
@@ -271,6 +286,7 @@ export const AdminStaffList = () => {
                     ) : null}
                   </td>
                   <td>{row.email}</td>
+                  <td>{row.telefono ? `+${row.telefono}` : <span className="se-admin-meta-hint">Sin celular</span>}</td>
                   <td>
                     <select
                       className="se-form-control"

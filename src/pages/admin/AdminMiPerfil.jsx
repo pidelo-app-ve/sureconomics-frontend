@@ -6,6 +6,9 @@ import { persistAuth } from "../../lib/authStorage";
 import { applyPageMeta } from "../../lib/seo";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
+/** `584121234567` → `+584121234567`, como se escribe un teléfono. */
+const conMas = (telefono) => (telefono ? `+${telefono}` : "");
+
 const ROLE_LABELS = {
   escritor: "Escritor",
   publicador: "Editor",
@@ -28,7 +31,7 @@ export const AdminMiPerfil = () => {
     try {
       const data = await getAdminMe();
       setState({ status: "success", data, error: null });
-      setProfileForm({ name: data?.name ?? "", email: data?.email ?? "" });
+      setProfileForm({ name: data?.name ?? "", email: data?.email ?? "", telefono: conMas(data?.telefono) });
     } catch (err) {
       setState({ status: "error", data: null, error: err });
     }
@@ -45,8 +48,10 @@ export const AdminMiPerfil = () => {
       const data = await updateAdminMe({
         name: profileForm.name.trim(),
         email: profileForm.email.trim(),
+        telefono: (profileForm.telefono ?? "").trim(),
       });
       setState((s) => ({ ...s, data }));
+      setProfileForm((f) => ({ ...f, telefono: conMas(data?.telefono) }));
       setProfileState({ status: "success", error: null, message: "Datos actualizados correctamente." });
     } catch (err) {
       setProfileState({ status: "error", error: err, message: "" });
@@ -147,6 +152,23 @@ export const AdminMiPerfil = () => {
             required
             disabled={profileState.status === "loading"}
           />
+        </label>
+        <label className="se-form-field" htmlFor="me-telefono">
+          <span className="se-form-label">Celular</span>
+          <input
+            id="me-telefono"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            className="se-form-control"
+            placeholder="+58 412 1234567"
+            value={profileForm.telefono ?? ""}
+            onChange={(e) => setProfileForm((f) => ({ ...f, telefono: e.target.value }))}
+            disabled={profileState.status === "loading"}
+          />
+          <span className="se-admin-meta-hint">
+            El mismo con el que usa Telegram: así lo reconoce el bot de la redacción.
+          </span>
         </label>
         <button type="submit" className="se-btn" disabled={profileState.status === "loading"}>
           {profileState.status === "loading" ? "Guardando…" : "Guardar cambios"}

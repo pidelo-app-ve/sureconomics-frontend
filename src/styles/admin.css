@@ -6094,6 +6094,44 @@
   opacity: 0.4;
 }
 
+/* La barra de «Guardar» de las páginas largas. Con cambios se pega abajo (pegada y no
+   fija: el contenedor del panel lleva un `transform`, que rompería el `position: fixed`). */
+.se-barra-guardar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--se-space-sm) var(--se-space-md);
+  margin-top: var(--se-space-lg);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 12px;
+  background: var(--adm-surface);
+}
+
+.se-barra-guardar--pendiente {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: 20;
+  border-color: var(--adm-warn, #b7791f);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.se-barra-guardar__estado {
+  margin: 0 auto 0 0;
+  color: var(--adm-text-muted);
+  font-size: 0.875rem;
+}
+
+.se-barra-guardar--pendiente .se-barra-guardar__estado {
+  color: var(--adm-text);
+  font-weight: 600;
+}
+
+.se-barra-guardar .se-btn {
+  min-height: 2.75rem;
+}
+
 /* La hoja de «Crear»: un formato por línea, a todo el ancho. */
 .se-campo-movil__cuerpo .se-admin-create {
   display: grid;

@@ -1,7 +1,9 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { BarraDeGuardar } from "../../components/admin/BarraDeGuardar";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { haceCuanto } from "../../lib/haceCuanto";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
@@ -429,6 +431,7 @@ export const AdminRedes = () => {
   }, []);
 
   const hayCambios = useMemo(() => inicial !== null && JSON.stringify(listas) !== inicial, [listas, inicial]);
+  useGuardiaDeSalida(hayCambios, confirm);
 
   const cambiar = useCallback((red, i, parche) => {
     setListas((prev) => {
@@ -664,19 +667,12 @@ export const AdminRedes = () => {
             </>
           )}
 
-          <div className="se-admin-form-actions" style={{ marginTop: "1.25rem" }}>
-            <button
-              type="button"
-              className="se-btn"
-              onClick={guardar}
-              disabled={!hayCambios || guardado.status === "saving" || Boolean(subiendo)}
-            >
-              {guardado.status === "saving" ? "Guardando…" : "Guardar"}
-            </button>
-            {hayCambios ? (
-              <p className="se-admin-meta-hint" style={{ margin: 0 }}>Hay cambios sin guardar.</p>
-            ) : null}
-          </div>
+          <BarraDeGuardar
+            hayCambios={hayCambios}
+            guardando={guardado.status === "saving"}
+            bloqueado={Boolean(subiendo)}
+            onGuardar={guardar}
+          />
 
           {guardado.mensaje ? (
             <p

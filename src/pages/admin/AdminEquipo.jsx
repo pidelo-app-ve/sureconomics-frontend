@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { TEAM, claveDeFoto } from "../../data/surEconomicsMock";
+import { BarraDeGuardar } from "../../components/admin/BarraDeGuardar";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
   ACCEPTED_IMAGE_MIME,
@@ -311,6 +314,8 @@ export const AdminEquipo = () => {
     const ids = new Set([...Object.keys(inicial), ...Object.keys(vistas)]);
     return [...ids].some((id) => (inicial[id] || "") !== (vistas[id] || ""));
   }, [inicial, vistas]);
+  const { confirm, ConfirmDialog } = useAdminConfirm();
+  useGuardiaDeSalida(hayCambios, confirm);
 
   const guardar = async () => {
     setGuardado({ status: "saving", mensaje: "" });
@@ -400,21 +405,12 @@ export const AdminEquipo = () => {
             </section>
           ))}
 
-          <div className="se-admin-form-actions" style={{ marginTop: "1rem" }}>
-            <button
-              type="button"
-              className="se-btn"
-              onClick={guardar}
-              disabled={!hayCambios || guardado.status === "saving" || Boolean(subiendo)}
-            >
-              {guardado.status === "saving" ? "Guardando…" : "Guardar"}
-            </button>
-            {hayCambios ? (
-              <p className="se-admin-meta-hint" style={{ margin: 0 }}>
-                Hay cambios sin guardar.
-              </p>
-            ) : null}
-          </div>
+          <BarraDeGuardar
+            hayCambios={hayCambios}
+            guardando={guardado.status === "saving"}
+            bloqueado={Boolean(subiendo)}
+            onGuardar={guardar}
+          />
 
           {guardado.mensaje ? (
             <p
@@ -433,6 +429,7 @@ export const AdminEquipo = () => {
           ) : null}
         </>
       ) : null}
+      <ConfirmDialog />
     </div>
   );
 };

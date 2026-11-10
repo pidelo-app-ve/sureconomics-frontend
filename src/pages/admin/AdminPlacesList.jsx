@@ -221,7 +221,8 @@ export const AdminPlacesList = () => {
                         El árbol es Mundo → continentes → regiones → países. Una pieza se etiqueta con
                         el lugar más específico que aplique, normalmente un país.
                         Al filtrar por una región aparecen sus países, así que el conteo de una región es
-                        solo el de las piezas etiquetadas con la región misma.
+                        solo el de las piezas etiquetadas con la región misma. El nombre en inglés se guarda
+                        solo al salir de su casilla.
                     </p>
                 </div>
             </header>

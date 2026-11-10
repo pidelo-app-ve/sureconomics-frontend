@@ -17,6 +17,13 @@ const ROLE_OPTIONS = [
   { value: "admin", label: "Admin" },
 ];
 
+/** Lo que puede hacer cada rol, dicho al confirmar un cambio. */
+const QUE_PUEDE = {
+  escritor: "Podrá escribir y guardar piezas, pero no publicarlas ni borrarlas.",
+  publicador: "Podrá publicar y borrar piezas, y llevar la publicidad, el boletín y lo automático.",
+  admin: "Podrá hacerlo todo, también crear y eliminar cuentas del panel.",
+};
+
 const emptyForm = { name: "", email: "", password: "", role: "escritor" };
 
 export const AdminStaffList = () => {
@@ -80,17 +87,30 @@ export const AdminStaffList = () => {
     }
   };
 
-  const handleRoleChange = async (id, newRole) => {
-    setRoleBusyId(id);
-    setRoleActionError("");
-    try {
-      await updateAdminStaffRole(id, newRole);
-      await load();
-    } catch (err) {
-      setRoleActionError(err instanceof Error ? err.message : "No se pudo cambiar el rol.");
-    } finally {
-      setRoleBusyId(null);
-    }
+  // Un desplegable en la fila cambiaba permisos con un clic equivocado: ahora se
+  // pregunta, diciendo qué podrá hacer la persona con el rol nuevo. Si se cancela, el
+  // desplegable vuelve solo a su valor (lo manda `row.role`).
+  const handleRoleChange = async (row, newRole) => {
+    if (newRole === row.role) return;
+    const nombre = (r) => ROLE_OPTIONS.find((o) => o.value === r)?.label ?? r;
+    await confirm({
+      title: "Cambiar el rol",
+      description: `«${row.name}» pasa de ${nombre(row.role)} a ${nombre(newRole)}. ${QUE_PUEDE[newRole] ?? ""}`,
+      confirmLabel: `Cambiar a ${nombre(newRole)}`,
+      warning: null,
+      onConfirm: async () => {
+        setRoleBusyId(row.id);
+        setRoleActionError("");
+        try {
+          await updateAdminStaffRole(row.id, newRole);
+          await load();
+        } catch (err) {
+          setRoleActionError(err instanceof Error ? err.message : "No se pudo cambiar el rol.");
+        } finally {
+          setRoleBusyId(null);
+        }
+      },
+    });
   };
 
   // Para quien deja el equipo. Eliminar no se puede si firmó piezas; desactivar sí, y
@@ -259,7 +279,8 @@ export const AdminStaffList = () => {
                       className="se-form-control"
                       value={row.role}
                       disabled={roleBusyId === row.id}
-                      onChange={(e) => handleRoleChange(row.id, e.target.value)}
+                      onChange={(e) => handleRoleChange(row, e.target.value)}
+                      aria-label={`Rol de ${row.name}`}
                     >
                       {ROLE_OPTIONS.map((r) => (
                         <option key={r.value} value={r.value}>
@@ -275,11 +296,12 @@ export const AdminStaffList = () => {
                       onClick={() => handleActive(row)}
                     >
                       {row.is_active === false ? "Reactivar" : "Desactivar"}
-                    </button>{" "}
+                    </button>
                     <button
                       type="button"
-                      className="se-link se-header__nav-link--button"
+                      className="se-admin-table__eliminar"
                       onClick={() => handleDelete(row.id, row.name)}
+                      aria-label={`Eliminar la cuenta de ${row.name}`}
                     >
                       Eliminar
                     </button>

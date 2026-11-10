@@ -5,7 +5,6 @@ import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
 import {
     Link,
-    useBlocker,
     useLocation,
     useNavigate,
     useParams,
@@ -46,6 +45,7 @@ import { SourcesField } from "../../components/admin/SourcesField";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
@@ -822,29 +822,10 @@ export const AdminPostEditor = () => {
     // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
     const sinGuardar = base !== null && comparable(form) !== comparable(base);
-    const blocker = useBlocker(
-        ({ currentLocation, nextLocation }) =>
-            sinGuardar && !saltarGuarda.current && currentLocation.pathname !== nextLocation.pathname,
-    );
-    useEffect(() => {
-        if (blocker.state !== "blocked") return;
-        confirm({
-            title: "¿Salir sin guardar?",
-            description: "Hay cambios en esta pieza que todavía no se guardaron.",
-            confirmLabel: "Salir sin guardar",
-            cancelLabel: "Seguir editando",
-            warning: null,
-        }).then((salir) => (salir ? blocker.proceed() : blocker.reset()));
-    }, [blocker, confirm]);
-    useEffect(() => {
-        if (!sinGuardar) return undefined;
-        const alSalir = (e) => {
-            e.preventDefault();
-            e.returnValue = "";
-        };
-        window.addEventListener("beforeunload", alSalir);
-        return () => window.removeEventListener("beforeunload", alSalir);
-    }, [sinGuardar]);
+    useGuardiaDeSalida(sinGuardar, confirm, {
+        saltar: saltarGuarda,
+        descripcion: "Hay cambios en esta pieza que todavía no se guardaron.",
+    });
 
     // Copia en este equipo de lo que no se ha guardado, por si se cierra la pestaña o se
     // cae el navegador: vuelve al abrir la pieza otra vez. No sustituye a «Guardar».

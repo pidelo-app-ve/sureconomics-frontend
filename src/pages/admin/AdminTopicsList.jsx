@@ -28,7 +28,6 @@ export const AdminTopicsList = () => {
         try {
             const items = await listAdminTopics();
             setState({ status: "success", items, error: null });
-            setDraft({});
         } catch (err) {
             setState({ status: "error", items: [], error: err });
         }
@@ -46,6 +45,14 @@ export const AdminTopicsList = () => {
         setBusyId(id);
         try {
             await patchAdminTopic(id, body);
+            // Solo se suelta lo tecleado en esta fila: antes, guardar un nombre borraba
+            // el que estuviera a medias en otra.
+            setDraft((prev) => {
+                const copia = { ...prev };
+                delete copia[id];
+                delete copia[`en-${id}`];
+                return copia;
+            });
             await load();
             toastSuccess(message, "Temas");
         } catch (err) {
@@ -88,7 +95,7 @@ export const AdminTopicsList = () => {
                         Lista cerrada de {state.items.length}. Los redactores eligen de aquí y no añaden:
                         eso es lo que mantiene el panel de filtros legible. Retirar un tema lo esconde de
                         los filtros del lector sin desclasificar las piezas que ya lo llevan, y por eso no
-                        hay opción de borrar.
+                        hay opción de borrar. Cada nombre se guarda solo al salir de su casilla.
                     </p>
                 </div>
             </header>

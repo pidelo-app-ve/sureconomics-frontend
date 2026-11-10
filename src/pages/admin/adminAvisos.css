@@ -302,3 +302,11 @@
     flex: 0 0 auto;
   }
 }
+
+.se-avisos__motivo {
+  color: var(--adm-text-muted);
+}
+
+.se-avisos__quitadas li + li {
+  margin-top: 0.3rem;
+}

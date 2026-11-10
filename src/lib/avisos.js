@@ -22,6 +22,8 @@ const paises = new Intl.DisplayNames("es", { type: "region" });
 /** El país por su nombre: «Venezuela» y no «VE». Si el código no es de un país, tal cual. */
 export const nombreDePais = (iso) => {
   if (!iso) return "Sin país";
+  // Así marcan los titulares lo que no es de un solo país.
+  if (String(iso).toUpperCase() === "GLOBAL") return "Internacional";
   try {
     return paises.of(String(iso).toUpperCase()) || iso;
   } catch {
@@ -64,18 +66,44 @@ export const leerAvisos = (data) => ({
   })),
 });
 
+/** Por qué no se pudo leer el artículo de un medio, como se dice en pantalla. */
+export const MOTIVO_SIN_LEER = {
+  google_news: "llegó por Google News y su enlace no se puede abrir",
+  bloqueado: "el sitio no deja leer a programas",
+  no_respondio: "no respondió a tiempo",
+  poco_texto: "la página no traía el texto (un muro de pago, por ejemplo)",
+  otra_cosa: "la página no hablaba de esta noticia",
+  no_es_una_pagina: "el enlace no era una página",
+};
+
+/** Por qué se quitó una frase del borrador. */
+export const MOTIVO_QUITADA = {
+  cifra: "traía una cifra que no está en las fuentes",
+  cita: "traía una cita que no está, palabra por palabra, en ningún artículo",
+};
+
 /**
  * El informe de la redacción de un aviso (`services/avisos_redaccion.py`), o nada si el
- * aviso todavía no tiene pieza. `cifras`: cada cifra del borrador con los medios que la
- * dan. `quitadas`: las frases que se quitaron por traer una cifra que no está en las
- * fuentes. `nombres`: los nombres propios que no se vieron escritos igual en las fuentes.
+ * aviso todavía no tiene pieza.
+ *
+ * - `leidos` y `sinLeer`: de qué medios se leyó el artículo entero y de cuáles no, y por qué.
+ * - `cifras`: cada cifra del borrador con los medios que la dan.
+ * - `quitadas`: las frases que se quitaron por traer una cifra o una cita sin respaldo.
+ * - `copiadas`: las que quedaron casi iguales a las de un medio: hay que reescribirlas.
+ * - `nombres`: los nombres propios que no se vieron escritos igual en las fuentes.
  */
 export const leerRevision = (r) => {
   if (!r || typeof r !== "object") return null;
   return {
     conIa: r.con_ia === true,
+    leidos: lista(r.leidos).map((l) => ({ medio: l?.medio || "Sin nombre", palabras: numero(l?.palabras) })),
+    sinLeer: lista(r.sin_leer).map((s) => ({ medio: s?.medio || "Sin nombre", motivo: s?.motivo || "no_respondio" })),
     cifras: lista(r.cifras).map((c) => ({ texto: String(c?.texto ?? ""), medios: lista(c?.medios) })),
-    quitadas: lista(r.quitadas),
+    // Los primeros informes guardaban solo la frase: eran todas por una cifra.
+    quitadas: lista(r.quitadas).map((q) =>
+      typeof q === "string" ? { frase: q, motivo: "cifra" } : { frase: q?.frase || "", motivo: q?.motivo || "cifra" },
+    ),
+    copiadas: lista(r.copiadas).map((c) => ({ frase: c?.frase || "", medio: c?.medio || "un medio" })),
     nombres: lista(r.nombres),
     avisos: lista(r.avisos),
     palabras: numero(r.palabras),
@@ -85,19 +113,34 @@ export const leerRevision = (r) => {
 
 /**
  * Lo que hay que decir de un borrador, en una línea, y si pide atención (`ojo`): se
- * quitaron frases, hay nombres por comprobar o algún aviso. Que no pida atención no
- * quiere decir que se publique sin leer: es un borrador.
+ * quitaron frases, quedaron frases copiadas, hay nombres por comprobar o algún aviso.
+ * Que no pida atención no quiere decir que se publique sin leer: es un borrador.
  */
 export const comprobacion = (revision) => {
   if (!revision) return null;
   if (!revision.conIa) {
     return { ojo: false, linea: `Borrador vacío, con el título y ${revision.fuentes === 1 ? "la fuente puesta" : `las ${revision.fuentes} fuentes puestas`}. Falta escribirla.` };
   }
-  const cosas = revision.quitadas.length + revision.nombres.length + revision.avisos.length;
-  const base = `Escrita por la IA con ${revision.fuentes === 1 ? "1 medio" : `${revision.fuentes} medios`}, ${revision.palabras} palabras.`;
+  const leidos = revision.leidos.length;
+  const con = leidos
+    ? `leyendo ${leidos === 1 ? "el artículo de 1 medio" : `los artículos de ${leidos} medios`}`
+    : "solo con los titulares";
+  const base = `Escrita por la IA ${con}: ${revision.palabras} palabras.`;
+  const cosas = revision.quitadas.length + revision.copiadas.length + revision.nombres.length + revision.avisos.length;
   return cosas
     ? { ojo: true, linea: `${base} Hay ${cosas === 1 ? "1 cosa" : `${cosas} cosas`} que mirar antes de publicar.` }
-    : { ojo: false, linea: `${base} Todas las cifras están en las fuentes.` };
+    : { ojo: false, linea: `${base} Todas las cifras y las citas están en las fuentes.` };
+};
+
+/** Lo que salió bien, en pocas palabras: «2 artículos leídos · 10 cifras comprobadas». */
+export const detalleDeLoComprobado = (revision) => {
+  const partes = [];
+  const leidos = revision.leidos.length;
+  const total = leidos + revision.sinLeer.length;
+  if (total) partes.push(leidos === total ? `${leidos === 1 ? "1 artículo leído" : `${leidos} artículos leídos`}` : `${leidos} de ${total} artículos leídos`);
+  const cifras = revision.cifras.length;
+  if (cifras) partes.push(cifras === 1 ? "1 cifra comprobada" : `${cifras} cifras comprobadas`);
+  return partes.join(" · ");
 };
 
 /** `GET /admin/avisos/candidatos`: lo que se avisaría ahora, sin crear nada. */

@@ -2,7 +2,7 @@
  * La lógica de «Avisos de noticias» del panel. `npm run test:avisos`.
  */
 import {
-  accionesDe, comprobacion, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
+  accionesDe, comprobacion, detalleDeLoComprobado, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
   pendientes, vistaInicial,
 } from "./avisos.js";
 
@@ -46,6 +46,7 @@ console.log("el país por su nombre");
 check("VE es Venezuela", nombreDePais("VE") === "Venezuela", nombreDePais("VE"));
 check("en minúsculas también", nombreDePais("br") === "Brasil", nombreDePais("br"));
 check("sin país", nombreDePais(null) === "Sin país");
+check("lo que no es de un solo país", nombreDePais("GLOBAL") === "Internacional");
 check("un código que no es de un país no rompe", typeof nombreDePais("regional") === "string");
 
 console.log("qué se puede hacer");
@@ -61,13 +62,31 @@ check("cuenta los pendientes", pendientes(dia.avisos) === 1);
 
 console.log("lo comprobado al redactar");
 check("un aviso sin pieza no trae informe", dia.avisos[0].revision === null && leerRevision(undefined) === null);
-const limpia = leerRevision({ con_ia: true, fuentes: 2, palabras: 140, cifras: [{ texto: "11,25 %", medios: ["EFE"] }] });
+const limpia = leerRevision({
+  con_ia: true, fuentes: 3, palabras: 240, cifras: [{ texto: "11,25 %", medios: ["EFE"] }],
+  leidos: [{ medio: "EFE", palabras: 400 }, { medio: "Reuters", palabras: 350 }],
+  sin_leer: [{ medio: "El Pitazo", motivo: "bloqueado" }],
+});
 check("lee las cifras con sus medios", limpia.cifras[0].texto === "11,25 %" && limpia.cifras[0].medios[0] === "EFE");
+check("lee qué artículos se leyeron y cuáles no",
+  limpia.leidos.length === 2 && limpia.sinLeer[0].motivo === "bloqueado", limpia);
 check("todo en las fuentes: no pide atención",
-  !comprobacion(limpia).ojo && comprobacion(limpia).linea.endsWith("Todas las cifras están en las fuentes."), comprobacion(limpia));
-const dudosa = leerRevision({ con_ia: true, fuentes: 3, palabras: 90, quitadas: ["Invertirá 5.000 millones."], nombres: ["Goldman"] });
-check("una frase quitada y un nombre: dos cosas que mirar",
-  comprobacion(dudosa).ojo && comprobacion(dudosa).linea.includes("Hay 2 cosas que mirar"), comprobacion(dudosa));
+  !comprobacion(limpia).ojo &&
+    comprobacion(limpia).linea === "Escrita por la IA leyendo los artículos de 2 medios: 240 palabras. Todas las cifras y las citas están en las fuentes.",
+  comprobacion(limpia));
+check("lo que salió bien, en pocas palabras",
+  detalleDeLoComprobado(limpia) === "2 de 3 artículos leídos · 1 cifra comprobada", detalleDeLoComprobado(limpia));
+const dudosa = leerRevision({
+  con_ia: true, fuentes: 3, palabras: 90, nombres: ["Goldman"],
+  quitadas: ["Invertirá 5.000 millones.", { frase: "«Es histórico», dijo.", motivo: "cita" }],
+  copiadas: [{ frase: "La empresa prevé producir más.", medio: "EFE" }],
+});
+check("un informe viejo (solo la frase) cuenta como quitada por una cifra",
+  dudosa.quitadas[0].motivo === "cifra" && dudosa.quitadas[1].motivo === "cita", dudosa.quitadas);
+check("dos frases quitadas, una copiada y un nombre: cuatro cosas que mirar",
+  comprobacion(dudosa).ojo && comprobacion(dudosa).linea.includes("Hay 4 cosas que mirar"), comprobacion(dudosa));
+check("sin artículos leídos lo dice",
+  comprobacion(dudosa).linea.startsWith("Escrita por la IA solo con los titulares: 90 palabras."), comprobacion(dudosa));
 check("sin IA: borrador vacío",
   comprobacion(leerRevision({ con_ia: false, fuentes: 2 })).linea.startsWith("Borrador vacío, con el título y las 2 fuentes puestas"));
 check("sin informe no hay nada que decir", comprobacion(null) === null);

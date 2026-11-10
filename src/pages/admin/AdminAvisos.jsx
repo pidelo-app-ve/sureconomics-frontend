@@ -2,13 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { Plegable } from "../../components/admin/Plegable";
 import { ErrorState, LoadingState } from "../../components/content";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
-  accionesDe, comprobacion, estadoDeAviso, lineaDelDia, nombreDeMotivo, nombreDePais, pendientes, vistaInicial,
+  accionesDe, comprobacion, detalleDeLoComprobado, estadoDeAviso, lineaDelDia, MOTIVO_QUITADA, MOTIVO_SIN_LEER, nombreDeMotivo, nombreDePais,
+  pendientes, vistaInicial,
 } from "../../lib/avisos";
 import { recorridoAvisos } from "../../lib/guias/guiaAvisos";
 import { applyPageMeta } from "../../lib/seo";
@@ -36,10 +38,11 @@ import "./adminAvisos.css";
  * - **Llevar los de hoy**: cada aviso se redacta, se toma («lo hago yo»), se suelta o se
  *   descarta con un motivo. Es lo mismo que hará el bot de Telegram de la redacción.
  *
- * **«Redactar»** convierte el aviso en una pieza en borrador escrita por la IA con lo que
- * cuentan los medios. El servidor comprueba lo escrito (ninguna cifra que no esté en las
- * fuentes llega al borrador) y la tarjeta enseña el informe (`Comprobacion`) antes del
- * botón de abrir el borrador: primero se lee qué se comprobó, después se revisa el texto.
+ * **«Redactar»** convierte el aviso en una pieza en borrador: el servidor lee el artículo
+ * de cada medio y la IA escribe una noticia completa. Después comprueba lo escrito
+ * (ninguna cifra ni cita que no esté en las fuentes llega al borrador) y la tarjeta
+ * enseña el informe (`Comprobacion`) antes del botón de abrir el borrador: primero se
+ * lee qué se comprobó, después se revisa el texto.
  *
  * Se vuelve a cargar cada minuto. El botón «Guía» lo explica sobre la propia página.
  */
@@ -105,28 +108,69 @@ const Comprobacion = ({ revision }) => {
   return (
     <div className={`se-avisos__comprobacion${resumen.ojo ? " is-ojo" : ""}`}>
       <p className="se-avisos__comprobacion-linea">{resumen.linea}</p>
-      {revision.cifras.length ? (
+      {/* Lo que salió bien va plegado: a la vista queda solo lo que hay que mirar. */}
+      {revision.leidos.length || revision.sinLeer.length || revision.cifras.length ? (
+        <Plegable titulo="Fuentes y cifras" resumen={detalleDeLoComprobado(revision)} estado="ok">
+          {revision.leidos.length || revision.sinLeer.length ? (
+            <>
+              <p className="se-avisos__comprobacion-rotulo">De dónde salió el texto</p>
+              <ul className="se-avisos__cifras">
+                {revision.leidos.map((l) => (
+                  <li key={l.medio}>
+                    <strong>{l.medio}</strong>
+                    <span>artículo leído entero ({l.palabras} palabras)</span>
+                  </li>
+                ))}
+                {revision.sinLeer.map((s) => (
+                  <li key={s.medio}>
+                    <strong>{s.medio}</strong>
+                    <span>solo su titular: {MOTIVO_SIN_LEER[s.motivo] ?? "no se pudo leer"}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          {revision.cifras.length ? (
+            <>
+              <p className="se-avisos__comprobacion-rotulo">Cifras del borrador y quién las da</p>
+              <ul className="se-avisos__cifras">
+                {revision.cifras.map((c) => (
+                  <li key={c.texto}>
+                    <strong>{c.texto}</strong>
+                    <span>{c.medios.join(", ")}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </Plegable>
+      ) : null}
+      {revision.quitadas.length ? (
         <>
-          <p className="se-avisos__comprobacion-rotulo">Cifras del borrador y quién las da</p>
-          <ul className="se-avisos__cifras">
-            {revision.cifras.map((c) => (
-              <li key={c.texto}>
-                <strong>{c.texto}</strong>
-                <span>{c.medios.join(", ")}</span>
+          <p className="se-avisos__comprobacion-rotulo">
+            {revision.quitadas.length === 1 ? "Se quitó una frase" : `Se quitaron ${revision.quitadas.length} frases`} que
+            no se pudo comprobar
+          </p>
+          <ul className="se-avisos__quitadas">
+            {revision.quitadas.map((q) => (
+              <li key={q.frase}>
+                «{q.frase}» <span className="se-avisos__motivo">({MOTIVO_QUITADA[q.motivo] ?? "no se pudo comprobar"})</span>
               </li>
             ))}
           </ul>
         </>
       ) : null}
-      {revision.quitadas.length ? (
+      {revision.copiadas.length ? (
         <>
           <p className="se-avisos__comprobacion-rotulo">
-            {revision.quitadas.length === 1 ? "Se quitó una frase" : `Se quitaron ${revision.quitadas.length} frases`} porque
-            traían una cifra que no está en las fuentes
+            {revision.copiadas.length === 1 ? "Una frase quedó" : `${revision.copiadas.length} frases quedaron`} casi igual
+            que en el medio: reescríbala{revision.copiadas.length === 1 ? "" : "s"} con sus palabras
           </p>
           <ul className="se-avisos__quitadas">
-            {revision.quitadas.map((frase) => (
-              <li key={frase}>«{frase}»</li>
+            {revision.copiadas.map((c) => (
+              <li key={c.frase}>
+                «{c.frase}» <span className="se-avisos__motivo">({c.medio})</span>
+              </li>
             ))}
           </ul>
         </>
@@ -173,7 +217,8 @@ const Aviso = ({ aviso, miId, motivos, ocupado, redactando, anclaje, onTomar, on
       <Comprobacion revision={aviso.revision} />
       {redactando ? (
         <p className="se-avisos__redactando" role="status">
-          Redactando con lo que cuentan los medios y comprobando las cifras… Tarda unos 15 segundos.
+          Leyendo los artículos de los medios, redactando y comprobando las cifras y las citas… Puede tardar
+          hasta medio minuto.
         </p>
       ) : acciones.includes("abrir") ? (
         <div className="se-avisos__acciones">

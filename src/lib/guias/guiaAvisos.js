@@ -43,7 +43,7 @@ export const PASOS_AVISOS = [
     puntos: [
       "País, puntaje y medios: de dónde es, cuánto importa y cuántos medios distintos la cuentan.",
       "Fuentes: lo que publicó cada medio, con su enlace para leerlo.",
-      "Redactar: la IA escribe un borrador con lo que cuentan esos medios y el aviso queda a su nombre. Tarda unos 15 segundos.",
+      "Redactar: el sistema lee el artículo de cada medio y la IA escribe una noticia completa, en borrador. El aviso queda a su nombre. Puede tardar medio minuto.",
       "Lo hago yo: el aviso queda a su nombre y nadie más lo toma. Si en dos horas no avanza, vuelve a quedar libre.",
       "Escribirla yo: abre un borrador vacío con el título y las fuentes ya puestas.",
       "Soltar: lo devuelve para que lo tome otra persona.",
@@ -57,7 +57,10 @@ export const PASOS_AVISOS = [
       "Cuando la IA redacta, el sistema revisa el texto antes de guardarlo y lo enseña en la tarjeta del aviso. " +
       "Nada sale publicado desde aquí: siempre es un borrador que hay que leer.",
     puntos: [
-      "Cifras: cada número del borrador, con el medio que lo da. Si una frase traía una cifra que no está en las fuentes, se quita y se dice cuál era.",
+      "De dónde salió el texto: de qué medios se leyó el artículo entero y de cuáles solo el titular, y por qué. Si no se pudo leer ninguno, sale una nota breve.",
+      "Cifras: cada número del borrador, con el medio que lo da.",
+      "Frases quitadas: las que traían una cifra que no está en las fuentes, o una cita entre comillas que no está palabra por palabra en ningún artículo.",
+      "Frases casi iguales a las del medio: hay que reescribirlas con palabras propias.",
       "Nombres: los que no se vieron escritos igual en las fuentes, para que los compruebe.",
       "Abrir el borrador: lleva al editor, con el tema y el lugar sugeridos. Ahí se corrige, se pone la foto y se publica.",
     ],

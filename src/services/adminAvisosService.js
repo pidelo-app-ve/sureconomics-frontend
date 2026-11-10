@@ -31,8 +31,9 @@ export const descartarAviso = async (id, motivo) =>
 
 /**
  * Convierte el aviso en una pieza en borrador y lo aparta para quien lo pide. Con `ia`,
- * la escribe la IA con lo que cuentan los medios y el servidor comprueba las cifras
- * (tarda unos 15 segundos); sin ella, nace vacía con el título y las fuentes puestas.
+ * el servidor lee el artículo de cada medio, la IA escribe la noticia y se comprueban
+ * sus cifras y sus citas (puede tardar medio minuto); sin ella, nace vacía con el título
+ * y las fuentes puestas.
  * Devuelve la clave de la pieza.
  */
 export const redactarAviso = async (id, { ia = true } = {}) => {

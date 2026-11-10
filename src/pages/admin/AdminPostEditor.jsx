@@ -39,6 +39,8 @@ import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { AxisPicker } from "../../components/admin/AxisPicker";
+import { ListaDeComprobacion } from "../../components/admin/ListaDeComprobacion";
+import { PiezaPublicada } from "../../components/admin/PiezaPublicada";
 import {
     SugerenciasDeClasificacion,
     useSugerenciasDeClasificacion,
@@ -456,7 +458,11 @@ export const AdminPostEditor = () => {
     const saltarGuarda = useRef(false);
     const canCreate = Boolean(role);
     const { postId } = useParams();
-    const { pathname } = useLocation();
+    const { pathname, state: estadoDeRuta } = useLocation();
+    // Recién publicada: se enseña el enlace y lo que se hace con él (`PiezaPublicada`).
+    const [recienPublicada, setRecienPublicada] = useState(Boolean(estadoDeRuta?.recienPublicada));
+    // Lo que hacen Ctrl+S y Ctrl+Enter, al día en cada pintado (ver más abajo).
+    const atajos = useRef({ guardar: null, publicar: null });
     const isCreate = /\/admin\/posts\/new\/?$/.test(pathname);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -699,11 +705,14 @@ export const AdminPostEditor = () => {
     // there is an image on a piece with nothing attached, and can clear it.
     const legacyImage = Boolean(form.featured_image_url && !form.image_asset_id);
 
-    const handleSave = async () => {
+    // `publicar`: al crear, la pieza nace publicada. Antes eran dos pasos (crear el
+    // borrador y, ya en la pantalla siguiente, publicar) para lo que casi siempre es uno.
+    const guardar = async ({ publicar = false } = {}) => {
         setSaveState({ status: "loading", message: "" });
         setActionState({ status: "idle", message: "", kind: "" });
         try {
             const payload = formToPayload(form);
+            if (publicar) payload.status = "published";
             if (isCreate) {
                 const created = await createAdminPost(payload, claveDeCreacion());
                 const newId = created?.id ?? null;
@@ -714,7 +723,9 @@ export const AdminPostEditor = () => {
                 if (newId != null) {
                     navigate(`/admin/posts/${newId}`, {
                         replace: true,
-                        state: { flash: `${label}: creada correctamente.` },
+                        state: publicar
+                            ? { flash: `${label}: publicada.`, recienPublicada: true }
+                            : { flash: `${label}: creada correctamente.` },
                     });
                 } else {
                     navigate("/admin/posts", {
@@ -755,6 +766,8 @@ export const AdminPostEditor = () => {
         }
     };
 
+    const handleSave = () => guardar();
+
     const runAction = (kind, fn, successMessage, failureMessage, toastTitle) => async () => {
         if (isCreate) return;
         setSaveState({ status: "idle", message: "" });
@@ -765,6 +778,7 @@ export const AdminPostEditor = () => {
             setBase(postToForm(updated));
             borrador.limpiar();
             setActionState({ status: "success", message: successMessage, kind });
+            setRecienPublicada(kind === "publish");
             toastSuccess(successMessage, toastTitle);
         } catch (err) {
             const message = adminErrorMessage(err, failureMessage);
@@ -827,6 +841,23 @@ export const AdminPostEditor = () => {
     // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
     const sinGuardar = base !== null && comparable(form) !== comparable(base);
+    // Ctrl+S guarda y Ctrl+Enter publica (Cmd en Mac): quien escribe no suelta el teclado.
+    useEffect(() => {
+        const alTeclear = (e) => {
+            if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+            const tecla = e.key.toLowerCase();
+            if (tecla === "s" && atajos.current.guardar) {
+                e.preventDefault();
+                atajos.current.guardar();
+            } else if (tecla === "enter" && atajos.current.publicar) {
+                e.preventDefault();
+                atajos.current.publicar();
+            }
+        };
+        window.addEventListener("keydown", alTeclear);
+        return () => window.removeEventListener("keydown", alTeclear);
+    }, []);
+
     // Tema y lugar propuestos leyendo lo escrito (con reglas, sin IA): se aceptan con un toque.
     const sugerencias = useSugerenciasDeClasificacion({
         titulo: form.title,
@@ -927,8 +958,13 @@ export const AdminPostEditor = () => {
         .filter(Boolean)
         .join(" · ");
     // Lo que impediría publicar, dicho en la barra fija de abajo antes de intentarlo.
+    const sinTema = !(form.topic_ids ?? []).length;
+    // El texto solo se pide donde la pieza ES el texto: una entrevista o un podcast son su video o su audio.
+    const sinTexto = requiredMedia === "none" && !nPalabras;
     const faltas = [
         !form.title.trim() ? "título" : null,
+        sinTexto ? "texto" : null,
+        sinTema ? "tema" : null,
         missingMedia
             ? requiredMedia === "video"
                 ? "video"
@@ -940,7 +976,41 @@ export const AdminPostEditor = () => {
         faltaFechaDePortada ? "hasta cuándo abre la portada" : null,
     ].filter(Boolean);
 
-    const publicarEsPrincipal = !isCreate && canPublish && form.status === "draft" && !faltas.length;
+    const publicarEsPrincipal = canPublish && form.status === "draft" && !faltas.length;
+    const ocupado = saveState.status === "loading" || actionState.status === "loading";
+    atajos.current = {
+        guardar: form.format && !ocupado ? handleSave : null,
+        publicar:
+            publicarEsPrincipal && !ocupado ? (isCreate ? () => guardar({ publicar: true }) : handlePublish) : null,
+    };
+
+    // «Antes de publicar»: lo que bloquea, lo que conviene y lo que ya está, de un vistazo.
+    const minutosDeLectura = Math.max(1, Math.round(nPalabras / 200));
+    const tieneImagen = Boolean(form.image_asset_id || legacyImage);
+    const chequeo = [
+        !form.title.trim()
+            ? { nivel: "falta", texto: "Título" }
+            : form.title.trim().length > 90
+              ? { nivel: "conviene", texto: "Título", detalle: ` ${form.title.trim().length} letras: en las tarjetas se corta. Mejor menos de 90.` }
+              : { nivel: "bien", texto: "Título" },
+        nPalabras
+            ? { nivel: "bien", texto: "Texto", detalle: ` ${nPalabras} palabras · ${minutosDeLectura} min de lectura` }
+            : { nivel: sinTexto ? "falta" : "conviene", texto: "Texto" },
+        missingMedia || requiredMedia !== "none"
+            ? {
+                  nivel: missingMedia ? "falta" : "bien",
+                  texto: requiredMedia === "video" ? "Video" : requiredMedia === "audio" ? "Audio" : "Documento",
+              }
+            : null,
+        sinTema
+            ? { nivel: "falta", texto: "Tema", detalle: " Sin tema no se puede publicar." }
+            : { nivel: "bien", texto: "Tema", detalle: ` ${temasElegidos.join(", ")}` },
+        lugaresElegidos.length
+            ? { nivel: "bien", texto: "Lugar", detalle: ` ${lugaresElegidos.join(", ")}` }
+            : { nivel: "conviene", texto: "Lugar" },
+        { nivel: tieneImagen ? "bien" : "conviene", texto: "Foto" },
+        { nivel: nFuentes ? "bien" : "conviene", texto: "Fuente" },
+    ].filter(Boolean);
 
     // «Publicación» (estado, fecha, portada): en el teléfono, entre las demás filas; en el
     // computador, en la columna de la derecha con el estado y los botones, abierta, que es
@@ -1125,6 +1195,14 @@ export const AdminPostEditor = () => {
               guia={recorridoEditor}
             />
 
+            {recienPublicada && form.status === "published" && form.slug ? (
+                <PiezaPublicada
+                    titulo={form.title.trim()}
+                    ruta={rutaDePieza({ formatoApi: form.format, slug: form.slug })}
+                    onCerrar={() => setRecienPublicada(false)}
+                />
+            ) : null}
+
             {borrador.recuperadoEn ? (
                 <p className="se-editor-recuperado" role="status">
                     Recuperamos lo que estaba sin guardar (copia de las {horaCorta(borrador.recuperadoEn)}).
@@ -1224,6 +1302,7 @@ export const AdminPostEditor = () => {
                             have to give it up because the field is smaller. */}
                         <CampoMovil
                             movil={esMovil}
+                            plegable
                             titulo={form.format === "editorial" ? "Entradilla" : "Resumen"}
                             resumen={recortar(textoPlano(form.excerpt)) || "Vacío"}
                             estado={textoPlano(form.excerpt) ? "ok" : undefined}
@@ -1251,6 +1330,7 @@ export const AdminPostEditor = () => {
                         {currentFormat?.shows_author !== false ? (
                             <CampoMovil
                                 movil={esMovil}
+                                plegable
                                 titulo="Firma y foto"
                                 resumen={form.byline.trim() || "Sin firma"}
                                 miniatura={assets.bylinePhoto?.url || undefined}
@@ -1492,6 +1572,177 @@ export const AdminPostEditor = () => {
 
                     </div>
 
+                    <div className="se-editor-group">
+                        <p className="se-editor-group__title">Foto y archivos</p>
+
+                        {requiredMedia === "video" ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Video de la entrevista"
+                                resumen={nombreDeArchivo(assets.video) || "Sin video"}
+                                estado={form.video_asset_id ? "ok" : "falta"}
+                            >
+                            <AssetField
+                                id="post-video"
+                                label="Video de la entrevista"
+                                hint="Suba el archivo y se aloja en nuestro servicio de video, o pegue un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
+                                kind="video"
+                                value={form.video_asset_id}
+                                asset={assets.video}
+                                onChange={setAsset("video_asset_id", "video")}
+                                onUpload={subirVideo}
+                                accept={ACCEPTED_VIDEO_MIME}
+                                required
+                            />
+                            </CampoMovil>
+                        ) : null}
+
+                        {requiredMedia === "document" ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Documento (PDF)"
+                                resumen={
+                                    form.document_asset_id
+                                        ? `${nombreDeArchivo(assets.document)}${form.document_open_access ? " · abierto" : ""}`
+                                        : "Sin documento"
+                                }
+                                estado={form.document_asset_id ? "ok" : "falta"}
+                            >
+                            <AssetField
+                                id="post-document"
+                                label="Documento del informe (PDF)"
+                                hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
+                                kind="document"
+                                value={form.document_asset_id}
+                                asset={assets.document}
+                                onChange={setAsset("document_asset_id", "document")}
+                                onUpload={uploadAdminMediaDocument}
+                                accept={ACCEPTED_DOCUMENT_MIME}
+                                required
+                            />
+
+                            {/* Quien puede descargarlo. Va aqui, pegado al campo del
+                                archivo, porque es una decision sobre ese archivo y no
+                                sobre la pieza en general. */}
+                            <label className="se-form-field se-acceso" htmlFor="post-open-access">
+                                <span className="se-acceso__fila">
+                                    <input
+                                        id="post-open-access"
+                                        type="checkbox"
+                                        checked={Boolean(form.document_open_access)}
+                                        onChange={(e) =>
+                                            setForm((prev) => ({
+                                                ...prev,
+                                                document_open_access: e.target.checked,
+                                            }))
+                                        }
+                                    />
+                                    <span className="se-form-label se-acceso__titulo">
+                                        Descarga abierta a todos
+                                    </span>
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Sin marcar, sólo los lectores registrados con el correo
+                                    confirmado pueden descargarlo. Marcado, cualquiera que
+                                    entre al sitio lo descarga en un clic, sin cuenta.
+                                </span>
+                                <span className="se-admin-meta-hint">
+                                    Se puede cambiar después: cerrar un informe abierto
+                                    corta el acceso de inmediato, también para quien ya
+                                    tenía la dirección.
+                                </span>
+                            </label>
+                            </CampoMovil>
+                        ) : null}
+
+                        {requiredMedia === "audio" ? (
+                            <CampoMovil
+                                movil={esMovil}
+                                titulo="Audio del podcast"
+                                resumen={nombreDeArchivo(assets.audio) || "Sin audio"}
+                                estado={form.audio_asset_id ? "ok" : "falta"}
+                            >
+                            <AssetField
+                                id="post-audio"
+                                label="Audio del podcast (MP3 o M4A)"
+                                hint="Se escucha sin cuenta, como cualquier pieza. Sin audio, el podcast no se puede publicar."
+                                kind="audio"
+                                value={form.audio_asset_id}
+                                asset={assets.audio}
+                                onChange={setAsset("audio_asset_id", "audio")}
+                                onUpload={uploadAdminMediaAudio}
+                                accept={ACCEPTED_AUDIO_MIME}
+                                required
+                            />
+                            </CampoMovil>
+                        ) : null}
+
+                        {/* Every format, because every format has a card in a listing
+                            and any piece may arrive with a photo. */}
+                        <CampoMovil
+                            movil={esMovil}
+                            titulo="Imagen"
+                            resumen={
+                                form.image_asset_id
+                                    ? `${nombreDeArchivo(assets.image)}${form.imagen_foco ? " · encuadrada" : ""}`
+                                    : legacyImage
+                                      ? "Imagen antigua por dirección"
+                                      : "Sin imagen"
+                            }
+                            miniatura={assets.image?.url || undefined}
+                            estado={form.image_asset_id || legacyImage ? "ok" : undefined}
+                        >
+                                <AssetField
+                                    id="post-image-asset"
+                                    label="Imagen"
+                                    hint={IMAGE_HINT[form.format] ?? IMAGE_HINT.default}
+                                    kind="image"
+                                    value={form.image_asset_id}
+                                    asset={assets.image}
+                                    onChange={setAsset("image_asset_id", "image")}
+                                    onUpload={uploadAdminMediaImage}
+                                    accept={ACCEPTED_IMAGE_MIME}
+                                />
+                                {/* Qué punto de la foto queda a la vista en cada tarjeta. */}
+                                {enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url) ? (
+                                    <EncuadreDeFoto
+                                        url={enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url)}
+                                        valor={form.imagen_foco}
+                                        titulo={form.title}
+                                        onChange={(v) => setForm((prev) => ({ ...prev, imagen_foco: v }))}
+                                    />
+                                ) : null}
+                                {legacyImage ? (
+                                    <p className="se-asset__legacy">
+                                        Esta pieza trae una imagen por URL de antes de la
+                                        biblioteca de archivos:{" "}
+                                        <a
+                                            className="se-link"
+                                            href={enlaceWeb(form.featured_image_url) || undefined}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            verla
+                                        </a>
+                                        {". "}
+                                        Se sigue usando mientras no adjunte una nueva.{" "}
+                                        <button
+                                            type="button"
+                                            className="se-link se-header__nav-link--button"
+                                            onClick={() =>
+                                                setForm((prev) => ({
+                                                    ...prev,
+                                                    featured_image_url: "",
+                                                }))
+                                            }
+                                        >
+                                            Quitarla
+                                        </button>
+                                    </p>
+                                ) : null}
+                        </CampoMovil>
+                        </div>
+
                     <div className="se-editor-group" {...ancla("clasificacion")}>
                         <p className="se-editor-group__title">Clasificación</p>
                         <SugerenciasDeClasificacion
@@ -1701,176 +1952,6 @@ export const AdminPostEditor = () => {
                         </CampoMovil>
                     </div>
 
-                    <div className="se-editor-group">
-                        <p className="se-editor-group__title">Archivos</p>
-
-                        {requiredMedia === "video" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Video de la entrevista"
-                                resumen={nombreDeArchivo(assets.video) || "Sin video"}
-                                estado={form.video_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-video"
-                                label="Video de la entrevista"
-                                hint="Suba el archivo y se aloja en nuestro servicio de video, o pegue un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
-                                kind="video"
-                                value={form.video_asset_id}
-                                asset={assets.video}
-                                onChange={setAsset("video_asset_id", "video")}
-                                onUpload={subirVideo}
-                                accept={ACCEPTED_VIDEO_MIME}
-                                required
-                            />
-                            </CampoMovil>
-                        ) : null}
-
-                        {requiredMedia === "document" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Documento (PDF)"
-                                resumen={
-                                    form.document_asset_id
-                                        ? `${nombreDeArchivo(assets.document)}${form.document_open_access ? " · abierto" : ""}`
-                                        : "Sin documento"
-                                }
-                                estado={form.document_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-document"
-                                label="Documento del informe (PDF)"
-                                hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
-                                kind="document"
-                                value={form.document_asset_id}
-                                asset={assets.document}
-                                onChange={setAsset("document_asset_id", "document")}
-                                onUpload={uploadAdminMediaDocument}
-                                accept={ACCEPTED_DOCUMENT_MIME}
-                                required
-                            />
-
-                            {/* Quien puede descargarlo. Va aqui, pegado al campo del
-                                archivo, porque es una decision sobre ese archivo y no
-                                sobre la pieza en general. */}
-                            <label className="se-form-field se-acceso" htmlFor="post-open-access">
-                                <span className="se-acceso__fila">
-                                    <input
-                                        id="post-open-access"
-                                        type="checkbox"
-                                        checked={Boolean(form.document_open_access)}
-                                        onChange={(e) =>
-                                            setForm((prev) => ({
-                                                ...prev,
-                                                document_open_access: e.target.checked,
-                                            }))
-                                        }
-                                    />
-                                    <span className="se-form-label se-acceso__titulo">
-                                        Descarga abierta a todos
-                                    </span>
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Sin marcar, sólo los lectores registrados con el correo
-                                    confirmado pueden descargarlo. Marcado, cualquiera que
-                                    entre al sitio lo descarga en un clic, sin cuenta.
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Se puede cambiar después: cerrar un informe abierto
-                                    corta el acceso de inmediato, también para quien ya
-                                    tenía la dirección.
-                                </span>
-                            </label>
-                            </CampoMovil>
-                        ) : null}
-
-                        {requiredMedia === "audio" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Audio del podcast"
-                                resumen={nombreDeArchivo(assets.audio) || "Sin audio"}
-                                estado={form.audio_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-audio"
-                                label="Audio del podcast (MP3 o M4A)"
-                                hint="Se escucha sin cuenta, como cualquier pieza. Sin audio, el podcast no se puede publicar."
-                                kind="audio"
-                                value={form.audio_asset_id}
-                                asset={assets.audio}
-                                onChange={setAsset("audio_asset_id", "audio")}
-                                onUpload={uploadAdminMediaAudio}
-                                accept={ACCEPTED_AUDIO_MIME}
-                                required
-                            />
-                            </CampoMovil>
-                        ) : null}
-
-                        {/* Every format, because every format has a card in a listing
-                            and any piece may arrive with a photo. */}
-                        <CampoMovil
-                            movil={esMovil}
-                            titulo="Imagen"
-                            resumen={
-                                form.image_asset_id
-                                    ? `${nombreDeArchivo(assets.image)}${form.imagen_foco ? " · encuadrada" : ""}`
-                                    : legacyImage
-                                      ? "Imagen antigua por dirección"
-                                      : "Sin imagen"
-                            }
-                            miniatura={assets.image?.url || undefined}
-                            estado={form.image_asset_id || legacyImage ? "ok" : undefined}
-                        >
-                                <AssetField
-                                    id="post-image-asset"
-                                    label="Imagen"
-                                    hint={IMAGE_HINT[form.format] ?? IMAGE_HINT.default}
-                                    kind="image"
-                                    value={form.image_asset_id}
-                                    asset={assets.image}
-                                    onChange={setAsset("image_asset_id", "image")}
-                                    onUpload={uploadAdminMediaImage}
-                                    accept={ACCEPTED_IMAGE_MIME}
-                                />
-                                {/* Qué punto de la foto queda a la vista en cada tarjeta. */}
-                                {enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url) ? (
-                                    <EncuadreDeFoto
-                                        url={enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url)}
-                                        valor={form.imagen_foco}
-                                        titulo={form.title}
-                                        onChange={(v) => setForm((prev) => ({ ...prev, imagen_foco: v }))}
-                                    />
-                                ) : null}
-                                {legacyImage ? (
-                                    <p className="se-asset__legacy">
-                                        Esta pieza trae una imagen por URL de antes de la
-                                        biblioteca de archivos:{" "}
-                                        <a
-                                            className="se-link"
-                                            href={enlaceWeb(form.featured_image_url) || undefined}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            verla
-                                        </a>
-                                        {". "}
-                                        Se sigue usando mientras no adjunte una nueva.{" "}
-                                        <button
-                                            type="button"
-                                            className="se-link se-header__nav-link--button"
-                                            onClick={() =>
-                                                setForm((prev) => ({
-                                                    ...prev,
-                                                    featured_image_url: "",
-                                                }))
-                                            }
-                                        >
-                                            Quitarla
-                                        </button>
-                                    </p>
-                                ) : null}
-                        </CampoMovil>
-                        </div>
 
                     {esMovil ? grupoPublicacion : null}
 
@@ -1975,6 +2056,8 @@ export const AdminPostEditor = () => {
                         </section>
                     ) : null}
 
+                    {!esMovil ? <ListaDeComprobacion titulo="Antes de publicar" puntos={chequeo} /> : null}
+
                     {!esMovil ? grupoPublicacion : null}
 
                     <VistaPreviaDePieza
@@ -2018,9 +2101,22 @@ export const AdminPostEditor = () => {
                                       ? "Crear y programar"
                                       : "Programar"
                                   : isCreate
-                                    ? "Crear"
+                                    ? form.status === "draft"
+                                        ? "Guardar borrador"
+                                        : "Crear"
                                     : "Guardar cambios"}
                         </button>
+                        {isCreate && canPublish && form.status === "draft" ? (
+                            <button
+                                type="button"
+                                className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
+                                onClick={() => guardar({ publicar: true })}
+                                disabled={saveState.status === "loading" || Boolean(faltas.length)}
+                                title={faltas.length ? `Falta: ${faltas.join(", ")}` : "Ctrl + Enter"}
+                            >
+                                Publicar
+                            </button>
+                        ) : null}
                         {!isCreate && canPublish ? (
                             <>
                                 {form.status !== "published" ? (

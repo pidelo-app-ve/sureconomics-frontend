@@ -4,7 +4,7 @@ import { EditarTitular } from "../../components/admin/titulares/EditarTitular";
 import { FuentesDeTitulares } from "../../components/admin/titulares/FuentesDeTitulares";
 import { HistorialTitular } from "../../components/admin/titulares/HistorialTitular";
 import { ErrorState, LoadingState } from "../../components/content";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
@@ -13,6 +13,7 @@ import { adminRequest } from "../../lib/api";
 import { recorridoTitulares } from "../../lib/guias/guiaTitulares";
 import { applyPageMeta } from "../../lib/seo";
 import { unwrapEntity } from "../../services/adminResponseUtils";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * «Titulares» en el panel: lo que hace la redacción con los titulares en caliente.
@@ -257,18 +258,16 @@ export const AdminTitulares = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header se-tit-cabecera" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Titulares en caliente
-          </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Titulares en caliente"
+        explica={
+          <>
             Salen solos cada 10 minutos, redactados a partir de lo que publican otros medios, en español e inglés.
             Si uno tiene un error, corríjalo o bórrelo aquí: la web lo cambia en menos de dos minutos.
-          </p>
-        </div>
-        <BotonGuia recorrido={recorridoTitulares} className="se-btn se-btn--secondary se-boton-guia" />
-      </header>
+          </>
+        }
+        guia={recorridoTitulares}
+      />
       <RecorridoVista recorrido={recorridoTitulares} />
 
       <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }}>

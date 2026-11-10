@@ -7,6 +7,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
 import { applyPageMeta } from "../../lib/seo";
 import { unwrapEntity } from "../../services/adminResponseUtils";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * «Traducir el archivo»: las piezas publicadas que aún no tienen inglés, en lote.
@@ -120,19 +121,17 @@ export const AdminTraducciones = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Traducciones
-          </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Traducciones"
+        explica={
+          <>
             Traduce con Claude todas las piezas publicadas que todavía no tienen versión en inglés. Las
             nuevas se siguen traduciendo una a una desde el editor. Lo traducido aquí sale en /en con el
             aviso de traducción automática; para corregir una, ábrala en el editor, revise el inglés y
             guarde.
-          </p>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }}>
         <div className="se-admin-filters" style={{ alignItems: "center" }}>

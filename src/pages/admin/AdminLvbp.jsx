@@ -8,6 +8,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminRequest } from "../../lib/api";
 import { unwrapEntity } from "../../services/adminResponseUtils";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * Los juegos de la LVBP en el panel.
@@ -135,19 +136,17 @@ export const AdminLvbp = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        Béisbol LVBP
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Los marcadores llegan solos de API-Sports mientras hay juego, y la tabla de
-                        posiciones se calcula con los juegos terminados que hay aquí. Esta pantalla es
-                        para lo que la API no trae (un juego de hace más de un día) y para corregir un
-                        marcador. Un juego tocado a mano queda bloqueado: la API ya no lo pisa.
-                    </p>
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo="Béisbol LVBP"
+              explica={
+                <>
+                  Los marcadores llegan solos de API-Sports mientras hay juego, y la tabla de
+                  posiciones se calcula con los juegos terminados que hay aquí. Esta pantalla es
+                  para lo que la API no trae (un juego de hace más de un día) y para corregir un
+                  marcador. Un juego tocado a mano queda bloqueado: la API ya no lo pisa.
+                </>
+              }
+            />
 
             <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }}>
                 <div className="se-admin-filters" style={{ alignItems: "center" }}>

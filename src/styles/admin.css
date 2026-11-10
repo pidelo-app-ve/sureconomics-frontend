@@ -2142,9 +2142,7 @@
   padding: 1.35rem 1.4rem 1.45rem;
   border-radius: 18px;
   border: 1px solid var(--adm-border);
-  background:
-    radial-gradient(900px 520px at 20% 0%, rgba(232, 64, 64, 0.14), transparent 60%),
-    var(--adm-surface);
+  background: var(--adm-surface);
   box-shadow:
     0 1px 0 rgba(var(--se-tinte), 0.06),
     var(--adm-shadow-md);
@@ -6092,6 +6090,65 @@
 
 .se-admin-table__eliminar:disabled {
   opacity: 0.4;
+}
+
+/* —— La cabecera de página, una para todo el panel (CabeceraDePagina) ——
+   Título y explicación a la izquierda; acciones y «Guía» a la derecha, arriba. */
+.se-admin-app .se-cabecera {
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.se-cabecera__texto {
+  flex: 1 1 24rem;
+  min-width: 0;
+}
+
+.se-admin-app .se-cabecera .se-heading-section {
+  margin: 0;
+}
+
+.se-cabecera__explica {
+  max-width: 78ch;
+  margin: 0.5rem 0 0;
+}
+
+.se-cabecera__dato {
+  margin: 0.5rem 0 0;
+}
+
+.se-cabecera .se-boton-guia {
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.se-cabecera .se-guardado {
+  margin-left: 0.75rem;
+}
+
+/* Mientras se abre la página siguiente: una línea que corre arriba del contenido. */
+.se-admin-abriendo {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 3px;
+  margin-bottom: -3px;
+  background: linear-gradient(90deg, transparent, var(--adm-accent), transparent);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: se-admin-abriendo 1s linear infinite;
+}
+
+@keyframes se-admin-abriendo {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-admin-abriendo {
+    animation: none;
+    background: var(--adm-accent);
+  }
 }
 
 /* La barra de «Guardar» de las páginas largas. Con cambios se pega abajo (pegada y no

@@ -9,6 +9,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const DIRECCIONES = [
     { value: "up", label: "Subió" },
@@ -113,25 +114,23 @@ export const AdminMarketTicker = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        Cinta de mercado
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Las cifras que corren en la cabecera del sitio. No hay conexión con ningún
-                        mercado: esto es lo que ustedes escriban. Por eso el sello importa — es lo
-                        que le dice al lector a qué cierre corresponden los números.
-                        {updatedAt ? (
-                            <>
-                                {" "}
-                                Última actualización:{" "}
-                                <strong>{new Date(updatedAt).toLocaleString("es")}</strong>.
-                            </>
-                        ) : null}
-                    </p>
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo="Cinta de mercado"
+              explica={
+                <>
+                  Las cifras que corren en la cabecera del sitio. No hay conexión con ningún
+                  mercado: esto es lo que ustedes escriban. Por eso el sello importa — es lo
+                  que le dice al lector a qué cierre corresponden los números.
+                  {updatedAt ? (
+                      <>
+                          {" "}
+                          Última actualización:{" "}
+                          <strong>{new Date(updatedAt).toLocaleString("es")}</strong>.
+                      </>
+                  ) : null}
+                </>
+              }
+            />
 
             <div className="se-editor-group">
                 <p className="se-editor-group__title">El sello</p>

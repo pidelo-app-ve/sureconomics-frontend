@@ -5,6 +5,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * The fourteen topics: rename, reorder, retire.
@@ -86,19 +87,17 @@ export const AdminTopicsList = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        Temas
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Lista cerrada de {state.items.length}. Los redactores eligen de aquí y no añaden:
-                        eso es lo que mantiene el panel de filtros legible. Retirar un tema lo esconde de
-                        los filtros del lector sin desclasificar las piezas que ya lo llevan, y por eso no
-                        hay opción de borrar. Cada nombre se guarda solo al salir de su casilla.
-                    </p>
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo="Temas"
+              explica={
+                <>
+                  Lista cerrada de {state.items.length}. Los redactores eligen de aquí y no añaden:
+                  eso es lo que mantiene el panel de filtros legible. Retirar un tema lo esconde de
+                  los filtros del lector sin desclasificar las piezas que ya lo llevan, y por eso no
+                  hay opción de borrar. Cada nombre se guarda solo al salir de su casilla.
+                </>
+              }
+            />
 
             <div className="se-admin-table-wrap">
                 <table className="se-admin-table">

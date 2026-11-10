@@ -4,6 +4,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { getConsentimiento, getEnVivo, getResumen } from "../../services/adminAnaliticaService";
 import "../../styles/analitica-consentimiento.css";
 import { enlaceWeb } from "../../lib/enlaces";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
@@ -684,52 +685,55 @@ export const AdminAnalitica = () => {
 
   return (
     <div className="se-admin-shell se-aud">
-      <header className="se-admin-shell__header se-aud__cabecera">
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Audiencia
-          </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem", maxWidth: "70ch" }}>
+      <CabeceraDePagina
+        titulo="Audiencia"
+        explica={
+          <>
             Medición propia, sin herramientas de terceros. Cuenta solo a quien aceptó las
             cookies, así que todo lo de aquí es un suelo: la audiencia real es algo mayor.
-          </p>
-        </div>
-        {/* Un solo filtro, arriba, y manda sobre todos los bloques. */}
-        <div className="se-aud__mandos">
-          <div className="se-aud__periodos" role="group" aria-label="Periodo">
-            {PERIODOS.map((p) => (
-              <button
-                key={p.dias}
-                type="button"
-                className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
-                aria-pressed={dias === p.dias}
-                onClick={() => setDias(p.dias)}
-              >
-                {p.etiqueta}
-              </button>
-            ))}
-          </div>
+          </>
+        }
+        acciones={
+          <>
+            {/* Un solo filtro, arriba, y manda sobre todos los bloques. */}
+            <div className="se-aud__mandos">
+              <div className="se-aud__periodos" role="group" aria-label="Periodo">
+                {PERIODOS.map((p) => (
+                  <button
+                    key={p.dias}
+                    type="button"
+                    className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
+                    aria-pressed={dias === p.dias}
+                    onClick={() => setDias(p.dias)}
+                  >
+                    {p.etiqueta}
+                  </button>
+                ))}
+              </div>
 
-          <div className="se-aud__refresco">
-            <button
-              type="button"
-              className="se-aud__actualizar"
-              onClick={actualizar}
-              disabled={aMano || cargando}
-            >
-              <span className="se-aud__actualizar-icono" aria-hidden="true">
-                ↻
-              </span>
-              {aMano ? "Actualizando…" : "Actualizar"}
-            </button>
-            {/* `aria-live` para que quien no ve la pantalla se entere de que hay datos
-                nuevos; `polite` porque no es una urgencia que deba cortar la lectura. */}
-            <span className="se-aud__sello" aria-live="polite">
-              {desdeHace(actualizado, reloj)}
-            </span>
-          </div>
-        </div>
-      </header>
+              <div className="se-aud__refresco">
+                <button
+                  type="button"
+                  className="se-aud__actualizar"
+                  onClick={actualizar}
+                  disabled={aMano || cargando}
+                >
+                  <span className="se-aud__actualizar-icono" aria-hidden="true">
+                    ↻
+                  </span>
+                  {aMano ? "Actualizando…" : "Actualizar"}
+                </button>
+                {/* `aria-live` para que quien no ve la pantalla se entere de que hay datos
+                    nuevos; `polite` porque no es una urgencia que deba cortar la lectura. */}
+                <span className="se-aud__sello" aria-live="polite">
+                  {desdeHace(actualizado, reloj)}
+                </span>
+              </div>
+            </div>
+          </>
+        }
+        className="se-aud__cabecera"
+      />
 
       {error ? (
         <p className="se-admin-form-feedback" role="alert">

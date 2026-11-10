@@ -36,6 +36,8 @@ import {
   listarComprasDeModulo,
 } from "../../services/adminEducacionService";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { LoadingState } from "../../components/content";
 
 /**
  * El panel de Educacion: modulos, lecciones y su orden.
@@ -929,22 +931,20 @@ export const AdminEducacion = () => {
 
   return (
     <div className="se-admin-shell se-admin-edu">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Educación
-          </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem", maxWidth: "70ch" }}>
+      <CabeceraDePagina
+        titulo="Educación"
+        explica={
+          <>
             Cada módulo se compra entero. La primera lección siempre es gratuita —con
             cuenta y correo verificado— y es la que engancha: conviene que sea la mejor.
             Los cambios se guardan al momento.
-          </p>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {resumen ? <CifrasDeEducacion resumen={resumen} /> : null}
 
-      {carga.estado === "cargando" ? <p className="se-admin-meta-hint">Cargando…</p> : null}
+      {carga.estado === "cargando" ? <LoadingState /> : null}
       {carga.estado === "error" ? (
         <p className="se-admin-form-feedback" role="alert">
           {carga.error}

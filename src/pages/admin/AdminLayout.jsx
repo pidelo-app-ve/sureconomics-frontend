@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useNavigation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../../context/AuthContext";
 import { AdminToastProvider } from "../../context/AdminToastContext";
@@ -51,6 +51,8 @@ const IconoBuscar = () => (
 const AdminShell = () => {
   const { logout, role } = useAuth();
   const location = useLocation();
+  // Las páginas se bajan al entrar: mientras llega la siguiente, el panel no decía nada.
+  const abriendo = useNavigation().state === "loading";
   const [menuOpen, setMenuOpen] = useState(false);
   const [buscando, setBuscando] = useState(false);
   const menu = useMemo(() => menuPara(role), [role]);
@@ -242,6 +244,7 @@ const AdminShell = () => {
         </aside>
 
         <main className="se-admin-main" role="main">
+          {abriendo ? <div className="se-admin-abriendo" role="status" aria-label="Abriendo la página" /> : null}
           <div className="se-admin-main__surface">
             <div key={location.pathname} className="se-admin-main__outlet">
               <Outlet />

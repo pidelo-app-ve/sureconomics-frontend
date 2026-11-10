@@ -4,6 +4,7 @@ import { ErrorState, LoadingState } from "../../components/content";
 import { dispatchAdminAuthSync } from "../../lib/api";
 import { persistAuth } from "../../lib/authStorage";
 import { applyPageMeta } from "../../lib/seo";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ROLE_LABELS = {
   escritor: "Escritor",
@@ -93,14 +94,14 @@ export const AdminMiPerfil = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1.5rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>
-          Mi perfil
-        </h1>
-        <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
-          Rol: {ROLE_LABELS[state.data?.role] ?? state.data?.role ?? "—"}
-        </p>
-      </header>
+      <CabeceraDePagina
+        titulo="Mi perfil"
+        dato={
+          <>
+            Rol: {ROLE_LABELS[state.data?.role] ?? state.data?.role ?? "—"}
+          </>
+        }
+      />
 
       <form
         className="se-contact-form"

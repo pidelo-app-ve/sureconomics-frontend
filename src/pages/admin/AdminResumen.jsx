@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { AssetField } from "../../components/admin/AssetField";
 import { ErrorState, LoadingState } from "../../components/content";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
@@ -11,6 +11,7 @@ import { recorridoResumen } from "../../lib/guias/guiaResumen";
 import { applyPageMeta } from "../../lib/seo";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
 import { unwrapEntity } from "../../services/adminResponseUtils";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * «Resumen diario» en el panel: ver cómo va a llegar al canal cada edición y ajustarla.
@@ -416,17 +417,17 @@ export const AdminResumen = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header se-tit-cabecera" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>Resumen diario</h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Resumen diario"
+        explica={
+          <>
             Sale solo a las {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y WhatsApp. Cada
             edición se arma una hora antes: hasta su hora puedes ajustarla o frenarla.
             {datos.reloj_encendido ? "" : " (Aquí no sale sola: ármala con los botones.)"}
-          </p>
-        </div>
-        <BotonGuia recorrido={recorridoResumen} className="se-btn se-btn--secondary se-tit-guia" />
-      </header>
+          </>
+        }
+        guia={recorridoResumen}
+      />
       <RecorridoVista recorrido={recorridoResumen} />
 
       {/* Las tres de hoy: su estado de un vistazo, y abrir o armar cada una. */}

@@ -17,6 +17,8 @@ import {
   sincronizarInstagram,
   sincronizarTiktok,
 } from "../../services/adminSettingsService";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { LoadingState } from "../../components/content";
 
 /**
  * «En redes»: qué publicaciones se destacan al pie de todas las vistas.
@@ -613,20 +615,20 @@ export const AdminRedes = () => {
 
   return (
     <div className="se-admin-shell">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>En redes</h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="En redes"
+        explica={
+          <>
             Lo que se destaca al pie de todas las páginas. Pegue el enlace de la
             publicación y escriba el texto como quiere que se lea; en Instagram y en
             TikTok, suba también la imagen -- en TikTok, un fotograma o una captura
             del video. El orden de aquí es el orden de la fila. Se guarda todo de una
             vez al pulsar Guardar.
-          </p>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      {carga.status === "loading" ? <p className="se-admin-meta-hint">Cargando…</p> : null}
+      {carga.status === "loading" ? <LoadingState /> : null}
       {carga.status === "error" ? (
         <p className="se-admin-form-feedback" role="alert">{carga.error}</p>
       ) : null}

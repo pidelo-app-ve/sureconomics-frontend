@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ESTADOS_DE_CAMPANA, estadoDeCampana } from "../../components/admin/MuralDeAnunciantes";
 import { MapaDelSitio } from "../../components/admin/mapa/MapaDelSitio";
 import { PlazasFijas } from "../../components/admin/PlazasFijas";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoPublicidad } from "../../lib/guias/guiaPublicidad";
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminToast } from "../../context/AdminToastContext";
@@ -40,6 +40,7 @@ import {
   getResumen,
   listar,
 } from "../../services/adminPublicidadService";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * El panel de publicidad: anunciantes, campañas, piezas y cifras.
@@ -1360,35 +1361,35 @@ export const AdminPublicidad = () => {
 
   return (
     <div className="se-admin-shell se-admin-pub">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-admin-shell__title">
+      <CabeceraDePagina
+        titulo={
+          <>
             Publicidad
             {guardado ? <span className="se-guardado">Guardado ✓</span> : null}
-          </h1>
-          <p className="se-admin-shell__subtitle">
-            Quién anuncia, qué campañas están al aire y cómo rinden.
-          </p>
-        </div>
-        <div className="se-editor-cabecera__acciones">
-        {/* El camino guiado, arriba y destacado. La lista de abajo sigue haciendo lo
-            mismo para quien ya sabe cómo encajan los tres niveles; esto existe para
-            quien no, que antes se encontraba una lista vacía y ninguna pista. */}
-        <button
-          type="button"
-          className="se-btn se-btn--primary"
-          onClick={() => {
-            setAsistenteCon(null);
-            setAsistente(true);
-          }}
-          disabled={carga.estado !== "listo"}
-          {...ancla("publicar")}
-        >
-          Publicar un anuncio
-        </button>
-        <BotonGuia recorrido={recorridoPublicidad} className="se-btn se-btn--secondary se-boton-guia" />
-        </div>
-      </header>
+          </>
+        }
+        explica="Quién anuncia, qué campañas están al aire y cómo rinden."
+        acciones={
+          <>
+            {/* El camino guiado, arriba y destacado. La lista de abajo sigue haciendo lo
+                mismo para quien ya sabe cómo encajan los tres niveles; esto existe para
+                quien no, que antes se encontraba una lista vacía y ninguna pista. */}
+            <button
+              type="button"
+              className="se-btn se-btn--primary"
+              onClick={() => {
+                setAsistenteCon(null);
+                setAsistente(true);
+              }}
+              disabled={carga.estado !== "listo"}
+              {...ancla("publicar")}
+            >
+              Publicar un anuncio
+            </button>
+          </>
+        }
+        guia={recorridoPublicidad}
+      />
 
       {carga.estado === "error" ? (
         <p className="se-admin-form-error">{carga.error}</p>

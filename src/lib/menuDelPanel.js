@@ -22,7 +22,7 @@ export const MENU_DEL_PANEL = [
       { to: "/admin/media", nombre: "Archivos", permiso: "todos", palabras: "imágenes fotos pdf audio biblioteca subir" },
       { to: "/admin/traducciones", nombre: "Traducciones", permiso: "todos", palabras: "inglés english traducir claude" },
       { to: "/admin/comments", nombre: "Comentarios", permiso: "editorial", palabras: "moderar lectores" },
-      { to: "/admin/submissions", nombre: "Propuestas de lectores", permiso: "editorial", palabras: "envíos colaborativos colaboradores" },
+      { to: "/admin/submissions", nombre: "Propuestas de lectores", permiso: "editorial", palabras: "envíos colaborativos colaboradores ajustes abrir cerrar recibir" },
       { to: "/admin/equipo", nombre: "Fotos del equipo", permiso: "todos", palabras: "quiénes somos retratos" },
     ],
   },
@@ -68,7 +68,6 @@ export const MENU_DEL_PANEL = [
     items: [
       { to: "/admin/topics", nombre: "Temas", permiso: "todos", palabras: "clasificación categorías" },
       { to: "/admin/places", nombre: "Lugares", permiso: "todos", palabras: "países regiones" },
-      { to: "/admin/settings/collaboration", nombre: "Ajustes de propuestas", permiso: "todos", palabras: "colaboración envíos" },
       { to: "/admin/staff", nombre: "Personal", permiso: "admin", palabras: "equipo roles cuentas del panel" },
       { to: "/admin/perfil", nombre: "Mi perfil", permiso: "todos", palabras: "contraseña nombre correo" },
     ],

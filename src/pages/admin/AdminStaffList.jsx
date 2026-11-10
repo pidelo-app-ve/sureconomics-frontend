@@ -10,6 +10,7 @@ import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ROLE_OPTIONS = [
   { value: "escritor", label: "Escritor" },
@@ -155,11 +156,9 @@ export const AdminStaffList = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1.5rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>
-          Personal
-        </h1>
-      </header>
+      <CabeceraDePagina
+        titulo="Personal"
+      />
 
       <form
         className="se-contact-form"

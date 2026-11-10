@@ -13,6 +13,8 @@ import {
 } from "../../services/adminMediaService";
 import { getTeamPhotos, putTeamPhotos } from "../../services/adminSettingsService";
 import { RecorteDeAvatar } from "../../components/admin/RecorteDeAvatar";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { LoadingState } from "../../components/content";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
 const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -350,20 +352,18 @@ export const AdminEquipo = () => {
 
   return (
     <div className="se-admin-shell">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Fotos del equipo
-          </h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Fotos del equipo"
+        explica={
+          <>
             Pulse el círculo de una persona para subir su foto. Quien no tenga sale con
             sus iniciales, que es normal y no un error. Los nombres y los cargos no se
             editan aquí. JPG, PNG, WebP, GIF o AVIF, hasta {formatMb(MAX_IMAGE_BYTES)}.
-          </p>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      {carga.status === "loading" ? <p className="se-admin-meta-hint">Cargando…</p> : null}
+      {carga.status === "loading" ? <LoadingState /> : null}
       {carga.status === "error" ? (
         <p className="se-admin-form-feedback" role="alert">
           {carga.error}

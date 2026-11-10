@@ -6,6 +6,7 @@ import {
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const FECHA = new Intl.DateTimeFormat("es-VE", {
   day: "2-digit", month: "short", year: "numeric",
@@ -88,48 +89,51 @@ export const AdminNewsletterList = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>Suscriptores del boletín</h1>
-          <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Suscriptores del boletín"
+        dato={
+          <>
             {state.meta?.total != null
               ? `${state.meta.total} ${estado === "unsubscribed" ? "bajas" : "en la lista"}`
               : "Quién pidió recibirlo"}
-          </p>
-        </div>
+          </>
+        }
+        acciones={
+          <>
+            {/* La cabecera ya reparte con `justify-content: space-between`, así que este
+                grupo se queda a la derecha sin CSS nuevo. */}
+            <div className="se-boletin__acciones">
+              <label className="se-form-field" htmlFor="boletin-estado">
+                <span className="se-sr-only">Estado</span>
+                <select
+                  id="boletin-estado"
+                  className="se-form-control"
+                  value={estado}
+                  onChange={(e) => cambiarFiltro(e.target.value)}
+                >
+                  <option value="subscribed">Suscritos</option>
+                  <option value="unsubscribed">Dados de baja</option>
+                  <option value="all">Todos</option>
+                </select>
+              </label>
 
-        {/* La cabecera ya reparte con `justify-content: space-between`, así que este
-            grupo se queda a la derecha sin CSS nuevo. */}
-        <div className="se-boletin__acciones">
-          <label className="se-form-field" htmlFor="boletin-estado">
-            <span className="se-sr-only">Estado</span>
-            <select
-              id="boletin-estado"
-              className="se-form-control"
-              value={estado}
-              onChange={(e) => cambiarFiltro(e.target.value)}
-            >
-              <option value="subscribed">Suscritos</option>
-              <option value="unsubscribed">Dados de baja</option>
-              <option value="all">Todos</option>
-            </select>
-          </label>
-
-          {/* Sólo `admin`: un publicador puede ver el listado en pantalla, y llevarse
-              todos los correos en un archivo es otra cosa. El servidor lo exige igual,
-              esto sólo evita ofrecer un botón que iba a dar 403. */}
-          {role === "admin" ? (
-            <button
-              type="button"
-              className="se-btn"
-              onClick={descargar}
-              disabled={csv.status === "loading"}
-            >
-              {csv.status === "loading" ? "Preparando…" : "Descargar CSV"}
-            </button>
-          ) : null}
-        </div>
-      </header>
+              {/* Sólo `admin`: un publicador puede ver el listado en pantalla, y llevarse
+                  todos los correos en un archivo es otra cosa. El servidor lo exige igual,
+                  esto sólo evita ofrecer un botón que iba a dar 403. */}
+              {role === "admin" ? (
+                <button
+                  type="button"
+                  className="se-btn"
+                  onClick={descargar}
+                  disabled={csv.status === "loading"}
+                >
+                  {csv.status === "loading" ? "Preparando…" : "Descargar CSV"}
+                </button>
+              ) : null}
+            </div>
+          </>
+        }
+      />
 
       {csv.status === "error" ? (
         <p className="se-admin-form-feedback" role="alert">{csv.error}</p>

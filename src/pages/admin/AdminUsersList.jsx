@@ -6,6 +6,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { puedeEnviarPropuestas } from "../../lib/adminUserDetailDisplay";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const flagLabel = (row) => {
   const v = puedeEnviarPropuestas(row);
@@ -44,11 +45,9 @@ export const AdminUsersList = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1.5rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>
-          Usuarios
-        </h1>
-      </header>
+      <CabeceraDePagina
+        titulo="Usuarios"
+      />
 
       {state.status === "loading" ? <LoadingState title="Cargando usuarios…" /> : null}
       {state.status === "error" ? (

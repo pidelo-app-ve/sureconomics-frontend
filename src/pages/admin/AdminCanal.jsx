@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ErrorState, LoadingState } from "../../components/content";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
@@ -15,6 +15,7 @@ import {
   quitarYoutube,
   sincronizarYoutube,
 } from "../../services/adminSettingsService";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * El canal de YouTube de la casa: cuál es, qué llegó de él y qué no sale.
@@ -157,16 +158,16 @@ export const AdminCanal = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header se-tit-cabecera" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>Canal de YouTube</h1>
-          <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
+      <CabeceraDePagina
+        titulo="Canal de YouTube"
+        explica={
+          <>
             Los shorts salen en la portada, en la fila «En la calle», y el último video, en la ventana «Nuestro
             canal». Llegan solos cada hora.
-          </p>
-        </div>
-        <BotonGuia recorrido={recorridoCanal} className="se-btn se-btn--secondary se-boton-guia" />
-      </header>
+          </>
+        }
+        guia={recorridoCanal}
+      />
       <RecorridoVista recorrido={recorridoCanal} />
 
       <section className="se-admin-table-wrap se-admin-canal__canal" {...ancla("canal")}>

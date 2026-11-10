@@ -24,8 +24,10 @@ import {
   verNumero,
 } from "../../services/adminBoletinService";
 import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../services/adminMediaService";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoBoletin } from "../../lib/guias/guiaBoletin";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { LoadingState } from "../../components/content";
 
 const anclaBoletin = (clave) => ({ [recorridoBoletin.atributo]: clave });
 
@@ -859,23 +861,25 @@ export const AdminBoletin = () => {
 
   return (
     <div className="se-admin-shell se-bol">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <div>
-          <h1 className="se-admin-shell__title">Entorno en Viñetas</h1>
-          <p className="se-admin-shell__subtitle">
+      <CabeceraDePagina
+        titulo="Entorno en Viñetas"
+        explica={
+          <>
             Un número por lunes. Se suben las páginas, se manda una prueba para ver cómo
             queda y se activa: ese lunes a las 9:00 sale solo a todos los suscriptores.
-          </p>
-        </div>
-        <div className="se-editor-cabecera__acciones">
-          {!abierto ? (
-            <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo} {...anclaBoletin("nuevo")}>
-              Nuevo número
-            </button>
-          ) : null}
-          <BotonGuia recorrido={recorridoBoletin} className="se-btn se-btn--secondary se-boton-guia" />
-        </div>
-      </header>
+          </>
+        }
+        acciones={
+          <>
+            {!abierto ? (
+              <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo} {...anclaBoletin("nuevo")}>
+                Nuevo número
+              </button>
+            ) : null}
+          </>
+        }
+        guia={recorridoBoletin}
+      />
 
       {error ? <p className="se-admin-form-error">{error}</p> : null}
 
@@ -902,7 +906,7 @@ export const AdminBoletin = () => {
           }}
         />
       ) : numeros === null ? (
-        !error ? <p className="se-admin-meta-hint">Cargando…</p> : null
+        !error ? <LoadingState /> : null
       ) : (
         <Listado numeros={numeros} onAbrir={abrir} onNuevo={abrirNuevo} />
       )}

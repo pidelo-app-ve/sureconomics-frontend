@@ -12,6 +12,7 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * The geography tree: Mundo, its continents, their regions, and the countries.
@@ -212,20 +213,18 @@ export const AdminPlacesList = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        Lugares
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        El árbol es Mundo → continentes → regiones → países. Una pieza se etiqueta con
-                        el lugar más específico que aplique, normalmente un país.
-                        Al filtrar por una región aparecen sus países, así que el conteo de una región es
-                        solo el de las piezas etiquetadas con la región misma. El nombre en inglés se guarda
-                        solo al salir de su casilla.
-                    </p>
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo="Lugares"
+              explica={
+                <>
+                  El árbol es Mundo → continentes → regiones → países. Una pieza se etiqueta con
+                  el lugar más específico que aplique, normalmente un país.
+                  Al filtrar por una región aparecen sus países, así que el conteo de una región es
+                  solo el de las piezas etiquetadas con la región misma. El nombre en inglés se guarda
+                  solo al salir de su casilla.
+                </>
+              }
+            />
 
             <div className="se-admin-table-wrap">
                 <table className="se-admin-table">

@@ -198,7 +198,8 @@ export const router = createBrowserRouter([
                     { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin") },
                     { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList") },
                     { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail") },
-                    { path: "settings/collaboration", lazy: pagina(() => import("./pages/admin/AdminCollaborationSettings"), "AdminCollaborationSettings") },
+                    // Era una página con una sola casilla; ahora es un interruptor en Propuestas.
+                    { path: "settings/collaboration", element: <Navigate to="/admin/submissions" replace /> },
                     { path: "users", lazy: pagina(() => import("./pages/admin/AdminUsersList"), "AdminUsersList") },
                     { path: "users/:id", lazy: pagina(() => import("./pages/admin/AdminUserDetail"), "AdminUserDetail") },
                     { path: "staff", lazy: pagina(() => import("./pages/admin/AdminStaffList"), "AdminStaffList") },

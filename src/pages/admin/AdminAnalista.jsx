@@ -3,6 +3,7 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import { listAdminCarreras, moderarCarrera } from "../../services/analistaService";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * El ranking de El Analista, para moderarlo.
@@ -84,11 +85,9 @@ export const AdminAnalista = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>
-          Ranking de El Analista
-        </h1>
-      </header>
+      <CabeceraDePagina
+        titulo="Ranking de El Analista"
+      />
       <p className="se-text-body" style={{ marginTop: 0, maxWidth: "62ch" }}>
         Cada carrera la anotó un lector con cuenta y el correo confirmado. Ocultar una la saca
         del ranking sin borrarla; si esa cuenta tiene otra carrera, sale la siguiente mejor.

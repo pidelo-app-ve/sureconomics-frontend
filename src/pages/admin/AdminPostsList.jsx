@@ -10,8 +10,9 @@ import { useAuth } from "../../context/AuthContext";
 import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
 import { rutaDePieza } from "../../lib/pieza";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoContenido } from "../../lib/guias/guiaContenido";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ancla = (clave) => ({ [recorridoContenido.atributo]: clave });
 
@@ -180,19 +181,19 @@ export const AdminPostsList = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1.5rem" }}>
-                <h1 className="se-heading-section" style={{ margin: 0 }}>
-                    Contenido
-                </h1>
-                <div className="se-editor-cabecera__acciones">
-                    {canCreate ? (
-                        <Link to="/admin/posts/new" className="se-btn" {...ancla("crear")}>
-                            Crear pieza
-                        </Link>
-                    ) : null}
-                    <BotonGuia recorrido={recorridoContenido} className="se-btn se-btn--secondary se-boton-guia" />
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo="Contenido"
+              acciones={
+                <>
+                  {canCreate ? (
+                      <Link to="/admin/posts/new" className="se-btn" {...ancla("crear")}>
+                          Crear pieza
+                      </Link>
+                  ) : null}
+                </>
+              }
+              guia={recorridoContenido}
+            />
 
             <div className="se-admin-filters" {...ancla("filtros")}>
                 {esMovil ? (

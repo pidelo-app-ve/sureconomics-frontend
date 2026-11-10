@@ -20,8 +20,9 @@ import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoArchivos } from "../../lib/guias/guiaArchivos";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ancla = (clave) => ({ [recorridoArchivos.atributo]: clave });
 
@@ -204,36 +205,38 @@ export const AdminMediaLibrary = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        Archivos
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        Imágenes, videos, documentos y podcast. Un archivo adjunto a una pieza no se puede
-                        eliminar: habría que quitarlo de la pieza primero.
-                    </p>
-                </div>
-                {canUpload ? (
-                    <div className="se-admin-create" {...ancla("subir")}>
-                        {/* Un solo botón: el tipo lo dice el archivo. Tres botones rellenos
-                            iguales («Subir imagen», «Subir PDF», «Subir audio») eran tres
-                            acciones principales para una sola tarea. */}
-                        <label className={`se-btn${busy ? " is-busy" : ""}`}>
-                            {busy ? "Subiendo…" : "Subir archivo"}
-                            <input
-                                type="file"
-                                accept={`${ACCEPTED_IMAGE_MIME},${ACCEPTED_DOCUMENT_MIME},${ACCEPTED_AUDIO_MIME}`}
-                                onChange={subirSegunElTipo}
-                                disabled={busy}
-                                className="se-sr-only"
-                            />
-                        </label>
-                        <span className="se-admin-meta-hint">Imagen, PDF o audio (MP3, M4A).</span>
-                    </div>
-                ) : null}
-                <BotonGuia recorrido={recorridoArchivos} className="se-btn se-btn--secondary se-boton-guia" />
-            </header>
+            <CabeceraDePagina
+              titulo="Archivos"
+              explica={
+                <>
+                  Imágenes, videos, documentos y podcast. Un archivo adjunto a una pieza no se puede
+                  eliminar: habría que quitarlo de la pieza primero.
+                </>
+              }
+              acciones={
+                <>
+                  {canUpload ? (
+                      <div className="se-admin-create" {...ancla("subir")}>
+                          {/* Un solo botón: el tipo lo dice el archivo. Tres botones rellenos
+                              iguales («Subir imagen», «Subir PDF», «Subir audio») eran tres
+                              acciones principales para una sola tarea. */}
+                          <label className={`se-btn${busy ? " is-busy" : ""}`}>
+                              {busy ? "Subiendo…" : "Subir archivo"}
+                              <input
+                                  type="file"
+                                  accept={`${ACCEPTED_IMAGE_MIME},${ACCEPTED_DOCUMENT_MIME},${ACCEPTED_AUDIO_MIME}`}
+                                  onChange={subirSegunElTipo}
+                                  disabled={busy}
+                                  className="se-sr-only"
+                              />
+                          </label>
+                          <span className="se-admin-meta-hint">Imagen, PDF o audio (MP3, M4A).</span>
+                      </div>
+                  ) : null}
+                </>
+              }
+              guia={recorridoArchivos}
+            />
 
             <div className="se-admin-filters" {...ancla("filtros")}>
                 <label className="se-admin-filters__field">

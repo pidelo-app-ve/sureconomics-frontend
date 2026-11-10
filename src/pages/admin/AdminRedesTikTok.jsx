@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { conectarTiktok } from "../../services/adminSettingsService";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * La vuelta de TikTok. Es la «Redirect URI» registrada en Login Kit, así que TikTok manda
@@ -46,9 +47,9 @@ export const AdminRedesTikTok = () => {
 
   return (
     <div className="se-admin-shell">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>Conectar TikTok</h1>
-      </header>
+      <CabeceraDePagina
+        titulo="Conectar TikTok"
+      />
       {error ? (
         <>
           <p className="se-admin-form-feedback" role="alert">{error}</p>

@@ -12,6 +12,7 @@ import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -187,11 +188,9 @@ export const AdminCommentsList = () => {
 
   return (
     <main role="main">
-      <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-        <h1 className="se-heading-section" style={{ margin: 0 }}>
-          Comentarios
-        </h1>
-      </header>
+      <CabeceraDePagina
+        titulo="Comentarios"
+      />
 
       <form
         className="se-contact-form se-contact-form--toolbar"

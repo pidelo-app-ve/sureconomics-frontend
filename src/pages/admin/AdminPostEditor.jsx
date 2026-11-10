@@ -58,8 +58,9 @@ import { enlaceWeb } from "../../lib/enlaces";
 import { EncuadreDeFoto } from "../../components/admin/EncuadreDeFoto";
 import { rutaDePieza } from "../../lib/pieza";
 import { useBorradorLocal } from "../../hooks/useBorradorLocal";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEditor } from "../../lib/guias/guiaEditor";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * Which extra fields each format asks for.
@@ -1084,31 +1085,35 @@ export const AdminPostEditor = () => {
 
     return (
         <main role="main" className={esMovil ? "se-editor-movil" : "se-editor-escritorio"}>
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        {/* "Crear"/"Editar" + the name works for every format;
-                            "nueva informe" would not. */}
-                        {isCreate
-                            ? currentFormat ? `Crear ${currentFormat.name.toLowerCase()}` : "Crear pieza"
-                            : `Editar ${currentFormat?.name?.toLowerCase() ?? "pieza"} #${postId}`}
-                    </h1>
-                    <p className="se-meta se-meta--category" style={{ marginTop: "0.5rem" }}>
-                        Estado:{" "}
-                        {form.status === "published"
-                            ? "publicado"
-                            : programada
-                              ? `programado para el ${fechaDeCaracas(form.published_at) || "…"} (hora de Caracas)`
-                              : "borrador"}
-                    </p>
-                </div>
-                <div className="se-editor-cabecera__acciones">
-                    <Link to="/admin/posts" className="se-link">
-                        Volver al listado
-                    </Link>
-                    <BotonGuia recorrido={recorridoEditor} className="se-btn se-btn--secondary se-boton-guia" />
-                </div>
-            </header>
+            <CabeceraDePagina
+              titulo={
+                <>
+                  {/* "Crear"/"Editar" + the name works for every format;
+                      "nueva informe" would not. */}
+                  {isCreate
+                      ? currentFormat ? `Crear ${currentFormat.name.toLowerCase()}` : "Crear pieza"
+                      : `Editar ${currentFormat?.name?.toLowerCase() ?? "pieza"} #${postId}`}
+                </>
+              }
+              dato={
+                <>
+                  Estado:{" "}
+                  {form.status === "published"
+                      ? "publicado"
+                      : programada
+                        ? `programado para el ${fechaDeCaracas(form.published_at) || "…"} (hora de Caracas)`
+                        : "borrador"}
+                </>
+              }
+              acciones={
+                <>
+                  <Link to="/admin/posts" className="se-link">
+                      Volver al listado
+                  </Link>
+                </>
+              }
+              guia={recorridoEditor}
+            />
 
             {borrador.recuperadoEn ? (
                 <p className="se-editor-recuperado" role="status">

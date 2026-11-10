@@ -13,6 +13,7 @@ import {
     patchAdminPalabra,
 } from "../../services/adminClaveService";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 /**
  * El catálogo de «La Clave»: las palabras de las que sale la del día, por categoría.
@@ -125,35 +126,39 @@ export const AdminJuegoPalabras = () => {
 
     return (
         <main role="main">
-            <header className="se-admin-shell__header" style={{ marginBottom: "1rem" }}>
-                <div>
-                    <h1 className="se-heading-section" style={{ margin: 0 }}>
-                        La Clave
-                    </h1>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-                        De aquí sale la palabra del día de cada categoría: el servidor elige una entre
-                        las activas, la misma para todos. Valen nombres propios (equipos, películas,
-                        héroes): de 4 a 10 letras, una sola palabra, con tilde o sin ella. La
-                        definición y la pista son opcionales; la pista se ofrece al tercer fallo y la
-                        definición se enseña al terminar.
-                    </p>
-                    <p className="se-admin-meta-hint" style={{ marginTop: "0.4rem" }}>
-                        {categorias.map((c) => `${nombreDe(c)}: ${totalPorCategoria[c] ?? 0}`).join(" · ")}
-                    </p>
-                </div>
-                {puedeEditar ? (
-                    <button
-                        type="button"
-                        className="se-btn se-btn--secondary"
-                        onClick={() => {
-                            setResultadoLote(null);
-                            setLote({ categoria: nueva.categoria, texto: "" });
-                        }}
-                    >
-                        Pegar una lista
-                    </button>
-                ) : null}
-            </header>
+            <CabeceraDePagina
+              titulo="La Clave"
+              explica={
+                <>
+                  De aquí sale la palabra del día de cada categoría: el servidor elige una entre
+                  las activas, la misma para todos. Valen nombres propios (equipos, películas,
+                  héroes): de 4 a 10 letras, una sola palabra, con tilde o sin ella. La
+                  definición y la pista son opcionales; la pista se ofrece al tercer fallo y la
+                  definición se enseña al terminar.
+                </>
+              }
+              dato={
+                <>
+                  {categorias.map((c) => `${nombreDe(c)}: ${totalPorCategoria[c] ?? 0}`).join(" · ")}
+                </>
+              }
+              acciones={
+                <>
+                  {puedeEditar ? (
+                      <button
+                          type="button"
+                          className="se-btn se-btn--secondary"
+                          onClick={() => {
+                              setResultadoLote(null);
+                              setLote({ categoria: nueva.categoria, texto: "" });
+                          }}
+                      >
+                          Pegar una lista
+                      </button>
+                  ) : null}
+                </>
+              }
+            />
 
             {puedeEditar ? (
                 <form className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} onSubmit={crear}>

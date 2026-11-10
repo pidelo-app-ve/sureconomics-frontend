@@ -10,6 +10,8 @@ import {
   submissionStatusLabel,
 } from "../../lib/submissionDisplay";
 import { useAuth } from "../../context/AuthContext";
+import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { AjusteDePropuestas } from "../../components/admin/AjusteDePropuestas";
 
 const STATUS_FILTERS = [
   { value: "", label: "Todos" },
@@ -101,17 +103,11 @@ export const AdminSubmissionsList = () => {
 
   return (
     <main role="main" className="se-admin-submissions">
-      <header className="se-admin-shell__header" style={{ marginBottom: "0.5rem", alignItems: "flex-start" }}>
-        <div>
-          <h1 className="se-heading-section" style={{ margin: 0 }}>
-            Propuestas de lectores
-          </h1>
-          <p className="se-admin-submissions__intro">
-            Revise propuestas de lectores, deje notas por envío y actualice el estado del flujo editorial desde el detalle
-            de cada fila.
-          </p>
-        </div>
-      </header>
+      <CabeceraDePagina
+        titulo="Propuestas de lectores"
+        explica="Lo que mandan los lectores para publicar. Abra una, déjele una nota y decida si se acepta."
+        acciones={<AjusteDePropuestas />}
+      />
 
       <div className="se-admin-submissions__toolbar" role="search" aria-label="Filtrar envíos por estado">
         <span className="se-admin-submissions__toolbar-label" id="submissions-filter-legend">

@@ -63,6 +63,8 @@ export const leerAvisos = (data) => ({
     creado: a.creado_en || null,
     fuentes: leerFuentes(a.fuentes),
     revision: leerRevision(a.revision),
+    // Alguien lo está redactando ahora mismo (quizá uno mismo, en otra pestaña).
+    redactando: a.redactando === true,
   })),
 });
 
@@ -187,9 +189,11 @@ export const estadoDeAviso = (aviso, miId) => {
  * Qué puede hacer con un aviso quien lo mira, como en el servidor. Uno pendiente se
  * redacta (que también lo aparta), se toma o se descarta; el que uno tomó se redacta, se
  * escribe a mano, se suelta o se descarta; el que ya tiene pieza, se abre; con el de otra
- * persona, o con uno que ya terminó, nada.
+ * persona, con uno que ya terminó o con uno que se está redactando, nada.
  */
 export const accionesDe = (aviso, miId) => {
+  // Mientras se redacta no se ofrece nada: el servidor rechazaría una segunda petición.
+  if (aviso.redactando) return [];
   if (aviso.estado === "pendiente") return ["redactar", "tomar", "descartar"];
   if (aviso.estado === "tomado" && miId != null && aviso.tomadoPorId === miId) {
     return ["redactar", "escribir", "soltar", "descartar"];

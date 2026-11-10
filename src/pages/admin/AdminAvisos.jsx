@@ -482,7 +482,7 @@ export const AdminAvisos = () => {
             <ul className="se-avisos__lista">
               {dia.avisos.map((a, k) => (
                 <Aviso key={a.id} aviso={a} miId={miId} motivos={dia.motivos} ocupado={ocupado}
-                  redactando={redactandoId === a.id} anclaje={k === 0 ? ancla("lista") : undefined}
+                  redactando={redactandoId === a.id || a.redactando} anclaje={k === 0 ? ancla("lista") : undefined}
                   onTomar={tomar} onSoltar={soltar} onDescartar={descartar} onRedactar={redactar} />
               ))}
             </ul>

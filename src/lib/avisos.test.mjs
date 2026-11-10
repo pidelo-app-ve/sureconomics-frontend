@@ -53,6 +53,9 @@ console.log("qué se puede hacer");
 check("pendiente: redactar, tomar o descartar", accionesDe(pendiente, 7).join() === "redactar,tomar,descartar");
 check("el mío: redactar, escribirla, soltar o descartar",
   accionesDe(tomado, 7).join() === "redactar,escribir,soltar,descartar");
+check("mientras se redacta: nada, aunque sea mío",
+  accionesDe({ ...tomado, redactando: true }, 7).length === 0 && accionesDe({ estado: "pendiente", redactando: true }, 7).length === 0);
+check("lee si se está redactando", leerAvisos({ avisos: [{ id: 1, redactando: true }] }).avisos[0].redactando === true && dia.avisos[0].redactando === false);
 check("con borrador: abrirlo", accionesDe({ estado: "redactado", piezaId: 5 }, 7).join() === "abrir");
 check("publicado con pieza: abrirla", accionesDe({ estado: "publicado", piezaId: 5 }, 3).join() === "abrir");
 check("el de otra persona: nada", accionesDe(tomado, 3).length === 0);

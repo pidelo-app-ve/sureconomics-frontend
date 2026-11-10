@@ -1,0 +1,44 @@
+/* Las sugerencias de tema y lugar del editor: una fila de botones sobre las dos listas. */
+.se-sugerencias {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px dashed var(--adm-border);
+  border-radius: 12px;
+  background: var(--adm-surface);
+}
+
+.se-sugerencias__rotulo {
+  color: var(--adm-text-muted);
+  font-size: 0.8rem;
+}
+
+.se-sugerencias__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--adm-accent);
+  border-radius: 999px;
+  background: none;
+  color: var(--adm-text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.se-sugerencias__opcion:hover,
+.se-sugerencias__opcion:focus-visible {
+  background: var(--adm-accent);
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .se-sugerencias__opcion {
+    min-height: 2.75rem;
+  }
+}

@@ -39,6 +39,10 @@ import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { AxisPicker } from "../../components/admin/AxisPicker";
+import {
+    SugerenciasDeClasificacion,
+    useSugerenciasDeClasificacion,
+} from "../../components/admin/SugerenciasDeClasificacion";
 import { AssetField } from "../../components/admin/AssetField";
 import { BylinePhotoField } from "../../components/admin/BylinePhotoField";
 import { SourcesField } from "../../components/admin/SourcesField";
@@ -823,6 +827,12 @@ export const AdminPostEditor = () => {
     // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
     const sinGuardar = base !== null && comparable(form) !== comparable(base);
+    // Tema y lugar propuestos leyendo lo escrito (con reglas, sin IA): se aceptan con un toque.
+    const sugerencias = useSugerenciasDeClasificacion({
+        titulo: form.title,
+        resumen: form.excerpt,
+        contenido: form.content,
+    });
     useGuardiaDeSalida(sinGuardar, confirm, {
         saltar: saltarGuarda,
         descripcion: "Hay cambios en esta pieza que todavía no se guardaron.",
@@ -1484,6 +1494,13 @@ export const AdminPostEditor = () => {
 
                     <div className="se-editor-group" {...ancla("clasificacion")}>
                         <p className="se-editor-group__title">Clasificación</p>
+                        <SugerenciasDeClasificacion
+                            sugerencias={sugerencias}
+                            temasPuestos={form.topic_ids ?? []}
+                            lugaresPuestos={form.place_ids ?? []}
+                            onTema={(id) => setForm((prev) => ({ ...prev, topic_ids: [...(prev.topic_ids ?? []), id] }))}
+                            onLugar={(id) => setForm((prev) => ({ ...prev, place_ids: [...(prev.place_ids ?? []), id] }))}
+                        />
                         <CampoMovil
                             movil={esMovil}
                             plegable

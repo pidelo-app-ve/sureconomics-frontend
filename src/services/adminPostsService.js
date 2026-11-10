@@ -61,6 +61,15 @@ export const traducirTextos = async (campos) =>
     unwrapEntity(await adminRequest("/admin/posts/traducir", { method: "POST", json: campos }));
 
 /**
+ * El tema y el lugar que parece tratar un texto, sin guardar nada. Lo calcula el servidor
+ * con reglas, sin IA.
+ * @param {{ title: string, excerpt: string, content: string }} campos
+ * @returns {Promise<{ temas: {id: number, name: string}[], lugares: {id: number, name: string}[] }>}
+ */
+export const sugerirClasificacion = async (campos) =>
+    unwrapEntity(await adminRequest("/admin/posts/sugerir-clasificacion", { method: "POST", json: campos }));
+
+/**
  * @param {string|number} postId
  */
 export const publishAdminPost = async (postId) =>

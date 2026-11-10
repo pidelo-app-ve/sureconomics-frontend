@@ -11,7 +11,7 @@ import { menuPara } from "../menuDelPanel.js";
 
 const TEXTO_DEL_GRUPO = {
   redaccion: "El día a día: el listado de piezas, crear una nueva, los archivos (fotos, PDF, audios), las traducciones, los comentarios y las propuestas que mandan los lectores.",
-  automatico: "Lo que llega solo y aquí se revisa: titulares en caliente, el resumen diario, la cinta de mercado, el canal de YouTube, las redes y el béisbol.",
+  automatico: "Lo que llega solo y aquí se revisa: titulares en caliente, los avisos de noticias, el resumen diario, la cinta de mercado, el canal de YouTube, las redes y el béisbol.",
   comercial: "Lo que se vende: la publicidad (con el mapa de dónde sale cada anuncio), el boletín Entorno en Viñetas y su lista, y los cursos de Educación.",
   lectores: "Quién lee y cómo participa: la audiencia, las cuentas de lectores y los juegos.",
   sistema: "Temas y lugares con que se clasifica todo, los ajustes de las propuestas, las cuentas del equipo y su perfil.",

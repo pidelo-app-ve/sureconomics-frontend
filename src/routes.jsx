@@ -191,6 +191,8 @@ export const router = createBrowserRouter([
                     // Traducir al inglés, en lote, las piezas publicadas que no lo tienen.
                     { path: "traducciones", lazy: pagina(() => import("./pages/admin/AdminTraducciones"), "AdminTraducciones") },
                     { path: "titulares", lazy: pagina(() => import("./pages/admin/AdminTitulares"), "AdminTitulares") },
+                    // Lo que la redacción debería mirar hoy: los avisos y lo que se avisaría ahora.
+                    { path: "avisos", lazy: pagina(() => import("./pages/admin/AdminAvisos"), "AdminAvisos") },
                     { path: "resumen", lazy: pagina(() => import("./pages/admin/AdminResumen"), "AdminResumen") },
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se

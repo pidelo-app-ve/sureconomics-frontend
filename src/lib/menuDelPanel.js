@@ -35,6 +35,7 @@ export const MENU_DEL_PANEL = [
     explica: "Lo que llega solo y se revisa aquí.",
     items: [
       { to: "/admin/titulares", nombre: "Titulares en caliente", permiso: "editorial", palabras: "última hora recolector" },
+      { to: "/admin/avisos", nombre: "Avisos de noticias", permiso: "editorial", palabras: "alertas noticias jugosas tomar descartar telegram bot" },
       { to: "/admin/resumen", nombre: "Resumen diario", permiso: "editorial", palabras: "whatsapp telegram ediciones mañana" },
       { to: "/admin/cinta", nombre: "Cinta de mercado", permiso: "todos", palabras: "monedas cotizaciones bolsa" },
       { to: "/admin/canal", nombre: "Canal de YouTube", permiso: "todos", palabras: "videos shorts al punto en la calle" },

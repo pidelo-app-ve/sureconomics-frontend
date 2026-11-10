@@ -1,0 +1,215 @@
+/* —— «Avisos de noticias» (AdminAvisos.jsx) ——
+   El interruptor es el `se-alaire` de Publicidad; aquí solo va lo propio de la página. */
+
+.se-avisos__estado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0 0 1rem;
+  padding: 1rem;
+}
+
+.se-avisos__interruptor {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.se-avisos__interruptor .se-admin-meta-hint,
+.se-avisos__cuenta .se-admin-meta-hint {
+  margin: 0.2rem 0 0;
+}
+
+.se-avisos__cuenta {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.se-avisos__linea {
+  margin: 0.15rem 0 0;
+  font-weight: 650;
+  color: var(--adm-text);
+}
+
+.se-avisos__vistas {
+  margin: 0 0 0.75rem;
+}
+
+.se-avisos__nota,
+.se-avisos__vacio {
+  max-width: 62ch;
+  margin: 0 0 0.75rem;
+}
+
+.se-avisos__lista {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.se-avisos__tarjeta {
+  padding: 1rem;
+}
+
+/* Descartado o vencido: sigue ahí para saber qué pasó, pero ya no pide nada. */
+.se-avisos__tarjeta.is-apagado .se-avisos__titulo,
+.se-avisos__tarjeta.is-apagado .se-avisos__fuentes {
+  opacity: 0.6;
+}
+
+.se-avisos__marcas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.45rem;
+}
+
+.se-avisos__marca {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--adm-text-muted);
+}
+
+.se-avisos__marca--ok {
+  border-color: var(--adm-ok-border);
+  background: var(--adm-ok-bg);
+  color: var(--adm-ok);
+}
+
+/* Lo que le toca a quien mira: suyo, o a punto de salir. El color de la marca. */
+.se-avisos__marca--mio {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent-soft);
+  color: var(--adm-err);
+}
+
+.se-avisos__marca--apagado {
+  border-style: dashed;
+}
+
+.se-avisos__titulo {
+  margin: 0 0 0.3rem;
+  text-wrap: balance;
+}
+
+.se-avisos__meta {
+  margin: 0;
+}
+
+.se-avisos__fuentes {
+  margin: 0.65rem 0 0;
+  padding: 0.6rem 0 0;
+  border-top: 1px solid var(--adm-border);
+}
+
+.se-avisos__fuentes ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+}
+
+.se-avisos__fuentes li {
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.se-avisos__medio {
+  flex: 0 0 9.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 650;
+  color: var(--adm-text-muted);
+}
+
+.se-avisos__fuentes a,
+.se-avisos__fuentes li > span:last-child {
+  min-width: 0;
+  color: var(--adm-text);
+  overflow-wrap: anywhere;
+}
+
+.se-avisos__fuentes a {
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.25);
+  text-underline-offset: 2px;
+}
+
+.se-avisos__fuentes a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* El botón discreto de la página: «Ver las N fuentes» y «Cancelar». */
+.se-avisos__mas {
+  margin: 0.4rem 0 0;
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--adm-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.se-avisos__mas:hover {
+  color: var(--adm-text);
+}
+
+.se-avisos__mas:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.se-avisos__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.85rem 0 0;
+}
+
+.se-avisos__acciones .se-avisos__mas {
+  margin: 0 0 0 0.25rem;
+}
+
+.se-avisos__pregunta {
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--adm-text);
+}
+
+@media (max-width: 640px) {
+  /* En el teléfono el medio va encima de su titular: en una fila no caben los dos. */
+  .se-avisos__fuentes li {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .se-avisos__medio {
+    flex: 0 0 auto;
+  }
+
+  .se-avisos__acciones > .se-btn {
+    flex: 1 1 auto;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  .se-avisos__pregunta {
+    flex: 1 1 100%;
+  }
+}

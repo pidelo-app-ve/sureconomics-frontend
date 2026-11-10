@@ -108,7 +108,7 @@ CeldaEtiqueta.propTypes = {
  */
 export const AdminMediaLibrary = () => {
     const { role } = useAuth();
-    const canUpload = role === "escritor" || role === "publicador" || role === "admin";
+    const canUpload = Boolean(role);
     const canDelete = role === "publicador" || role === "admin";
     const [page, setPage] = useState(1);
     const [kind, setKind] = useState("");

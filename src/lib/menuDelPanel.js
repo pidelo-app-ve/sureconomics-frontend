@@ -8,7 +8,10 @@
  * mismo que el título de la página a la que lleva: el menú decía «Suscriptores» y la
  * página «Boletín», o «Boletín» y la página «Entorno en Viñetas».
  *
- * `permiso`: quién lo ve. `todos`, `crear` (escritor y admin), `editorial` (publicador y
+ * Dos roles desde el 10-nov-2026: **Editor** (`publicador` en los datos) lo hace todo menos
+ * llevar las cuentas del panel; **admin** es solo el dueño. El «escritor» dejó de existir.
+ *
+ * `permiso`: quién lo ve. `todos`, `crear` (cualquiera del panel), `editorial` (editor y
  * admin) o `admin`. `palabras`: otras formas de llamarlo, para el buscador.
  */
 export const MENU_DEL_PANEL = [
@@ -56,7 +59,7 @@ export const MENU_DEL_PANEL = [
     explica: "Quién lee y cómo participa.",
     items: [
       { to: "/admin/analitica", nombre: "Audiencia", permiso: "todos", palabras: "analítica visitas lectores estadísticas" },
-      { to: "/admin/users", nombre: "Usuarios", permiso: "admin", palabras: "cuentas lectores registrados" },
+      { to: "/admin/users", nombre: "Usuarios", permiso: "editorial", palabras: "cuentas lectores registrados" },
       { to: "/admin/juegos/palabras", nombre: "La Clave", permiso: "editorial", palabras: "juego palabras wordle" },
       { to: "/admin/analista", nombre: "Ranking de El Analista", permiso: "editorial", palabras: "juego ranking" },
     ],
@@ -76,7 +79,7 @@ export const MENU_DEL_PANEL = [
 
 /** Si este rol puede ver un enlace del menú. */
 export const puedeVer = (permiso, role) => {
-  if (permiso === "crear") return role === "escritor" || role === "admin";
+  if (permiso === "crear") return Boolean(role);
   if (permiso === "editorial") return role === "publicador" || role === "admin";
   if (permiso === "admin") return role === "admin";
   return true;
@@ -87,6 +90,12 @@ export const menuPara = (role) =>
   MENU_DEL_PANEL.map((g) => ({ ...g, items: g.items.filter((i) => puedeVer(i.permiso, role)) })).filter(
     (g) => g.items.length,
   );
+
+/** Cómo se llama cada rol en pantalla. `escritor` queda por si llega una sesión vieja. */
+export const NOMBRE_DE_ROL = { publicador: "Editor", admin: "Admin", escritor: "Escritor" };
+
+/** El editor y el admin: todo lo del panel menos las cuentas del propio panel. */
+export const esEditor = (role) => role === "publicador" || role === "admin";
 
 /** El nombre de la página de una ruta, para el título de la pestaña. */
 export const nombreDeRuta = (pathname) => {

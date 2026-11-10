@@ -37,6 +37,7 @@ import {
 } from "../../services/adminEducacionService";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { esEditor } from "../../lib/menuDelPanel";
 import { LoadingState } from "../../components/content";
 
 /**
@@ -778,7 +779,7 @@ const ComprasDelModulo = ({ moduloId, total }) => {
   const [error, setError] = useState("");
   const [ocupada, setOcupada] = useState(null);
 
-  if (role !== "admin") return null;
+  if (!esEditor(role)) return null;
 
   const cargar = async () => {
     setError("");

@@ -33,11 +33,11 @@ export const AdminUsersList = () => {
   }, []);
 
   useEffect(() => {
-    if (role === "admin") load();
+    if (role === "publicador" || role === "admin") load();
   }, [role, load]);
 
-  if (role !== "admin") {
-    return <EmptyState title="Sin acceso" description="Solo una cuenta con rol admin puede ver a los usuarios y colaboradores." />;
+  if (!(role === "publicador" || role === "admin")) {
+    return <EmptyState title="Sin acceso" description="Hace falta ser editor o admin para ver a los lectores." />;
   }
 
   const meta = state.meta;

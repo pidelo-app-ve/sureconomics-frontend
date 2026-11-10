@@ -120,14 +120,15 @@ check("los pasos del menú lo abren en el teléfono", PASOS_CUENTA.filter((p) =>
 console.log("bienvenida del panel");
 {
   const admin = recorridoPanelPara("admin");
-  const escritor = recorridoPanelPara("escritor");
+  const editor = recorridoPanelPara("publicador");
   check("empieza sin anclaje y acaba en la ayuda", admin.pasos[0].clave === undefined && admin.pasos.at(-1).clave === "ayuda");
   check("un paso por grupo del menú (admin ve los cinco)", admin.pasos.filter((p) => p.clave?.startsWith("grupo-")).length === 5);
   const { menuPara } = await import("./menuDelPanel.js");
   const rutasDe = (role) => menuPara(role).flatMap((g) => g.items.map((i) => i.to));
-  check("el escritor no ve Publicidad ni Usuarios", !rutasDe("escritor").includes("/admin/publicidad") && !rutasDe("escritor").includes("/admin/users"));
-  check("el publicador no puede crear piezas desde el menú", !rutasDe("publicador").includes("/admin/posts/new"));
-  check("pasos del escritor = sus grupos", escritor.pasos.filter((p) => p.clave?.startsWith("grupo-")).length === menuPara("escritor").length);
+  // Dos roles desde el 10-nov-2026: el editor (`publicador`) lo ve todo menos Personal.
+  check("el editor crea piezas y ve Publicidad y Usuarios", ["/admin/posts/new", "/admin/publicidad", "/admin/users"].every((r) => rutasDe("publicador").includes(r)));
+  check("el editor no ve Personal; el admin sí", !rutasDe("publicador").includes("/admin/staff") && rutasDe("admin").includes("/admin/staff"));
+  check("pasos del editor = sus grupos", editor.pasos.filter((p) => p.clave?.startsWith("grupo-")).length === menuPara("publicador").length);
   check("una guía por rol, la misma cada vez", recorridoPanelPara("admin") === admin);
   check("anclaje data-tour-panel", admin.atributo === "data-tour-panel");
 }

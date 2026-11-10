@@ -171,6 +171,8 @@ RecorridoVista.propTypes = {
     pasoActivo: PropTypes.func.isRequired,
     irAPaso: PropTypes.func.isRequired,
     suscribir: PropTypes.func.isRequired,
+    // Los recorridos de la cuenta del lector traen claves de idioma en vez de textos.
+    traducir: PropTypes.bool,
   }).isRequired,
 };
 

@@ -8,7 +8,7 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ROLE_LABELS = {
   escritor: "Escritor",
-  publicador: "Publicador",
+  publicador: "Editor",
   admin: "Admin",
 };
 

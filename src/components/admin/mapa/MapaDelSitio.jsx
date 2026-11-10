@@ -256,7 +256,8 @@ export const MapaDelSitio = ({
   const [aparato, setAparato] = useState("pc");
   const [recarga, setRecarga] = useState(0);
   const total = recargas?.length ?? 0;
-  const reparto = recargas?.[Math.min(recarga, Math.max(0, total - 1))] ?? {};
+  // Con `useMemo`: sin recargas, un `{}` nuevo en cada pintado hacía recalcular lo de abajo.
+  const reparto = useMemo(() => recargas?.[Math.min(recarga, Math.max(0, total - 1))] ?? {}, [recargas, recarga, total]);
   const actual = PAGINAS.find((p) => p.clave === pagina) ?? PAGINAS[0];
   const { marco, lienzo, escala, alto } = useEscala(ANCHO[aparato]);
 

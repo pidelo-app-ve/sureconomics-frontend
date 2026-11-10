@@ -35,7 +35,7 @@ const NIVEL = {
 export const AdminPlacesList = () => {
     const { role } = useAuth();
     const canCurate = role === "publicador" || role === "admin";
-    const isAdmin = role === "admin";
+    const isAdmin = role === "publicador" || role === "admin";
     const [state, setState] = useState({ status: "idle", rows: [], error: null });
     const [busyId, setBusyId] = useState(null);
     const [newCountry, setNewCountry] = useState({ name: "", name_en: "", iso2: "", parent_id: "" });

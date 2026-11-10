@@ -450,7 +450,7 @@ export const AdminPostEditor = () => {
     // deja pasar las salidas que hace el propio editor (tras crear o eliminar).
     const [base, setBase] = useState(null);
     const saltarGuarda = useRef(false);
-    const canCreate = role === "escritor" || role === "admin";
+    const canCreate = Boolean(role);
     const { postId } = useParams();
     const { pathname } = useLocation();
     const isCreate = /\/admin\/posts\/new\/?$/.test(pathname);
@@ -853,7 +853,7 @@ export const AdminPostEditor = () => {
     })();
 
     if (isCreate && !canCreate) {
-        return <EmptyState title="Sin acceso" description="Solo escritor y admin pueden crear contenido nuevo." />;
+        return <EmptyState title="Sin acceso" description="Hace falta una cuenta del panel para crear contenido nuevo." />;
     }
 
     if (loadState.status === "loading") {

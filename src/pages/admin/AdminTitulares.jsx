@@ -157,7 +157,7 @@ FijarArriba.propTypes = {
 
 export const AdminTitulares = () => {
   const { role } = useAuth();
-  const esAdmin = role === "admin";
+  const esAdmin = role === "publicador" || role === "admin";
   const { toastSuccess, toastError } = useAdminToast();
   const { confirm, ConfirmDialog } = useAdminConfirm();
   const [vista, setVista] = useState("publicados");

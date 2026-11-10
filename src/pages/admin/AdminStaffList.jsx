@@ -13,19 +13,17 @@ import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
 const ROLE_OPTIONS = [
-  { value: "escritor", label: "Escritor" },
-  { value: "publicador", label: "Publicador" },
+  { value: "publicador", label: "Editor" },
   { value: "admin", label: "Admin" },
 ];
 
 /** Lo que puede hacer cada rol, dicho al confirmar un cambio. */
 const QUE_PUEDE = {
-  escritor: "Podrá escribir y guardar piezas, pero no publicarlas ni borrarlas.",
-  publicador: "Podrá publicar y borrar piezas, y llevar la publicidad, el boletín y lo automático.",
-  admin: "Podrá hacerlo todo, también crear y eliminar cuentas del panel.",
+  publicador: "Podrá hacerlo todo en el panel, menos crear, cambiar o eliminar cuentas del propio panel.",
+  admin: "Podrá hacerlo todo, también crear, cambiar y eliminar cuentas del panel.",
 };
 
-const emptyForm = { name: "", email: "", password: "", role: "escritor" };
+const emptyForm = { name: "", email: "", password: "", role: "publicador" };
 
 export const AdminStaffList = () => {
   const { role } = useAuth();
@@ -40,7 +38,7 @@ export const AdminStaffList = () => {
   useEffect(() => {
     applyPageMeta({
       title: "Admin — Personal",
-      description: "Cuentas de escritor, publicador y admin del backoffice.",
+      description: "Cuentas de editor y admin del panel.",
       noindex: true,
     });
   }, []);
@@ -63,7 +61,7 @@ export const AdminStaffList = () => {
     return (
       <EmptyState
         title="Sin acceso"
-        description="Solo una cuenta con rol admin puede gestionar el personal del backoffice."
+        description="Solo el admin lleva las cuentas del panel."
       />
     );
   }
@@ -245,7 +243,7 @@ export const AdminStaffList = () => {
         <ErrorState title="No se pudo cargar el personal" error={state.error} onRetry={load} />
       ) : null}
       {state.status === "success" && state.items.length === 0 ? (
-        <EmptyState title="Sin cuentas" description="Todavía no hay escritores ni publicadores." />
+        <EmptyState title="Sin cuentas" description="Todavía no hay editores." />
       ) : null}
 
       {state.status === "success" && state.items.length > 0 ? (

@@ -51,7 +51,7 @@ const principalPlace = (row) => row?.places?.[0]?.name ?? null;
 export const AdminPostsList = () => {
     const { role } = useAuth();
     const canPublish = role === "publicador" || role === "admin";
-    const canCreate = role === "escritor" || role === "admin";
+    const canCreate = Boolean(role);
     const [page, setPage] = useState(1);
     const [filters, setFilters] = useState({
         format: "",

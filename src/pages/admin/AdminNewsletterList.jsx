@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { esEditor } from "../../lib/menuDelPanel";
 
 const FECHA = new Intl.DateTimeFormat("es-VE", {
   day: "2-digit", month: "short", year: "numeric",
@@ -120,7 +121,7 @@ export const AdminNewsletterList = () => {
               {/* Sólo `admin`: un publicador puede ver el listado en pantalla, y llevarse
                   todos los correos en un archivo es otra cosa. El servidor lo exige igual,
                   esto sólo evita ofrecer un botón que iba a dar 403. */}
-              {role === "admin" ? (
+              {esEditor(role) ? (
                 <button
                   type="button"
                   className="se-btn"

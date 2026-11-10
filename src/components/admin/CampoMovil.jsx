@@ -1,3 +1,4 @@
+import { Plegable } from "./Plegable";
 import PropTypes from "prop-types";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -25,7 +26,7 @@ import { createPortal } from "react-dom";
  * Cerrar la hoja no pierde nada: lo escrito ya está en el editor. Lo que guarda es el
  * botón «Guardar» de la barra fija de abajo, igual que en el computador.
  *
- * **En el computador, con `plegable`**, el campo va en un `<details>` cuya cabecera dice
+ * **En el computador, con `plegable`**, el campo va en un `Plegable` cuya cabecera dice
  * lo mismo que la fila del teléfono (qué es, qué tiene, si falta). Así el editor de
  * escritorio enseña abierto lo que se escribe siempre y plegado lo que se toca de vez
  * en cuando, sin una segunda versión del campo. Se abre solo si le falta algo.
@@ -58,14 +59,9 @@ export const CampoMovil = ({ movil, plegable, abierto, titulo, resumen, estado, 
 
   if (!movil && plegable) {
     return (
-      <details className="se-plegable" open={abierto || estado === "falta" || undefined}>
-        <summary className="se-plegable__cabeza">
-          <span className="se-plegable__titulo">{titulo}</span>
-          <span className="se-plegable__resumen">{resumen}</span>
-          {estado === "falta" ? <span className="se-plegable__falta">Falta</span> : null}
-        </summary>
-        <div className="se-plegable__cuerpo">{children}</div>
-      </details>
+      <Plegable titulo={titulo} resumen={resumen} estado={estado} abierto={abierto}>
+        {children}
+      </Plegable>
     );
   }
   if (!movil) return children;

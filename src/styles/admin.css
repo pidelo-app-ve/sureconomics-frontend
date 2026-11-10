@@ -7820,84 +7820,6 @@
   cursor: pointer;
 }
 
-/* —— Lo plegado: la cabecera dice qué es y qué tiene —— */
-.se-plegable {
-  margin: 0 0 0.75rem;
-  border: 1px solid var(--adm-border);
-  border-radius: 10px;
-  background: var(--adm-surface);
-}
-
-.se-plegable__cabeza {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.8rem 1rem;
-  cursor: pointer;
-  list-style: none;
-}
-
-.se-plegable__cabeza::-webkit-details-marker {
-  display: none;
-}
-
-.se-plegable__cabeza::before {
-  content: "›";
-  flex: 0 0 auto;
-  width: 0.8rem;
-  color: var(--adm-text-muted);
-  transition: transform var(--adm-dur) var(--adm-ease);
-}
-
-.se-plegable[open] > .se-plegable__cabeza::before {
-  transform: rotate(90deg);
-}
-
-.se-plegable__titulo {
-  font-weight: 700;
-  color: var(--adm-text);
-}
-
-.se-plegable__resumen {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.9rem;
-  color: var(--adm-text-muted);
-}
-
-.se-plegable__falta {
-  margin-left: auto;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--adm-err);
-}
-
-.se-plegable__cabeza:hover .se-plegable__titulo {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.se-plegable__cabeza:focus-visible {
-  outline: 2px solid var(--adm-accent);
-  outline-offset: -2px;
-}
-
-.se-plegable[open] > .se-plegable__cabeza {
-  border-bottom: 1px solid var(--adm-border);
-}
-
-.se-plegable__cuerpo {
-  padding: 1rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-plegable__cabeza::before {
-    transition: none;
-  }
-}
-
 /* —— Crear: los formatos a la vista —— */
 .se-formatos {
   display: grid;
@@ -8265,14 +8187,6 @@
 .se-editor-rejilla__estado .se-editor-group {
   margin: 0;
   padding: 0.9rem 1rem;
-}
-
-.se-editor-rejilla__estado .se-editor-group .se-plegable {
-  margin-bottom: 0;
-}
-
-.se-editor-rejilla__estado .se-plegable__cuerpo {
-  padding: 0.75rem;
 }
 
 /* —— El encuadre de la foto (editor de piezas) —— */

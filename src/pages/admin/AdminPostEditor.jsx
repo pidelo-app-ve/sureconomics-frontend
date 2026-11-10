@@ -1961,11 +1961,10 @@ export const AdminPostEditor = () => {
                     <div className={esMovil ? "se-editor-group" : undefined}>
                     <CampoMovil
                         movil={esMovil}
+                        plegable
                         titulo="Dirección y SEO"
                         resumen={form.slug.trim() ? `/${form.slug.trim()}` : "Automáticas"}
                     >
-                    <details className="se-editor-advanced" open={esMovil || undefined}>
-                        <summary>Avanzado — dirección y SEO</summary>
                         <div className="se-editor-advanced__body">
                             <label className="se-form-field" htmlFor="post-slug">
                                 <span className="se-form-label">
@@ -2015,7 +2014,6 @@ export const AdminPostEditor = () => {
                                 lo correcto.
                             </p>
                         </div>
-                    </details>
                     </CampoMovil>
                     </div>
                 </>

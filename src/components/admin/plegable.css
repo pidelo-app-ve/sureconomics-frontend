@@ -1,0 +1,206 @@
+/* —— Lo plegado del panel (Plegable.jsx): la cabecera dice qué es y qué tiene ——
+   La curva es de salida (rápida al empezar, suave al llegar): lo que responde a un clic
+   tiene que moverse ya. 240 ms: más corto se nota a saltos; más largo, hace esperar. */
+.se-plegable {
+  --plegable-dur: 240ms;
+  --plegable-curva: cubic-bezier(0.22, 0.8, 0.24, 1);
+  margin: 0 0 0.6rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 12px;
+  background: var(--adm-surface);
+  transition:
+    border-color var(--plegable-dur) var(--plegable-curva),
+    box-shadow var(--plegable-dur) var(--plegable-curva);
+}
+
+/* Pegado a un campo de arriba (el título), que respire. */
+.se-plegable:not(:first-child) {
+  margin-top: 0.6rem;
+}
+
+.se-plegable.is-abierto {
+  border-color: rgba(0, 0, 0, 0.22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.se-plegable__cabeza {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.55rem 0.75rem 0.55rem 0.9rem;
+  border: 0;
+  border-radius: 11px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease-out;
+}
+
+.se-plegable__cabeza:hover {
+  background: rgba(0, 0, 0, 0.035);
+}
+
+.se-plegable__cabeza:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.se-plegable__cabeza:focus-visible {
+  outline: 2px solid var(--adm-accent);
+  outline-offset: -2px;
+}
+
+.se-plegable.is-abierto > .se-plegable__cabeza {
+  border-radius: 11px 11px 0 0;
+}
+
+/* La marca del estado: un aro si está vacío, verde con su visto si está completo, y el
+   color de aviso si falta. Dice de un vistazo qué filas están hechas. */
+.se-plegable__marca {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.22);
+  border-radius: 50%;
+  color: #fff;
+  transition:
+    background-color var(--plegable-dur) var(--plegable-curva),
+    border-color var(--plegable-dur) var(--plegable-curva);
+}
+
+.se-plegable__marca--ok {
+  border-color: var(--adm-ok);
+  background: var(--adm-ok);
+}
+
+.se-plegable__marca--falta {
+  border-color: var(--adm-err);
+  background: var(--adm-err-bg, rgba(143, 58, 23, 0.1));
+}
+
+.se-plegable__titulo {
+  flex: 0 0 auto;
+  font-weight: 650;
+  color: var(--adm-text);
+}
+
+.se-plegable__resumen {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: var(--adm-text-muted);
+  transition: opacity 160ms ease-out;
+}
+
+/* Abierto, el resumen sobra: lo que resumía está a la vista justo debajo. */
+.se-plegable.is-abierto .se-plegable__resumen {
+  opacity: 0;
+}
+
+.se-plegable__falta {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--adm-err-bg, rgba(143, 58, 23, 0.1));
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--adm-err);
+}
+
+.se-plegable__flecha {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: auto;
+  border-radius: 50%;
+  color: var(--adm-text-muted);
+  transition:
+    transform var(--plegable-dur) var(--plegable-curva),
+    background-color 140ms ease-out;
+}
+
+.se-plegable__cabeza:hover .se-plegable__flecha {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--adm-text);
+}
+
+.se-plegable.is-abierto .se-plegable__flecha {
+  transform: rotate(180deg);
+}
+
+/* La altura: de `0fr` a `1fr`. Cerrado, además, no se ve ni se puede enfocar. */
+.se-plegable__caja {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--plegable-dur) var(--plegable-curva),
+    visibility 0s linear var(--plegable-dur);
+}
+
+.se-plegable.is-abierto > .se-plegable__caja {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows var(--plegable-dur) var(--plegable-curva),
+    visibility 0s linear 0s;
+}
+
+.se-plegable__recorte {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Abierto del todo ya no se recorta: un menú o un borde de enfoque de dentro saldrían
+   cortados. */
+.se-plegable.is-asentado > .se-plegable__caja > .se-plegable__recorte {
+  overflow: visible;
+}
+
+.se-plegable__cuerpo {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 1px solid var(--adm-border);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 140ms ease-out,
+    transform var(--plegable-dur) var(--plegable-curva);
+}
+
+.se-plegable.is-abierto .se-plegable__cuerpo {
+  opacity: 1;
+  transform: none;
+  transition-delay: 60ms, 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-plegable,
+  .se-plegable *,
+  .se-plegable.is-abierto * {
+    transition: none !important;
+  }
+}
+
+/* En la columna de la derecha del editor (estado y publicación), más apretado. */
+.se-editor-rejilla__estado .se-editor-group .se-plegable {
+  margin-bottom: 0;
+}
+
+.se-editor-rejilla__estado .se-plegable__cuerpo {
+  padding: 0.75rem;
+}
+
+/* «Dirección y SEO» traía su propio relleno de cuando era un `<details>` aparte. */
+.se-plegable__cuerpo .se-editor-advanced__body {
+  padding: 0;
+}

@@ -4,18 +4,12 @@ import { listAdminUsers } from "../../services/adminUsersService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
+import { puedeEnviarPropuestas } from "../../lib/adminUserDetailDisplay";
 import { useAuth } from "../../context/AuthContext";
 
 const flagLabel = (row) => {
-  const v =
-    row?.can_submit_collaborations ??
-    row?.collaborative_submissions_enabled ??
-    row?.collaborative ??
-    row?.is_collaborator;
-  if (typeof v === "boolean") return v ? "Sí" : "No";
-  if (v === 1 || v === "1" || v === "true") return "Sí";
-  if (v === 0 || v === "0" || v === "false") return "No";
-  return "—";
+  const v = puedeEnviarPropuestas(row);
+  return v === null ? "—" : v ? "Sí" : "No";
 };
 
 export const AdminUsersList = () => {

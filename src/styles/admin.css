@@ -6071,6 +6071,29 @@
   opacity: 0.4;
 }
 
+/* En la tabla, «Eliminar» va aparte de «Editar · Ver»: lejos del clic de todos los días
+   y en el color de lo que no tiene vuelta atrás. */
+.se-admin-table__eliminar {
+  margin-left: 1.25rem;
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--adm-text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.se-admin-table__eliminar:hover,
+.se-admin-table__eliminar:focus-visible {
+  color: var(--adm-err);
+  text-decoration: underline;
+}
+
+.se-admin-table__eliminar:disabled {
+  opacity: 0.4;
+}
+
 /* La hoja de «Crear»: un formato por línea, a todo el ancho. */
 .se-campo-movil__cuerpo .se-admin-create {
   display: grid;

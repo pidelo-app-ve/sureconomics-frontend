@@ -17,15 +17,10 @@ import {
   formatAdminUserFieldPresentation,
   labelForAdminUserField,
   sortedAdminUserKeys,
+  puedeEnviarPropuestas,
 } from "../../lib/adminUserDetailDisplay";
 
-const readCollabFlag = (row) => {
-  if (!row || typeof row !== "object") return false;
-  const v = row.can_submit_collaborations ?? row.collaborative_submissions_enabled ?? row.collaborative ?? row.is_collaborator;
-  if (typeof v === "boolean") return v;
-  if (v === 1 || v === "1" || v === "true") return true;
-  return false;
-};
+const readCollabFlag = (row) => puedeEnviarPropuestas(row) === true;
 
 const readActiveFlag = (row) => {
   if (!row || typeof row !== "object") return true;
@@ -110,11 +105,16 @@ export const AdminUserDetail = () => {
         merged = merged && typeof merged === "object" ? { ...merged, ...nameUpdate } : nameUpdate;
       }
 
-      const collabUpdate = await setAdminUserCollabEnabled(numericId, collab);
-      merged = merged && typeof merged === "object" ? { ...merged, ...collabUpdate } : collabUpdate;
+      // Solo lo que cambió: guardar un nombre no tiene por qué tocar los permisos.
+      if (collab !== readCollabFlag(row)) {
+        const collabUpdate = await setAdminUserCollabEnabled(numericId, collab);
+        merged = merged && typeof merged === "object" ? { ...merged, ...collabUpdate } : collabUpdate;
+      }
 
-      const activeUpdate = await setAdminUserActive(numericId, active);
-      merged = merged && typeof merged === "object" ? { ...merged, ...activeUpdate } : activeUpdate;
+      if (active !== readActiveFlag(row)) {
+        const activeUpdate = await setAdminUserActive(numericId, active);
+        merged = merged && typeof merged === "object" ? { ...merged, ...activeUpdate } : activeUpdate;
+      }
 
       setRow(merged);
       setCollab(readCollabFlag(merged));
@@ -199,7 +199,7 @@ export const AdminUserDetail = () => {
                 <span
                   className={`se-admin-user-detail__chip${readCollabFlag(row) ? " se-admin-user-detail__chip--ok" : ""}`}
                 >
-                  Colaboraciones: {readCollabFlag(row) ? "Sí" : "No"}
+                  Propuestas: {readCollabFlag(row) ? "puede enviar" : "no puede enviar"}
                 </span>
                 <span
                   className={`se-admin-user-detail__chip${readActiveFlag(row) ? " se-admin-user-detail__chip--ok" : " se-admin-user-detail__chip--pending"}`}
@@ -242,11 +242,10 @@ export const AdminUserDetail = () => {
           <section className="se-admin-user-detail__surface" aria-labelledby="admin-user-api-heading">
             <div className="se-admin-user-detail__section-head">
               <h2 id="admin-user-api-heading" className="se-admin-user-detail__panel-title">
-                Respuesta del servidor
+                Datos de la cuenta
               </h2>
               <p className="se-admin-user-detail__panel-lead">
-                Todos los datos disponibles de este usuario. Los campos con varias líneas se muestran
-                expandidos para facilitar la lectura.
+                Lo que el lector puso al registrarse y lo que el sitio sabe de su cuenta.
               </p>
             </div>
             <dl className="se-admin-user-detail__spec">
@@ -277,7 +276,7 @@ export const AdminUserDetail = () => {
           <div className="se-admin-user-detail__surface se-admin-user-detail__surface--sticky">
             <h2 className="se-admin-user-detail__panel-title">Editar</h2>
             <p className="se-admin-user-detail__panel-lead">
-              Los cambios se guardan automáticamente al enviar el formulario. El resto de campos son de solo lectura desde esta vista.
+              Aquí se cambia el nombre, si puede enviar propuestas y si la cuenta está activa. Nada se guarda hasta pulsar «Guardar cambios».
             </p>
 
             <form className="se-contact-form se-admin-user-detail__form" onSubmit={handleSubmit}>
@@ -321,7 +320,7 @@ export const AdminUserDetail = () => {
 
               <label className="se-form-field se-admin-user-detail__toggle" htmlFor="user-collab">
                 <input id="user-collab" type="checkbox" checked={collab} onChange={(e) => setCollab(e.target.checked)} />
-                <span className="se-form-label">Puede enviar colaboraciones</span>
+                <span className="se-form-label">Puede enviar propuestas</span>
               </label>
 
               <label className="se-form-field se-admin-user-detail__toggle" htmlFor="user-active">

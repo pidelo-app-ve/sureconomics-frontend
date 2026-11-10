@@ -374,6 +374,13 @@ export const AdminPostsList = () => {
                                             {d.missing ? (
                                                 <em className="se-admin-table__note">{d.missing}</em>
                                             ) : null}
+                                            <Link
+                                                to={`/admin/posts/${d.id}`}
+                                                className="se-link se-admin-tarjeta__ver"
+                                                aria-label={`Editar «${d.title}»`}
+                                            >
+                                                Editar
+                                            </Link>
                                             {d.status === "published" && d.slug ? (
                                                 <a
                                                     href={enElSitio(row)}
@@ -532,10 +539,9 @@ export const AdminPostsList = () => {
                                                 ) : null}
                                                 {canPublish ? (
                                                     <>
-                                                        {" · "}
                                                         <button
                                                             type="button"
-                                                            className="se-link se-header__nav-link--button"
+                                                            className="se-admin-table__eliminar"
                                                             disabled={busy}
                                                             onClick={() => handleDelete(id, title)}
                                                             aria-label={`Eliminar «${title}»`}

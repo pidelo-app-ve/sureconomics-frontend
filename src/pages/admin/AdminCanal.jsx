@@ -198,7 +198,7 @@ export const AdminCanal = () => {
           <p className="se-admin-meta-hint">
             Se actualiza solo cada hora. Última vez: {haceCuanto(d.sincronizado_en)}. En la portada salen los{" "}
             {d.mostrar.shorts} primeros shorts que no estén ocultos.
-            {d.con_duraciones ? "" : " Las tarjetas salen sin duración: falta la clave de Google (YOUTUBE_API_KEY) en el servidor."}
+            {d.con_duraciones ? "" : " Las tarjetas salen sin la duración del video: falta conectar la cuenta de Google. Avise a quien administra el sitio."}
           </p>
         ) : null}
         {d.error ? (

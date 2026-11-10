@@ -140,7 +140,7 @@ export const AdminTraducciones = () => {
             <span className="se-form-label">Pendientes</span>
             <span className="se-admin-meta-hint">
               {d.disponible
-                ? `${d.pendientes} piezas publicadas sin inglés${usd(d.costo_estimado_usd) ? ` · costo aproximado: ${usd(d.costo_estimado_usd)}` : ""} · modelo: ${d.modelo}`
+                ? `${d.pendientes} piezas publicadas sin inglés${usd(d.costo_estimado_usd) ? ` · costo aproximado: ${usd(d.costo_estimado_usd)}` : ""}`
                 : "Sin clave de Anthropic (ANTHROPIC_API_KEY) ni de Cloudflare (CF_IA_ACCOUNT_ID y CF_IA_API_TOKEN) en el servidor: no se puede traducir."}
             </span>
           </div>

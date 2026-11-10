@@ -420,11 +420,9 @@ export const AdminResumen = () => {
         <div>
           <h1 className="se-heading-section" style={{ margin: 0 }}>Resumen diario</h1>
           <p className="se-admin-meta-hint" style={{ marginTop: "0.5rem" }}>
-            Tres ediciones al día, cada una con lo nuevo desde la anterior: salen solas a las{" "}
-            {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y el canal de WhatsApp; nadie tiene que
-            aprobarlas. Cada una se arma sola una hora antes: hasta su hora puedes cambiar la foto y ajustar el texto
-            (si lo cambias, sale cambiado) o frenarla con «No mandar esta edición».
-            {datos.reloj_encendido ? "" : " (El reloj está apagado en este entorno: ármalas con los botones.)"}
+            Sale solo a las {datos.ediciones.map((e) => e.sale).join(", ")} en la web, Telegram y WhatsApp. Cada
+            edición se arma una hora antes: hasta su hora puedes ajustarla o frenarla.
+            {datos.reloj_encendido ? "" : " (Aquí no sale sola: ármala con los botones.)"}
           </p>
         </div>
         <BotonGuia recorrido={recorridoResumen} className="se-btn se-btn--secondary se-tit-guia" />

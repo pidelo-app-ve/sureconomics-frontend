@@ -24,7 +24,9 @@ const LABELS = {
   email_verified: "Correo verificado",
   isEmailVerified: "Correo verificado",
   email_verified_at: "Verificación del correo",
+  can_submit_collaborative_articles: "Puede enviar propuestas",
   can_submit_collaborations: "Puede enviar colaboraciones",
+  is_active: "Cuenta activa",
   collaborative_submissions_enabled: "Colaboraciones habilitadas",
   collaborative: "Colaborativo",
   is_collaborator: "Es colaborador",
@@ -74,6 +76,8 @@ const PRIORITY_KEYS = [
   "email_verified",
   "isEmailVerified",
   "email_verified_at",
+  "can_submit_collaborative_articles",
+  "is_active",
   "can_submit_collaborations",
   "collaborative_submissions_enabled",
   "collaborative",
@@ -180,6 +184,28 @@ export const formatAdminUserFieldPresentation = (key, value, formatDate) => {
     }
   }
   return { kind: "text", text: formatPrimitive(key, value, formatDate) };
+};
+
+/**
+ * Si el lector puede enviar propuestas, o `null` si la respuesta no lo dice. El servidor
+ * lo manda como `can_submit_collaborative_articles`; los otros nombres son de versiones
+ * viejas. La ficha lo leía sin ese nombre: decía «No» a quien sí podía y, al guardar
+ * cualquier otro cambio, le quitaba el permiso (10-nov-2026).
+ * @param {unknown} row
+ * @returns {boolean | null}
+ */
+export const puedeEnviarPropuestas = (row) => {
+  if (!row || typeof row !== "object") return null;
+  const v =
+    row.can_submit_collaborative_articles ??
+    row.can_submit_collaborations ??
+    row.collaborative_submissions_enabled ??
+    row.collaborative ??
+    row.is_collaborator;
+  if (typeof v === "boolean") return v;
+  if (v === 1 || v === "1" || v === "true") return true;
+  if (v === 0 || v === "0" || v === "false") return false;
+  return null;
 };
 
 /**

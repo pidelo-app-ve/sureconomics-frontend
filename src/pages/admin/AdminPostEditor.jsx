@@ -129,6 +129,7 @@ const emptyForm = () => ({
     excerpt: "",
     content: "",
     meta_title: "",
+    seo_automatico: false,
     meta_description: "",
     canonical_url: "",
     byline: "",
@@ -343,6 +344,7 @@ const postToForm = (post) => {
         excerpt: pickStr(post, ["excerpt", "summary"]),
         content: pickStr(post, ["content", "body", "html"]),
         meta_title: pickStr(post, ["meta_title"]),
+        seo_automatico: post?.seo_automatico === true,
         meta_description: pickStr(post, ["meta_description"]),
         canonical_url: pickStr(post, ["canonical_url"]),
         byline: pickStr(post, ["byline"]),
@@ -1968,7 +1970,7 @@ export const AdminPostEditor = () => {
                         <div className="se-editor-advanced__body">
                             <label className="se-form-field" htmlFor="post-slug">
                                 <span className="se-form-label">
-                                    Slug (opcional; se genera del título si lo deja vacío)
+                                    Dirección (slug). Si la deja vacía, sale sola del título, corta
                                 </span>
                                 <input
                                     id="post-slug"
@@ -1977,6 +1979,11 @@ export const AdminPostEditor = () => {
                                     onChange={handleChange("slug")}
                                 />
                             </label>
+                            <p className="se-admin-meta-hint" style={{ margin: "0 0 0.5rem" }}>
+                                {form.seo_automatico
+                                    ? "El meta título y la meta descripción los puso el sistema. Si cambia el titular o el texto, se rehacen solos; si escribe aquí los suyos, se quedan como los deje."
+                                    : "Es lo que enseña Google. Si los deja vacíos, se rellenan solos a los pocos minutos de publicar."}
+                            </p>
                             <label className="se-form-field" htmlFor="post-meta-title">
                                 <span className="se-form-label">Meta título</span>
                                 <input

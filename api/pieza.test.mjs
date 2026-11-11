@@ -14,9 +14,11 @@ import handler, {
   IMAGEN_DE_MARCA,
   descripcionDe,
   descripcionDelResumen,
+  enSuIngles,
   esNuestroShell,
   imagenParaCompartir,
   inyectar,
+  tituloParaBuscadores,
 } from "./pieza.js";
 
 const SHELL = `<!doctype html>
@@ -230,6 +232,20 @@ check("un resumen vacío no cuenta como resumen",
 check("cae al cuerpo cuando no hay nada más",
   descripcionDe({ content: "<p>La coyuntura política actual tiene un diagnóstico revelador.</p>" })
     === "La coyuntura política actual tiene un diagnóstico revelador.");
+check("prefiere meta_description al resumen: se escribió para los buscadores",
+  descripcionDe({ meta_description: "Para buscadores.", excerpt: "<p>El resumen.</p>" }) === "Para buscadores.");
+check("el título de la pestaña es el meta título si lo hay, y si no el titular",
+  tituloParaBuscadores({ meta_title: "Corto para Google", title: "El titular entero" }) === "Corto para Google" &&
+    tituloParaBuscadores({ meta_title: "  ", title: "El titular entero" }) === "El titular entero");
+check("en inglés no se usa el SEO en español",
+  tituloParaBuscadores(enSuIngles({ meta_title: "Corto", title: "x", title_en: "The headline" })) === "The headline");
+{
+  const pagina = inyectar("<html lang=\"es\"><head><title>x</title></head><body><div id=\"root\"></div></body></html>",
+    { titulo: "El titular entero de la pieza", tituloDePestana: "Corto para Google", url: "https://x.test/a" });
+  check("la pestaña lleva el meta título y la tarjeta de las redes, el titular",
+    pagina.includes("<title>Corto para Google — SurEconomics</title>") &&
+      pagina.includes('property="og:title" content="El titular entero de la pieza"'), pagina.slice(0, 400));
+}
 check("prefiere meta_description al cuerpo",
   descripcionDe({ meta_description: "Para buscadores.", content: "<p>Cuerpo.</p>" }) === "Para buscadores.");
 check("sin nada devuelve nulo", descripcionDe({}) === null);

@@ -310,6 +310,10 @@ export const piezaFromApi = (row) => {
     formatoNombre: meta ? nombreDeFormato(row.format) : row.content_format?.name_plural ?? row.format ?? "",
     formatoApi: row.format ?? "",
     titulo: String(title ?? ""),
+    // Lo que va a la pestaña y a Google: el meta título y la meta descripción, que el
+    // servidor pone solos a lo publicado. Están en español: en inglés no se usan.
+    metaTitulo: en ? "" : String(row.meta_title ?? "").trim(),
+    metaDescripcion: en ? "" : String(row.meta_description ?? "").trim(),
     // Two forms on purpose: the cards want text, the reading view wants the markup
     // the writer actually applied.
     resumen: textoLlano(excerpt),

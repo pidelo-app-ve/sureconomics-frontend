@@ -274,8 +274,11 @@ export const Pieza = () => {
       ? { title: t("piezas.noEncontrada.meta.titulo", { marca: BRAND.name }), noindex: true }
       : pieza
         ? {
-            title: t("piezas.pieza.meta.titulo", { titulo: pieza.titulo, marca: BRAND.name }),
-            description: pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
+            // El mismo título y la misma descripción que pone la función de Vercel antes
+            // de que cargue la página (`api/pieza.js`): si no, la pestaña cambiaba al cargar.
+            title: t("piezas.pieza.meta.titulo", { titulo: pieza.metaTitulo || pieza.titulo, marca: BRAND.name }),
+            description:
+              pieza.metaDescripcion || pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
             soloEspanol: !pieza.tieneIngles,
             tipo: "article",
             autor: pieza.formatoApi === "editorial" ? BRAND.name : pieza.autor || BRAND.name,

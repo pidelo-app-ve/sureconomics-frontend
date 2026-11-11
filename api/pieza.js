@@ -197,10 +197,20 @@ export const imagenParaCompartir = (url, foco = null) => {
  * no line under it is the version a phone is most likely to refuse to draw.
  */
 export const descripcionDe = (pieza) =>
-  textoLlano(pieza?.excerpt) ||
+  // Primero la que se escribió para esto. Desde el 11-nov-2026 el servidor se la pone
+  // sola a lo publicado (`seo_service` en el backend): antes iba detrás de la entradilla
+  // y, como nadie la llenaba, daba igual.
   textoLlano(pieza?.meta_description) ||
+  textoLlano(pieza?.excerpt) ||
   textoLlano(pieza?.content) ||
   null;
+
+/**
+ * El título de la pestaña y de los resultados de Google: el meta título si la pieza lo
+ * tiene, y si no el titular. Las tarjetas de las redes (`og:title`) siguen con el
+ * titular entero: ahí cabe, y es lo que la redacción quiso decir.
+ */
+export const tituloParaBuscadores = (pieza) => textoLlano(pieza?.meta_title) || pieza?.title || "";
 
 const etiquetas = ({
   titulo,
@@ -295,6 +305,8 @@ export const enSuIngles = (pieza) => ({
   title: pieza.title_en,
   excerpt: pieza.excerpt_en || "",
   content: pieza.content_en,
+  // El SEO está escrito en español: en inglés mandan el título y la entradilla.
+  meta_title: null,
   meta_description: null,
 });
 
@@ -418,7 +430,12 @@ export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
  * Exported for the tests, which is the only way to check this without deploying:
  * a wrong `<head>` looks fine to a person and is invisible to every crawler.
  */
-export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, idioma = "es", ...resto }) => {
+export const inyectar = (
+  shell,
+  { titulo, tituloDePestana = null, html, ficha, datos, noindex = false, idioma = "es", ...resto }
+) => {
+  // `titulo` va a las tarjetas de las redes; `tituloDePestana`, si viene, al `<title>`.
+  const pestana = tituloDePestana || titulo;
   let bloque = etiquetas({ titulo, ...resto });
   if (ficha) {
     bloque += `\n    <script type="application/ld+json">${jsonEnScript(ficha)}</script>`;
@@ -450,9 +467,9 @@ export const inyectar = (shell, { titulo, html, ficha, datos, noindex = false, i
   const conTitulo = sinGenerico.replace(
     /<title>[\s\S]*?<\/title>/i,
     tal(
-      titulo.includes("SurEconomics")
-        ? `<title>${escapar(titulo)}</title>`
-        : `<title>${escapar(titulo)} — SurEconomics</title>`
+      pestana.includes("SurEconomics")
+        ? `<title>${escapar(pestana)}</title>`
+        : `<title>${escapar(pestana)} — SurEconomics</title>`
     )
   );
   // El shell dice `<html lang="es">`; una pieza leída en inglés lo dice en inglés.
@@ -660,6 +677,7 @@ export default async function handler(req, res) {
     imagenParaCompartir(pieza.image_asset?.url || pieza.featured_image_url, pieza.imagen_foco) ?? IMAGEN_DE_MARCA;
   const html = inyectar(shell, {
     titulo: leida.title,
+    tituloDePestana: tituloParaBuscadores(leida),
     descripcion: descripcionDe(leida),
     imagen,
     url,

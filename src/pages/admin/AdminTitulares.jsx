@@ -59,6 +59,8 @@ const resumenDelCiclo = (c) => {
   const partes = [
     [n("sumadas") + n("grupos_nuevos") + n("absorbidas"), "notas agrupadas"],
     [n("descartadas"), "descartadas por el filtro"],
+    // Las que llegaron con más de 3 horas: «todo en caliente» (11-nov-2026).
+    [n("viejas"), "viejas, fuera"],
     [n("redactados"), "redactados"],
     // Los dos que explican un «0 redactados»: sin ellos, el 27-oct la sección pasó un día
     // vacía y el panel solo decía «notas agrupadas… caducados».
@@ -68,6 +70,8 @@ const resumenDelCiclo = (c) => {
     [n("sin_cupo"), "sin presupuesto"],
     [n("zona_gris_sin_saldo"), "dudosas sin consultar (día gastado)"],
     [n("fuera_del_tope"), "fuera del tope por ciclo"],
+    // Un mismo medio no encabeza más de dos en tres horas: esperan su turno.
+    [n("tope_por_medio"), "en espera por el tope por medio"],
     [n("caducados"), "caducados"],
   ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
   const fallos = Object.keys(c).filter((k) => k.startsWith("fallo_")).map((k) => ETAPAS[k.slice(6)] || k.slice(6));

@@ -290,11 +290,12 @@ Aviso.propTypes = {
 /** Una noticia que el sistema tiene en la mira: todavía no es un aviso. */
 const Candidato = ({ candidato, anclaje }) => (
   <li className="se-admin-table-wrap se-avisos__tarjeta" {...anclaje}>
-    {candidato.enEstaPasada || candidato.venezuela || candidato.enUltimaHora ? (
+    {candidato.enEstaPasada || candidato.venezuela || candidato.enUltimaHora || candidato.seTraduce ? (
       <p className="se-avisos__marcas">
         {candidato.enEstaPasada ? <span className="se-avisos__marca se-avisos__marca--mio">Saldría en la próxima pasada</span> : null}
         {candidato.venezuela ? <span className="se-avisos__marca se-avisos__marca--ok">Venezuela</span> : null}
         {candidato.enUltimaHora ? <span className="se-avisos__marca">Ya está en «Última hora»</span> : null}
+        {candidato.seTraduce ? <span className="se-avisos__marca">El aviso sale traducido al español</span> : null}
       </p>
     ) : null}
     <h2 className="se-heading-card se-avisos__titulo">{candidato.titulo}</h2>

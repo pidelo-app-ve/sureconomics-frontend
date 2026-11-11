@@ -28,7 +28,9 @@ check("un aviso sin fuentes trae la lista vacía", dia.avisos[1].fuentes.length 
 const vacio = leerAvisos(undefined);
 check("sin respuesta: apagados y sin avisos", !vacio.activos && vacio.avisos.length === 0 && vacio.hoy === 0, vacio);
 check("sin motivos del servidor quedan los tres de siempre", vacio.motivos.length === 3, vacio.motivos);
-const ahora = leerCandidatos({ candidatos: [{ cluster_id: 9, titulo: "X", venezuela: true, en_esta_pasada: true, medio_principal: "Reuters" }] });
+const ahora = leerCandidatos({ candidatos: [{ cluster_id: 9, titulo: "X", venezuela: true, en_esta_pasada: true, medio_principal: "Reuters" },
+  { cluster_id: 10, titulo: "Poupança tem saída líquida", idioma: "pt" }, { cluster_id: 11, titulo: "Sube", idioma: "es" }] });
+check("sabe cuál se va a traducir", !ahora.candidatos[0].seTraduce && ahora.candidatos[1].seTraduce && !ahora.candidatos[2].seTraduce);
 check("lee un candidato", ahora.candidatos[0].id === 9 && ahora.candidatos[0].venezuela && ahora.candidatos[0].enEstaPasada, ahora);
 
 console.log("cómo está cada aviso");

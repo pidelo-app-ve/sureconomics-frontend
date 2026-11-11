@@ -151,6 +151,8 @@ export const leerCandidatos = (data) => ({
   candidatos: lista(data?.candidatos).map((c) => ({
     id: c.cluster_id,
     titulo: c.titulo || "",
+    // El titular viene de un medio en otro idioma: el aviso sale traducido.
+    seTraduce: Boolean(c.idioma) && c.idioma !== "es",
     pais: c.pais || null,
     venezuela: c.venezuela === true,
     calor: numero(c.calor),

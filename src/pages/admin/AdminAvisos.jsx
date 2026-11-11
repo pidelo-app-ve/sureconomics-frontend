@@ -31,7 +31,7 @@ import "./adminAvisos.css";
  * «Avisos de noticias» en el panel: lo que la redacción debería mirar hoy.
  *
  * Los avisos se crean solos al final de cada ciclo de titulares (cada 10 minutos, ver
- * `services/avisos_service.py` en el backend): como mucho 2 por pasada y 10 al día,
+ * `services/avisos_service.py` en el backend): todo lo importante, sin tope,
  * primero lo de Venezuela. Nacen **apagados**. Esta página sirve para dos cosas:
  *
  * - **Mirar antes de encender**: «Lo que se avisaría ahora» enseña las noticias que el
@@ -408,7 +408,7 @@ export const AdminAvisos = () => {
       ...(encender
         ? {
             title: "Encender los avisos",
-            description: `Desde la próxima pasada (cada 10 minutos) saldrán avisos: como mucho 2 por pasada y ${dia.maxAlDia} al día, nunca de 10 de la noche a 6 de la mañana. Por ahora se ven solo en esta página.`,
+            description: "Desde la próxima pasada (cada 10 minutos) saldrán avisos de todas las noticias importantes, sin tope, nunca de 10 de la noche a 6 de la mañana. Llegan aquí y a cada persona vinculada al bot de Telegram.",
             confirmLabel: "Encender",
           }
         : {

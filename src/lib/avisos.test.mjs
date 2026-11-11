@@ -14,19 +14,19 @@ const check = (nombre, ok, detalle) => {
 
 console.log("lo que manda el servidor");
 const dia = leerAvisos({
-  activos: true, silencio: false, max_al_dia: 10, quedan: 8, motivos: ["ya_la_dimos", "poca_cosa"],
+  activos: true, silencio: false, hoy: 2, motivos: ["ya_la_dimos", "poca_cosa"],
   avisos: [
     { id: 1, titulo: "Sube el dólar", pais: "VE", calor: 41.5, medios: 3, estado: "tomado", tomado_por_id: 7,
       tomado_por: "María", fuentes: [{ medio: "EFE", titulo: "El dólar sube", url: "https://efe.com/x" }] },
     { id: 2, titulo: "Baja el crudo", estado: "pendiente" },
   ],
 });
-check("lee el estado del día", dia.activos && dia.quedan === 8 && dia.maxAlDia === 10, dia);
+check("lee el estado del día", dia.activos && dia.hoy === 2, dia);
 check("lee quién lo tomó", dia.avisos[0].tomadoPorId === 7 && dia.avisos[0].tomadoPor === "María");
 check("lee las fuentes", dia.avisos[0].fuentes[0].medio === "EFE");
 check("un aviso sin fuentes trae la lista vacía", dia.avisos[1].fuentes.length === 0);
 const vacio = leerAvisos(undefined);
-check("sin respuesta: apagados y sin avisos", !vacio.activos && vacio.avisos.length === 0 && vacio.maxAlDia === 10, vacio);
+check("sin respuesta: apagados y sin avisos", !vacio.activos && vacio.avisos.length === 0 && vacio.hoy === 0, vacio);
 check("sin motivos del servidor quedan los tres de siempre", vacio.motivos.length === 3, vacio.motivos);
 const ahora = leerCandidatos({ candidatos: [{ cluster_id: 9, titulo: "X", venezuela: true, en_esta_pasada: true, medio_principal: "Reuters" }] });
 check("lee un candidato", ahora.candidatos[0].id === 9 && ahora.candidatos[0].venezuela && ahora.candidatos[0].enEstaPasada, ahora);
@@ -105,9 +105,10 @@ check("sin respuesta del servidor: sin configurar y sin nadie", leerBot(undefine
 
 console.log("la línea de la cabecera");
 check("apagados", lineaDelDia(vacio) === "Apagados: no se crea ningún aviso");
-check("encendidos, con cupo", lineaDelDia(dia) === "Quedan 8 de 10 hoy");
-check("de noche", lineaDelDia({ ...dia, silencio: true }) === "Quedan 8 de 10 hoy · En silencio hasta las 6:00");
-check("sin cupo", lineaDelDia({ ...dia, quedan: 0 }) === "Ya salieron los 10 de hoy");
+check("encendidos", lineaDelDia(dia) === "2 avisos hoy", lineaDelDia(dia));
+check("uno", lineaDelDia({ ...dia, hoy: 1 }) === "1 aviso hoy");
+check("de noche", lineaDelDia({ ...dia, silencio: true }) === "2 avisos hoy · En silencio hasta las 6:00");
+check("sin ninguno", lineaDelDia({ ...dia, hoy: 0 }) === "Ninguno todavía hoy");
 
 console.log("en qué vista se abre");
 check("con avisos de hoy: hoy", vistaInicial(dia) === "hoy");

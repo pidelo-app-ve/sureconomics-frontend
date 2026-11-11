@@ -34,12 +34,12 @@ export const nombreDePais = (iso) => {
 const lista = (valor) => (Array.isArray(valor) ? valor : []);
 const numero = (valor, porDefecto = 0) => (Number.isFinite(Number(valor)) ? Number(valor) : porDefecto);
 
-/** Lo común a las dos respuestas: si están encendidos y cuántos quedan hoy. */
+/** Lo común a las dos respuestas: si están encendidos y cuántos van hoy. Sin tope desde
+ *  el 11-nov-2026: sale todo lo importante y la redacción decide. */
 const leerDia = (data) => ({
   activos: data?.activos === true,
   silencio: data?.silencio === true,
-  maxAlDia: numero(data?.max_al_dia, 10),
-  quedan: numero(data?.quedan),
+  hoy: numero(data?.hoy),
   motivos: lista(data?.motivos).length ? lista(data.motivos) : Object.keys(NOMBRE_DE_MOTIVO),
 });
 
@@ -206,9 +206,9 @@ export const accionesDe = (aviso, miId) => {
 export const pendientes = (avisos) => avisos.filter((a) => a.estado === "pendiente").length;
 
 /** La línea de estado de la cabecera: lo que pasa ahora con los avisos. */
-export const lineaDelDia = ({ activos, silencio, quedan, maxAlDia }) => {
+export const lineaDelDia = ({ activos, silencio, hoy }) => {
   if (!activos) return "Apagados: no se crea ningún aviso";
-  const cupo = quedan > 0 ? `Quedan ${quedan} de ${maxAlDia} hoy` : `Ya salieron los ${maxAlDia} de hoy`;
+  const cupo = hoy ? `${hoy === 1 ? "1 aviso" : `${hoy} avisos`} hoy` : "Ninguno todavía hoy";
   return silencio ? `${cupo} · En silencio hasta las 6:00` : cupo;
 };
 

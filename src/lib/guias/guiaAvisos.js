@@ -10,7 +10,7 @@ export const PASOS_AVISOS = [
     titulo: "Qué hay en esta página",
     texto:
       "Las noticias que la redacción debería mirar hoy. El sistema lee lo que publican los medios, " +
-      "junta las notas que cuentan lo mismo y aparta las más importantes: como mucho 10 al día, y " +
+      "junta las notas que cuentan lo mismo y aparta las importantes, sin tope, y " +
       "primero las de Venezuela. Cada aviso espera a que alguien del equipo diga «lo hago yo» o «esto no».",
   },
   {
@@ -18,16 +18,16 @@ export const PASOS_AVISOS = [
     titulo: "Encendidos o apagados",
     puntos: [
       "Apagados: no se crea ningún aviso. Se puede mirar igual qué se avisaría.",
-      "Encendidos: cada 10 minutos salen hasta 2 avisos nuevos, hasta llegar a 10 en el día.",
+      "Encendidos: cada 10 minutos salen los avisos nuevos, todos los que lo merezcan. La redacción decide cuáles suben.",
       "De noche: de 10 de la noche a 6 de la mañana no sale ninguno.",
     ],
   },
   {
     clave: "cuenta",
-    titulo: "Cuántos quedan hoy",
+    titulo: "Cuántos van hoy",
     texto:
-      "Los avisos que todavía pueden salir hoy. Son pocos a propósito: diez que se leen sirven más " +
-      "que cincuenta que nadie mira.",
+      "Los avisos que salieron hoy. No hay tope: sale todo lo importante y la redacción decide qué " +
+      "se convierte en pieza y qué se descarta.",
   },
   {
     clave: "bot",
@@ -37,6 +37,7 @@ export const PASOS_AVISOS = [
       "Ver fuentes y No interesa. Si alguien toma uno, a los demás se les cambia el mensaje solo.",
     puntos: [
       "Vincularse: abrir el bot, escribir /start y pulsar «Compartir mi número». Tiene que ser el mismo celular de «Mi perfil».",
+      "Mandar noticia: cualquiera del equipo le pega al bot el enlace de algo que cree que hay que contar (o varios del mismo hecho). El bot lee esos artículos y deja el borrador en el panel, con lo mismo comprobado.",
       "Conectar el bot: lo hace el administrador una vez, para que Telegram sepa adónde llamar.",
       "Pausar avisos: desde el menú del propio bot, cada uno los pausa y los reanuda.",
     ],

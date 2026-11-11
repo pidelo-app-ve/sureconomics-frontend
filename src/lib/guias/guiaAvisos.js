@@ -33,13 +33,28 @@ export const PASOS_AVISOS = [
     clave: "bot",
     titulo: "El bot de Telegram",
     texto:
-      "Los mismos avisos, en el chat de cada persona del equipo, con sus botones: Redactar, Lo hago yo, " +
-      "Ver fuentes y No interesa. Si alguien toma uno, a los demás se les cambia el mensaje solo.",
+      "Los mismos avisos, en el chat del jefe editorial, con sus botones: Redactar, Lo hago yo, Ver fuentes " +
+      "y No interesa. La noticia redactada le llega entera al chat y desde ahí la termina y la publica.",
     puntos: [
       "Vincularse: abrir el bot, escribir /start y pulsar «Compartir mi número». Tiene que ser el mismo celular de «Mi perfil».",
-      "Mandar noticia: cualquiera del equipo le pega al bot el enlace de algo que cree que hay que contar (o varios del mismo hecho). El bot lee esos artículos y deja el borrador en el panel, con lo mismo comprobado.",
+      "Quién recibe las noticias: el administrador marca aquí a quién le llegan los avisos. A los demás vinculados no les llega ninguno.",
+      "En el chat, con cada noticia: elegir el titular entre varios, ponerle el tema, mandarle la foto y su crédito, publicarla y, si hace falta, despublicarla.",
+      "Mandar noticia: quien esté vinculado le pega al bot el enlace de algo que cree que hay que contar (o varios del mismo hecho). El bot lee esos artículos y devuelve la noticia redactada, con lo mismo comprobado.",
       "Conectar el bot: lo hace el administrador una vez, para que Telegram sepa adónde llamar.",
-      "Pausar avisos: desde el menú del propio bot, cada uno los pausa y los reanuda.",
+      "Pausar avisos: desde el menú del propio bot, quien los recibe los pausa y los reanuda.",
+    ],
+  },
+  {
+    clave: "marketing",
+    titulo: "Marketing: lo de Instagram",
+    texto:
+      "Es otro camino, aparte. Cuando una noticia ya está publicada, el jefe editorial pulsa «Mandar a marketing» " +
+      "en el chat y, si quiere, escribe el titular o la idea que propone. A cada persona de esta lista le llega " +
+      "la noticia con su enlace, su foto y esa nota, para que monte la publicación de Instagram.",
+    puntos: [
+      "Agregar: el nombre y el celular de la persona. No necesita cuenta en el panel.",
+      "Vincularse: ella abre el bot, escribe /start y comparte su número. Hasta entonces sale «falta que abra el bot» y no le llega nada.",
+      "Quitar: deja de recibir. No borra nada de lo que ya se le mandó.",
     ],
   },
   {

@@ -227,8 +227,34 @@ export const leerBot = (data) => {
       nombre: p?.nombre || "Sin nombre",
       activo: p?.activo !== false,
       recibeAvisos: p?.recibe_avisos !== false,
+      // De quienes reciben el flujo de noticias (lo marca el admin). Sin el dato, no.
+      enElFlujo: p?.en_el_flujo === true,
+    })),
+    marketing: lista(data?.marketing).map((c) => ({
+      id: c?.id,
+      nombre: c?.nombre || "Sin nombre",
+      telefono: typeof c?.telefono === "string" ? c.telefono : "",
+      vinculada: c?.vinculada === true,
     })),
   };
+};
+
+/** A quién le llegan las noticias en el bot, en una frase. */
+export const lineaDeQuienRecibe = (bot) => {
+  if (!bot.vinculados.length) return "Todavía no se ha vinculado nadie.";
+  const nombres = bot.vinculados.filter((p) => p.activo && p.enElFlujo).map((p) => p.nombre);
+  if (!nombres.length) {
+    return "Ahora mismo no le llegan a nadie: el administrador marca aquí a quien deba recibirlas.";
+  }
+  const quienes = nombres.length === 1 ? nombres[0] : `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}`;
+  return `Le llegan a ${quienes}, para elegir, redactar y publicar desde el chat. Los demás vinculados pueden mandarle enlaces al bot, pero no reciben avisos.`;
+};
+
+/** Lo que hay que saber de una persona vinculada, si hay algo. */
+export const estadoDePersona = (persona) => {
+  if (!persona.activo) return "sin acceso al panel";
+  if (persona.enElFlujo && !persona.recibeAvisos) return "los pausó desde el bot";
+  return null;
 };
 
 /** El estado del bot en una línea. */

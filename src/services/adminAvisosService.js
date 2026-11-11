@@ -47,3 +47,21 @@ export const traerBot = async () => leerBot(unwrapEntity(await adminRequest("/ad
 /** Le dice a Telegram adónde llamar. Solo el admin. Devuelve el estado nuevo. */
 export const conectarBot = async () =>
   leerBot(unwrapEntity(await adminRequest("/admin/avisos/bot/conectar", { method: "POST" })));
+
+/** Marca (o desmarca) a una persona vinculada como de quienes reciben las noticias. Solo el admin. */
+export const ponerEnElFlujo = async (id, enElFlujo) =>
+  leerBot(
+    unwrapEntity(
+      await adminRequest(`/admin/avisos/bot/personas/${id}`, { method: "PUT", json: { en_el_flujo: enElFlujo } }),
+    ),
+  );
+
+/** Añade a alguien de marketing, con su celular: recibirá lo publicado para Instagram. */
+export const agregarAMarketing = async ({ nombre, telefono }) =>
+  leerBot(
+    unwrapEntity(await adminRequest("/admin/avisos/bot/marketing", { method: "POST", json: { nombre, telefono } })),
+  );
+
+/** La saca de la lista de marketing. */
+export const quitarDeMarketing = async (id) =>
+  leerBot(unwrapEntity(await adminRequest(`/admin/avisos/bot/marketing/${id}`, { method: "DELETE" })));

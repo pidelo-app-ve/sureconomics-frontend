@@ -409,7 +409,7 @@ export const AdminAvisos = () => {
       ...(encender
         ? {
             title: "Encender los avisos",
-            description: "Desde la próxima pasada (cada 10 minutos) saldrán avisos de todas las noticias importantes, sin tope, nunca de 10 de la noche a 6 de la mañana. Llegan aquí y a cada persona vinculada al bot de Telegram.",
+            description: "Desde la próxima pasada (cada 10 minutos) saldrán avisos de todas las noticias importantes, sin tope, nunca de 10 de la noche a 6 de la mañana. Llegan aquí y, por Telegram, a quien esté marcado abajo en «Quién recibe las noticias».",
             confirmLabel: "Encender",
           }
         : {
@@ -436,7 +436,7 @@ export const AdminAvisos = () => {
         titulo="Avisos de noticias"
         explica={
           <>
-            Las noticias que la redacción debería mirar hoy: pocas, y primero las de Venezuela. Cada una espera a que
+            Las noticias que la redacción debería mirar hoy: las importantes, y primero las de Venezuela. Cada una espera a que
             alguien diga «lo hago yo» o «esto no».
           </>
         }
@@ -468,7 +468,7 @@ export const AdminAvisos = () => {
         </div>
       </section>
 
-      <BotDeTelegram anclaje={ancla("bot")} />
+      <BotDeTelegram anclaje={ancla("bot")} anclajeMarketing={ancla("marketing")} />
 
       <div className="se-admin-filters se-avisos__vistas" role="tablist" aria-label="Qué ver" {...ancla("vistas")}>
         {VISTAS.map((v) => (

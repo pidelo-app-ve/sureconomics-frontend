@@ -3,7 +3,7 @@
  */
 import {
   accionesDe, comprobacion, detalleDeLoComprobado, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
-  leerBot, lineaDelBot, pendientes, vistaInicial,
+  estadoDePersona, leerBot, lineaDelBot, lineaDeQuienRecibe, pendientes, vistaInicial,
 } from "./avisos.js";
 
 let fallos = 0;
@@ -104,6 +104,26 @@ const bot = leerBot({ configurado: true, conectado: true, usuario: "SurRedaccion
 check("conectado, con su enlace y quién está", bot.enlace === "https://t.me/SurRedaccionBot" &&
   lineaDelBot(bot) === "@SurRedaccionBot · 1 persona vinculada" && bot.vinculados[0].recibeAvisos === false, lineaDelBot(bot));
 check("sin respuesta del servidor: sin configurar y sin nadie", leerBot(undefined).vinculados.length === 0 && !leerBot(null).configurado);
+
+console.log("quién recibe las noticias y marketing");
+check("sin el dato, nadie está en el flujo", bot.vinculados.every((p) => p.enElFlujo === false) && bot.marketing.length === 0);
+check("nadie marcado: lo dice", lineaDeQuienRecibe(bot).startsWith("Ahora mismo no le llegan a nadie"), lineaDeQuienRecibe(bot));
+check("nadie vinculado", lineaDeQuienRecibe(leerBot({ configurado: true, conectado: true })) === "Todavía no se ha vinculado nadie.");
+const conPablo = leerBot({ configurado: true, conectado: true, usuario: "SurRedaccionBot",
+  vinculados: [
+    { id: 1, nombre: "Pablo", activo: true, recibe_avisos: true, en_el_flujo: true },
+    { id: 2, nombre: "Ana", activo: true, recibe_avisos: false, en_el_flujo: true },
+    { id: 3, nombre: "Beto", activo: false, en_el_flujo: true },
+    { id: 4, nombre: "Carla", activo: true, en_el_flujo: false }],
+  marketing: [{ id: 7, nombre: "Marta", telefono: "584149990001", vinculada: true }, { id: 8, telefono: 5 }] });
+check("los marcados, por su nombre; quien no tiene acceso no cuenta",
+  lineaDeQuienRecibe(conPablo).startsWith("Le llegan a Pablo y Ana, para elegir"), lineaDeQuienRecibe(conPablo));
+check("lo que hay que saber de cada persona",
+  estadoDePersona(conPablo.vinculados[0]) === null && estadoDePersona(conPablo.vinculados[1]) === "los pausó desde el bot" &&
+  estadoDePersona(conPablo.vinculados[2]) === "sin acceso al panel" && estadoDePersona(conPablo.vinculados[3]) === null);
+check("marketing: nombre, celular y si se vinculó", conPablo.marketing[0].vinculada === true &&
+  conPablo.marketing[0].telefono === "584149990001" && conPablo.marketing[1].nombre === "Sin nombre" &&
+  conPablo.marketing[1].telefono === "" && conPablo.marketing[1].vinculada === false);
 
 console.log("la línea de la cabecera");
 check("apagados", lineaDelDia(vacio) === "Apagados: no se crea ningún aviso");

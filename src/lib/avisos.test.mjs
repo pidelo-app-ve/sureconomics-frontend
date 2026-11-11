@@ -3,7 +3,7 @@
  */
 import {
   accionesDe, comprobacion, detalleDeLoComprobado, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
-  pendientes, vistaInicial,
+  leerBot, lineaDelBot, pendientes, vistaInicial,
 } from "./avisos.js";
 
 let fallos = 0;
@@ -93,6 +93,15 @@ check("sin artículos leídos lo dice",
 check("sin IA: borrador vacío",
   comprobacion(leerRevision({ con_ia: false, fuentes: 2 })).linea.startsWith("Borrador vacío, con el título y las 2 fuentes puestas"));
 check("sin informe no hay nada que decir", comprobacion(null) === null);
+
+console.log("el bot de Telegram");
+check("sin token", lineaDelBot(leerBot({ configurado: false })).startsWith("Sin configurar"));
+check("sin conectar", lineaDelBot(leerBot({ configurado: true })).startsWith("Configurado, pero sin conectar"));
+const bot = leerBot({ configurado: true, conectado: true, usuario: "SurRedaccionBot", vinculados: [
+  { id: 1, nombre: "Ana", activo: true, recibe_avisos: false }, { id: 2, nombre: "Beto", activo: false }] });
+check("conectado, con su enlace y quién está", bot.enlace === "https://t.me/SurRedaccionBot" &&
+  lineaDelBot(bot) === "@SurRedaccionBot · 1 persona vinculada" && bot.vinculados[0].recibeAvisos === false, lineaDelBot(bot));
+check("sin respuesta del servidor: sin configurar y sin nadie", leerBot(undefined).vinculados.length === 0 && !leerBot(null).configurado);
 
 console.log("la línea de la cabecera");
 check("apagados", lineaDelDia(vacio) === "Apagados: no se crea ningún aviso");

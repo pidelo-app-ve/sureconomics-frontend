@@ -212,5 +212,31 @@ export const lineaDelDia = ({ activos, silencio, quedan, maxAlDia }) => {
   return silencio ? `${cupo} · En silencio hasta las 6:00` : cupo;
 };
 
+/** `GET /admin/avisos/bot`: el bot de Telegram de la redacción y quién está vinculado. */
+export const leerBot = (data) => {
+  const usuario = typeof data?.usuario === "string" && data.usuario ? data.usuario : null;
+  return {
+    configurado: data?.configurado === true,
+    conectado: data?.conectado === true,
+    usuario,
+    enlace: usuario ? `https://t.me/${usuario}` : null,
+    vinculados: lista(data?.vinculados).map((p) => ({
+      id: p?.id,
+      nombre: p?.nombre || "Sin nombre",
+      activo: p?.activo !== false,
+      recibeAvisos: p?.recibe_avisos !== false,
+    })),
+  };
+};
+
+/** El estado del bot en una línea. */
+export const lineaDelBot = (bot) => {
+  if (!bot.configurado) return "Sin configurar: falta su token en Render (REDACCION_TELEGRAM_BOT_TOKEN).";
+  if (!bot.conectado) return "Configurado, pero sin conectar: Telegram todavía no sabe adónde llamar.";
+  const n = bot.vinculados.filter((p) => p.activo).length;
+  const quien = n ? `${n === 1 ? "1 persona vinculada" : `${n} personas vinculadas`}` : "nadie vinculado todavía";
+  return `${bot.usuario ? `@${bot.usuario}` : "Conectado"} · ${quien}`;
+};
+
 /** En qué vista se abre la página: si no hay avisos de hoy, lo que se avisaría ahora. */
 export const vistaInicial = ({ avisos }) => (avisos.length ? "hoy" : "ahora");

@@ -1,5 +1,5 @@
 import { adminRequest } from "../lib/api";
-import { leerAvisos, leerCandidatos } from "../lib/avisos";
+import { leerAvisos, leerBot, leerCandidatos } from "../lib/avisos";
 import { unwrapEntity } from "./adminResponseUtils";
 
 /* —— Avisos de noticias ——
@@ -40,3 +40,10 @@ export const redactarAviso = async (id, { ia = true } = {}) => {
   const data = unwrapEntity(await adminRequest(`/admin/avisos/${id}/redactar`, { method: "POST", json: { ia } }));
   return { piezaId: data?.post_id ?? null, yaExistia: data?.ya_existia === true };
 };
+
+/** El bot de Telegram de la redacción: si está listo, su @nombre y quién está vinculado. */
+export const traerBot = async () => leerBot(unwrapEntity(await adminRequest("/admin/avisos/bot")));
+
+/** Le dice a Telegram adónde llamar. Solo el admin. Devuelve el estado nuevo. */
+export const conectarBot = async () =>
+  leerBot(unwrapEntity(await adminRequest("/admin/avisos/bot/conectar", { method: "POST" })));

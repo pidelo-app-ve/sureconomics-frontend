@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { BotDeTelegram } from "../../components/admin/BotDeTelegram";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { Plegable } from "../../components/admin/Plegable";
 import { ErrorState, LoadingState } from "../../components/content";
@@ -465,6 +466,8 @@ export const AdminAvisos = () => {
           ) : null}
         </div>
       </section>
+
+      <BotDeTelegram anclaje={ancla("bot")} />
 
       <div className="se-admin-filters se-avisos__vistas" role="tablist" aria-label="Qué ver" {...ancla("vistas")}>
         {VISTAS.map((v) => (

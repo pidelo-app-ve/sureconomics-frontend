@@ -30,6 +30,18 @@ export const PASOS_AVISOS = [
       "que cincuenta que nadie mira.",
   },
   {
+    clave: "bot",
+    titulo: "El bot de Telegram",
+    texto:
+      "Los mismos avisos, en el chat de cada persona del equipo, con sus botones: Redactar, Lo hago yo, " +
+      "Ver fuentes y No interesa. Si alguien toma uno, a los demás se les cambia el mensaje solo.",
+    puntos: [
+      "Vincularse: abrir el bot, escribir /start y pulsar «Compartir mi número». Tiene que ser el mismo celular de «Mi perfil».",
+      "Conectar el bot: lo hace el administrador una vez, para que Telegram sepa adónde llamar.",
+      "Pausar avisos: desde el menú del propio bot, cada uno los pausa y los reanuda.",
+    ],
+  },
+  {
     clave: "vistas",
     titulo: "Las dos vistas",
     puntos: [

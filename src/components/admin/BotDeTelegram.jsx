@@ -162,7 +162,8 @@ export const BotDeTelegram = ({ anclaje, anclajeMarketing }) => {
             <span className="se-form-label">Marketing (Instagram)</span>
             <p className="se-admin-meta-hint se-bot__como">
               A estas personas les llega sola por Telegram cada pieza que se publica en la página, con su enlace
-              y su foto, para que la revisen y la monten en Instagram. No necesitan cuenta en el panel: abren el
+              y su foto, para que la revisen y la monten en Instagram. Si la van a subir, piden ahí mismo la lámina
+              (la imagen con la plantilla del medio y el texto del pie). No necesitan cuenta en el panel: abren el
               bot, escriben /start y comparten su número, que tiene que ser el de aquí.
             </p>
             {bot.marketing.length ? (

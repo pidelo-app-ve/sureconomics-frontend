@@ -50,7 +50,9 @@ export const PASOS_AVISOS = [
     texto:
       "Es otro camino, aparte. Cada vez que una pieza sale publicada en la página (desde el bot, desde el panel " +
       "o programada), a cada persona de esta lista le llega sola por Telegram, con su enlace y su foto, para que " +
-      "la revise y monte la publicación de Instagram. Nadie tiene que mandársela, y cada pieza llega una sola vez.",
+      "la revise y monte la publicación de Instagram. Nadie tiene que mandársela, y cada pieza llega una sola vez. " +
+      "Si la van a subir, tocan «Hacer la lámina» y el bot les devuelve la imagen de 1080×1350 con la plantilla " +
+      "del medio y el texto del pie, listo para copiar; pueden pedir otro titular, escribir el suyo o cambiar la foto.",
     puntos: [
       "Agregar: el nombre y el celular de la persona. No necesita cuenta en el panel.",
       "Vincularse: ella abre el bot, escribe /start y comparte su número. Hasta entonces sale «falta que abra el bot» y no le llega nada.",

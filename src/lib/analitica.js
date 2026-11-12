@@ -546,11 +546,18 @@ export const registrarVista = (ruta) => {
  *
  * Solo con la medicion encendida. De quien no acepto no se sabe por donde llego, asi que
  * no hay nada que sumar; las altas de verdad se cuentan aparte, en la lista.
+ *
+ * Va con la visita que esta en la cookie tal cual, sin pasar por `identidad()`: quien
+ * tarda mas de media hora en rellenar el formulario con la pestana quieta estrenaria
+ * ahi una visita nueva, que el servidor no conoce, y el alta se perderia.
  */
 export const registrarAlta = () => {
   if (!encendido) return;
-  const alta = evento("alta");
-  if (alta) enviar([alta]);
+  const userId = leer(COOKIE_USUARIO);
+  const sessionId = leer(COOKIE_SESION);
+  if (!userId || !sessionId) return;
+  const ruta = rutaActual ?? window.location.pathname;
+  enviar([{ tipo: "alta", ruta, user_id: userId, session_id: sessionId }]);
 };
 
 /** Lo que la pagina de cookies ensena: que hay puesto ahora mismo, sin inventar nada. */

@@ -2,8 +2,9 @@
 
 **Escrito el 22/09/2026, el día que se activó la medición.**
 
-La política se activó con el texto aprobado. Lo que sigue son tres cosas que el texto
-dice —o dejó de decir— y que conviene resolver antes de que empiecen a importar. Ninguna
+La política se activó con el texto aprobado. Lo que sigue son tres cosas (y una
+cuarta, añadida el 12/11/2026: el punto 4) que el texto dice —o dejó de decir— y
+que conviene resolver antes de que empiecen a importar. Ninguna
 es urgente hoy; las tres lo serán en cuanto se encienda lo que está apagado.
 
 ## De dónde sale esto
@@ -112,6 +113,46 @@ Conviene comprobar si eso guarda algo que identifique al navegador, y si guarda 
 declararlo.
 
 **Hoy no corre prisa** porque no hay campañas sirviéndose a lectores reales.
+
+## 4. Desde el 12/11/2026 la medición guarda más cosas
+
+**Añadido el 12/11/2026**, con el cambio que amplió la medición de audiencia para la
+agencia de SEO. El texto de `/cookies` se puso al día el mismo día, en los dos idiomas.
+
+| Lo nuevo | Qué se guarda de verdad | Dónde se cumple |
+|---|---|---|
+| Por dónde llega la visita | Un canal (buscador, redes, mensajería, IA, correo, otros, directo) y un nombre («google») o el dominio. Del navegador solo sale el nombre del sitio: nunca la dirección entera ni lo buscado | `lib/llegada.js` (`sitioDeOrigen`) y `analitica_origen.clasificar` |
+| País | Dos letras. Sale de la zona horaria del aparato; la zona no se guarda y la IP no se mira | `analitica_origen.pais_de` |
+| Aparato | Una palabra de tres: móvil, tableta o computadora. El agente de usuario no se guarda | `lib/llegada.js` (`aparatoDe`) |
+| Altas al boletín por canal | Un contador por día y canal, sin correo y sin marca en la visita | `registrarAlta`, en `lib/analitica.js` |
+| Páginas vistas sin medir | Un contador por día. Viajan dos datos: si la persona rechazó o no ha contestado, y si es la primera página de la carga. Sin cookie, sin identificador, sin la página | `contarPagina` → `POST /analitica/pagina` |
+
+Las cuatro primeras filas solo ocurren con el «Aceptar». La última es la que hay que mirar.
+
+**Para el abogado**, cuatro preguntas:
+
+1. **El contador de páginas suma también de quien dijo que no y de quien aún no ha
+   contestado.** No lee ni escribe cookies, no lleva identificador y no guarda la IP;
+   por eso se dio por bueno, igual que el contador de «aceptaron / rechazaron» que ya
+   existía. Es una lectura nuestra, no una opinión legal. Si la respuesta es que tras un
+   «no» no debe sumar nada, el cambio es de una línea (`contarPagina` deja de contar
+   cuando `consentimiento() === "no"`) y la «audiencia real estimada» del panel se
+   calcularía solo con quien no ha contestado.
+2. **El país sale de la zona horaria del navegador** (`Intl.DateTimeFormat`), y el tipo
+   de aparato de lo que el navegador dice de sí mismo. Son características del aparato:
+   se leen solo con consentimiento y están dichas en `/cookies`. ¿Basta así?
+3. **A quien ya había aceptado no se le vuelve a preguntar.** El permiso que dio antes
+   del 12/11/2026 cubría menos cosas que las que se guardan ahora. Hoy el aviso no
+   tiene versión: si hay que volver a preguntar, se añade una fecha de corte y el
+   permiso anterior a ella deja de valer.
+4. **La barra no cambió.** Sigue diciendo «cuántas personas nos leen, si vuelven y qué
+   se lee de verdad». Lo nuevo está en `/cookies`, no en la barra. Si conviene que la
+   barra lo nombre, es una frase.
+
+**Lo que se corrigió en `/cookies`:** ya no dice que el contador de la decisión sea «lo
+único que un no envía» (ahora son dos contadores); la lista de lo que no se guarda
+aclara qué queda del aparato, de la página de origen y de la zona horaria; y hay un
+párrafo para las altas al boletín.
 
 ---
 

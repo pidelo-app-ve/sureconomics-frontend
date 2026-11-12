@@ -1,6 +1,7 @@
 import { createApiClient } from "./apiClient";
 import { adminRequest } from "../lib/api";
 import { readStoredAuth } from "../lib/authStorage";
+import { registrarAlta } from "../lib/analitica";
 import { unwrapListResponse } from "./adminResponseUtils";
 
 const defaultClient = (() => {
@@ -27,13 +28,20 @@ const ensureClient = (client) => {
  * `honeypot` es el campo trampa. Va vacío desde una persona; se manda de todas formas
  * porque el contrato del formulario lo incluye y así el servidor no tiene que adivinar
  * si el cliente lo soporta.
+ *
+ * Tras el acierto se avisa a la medición (`registrarAlta`), que suma un alta al canal
+ * por el que llegó la visita: es lo que deja saber de dónde vienen los suscriptores.
+ * Va aquí y no en cada formulario para que ninguno se quede sin contar. No lleva el
+ * correo, y si el lector no aceptó las cookies no manda nada.
  */
 export const subscribeToNewsletter = async (email, { source, honeypot = "", turnstile = "", client } = {}) => {
   const c = ensureClient(client);
-  return c.request("/newsletter", {
+  const respuesta = await c.request("/newsletter", {
     method: "POST",
     json: { email, source, website: honeypot, turnstile },
   });
+  registrarAlta();
+  return respuesta;
 };
 
 /** Salir de la lista con el token que viaja en el enlace del correo. */

@@ -5,7 +5,7 @@
  * latido cada veinte segundos y un aviso de salida que sobrevive al cierre de la
  * pestana. Nada de esto existe hasta que alguien dice que si; ver `arrancar`.
  *
- * ## Las cuatro decisiones que no son obvias
+ * ## Las cinco decisiones que no son obvias
  *
  * **Las cookies no viajan solas.** El sitio esta en `www.sureconomics.com` y la API en
  * `onrender.com`: dominios distintos. Una cookie puesta aqui no se manda en la cabecera
@@ -28,7 +28,16 @@
  * del navegador dura lo que dure la ventana abierta, que puede ser una semana. La regla
  * de los treinta minutos se aplica comparando contra `last_activity`: si se paso, se
  * emite un `session_id` nuevo.
+ *
+ * **De la llegada sale una palabra, no una direccion.** Con cada pagina vista viaja
+ * por donde se llego, y de eso solo el nombre del sitio anterior -- nunca la pagina ni
+ * lo que se busco --, la zona horaria del aparato y si es movil, tableta o
+ * computadora. El servidor lo reduce a un canal, un pais y un aparato, y lo fija una
+ * sola vez por visita. Las cuentas estan en `llegada.js`, que no toca el navegador y
+ * por eso tiene pruebas.
  */
+
+import { aparatoDe, bloqueDeLlegada, etiquetaDeCampana, sitioDeOrigen } from "./llegada";
 
 /**
  * El interruptor general. Encendido el 22/09/2026, con el texto del aviso aprobado.
@@ -74,6 +83,7 @@ const MINIMO_LEGIBLE = 3;
 const RUTA_EVENTOS = "/analitica/eventos";
 const RUTA_OLVIDAR = "/analitica/olvidar";
 const RUTA_CONSENTIMIENTO = "/analitica/consentimiento";
+const RUTA_PAGINA = "/analitica/pagina";
 
 /* ─── Cookies ──────────────────────────────────────────────────────────────── */
 
@@ -199,17 +209,15 @@ const base = () => (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 /* ─── Envio ────────────────────────────────────────────────────────────────── */
 
 /**
- * Manda uno o varios eventos.
+ * Suelta un cuerpo hacia la API sin esperar respuesta. Lo usan la medicion y los dos
+ * contadores sin identificador.
  *
  * Con `conBeacon` va por `sendBeacon`, que encola el envio en el navegador y lo suelta
- * aunque la pagina ya no exista. Sin el, `fetch` con `keepalive`. Los dos van como
- * `text/plain` por lo del preflight; el servidor lo espera asi.
+ * aunque la pagina ya no exista. Sin el -- o si el navegador no lo admite --, `fetch`
+ * con `keepalive`. Los dos van como `text/plain` por lo del preflight; el servidor lo
+ * espera asi.
  */
-const enviar = (eventos, { conBeacon = false } = {}) => {
-  const url = base() + RUTA_EVENTOS;
-  if (!base() || !eventos.length) return;
-  const cuerpo = JSON.stringify(eventos.length === 1 ? eventos[0] : { eventos });
-
+const soltar = (url, cuerpo, { conBeacon = false } = {}) => {
   if (conBeacon && navigator.sendBeacon) {
     try {
       // El tipo del Blob es el Content-Type de la peticion. `text/plain` la mantiene
@@ -237,11 +245,19 @@ const enviar = (eventos, { conBeacon = false } = {}) => {
   }
 };
 
+/** Manda uno o varios eventos de la medicion. */
+const enviar = (eventos, { conBeacon = false } = {}) => {
+  if (!base() || !eventos.length) return;
+  const cuerpo = JSON.stringify(eventos.length === 1 ? eventos[0] : { eventos });
+  soltar(base() + RUTA_EVENTOS, cuerpo, { conBeacon });
+};
+
 /**
- * Suma uno al contador del dia de «aceptaron» o «rechazaron». Es lo unico que un «no»
- * manda al servidor, y por eso el cuerpo es exactamente `{"decision":"si"|"no"}`: ni
- * identificador, ni ruta, ni nada que `identidad()` pueda haber puesto. No lee cookies
- * ni las escribe; la del consentimiento la pone `decidir`, que es otra cosa.
+ * Suma uno al contador del dia de «aceptaron» o «rechazaron». Con `contarPagina`, lo
+ * unico que un «no» manda al servidor, y por eso el cuerpo es exactamente
+ * `{"decision":"si"|"no"}`: ni identificador, ni ruta, ni nada que `identidad()` pueda
+ * haber puesto. No lee cookies ni las escribe; la del consentimiento la pone `decidir`,
+ * que es otra cosa.
  *
  * No vive dentro de `decidir` a proposito. `decidir` se llama tambien desde `/cookies`
  * -- al aceptar desde la pagina, al revocar -- y desde `revocar`, y contar esas veces
@@ -254,29 +270,48 @@ const enviar = (eventos, { conBeacon = false } = {}) => {
  */
 export const contarDecision = (respuesta) => {
   if (!MEDICION_HABILITADA || !base()) return;
-  const url = base() + RUTA_CONSENTIMIENTO;
   const cuerpo = JSON.stringify({ decision: respuesta === "si" ? "si" : "no" });
+  soltar(base() + RUTA_CONSENTIMIENTO, cuerpo, { conBeacon: true });
+};
 
-  if (navigator.sendBeacon) {
-    try {
-      const ok = navigator.sendBeacon(url, new Blob([cuerpo], { type: "text/plain;charset=UTF-8" }));
-      if (ok) return;
-    } catch {
-      // Cae al fetch de abajo.
-    }
-  }
+/** Si esta carga del sitio ya sumo su primera pagina, y cual fue la ultima que se conto. */
+let cargaContada = false;
+let paginaContada = null;
 
-  try {
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      body: cuerpo,
-      keepalive: true,
-      credentials: "omit",
-    }).catch(() => {});
-  } catch {
-    // Contar nunca puede romper una pagina.
-  }
+/**
+ * Suma una pagina vista al contador del dia de quien **no** esta siendo medido: quien
+ * dijo que no y quien aun no ha contestado. A quien acepto no lo cuenta esto; ya lo
+ * cuenta la medicion.
+ *
+ * Existe porque la medicion solo ve a quien acepta, y eso es un suelo: no dice cuanta
+ * gente hay, dice cuanta se deja contar. Con este numero -- cuantas paginas se ven sin
+ * medir, y cuantas de ellas son la primera de una carga del sitio -- el panel estima
+ * cuanta audiencia hay de verdad.
+ *
+ * El cuerpo es exactamente `{"estado":"no"|"pendiente","primera":true|false}`. Ni
+ * identificador, ni la pagina, ni nada que sea de alguien: no lee ni escribe cookies de
+ * medicion, y por eso puede sumar tambien de quien rechazo. Es la misma promesa que
+ * `contarDecision`, y lo que el texto de `/cookies` dice que pasa. Si algun dia hace
+ * falta mandar aqui algo mas, ese texto deja de ser verdad.
+ *
+ * La pagina se mira aqui, para no contar dos veces seguidas la misma, y no sale del
+ * navegador.
+ */
+export const contarPagina = (ruta) => {
+  if (!MEDICION_HABILITADA || !base() || typeof document === "undefined") return;
+  if (aceptado()) return;
+  // Un navegador manejado por un programa no es un lector.
+  if (navigator.webdriver) return;
+  const destino = ruta || window.location.pathname;
+  if (destino === paginaContada) return;
+  paginaContada = destino;
+
+  const cuerpo = JSON.stringify({
+    estado: consentimiento() === "no" ? "no" : "pendiente",
+    primera: !cargaContada,
+  });
+  cargaContada = true;
+  soltar(base() + RUTA_PAGINA, cuerpo, { conBeacon: true });
 };
 
 const olvidarEnServidor = (userId) => {
@@ -287,6 +322,61 @@ const olvidarEnServidor = (userId) => {
     body: JSON.stringify({ user_id: userId }),
     credentials: "omit",
   }).catch(() => {});
+};
+
+/* ─── Llegada ──────────────────────────────────────────────────────────────── */
+
+/**
+ * Por donde llego **esta carga** del sitio. Se lee una vez, al cargar el modulo: despues
+ * la aplicacion cambia de pagina sin recargar y la direccion ya no lleva las etiquetas
+ * de campana (`?utm_source=boletin`) con las que se entro.
+ */
+const ORIGEN =
+  typeof document === "undefined"
+    ? {}
+    : {
+        ref: sitioDeOrigen(document.referrer, window.location.hostname),
+        utm_source: etiquetaDeCampana(window.location.search, "utm_source"),
+        utm_medium: etiquetaDeCampana(window.location.search, "utm_medium"),
+      };
+
+/** «America/Caracas». De ella el servidor saca el pais, y no la guarda. */
+const zonaHoraria = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+};
+
+const aparato = () => {
+  try {
+    return aparatoDe({
+      agente: navigator.userAgent,
+      toques: navigator.maxTouchPoints,
+      movil: navigator.userAgentData?.mobile === true,
+    });
+  } catch {
+    return null;
+  }
+};
+
+/** La visita con la que se llego: la primera que cuenta una pagina tras cargar el sitio. */
+let sesionDeLlegada = null;
+
+/**
+ * El bloque que acompana a cada pagina vista. Va en todas y no solo en la primera: el
+ * servidor lo usa una sola vez por visita, y si esa primera peticion se pierde la
+ * siguiente lo trae.
+ */
+const llegada = (sessionId) => {
+  if (sesionDeLlegada === null) sesionDeLlegada = sessionId;
+  return bloqueDeLlegada({
+    origen: ORIGEN,
+    esLaDeLlegada: sessionId === sesionDeLlegada,
+    zona: zonaHoraria(),
+    dispositivo: aparato(),
+  });
 };
 
 /* ─── Identidad ────────────────────────────────────────────────────────────── */
@@ -317,7 +407,9 @@ const identidad = () => {
 const evento = (tipo, extra = {}) => {
   const quien = identidad();
   if (!quien) return null;
-  return { tipo, ruta: rutaActual ?? window.location.pathname, ...quien, ...extra };
+  const e = { tipo, ruta: rutaActual ?? window.location.pathname, ...quien, ...extra };
+  if (tipo === "vista") e.llegada = llegada(quien.session_id);
+  return e;
 };
 
 /* ─── Tiempo visible ───────────────────────────────────────────────────────── */
@@ -445,6 +537,20 @@ export const registrarVista = (ruta) => {
   const vista = evento("vista");
   if (vista) eventos.push(vista);
   if (eventos.length) enviar(eventos);
+};
+
+/**
+ * Avisa de que en esta visita alguien se apunto al boletin. No lleva el correo ni marca
+ * la visita: el servidor suma uno al contador del dia del canal por el que se llego,
+ * que es lo que deja saber de donde vienen los suscriptores.
+ *
+ * Solo con la medicion encendida. De quien no acepto no se sabe por donde llego, asi que
+ * no hay nada que sumar; las altas de verdad se cuentan aparte, en la lista.
+ */
+export const registrarAlta = () => {
+  if (!encendido) return;
+  const alta = evento("alta");
+  if (alta) enviar([alta]);
 };
 
 /** Lo que la pagina de cookies ensena: que hay puesto ahora mismo, sin inventar nada. */

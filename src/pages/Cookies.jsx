@@ -26,13 +26,15 @@ import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from ".
  */
 
 /** Fecha de la última revisión del texto. Se formatea en el idioma de la página. */
-const ACTUALIZADO = "2026-10-26";
+const ACTUALIZADO = "2026-11-12";
 
 /* Las cinco cookies. Tipo, finalidad, duración y base viven en `paginas.json`
    (`paginas.cookies.tabla.<nombre>`), para los dos idiomas. */
 const COOKIES = ["cookie_consent", "user_id", "session_id", "last_activity", "exit_page"];
 
-const NO_SE_GUARDA = ["l1", "l2", "l3", "l4", "l5"];
+/* En el orden en que se leen: lo de la visita primero y, para cerrar, las categorias
+   especiales. Las claves no van seguidas porque `l6` y `l7` llegaron despues. */
+const NO_SE_GUARDA = ["l1", "l2", "l3", "l4", "l6", "l7", "l5"];
 
 const legible = (clave, valor) => {
   if (!valor) return <em>{tActual("paginas.cookies.estado.noPuesta")}</em>;
@@ -263,7 +265,7 @@ export const Cookies = () => {
           </p>
           <p>{t("paginas.cookies.datos2")}</p>
           <ul className="se-legal__lista">
-            {["cuenta1", "cuenta2", "cuenta3", "cuenta4"].map((clave) => (
+            {["cuenta1", "cuenta2", "cuenta3", "cuenta4", "cuenta5"].map((clave) => (
               <li key={clave}>{t(`paginas.cookies.${clave}`)}</li>
             ))}
           </ul>
@@ -274,10 +276,18 @@ export const Cookies = () => {
             ))}
           </ul>
           <p>{t("paginas.cookies.datos3")}</p>
-          {/* Lo unico que ocurre tambien cuando la respuesta es no. Va dicho aqui, en la
-              seccion de los datos, y no escondido: la promesa de que un no no deja rastro
-              se sostiene porque lo que se manda es un uno sin nadie detras. */}
+          {/* Las altas al boletin se cuentan por canal, y solo en una visita medida. Va
+              junto a lo de la cuenta porque es la misma promesa: el numero no lleva a nadie. */}
+          <p>{t("paginas.cookies.datosBoletin")}</p>
+          {/* Lo que ocurre tambien cuando la respuesta es no: dos contadores, el de la
+              decision y el de paginas vistas (`contarDecision` y `contarPagina`, en
+              `lib/analitica.js`). Va dicho aqui, en la seccion de los datos, y no escondido:
+              la promesa de que un no no deja rastro se sostiene porque lo que se manda es
+              un uno sin nadie detras. Si alguno de los dos pasa a mandar algo mas, estos
+              tres parrafos dejan de ser verdad. */}
           <p>{t("paginas.cookies.datos4")}</p>
+          <p>{t("paginas.cookies.datos5")}</p>
+          <p>{t("paginas.cookies.datos6")}</p>
         </section>
 
         {/* Los videos de YouTube: lo único de un tercero que puede cargarse en la página, y

@@ -8,6 +8,7 @@ import {
   arrancar,
   consentimiento,
   contarDecision,
+  contarPagina,
   decidir,
   registrarVista,
 } from "../lib/analitica";
@@ -21,8 +22,10 @@ import {
  *
  * ## Lo que lo hace valido, y no solo bonito
  *
- * **No se pone nada antes de contestar.** Ni un identificador, ni una marca de tiempo.
- * El unico efecto de entrar al sitio sin haber contestado es ver esta barra.
+ * **No se pone nada antes de contestar.** Ni un identificador, ni una marca de tiempo:
+ * en el navegador no se escribe nada. Lo unico que sale hacia el servidor es una suma
+ * a un contador de paginas sin identificador (`contarPagina`), que es lo que deja
+ * estimar cuanta audiencia queda fuera de la medicion.
  *
  * **"Rechazar" pesa lo mismo que "Aceptar".** Mismo tamano, mismo contraste, misma
  * distancia del dedo. Un rechazo escondido en gris claro invalida el consentimiento
@@ -41,7 +44,8 @@ import {
  * El sitio es una sola pagina que cambia de ruta sin recargar, asi que nadie se entera
  * de un cambio de articulo salvo que alguien lo cuente. Este componente ya esta montado
  * en todas las vistas y ya sabe si hay permiso: es el sitio natural. Si no hay permiso,
- * `registrarVista` no hace nada.
+ * `registrarVista` no hace nada y es `contarPagina` quien suma la pagina al contador
+ * sin identificador; con permiso, al reves. Nunca cuentan los dos la misma.
  *
  * ## En pausa mientras el aviso esta en revision
  *
@@ -68,6 +72,8 @@ export const AvisoDeCookies = () => {
     // quien volvia al sitio desde una pagina fuera del `Layout` (El Analista, /entorno):
     // el `Layout` se montaba de nuevo y su primera ruta no se contaba.
     registrarVista(pathname);
+    // Y quien no esta siendo medido suma una pagina al contador anonimo.
+    contarPagina(pathname);
   }, [pathname]);
 
   const responder = useCallback((respuesta) => {

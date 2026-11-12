@@ -1,10 +1,33 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { getConsentimiento, getEnVivo, getResumen } from "../../services/adminAnaliticaService";
+import {
+  DIAS_GUARDADOS,
+  NOMBRE_FORMATO,
+  desdeHace,
+  diaCorto,
+  diaLargo,
+  duracion,
+  numero,
+  porciento,
+} from "../../lib/audiencia";
+import { ancla, recorridoAudiencia } from "../../lib/guias/guiaAudiencia";
+import {
+  descargarInforme,
+  getConsentimiento,
+  getEnVivo,
+  getResumen,
+} from "../../services/adminAnaliticaService";
 import "../../styles/analitica-consentimiento.css";
-import { enlaceWeb } from "../../lib/enlaces";
+import "../../styles/analitica-bloques.css";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { AudienciaReal } from "../../components/admin/audiencia/AudienciaReal";
+import { ComoVaElMes } from "../../components/admin/audiencia/ComoVaElMes";
+import { CuantosVuelven } from "../../components/admin/audiencia/CuantosVuelven";
+import { DeDondeLlegan } from "../../components/admin/audiencia/DeDondeLlegan";
+import { PaisesYAparatos } from "../../components/admin/audiencia/PaisesYAparatos";
+import { Barras, Bloque, Columnas, Ficha, Tabla, Variacion } from "../../components/admin/audiencia/Piezas";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
@@ -12,7 +35,8 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * Los números salen de la medición propia del sitio -- ver `lib/analitica.js` y
  * `analitica_service.py` --, así que cuentan solo a quien aceptó las cookies. Eso lo dice
  * la pantalla en voz alta: un panel de audiencia que no lo advierta se lee como si fueran
- * todos los lectores, y no lo son.
+ * todos los lectores, y no lo son. Cuánto queda fuera lo estima «Audiencia real
+ * estimada», con el contador de páginas, que no guarda nada de la persona.
  *
  * ## Cómo está armada
  *
@@ -28,7 +52,14 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * ninguno de los dos. «Cuántos se quedaron» sí se contesta.
  *
  * **Un filtro, arriba, para todo.** No hay filtros dentro de las tarjetas: el periodo
- * manda sobre todos los bloques a la vez.
+ * manda sobre todos los bloques a la vez. Las dos excepciones lo dicen en su apunte:
+ * «Cómo va el mes» es del mes en curso y «Cuántos vuelven» mira las últimas semanas.
+ *
+ * **La página ordena; los bloques viven aparte.** Aquí quedan la carga de los datos, la
+ * cabecera y el orden. Las piezas comunes (ficha, bloque, barras, tabla) y los bloques
+ * de audiencia real, proyección del mes, origen, país y aparato y retorno están en
+ * `components/admin/audiencia/`; las palabras con que se escriben los números, en
+ * `lib/audiencia.js`; y la guía de la página, en `lib/guias/guiaAudiencia.js`.
  *
  * ## Sobre los gráficos
  *
@@ -55,49 +86,6 @@ const PERIODOS = [
 
 const REFRESCO_EN_VIVO = 20000;
 
-const NOMBRE_FORMATO = {
-  noticias: "Noticias",
-  articulos: "Artículos",
-  editorial: "Editorial",
-  entrevistas: "Entrevistas",
-  informes: "Informes",
-  podcast: "Podcast",
-};
-
-/** 95 -> «1 min 35 s». Un promedio en segundos sueltos no se lee de un vistazo. */
-const duracion = (segundos) => {
-  const n = Math.max(0, Math.round(segundos || 0));
-  if (n < 60) return `${n} s`;
-  const m = Math.floor(n / 60);
-  const s = n % 60;
-  return s ? `${m} min ${s} s` : `${m} min`;
-};
-
-const numero = (n) => new Intl.NumberFormat("es").format(Math.round(n || 0));
-
-/** «hace 40 s», «hace 3 min». Dice cuándo se miró, que en un panel en vivo es la mitad. */
-const desdeHace = (marca, ahora) => {
-  const s = Math.max(0, Math.round((ahora - marca) / 1000));
-  if (s < 10) return "recién actualizado";
-  if (s < 60) return `actualizado hace ${s} s`;
-  const m = Math.round(s / 60);
-  return `actualizado hace ${m} min`;
-};
-
-const diaCorto = (iso) => {
-  const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleDateString("es", { day: "numeric", month: "short" });
-};
-
-const diaLargo = (iso) => {
-  const d = new Date(`${iso}T00:00:00`);
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" });
-};
-
 /** El ancho real del contenedor. Los gráficos se dibujan en píxeles, no en porcentajes. */
 const useAncho = () => {
   const ref = useRef(null);
@@ -115,99 +103,6 @@ const useAncho = () => {
     return () => obs.disconnect();
   }, []);
   return [ref, ancho];
-};
-
-/* ─── Piezas ───────────────────────────────────────────────────────────────── */
-
-/** La variación contra el periodo anterior. Signo escrito: el color solo acompaña. */
-const Variacion = ({ actual, anterior }) => {
-  if (!anterior) {
-    return <span className="se-aud__delta se-aud__delta--nuevo">sin periodo anterior</span>;
-  }
-  const pct = Math.round(((actual - anterior) / anterior) * 100);
-  const signo = pct > 0 ? "+" : "";
-  const clase = pct > 0 ? "sube" : pct < 0 ? "baja" : "igual";
-  return (
-    <span className={`se-aud__delta se-aud__delta--${clase}`}>
-      {signo}
-      {pct} % vs. periodo anterior
-    </span>
-  );
-};
-
-Variacion.propTypes = { actual: PropTypes.number.isRequired, anterior: PropTypes.number };
-
-/**
- * `valor` puede llegar vacío cuando el servidor es más viejo que esta pantalla -- se
- * despliegan por separado. Entonces se dibuja una raya: «no lo sé» es una respuesta;
- * «undefined %» es un fallo escrito en la cara del lector.
- */
-const Ficha = ({ valor, etiqueta, nota, children }) => (
-  <div className="se-aud__ficha">
-    <span className="se-aud__ficha-valor">
-      {valor === null || valor === undefined || valor === "" ? "—" : valor}
-    </span>
-    <span className="se-aud__ficha-etiqueta">{etiqueta}</span>
-    {children}
-    {nota ? <span className="se-aud__ficha-nota">{nota}</span> : null}
-  </div>
-);
-
-Ficha.propTypes = {
-  // Sin `isRequired`: `null` es un valor legitimo aqui -- significa "el servidor no
-  // manda ese dato" -- y se dibuja como una raya.
-  valor: PropTypes.node,
-  etiqueta: PropTypes.string.isRequired,
-  nota: PropTypes.string,
-  children: PropTypes.node,
-};
-
-/**
- * Una tarjeta con su gráfico y su tabla.
- *
- * La tabla no es un extra de accesibilidad colgado al final: es la misma información sin
- * depender de la vista ni del ratón, y por eso el botón está donde se ve.
- */
-const Bloque = ({ titulo, apunte, tabla, children, vacio }) => {
-  const [verTabla, setVerTabla] = useState(false);
-  const id = `aud-${titulo.replace(/\W+/g, "-").toLowerCase()}`;
-  return (
-    <section className="se-aud__bloque" aria-labelledby={id}>
-      <div className="se-aud__bloque-cabeza">
-        <div>
-          <h3 id={id} className="se-aud__h3">
-            {titulo}
-          </h3>
-          {apunte ? <p className="se-aud__apunte">{apunte}</p> : null}
-        </div>
-        {tabla ? (
-          <button
-            type="button"
-            className="se-aud__ver-tabla"
-            aria-pressed={verTabla}
-            onClick={() => setVerTabla((v) => !v)}
-          >
-            {verTabla ? "Gráfico" : "Tabla"}
-          </button>
-        ) : null}
-      </div>
-      {vacio ? (
-        <p className="se-admin-meta-hint">Sin datos en el periodo.</p>
-      ) : verTabla ? (
-        <div className="se-aud__tabla-caja">{tabla}</div>
-      ) : (
-        children
-      )}
-    </section>
-  );
-};
-
-Bloque.propTypes = {
-  titulo: PropTypes.string.isRequired,
-  apunte: PropTypes.string,
-  tabla: PropTypes.node,
-  children: PropTypes.node,
-  vacio: PropTypes.bool,
 };
 
 /* ─── Gráfico de área: visitas por día ─────────────────────────────────────── */
@@ -351,86 +246,6 @@ const SerieDiaria = ({ serie }) => {
 
 SerieDiaria.propTypes = { serie: PropTypes.arrayOf(PropTypes.object).isRequired };
 
-/* ─── Columnas ─────────────────────────────────────────────────────────────── */
-
-/**
- * Columnas verticales. `rampa` solo cuando las categorías tienen orden natural: pintar
- * más oscuro lo más grande en categorías sin orden repite con el color lo que ya dice la
- * altura, y gasta el único canal libre que quedaba.
- */
-const Columnas = ({ datos, rampa, formatoEtiqueta }) => {
-  const max = Math.max(1, ...datos.map((d) => d.valor));
-  return (
-    <ul className={`se-aud__columnas${rampa ? " se-aud__columnas--rampa" : ""}`}>
-      {datos.map((d, i) => (
-        <li key={d.etiqueta} className="se-aud__columna" title={`${d.etiqueta}: ${numero(d.valor)}`}>
-          <span className="se-aud__columna-caja">
-            <span
-              className="se-aud__columna-marca"
-              data-paso={rampa ? i : undefined}
-              style={{ height: `${Math.max(d.valor > 0 ? 2 : 0, (d.valor / max) * 100)}%` }}
-            />
-          </span>
-          <span className="se-aud__columna-pie">
-            {formatoEtiqueta ? formatoEtiqueta(d.etiqueta, i) : d.etiqueta}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-Columnas.propTypes = {
-  datos: PropTypes.arrayOf(PropTypes.object).isRequired,
-  rampa: PropTypes.bool,
-  formatoEtiqueta: PropTypes.func,
-};
-
-/* ─── Barras horizontales ──────────────────────────────────────────────────── */
-
-const Barras = ({ datos, enlazar }) => {
-  const max = Math.max(1, ...datos.map((d) => d.valor));
-  return (
-    <ul className="se-aud__barras">
-      {datos.map((d) => (
-        <li key={d.clave} className="se-aud__fila">
-          {enlazar ? (
-            <a
-              className="se-aud__etiqueta se-aud__etiqueta--enlace"
-              // La ruta la manda el navegador de cualquier visitante: solo rutas del sitio.
-              href={enlaceWeb(d.clave) || undefined}
-              target="_blank"
-              rel="noreferrer"
-              title={d.clave}
-            >
-              {d.etiqueta}
-            </a>
-          ) : (
-            <span className="se-aud__etiqueta" title={d.etiqueta}>
-              {d.etiqueta}
-            </span>
-          )}
-          <span className="se-aud__pista">
-            <span
-              className="se-aud__marca"
-              style={{ width: `${Math.max(2, (d.valor / max) * 100)}%` }}
-            />
-          </span>
-          <span className="se-aud__valor">
-            {numero(d.valor)}
-            {d.apunte ? <small> · {d.apunte}</small> : null}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
-Barras.propTypes = {
-  datos: PropTypes.arrayOf(PropTypes.object).isRequired,
-  enlazar: PropTypes.bool,
-};
-
 /* ─── El aviso de cookies: cuántos dicen que sí ────────────────────────────── */
 
 /**
@@ -475,10 +290,11 @@ const PilasDeConsentimiento = ({ serie }) => {
 PilasDeConsentimiento.propTypes = { serie: PropTypes.arrayOf(PropTypes.object).isRequired };
 
 /**
- * Lo único del panel que cuenta también a quien dijo que no.
+ * Cuenta también a quien dijo que no; fuera de este bloque solo lo hace «Audiencia real
+ * estimada» (`components/admin/audiencia/AudienciaReal.jsx`).
  *
  * Por eso va en su propio bloque y con su propia petición: el resto de la pantalla sale
- * de quien aceptó, y esto es la respuesta a «¿qué parte de la audiencia real es eso?».
+ * de quien aceptó, y esto dice cuántos son los que aceptan.
  * Un fallo aquí no tumba el panel -- se dice dentro de la tarjeta y ya --, porque es
  * un dato nuevo que el servidor puede no tener todavía.
  */
@@ -509,7 +325,8 @@ const AvisoDeCookiesBloque = ({ dias, recarga }) => {
   return (
     <Bloque
       titulo={titulo}
-      apunte="Cuántos aceptan la medición. Un número por día y por respuesta, sin identificador: es lo único que un «no» envía."
+      apunte="Cuántos aceptan la medición. Un número por día y por respuesta, sin identificador."
+      parada="cookies"
       tabla={
         total ? (
           <Tabla
@@ -553,34 +370,6 @@ AvisoDeCookiesBloque.propTypes = {
   recarga: PropTypes.number.isRequired,
 };
 
-const Tabla = ({ columnas, filas }) => (
-  <table className="se-aud__tabla">
-    <thead>
-      <tr>
-        {columnas.map((c) => (
-          <th key={c} scope="col">
-            {c}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {filas.map((f, i) => (
-        <tr key={i}>
-          {f.map((celda, j) => (
-            <td key={j}>{celda}</td>
-          ))}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
-
-Tabla.propTypes = {
-  columnas: PropTypes.arrayOf(PropTypes.string).isRequired,
-  filas: PropTypes.array.isRequired,
-};
-
 /* ─── La pantalla ──────────────────────────────────────────────────────────── */
 
 export const AdminAnalitica = () => {
@@ -594,6 +383,8 @@ export const AdminAnalitica = () => {
   // envejece -- y para lo que esta el boton -- es el periodo.
   const [actualizado, setActualizado] = useState(() => Date.now());
   const [aMano, setAMano] = useState(false);
+  // Los días del informe que se está bajando; cero si no se está bajando ninguno.
+  const [bajando, setBajando] = useState(0);
   // Un tic cada quince segundos solo para que «hace 40 s» siga siendo verdad. No pide
   // nada al servidor: repintar un texto es gratis, preguntar no.
   const [reloj, setReloj] = useState(() => Date.now());
@@ -656,6 +447,24 @@ export const AdminAnalitica = () => {
     if (montado.current) setAMano(false);
   }, [pedirVivo]);
 
+  /**
+   * Bajar el informe en hoja de cálculo. `cuantos` son los días que abarca: los del
+   * periodo que se está mirando o todo lo que se conserva.
+   *
+   * Tarda unos segundos -- el servidor lo arma al pedirlo --, así que los dos botones
+   * se apagan mientras tanto: dos informes a la vez no llegan antes que uno.
+   */
+  const bajar = useCallback(async (cuantos) => {
+    setBajando(cuantos);
+    try {
+      await descargarInforme(cuantos);
+    } catch (e) {
+      if (montado.current) setError(adminErrorMessage(e));
+    } finally {
+      if (montado.current) setBajando(0);
+    }
+  }, []);
+
   useEffect(() => {
     let vigente = true;
     setCargando(true);
@@ -690,50 +499,87 @@ export const AdminAnalitica = () => {
         explica={
           <>
             Medición propia, sin herramientas de terceros. Cuenta solo a quien aceptó las
-            cookies, así que todo lo de aquí es un suelo: la audiencia real es algo mayor.
+            cookies, así que casi todo lo de aquí es un mínimo: cuánto queda fuera lo dice
+            «Audiencia real estimada».
           </>
         }
         acciones={
           <>
             {/* Un solo filtro, arriba, y manda sobre todos los bloques. */}
             <div className="se-aud__mandos">
-              <div className="se-aud__periodos" role="group" aria-label="Periodo">
-                {PERIODOS.map((p) => (
+              <div className="se-aud__mandos-grupo" {...ancla("periodo")}>
+                <div className="se-aud__periodos" role="group" aria-label="Periodo">
+                  {PERIODOS.map((p) => (
+                    <button
+                      key={p.dias}
+                      type="button"
+                      className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
+                      aria-pressed={dias === p.dias}
+                      onClick={() => setDias(p.dias)}
+                    >
+                      {p.etiqueta}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="se-aud__refresco">
                   <button
-                    key={p.dias}
                     type="button"
-                    className={`se-aud__periodo${dias === p.dias ? " se-aud__periodo--on" : ""}`}
-                    aria-pressed={dias === p.dias}
-                    onClick={() => setDias(p.dias)}
+                    className="se-aud__actualizar"
+                    onClick={actualizar}
+                    disabled={aMano || cargando}
                   >
-                    {p.etiqueta}
+                    <span className="se-aud__actualizar-icono" aria-hidden="true">
+                      ↻
+                    </span>
+                    {aMano ? "Actualizando…" : "Actualizar"}
                   </button>
-                ))}
+                  {/* `aria-live` para que quien no ve la pantalla se entere de que hay datos
+                      nuevos; `polite` porque no es una urgencia que deba cortar la lectura. */}
+                  <span className="se-aud__sello" aria-live="polite">
+                    {desdeHace(actualizado, reloj)}
+                  </span>
+                </div>
               </div>
 
-              <div className="se-aud__refresco">
+              {/* El informe en hoja de cálculo: lo mismo que la página y sin recortes. Dos
+                  botones y no un desplegable, porque a «¿de cuándo?» solo hay dos
+                  respuestas: lo que se está mirando o todo lo que se conserva. */}
+              <div
+                className="se-aud__descarga"
+                role="group"
+                aria-label="Informe en Excel"
+                {...ancla("descarga")}
+              >
+                <span className="se-aud__descarga-rotulo" aria-hidden="true">
+                  Informe en Excel
+                </span>
                 <button
                   type="button"
-                  className="se-aud__actualizar"
-                  onClick={actualizar}
-                  disabled={aMano || cargando}
+                  className="se-aud__bajar"
+                  onClick={() => bajar(dias)}
+                  disabled={Boolean(bajando)}
                 >
-                  <span className="se-aud__actualizar-icono" aria-hidden="true">
-                    ↻
-                  </span>
-                  {aMano ? "Actualizando…" : "Actualizar"}
+                  <span aria-hidden="true">↓</span>
+                  {bajando === dias ? "Preparando…" : `Estos ${dias} días`}
                 </button>
-                {/* `aria-live` para que quien no ve la pantalla se entere de que hay datos
-                    nuevos; `polite` porque no es una urgencia que deba cortar la lectura. */}
-                <span className="se-aud__sello" aria-live="polite">
-                  {desdeHace(actualizado, reloj)}
-                </span>
+                <button
+                  type="button"
+                  className="se-aud__bajar"
+                  onClick={() => bajar(DIAS_GUARDADOS)}
+                  disabled={Boolean(bajando)}
+                >
+                  <span aria-hidden="true">↓</span>
+                  {bajando === DIAS_GUARDADOS ? "Preparando…" : "Todo lo guardado"}
+                </button>
               </div>
             </div>
           </>
         }
+        guia={recorridoAudiencia}
         className="se-aud__cabecera"
       />
+      <RecorridoVista recorrido={recorridoAudiencia} />
 
       {error ? (
         <p className="se-admin-form-feedback" role="alert">
@@ -749,7 +595,7 @@ export const AdminAnalitica = () => {
       ) : null}
 
       {/* La única cifra grande de la pantalla. */}
-      <section className="se-aud__directo" aria-labelledby="aud-directo">
+      <section className="se-aud__directo" aria-labelledby="aud-directo" {...ancla("directo")}>
         <div className="se-aud__directo-cifra">
           <h2 id="aud-directo" className="se-aud__directo-rotulo">
             <span className="se-aud__pulso" aria-hidden="true" />
@@ -783,12 +629,20 @@ export const AdminAnalitica = () => {
         <p className="se-admin-meta-hint">Cargando…</p>
       ) : r ? (
         <div className={`se-aud__cuerpo${cargando ? " se-aud__cuerpo--esperando" : ""}`}>
-          <div className="se-aud__fichas">
+          <div className="se-aud__fichas" {...ancla("fichas")}>
             <Ficha valor={numero(r.sesiones)} etiqueta="visitas">
-              <Variacion actual={r.sesiones} anterior={r.anterior?.sesiones} />
+              <Variacion
+                actual={r.sesiones}
+                anterior={r.anterior?.sesiones}
+                comparacion={r.comparacion.sesiones}
+              />
             </Ficha>
             <Ficha valor={numero(r.personas)} etiqueta="navegadores distintos">
-              <Variacion actual={r.personas} anterior={r.anterior?.personas} />
+              <Variacion
+                actual={r.personas}
+                anterior={r.anterior?.personas}
+                comparacion={r.comparacion.personas}
+              />
             </Ficha>
             <Ficha
               valor={numero(r.recurrentes)}
@@ -806,19 +660,27 @@ export const AdminAnalitica = () => {
               nota="solo tiempo con la pieza visible"
             />
             <Ficha
+              valor={porciento(r.completas.porcentaje)}
+              etiqueta="la leyeron entera"
+              nota={`de ${numero(r.completas.lecturas)} lecturas de texto`}
+            />
+            <Ficha
               valor={r.una_pagina === null ? null : `${r.una_pagina} %`}
               etiqueta="se van en la primera"
               nota="leyeron una página y salieron"
             />
           </div>
 
-          {/* Justo debajo de las fichas y antes de la serie: es el dato que dice cuánto
-              de la audiencia real está viendo todo lo demás. */}
+          {/* Justo debajo de las fichas y antes de la serie, los dos bloques que dicen
+              cuánto de la audiencia real está viendo todo lo demás: la estimación del
+              total y, detrás, cuántos aceptan medirse. */}
+          <AudienciaReal datos={r.audiencia_real} />
           <AvisoDeCookiesBloque dias={dias} recarga={recarga} />
 
           <Bloque
             titulo="Visitas por día"
             apunte="Pase el ratón para ver un día concreto."
+            parada="serie"
             vacio={!r.serie?.length}
             tabla={
               <Tabla
@@ -830,7 +692,9 @@ export const AdminAnalitica = () => {
             {r.serie?.length ? <SerieDiaria serie={r.serie} /> : null}
           </Bloque>
 
-          <div className="se-aud__par">
+          <ComoVaElMes datos={r.proyeccion} />
+
+          <div className="se-aud__par" {...ancla("lecturas")}>
             <Bloque
               titulo="Cuánto duran las lecturas"
               apunte="Cuántos se quedaron, que es lo que una media no dice."
@@ -873,6 +737,9 @@ export const AdminAnalitica = () => {
             </Bloque>
           </div>
 
+          <DeDondeLlegan origen={r.origen} boletin={r.boletin} />
+          <PaisesYAparatos paises={r.paises} dispositivos={r.dispositivos} />
+
           <Bloque
             titulo="Por sección"
             vacio={!r.formatos?.length}
@@ -899,14 +766,18 @@ export const AdminAnalitica = () => {
 
           <Bloque
             titulo="Lo más leído"
+            apunte="Las quince piezas con más lecturas, con su tiempo medio y en cuántas lecturas dio tiempo a terminarla. La lista entera está en el informe."
+            parada="piezas"
             vacio={!r.piezas?.length}
             tabla={
               <Tabla
-                columnas={["Pieza", "Lecturas", "Tiempo medio"]}
+                columnas={["Pieza", "Lecturas", "Lectores", "Tiempo medio", "La terminaron"]}
                 filas={(r.piezas ?? []).map((p) => [
-                  p.ruta,
+                  p.titulo || p.ruta,
                   numero(p.lecturas),
+                  numero(p.lectores),
                   duracion(p.segundos_medios),
+                  porciento(p.enteras) ?? "—",
                 ])}
               />
             }
@@ -915,15 +786,25 @@ export const AdminAnalitica = () => {
               enlazar
               datos={(r.piezas ?? []).map((p) => ({
                 clave: p.ruta,
-                etiqueta: p.ruta,
+                // El título, si el servidor lo conoce: una ruta es una dirección, no un
+                // nombre. La dirección sigue en el enlace y al pasar el ratón.
+                etiqueta: p.titulo || p.ruta,
                 valor: p.lecturas,
-                apunte: `${duracion(p.segundos_medios)} de media`,
+                apunte: [
+                  `${duracion(p.segundos_medios)} de media`,
+                  porciento(p.enteras) ? `${porciento(p.enteras)} la terminó` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · "),
               }))}
             />
           </Bloque>
 
+          <CuantosVuelven retorno={r.retorno} />
+
           <Bloque
             titulo="Por dónde se van"
+            parada="salidas"
             apunte="La última página de cada visita. Si una se repite mucho, algo termina ahí."
             vacio={!r.salidas?.length}
             tabla={
@@ -948,7 +829,9 @@ export const AdminAnalitica = () => {
       <p className="se-aud__pie">
         El tiempo de lectura cuenta solo los segundos que la pieza estuvo{" "}
         <strong>visible</strong> en pantalla: una pestaña abierta de fondo no suma. Los
-        registros se borran a los catorce meses, como dice el aviso de cookies.
+        registros se borran a los catorce meses, como dice el aviso de cookies. El informe
+        en Excel trae lo mismo que esta página y sin recortes: todas las piezas, las
+        semanas, los países y las fuentes, con una pestaña que explica cada columna.
       </p>
     </div>
   );

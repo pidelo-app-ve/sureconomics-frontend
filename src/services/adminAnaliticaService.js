@@ -1,4 +1,6 @@
 import { adminRequest } from "../lib/api";
+import { readStoredAuth } from "../lib/authStorage";
+import { nombreDelInforme } from "../lib/audiencia";
 import { unwrapEntity } from "./adminResponseUtils";
 
 /**
@@ -32,6 +34,14 @@ const numeroDe = (v, porDefecto = 0) => (typeof v === "number" && Number.isFinit
  */
 const cifraDe = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 const listaDe = (v) => (Array.isArray(v) ? v : []);
+/**
+ * Un bloque entero que puede no venir: `null` si falta.
+ *
+ * Es para lo que el servidor manda vacío a propósito cuando aún no hay con qué
+ * calcularlo -- la proyección del mes, la audiencia real -- y para lo que un servidor
+ * más viejo no manda. En los dos casos la pantalla dice «todavía no», que es verdad.
+ */
+const bloqueDe = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : null);
 
 /** Quién está leyendo ahora mismo y qué. */
 export const getEnVivo = async () => {
@@ -84,12 +94,52 @@ export const getResumen = async (dias = 7) => {
       sesiones: numeroDe(d.anterior?.sesiones),
       personas: numeroDe(d.anterior?.personas),
     },
+    // Si el cambio frente al periodo anterior es de fiar o puede ser casualidad.
+    comparacion: {
+      sesiones: bloqueDe(d.comparacion?.sesiones),
+      personas: bloqueDe(d.comparacion?.personas),
+    },
     serie: listaDe(d.serie),
     horas: listaDe(d.horas),
     profundidad: listaDe(d.profundidad),
     formatos: listaDe(d.formatos),
     piezas: listaDe(d.piezas),
     salidas: listaDe(d.salidas),
+    // De las lecturas de texto, en cuántas el tiempo dio para leer la pieza entera.
+    completas: {
+      lecturas: numeroDe(d.completas?.lecturas),
+      enteras: numeroDe(d.completas?.enteras),
+      porcentaje: cifraDe(d.completas?.porcentaje),
+    },
+    // De quienes vinieron una semana, cuántos volvieron la siguiente.
+    retorno: {
+      semanas: listaDe(d.retorno?.semanas),
+      personas: numeroDe(d.retorno?.personas),
+      volvieron: numeroDe(d.retorno?.volvieron),
+      porcentaje: cifraDe(d.retorno?.porcentaje),
+    },
+    // «A este ritmo, el mes cierra en…». `null` mientras no haya dos semanas medidas.
+    proyeccion: bloqueDe(d.proyeccion),
+    // Por dónde llegan, desde qué país y con qué aparato. Solo desde nov-2026.
+    origen: {
+      con_dato: numeroDe(d.origen?.con_dato),
+      sin_dato: numeroDe(d.origen?.sin_dato),
+      canales: listaDe(d.origen?.canales),
+      fuentes: listaDe(d.origen?.fuentes),
+    },
+    paises: {
+      con_dato: numeroDe(d.paises?.con_dato),
+      lista: listaDe(d.paises?.lista),
+    },
+    dispositivos: listaDe(d.dispositivos),
+    // Cuánta gente hay contando a quien no aceptó las cookies: un rango. `null`
+    // mientras el contador de páginas no tenga datos.
+    audiencia_real: bloqueDe(d.audiencia_real),
+    boletin: {
+      altas: numeroDe(d.boletin?.altas),
+      medidas: numeroDe(d.boletin?.medidas),
+      por_canal: listaDe(d.boletin?.por_canal),
+    },
   };
 };
 
@@ -113,4 +163,47 @@ export const getConsentimiento = async (dias = 30) => {
     tasa_aceptacion: cifraDe(d.tasa_aceptacion),
     serie: listaDe(d.serie),
   };
+};
+
+/**
+ * Descarga el informe del periodo en una hoja de cálculo (`.xlsx`).
+ *
+ * Lleva lo mismo que la pantalla sin recortar -- todas las piezas, todas las fuentes --
+ * y admite hasta lo que el servidor conserva, que es más de lo que la pantalla deja
+ * elegir. Es para trabajar con los datos fuera del panel o pasárselos a un tercero.
+ *
+ * Va igual que la descarga de la lista del boletín (`downloadNewsletterCsv`), y por
+ * lo mismo: el endpoint pide la cabecera `Authorization`, que un enlace normal no
+ * manda. Una petición mínima por `adminRequest` antes, solo para que refresque el
+ * token si estaba a punto de caducar; después los bytes a memoria y de ahí al
+ * navegador como descarga.
+ */
+export const descargarInforme = async (dias = 30) => {
+  await adminRequest("/admin/analitica/en-vivo");
+
+  const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+  const consulta = new URLSearchParams({ dias: String(dias) });
+  const zona = zonaDeAqui();
+  if (zona) consulta.set("zona", zona);
+  const res = await fetch(`${base}/admin/analitica/informe?${consulta}`, {
+    headers: { Authorization: `Bearer ${readStoredAuth().accessToken || ""}` },
+  });
+  if (!res.ok) {
+    const detalle = await res.json().catch(() => ({}));
+    throw new Error(detalle?.error?.message || "No se pudo descargar el informe.");
+  }
+
+  const blob = await res.blob();
+  const objeto = URL.createObjectURL(blob);
+  try {
+    const enlace = document.createElement("a");
+    enlace.href = objeto;
+    enlace.download = nombreDelInforme(dias);
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+  } finally {
+    // Sin esto el blob se queda en memoria hasta que se recargue la página.
+    URL.revokeObjectURL(objeto);
+  }
 };

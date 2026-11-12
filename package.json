@@ -25,6 +25,8 @@
         "test:publicidad": "node src/lib/listaDeQuery.test.mjs",
         "test:youtube": "node src/lib/youtube.test.mjs",
         "test:avisos": "node src/lib/avisos.test.mjs",
+        "test:llegada": "node src/lib/llegada.test.mjs",
+        "test:audiencia": "node src/lib/audiencia.test.mjs",
         "i18n": "node scripts/i18n-comprobar.mjs",
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },

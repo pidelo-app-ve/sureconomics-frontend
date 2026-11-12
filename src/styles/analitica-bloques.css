@@ -1,0 +1,175 @@
+/* Los bloques que la pantalla de audiencia ganó en nov-2026 (`components/admin/audiencia/`):
+   la descarga del informe, el veredicto bajo cada variación, la audiencia real, la
+   proyección del mes, el origen de las visitas y el retorno.
+
+   Solo lo que las clases de `se-aud__*` de admin.css no tienen. Los colores salen de
+   las mismas variables: un solo tono para la magnitud, y gris para lo que acompaña. */
+
+/* --- El periodo y «Actualizar», juntos: son una sola parada de la guía ---
+   Se alinean como su columna (`se-aud__mandos`): a la derecha, y a la izquierda en
+   pantallas estrechas. */
+.se-aud__mandos-grupo {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 0.5rem;
+}
+
+/* --- La descarga, tercera fila de los mandos de la cabecera --- */
+.se-aud__descarga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 0.5rem;
+}
+
+.se-aud__descarga-rotulo {
+  font-family: var(--se-font-ui);
+  font-size: 0.7rem;
+  color: var(--color-slate-2);
+}
+
+.se-aud__bajar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+.se-aud__bajar:hover:not(:disabled) { border-color: var(--color-ink); }
+.se-aud__bajar:disabled { opacity: 0.55; cursor: default; }
+.se-aud__bajar:focus-visible { outline: 2px solid var(--aud-marca); outline-offset: 2px; }
+
+/* --- Bajo la variación: si el cambio es de fiar --- */
+.se-aud__veredicto { margin-top: 0; }
+
+/* --- Texto dentro de un bloque --- */
+.se-aud__nota {
+  margin: 0.85rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+  max-width: 72ch;
+}
+
+.se-aud__subtitulo {
+  margin: 1.2rem 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+/* Una cifra y su frase, en una línea: el resumen de un bloque que es una lista. */
+.se-aud__destacado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.6rem;
+  margin: 0 0 0.9rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--color-slate-2);
+}
+.se-aud__destacado strong {
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+/* Dos bloques en pareja se separan de lo que sigue igual que un bloque suelto. En
+   admin.css el par no tenía margen: no se notaba mientras hubo uno solo. */
+.se-aud__par { margin-bottom: 1.25rem; }
+
+/* Dentro de un bloque las fichas no llevan el margen de las de arriba. */
+.se-aud__bloque .se-aud__fichas { margin-bottom: 0; }
+
+/* --- Qué parte de las páginas vistas se mide --- */
+.se-aud__cobertura {
+  display: block;
+  height: 10px;
+  margin-top: 1rem;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+.se-aud__cobertura > span {
+  display: block;
+  height: 100%;
+  background: var(--aud-marca);
+  transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- Cómo va el mes: lo que lleva, dónde puede cerrar y lo más probable ---
+   Una sola pista. Lo hecho va en el tono de marca; el tramo donde puede cerrar, en el
+   mismo tono aclarado -- es la misma magnitud, todavía sin ocurrir --; y lo más
+   probable, una raya oscura. */
+.se-aud__meta {
+  position: relative;
+  height: 14px;
+  margin-top: 1rem;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.se-aud__meta > span { position: absolute; top: 0; bottom: 0; }
+.se-aud__meta-hecho {
+  left: 0;
+  border-radius: 7px 0 0 7px;
+  background: var(--aud-marca);
+}
+.se-aud__meta-rango {
+  border-radius: 0 7px 7px 0;
+  background: var(--aud-paso-0);
+  opacity: 0.55;
+}
+.se-aud__meta > .se-aud__meta-punto {
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--color-ink);
+}
+
+.se-aud__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--se-font-ui);
+  font-size: 0.72rem;
+  color: var(--color-slate-2);
+}
+.se-aud__leyenda li { display: inline-flex; align-items: center; gap: 0.35rem; }
+.se-aud__leyenda i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--aud-marca);
+}
+.se-aud__leyenda i[data-de="rango"] { background: var(--aud-paso-0); opacity: 0.55; }
+.se-aud__leyenda i[data-de="punto"] { width: 2px; border-radius: 0; background: var(--color-ink); }
+
+@media (max-width: 720px) {
+  .se-aud__descarga { justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-aud__cobertura > span { transition: none; }
+}

@@ -28,8 +28,8 @@ const SIN_CONTACTO = { nombre: "", telefono: "" };
  * Son dos grupos distintos:
  * - **Quién recibe las noticias**: de los vinculados, a quién le llegan los avisos para
  *   elegir, redactar y publicar desde el chat (el jefe editorial). Lo marca el admin.
- * - **Marketing**: personas que no tienen cuenta en el panel. Solo reciben lo que el jefe
- *   editorial les manda después de publicar, para montarlo en Instagram.
+ * - **Marketing**: personas que no tienen cuenta en el panel. Les llega sola cada pieza que
+ *   se publica en la página, para revisarla y montarla en Instagram.
  *
  * Si el estado no carga, el bloque no se pinta: el resto de la página sirve igual.
  */
@@ -161,9 +161,9 @@ export const BotDeTelegram = ({ anclaje, anclajeMarketing }) => {
           <div className="se-bot__bloque" {...anclajeMarketing}>
             <span className="se-form-label">Marketing (Instagram)</span>
             <p className="se-admin-meta-hint se-bot__como">
-              A estas personas les llega por Telegram cada noticia que el jefe editorial les manda después de
-              publicarla, con el enlace, la foto y su nota. No necesitan cuenta en el panel: abren el bot, escriben
-              /start y comparten su número, que tiene que ser el de aquí.
+              A estas personas les llega sola por Telegram cada pieza que se publica en la página, con su enlace
+              y su foto, para que la revisen y la monten en Instagram. No necesitan cuenta en el panel: abren el
+              bot, escriben /start y comparten su número, que tiene que ser el de aquí.
             </p>
             {bot.marketing.length ? (
               <ul className="se-bot__lista">

@@ -48,9 +48,9 @@ export const PASOS_AVISOS = [
     clave: "marketing",
     titulo: "Marketing: lo de Instagram",
     texto:
-      "Es otro camino, aparte. Cuando una noticia ya está publicada, el jefe editorial pulsa «Mandar a marketing» " +
-      "en el chat y, si quiere, escribe el titular o la idea que propone. A cada persona de esta lista le llega " +
-      "la noticia con su enlace, su foto y esa nota, para que monte la publicación de Instagram.",
+      "Es otro camino, aparte. Cada vez que una pieza sale publicada en la página (desde el bot, desde el panel " +
+      "o programada), a cada persona de esta lista le llega sola por Telegram, con su enlace y su foto, para que " +
+      "la revise y monte la publicación de Instagram. Nadie tiene que mandársela, y cada pieza llega una sola vez.",
     puntos: [
       "Agregar: el nombre y el celular de la persona. No necesita cuenta en el panel.",
       "Vincularse: ella abre el bot, escribe /start y comparte su número. Hasta entonces sale «falta que abra el bot» y no le llega nada.",

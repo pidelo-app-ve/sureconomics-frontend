@@ -43,6 +43,25 @@
   padding: 1.1rem 1.25rem 1rem;
 }
 
+/* En el paso en que la tarjeta, abajo, tapaba el elemento (ver `medir`). */
+.se-recorrido__tarjeta--arriba {
+  top: 1.5rem;
+  bottom: auto;
+}
+
+/* El hueco tras el final de la página mientras la guía está abierta: deja subir por
+   encima de la tarjeta lo que está al fondo. `top` y `height` los pone la guía.
+   `absolute` y no en el flujo: el `#root` mide una pantalla y el contenido lo desborda,
+   así que un hueco detrás de él no alargaba nada. */
+.se-recorrido-hueco {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .se-recorrido__cabeza {
   display: flex;
   align-items: baseline;
@@ -151,4 +170,20 @@
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
+}
+
+/* Las fichas sin `CabeceraDePagina` (usuario, propuesta de un lector): «Guía» arriba a
+   la derecha, en la fila del enlace de vuelta, como en la cabecera de las demás. El
+   margen de abajo pasa del enlace a la fila. */
+.se-fila-guia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.se-fila-guia > .se-link {
+  margin-bottom: 0;
 }

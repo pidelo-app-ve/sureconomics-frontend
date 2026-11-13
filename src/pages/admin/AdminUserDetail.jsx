@@ -19,6 +19,10 @@ import {
   sortedAdminUserKeys,
   puedeEnviarPropuestas,
 } from "../../lib/adminUserDetailDisplay";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoFichaUsuario } from "../../lib/guias/guiaUsuarios";
+
+const { ancla } = recorridoFichaUsuario;
 
 const readCollabFlag = (row) => puedeEnviarPropuestas(row) === true;
 
@@ -163,11 +167,17 @@ export const AdminUserDetail = () => {
 
   return (
     <main role="main" className="se-admin-user-detail">
-      <Link to="/admin/users" className="se-link se-admin-user-detail__back">
-        ← Usuarios
-      </Link>
+      {/* «Guía» arriba a la derecha, como en la cabecera de las demás páginas (esta no
+          tiene `CabeceraDePagina`). Dentro de la ficha, en el teléfono quedaba a media
+          pantalla. */}
+      <div className="se-fila-guia">
+        <Link to="/admin/users" className="se-link se-admin-user-detail__back">
+          ← Usuarios
+        </Link>
+        <BotonGuia recorrido={recorridoFichaUsuario} className="se-btn se-btn--secondary se-boton-guia" />
+      </div>
 
-      <header className="se-admin-user-detail__hero" aria-labelledby="admin-user-heading">
+      <header className="se-admin-user-detail__hero" aria-labelledby="admin-user-heading" {...ancla("resumen")}>
         <div className="se-admin-user-detail__hero-main">
           <div className="se-admin-user-detail__identity">
             {avatarUrl && !avatarFailed ? (
@@ -239,7 +249,7 @@ export const AdminUserDetail = () => {
 
       <div className="se-admin-user-detail__grid">
         <div className="se-admin-user-detail__column se-admin-user-detail__column--wide">
-          <section className="se-admin-user-detail__surface" aria-labelledby="admin-user-api-heading">
+          <section className="se-admin-user-detail__surface" aria-labelledby="admin-user-api-heading" {...ancla("datos")}>
             <div className="se-admin-user-detail__section-head">
               <h2 id="admin-user-api-heading" className="se-admin-user-detail__panel-title">
                 Datos de la cuenta
@@ -272,7 +282,11 @@ export const AdminUserDetail = () => {
           </section>
         </div>
 
-        <aside className="se-admin-user-detail__column se-admin-user-detail__column--side" aria-label="Edición de usuario">
+        <aside
+          className="se-admin-user-detail__column se-admin-user-detail__column--side"
+          aria-label="Edición de usuario"
+          {...ancla("editar")}
+        >
           <div className="se-admin-user-detail__surface se-admin-user-detail__surface--sticky">
             <h2 className="se-admin-user-detail__panel-title">Editar</h2>
             <p className="se-admin-user-detail__panel-lead">
@@ -337,6 +351,8 @@ export const AdminUserDetail = () => {
           </div>
         </aside>
       </div>
+
+      <RecorridoVista recorrido={recorridoFichaUsuario} />
     </main>
   );
 };

@@ -24,6 +24,10 @@ import {
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoRevisarPropuesta } from "../../lib/guias/guiaPropuestasDeLectores";
+
+const { ancla } = recorridoRevisarPropuesta;
 
 const normalizeStatusForSelect = (value) => {
   const s = String(value || "").toLowerCase();
@@ -234,6 +238,7 @@ export const AdminSubmissionDetail = () => {
       title: "Eliminar nota",
       description: `¿Eliminar esta nota (ID ${noteId})?`,
       confirmLabel: "Eliminar nota",
+      warning: "Se borra del todo y el autor deja de verla en su cuenta. No se puede recuperar.",
       onConfirm: async () => {
         setDeleteState({ status: "loading", error: null, noteId });
         await deleteAdminSubmissionNote(numericId, noteId);
@@ -290,11 +295,16 @@ export const AdminSubmissionDetail = () => {
 
   return (
     <main role="main" className="se-admin-submission-detail">
-      <Link to="/admin/submissions" className="se-link se-admin-submission-detail__back">
-        ← Envíos colaborativos
-      </Link>
+      {/* «Guía» arriba a la derecha, como en la cabecera de las demás páginas (esta no
+          tiene `CabeceraDePagina`), y como en la ficha de usuario. */}
+      <div className="se-fila-guia">
+        <Link to="/admin/submissions" className="se-link se-admin-submission-detail__back">
+          ← Envíos colaborativos
+        </Link>
+        <BotonGuia recorrido={recorridoRevisarPropuesta} className="se-btn se-btn--secondary se-boton-guia" />
+      </div>
 
-      <section className="se-admin-submission-detail__author-board" aria-labelledby="submission-author-heading">
+      <section className="se-admin-submission-detail__author-board" aria-labelledby="submission-author-heading" {...ancla("autor")}>
         <div className="se-admin-submission-detail__author-board-head">
           <div className="se-admin-submission-detail__author-avatar" aria-hidden="true">
             {authorBoard.initials}
@@ -346,7 +356,7 @@ export const AdminSubmissionDetail = () => {
       </section>
 
       <div className="se-admin-submission-detail__grid">
-        <article className="se-admin-submission-detail__surface">
+        <article className="se-admin-submission-detail__surface" {...ancla("pieza")}>
           <header className="se-admin-submission-detail__head">
             <div className="se-admin-submission-detail__title-row">
               <h1 className="se-heading-section">{title}</h1>
@@ -412,7 +422,7 @@ export const AdminSubmissionDetail = () => {
           </section>
         </article>
 
-        <aside className="se-admin-submission-detail__panel se-admin-submission-detail__panel--sticky">
+        <aside className="se-admin-submission-detail__panel se-admin-submission-detail__panel--sticky" {...ancla("decision")}>
           <h2 className="se-admin-submission-detail__panel-title">Revisión</h2>
           <form className="se-contact-form" onSubmit={handleSave}>
             {saveState.status === "error" ? (
@@ -451,7 +461,7 @@ export const AdminSubmissionDetail = () => {
         </aside>
       </div>
 
-      <section className="se-admin-submission-detail__notes-panel" aria-label="Notas del envío">
+      <section className="se-admin-submission-detail__notes-panel" aria-label="Notas del envío" {...ancla("notas")}>
         <h2 className="se-admin-submission-detail__notes-title">Notas del envío</h2>
         {notesFeedback.status === "success" ? (
           <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
@@ -586,6 +596,7 @@ export const AdminSubmissionDetail = () => {
         ) : null}
       </section>
 
+      <RecorridoVista recorrido={recorridoRevisarPropuesta} />
       <ConfirmDialog />
     </main>
   );

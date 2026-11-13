@@ -12,6 +12,10 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { AjusteDePropuestas } from "../../components/admin/AjusteDePropuestas";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoPropuestas } from "../../lib/guias/guiaPropuestasDeLectores";
+
+const { ancla } = recorridoPropuestas;
 
 const STATUS_FILTERS = [
   { value: "", label: "Todos" },
@@ -106,10 +110,11 @@ export const AdminSubmissionsList = () => {
       <CabeceraDePagina
         titulo="Propuestas de lectores"
         explica="Lo que mandan los lectores para publicar. Abra una, déjele una nota y decida si se acepta."
-        acciones={<AjusteDePropuestas />}
+        acciones={<AjusteDePropuestas {...ancla("recibir")} />}
+        guia={recorridoPropuestas}
       />
 
-      <div className="se-admin-submissions__toolbar" role="search" aria-label="Filtrar envíos por estado">
+      <div className="se-admin-submissions__toolbar" role="search" aria-label="Filtrar envíos por estado" {...ancla("estados")}>
         <span className="se-admin-submissions__toolbar-label" id="submissions-filter-legend">
           Estado
         </span>
@@ -161,7 +166,9 @@ export const AdminSubmissionsList = () => {
             </span>
           </div>
 
-          <div className="se-admin-submissions__cards" aria-label="Lista de envíos (vista móvil)">
+          {/* La lista va dos veces (tarjetas en el teléfono, tabla en la computadora) y las
+              dos llevan la parada de la guía: ilumina la que se ve. */}
+          <div className="se-admin-submissions__cards" aria-label="Lista de envíos (vista móvil)" {...ancla("lista")}>
             {state.items.map((row) => {
               const r = mapRow(row);
               if (!r.sid) return null;
@@ -190,7 +197,7 @@ export const AdminSubmissionsList = () => {
             })}
           </div>
 
-          <div className="se-admin-submissions__table-only">
+          <div className="se-admin-submissions__table-only" {...ancla("lista")}>
             <div className="se-admin-table-wrap">
               <table className="se-admin-table">
                 <thead>
@@ -245,6 +252,8 @@ export const AdminSubmissionsList = () => {
           <Pagination page={currentPage} totalPages={totalPages} onPageChange={setPage} />
         </>
       ) : null}
+
+      <RecorridoVista recorrido={recorridoPropuestas} />
     </main>
   );
 };

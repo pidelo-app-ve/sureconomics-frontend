@@ -17,6 +17,10 @@
  * Por convención el primer paso no lleva clave (qué hay en la página) y el último se
  * ancla al propio botón «Guía» («vuelve aquí cuando quieras»).
  *
+ * La página marca cada elemento con `recorrido.ancla(clave)`, que da el atributo:
+ * `const { ancla } = recorridoX;` y luego `<div {...ancla("lista")}>`. Sin clave
+ * (`ancla(guia && "ficha")` donde no toca) no pone nada.
+ *
  * Con `{ traducir: true }`, `titulo`, `texto` y cada punto son claves de los JSON de
  * idioma y no el texto: así van las guías de la parte pública (la cuenta del lector),
  * que se lee en español y en inglés. Las del panel van escritas tal cual.
@@ -48,6 +52,7 @@ const todas = new Set();
 export const crearRecorrido = (nombre, pasos, { traducir = false } = {}) => {
   const CLAVE = `sureconomics_recorrido_${nombre}`;
   const EVENTO = `sureconomics:recorrido-${nombre}`;
+  const atributo = `data-tour-${nombre}`;
 
   const pasoActivo = () => {
     const crudo = leer(CLAVE);
@@ -65,7 +70,8 @@ export const crearRecorrido = (nombre, pasos, { traducir = false } = {}) => {
     pasos,
     nombre,
     traducir,
-    atributo: `data-tour-${nombre}`,
+    atributo,
+    ancla: (clave) => (clave ? { [atributo]: clave } : {}),
     pasoActivo,
     definicionActual: () => {
       const n = pasoActivo();

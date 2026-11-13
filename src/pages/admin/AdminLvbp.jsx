@@ -9,6 +9,8 @@ import { adminRequest } from "../../lib/api";
 import { unwrapEntity } from "../../services/adminResponseUtils";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoLvbp } from "../../lib/guias/guiaLvbp";
 
 /**
  * Los juegos de la LVBP en el panel.
@@ -29,6 +31,8 @@ const ESTADOS = {
   cancelado: "Cancelado",
 };
 const NUEVO = { fecha: "", hora: "19:00", local: "MAG", visitante: "LAG", carreras_local: "", carreras_visitante: "", estado: "final", estadio: "" };
+
+const { ancla } = recorridoLvbp;
 
 const fechaIso = (d) => d.toISOString().slice(0, 10);
 const cuandoFue = (iso) => (iso ? new Date(iso).toLocaleString("es-VE", { timeZone: "America/Caracas" }) : "nunca");
@@ -146,9 +150,11 @@ export const AdminLvbp = () => {
                   marcador. Un juego tocado a mano queda bloqueado: la API ya no lo pisa.
                 </>
               }
+              guia={recorridoLvbp}
             />
+            <RecorridoVista recorrido={recorridoLvbp} />
 
-            <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }}>
+            <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} {...ancla("sync")}>
                 <div className="se-admin-filters" style={{ alignItems: "center" }}>
                     <div className="se-admin-filters__field se-admin-filters__field--grow">
                         <span className="se-form-label">Sincronización con API-Sports</span>
@@ -168,7 +174,7 @@ export const AdminLvbp = () => {
             </section>
 
             {puedeEditar ? (
-                <form className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} onSubmit={crear}>
+                <form className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} onSubmit={crear} {...ancla("cargar")}>
                     <h2 className="se-heading-card" style={{ margin: "0 0 0.5rem" }}>
                         Cargar un juego a mano
                     </h2>
@@ -218,7 +224,7 @@ export const AdminLvbp = () => {
                 </form>
             ) : null}
 
-            <div className="se-admin-filters" style={{ marginBottom: "1rem" }}>
+            <div className="se-admin-filters" style={{ marginBottom: "1rem" }} {...ancla("fechas")}>
                 <label className="se-admin-filters__field">
                     <span className="se-form-label">Desde</span>
                     <input className="se-form-control" type="date" value={rango.desde} onChange={(e) => setRango((r) => ({ ...r, desde: e.target.value }))} />
@@ -234,7 +240,7 @@ export const AdminLvbp = () => {
             {state.status === "success" && !state.items.length ? <EmptyState title="No hay juegos en esas fechas" /> : null}
 
             {state.items.length ? (
-                <div className="se-admin-table-wrap">
+                <div className="se-admin-table-wrap" {...ancla("juegos")}>
                     <table className="se-admin-table">
                         <thead>
                             <tr>
@@ -285,6 +291,7 @@ export const AdminLvbp = () => {
                                                         title: "Borrar el juego",
                                                         description: "¿Borrar este juego? Si la API lo trae, volverá a aparecer en la próxima sincronización.",
                                                         confirmLabel: "Borrar",
+                                                        warning: "Si es de anteayer o de antes, la API ya no lo trae: para recuperarlo habría que cargarlo otra vez a mano.",
                                                     });
                                                     if (borrar) {
                                                         correr(j.id, () => adminRequest(`/admin/lvbp/juegos/${j.id}`, { method: "DELETE" }), "Juego borrado.");

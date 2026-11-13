@@ -18,6 +18,8 @@ import {
   sincronizarTiktok,
 } from "../../services/adminSettingsService";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoRedes } from "../../lib/guias/guiaRedes";
 import { LoadingState } from "../../components/content";
 
 /**
@@ -51,6 +53,8 @@ import { LoadingState } from "../../components/content";
  */
 
 const MAX_POR_RED = 8;
+
+const { ancla } = recorridoRedes;
 
 //: Qué redes llevan una imagen (foto o fotograma) además del texto. X es sólo texto.
 const REDES_CON_IMAGEN = new Set(["instagram", "tiktok"]);
@@ -169,7 +173,7 @@ const TIPO = { VIDEO: "Reel", CAROUSEL_ALBUM: "Carrusel", IMAGE: "Foto" };
 const InstagramAutomatico = ({ auto, ocupado, onActualizar, onOcultar }) => {
   let visibles = 0;
   return (
-    <section className="se-admin-redes__red">
+    <section className="se-admin-redes__red" {...ancla("instagram")}>
       <header className="se-admin-redes__red-cabeza">
         <h2 className="se-admin-redes__red-titulo">
           Instagram <span className="se-admin-redes__auto">Automático</span>
@@ -290,7 +294,7 @@ const TikTokAutomatico = ({ auto, ocupado, onActualizar, onOcultar, onDesconecta
   let visibles = 0;
   const cuenta = auto.cuenta?.nombre;
   return (
-    <section className="se-admin-redes__red">
+    <section className="se-admin-redes__red" {...ancla("tiktok")}>
       <header className="se-admin-redes__red-cabeza">
         <h2 className="se-admin-redes__red-titulo">
           TikTok <span className="se-admin-redes__auto">Automático</span>
@@ -567,13 +571,12 @@ export const AdminRedes = () => {
         "Dejan de llegar los videos nuevos y la fila de TikTok vuelve a la lista manual. Para volver a automático hay que conectar otra vez desde aquí.",
       confirmLabel: "Desconectar",
       cancelLabel: "Seguir conectado",
-      warning: null,
     });
     if (vale) conTiktok(desconectarTiktok, "TikTok desconectado. La fila vuelve a la lista manual.");
   };
 
   const bloque = (red) => (
-    <section className="se-admin-redes__red" key={red}>
+    <section className="se-admin-redes__red" key={red} {...ancla(red)}>
       <header className="se-admin-redes__red-cabeza">
         <h2 className="se-admin-redes__red-titulo">{NOMBRE[red]}</h2>
         <span className="se-admin-meta-hint">
@@ -626,7 +629,9 @@ export const AdminRedes = () => {
             vez al pulsar Guardar.
           </>
         }
+        guia={recorridoRedes}
       />
+      <RecorridoVista recorrido={recorridoRedes} />
 
       {carga.status === "loading" ? <LoadingState /> : null}
       {carga.status === "error" ? (
@@ -674,6 +679,7 @@ export const AdminRedes = () => {
             guardando={guardado.status === "saving"}
             bloqueado={Boolean(subiendo)}
             onGuardar={guardar}
+            {...ancla("guardar")}
           />
 
           {guardado.mensaje ? (

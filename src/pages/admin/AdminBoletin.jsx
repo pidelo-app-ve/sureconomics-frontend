@@ -29,7 +29,7 @@ import { recorridoBoletin } from "../../lib/guias/guiaBoletin";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { LoadingState } from "../../components/content";
 
-const anclaBoletin = (clave) => ({ [recorridoBoletin.atributo]: clave });
+const { ancla } = recorridoBoletin;
 
 /**
  * Los números de "Entorno en Viñetas".
@@ -104,7 +104,7 @@ const Listado = ({ numeros, onAbrir, onNuevo }) => {
     );
   }
   return (
-    <ul className="se-bol__lista" {...anclaBoletin("lista")}>
+    <ul className="se-bol__lista" {...ancla("lista")}>
       {numeros.map((n) => (
         <li key={n.id}>
           <button type="button" className="se-bol__fila" onClick={() => onAbrir(n.id)}>
@@ -337,7 +337,6 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
         ? `Sale ya, en vez de el ${lunesLargo(numero.send_on)} a las 9:00. Va a la lista real y no se puede deshacer.`
         : "Sale a la lista real y no se puede deshacer. Si aún no lo ha visto en su bandeja, mande antes una prueba.",
       confirmLabel: "Enviar ahora",
-      warning: null,
     });
     if (!vale) return;
     await porLotes(enviados, n - enviados, "Número enviado a toda la lista");
@@ -374,7 +373,6 @@ const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
       title: `¿Reenviar este número a ${n} ${n === 1 ? "suscriptor" : "suscriptores"}?`,
       description: `Llega otra vez a toda la lista con el asunto «${asuntoReenvio.trim() || numero.subject}». Quien se dio de baja no lo recibe. No se puede deshacer: mande antes una prueba.`,
       confirmLabel: "Reenviar ahora",
-      warning: null,
     });
     if (!vale) return;
     const r = await correr(() => reenviarNumero(numero.id, asuntoReenvio.trim()), null);
@@ -569,7 +567,6 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
         description: "El asunto o la introducción tienen cambios que todavía no se guardaron.",
         confirmLabel: "Salir sin guardar",
         cancelLabel: "Seguir editando",
-        warning: null,
       });
       if (!salir) return;
     }
@@ -600,7 +597,6 @@ const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) =>
                   "Se borra el número. Las imágenes se quedan en Archivos, así que se pueden volver a usar.",
                 confirmLabel: "Borrar el número",
                 busyLabel: "Borrando…",
-                warning: null,
               });
               if (!vale) return;
               const r = await correr(() => borrarNumero(numero.id), "Número borrado");
@@ -872,7 +868,7 @@ export const AdminBoletin = () => {
         acciones={
           <>
             {!abierto ? (
-              <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo} {...anclaBoletin("nuevo")}>
+              <button type="button" className="se-btn se-btn--primary" onClick={abrirNuevo} {...ancla("nuevo")}>
                 Nuevo número
               </button>
             ) : null}

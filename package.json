@@ -19,7 +19,7 @@
         "test:i18n": "node src/i18n/motor.test.mjs",
         "test:guacamaya": "node src/juegos/guacamaya/motor.test.mjs",
         "test:clave": "node src/juegos/clave/motor.test.mjs",
-        "test:recorrido": "node src/lib/recorridoVista.test.mjs",
+        "test:recorrido": "node src/lib/recorridoVista.test.mjs && node src/lib/todasLasGuias.test.mjs",
         "test:relojes": "node src/lib/relojes.test.mjs",
         "test:ultimahora": "node src/lib/listaUltimaHora.test.mjs",
         "test:publicidad": "node src/lib/listaDeQuery.test.mjs",
@@ -49,6 +49,7 @@
         "eslint-plugin-react": "^7.33.1",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.3",
+        "espree": "^9.6.1",
         "vite": "^4.4.8"
     },
     "engines": {

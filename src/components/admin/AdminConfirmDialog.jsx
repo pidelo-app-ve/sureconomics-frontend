@@ -146,11 +146,9 @@ export const AdminConfirmDialog = ({
 
         <div id={descId} className="se-adm-dialog__body">
           {typeof description === "string" ? <p className="se-adm-dialog__text">{description}</p> : description}
-          {/* El aviso era fijo, y eso lo puso a contradecir a quien lo abría: una
-              pieza de publicidad avisa de que el arte se conserva en Archivos y justo
-              debajo aparecía «el contenido se eliminará de forma permanente». Quien
-              sabe exactamente qué se pierde lo dice en `description` y pasa `warning`
-              en nulo; los demás siguen con el texto de siempre. */}
+          {/* Solo el aviso que da quien abre el diálogo. Hubo uno por defecto («Esta
+              acción es irreversible…») y acabó diciéndolo de acciones que se deshacen,
+              como quitar un canal o desactivar una cuenta. */}
           {warning ? <p className="se-adm-dialog__warn">{warning}</p> : null}
           {errorMessage ? (
             <p className="se-adm-dialog__error" role="alert">
@@ -186,7 +184,7 @@ AdminConfirmDialog.propTypes = {
   description: PropTypes.node.isRequired,
   confirmLabel: PropTypes.string,
   cancelLabel: PropTypes.string,
-  /** El recuadro de aviso. En nulo no se pinta, para quien ya lo dijo mejor arriba. */
+  /** El recuadro de aviso. Sin él no se pinta: lo da quien tiene algo cierto que advertir. */
   warning: PropTypes.node,
   /** Lo que dice el botón mientras trabaja. */
   busyLabel: PropTypes.string,
@@ -200,8 +198,6 @@ AdminConfirmDialog.propTypes = {
 AdminConfirmDialog.defaultProps = {
   confirmLabel: "Eliminar",
   cancelLabel: "Cancelar",
-  warning:
-    "Esta acción es irreversible. Si continúa, el contenido se eliminará de forma permanente.",
   busyLabel: "Eliminando…",
   variant: "danger",
   isBusy: false,

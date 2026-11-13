@@ -57,7 +57,7 @@ const AdminShell = () => {
   const [buscando, setBuscando] = useState(false);
   const menu = useMemo(() => menuPara(role), [role]);
   const recorrido = useMemo(() => recorridoPanelPara(role), [role]);
-  const ancla = (clave) => ({ [recorrido.atributo]: clave });
+  const { ancla } = recorrido;
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const handleToggleMenu = useCallback(() => setMenuOpen((o) => !o), []);

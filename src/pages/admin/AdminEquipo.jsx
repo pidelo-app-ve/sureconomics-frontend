@@ -14,10 +14,13 @@ import {
 import { getTeamPhotos, putTeamPhotos } from "../../services/adminSettingsService";
 import { RecorteDeAvatar } from "../../components/admin/RecorteDeAvatar";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoEquipo } from "../../lib/guias/guiaEquipo";
 import { LoadingState } from "../../components/content";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
 const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+const { ancla } = recorridoEquipo;
 
 /**
  * Rechazar aquí lo obvio, antes de que el archivo viaje al servidor para volver
@@ -130,11 +133,12 @@ const GRUPOS = [
   }))
   .filter((grupo) => grupo.gente.length > 0);
 
-const FichaDeFoto = ({ persona, foto, ocupado, onSubir, onQuitar }) => {
+// `resto`: lo que la página quiera poner en la ficha, como el anclaje de la guía.
+const FichaDeFoto = ({ persona, foto, ocupado, onSubir, onQuitar, ...resto }) => {
   const entrada = useRef(null);
 
   return (
-    <li className="se-admin-equipo__ficha">
+    <li className="se-admin-equipo__ficha" {...resto}>
       <button
         type="button"
         className="se-admin-equipo__avatar-btn"
@@ -361,6 +365,7 @@ export const AdminEquipo = () => {
             editan aquí. JPG, PNG, WebP, GIF o AVIF, hasta {formatMb(MAX_IMAGE_BYTES)}.
           </>
         }
+        guia={recorridoEquipo}
       />
 
       {carga.status === "loading" ? <LoadingState /> : null}
@@ -387,13 +392,14 @@ export const AdminEquipo = () => {
 
       {carga.status === "ready" ? (
         <>
-          {GRUPOS.map((grupo) => (
+          {GRUPOS.map((grupo, g) => (
             <section key={grupo.titulo} className="se-admin-equipo__grupo">
               <h2 className="se-admin-equipo__grupo-titulo">{grupo.titulo}</h2>
               <ul className="se-admin-equipo__lista">
-                {grupo.gente.map((persona) => (
+                {grupo.gente.map((persona, p) => (
                   <FichaDeFoto
                     key={persona.id}
+                    {...(g === 0 && p === 0 ? ancla("persona") : {})}
                     persona={persona}
                     foto={vistas[claveDeFoto(persona)] || ""}
                     ocupado={subiendo === claveDeFoto(persona)}
@@ -410,6 +416,7 @@ export const AdminEquipo = () => {
             guardando={guardado.status === "saving"}
             bloqueado={Boolean(subiendo)}
             onGuardar={guardar}
+            {...ancla("guardar")}
           />
 
           {guardado.mensaje ? (
@@ -430,6 +437,7 @@ export const AdminEquipo = () => {
         </>
       ) : null}
       <ConfirmDialog />
+      <RecorridoVista recorrido={recorridoEquipo} />
     </div>
   );
 };

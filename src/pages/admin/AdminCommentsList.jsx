@@ -13,6 +13,10 @@ import { adminPick } from "../../lib/adminPick";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoComentarios } from "../../lib/guias/guiaComentarios";
+
+const { ancla } = recorridoComentarios;
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -190,10 +194,12 @@ export const AdminCommentsList = () => {
     <main role="main">
       <CabeceraDePagina
         titulo="Comentarios"
+        guia={recorridoComentarios}
       />
 
       <form
         className="se-contact-form se-contact-form--toolbar"
+        {...ancla("filtros")}
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);
@@ -259,7 +265,7 @@ export const AdminCommentsList = () => {
           <p className="se-text-body" style={{ marginBottom: "1rem" }}>
             Página {meta?.page ?? page} de {totalPages} — {meta?.total ?? state.items.length} en total
           </p>
-          <div className="se-admin-table-wrap">
+          <div className="se-admin-table-wrap" {...ancla("lista")}>
             <table className="se-admin-table">
               <thead>
                 <tr>
@@ -399,6 +405,7 @@ export const AdminCommentsList = () => {
         </>
       ) : null}
 
+      <RecorridoVista recorrido={recorridoComentarios} />
       <ConfirmDialog />
     </main>
   );

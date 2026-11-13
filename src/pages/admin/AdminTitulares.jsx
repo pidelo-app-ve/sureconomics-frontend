@@ -42,7 +42,7 @@ const zona = { timeZone: "America/Caracas" };
 const cuando = (iso) => (iso ? new Date(iso).toLocaleString("es-VE", { ...zona, dateStyle: "short", timeStyle: "short" }) : "—");
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }) : "—");
 const usd = (n) => (typeof n === "number" ? `${n.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD` : "—");
-const ancla = (clave) => ({ [recorridoTitulares.atributo]: clave });
+const { ancla } = recorridoTitulares;
 
 /** Los nombres de las etapas del ciclo, para el aviso de «falló». */
 const ETAPAS = { recuperar: "recuperar notas", notas: "agrupar notas", grupos: "redactar y publicar",
@@ -229,7 +229,7 @@ export const AdminTitulares = () => {
   };
 
   const restaurar = async (grupo) => {
-    const ok = await confirm({ title: "Restaurar el titular", description: `«${grupo.titulo}» vuelve a la web.`, confirmLabel: "Restaurar", warning: null });
+    const ok = await confirm({ title: "Restaurar el titular", description: `«${grupo.titulo}» vuelve a la web.`, confirmLabel: "Restaurar" });
     if (!ok) return;
     await hacer(() => adminRequest(`/admin/headlines/${grupo.id}/restore`, { method: "POST" }), "Restaurado.", "No se pudo restaurar.");
   };
@@ -245,7 +245,7 @@ export const AdminTitulares = () => {
     hacer(() => adminRequest(`/admin/headlines/${grupo.id}/pin`, { method: "DELETE" }), "Quitado de arriba.", "No se pudo quitar.");
 
   const cambiar = async (clave, valor, pregunta) => {
-    const ok = await confirm({ title: pregunta.titulo, description: pregunta.texto, confirmLabel: pregunta.boton, warning: null });
+    const ok = await confirm({ title: pregunta.titulo, description: pregunta.texto, confirmLabel: pregunta.boton });
     if (!ok) return;
     await hacer(() => adminRequest("/admin/headlines/settings", { method: "PUT", json: { [clave]: valor } }), "Hecho.", "No se pudo cambiar.");
   };

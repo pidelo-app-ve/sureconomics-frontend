@@ -8,6 +8,8 @@ import { adminRequest } from "../../lib/api";
 import { applyPageMeta } from "../../lib/seo";
 import { unwrapEntity } from "../../services/adminResponseUtils";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoTraducciones } from "../../lib/guias/guiaTraducciones";
 
 /**
  * «Traducir el archivo»: las piezas publicadas que aún no tienen inglés, en lote.
@@ -27,6 +29,8 @@ const ESTADOS = {
   cancelado: "Cancelado",
 };
 const EN_MARCHA = new Set(["en_curso", "cancelando"]);
+
+const { ancla } = recorridoTraducciones;
 
 const cuando = (iso) =>
   iso ? new Date(iso).toLocaleString("es-VE", { timeZone: "America/Caracas", dateStyle: "short", timeStyle: "short" }) : "—";
@@ -79,6 +83,7 @@ export const AdminTraducciones = () => {
         </>
       ),
       confirmLabel: "Traducir",
+      warning: "El crédito que se gaste no se recupera.",
     });
     if (!ok) return;
     setOcupado(true);
@@ -131,9 +136,10 @@ export const AdminTraducciones = () => {
             guarde.
           </>
         }
+        guia={recorridoTraducciones}
       />
 
-      <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }}>
+      <section className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} {...ancla("pendientes")}>
         <div className="se-admin-filters" style={{ alignItems: "center" }}>
           <div className="se-admin-filters__field se-admin-filters__field--grow">
             <span className="se-form-label">Pendientes</span>
@@ -157,7 +163,7 @@ export const AdminTraducciones = () => {
       </section>
 
       {d.estado !== "inactivo" ? (
-        <section className="se-admin-table-wrap" style={{ padding: "1rem" }} aria-live="polite">
+        <section className="se-admin-table-wrap" style={{ padding: "1rem" }} aria-live="polite" {...ancla("avance")}>
           <h2 className="se-heading-card" style={{ margin: "0 0 0.5rem" }}>
             {ESTADOS[d.estado] ?? d.estado}
             {d.total ? ` · ${porcentaje} %` : ""}
@@ -211,6 +217,7 @@ export const AdminTraducciones = () => {
           ) : null}
         </section>
       ) : null}
+      <RecorridoVista recorrido={recorridoTraducciones} />
       <ConfirmDialog />
     </main>
   );

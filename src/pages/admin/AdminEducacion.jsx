@@ -37,6 +37,8 @@ import {
 } from "../../services/adminEducacionService";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoEducacion } from "../../lib/guias/guiaEducacion";
 import { esEditor } from "../../lib/menuDelPanel";
 import { LoadingState } from "../../components/content";
 
@@ -90,6 +92,25 @@ const NIVELES = [
 const precioLegible = (centavos, moneda) =>
   `${((Number(centavos) || 0) / 100).toFixed(2)} ${moneda || "USD"}`;
 
+/** Una parada de la guía, solo donde toca: `{...ancla(guia && "ficha")}`. */
+const { ancla } = recorridoEducacion;
+
+/**
+ * Despliega el primer módulo (o su primera lección) cuando el paso de la guía lo pide
+ * con `abrirModulo` o `abrirLeccion`: lo que el paso explica tiene que verse. Solo
+ * abre; cerrar sigue siendo cosa de quien edita.
+ */
+const useAbiertoPorLaGuia = (activo, campo, abrir) => {
+  useEffect(() => {
+    if (!activo) return undefined;
+    const mirar = () => {
+      if (recorridoEducacion.definicionActual()?.[campo]) abrir(true);
+    };
+    mirar();
+    return recorridoEducacion.suscribir(mirar);
+  }, [activo, campo, abrir]);
+};
+
 /* ─── Una leccion ────────────────────────────────────────────────────────── */
 
 const FilaDeLeccion = ({
@@ -100,8 +121,10 @@ const FilaDeLeccion = ({
   onMover,
   onBorrar,
   subirVideo,
+  guia,
 }) => {
   const [abierta, setAbierta] = useState(false);
+  useAbiertoPorLaGuia(guia, "abrirLeccion", setAbierta);
   // El objeto del archivo, para que el selector pueda enseñar lo que hay puesto.
   // Vive aparte del borrador porque no se guarda: se manda el id, y esto es lo que
   // se pinta mientras tanto.
@@ -235,7 +258,7 @@ const FilaDeLeccion = ({
       </div>
 
       {abierta ? (
-        <div className="se-admin-edu__leccion-cuerpo">
+        <div className="se-admin-edu__leccion-cuerpo" {...ancla(guia && "leccion")}>
           <label className="se-form-label" htmlFor={`${id}-titulo`}>
             Título
           </label>
@@ -407,12 +430,15 @@ FilaDeLeccion.propTypes = {
   onGuardar: PropTypes.func.isRequired,
   onMover: PropTypes.func.isRequired,
   onBorrar: PropTypes.func.isRequired,
+  /** La primera lección del primer módulo: lleva la parada de la guía. */
+  guia: PropTypes.bool,
 };
 
 /* ─── Un modulo ──────────────────────────────────────────────────────────── */
 
-const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
+const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError, guia }) => {
   const [abierto, setAbierto] = useState(false);
+  useAbiertoPorLaGuia(guia, "abrirModulo", setAbierto);
   const { confirm, ConfirmDialog } = useAdminConfirm();
   // Una clave por módulo: dos pestañas abiertas en módulos distintos son subidas
   // distintas, y compartirla haría que la segunda recibiera la respuesta de la primera.
@@ -491,7 +517,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
 
   return (
     <section className="se-admin-edu__modulo">
-      <header className="se-admin-edu__modulo-cabeza">
+      <header className="se-admin-edu__modulo-cabeza" {...ancla(guia && "modulo")}>
         <button
           type="button"
           className="se-admin-edu__modulo-titulo"
@@ -550,7 +576,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
       </header>
 
       {abierto ? (
-        <div className="se-admin-edu__modulo-cuerpo">
+        <div className="se-admin-edu__modulo-cuerpo" {...ancla(guia && "ficha")}>
           {/* La lista se enseña sola cuando alguien intenta publicar y no puede, y a
               demanda el resto del tiempo: en un módulo que ya está bien, una lista de
               comprobación permanente es ruido. */}
@@ -649,7 +675,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
             </div>
           </div>
 
-          <div className="se-admin-form-actions">
+          <div className="se-admin-form-actions" {...ancla(guia && "guardar")}>
             <button
               type="button"
               className="se-btn"
@@ -679,7 +705,9 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
               onClick={async () => {
                 const borrar = await confirm({
                   title: "Borrar el módulo",
-                  description: `¿Borrar «${modulo.titulo}» y todas sus lecciones? No se puede deshacer.`,
+                  description: `¿Borrar «${modulo.titulo}» y todas sus lecciones? No se puede deshacer.${
+                    publicado ? " Si solo quiere sacarlo del catálogo, use «Pasar a borrador»." : ""
+                  }`,
                   confirmLabel: "Borrar el módulo",
                 });
                 if (!borrar) return;
@@ -695,10 +723,11 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
 
           <h3 className="se-admin-edu__sub">Lecciones</h3>
           {modulo.lecciones.length ? (
-            <ol className="se-admin-edu__lecciones">
-              {modulo.lecciones.map((leccion) => (
+            <ol className="se-admin-edu__lecciones" {...ancla(guia && "lecciones")}>
+              {modulo.lecciones.map((leccion, i) => (
                 <FilaDeLeccion
                   key={leccion.id}
+                  guia={guia && i === 0}
                   leccion={leccion}
                   total={modulo.lecciones.length}
                   ocupado={ocupado}
@@ -729,7 +758,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
               ))}
             </ol>
           ) : (
-            <p className="se-admin-meta-hint">
+            <p className="se-admin-meta-hint" {...ancla(guia && "lecciones")}>
               Todavía no tiene lecciones. Sin al menos una, el módulo no se puede publicar.
             </p>
           )}
@@ -757,7 +786,9 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
             </button>
           </div>
 
-          {modulo.compras ? <ComprasDelModulo moduloId={modulo.id} total={modulo.compras} /> : null}
+          {modulo.compras ? (
+            <ComprasDelModulo moduloId={modulo.id} total={modulo.compras} guia={guia} />
+          ) : null}
         </div>
       ) : null}
       <ConfirmDialog />
@@ -772,7 +803,7 @@ const TarjetaDeModulo = ({ modulo, ocupado, onCambio, onError }) => {
  * para lo que pasa fuera de ellas: un reembolso hecho por transferencia, un fraude, o
  * devolver el acceso cuando una disputa se gana. Solo para admin, como en el servidor.
  */
-const ComprasDelModulo = ({ moduloId, total }) => {
+const ComprasDelModulo = ({ moduloId, total, guia }) => {
   const { role } = useAuth();
   const { confirm, ConfirmDialog } = useAdminConfirm();
   const [compras, setCompras] = useState(null);
@@ -813,7 +844,7 @@ const ComprasDelModulo = ({ moduloId, total }) => {
   };
 
   return (
-    <div className="se-admin-edu__compras">
+    <div className="se-admin-edu__compras" {...ancla(guia && "compras")}>
       <h3 className="se-form-label" style={{ marginTop: "1.5rem" }}>
         Compras
       </h3>
@@ -875,6 +906,7 @@ const ComprasDelModulo = ({ moduloId, total }) => {
 ComprasDelModulo.propTypes = {
   moduloId: PropTypes.number.isRequired,
   total: PropTypes.number.isRequired,
+  guia: PropTypes.bool,
 };
 
 TarjetaDeModulo.propTypes = {
@@ -883,6 +915,8 @@ TarjetaDeModulo.propTypes = {
   /** Recibe el módulo actualizado, o `null` si se borró. */
   onCambio: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
+  /** El primer módulo de la lista: lleva las paradas de la guía. */
+  guia: PropTypes.bool,
 };
 
 /* ─── La pantalla ────────────────────────────────────────────────────────── */
@@ -941,9 +975,11 @@ export const AdminEducacion = () => {
             Los cambios se guardan al momento.
           </>
         }
+        guia={recorridoEducacion}
       />
+      <RecorridoVista recorrido={recorridoEducacion} />
 
-      {resumen ? <CifrasDeEducacion resumen={resumen} /> : null}
+      {resumen ? <CifrasDeEducacion resumen={resumen} {...ancla("cifras")} /> : null}
 
       {carga.estado === "cargando" ? <LoadingState /> : null}
       {carga.estado === "error" ? (
@@ -959,7 +995,7 @@ export const AdminEducacion = () => {
 
       {carga.estado === "listo" ? (
         <>
-          <div className="se-admin-edu__nueva se-admin-edu__nueva--modulo">
+          <div className="se-admin-edu__nueva se-admin-edu__nueva--modulo" {...ancla("nuevo")}>
             <input
               className="se-form-control"
               placeholder="Título del nuevo módulo"
@@ -994,9 +1030,10 @@ export const AdminEducacion = () => {
             </p>
           ) : null}
 
-          {modulos.map((modulo) => (
+          {modulos.map((modulo, i) => (
             <TarjetaDeModulo
               key={modulo.id}
+              guia={i === 0}
               modulo={modulo}
               ocupado={ocupado}
               onCambio={aplicar(modulo.id)}

@@ -25,7 +25,7 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * elige el canal y se oculta lo que no deba salir.
  */
 
-const ancla = (clave) => ({ [recorridoCanal.atributo]: clave });
+const { ancla } = recorridoCanal;
 const SIGUE = "Se está actualizando por detrás. Vuelve a abrir esta página en un minuto para verlo.";
 
 const duracion = (s) => (s == null ? null : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`);
@@ -146,6 +146,10 @@ export const AdminCanal = () => {
       title: "Quitar el canal",
       description: "La portada deja de enseñar «En la calle» y «Nuestro canal» hasta que elijas otro.",
       confirmLabel: "Quitar",
+      // Quitarlo olvida también la lista de ocultos (`youtube_service.olvidar`).
+      warning:
+        [...d.shorts, ...d.largos].some((v) => v.oculto) &&
+        "También se olvidan los videos que ocultaste: si vuelves a elegir este canal, salen otra vez.",
     });
     if (ok) hacer(quitarYoutube, "Canal quitado.", "No se pudo quitar el canal.");
   };

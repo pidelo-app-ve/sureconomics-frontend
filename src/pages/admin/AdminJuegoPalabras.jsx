@@ -14,6 +14,8 @@ import {
 } from "../../services/adminClaveService";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoLaClave } from "../../lib/guias/guiaLaClave";
 
 /**
  * El catálogo de «La Clave»: las palabras de las que sale la del día, por categoría.
@@ -36,6 +38,7 @@ const NOMBRE_DE_CATEGORIA = {
     sabor: "Sabor",
 };
 const nombreDe = (c) => NOMBRE_DE_CATEGORIA[c] ?? c;
+const { ancla } = recorridoLaClave;
 
 const LIMITE = 50;
 const NUEVA = { palabra: "", categoria: "economia", definicion: "", pista: "" };
@@ -138,9 +141,9 @@ export const AdminJuegoPalabras = () => {
                 </>
               }
               dato={
-                <>
+                <span {...ancla("cuenta")}>
                   {categorias.map((c) => `${nombreDe(c)}: ${totalPorCategoria[c] ?? 0}`).join(" · ")}
-                </>
+                </span>
               }
               acciones={
                 <>
@@ -148,6 +151,7 @@ export const AdminJuegoPalabras = () => {
                       <button
                           type="button"
                           className="se-btn se-btn--secondary"
+                          {...ancla("pegar")}
                           onClick={() => {
                               setResultadoLote(null);
                               setLote({ categoria: nueva.categoria, texto: "" });
@@ -158,10 +162,12 @@ export const AdminJuegoPalabras = () => {
                   ) : null}
                 </>
               }
+              guia={recorridoLaClave}
             />
+            <RecorridoVista recorrido={recorridoLaClave} />
 
             {puedeEditar ? (
-                <form className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} onSubmit={crear}>
+                <form className="se-admin-table-wrap" style={{ marginBottom: "1rem", padding: "1rem" }} onSubmit={crear} {...ancla("anadir")}>
                     <h2 className="se-heading-card" style={{ margin: "0 0 0.5rem" }}>
                         Añadir una palabra
                     </h2>
@@ -214,7 +220,7 @@ export const AdminJuegoPalabras = () => {
                 </form>
             ) : null}
 
-            <div className="se-admin-filters" style={{ marginBottom: "1rem" }}>
+            <div className="se-admin-filters" style={{ marginBottom: "1rem" }} {...ancla("filtros")}>
                 <label className="se-admin-filters__field">
                     <span className="se-form-label">Categoría</span>
                     <select
@@ -281,7 +287,7 @@ export const AdminJuegoPalabras = () => {
                         </p>
                         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} compacta etiqueta="Paginación" />
                     </div>
-                    <div className="se-admin-table-wrap">
+                    <div className="se-admin-table-wrap" {...ancla("lista")}>
                         <table className="se-admin-table">
                             <thead>
                                 <tr>
@@ -348,6 +354,7 @@ export const AdminJuegoPalabras = () => {
                                                                 title: "Borrar la palabra",
                                                                 description: `¿Borrar «${row.palabra}»? Si solo quiere sacarla del sorteo, retírela.`,
                                                                 confirmLabel: "Borrar",
+                                                                warning: "Se borra del todo, con su definición y su pista, y no se puede recuperar.",
                                                             });
                                                             if (borrar) {
                                                                 correr(row.id, () => deleteAdminPalabra(row.id), `«${row.palabra}» borrada.`);

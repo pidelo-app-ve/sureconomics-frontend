@@ -14,7 +14,7 @@ const TEXTO_DEL_GRUPO = {
   automatico: "Lo que llega solo y aquí se revisa: titulares en caliente, los avisos de noticias, el resumen diario, la cinta de mercado, el canal de YouTube, las redes y el béisbol.",
   comercial: "Lo que se vende: la publicidad (con el mapa de dónde sale cada anuncio), el boletín Entorno en Viñetas y su lista, y los cursos de Educación.",
   lectores: "Quién lee y cómo participa: la audiencia, las cuentas de lectores y los juegos.",
-  sistema: "Temas y lugares con que se clasifica todo, los ajustes de las propuestas, las cuentas del equipo y su perfil.",
+  sistema: "Los temas y los lugares con que se clasifica todo, las cuentas del equipo (solo las ve el admin) y su perfil.",
 };
 
 const pasosPara = (role) => [
@@ -43,8 +43,8 @@ const pasosPara = (role) => [
     abrirMenu: true,
     titulo: "Vuelva aquí cuando quiera",
     texto:
-      "Este botón repite esta visita. Además, las páginas con más cosas (Contenido, el editor, Archivos, " +
-      "Publicidad, el boletín…) tienen su botón «Guía» arriba a la derecha.",
+      "Este botón repite esta visita. Además, cada página del panel tiene arriba su botón «Guía», que " +
+      "enseña paso a paso lo que hay en ella.",
   },
 ];
 

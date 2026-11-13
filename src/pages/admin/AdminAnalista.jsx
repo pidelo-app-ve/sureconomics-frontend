@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import { listAdminCarreras, moderarCarrera } from "../../services/analistaService";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoAnalista } from "../../lib/guias/guiaAnalista";
 
 /**
  * El ranking de El Analista, para moderarlo.
@@ -22,6 +24,8 @@ const ESTADOS = [
 
 const dinero = (n) =>
   `USD ${Number(n || 0).toLocaleString("es", { maximumFractionDigits: 0 })}`;
+
+const { ancla } = recorridoAnalista;
 
 const fecha = (iso) =>
   iso
@@ -87,7 +91,9 @@ export const AdminAnalista = () => {
     <main role="main">
       <CabeceraDePagina
         titulo="Ranking de El Analista"
+        guia={recorridoAnalista}
       />
+      <RecorridoVista recorrido={recorridoAnalista} />
       <p className="se-text-body" style={{ marginTop: 0, maxWidth: "62ch" }}>
         Cada carrera la anotó un lector con cuenta y el correo confirmado. Ocultar una la saca
         del ranking sin borrarla; si esa cuenta tiene otra carrera, sale la siguiente mejor.
@@ -95,6 +101,7 @@ export const AdminAnalista = () => {
 
       <form
         className="se-contact-form se-contact-form--toolbar"
+        {...ancla("filtros")}
         onSubmit={(e) => {
           e.preventDefault();
           setPage(1);
@@ -164,7 +171,7 @@ export const AdminAnalista = () => {
             </p>
             <Pagination page={page} totalPages={totalPages} onPageChange={setPage} compacta etiqueta="Paginación (arriba)" />
           </div>
-          <div className="se-admin-table-wrap">
+          <div className="se-admin-table-wrap" {...ancla("tabla")}>
             <table className="se-admin-table">
               <thead>
                 <tr>

@@ -29,7 +29,7 @@ const contributorFormats = (t) => [
   },
 ];
 
-const ancla = (clave) => ({ [recorridoPropuesta.atributo]: clave });
+const { ancla } = recorridoPropuesta;
 
 /** El texto de un HTML del editor, para saber si de verdad se escribió algo. */
 const textoDe = (html) =>

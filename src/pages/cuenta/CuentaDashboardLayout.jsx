@@ -197,7 +197,7 @@ const DashboardShell = () => {
               end={Boolean(end)}
               className={navClass}
               onClick={handleCloseRail}
-              {...{ [recorridoCuenta.atributo]: guia }}
+              {...recorridoCuenta.ancla(guia)}
             >
               <span className="se-reader-dash__nav-ico" aria-hidden="true">
                 <Icon />
@@ -258,7 +258,7 @@ const DashboardShell = () => {
             onClick={recorridoCuenta.iniciar}
             aria-label={t("cuenta.guias.cuenta.boton")}
             title={t("cuenta.guias.cuenta.boton")}
-            {...{ [recorridoCuenta.atributo]: "ayuda" }}
+            {...recorridoCuenta.ancla("ayuda")}
           >
             <IconAyuda />
           </button>

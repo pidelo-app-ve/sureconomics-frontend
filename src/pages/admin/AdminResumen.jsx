@@ -45,7 +45,7 @@ const CANAL = {
   fallo: "falló",
 };
 const MOMENTO = { manana: "Mañana", tarde: "Tarde", noche: "Noche" };
-const ancla = (clave) => ({ [recorridoResumen.atributo]: clave });
+const { ancla } = recorridoResumen;
 const zona = { timeZone: "America/Caracas" };
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }) : "—");
 /** El chip de una edición: un borrador dice a qué hora sale solo o, si ya no va a salir, que no salió. */
@@ -347,6 +347,10 @@ export const AdminResumen = () => {
       title: "Rehacer esta edición",
       description: "Se arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan.",
       confirmLabel: "Rehacer",
+      // Al recargar la edición también se va lo que no se guardó (frase y foto incluidas).
+      warning: sucio
+        ? "Los cambios a las líneas no se recuperan, ni lo que no hayas guardado."
+        : "Los cambios a las líneas no se recuperan.",
     });
     if (ok) await hacer(() => adminRequest(`/admin/resumen/${actual.id}/rehacer`, { method: "POST" }), "Rehecho.", "No se pudo rehacer.");
   };

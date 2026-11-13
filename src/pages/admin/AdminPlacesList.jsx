@@ -13,6 +13,10 @@ import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoLugares } from "../../lib/guias/guiaLugares";
+
+const { ancla } = recorridoLugares;
 
 /**
  * The geography tree: Mundo, its continents, their regions, and the countries.
@@ -115,6 +119,7 @@ export const AdminPlacesList = () => {
             title: "Eliminar lugar",
             description: `¿Eliminar «${row.name}»? Solo se puede si no tiene países debajo ni piezas asociadas.`,
             confirmLabel: "Eliminar",
+            warning: "Se borra del todo. Si hiciera falta otra vez, habría que añadirlo de nuevo.",
             onConfirm: async () => {
                 await deleteAdminPlace(row.id);
                 await load();
@@ -224,9 +229,10 @@ export const AdminPlacesList = () => {
                   solo al salir de su casilla.
                 </>
               }
+              guia={recorridoLugares}
             />
 
-            <div className="se-admin-table-wrap">
+            <div className="se-admin-table-wrap" {...ancla("lista")}>
                 <table className="se-admin-table">
                     <thead>
                         <tr>
@@ -245,7 +251,7 @@ export const AdminPlacesList = () => {
             </div>
 
             {canCurate ? (
-                <form className="se-admin-inline-form" onSubmit={handleCreate}>
+                <form className="se-admin-inline-form" onSubmit={handleCreate} {...ancla("anadir")}>
                     <h2 className="se-heading-sub" style={{ margin: "2rem 0 0.75rem" }}>
                         Añadir un país
                     </h2>
@@ -309,6 +315,7 @@ export const AdminPlacesList = () => {
                 </form>
             ) : null}
 
+            <RecorridoVista recorrido={recorridoLugares} />
             <ConfirmDialog />
         </main>
     );

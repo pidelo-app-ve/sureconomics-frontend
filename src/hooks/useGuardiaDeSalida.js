@@ -25,7 +25,6 @@ export const useGuardiaDeSalida = (sinGuardar, confirm, { saltar, descripcion } 
             description: descripcion || "Hay cambios en esta página que todavía no se guardaron.",
             confirmLabel: "Salir sin guardar",
             cancelLabel: "Seguir editando",
-            warning: null,
         }).then((salir) => (salir ? blocker.proceed() : blocker.reset()));
     }, [blocker, confirm, descripcion]);
     useEffect(() => {

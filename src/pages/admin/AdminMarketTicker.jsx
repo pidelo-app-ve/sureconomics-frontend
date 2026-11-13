@@ -10,6 +10,8 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoCinta } from "../../lib/guias/guiaCinta";
 
 const DIRECCIONES = [
     { value: "up", label: "Subió" },
@@ -18,6 +20,8 @@ const DIRECCIONES = [
 ];
 
 const filaVacia = () => ({ label: "", value: "", direction: "flat" });
+
+const { ancla } = recorridoCinta;
 
 /**
  * The market strip that runs across the top of the site.
@@ -130,9 +134,11 @@ export const AdminMarketTicker = () => {
                   ) : null}
                 </>
               }
+              guia={recorridoCinta}
             />
+            <RecorridoVista recorrido={recorridoCinta} />
 
-            <div className="se-editor-group">
+            <div className="se-editor-group" {...ancla("sello")}>
                 <p className="se-editor-group__title">El sello</p>
                 <label className="se-form-field" htmlFor="ticker-caption">
                     <span className="se-form-label">Texto del sello</span>
@@ -160,7 +166,7 @@ export const AdminMarketTicker = () => {
                 </label>
             </div>
 
-            <div className="se-editor-group">
+            <div className="se-editor-group" {...ancla("cifras")}>
                 <p className="se-editor-group__title">Las cifras</p>
                 <div className="se-admin-table-wrap">
                     <table className="se-admin-table">
@@ -273,6 +279,7 @@ export const AdminMarketTicker = () => {
                         type="button"
                         className="se-btn"
                         onClick={handleSave}
+                        {...ancla("guardar")}
                         disabled={saveState.status === "loading"}
                     >
                         {saveState.status === "loading" ? "Guardando…" : "Guardar la cinta"}

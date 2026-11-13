@@ -50,9 +50,6 @@ export const useAdminConfirm = () => {
           description: options.description,
           confirmLabel: options.confirmLabel ?? "Eliminar",
           cancelLabel: options.cancelLabel ?? "Cancelar",
-          // `undefined` deja que el dialogo ponga su texto de siempre; `null` lo
-          // quita. La diferencia importa: quien ya explico que se pierde no quiere
-          // un aviso generico debajo contradiciendole.
           warning: options.warning,
           busyLabel: options.busyLabel,
           isBusy: false,

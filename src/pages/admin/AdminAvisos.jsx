@@ -61,7 +61,7 @@ const zona = { timeZone: "America/Caracas" };
 const hora = (iso) =>
   iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }).replace(/\s/g, "\u00a0") : "—";
 const medios = (n) => `${n} medio${n === 1 ? "" : "s"}`;
-const ancla = (clave) => ({ [recorridoAvisos.atributo]: clave });
+const { ancla } = recorridoAvisos;
 
 /** Lo que publicó cada medio sobre el hecho: tres a la vista y el resto al pulsar. */
 const Fuentes = ({ fuentes }) => {
@@ -403,9 +403,7 @@ export const AdminAvisos = () => {
 
   const alternar = async (dia) => {
     const encender = !dia.activos;
-    // `warning: null`: sin el «Esta acción es irreversible…» del diálogo, que aquí sería falso.
     const ok = await confirm({
-      warning: null,
       ...(encender
         ? {
             title: "Encender los avisos",

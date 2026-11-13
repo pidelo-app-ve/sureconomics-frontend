@@ -11,6 +11,8 @@ import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoPersonal } from "../../lib/guias/guiaPersonal";
 
 const ROLE_OPTIONS = [
   { value: "publicador", label: "Editor" },
@@ -24,6 +26,8 @@ const QUE_PUEDE = {
 };
 
 const emptyForm = { name: "", email: "", password: "", role: "publicador", telefono: "" };
+
+const { ancla } = recorridoPersonal;
 
 export const AdminStaffList = () => {
   const { role } = useAuth();
@@ -97,7 +101,7 @@ export const AdminStaffList = () => {
       title: "Cambiar el rol",
       description: `«${row.name}» pasa de ${nombre(row.role)} a ${nombre(newRole)}. ${QUE_PUEDE[newRole] ?? ""}`,
       confirmLabel: `Cambiar a ${nombre(newRole)}`,
-      warning: null,
+      busyLabel: "Cambiando…",
       onConfirm: async () => {
         setRoleBusyId(row.id);
         setRoleActionError("");
@@ -123,6 +127,7 @@ export const AdminStaffList = () => {
         ? `«${row.name}» podrá volver a entrar al panel con su contraseña.`
         : `«${row.name}» no podrá entrar al panel y su sesión abierta se cierra. Sus piezas siguen firmadas por esta cuenta. Se puede reactivar cuando quiera.`,
       confirmLabel: activar ? "Reactivar" : "Desactivar",
+      busyLabel: activar ? "Reactivando…" : "Desactivando…",
       onConfirm: async () => {
         setRoleActionError("");
         try {
@@ -139,6 +144,7 @@ export const AdminStaffList = () => {
     await confirm({
       title: "Eliminar cuenta",
       description: `¿Eliminar la cuenta de «${name}» de forma permanente?`,
+      warning: "Si solo quiere cortarle el acceso, desactívela.",
       confirmLabel: "Eliminar cuenta",
       onConfirm: async () => {
         setRoleActionError("");
@@ -157,6 +163,7 @@ export const AdminStaffList = () => {
     <main role="main">
       <CabeceraDePagina
         titulo="Personal"
+        guia={recorridoPersonal}
       />
 
       <form
@@ -164,6 +171,7 @@ export const AdminStaffList = () => {
         onSubmit={handleCreate}
         style={{ marginBottom: "2rem", maxWidth: 480 }}
         noValidate
+        {...ancla("crear")}
       >
         <h2 className="se-heading-section" style={{ fontSize: "1.15rem", margin: "0 0 0.5rem" }}>
           Crear cuenta
@@ -261,7 +269,7 @@ export const AdminStaffList = () => {
       ) : null}
 
       {state.status === "success" && state.items.length > 0 ? (
-        <div className="se-admin-table-wrap">
+        <div className="se-admin-table-wrap" {...ancla("lista")}>
           <table className="se-admin-table">
             <thead>
               <tr>
@@ -327,6 +335,7 @@ export const AdminStaffList = () => {
       ) : null}
 
       <ConfirmDialog />
+      <RecorridoVista recorrido={recorridoPersonal} />
     </main>
   );
 };

@@ -21,8 +21,10 @@ const leer = (data) => {
  * guardar, en otro grupo del menú. Va donde se usa, y se guarda al pulsarlo, como el
  * «Al aire» de Publicidad (mismo estilo). Mientras no se sabe cómo está, no se pinta:
  * un interruptor apagado por defecto diría algo que puede no ser cierto.
+ *
+ * `resto`: atributos para el interruptor, como el anclaje de la guía de la página.
  */
-export const AjusteDePropuestas = () => {
+export const AjusteDePropuestas = ({ ...resto }) => {
   const [abierto, setAbierto] = useState(null);
   const [ocupado, setOcupado] = useState(false);
   const { toastSuccess, toastError } = useAdminToast();
@@ -58,6 +60,7 @@ export const AjusteDePropuestas = () => {
 
   return (
     <button
+      {...resto}
       type="button"
       role="switch"
       aria-checked={abierto}

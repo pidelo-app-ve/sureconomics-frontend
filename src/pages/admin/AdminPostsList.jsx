@@ -14,7 +14,7 @@ import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoContenido } from "../../lib/guias/guiaContenido";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
-const ancla = (clave) => ({ [recorridoContenido.atributo]: clave });
+const { ancla } = recorridoContenido;
 
 /** La pieza en el sitio, para abrirla desde la lista. */
 const enElSitio = (row) => rutaDePieza({ formatoApi: row?.format, slug: row?.slug });
@@ -115,12 +115,16 @@ export const AdminPostsList = () => {
         }
     };
 
-    const handleDelete = async (id, title) => {
+    const handleDelete = async (id, title, status) => {
         setActionFeedback({ status: "idle", message: "", error: null });
         await confirm({
             title: "Eliminar pieza",
             description: `¿Eliminar «${title}» (ID ${id}) de forma permanente?`,
             confirmLabel: "Eliminar",
+            // Los comentarios caen con la pieza (CASCADE); despublicar está en el editor.
+            warning:
+                status === "published" &&
+                "Con ella se borran sus comentarios. Si solo quiere quitarla de la web, despublíquela.",
             onConfirm: async () => {
                 await deleteAdminPost(id);
                 await load();
@@ -413,7 +417,7 @@ export const AdminPostsList = () => {
                                                         type="button"
                                                         className="se-admin-tarjeta__eliminar"
                                                         disabled={d.busy}
-                                                        onClick={() => handleDelete(d.id, d.title)}
+                                                        onClick={() => handleDelete(d.id, d.title, d.status)}
                                                         aria-label={`Eliminar «${d.title}»`}
                                                     >
                                                         Eliminar
@@ -544,7 +548,7 @@ export const AdminPostsList = () => {
                                                             type="button"
                                                             className="se-admin-table__eliminar"
                                                             disabled={busy}
-                                                            onClick={() => handleDelete(id, title)}
+                                                            onClick={() => handleDelete(id, title, status)}
                                                             aria-label={`Eliminar «${title}»`}
                                                         >
                                                             Eliminar

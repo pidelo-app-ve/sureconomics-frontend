@@ -5,9 +5,13 @@ import { dispatchAdminAuthSync } from "../../lib/api";
 import { persistAuth } from "../../lib/authStorage";
 import { applyPageMeta } from "../../lib/seo";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMiPerfil } from "../../lib/guias/guiaMiPerfil";
 
 /** `584121234567` → `+584121234567`, como se escribe un teléfono. */
 const conMas = (telefono) => (telefono ? `+${telefono}` : "");
+
+const { ancla } = recorridoMiPerfil;
 
 const ROLE_LABELS = {
   escritor: "Escritor",
@@ -106,6 +110,7 @@ export const AdminMiPerfil = () => {
             Rol: {ROLE_LABELS[state.data?.role] ?? state.data?.role ?? "—"}
           </>
         }
+        guia={recorridoMiPerfil}
       />
 
       <form
@@ -113,6 +118,7 @@ export const AdminMiPerfil = () => {
         onSubmit={handleProfileSubmit}
         style={{ marginBottom: "2.5rem", maxWidth: 480 }}
         noValidate
+        {...ancla("datos")}
       >
         <h2 className="se-heading-section" style={{ fontSize: "1.15rem", margin: "0 0 0.5rem" }}>
           Datos de la cuenta
@@ -175,7 +181,13 @@ export const AdminMiPerfil = () => {
         </button>
       </form>
 
-      <form className="se-contact-form" onSubmit={handlePasswordSubmit} style={{ maxWidth: 480 }} noValidate>
+      <form
+        className="se-contact-form"
+        onSubmit={handlePasswordSubmit}
+        style={{ maxWidth: 480 }}
+        noValidate
+        {...ancla("contrasena")}
+      >
         <h2 className="se-heading-section" style={{ fontSize: "1.15rem", margin: "0 0 0.5rem" }}>
           Cambiar contraseña
         </h2>
@@ -235,6 +247,8 @@ export const AdminMiPerfil = () => {
           {passwordState.status === "loading" ? "Cambiando…" : "Cambiar contraseña"}
         </button>
       </form>
+
+      <RecorridoVista recorrido={recorridoMiPerfil} />
     </main>
   );
 };

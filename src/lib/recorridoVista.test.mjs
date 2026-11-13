@@ -55,6 +55,8 @@ a.iniciar();
 check("tras soltar ya no avisa", avisos === 4, avisos);
 check("el paso sobrevive en el almacén", almacen.get("sureconomics_recorrido_prueba-a") === "0");
 check("su atributo de anclaje", a.atributo === "data-tour-prueba-a");
+check("ancla(clave) marca el elemento", JSON.stringify(a.ancla("lista")) === '{"data-tour-prueba-a":"lista"}');
+check("ancla sin clave no pone nada", [undefined, null, false, ""].every((v) => Object.keys(a.ancla(v)).length === 0));
 a.irAPaso(null);
 check("cerrar borra el paso", !almacen.has("sureconomics_recorrido_prueba-a"));
 

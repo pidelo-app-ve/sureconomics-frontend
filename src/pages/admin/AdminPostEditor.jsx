@@ -308,7 +308,7 @@ const comparable = (f) =>
 /** Lo mismo que `comparable`, como objeto: el borrador local compara con esto. */
 const normalizarPieza = (f) => (f ? JSON.parse(comparable(f)) : f);
 
-const ancla = (clave) => ({ [recorridoEditor.atributo]: clave });
+const { ancla } = recorridoEditor;
 
 /** «14:32», para decir cuándo se guardó la copia en este equipo. */
 const horaCorta = (marca) =>
@@ -602,7 +602,6 @@ export const AdminPostEditor = () => {
                 description: "Esto reemplaza lo que hay escrito en inglés por una traducción nueva.",
                 confirmLabel: "Reemplazar",
                 cancelLabel: "Dejarla como está",
-                warning: null,
             });
             if (!seguir) return;
         }

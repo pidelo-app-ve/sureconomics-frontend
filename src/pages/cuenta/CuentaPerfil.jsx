@@ -10,7 +10,7 @@ import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoV
 import { recorridoPerfil } from "../../lib/guias/guiaPerfil";
 import "../../styles/cuenta.css";
 
-const ancla = (clave) => ({ [recorridoPerfil.atributo]: clave });
+const { ancla } = recorridoPerfil;
 
 /**
  * Mi perfil: editable, con retrato.

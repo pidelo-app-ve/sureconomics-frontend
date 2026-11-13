@@ -7,6 +7,10 @@ import { adminPick } from "../../lib/adminPick";
 import { puedeEnviarPropuestas } from "../../lib/adminUserDetailDisplay";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoUsuarios } from "../../lib/guias/guiaUsuarios";
+
+const { ancla } = recorridoUsuarios;
 
 const flagLabel = (row) => {
   const v = puedeEnviarPropuestas(row);
@@ -47,6 +51,7 @@ export const AdminUsersList = () => {
     <main role="main">
       <CabeceraDePagina
         titulo="Usuarios"
+        guia={recorridoUsuarios}
       />
 
       {state.status === "loading" ? <LoadingState title="Cargando usuarios…" /> : null}
@@ -63,7 +68,7 @@ export const AdminUsersList = () => {
           <p className="se-text-body" style={{ marginBottom: "1rem" }}>
             Página {meta?.page ?? page} de {totalPages} — {meta?.total ?? state.items.length} en total
           </p>
-          <div className="se-admin-table-wrap">
+          <div className="se-admin-table-wrap" {...ancla("lista")}>
             <table className="se-admin-table">
               <thead>
                 <tr>
@@ -101,6 +106,8 @@ export const AdminUsersList = () => {
           <Pagination page={meta?.page ?? page} totalPages={totalPages} onPageChange={setPage} />
         </>
       ) : null}
+
+      <RecorridoVista recorrido={recorridoUsuarios} />
     </main>
   );
 };

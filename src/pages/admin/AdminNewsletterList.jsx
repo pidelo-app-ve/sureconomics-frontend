@@ -8,6 +8,10 @@ import { applyPageMeta } from "../../lib/seo";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { esEditor } from "../../lib/menuDelPanel";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoSuscriptores } from "../../lib/guias/guiaSuscriptores";
+
+const { ancla } = recorridoSuscriptores;
 
 const FECHA = new Intl.DateTimeFormat("es-VE", {
   day: "2-digit", month: "short", year: "numeric",
@@ -23,6 +27,7 @@ const ORIGEN = {
   home: "Portada",
   footer: "Pie de página",
   instagram: "Instagram",
+  invitacion: "Invitación",
   admin: "Panel",
   otro: "—",
 };
@@ -104,7 +109,7 @@ export const AdminNewsletterList = () => {
             {/* La cabecera ya reparte con `justify-content: space-between`, así que este
                 grupo se queda a la derecha sin CSS nuevo. */}
             <div className="se-boletin__acciones">
-              <label className="se-form-field" htmlFor="boletin-estado">
+              <label className="se-form-field" htmlFor="boletin-estado" {...ancla("filtro")}>
                 <span className="se-sr-only">Estado</span>
                 <select
                   id="boletin-estado"
@@ -127,6 +132,7 @@ export const AdminNewsletterList = () => {
                   className="se-btn"
                   onClick={descargar}
                   disabled={csv.status === "loading"}
+                  {...ancla("csv")}
                 >
                   {csv.status === "loading" ? "Preparando…" : "Descargar CSV"}
                 </button>
@@ -134,7 +140,9 @@ export const AdminNewsletterList = () => {
             </div>
           </>
         }
+        guia={recorridoSuscriptores}
       />
+      <RecorridoVista recorrido={recorridoSuscriptores} />
 
       {csv.status === "error" ? (
         <p className="se-admin-form-feedback" role="alert">{csv.error}</p>
@@ -162,7 +170,7 @@ export const AdminNewsletterList = () => {
 
       {state.status === "success" && state.items.length > 0 ? (
         <>
-          <div className="se-admin-table-wrap">
+          <div className="se-admin-table-wrap" {...ancla("tabla")}>
             <table className="se-admin-table">
               <thead>
                 <tr>

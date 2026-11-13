@@ -24,7 +24,7 @@ import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoArchivos } from "../../lib/guias/guiaArchivos";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 
-const ancla = (clave) => ({ [recorridoArchivos.atributo]: clave });
+const { ancla } = recorridoArchivos;
 
 const KINDS = [
     { value: "", label: "Todos" },

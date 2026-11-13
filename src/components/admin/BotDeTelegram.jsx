@@ -94,7 +94,6 @@ export const BotDeTelegram = ({ anclaje, anclajeMarketing }) => {
 
   const quitar = async (persona) => {
     const ok = await confirm({
-      warning: null,
       title: `Quitar a ${persona.nombre}`,
       description:
         "Deja de recibir las noticias para Instagram. Si vuelve a la lista, tendrá que vincularse otra vez desde el bot.",

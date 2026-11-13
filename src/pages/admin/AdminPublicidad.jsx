@@ -468,7 +468,7 @@ FilaDePieza.propTypes = {
 
 /* ─── Campañas ───────────────────────────────────────────────────────────── */
 
-const ancla = (clave) => ({ [recorridoPublicidad.atributo]: clave });
+const { ancla } = recorridoPublicidad;
 
 /**
  * «Al aire»: encender o pausar una campaña con un clic, sin abrir su ficha. Antes el
@@ -821,12 +821,11 @@ const TarjetaDeCampana = ({
                   title: `¿Borrar la campaña «${campana.nombre}»?`,
                   description:
                     n > 0
-                      ? `Se van con ella sus ${n} ${n === 1 ? "pieza" : "piezas"} y las cifras de cada una.`
+                      ? `Se van con ella sus ${n} ${n === 1 ? "pieza" : "piezas"}.`
                       : "No tiene piezas, así que no se pierde ningún arte.",
                   confirmLabel: "Borrar la campaña",
                   busyLabel: "Borrando…",
-                  warning:
-                    "Las impresiones y los clics ya contados se pierden, y eso no se puede deshacer.",
+                  warning: "No se puede deshacer.",
                 });
                 if (!vale) return;
                 correr(
@@ -866,11 +865,9 @@ const TarjetaDeCampana = ({
                     const vale = await preguntar({
                       title: `¿Quitar ${nombreDeFormato(pieza.formato, ajustes?.formatos).toLowerCase()}?`,
                       description:
-                        "Se borra la pieza y sus cifras. El arte se queda en Archivos, así que se puede volver a usar.",
+                        "Se borra la pieza. El arte se queda en Archivos, así que se puede volver a usar.",
                       confirmLabel: "Quitar la pieza",
                       busyLabel: "Quitando…",
-                      // La descripcion ya dice exactamente que se pierde y que no.
-                      warning: null,
                     });
                     if (!vale) return;
                     correr(
@@ -1198,11 +1195,10 @@ const TarjetaDeAnunciante = ({
                 const n = anunciante.campanas?.length ?? 0;
                 const vale = await preguntar({
                   title: `¿Borrar «${anunciante.nombre}»?`,
-                  description: `Se van con él sus ${n} ${n === 1 ? "campaña" : "campañas"}, todas sus piezas y el histórico de impresiones y clics. Si sólo quiere que deje de salir, use «Desactivar».`,
+                  description: `Se van con él sus ${n} ${n === 1 ? "campaña" : "campañas"} y todas sus piezas. Si sólo quiere que deje de salir, use «Desactivar».`,
                   confirmLabel: "Borrar el anunciante",
                   busyLabel: "Borrando…",
-                  warning:
-                    "Las cifras históricas se pierden, y eso no se puede deshacer.",
+                  warning: "No se puede deshacer.",
                 });
                 if (!vale) return;
                 correr(
@@ -1210,7 +1206,7 @@ const TarjetaDeAnunciante = ({
                     await borrarAnunciante(anunciante.id);
                     return listar();
                   },
-                  `«${anunciante.nombre}» borrado con sus campañas y sus cifras`,
+                  `«${anunciante.nombre}» borrado con sus campañas`,
                 ).then(onCambio);
               }}
             >
@@ -1484,7 +1480,6 @@ export const AdminPublicidad = () => {
                         "Es lo que se hace el día de una noticia delicada. Se vuelve a encender con la misma casilla.",
                       confirmLabel: "Apagar la publicidad",
                       cancelLabel: "Dejarla encendida",
-                      warning: null,
                     });
                     if (!apagar) return;
                   }

@@ -6,6 +6,10 @@ import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoTemas } from "../../lib/guias/guiaTemas";
+
+const { ancla } = recorridoTemas;
 
 /**
  * The fourteen topics: rename, reorder, retire.
@@ -97,9 +101,10 @@ export const AdminTopicsList = () => {
                   hay opción de borrar. Cada nombre se guarda solo al salir de su casilla.
                 </>
               }
+              guia={recorridoTemas}
             />
 
-            <div className="se-admin-table-wrap">
+            <div className="se-admin-table-wrap" {...ancla("lista")}>
                 <table className="se-admin-table">
                     <thead>
                         <tr>
@@ -226,6 +231,8 @@ export const AdminTopicsList = () => {
                     </tbody>
                 </table>
             </div>
+
+            <RecorridoVista recorrido={recorridoTemas} />
         </main>
     );
 };

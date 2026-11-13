@@ -6,9 +6,11 @@ import PropTypes from "prop-types";
  * Estaba al fondo: en «En redes» había que bajar cuatro pantallas para encontrarlo, y
  * mientras tanto nada decía que lo cambiado seguía sin guardar. Con cambios, la barra
  * se pega al borde de abajo y lo dice; sin cambios, se queda quieta en su sitio.
+ *
+ * `resto`: atributos para la barra, como el anclaje de la guía de la página.
  */
-export const BarraDeGuardar = ({ hayCambios, guardando, bloqueado, onGuardar, etiqueta, children }) => (
-  <div className={`se-barra-guardar${hayCambios ? " se-barra-guardar--pendiente" : ""}`}>
+export const BarraDeGuardar = ({ hayCambios, guardando, bloqueado, onGuardar, etiqueta, children, ...resto }) => (
+  <div {...resto} className={`se-barra-guardar${hayCambios ? " se-barra-guardar--pendiente" : ""}`}>
     <p className="se-barra-guardar__estado" role="status">
       {hayCambios ? "Hay cambios sin guardar." : "Todo guardado."}
     </p>

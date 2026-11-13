@@ -33,13 +33,14 @@ const dinero = (centavos, moneda) => {
   }
 };
 
-export const CifrasDeEducacion = ({ resumen }) => {
+/** `resto`: atributos para la sección, como el anclaje de la guía de la página. */
+export const CifrasDeEducacion = ({ resumen, ...resto }) => {
   const conMovimiento = (resumen.por_modulo ?? []).filter(
     (m) => m.ventas > 0 || m.aperturas_de_entrada > 0,
   );
 
   return (
-    <section className="se-edunum" aria-label="Cifras de Educación">
+    <section {...resto} className="se-edunum" aria-label="Cifras de Educación">
       <div className="se-edunum__cifras">
         <div className="se-edunum__cifra">
           <span className="se-edunum__n">

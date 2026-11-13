@@ -65,7 +65,7 @@ const MarcaDeVideo = ({ pieza }) =>
 
 MarcaDeVideo.propTypes = { pieza: PropTypes.object.isRequired };
 
-export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
+export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad }) => {
   const [fallo, setFallo] = useState(false);
 
   // El sello va aquí y no en cada rejilla porque cinco de las seis pintan su imagen
@@ -87,7 +87,13 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes }) => {
           srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
           sizes={sizes}
           alt=""
-          loading="lazy"
+          // Con `prioridad`, ya y antes que lo demás: es la foto que abre la portada, lo
+          // primero que se ve y lo que Google mide como LCP. Con `lazy` salía con
+          // prioridad baja. Las demás, cuando se acerquen.
+          loading={prioridad ? "eager" : "lazy"}
+          // En minúsculas: React 18.2 no conoce `fetchPriority` (ver `PieceBody.jsx`).
+          // eslint-disable-next-line react/no-unknown-property
+          fetchpriority={prioridad ? "high" : undefined}
           decoding="async"
           onError={() => setFallo(true)}
         />
@@ -119,6 +125,8 @@ CardMedia.propTypes = {
   etiqueta: PropTypes.string,
   /** El `sizes` de la imagen: el de una tarjeta de rejilla salvo que quien llama ocupe otra cosa. */
   sizes: PropTypes.string,
+  /** La foto que abre la página: se pide ya y con prioridad alta. Solo una por página. */
+  prioridad: PropTypes.bool,
 };
 
-CardMedia.defaultProps = { ancho: 800, etiqueta: null, sizes: SIZES };
+CardMedia.defaultProps = { ancho: 800, etiqueta: null, sizes: SIZES, prioridad: false };

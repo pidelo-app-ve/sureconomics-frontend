@@ -258,8 +258,14 @@ export const Pieza = () => {
 
   // `lang` en las dependencias: `piezaFromApi` lee el idioma del motor, y es lo que hace
   // que la pieza cambie de idioma sin volver a pedirla.
+  //
+  // Y solo la de esta dirección: al tocar otra pieza, el primer render ya trae el slug
+  // nuevo y todavía la anterior (el efecto de arriba la cambia justo después). Pintarla
+  // llevaba a la comprobación de la dirección canónica de abajo, que devolvía al lector a
+  // la pieza de la que venía (pasaba con «Siguiente lectura»), y pedía sus anuncios con
+  // el contexto equivocado. Ese render se pinta como cargando.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const pieza = useMemo(() => (state.fila ? piezaFromApi(state.fila) : null), [state.fila, lang]);
+  const pieza = useMemo(() => (state.fila?.slug === slug ? piezaFromApi(state.fila) : null), [state.fila, slug, lang]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const relacionadas = useMemo(() => piezasFromApi(relacionadasFilas), [relacionadasFilas, lang]);
   const cargando = useDelayedFlag(state.status === "loading");
@@ -334,11 +340,13 @@ export const Pieza = () => {
     listo: Boolean(pieza) && !pieza.sinPublicidad,
   });
 
-  if (state.status === "loading") {
+  if (state.status === "loading" || (state.fila && !pieza)) {
     // Nothing at all for the first fraction of a second: a piece that loads fast
-    // should just appear, without a card flashing in front of it.
+    // should just appear, without a card flashing in front of it. Pero con una
+    // pantalla de alto desde el primer momento: sin ella el pie quedaba a la vista y
+    // la pieza, al llegar, lo empujaba fuera de golpe.
     return (
-      <main className="se-blog se-articles" role="main">
+      <main className="se-blog se-articles se-cargando-pantalla" role="main">
         <section className="se-section">
           <div className="se-container">{cargando ? <LoadingState title={t("comun.cargando")} /> : null}</div>
         </section>
@@ -436,9 +444,14 @@ export const Pieza = () => {
             {/* El banner, debajo de la foto (o del titular, si la pieza no lleva foto) y
                 antes de la firma: en el teléfono era lo primero que faltaba, con el único
                 anuncio al final del todo. Solo se pide donde la foto va debajo del
-                titular (ver arriba). */}
+                titular (ver arriba). Guarda su sitio mientras llegan los anuncios, salvo
+                en una pieza sin publicidad, donde no se piden. */}
             {fotoDebajo ? (
-              <EspacioPublicitario espacio={ESPACIOS.ARTICULO_APERTURA} className="se-piece__apertura-ad" />
+              <EspacioPublicitario
+                espacio={ESPACIOS.ARTICULO_APERTURA}
+                className="se-piece__apertura-ad"
+                reservar={!pieza.sinPublicidad}
+              />
             ) : null}
 
             <div className="se-piece__meta">

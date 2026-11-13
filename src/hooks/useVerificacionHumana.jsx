@@ -24,7 +24,8 @@ import { userPublicRequest } from "../lib/userApi";
  * - **El script de Cloudflare se carga al tocar el formulario** (`activar`, en el
  *   `onFocus` del `<form>`), no al pintar la página: el boletín está en el pie de todas
  *   las vistas, y cargar un script de terceros en cada visita para los pocos que se
- *   suscriben sería pagar el coste en todas.
+ *   suscriben sería pagar el coste en todas. Donde el foco entra solo (la invitación al
+ *   boletín), va en el `onInput`: con el foco, el control salía sin que nadie tocara nada.
  * - **Casi siempre es invisible** (`appearance: "interaction-only"`): el control solo
  *   aparece si Cloudflare necesita que la persona marque algo.
  * - **Sin claves en el servidor no hace nada.** La configuración sale de

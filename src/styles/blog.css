@@ -14427,6 +14427,15 @@ html {
     padding-left: 0;
     padding-right: 0;
   }
+
+  /* A sangre la tira mide justo la pantalla, pero la que se va al rotar se despega en
+     perspectiva (`se-ad-despegar`) y su borde de abajo crece unos píxeles a cada lado:
+     el documento pasaba de 390 a 402 y el teléfono reencuadraba la página. `clip` y no
+     `hidden`: no crea caja de desplazamiento, así que lo pegajoso sigue pegando y los
+     márgenes no cambian. Lo que corta ya caía fuera de la pantalla. */
+  .se-publico {
+    overflow-x: clip;
+  }
 }
 
 /* La tarjeta bajo las monedas de la primera plana. Llena el blanco que queda hasta el

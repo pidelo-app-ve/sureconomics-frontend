@@ -40,6 +40,7 @@ import { ESPACIOS, getEspacios } from "../../services/publicidadService";
 const PublicidadContexto = createContext({
   activa: true,
   huecos: {},
+  pendiente: false,
   registrar: () => {},
 });
 
@@ -52,7 +53,9 @@ const PublicidadContexto = createContext({
 //: impresión se factura. Un anuncio que nadie ve no se le puede cobrar a nadie.
 export const ESPACIOS_DE_SITIO = [ESPACIOS.BARRA_INFERIOR];
 
-const VACIO = { activa: true, huecos: {} };
+//: `ruta`: la de la página a la que ya se le contestó (con anuncios, sin ellos o con un
+//: fallo). Mientras no sea la de ahora, sus anuncios están en camino.
+const VACIO = { activa: true, huecos: {}, ruta: null };
 
 export const ProveedorDePublicidad = ({ children }) => {
   const { pathname } = useLocation();
@@ -95,10 +98,13 @@ export const ProveedorDePublicidad = ({ children }) => {
     let vivo = true;
     getEspacios(pedido.espacios, pedido.contexto)
       .then((r) => {
-        if (vivo) setEstado({ activa: r.activa, huecos: r.espacios });
+        if (vivo) setEstado({ activa: r.activa, huecos: r.espacios, ruta: pedido.ruta });
       })
-      // Un fallo aquí no puede romper la lectura: sin anuncios se lee igual de bien.
-      .catch(() => {});
+      // Un fallo aquí no puede romper la lectura: sin anuncios se lee igual de bien. Solo
+      // se anota que ya hubo respuesta, para que un hueco que guardaba su sitio lo suelte.
+      .catch(() => {
+        if (vivo) setEstado((e) => ({ ...e, ruta: pedido.ruta }));
+      });
 
     return () => {
       vivo = false;
@@ -106,8 +112,8 @@ export const ProveedorDePublicidad = ({ children }) => {
   }, [pedido, pathname]);
 
   const valor = useMemo(
-    () => ({ activa: estado.activa, huecos: estado.huecos, registrar }),
-    [estado, registrar],
+    () => ({ activa: estado.activa, huecos: estado.huecos, pendiente: estado.ruta !== pathname, registrar }),
+    [estado, pathname, registrar],
   );
 
   return <PublicidadContexto.Provider value={valor}>{children}</PublicidadContexto.Provider>;
@@ -167,3 +173,10 @@ export const useCiclo = (espacio) => {
  * que decide si dibujar su sección, y la barra fija, que no rota.
  */
 export const useHueco = (espacio) => useCiclo(espacio)[0] ?? null;
+
+/**
+ * Si los anuncios de esta página todavía no han llegado. Ojo: también vale `true` en una
+ * vista que no declara huecos, así que solo lo pregunta un hueco que sabe que su vista
+ * los pide (ver `reservar` en `EspacioPublicitario`).
+ */
+export const useAnunciosPendientes = () => useContext(PublicidadContexto).pendiente;

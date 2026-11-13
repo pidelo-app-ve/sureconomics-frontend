@@ -15,14 +15,15 @@ import { enlaceWeb } from "../../lib/enlaces";
  *
  * The list is rendered twice so the marquee can loop without a visible seam.
  *
- * *Por qué recuerda si hubo cinta.* Las cifras llegan por red, así que en la
- * primera pintura no están: medido, aparecían a 2,3 s y empujaban la cabecera 33 px
+ * *Por qué guarda el hueco mientras carga.* Las cifras llegan por red, así que en la
+ * primera pintura no están: medido, aparecían a 2,3 s y empujaban la página 34 px
  * hacia abajo, justo cuando el lector va a tocar el menú.
  *
- * Reservar el hueco siempre lo habría empeorado: hoy la cinta está vacía en
- * producción, así que se vería aparecer una banda y colapsarse. Así que se recuerda
- * en la sesión si la última carga trajo cifras. La primera visita se comporta como
- * ahora; a partir de ahí el hueco está desde el primer instante y nada se mueve.
+ * Se guarda también en la primera visita, que es la de casi todos los que llegan de un
+ * buscador: la cinta casi siempre trae cifras (el servidor solo calla las de más de dos
+ * días hábiles). Lo que se recuerda en la sesión es lo contrario, que la última carga
+ * vino **sin** cifras: entonces el hueco va como cinta del mundo (`--solo-mundo`), que
+ * en escritorio ocupa lo mismo y en el teléfono no se pinta, y tampoco ahí se mueve nada.
  */
 const RECUERDO = "sureconomics_cinta_con_datos";
 /** El ultimo juego de cifras que llego bien, para no perder la banda por un fallo
@@ -34,11 +35,11 @@ const ULTIMA = "sureconomics_cinta_ultima";
 const CADUCA_MS = 12 * 60 * 60 * 1000;
 const INTENTOS = [0, 600, 1800];
 
-const huboCinta = () => {
+const vinoSinCifras = () => {
   try {
-    return sessionStorage.getItem(RECUERDO) === "1";
+    return sessionStorage.getItem(RECUERDO) === "0";
   } catch {
-    // Navegación privada o almacenamiento bloqueado: sin recuerdo, y sin reservar.
+    // Navegación privada o almacenamiento bloqueado: sin recuerdo, como en la primera visita.
     return false;
   }
 };
@@ -334,10 +335,12 @@ export const MarketTicker = () => {
   // vive por su cuenta, así que si el BCV se calla -- porque el dato es viejo, que es
   // la regla -- el lector sigue viendo el Brent y el oro en vez de un hueco.
   //
-  // Mientras carga se guarda el sitio sólo si la última vez hubo cifras: reservarlo
-  // siempre haría aparecer y colapsar una banda en la primera visita.
-  if (!hayCifras && cargando && huboCinta()) {
-    return <div className="se-ticker se-ticker--hueco" aria-hidden="true" />;
+  // Mientras carga se guarda el sitio (ver arriba): con la forma de la cinta sin cifras
+  // si la última vez vino así.
+  if (!hayCifras && cargando) {
+    return (
+      <div className={`se-ticker se-ticker--hueco${vinoSinCifras() ? " se-ticker--solo-mundo" : ""}`} aria-hidden="true" />
+    );
   }
 
   const flecha = (direccion) => (direccion === "up" ? "▲" : direccion === "down" ? "▼" : "▬");

@@ -339,8 +339,13 @@ export const InvitacionAlBoletin = () => {
               {t("boletin.invitacion.texto")}
             </p>
 
+            {/* La verificación arranca al escribir (`onInput`: teclear, pegar o el
+                autocompletado) y no con el foco, como en los otros formularios: aquí el
+                foco entra solo al abrirse, y Cloudflare, si pedía marcar la casilla, la
+                pintaba sin que nadie tocara nada y la caja crecía y se recentraba. Quien
+                envía sin haber escrito la arranca igual al enviar (`pedirToken`). */}
             <form
-              onFocus={humano.activar}
+              onInput={humano.activar}
               className="se-invitacion__form"
               onSubmit={enviar}
               aria-busy={enviando}

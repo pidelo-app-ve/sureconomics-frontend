@@ -7,6 +7,11 @@
     <!-- La letra del sitio, servida por nosotros (ver src/styles/fuentes.css). Se precarga
          la que usa casi todo el texto para que no haya un salto al llegar. -->
     <link rel="preload" href="/fuentes/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Los datos de cada página salen de la API en Render: la conexión (DNS, TCP, TLS) se
+         abre mientras baja el JavaScript, y no después. `crossorigin` porque la página la
+         llama con fetch en modo CORS y sin cookies; sin él el navegador abre otra conexión
+         que luego no usa. Las fotos no van por ahí: se piden a /media de este dominio. -->
+    <link rel="preconnect" href="https://sureconomics-backend.onrender.com" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <!-- Quién publica: la ficha del medio para Google (logo, nombre, redes). Va en todas

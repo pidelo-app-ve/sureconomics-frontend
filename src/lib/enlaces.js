@@ -5,6 +5,10 @@
  * también pinta lo guardado antes de esa regla y lo que escriba el panel en una vista
  * previa sin guardar. Un `href` o un `src` con `javascript:` es código corriendo en
  * nuestra página con la sesión de quien la mire; aquí se queda en nada.
+ *
+ * Sin importaciones, y así tiene que quedarse: también lo carga `api/pieza.js`, que
+ * corre en Node sin Vite. Una importación aquí (y más una sin `.js`) tumbaría esa
+ * función y con ella todas las páginas de pieza; `npm test` lo nota.
  */
 
 const ESQUEMAS = new Set(["http:", "https:"]);

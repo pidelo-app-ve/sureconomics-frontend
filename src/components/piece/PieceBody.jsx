@@ -7,12 +7,10 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { fetchPieceDocument } from "../../services/documentService";
 import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";
-import { estiloDeFoto, imagenAncho, imagenSrcSet } from "../../lib/pieza";
+import { estiloDeFoto } from "../../lib/pieza";
+import { fotoDePortada } from "../../lib/fotoDePieza";
 import { enlaceWeb, esDeDominio } from "../../lib/enlaces";
 import { esShort, idDeYoutube } from "../../lib/youtube";
-
-/** Las mismas tallas que las tarjetas: las que genera el backend al subir. */
-const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
 
 /**
  * Body copy, as the writer formatted it.
@@ -374,10 +372,11 @@ export const Media = ({ pieza, conMarcador = false }) => {
       <figure className="se-piece__media">
         <img
           className="se-piece__img"
-          src={imagenAncho(pieza.imagenUrl, 1400)}
+          // `src`, `srcSet`, `sizes`, `width` y `height`: los mismos que pone `api/pieza.js`
+          // en el HTML previo, para que el navegador reutilice la foto que ya bajó y
+          // reserve su hueco antes de que llegue (ver `fotoDePortada`).
+          {...fotoDePortada(pieza.imagenUrl, pieza.imagenAnchoOriginal, pieza.imagenAltoOriginal)}
           style={estiloDeFoto(pieza)}
-          srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS_DE_PORTADA, pieza.imagenAnchoOriginal) ?? undefined}
-          sizes="(max-width: 960px) 100vw, 1100px"
           alt={pieza.titulo}
           // La foto de arriba es lo primero que se ve de la pieza: pedirla la primera, no
           // dejarla para después como a las de más abajo. Con `lazy` el navegador la

@@ -20,6 +20,7 @@ import handler, {
   inyectar,
   tituloParaBuscadores,
 } from "./pieza.js";
+import { fotoDePortada } from "../src/lib/fotoDePieza.js";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -89,7 +90,9 @@ await conFetch(fetchNormal(PIEZA), async () => {
     (h.match(/og:description" content="([^"]*)"/) || [])[1]?.endsWith("…"));
   check("og:image a 1200x630 y en jpg fijo, no f_auto",
     h.includes("f_jpg,q_auto,c_fill,w_1200,h_630/v1787613820/sureconomics/foto.jpg")
-    && !h.includes("f_auto"));
+    // Ninguna etiqueta: la foto del HTML previo sí lleva `f_auto`, porque esa la pide
+    // un navegador, que es quien elige el formato.
+    && !/<meta [^>]*f_auto/.test(h));
   check("secure_url y type declarados",
     h.includes('og:image:secure_url') && h.includes('content="image/jpeg"'));
   check("tarjeta grande cuando hay foto", h.includes('name="twitter:card" content="summary_large_image"'));
@@ -505,6 +508,85 @@ await conFetch(async (url) => {
   check("al centro es la de siempre", ipc(base, "50,50")?.url?.endsWith("-og.jpg"));
   check("fuera de los pasos de 5 se ignora", ipc(base, "33,70")?.url?.endsWith("-og.jpg"));
 }
+
+// —— La foto de cabecera del HTML previo (13-nov-2026) ——
+//
+// La misma `<img>` que pinta la página (`fotoDePortada`), en la cabecera y no después de
+// la firma. Antes era la original (un PNG de 1,9 MB) sin medidas: el navegador bajaba un
+// archivo que React no usaba, React pintaba otra foto más tarde -- y Google medía esa
+// (LCP) --, y su hueco medía cero hasta que llegaba, así que empujaba el texto (CLS).
+const raizDe = (h) => (h.match(/<div id="root">([\s\S]*?)<\/div><script/) || [])[1] || "";
+const imgDe = (h) => (raizDe(h).match(/<img [^>]*>/) || [])[0] || "";
+const pedir = async (pieza, seccion = "articulos") => {
+  const res = respuestaFalsa();
+  await conFetch(fetchNormal(pieza), () => handler({ query: { seccion, slug: "x" } }, res));
+  return res.body;
+};
+const EN_R2 = "/media/image/2026/11/recurso-33285c7f7d61.png";
+const CON_FOTO = { ...CON_CUERPO, image_asset: { url: EN_R2, width: 1733, height: 907 }, imagen_foco: "60,10" };
+{
+  const h = await pedir(CON_FOTO);
+  const img = imgDe(h);
+  const igual = fotoDePortada(EN_R2, 1733, 907);
+  check("foto previa: la clase de la página", img.startsWith('<img class="se-piece__img" '), img);
+  check("foto previa: las tallas y el sizes de la página, no la original",
+    img.includes(`srcset="${igual.srcSet}"`) && igual.srcSet.includes("recurso-33285c7f7d61-1400.png 1400w")
+      && img.includes(`sizes="${igual.sizes}"`));
+  check("foto previa: con su proporción", img.includes('width="1733" height="907"'));
+  check("foto previa: se pide ya y primero", img.includes('loading="eager"') && img.includes('fetchpriority="high"'));
+  check("foto previa: con su encuadre", img.includes('style="object-position:60% 10%"'));
+  check("foto previa: el titular de texto alternativo", img.includes('alt="Concertación &quot;tripartita&quot; &amp; el salario real en Uruguay"'));
+  const raiz = raizDe(h);
+  check("foto previa: en la cabecera, antes de la firma, como en la página",
+    /<header class="se-piece__head se-piece__head--media"><div class="se-piece__head-text"><h1 [\s\S]*<\/div><div class="se-piece__head-media"><img /.test(raiz)
+      && raiz.indexOf("se-piece__img") < raiz.indexOf("se-piece__meta"));
+  check("foto previa: la de compartir no cambia",
+    h.includes('property="og:image" content="https://www.sureconomics.com/media/image/2026/11/recurso-33285c7f7d61-og-60-10.jpg"'));
+}
+{
+  const img = imgDe(await pedir({ ...CON_FOTO, image_asset: { url: "/media/image/2026/10/vieja-abc.jpg" }, imagen_foco: null }));
+  check("foto previa sin medidas (pieza vieja): sale, sin inventarse proporción ni encuadre",
+    img.includes('src="/media/image/2026/10/vieja-abc.jpg"') && !img.includes("width=") && !img.includes("style="));
+}
+{
+  const img = imgDe(await pedir({ ...CON_FOTO, image_asset: { url: "/media/image/2026/11/chica-abc.jpg", width: 588, height: 393 } }));
+  check("foto previa más chica que las tallas: la original, sin srcset",
+    img.includes('src="/media/image/2026/11/chica-abc.jpg"') && !img.includes("srcset=") && img.includes('width="588" height="393"'));
+}
+{
+  const h = await pedir(CON_CUERPO);
+  check("foto previa de Cloudinary: la talla de la página",
+    imgDe(h).includes('src="https://res.cloudinary.com/pjr7bqzt/image/upload/f_auto,q_auto,c_fill,w_1400/v1787613820/sureconomics/foto.jpg"'));
+}
+{
+  const h = await pedir({ ...CON_FOTO, image_asset: { url: "/media/image/2026/11/grafico-abc.svg", width: 1200, height: 800 } });
+  check("foto previa en SVG: se pinta sin tallas, que no existen",
+    imgDe(h).includes('src="/media/image/2026/11/grafico-abc.svg"') && !imgDe(h).includes("srcset="));
+  check("foto previa en SVG: la tarjeta de compartir sigue siendo la de marca", h.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
+}
+{
+  const h = await pedir({ ...CON_FOTO, format: "entrevista" }, "entrevistas");
+  check("entrevista: sin foto arriba, como la página (su portada es el video)",
+    !raizDe(h).includes("<img") && raizDe(h).includes('<header class="se-piece__head"><div class="se-piece__head-text">'));
+}
+{
+  const h = await pedir({ ...CON_FOTO, image_asset: null, featured_image_url: null });
+  check("sin foto: cabecera de una columna y ninguna img", !raizDe(h).includes("<img") && raizDe(h).includes('<header class="se-piece__head">'));
+}
+{
+  const h = await pedir({ ...CON_FOTO, image_asset: { url: "javascript:alert(1)", width: 10, height: 10 } });
+  check("una dirección que no es web no se pinta, como en la página", !raizDe(h).includes("<img") && !raizDe(h).includes("javascript:"));
+}
+{
+  const res = respuestaFalsa();
+  await conFetch(fetchNormal({ ...EN_INGLES, image_asset: { url: EN_R2, width: 1733, height: 907 } }),
+    () => handler({ query: { seccion: "articulos", slug: "x", lang: "en" } }, res));
+  check("en: la foto lleva de texto alternativo el titular en inglés, como la página",
+    imgDe(res.body).includes('alt="Tripartite &quot;agreement&quot; and real wages in Uruguay"'));
+}
+check("fotoDePortada: medidas raras no se ponen",
+  [[0, 400], [800, null], ["800", "600"], [Number.NaN, 3], [1.5, 2], [-4, 3]]
+    .every(([w, h]) => fotoDePortada(EN_R2, w, h).width === undefined && fotoDePortada(EN_R2, w, h).height === undefined));
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

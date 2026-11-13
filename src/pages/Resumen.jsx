@@ -178,7 +178,9 @@ export const Resumen = () => {
   useMetaPagina({ title: t("resumen.meta", { titulo, marca: BRAND.name }), description: t("resumen.descripcion") });
 
   return (
-    <main className="se-section se-res" role="main">
+    // Mientras carga, una pantalla de alto: el pie no asoma bajo «Cargando» para que el
+    // resumen lo empuje fuera al llegar.
+    <main className={`se-section se-res${status === "loading" ? " se-cargando-pantalla" : ""}`} role="main">
       <div className="se-container se-res__caja">
         <h1 className="se-res__titulo">{titulo}</h1>
         {datos ? (

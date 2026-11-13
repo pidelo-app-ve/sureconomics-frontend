@@ -4,7 +4,7 @@ import { tActual } from "../../i18n/motor";
 
 import { enlaceDeClic } from "../../services/publicidadService";
 import { esArteTelefonoAutomatico } from "../../lib/arteTelefono";
-import { useCiclo, useHueco } from "./ProveedorDePublicidad";
+import { useAnunciosPendientes, useCiclo, useHueco } from "./ProveedorDePublicidad";
 import { useRotacion } from "./useRotacion";
 
 /**
@@ -332,8 +332,9 @@ FilaDeAnuncio.propTypes = { espacio: PropTypes.string.isRequired };
 
 /* -------------------------------------------------------------------- público */
 
-export const EspacioPublicitario = ({ espacio, variante = "tarjeta", className, desde = null }) => {
+export const EspacioPublicitario = ({ espacio, variante = "tarjeta", className, desde = null, reservar = false }) => {
   const completo = useCiclo(espacio);
+  const pendiente = useAnunciosPendientes();
   // Con `desde`, solo esa pieza del ciclo y quieta: es una copia más del hueco (ver
   // `AnuncioEntreTandas`) y, si rotara, acabaría enseñando lo mismo que el original.
   const ciclo = useMemo(
@@ -342,7 +343,22 @@ export const EspacioPublicitario = ({ espacio, variante = "tarjeta", className, 
   );
   const { contenedor, indice, entrando, pausa, saliente, pieza } = useRotacion(ciclo);
 
-  if (!pieza) return null;
+  if (!pieza) {
+    // Mientras llegan los anuncios, la caja vacía de un banner (B), con las mismas clases
+    // para que mida lo mismo en cada ancho: sin ella el anuncio aparecía después y
+    // empujaba todo lo de debajo. Si al final no llega ninguno, se cierra como siempre.
+    if (!reservar || !pendiente) return null;
+    return (
+      <div className={`se-ad-hueco${className ? ` ${className}` : ""}`} aria-hidden="true">
+        <div className="se-ad se-ad--montaje se-ad--banner">
+          <div className="se-ad__cinta" />
+          <span className="se-ad__cinta-sello">
+            <span className="se-ad__etiqueta">{"\u00a0"}</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const Pieza = POR_FORMATO[pieza.formato];
   // La H (barra fija) tiene componente propio porque se posiciona sobre la página
@@ -382,6 +398,8 @@ EspacioPublicitario.propTypes = {
   className: PropTypes.string,
   /** Solo la pieza N del ciclo, sin rotar. Lo usa `AnuncioEntreTandas`. */
   desde: PropTypes.number,
+  /** Guardar el sitio de un banner mientras llegan los anuncios. Solo si la vista los pide. */
+  reservar: PropTypes.bool,
 };
 
 /**

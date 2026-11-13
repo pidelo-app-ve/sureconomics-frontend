@@ -91,11 +91,13 @@ html.se-con-aviso-cookies {
   scroll-padding-bottom: calc(var(--se-aviso-cookies-alto, 240px) + 12px);
 }
 
-/* —— Mientras carga la portada (CLS) ——
+/* —— Mientras carga la portada, una pieza o el resumen (CLS) ——
    La portada no dibujaba nada hasta tener el contenido, asi que el boletin, los
    aliados y el pie subian hasta la cabecera y luego bajaban de golpe. El hueco
-   guarda una pantalla de alto: lo que hay debajo ya nace donde va a quedarse. */
-.se-portada-cargando {
+   guarda una pantalla de alto: lo que hay debajo ya nace donde va a quedarse.
+   Solo mientras carga: el error y el «no existe» son cortos y se quedan con su alto. */
+.se-portada-cargando,
+.se-cargando-pantalla {
   min-height: 100vh;
   min-height: 100svh;
 }

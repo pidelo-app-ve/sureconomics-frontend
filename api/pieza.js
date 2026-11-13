@@ -40,6 +40,11 @@
  * this application is not served at all.
  */
 
+// Los mismos módulos que usa la página, para que la foto del HTML previo sea la que
+// pinta React. Con extensión y sin importaciones propias: Node los carga sin Vite.
+import { enlaceWeb } from "../src/lib/enlaces.js";
+import { fotoDePortada, posicionDeFoco } from "../src/lib/fotoDePieza.js";
+
 const API =
   process.env.VITE_API_URL ||
   process.env.API_BASE_URL ||
@@ -404,19 +409,40 @@ export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
   const firma = String(pieza.byline || (en ? "SurEconomics" : "Redacción SurEconomics")).trim();
   const fecha = pieza.published_at ? fechaLarga(pieza.published_at, idioma) : "";
   const entradilla = textoLlano(pieza.excerpt, 600);
-  const foto = pieza.image_asset?.url || pieza.featured_image_url;
-  const fotoAbsoluta = foto ? (foto.startsWith("/") ? `${SITIO}${foto}` : foto) : null;
+  // La foto de cabecera: la misma `<img>` que pinta la página (`Media`, con
+  // `fotoDePortada`) y en el mismo sitio, junto al titular y antes de la firma. Así el
+  // navegador la baja con el HTML y en la talla que va a usar -- antes pedía la
+  // original, un PNG de casi 2 MB --, y React, al montar, reutiliza ese archivo con el
+  // mismo tamaño en vez de pintar otra foto más tarde, que era lo que Google medía
+  // como LCP. La entrevista no lleva foto arriba: su portada es el video.
+  const url = enlaceWeb(pieza.image_asset?.url) || enlaceWeb(pieza.featured_image_url);
+  const foto =
+    url && pieza.format !== "entrevista"
+      ? fotoDePortada(url, pieza.image_asset?.width ?? null, pieza.image_asset?.height ?? null)
+      : null;
+  const encuadre = foto ? posicionDeFoco(pieza.imagen_foco) : undefined;
+  const img = foto
+    ? `<img class="se-piece__img" src="${escapar(foto.src)}"` +
+      (encuadre ? ` style="object-position:${escapar(encuadre)}"` : "") +
+      (foto.srcSet ? ` srcset="${escapar(foto.srcSet)}"` : "") +
+      ` sizes="${escapar(foto.sizes)}"` +
+      (foto.width ? ` width="${foto.width}" height="${foto.height}"` : "") +
+      ` alt="${escapar(pieza.title)}" loading="eager" fetchpriority="high" />`
+    : "";
   const partes = [
     `<main class="se-blog se-articles se-previa"><section class="se-section"><div class="se-container"><article class="se-piece">`,
     // El formato como las migas de la página, que es donde lo pinta React: sin el
     // rótulo encima del titular, la pieza no salta al hidratarse.
     kicker ? `<p class="se-piece__crumbs">${escapar(kicker)}</p>` : "",
+    // La cabecera de la página: titular y entradilla, y la foto al lado (debajo en el
+    // teléfono). Sin ella la foto salía a todo el ancho y React la encogía al montar.
+    // Sin `<figure>` a propósito: fuera de `.se-publico` lleva esquinas redondas, y la
+    // de la página no; el ancho es el mismo.
+    `<header class="se-piece__head${img ? " se-piece__head--media" : ""}"><div class="se-piece__head-text">`,
     `<h1 class="se-piece__title">${escapar(pieza.title)}</h1>`,
-    entradilla ? `<p class="se-piece__lead">${escapar(entradilla)}</p>` : "",
+    entradilla ? `<p class="se-piece__lead se-piece__lead--head">${escapar(entradilla)}</p>` : "",
+    `</div>${img ? `<div class="se-piece__head-media">${img}</div>` : ""}</header>`,
     `<p class="se-piece__meta">${en ? "By" : "Por"} ${escapar(firma)}${fecha ? ` · <time datetime="${escapar(pieza.published_at)}">${escapar(fecha)}</time>` : ""}</p>`,
-    fotoAbsoluta && !/\.svg(\?|$)/i.test(fotoAbsoluta)
-      ? `<img class="se-previa__foto" src="${escapar(fotoAbsoluta)}" alt="${escapar(pieza.title)}" style="max-width:100%;height:auto" />`
-      : "",
     `<div class="se-piece__body">${cuerpoSeguro(pieza.content)}</div>`,
     `</article></div></section></main>`,
   ];

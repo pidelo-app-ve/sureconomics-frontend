@@ -234,7 +234,8 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
                 aria-hidden="true"
                 tabIndex={-1}
               >
-                <CardMedia pieza={actual} ancho={1200} etiqueta={temaPrincipal(actual)} sizes={SIZES_PRINCIPAL} />
+                {/* La foto que abre la portada: la única que se pide con prioridad. */}
+                <CardMedia pieza={actual} ancho={1200} etiqueta={temaPrincipal(actual)} sizes={SIZES_PRINCIPAL} prioridad />
               </Enlace>
             </div>
             )}

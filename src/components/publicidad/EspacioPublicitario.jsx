@@ -67,18 +67,37 @@ Envoltorio.propTypes = {
 // Con su ancho y su alto, que manda el servidor (`imagen_medidas`). Dicen la proporción;
 // el tamaño lo sigue poniendo la hoja, que fija el ancho en `auto` pero no el alto: sin el
 // `height: auto` el atributo lo fijaría, y un SVG sin medidas propias saldría más grande.
-const Logo = ({ hueco, className }) =>
-  hueco.imagen ? (
+//
+// Y con sus tallas (16-nov-2026): se bajaba el original, que un anunciante entregó a 4.306
+// px. Si una talla no carga, el original, como en `Montaje`.
+const Logo = ({ hueco, className }) => {
+  const [rota, setRota] = useState(null);
+  if (!hueco.imagen) return null;
+  const tallas = rota === hueco.imagen ? undefined : tallasDelArte(hueco.imagen, hueco.imagen_medidas);
+  return (
     <img
       className={className}
       src={hueco.imagen}
+      srcSet={tallas}
+      sizes={tallas ? SIZES_DEL_LOGO : undefined}
+      onError={tallas ? () => setRota(hueco.imagen) : undefined}
       width={hueco.imagen_medidas?.ancho}
       height={hueco.imagen_medidas?.alto}
       style={hueco.imagen_medidas ? { height: "auto" } : undefined}
       alt={hueco.alt || hueco.anunciante || ""}
       loading="lazy"
     />
-  ) : null;
+  );
+};
+
+/**
+ * Lo ancho que puede llegar a verse un logo de anunciante. Con `srcset`, el tamaño natural
+ * de la imagen pasa a ser este, y el logo se pinta a su tamaño natural recortado por los
+ * `max-*` de su caja: si se queda corto, el logo sale más pequeño que su caja. Así que no
+ * puede quedarse por debajo de la caja más ancha: en el lateral de una pieza, por debajo de
+ * 1000 px, va a todo el ancho (con 240 un logo apaisado pasaba de 290 a 240 en un teléfono).
+ */
+const SIZES_DEL_LOGO = "(max-width: 999px) calc(100vw - 48px), 320px";
 
 Logo.propTypes = { hueco: PropTypes.object.isRequired, className: PropTypes.string };
 

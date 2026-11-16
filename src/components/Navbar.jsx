@@ -11,8 +11,13 @@ import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
 
-/** El logotipo de la barra y del cajón en WebP sin pérdida: los mismos píxeles que el PNG, en 22 KB y no 41. */
-const LOGO_WEBP = BRAND.lockupNegativoWebp;
+/** El logotipo de la barra y del cajón en WebP sin pérdida: los mismos píxeles que el PNG, en 22 KB y no 41,
+ *  y en tallas para que cada pantalla baje la suya. */
+const LOGO_WEBP = BRAND.lockupNegativoTallas;
+
+/** Lo ancho que se ve el logo de la barra: 24 px de alto hasta 759, 26 entre 1100 y 1365
+ *  y hasta 34 en el resto (`.se-header__logo`), con la proporción del archivo (900x117). */
+const SIZES_LOGO = "(max-width: 759px) 185px, (min-width: 1100px) and (max-width: 1365px) 200px, 262px";
 
 /** Lo que se puede tabular dentro del cajón: el mismo criterio que el cuadro de TikTok. */
 const FOCALES =
@@ -378,7 +383,7 @@ export const Navbar = () => {
           {/* La marca entera también en el teléfono: sin el reloj en la barra cabe a
               24 px de alto, y la versión comprimida («Sur E») se leía como un logo roto. */}
           <picture>
-            <source srcSet={LOGO_WEBP} type="image/webp" />
+            <source srcSet={LOGO_WEBP} sizes={SIZES_LOGO} type="image/webp" />
             <img
               src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
               alt=""
@@ -520,7 +525,7 @@ export const Navbar = () => {
                   "Menú", una etiqueta que no dice nada que el cajón abierto no
                   diga ya, y que además chocaba con el logo de la barra. */}
               <picture>
-                <source srcSet={LOGO_WEBP} type="image/webp" />
+                <source srcSet={LOGO_WEBP} sizes="150px" type="image/webp" />
                 <img
                   className="se-header__menu-brand"
                   src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}

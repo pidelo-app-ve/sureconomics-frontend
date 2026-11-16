@@ -123,6 +123,23 @@ const SIMBOLOS_MOVIL = (oro) => [
 const CORTE_MOVIL = "(max-width: 860px)";
 
 /**
+ * Lo que dice que el lector ya está leyendo y no esperando a que cargue la página:
+ * mover el ratón, tocar, una tecla, la rueda o desplazar. Con el primero se pide la
+ * cinta del mundo; si no hay ninguno, a los `ESPERA_SIN_GESTOS` de cargar la página.
+ *
+ * Medido el 16-nov-2026 con PageSpeed en el teléfono: pedida apenas el navegador quedaba
+ * libre, sus once hojas de estilo bajaban a la vez que la foto principal, y su marco
+ * deja tres cookies de medición propia de TradingView, que Google cuenta en contra.
+ * Para quien lee casi no cambia: en escritorio la cinta sale en cuanto mueve el ratón.
+ */
+const GESTOS_DEL_LECTOR = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"];
+const ESPERA_SIN_GESTOS = 6000;
+/** En captura y pasivas: un desplazamiento dentro de una lista también cuenta, y no frenan nada. */
+const ESCUCHA = { capture: true, passive: true };
+/** Una vez que el lector se movió, las cintas que se monten después ya no esperan. */
+let huboGesto = false;
+
+/**
  * Va en la cinta de arriba, en línea con nuestras cifras, en escritorio; y en el
  * teléfono, bajo las monedas de la primera plana (`PrimeraPlana`), donde hay sitio.
  * `solo` dice en cuál de los dos anchos se pinta, para que nunca se monten dos widgets:
@@ -171,10 +188,11 @@ export const CintaMundial = ({ tema = "light", solo = null }) => {
     // deja dos cintas apiladas, y al cruzar el corte se acumularian.
     destino.innerHTML = "";
 
-    // **Cuando el navegador esté libre**, no al montar. El script de TradingView pesa y
-    // arranca su propio marco con más scripts; inyectado al pintar la cabecera competía
-    // con la portada por la red y el procesador justo cuando el lector espera ver algo.
-    // Llega igual medio segundo después, y nadie mira primero la cinta de mercados.
+    // **Al primer gesto del lector, o a los pocos segundos de cargar** (ver
+    // `GESTOS_DEL_LECTOR`), y entonces cuando el navegador esté libre. El script de
+    // TradingView pesa y arranca su propio marco con más scripts y once hojas de estilo;
+    // pedido al pintar la cabecera, competía por la red con la foto principal justo
+    // cuando el lector espera verla. Nadie mira primero la cinta de mercados.
     let vigia = null;
     const montar = () => {
       const contenedor = document.createElement("div");
@@ -235,13 +253,43 @@ export const CintaMundial = ({ tema = "light", solo = null }) => {
     };
 
     const ocioso = typeof window.requestIdleCallback === "function";
-    const turno = ocioso
-      ? window.requestIdleCallback(montar, { timeout: 2500 })
-      : window.setTimeout(montar, 1200);
+    let turno = null;
+    let reloj = null;
+    const programar = () => {
+      if (turno !== null) return;
+      quitarEscuchas();
+      turno = ocioso
+        ? window.requestIdleCallback(montar, { timeout: 2500 })
+        : window.setTimeout(montar, 0);
+    };
+    const alGesto = () => {
+      huboGesto = true;
+      programar();
+    };
+    const alCargar = () => {
+      reloj = window.setTimeout(programar, ESPERA_SIN_GESTOS);
+    };
+    function quitarEscuchas() {
+      GESTOS_DEL_LECTOR.forEach((g) => window.removeEventListener(g, alGesto, ESCUCHA));
+      window.removeEventListener("load", alCargar);
+      window.clearTimeout(reloj);
+    }
+
+    if (huboGesto) {
+      // Ya se movió en esta visita (otra página, o al girar el teléfono): sin esperar.
+      programar();
+    } else {
+      GESTOS_DEL_LECTOR.forEach((g) => window.addEventListener(g, alGesto, ESCUCHA));
+      if (document.readyState === "complete") alCargar();
+      else window.addEventListener("load", alCargar, { once: true });
+    }
 
     return () => {
-      if (ocioso) window.cancelIdleCallback(turno);
-      else window.clearTimeout(turno);
+      quitarEscuchas();
+      if (turno !== null) {
+        if (ocioso) window.cancelIdleCallback(turno);
+        else window.clearTimeout(turno);
+      }
       vigia?.disconnect();
       destino.innerHTML = "";
     };

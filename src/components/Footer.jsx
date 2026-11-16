@@ -97,9 +97,10 @@ export const Footer = () => {
         <div className="se-footer__grid se-footer__grid--cinco">
           <div className="se-footer__about">
             <h2 className="se-footer__brand">
-              {/* El mismo WebP sin pérdida que la cabecera (ver `Navbar.jsx`). */}
+              {/* El mismo WebP sin pérdida que la cabecera, en sus tallas (ver `Navbar.jsx`):
+                  aquí no pasa de 240 px de ancho (`.se-footer__brand-mark`). */}
               <picture>
-                <source srcSet={MARCA.lockupNegativoWebp} type="image/webp" />
+                <source srcSet={MARCA.lockupNegativoTallas} sizes="240px" type="image/webp" />
                 <img
                   className="se-footer__brand-mark"
                   src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}

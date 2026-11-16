@@ -615,6 +615,9 @@
   flex: 1 1 auto;
   align-items: center;
   min-width: 0;
+  /* El alto del marco de TradingView, guardado desde el principio: la cinta llega tarde (al
+     primer gesto o a los seis segundos) y la fila pasaba de 26 a 84 px y empujaba lo de abajo. */
+  min-height: 84px;
   overflow: hidden;
 }
 

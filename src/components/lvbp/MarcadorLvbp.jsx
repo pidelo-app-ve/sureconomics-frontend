@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Enlace } from "../Enlace";
 import { formatearFecha } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { LOGO_LIGA, diasParaLaFranja, equipo, escudoDe, fechaDelDia, hayJuegoVivo, horaBonita } from "../../lib/lvbp";
+import { LOGO_LIGA_PEQUENO, TALLAS_LOGO_LIGA, diasParaLaFranja, equipo, escudoDe, fechaDelDia, hayJuegoVivo, horaBonita, tallasDeEscudo } from "../../lib/lvbp";
 import { getLvbp } from "../../services/lvbpService";
 import "./marcadorLvbp.css";
 
@@ -99,6 +99,7 @@ export const Escudo = ({ sigla, tamano = 24 }) => {
     <img
       className="se-lvbp__escudo"
       src={escudoDe(sigla)}
+      srcSet={tallasDeEscudo(sigla)}
       alt=""
       width={tamano}
       height={tamano}
@@ -205,7 +206,7 @@ export const MarcadorLvbp = () => {
   return (
     <section className="se-lvbp" aria-label={t("lvbp.titulo")}>
       <div className="se-lvbp__cabeza">
-        <img className="se-lvbp__liga" src={LOGO_LIGA} alt="" width="40" height="40" decoding="async" />
+        <img className="se-lvbp__liga" src={LOGO_LIGA_PEQUENO} srcSet={TALLAS_LOGO_LIGA} alt="" width="40" height="40" decoding="async" />
         <div className="se-lvbp__cabeza-texto">
           <span className="se-lvbp__nombre">LVBP</span>
           <span className="se-lvbp__temporada">{t("lvbp.temporada", { temporada: datos.temporada })}</span>

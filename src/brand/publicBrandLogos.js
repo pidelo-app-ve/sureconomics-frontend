@@ -29,6 +29,13 @@ export const BRAND = {
   /** El mismo en WebP sin pérdida (los mismos píxeles, 22 KB y no 41). La carpeta v2 se
    * sirve con caché de un año e `immutable`: un cambio de marca va en otra carpeta (v3). */
   lockupNegativoWebp: file("lockup-negativo.webp"),
+  /** Y sus tallas (16-nov-2026), para un `srcset`: el logo se ve de 150 a 262 px y el
+   * de 900 sobraba en casi todas las pantallas (PageSpeed lo marcaba en la cabecera y en
+   * el pie). Mismos píxeles reducidos, también sin pérdida. */
+  lockupNegativoTallas: [300, 462, 600]
+    .map((ancho) => `${file(`lockup-negativo-${ancho}.webp`)} ${ancho}w`)
+    .concat(`${file("lockup-negativo.webp")} 900w`)
+    .join(", "),
 
   /** Versión secundaria "Sur E", para cuando no cabe el lockup. */
   corta: file("sure-verde.png"),

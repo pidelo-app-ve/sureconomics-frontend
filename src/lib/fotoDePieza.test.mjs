@@ -5,7 +5,7 @@
  * tarjeta sin foto), que las pequeñas solo salgan donde se piden y de un JPEG, y que con
  * ellas vaya la original para quien necesite más.
  */
-import { fotoPequena, imagenSrcSet } from "./fotoDePieza.js";
+import { fotoPequena, imagenSrcSet, tallasPequenas } from "./fotoDePieza.js";
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -44,6 +44,16 @@ check("uno de 300 px, la de 160, que es la que tiene", fotoPequena(FOTO, 300) ==
 check("sin ancho, o de 160 o menos, la original", fotoPequena(FOTO, null) === null && fotoPequena(FOTO, 160) === null);
 check("de fuera o de otro formato, nada",
   fotoPequena("https://otro.example/a.jpg", 900) === null && fotoPequena("/media/image/a.png", 900) === null);
+
+console.log("tallasPequenas");
+check("el retrato de 553 px ofrece la de 160 y la de 320, y el navegador elige",
+  tallasPequenas("/media/image/2026/11/leonardo-abc.jpg", 553) ===
+    "/media/image/2026/11/leonardo-abc-160.jpg 160w, /media/image/2026/11/leonardo-abc-320.jpg 320w");
+check("uno de 300 px, solo la de 160 (la de 320 no existe)",
+  tallasPequenas(FOTO, 300) === "/media/image/2026/11/foto-abc-160.jpg 160w");
+check("sin ancho, de fuera o de otro formato, nada (va la original, como en fotoPequena)",
+  tallasPequenas(FOTO, null) === null && tallasPequenas("https://otro.example/a.jpg", 900) === null &&
+    tallasPequenas("/media/image/a.png", 900) === null);
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

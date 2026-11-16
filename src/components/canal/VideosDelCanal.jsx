@@ -28,7 +28,15 @@ const Meta = ({ v }) => {
 
 Meta.propTypes = { v: PropTypes.object.isRequired };
 
-const Portada = ({ v, onClick, className = "", tabIndex }) => {
+/** Lo ancho que se ve una miniatura en «Todos los videos» (`.se-alvideo__rejilla`). */
+const SIZES_DE_LA_REJILLA = "(max-width: 640px) calc(100vw - 48px), 400px";
+
+/**
+ * La portada de un video. Con `sizes`, también sus tallas de 320 y 480 (`portada_srcset`,
+ * que da el servidor): en la rejilla se ven a 260-400 px y la de 640 sobraba. Sin él, la
+ * de 640, que es la que pide el video grande.
+ */
+const Portada = ({ v, onClick, className = "", tabIndex, sizes }) => {
   const { t } = useIdioma();
   const dura = duracionReloj(v.duracion);
   const vertical = v.tipo === "short";
@@ -46,6 +54,8 @@ const Portada = ({ v, onClick, className = "", tabIndex }) => {
     >
       <img
         src={v.portada}
+        srcSet={sizes && v.portada_srcset ? v.portada_srcset : undefined}
+        sizes={sizes && v.portada_srcset ? sizes : undefined}
         alt=""
         width={vertical ? 360 : 640}
         height={vertical ? 640 : 360}
@@ -65,6 +75,7 @@ Portada.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
   tabIndex: PropTypes.number,
+  sizes: PropTypes.string,
 };
 
 export const VideosDelCanal = ({ canal, videos }) => {
@@ -122,7 +133,7 @@ export const VideosDelCanal = ({ canal, videos }) => {
           <ul className="se-alvideo__rejilla">
             {videos.map((x, i) => (
               <li key={x.id} className={`se-alvideo__item${i === actual ? " is-actual" : ""}`}>
-                <Portada v={x} onClick={() => elegir(i)} className="se-alvideo__mini" />
+                <Portada v={x} onClick={() => elegir(i)} className="se-alvideo__mini" sizes={SIZES_DE_LA_REJILLA} />
                 <p className="se-alvideo__item-titulo">{x.titulo}</p>
                 <Meta v={x} />
               </li>

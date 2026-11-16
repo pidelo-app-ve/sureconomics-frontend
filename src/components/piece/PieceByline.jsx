@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { BRAND } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
-import { fotoPequena } from "../../lib/fotoDePieza";
+import { fotoPequena, tallasPequenas } from "../../lib/fotoDePieza";
 
 /**
  * La firma de una pieza, como la define el brandbook.
@@ -58,15 +58,23 @@ const IconoFecha = () => (
  * portada) y la original llegaba a pesar 93 KB. Una foto de antes de las tallas pequeñas no la tiene hasta que
  * se rehacen sus tallas: entonces, la original. `onError` solo se llama si tampoco esa
  * carga. Lo usan la firma de la pieza y los análisis de la portada (`PrimeraPlana`).
+ *
+ * Con las dos tallas pequeñas en `srcset`, el navegador baja la de 160 donde le basta. El
+ * `sizes` es el lado por 1,5: con `cover`, una foto apaisada (3:2) se pinta más ancha que
+ * el círculo, y es lo que decía `fotoPequena` de la de 160 a 56 px en una pantalla 3x.
  */
 export const Retrato = ({ url, ancho, onError, ...resto }) => {
   const pequena = fotoPequena(url, ancho);
+  const tallas = tallasPequenas(url, ancho);
   const [rota, setRota] = useState(null);
   const usaPequena = Boolean(pequena) && rota !== pequena;
+  const lado = Number(resto.width) || 56;
   return (
     <img
       {...resto}
       src={usaPequena ? pequena : url}
+      srcSet={usaPequena && tallas ? tallas : undefined}
+      sizes={usaPequena && tallas ? `${Math.round(lado * 1.5)}px` : undefined}
       onError={usaPequena ? () => setRota(pequena) : onError}
     />
   );

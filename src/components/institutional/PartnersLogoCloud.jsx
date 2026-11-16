@@ -20,11 +20,26 @@ import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
  * archivo todavía no existe, y un hueco en el desfile se leería como que la marca
  * no está.
  */
+/**
+ * Las tallas de un logo de `/brand/aliadas` (16-nov-2026): junto a cada `x.webp` de 432 px
+ * hay un `x-280.webp`. El logo se ve a 158 px en el teléfono y a 216 en escritorio, así que
+ * la de 280 basta salvo en una pantalla densa de escritorio. Otro archivo, sin tallas.
+ */
+const tallasDeLogo = (logo) =>
+  /^\/brand\/aliadas\/[^/]+\.webp$/.test(logo)
+    ? `${logo.replace(/\.webp$/, "-280.webp")} 280w, ${logo} 432w`
+    : undefined;
+
+/** Lo ancho que se ve (`.se-partners__img`). */
+const SIZES_DE_LOGO = "(max-width: 640px) 158px, 216px";
+
 const Marca = ({ aliada }) =>
   aliada.logo ? (
     <img
       className="se-partners__img"
       src={aliada.logo}
+      srcSet={tallasDeLogo(aliada.logo)}
+      sizes={tallasDeLogo(aliada.logo) ? SIZES_DE_LOGO : undefined}
       alt={aliada.nameLong ?? aliada.name}
       loading="lazy"
       decoding="async"

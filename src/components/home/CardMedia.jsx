@@ -46,8 +46,10 @@ import { piezaShape } from "./piezaShape";
  */
 /** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x. */
 export const ANCHOS = [400, 640, 800, 1100, 1400];
-/** Una columna en telefono, dos en tablet, tres en escritorio. */
-const SIZES = "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 33vw";
+/** Una columna en telefono, dos en tablet, tres en escritorio. En el telefono, el ancho
+ *  menos los 24 px de margen a cada lado (`--se-content-gutter`), y no un 92 % que se pasaba:
+ *  a 412 px y 1,75x pedia 663 y bajaba la de 1100 cuando la de 640 llenaba la caja (364 px). */
+const SIZES = "(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) 46vw, 33vw";
 
 /**
  * Que la pieza tiene video: ▶ y su duración («3:08») en la esquina de abajo a la derecha,

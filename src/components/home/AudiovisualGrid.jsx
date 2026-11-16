@@ -26,8 +26,8 @@ const ANCHOS = [400, 640, 800, 1100, 1400];
 
 /** Cuánto ocupa la caja según la variante, para que el navegador elija talla. */
 const SIZES = {
-  rejilla: "(max-width: 640px) 92vw, (max-width: 900px) 46vw, 33vw",
-  hero: "(max-width: 900px) 92vw, 62vw",
+  rejilla: "(max-width: 640px) calc(100vw - 48px), (max-width: 900px) 46vw, 33vw",
+  hero: "(max-width: 640px) calc(100vw - 48px), (max-width: 900px) 92vw, 62vw",
 };
 
 /** Ancho de la derivada que se pide cuando no hay `srcset` que ofrecer. */

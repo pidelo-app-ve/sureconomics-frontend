@@ -59,7 +59,7 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null, sinAper
         {lead ? (
         <article className="se-noticias__lead">
           <Enlace to={rutaDePieza(lead)} className="se-noticias__foto" aria-hidden="true" tabIndex={-1}>
-            <CardMedia pieza={lead} ancho={1100} etiqueta={temaPrincipal(lead)} sizes="(max-width: 899px) 92vw, 34vw" />
+            <CardMedia pieza={lead} ancho={1100} etiqueta={temaPrincipal(lead)} sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 899px) 92vw, 34vw" />
           </Enlace>
           <div className="se-noticias__lead-texto">
             <Meta pieza={lead} />

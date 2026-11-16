@@ -133,6 +133,18 @@ export const fotoPequena = (url, anchoOriginal) => {
 };
 
 /**
+ * Las tallas pequeñas de una foto como `srcset` (16-nov-2026), para que un retrato baje la
+ * de 160 donde le basta y la de 320 solo en una pantalla densa. Con solo la de 320,
+ * PageSpeed marcaba el retrato de 44 px de la portada: 320 px para pintar 77. Nulo donde
+ * `fotoPequena` lo es, y con las mismas condiciones.
+ */
+export const tallasPequenas = (url, anchoOriginal) => {
+  if (!esDeNuestroBucket(url) || !esJpeg(url)) return null;
+  const anchos = ANCHOS_PEQUENOS.filter((a) => a < anchoOriginal);
+  return anchos.length ? anchos.map((a) => `${tallaEnR2(url, a)} ${a}w`).join(", ") : null;
+};
+
+/**
  * El encuadre de la foto («x,y» en por ciento) como `[x, y]`, o `null` si no hay o está
  * al centro. Lo elige la redacción en el editor (`EncuadreDeFoto`).
  */

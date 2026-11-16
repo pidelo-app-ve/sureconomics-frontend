@@ -43,6 +43,19 @@ siquiera los vemos.
 del visitante, su navegador y la URL de la página. Eso ocurre antes de que la barra de
 cookies aparezca siquiera.
 
+**Lo que se vio el 16-nov-2026 (PageSpeed, «Utiliza cookies de terceros»):** el marco de
+la cinta (`www.tradingview-widget.com`) deja tres cookies propias de TradingView:
+`_sp_id.*`, `_sp_ses.*` y `_sp_root_domain_test_*`. Son de Snowplow, una herramienta de
+medición: TradingView cuenta las visitas a su cinta con un identificador que dura. No son
+nuestras ni las leemos, pero son medición de un tercero dentro de nuestra página, y se
+ponen sin esperar a que el lector acepte o rechace. Pesa sobre la frase del aviso
+(«ninguna empresa de terceros mide su lectura»): que el abogado la revise con este dato.
+
+Desde ese día la cinta se pide al primer gesto del lector (mover el ratón, tocar, una
+tecla, desplazar) o a los seis segundos de cargar, para que no compita con la foto
+principal (`GESTOS_DEL_LECTOR` en `MarketTicker.jsx`). Eso no cambia lo de arriba: sigue
+sin esperar al consentimiento.
+
 Por eso la entradilla del aviso se cambió al activarlo. Decía:
 
 > No hay publicidad, no hay redes sociales incrustadas y no hay ninguna empresa de

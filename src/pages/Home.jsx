@@ -603,7 +603,10 @@ export const Home = () => {
       ))}
 
       <NewsletterBlock />
-      <PartnersLogoCloud partners={PARTNERS} />
+      {/* Los aliados, cuando ya hay portada (16-nov-2026). Mientras carga, la página mide
+          una pantalla y sus logos quedaban a tiro del `loading="lazy"`: se pedían a la vez
+          que la foto principal, y están al final de todo. */}
+      {cargando ? null : <PartnersLogoCloud partners={PARTNERS} />}
     </main>
   );
 };

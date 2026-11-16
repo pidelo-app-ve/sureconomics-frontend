@@ -28,6 +28,11 @@ const QUIEN = "nuestro-canal";
 const DISTANCIA = 80;
 const VELOCIDAD = 0.11;
 
+/** Lo ancho que se ve una portada en la pista (`.se-canal__pista`): el 86 % de la columna en el
+ *  teléfono y la tableta, y la columna entera (de 290 a 352 px) desde 960. Con esto baja la talla
+ *  de 320 o 480 que da el servidor (`portada_srcset`) y no siempre la de 640. Los shorts, a 160. */
+const SIZES_DE_LA_PISTA = "(min-width: 960px) 360px, calc((100vw - 48px) * 0.86)";
+
 // Exportado para «Al punto» (`VideosDelCanal`): el mismo reproductor, con su esquina.
 export const Reproductor = ({ v, onCerrar }) => {
   const { t } = useIdioma();
@@ -194,9 +199,9 @@ export const NuestroCanal = () => {
                   aria-label={dura ? t("portada.canal.reproducirConDuracion", { titulo: v.titulo, duracion: dura }) : t("portada.canal.reproducir", { titulo: v.titulo })}
                 >
                   {v.tipo === "short" ? (
-                    <img src={v.portada} alt="" width="360" height="640" loading="lazy" decoding="async" />
+                    <img src={v.portada} srcSet={v.portada_srcset || undefined} sizes={v.portada_srcset ? "160px" : undefined} alt="" width="360" height="640" loading="lazy" decoding="async" />
                   ) : (
-                    <img src={v.portada} alt="" width="640" height="360" loading="lazy" decoding="async" />
+                    <img src={v.portada} srcSet={v.portada_srcset || undefined} sizes={v.portada_srcset ? SIZES_DE_LA_PISTA : undefined} alt="" width="640" height="360" loading="lazy" decoding="async" />
                   )}
                   <span className="se-canal__play">
                     <IconoPlay tamano={22} />

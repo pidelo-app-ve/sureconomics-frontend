@@ -198,7 +198,7 @@
       "fecha": {
         "displayName": "Fecha de la edición",
         "fontStyle": "italic",
-        "purpose": "La fecha larga sobre el doble filete de 3 px, en la cursiva real de Newsreader (newsreader-italic-latin.woff2)."
+        "purpose": "La fecha larga sobre el doble filete de 3 px, en la cursiva real de Newsreader (newsreader-italic-o16-latin.woff2)."
       },
       "body": {
         "displayName": "Lectura",

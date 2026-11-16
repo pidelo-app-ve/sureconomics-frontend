@@ -43,15 +43,29 @@
 /*
  * Newsreader para los titulares y JetBrains Mono para las cifras de mercado, también
  * servidas desde nuestro dominio (SIL OFL 1.1; la CSP solo admite fuentes propias).
- * Newsreader es variable en peso y en tamaño óptico: el navegador ajusta el trazo al
- * cuerpo de cada titular.
+ *
+ * Newsreader de Google es variable en peso y en tamaño óptico (opsz: el trazo cambia con
+ * el cuerpo). Aquí va con el tamaño óptico FIJO y el peso de 400 a 700, lo único que usa
+ * el sitio: así pesa la tercera parte (redonda 129 -> 40 KB, cursiva 143 -> 44 KB), a
+ * cambio de que el trazo ya no se ajuste solo a cada cuerpo.
+ *   - Redonda en opsz 36: es el cuerpo del titular de las piezas en el teléfono (ahí no
+ *     cambia nada) y, probado con 1078 titulares reales en cada hueco del sitio, el valor
+ *     con el que menos titulares cambian de número de líneas (16 a 56 px).
+ *   - Cursiva en opsz 16: casi siempre sale pequeña (fecha de la edición, firmas, rótulos,
+ *     14-16 px); en las citas de 24-32 px queda un poco más ancha que antes.
+ * Sacadas de los archivos de Google (latín y latín extendido, los mismos caracteres) con
+ *   fonttools varLib.instancer <original>.woff2 opsz=36 wght=400:700 -o <nuevo>.woff2
+ * (la cursiva con opsz=16).
+ * El opsz va en el nombre: si se rehacen, cambia el nombre, porque /fuentes se sirve con
+ * caché de un año (vercel.json) y el navegador no volvería a pedir un archivo con el
+ * mismo nombre.
  */
 @font-face {
   font-family: "Newsreader";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url("/fuentes/newsreader-latin-ext.woff2") format("woff2");
+  src: url("/fuentes/newsreader-o36-latin-ext.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
@@ -59,7 +73,7 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url("/fuentes/newsreader-latin.woff2") format("woff2");
+  src: url("/fuentes/newsreader-o36-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
@@ -77,6 +91,6 @@
   font-style: italic;
   font-weight: 400 700;
   font-display: swap;
-  src: url("/fuentes/newsreader-italic-latin.woff2") format("woff2");
+  src: url("/fuentes/newsreader-italic-o16-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }

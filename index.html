@@ -4,9 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/brand/v2/isotipo-verde.png" />
     <link rel="apple-touch-icon" href="/brand/v2/isotipo-verde.png" />
-    <!-- La letra del sitio, servida por nosotros (ver src/styles/fuentes.css). Se precarga
-         la que usa casi todo el texto para que no haya un salto al llegar. -->
+    <!-- La letra del sitio, servida por nosotros (ver src/styles/fuentes.css). Se precargan
+         las dos de la primera pantalla para que no haya un salto al llegar: Host Grotesk,
+         la de casi todo el texto, y Newsreader, la de los titulares. `crossorigin` porque
+         las fuentes siempre se piden en modo CORS: sin él se bajarían dos veces. -->
     <link rel="preload" href="/fuentes/host-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fuentes/newsreader-o36-latin.woff2" as="font" type="font/woff2" crossorigin />
     <!-- Los datos de cada página salen de la API en Render: la conexión (DNS, TCP, TLS) se
          abre mientras baja el JavaScript, y no después. `crossorigin` porque la página la
          llama con fetch en modo CORS y sin cookies; sin él el navegador abre otra conexión

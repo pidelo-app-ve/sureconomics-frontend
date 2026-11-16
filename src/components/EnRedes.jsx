@@ -186,11 +186,12 @@ const VideoTikTok = ({ pieza, onCerrar }) => {
           )}
         </div>
         <p id={tituloId} className="se-redes-video__pie">
-          {pieza.texto}{" "}
-          <a href={pieza.enlace} target="_blank" rel="noreferrer noopener">
-            {t("portada.redes.verEnTikTok")}<span aria-hidden="true"> ↗</span>
-          </a>
+          {pieza.texto}
         </p>
+        {/* Fuera del pie, que se corta en tres o cuatro líneas: el enlace siempre a la vista. */}
+        <a className="se-redes-video__enlace" href={pieza.enlace} target="_blank" rel="noreferrer noopener">
+          {t("portada.redes.verEnTikTok")}<span aria-hidden="true"> ↗</span>
+        </a>
       </div>
     </div>
   );

@@ -5648,8 +5648,10 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   /* El ancho sale del alto disponible: un video vertical a 420 px de ancho mide 746
      de alto, y en una pantalla más baja se recortaba la altura pero no el ancho -- se
      rompía la proporción y el reproductor quedaba cortado con barra de desplazamiento.
-     Ahora cabe entero: alto de la ventana menos el pie y el botón de cerrar, por 9/16. */
-  --video-alto-libre: calc(100dvh - 10rem);
+     Ahora cabe entero: alto de la ventana menos el pie y el botón de cerrar, por 9/16.
+     12,5rem: el margen (2), el botón con su hueco (3), el hueco del pie (0,85), el pie
+     a lo sumo (4 líneas, 4,9) y «Ver en TikTok» con su hueco (1,6). */
+  --video-alto-libre: calc(100dvh - 12.5rem);
   width: min(420px, calc(100vw - 2.4rem), calc(var(--video-alto-libre) * 9 / 16));
   max-height: calc(100dvh - 2rem);
   opacity: 0;
@@ -5657,9 +5659,11 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 }
 
 .se-redes-video__cerrar {
-  position: absolute;
-  top: -3rem;
-  right: 0;
+  /* En la columna, arriba a la derecha, y no colgado por encima de la caja: con un pie
+     largo la caja crecía y el botón quedaba fuera de la pantalla (teléfono, 16-nov). */
+  align-self: flex-end;
+  flex: none;
+  margin-bottom: -0.6rem;
   width: 44px;
   height: 44px;
   border-radius: 999px;
@@ -5713,20 +5717,34 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 }
 
 .se-redes-video__pie {
+  flex: none;
+  /* Cuatro líneas como mucho (tres en el teléfono) y «…»: un pie de TikTok puede ser muy
+     largo y empujaba el video y el botón fuera. Entero, a un toque: «Ver en TikTok». */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
   margin: 0;
   color: rgba(255, 255, 255, 0.88);
   font-family: var(--se-font-ui);
   font-size: 0.82rem;
   line-height: 1.5;
 }
-.se-redes-video__pie a {
+.se-redes-video__enlace {
+  flex: none;
+  align-self: flex-start;
+  margin-top: -0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
   color: #fff;
   text-decoration: underline;
   text-underline-offset: 2px;
   white-space: nowrap;
 }
-.se-redes-video__pie a:hover,
-.se-redes-video__pie a:focus-visible { color: var(--color-accent); }
+.se-redes-video__enlace:hover,
+.se-redes-video__enlace:focus-visible { color: var(--color-accent); }
 
 @keyframes se-redes-video-fondo-in {
   from { opacity: 0; }
@@ -5739,10 +5757,10 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 
 @media (max-width: 640px) {
   .se-redes-video__superficie {
-    --video-alto-libre: calc(100dvh - 9rem);
+    --video-alto-libre: calc(100dvh - 11.25rem);
     width: min(calc(100vw - 1.6rem), calc(var(--video-alto-libre) * 9 / 16));
   }
-  .se-redes-video__cerrar { top: -3.2rem; }
+  .se-redes-video__pie { -webkit-line-clamp: 3; line-clamp: 3; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -133,7 +133,7 @@ const esTextoHumano = (texto) => {
 const restos = [];
 for (const archivo of publicos) {
   if (!archivo.endsWith(".jsx")) continue;
-  const lineas = readFileSync(archivo, "utf8").split("\n");
+  const lineas = readFileSync(archivo, "utf8").split(/\r?\n/);
   const encontrados = [];
   // Un comentario de bloque abierto en una línea anterior: nada de lo que diga es texto visible.
   let enComentario = false;

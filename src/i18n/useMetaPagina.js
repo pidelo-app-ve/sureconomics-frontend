@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { SITIO, applyPageMeta } from "../lib/seo";
+import { consultaCanonica } from "../lib/canonica";
 import { rutaEnIdioma, sinPrefijo } from "./motor";
 import { useIdioma } from "./ProveedorIdioma";
 
@@ -29,7 +30,8 @@ export const useMetaPagina = ({
 } = {}) => {
   const { lang } = useIdioma();
   const { pathname, search } = useLocation();
-  const base = sinPrefijo(pathname) + search;
+  // Solo la consulta que cambia de página (ver `lib/canonica`): sin el `?v=` de compartir.
+  const base = sinPrefijo(pathname) + consultaCanonica(search);
 
   useEffect(() => {
     const enEspanol = `${SITIO}${rutaEnIdioma(base, "es")}`;

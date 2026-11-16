@@ -41,6 +41,10 @@ check("vista previa desde youtube-nocookie", previa.startsWith("https://www.yout
 check("vista previa muda y sin controles", previa.includes("mute=1") && previa.includes("controls=0"));
 check("vista previa sin bucle (sin ⏮ ⏭)", !previa.includes("loop=") && !previa.includes("playlist="));
 check("la ventana se puede pausar por mensaje", urlReproductor("XH7XySD6nDs").includes("enablejsapi=1"));
+check("sin origen, la vista previa no habla por mensaje", !previa.includes("enablejsapi"));
+const escucha = urlVistaPrevia("XH7XySD6nDs", { origen: "https://www.sureconomics.com" });
+check("con origen, contesta por mensaje y solo a la web",
+  escucha.includes("enablejsapi=1") && escucha.includes("origin=https%3A%2F%2Fwww.sureconomics.com") && escucha.includes("mute=1"));
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

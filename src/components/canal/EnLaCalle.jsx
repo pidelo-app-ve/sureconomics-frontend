@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanal } from "../../hooks/useCanal";
 import { consulta, usePuedePrevisualizar } from "../../hooks/useVistaPrevia";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { duracionReloj } from "../../lib/youtube";
+import { duracionReloj, precalentarReproductor } from "../../lib/youtube";
 import { IconoPausa } from "../comun/IconoPausa";
 import { VisorDeShorts, precargarVisor } from "./VisorDeShorts";
 import { IconoPlay, VistaPrevia } from "./VistaPrevia";
@@ -27,7 +27,7 @@ import "./enLaCalle.css";
  */
 
 const SIN_PREVIAS = "se_calle_previas";
-const ESPERA_RATON = 350;
+const ESPERA_RATON = 150;
 const ESPERA_TACTIL = 500;
 
 const esClicSencillo = (e) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
@@ -71,7 +71,7 @@ const Tarjeta = ({ v, indice, previa, onAbrir, onAsomar, onRetirar, onAgotada })
           decoding="async"
         />
         {previa ? (
-          <VistaPrevia id={v.id} titulo={v.titulo} className="se-calle__previa" onAgotada={() => onAgotada(indice)} />
+          <VistaPrevia id={v.id} titulo={v.titulo} className="se-calle__previa" onAgotada={() => onAgotada(indice)} enCuantoCorra />
         ) : null}
         <span className="se-calle__texto">
           <span className="se-calle__dura">
@@ -185,9 +185,16 @@ export const EnLaCalle = () => {
     };
   }, [hay, fino, programar]);
 
+  // Con la fila a la vista y vistas previas posibles, la conexión con YouTube se abre ya:
+  // al pasar el ratón el video llega antes. Nunca al cargar la página.
+  const asomaria = puede && !pausado && enPantalla;
+  useEffect(() => {
+    if (asomaria) precalentarReproductor();
+  }, [asomaria]);
+
   if (!hay) return null;
 
-  const previa = puede && !pausado && enPantalla && visible && abierto === null ? candidata : null;
+  const previa = asomaria && visible && abierto === null ? candidata : null;
 
   const alternarPausa = () => {
     const nuevo = !pausado;

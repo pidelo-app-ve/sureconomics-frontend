@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { urlVistaPrevia } from "../../lib/youtube";
+import { alEmpezar, urlVistaPrevia } from "../../lib/youtube";
 
 /**
  * El video mudo que se asoma sobre una portada: la fila «En la calle» y la apertura con
@@ -10,27 +10,45 @@ import { urlVistaPrevia } from "../../lib/youtube";
  *
  * - YouTube enseña un instante su carátula, su rueda y sus mandos al arrancar: el video
  *   se funde sobre la portada cuando ya corre limpio (`ESPERA_LIMPIO`).
+ * - Con `enCuantoCorra`, se enseña en cuanto el reproductor dice que corre (y, si no lo
+ *   dice, a los `ESPERA_LIMPIO` igual): para quien recorta la franja de YouTube con CSS.
  * - Es un asomo, no el video: a los 20 s avisa (`onAgotada`) para que vuelva la portada.
  * - No recibe ni el foco ni el ratón: la tarjeta de debajo es el botón.
  */
 export const ESPERA_LIMPIO = 2600;
 export const DURA_PREVIA = 20000;
+/** Ya corriendo, lo que tarda en irse la rueda de YouTube. */
+const ESPERA_CORRIENDO = 200;
 
-export const VistaPrevia = ({ id, titulo, className, onAgotada }) => {
+export const VistaPrevia = ({ id, titulo, className, onAgotada, enCuantoCorra }) => {
   const { t } = useIdioma();
   const [lista, setLista] = useState(false);
   const relojes = useRef([]);
-  useEffect(() => () => relojes.current.forEach((r) => window.clearTimeout(r)), []);
+  const marco = useRef(null);
+  const dejarDeEscuchar = useRef(null);
+  useEffect(
+    () => () => {
+      relojes.current.forEach((r) => window.clearTimeout(r));
+      dejarDeEscuchar.current?.();
+    },
+    []
+  );
   const alCargar = () => {
     relojes.current = [
       window.setTimeout(() => setLista(true), ESPERA_LIMPIO),
       window.setTimeout(() => onAgotada?.(), ESPERA_LIMPIO + DURA_PREVIA),
     ];
+    if (enCuantoCorra) {
+      dejarDeEscuchar.current = alEmpezar(marco.current, () => {
+        relojes.current.push(window.setTimeout(() => setLista(true), ESPERA_CORRIENDO));
+      });
+    }
   };
   return (
     <iframe
+      ref={marco}
       className={`${className}${lista ? " is-lista" : ""}`}
-      src={urlVistaPrevia(id)}
+      src={urlVistaPrevia(id, enCuantoCorra ? { origen: window.location.origin } : undefined)}
       title={t("portada.calle.vistaPrevia", { titulo })}
       tabIndex={-1}
       aria-hidden="true"
@@ -46,6 +64,8 @@ VistaPrevia.propTypes = {
   titulo: PropTypes.string,
   className: PropTypes.string.isRequired,
   onAgotada: PropTypes.func,
+  /** Enseñarlo en cuanto corre: quien lo usa recorta la franja de arriba de YouTube. */
+  enCuantoCorra: PropTypes.bool,
 };
 
 /** El ▶ en un círculo de las portadas de video. */

@@ -134,8 +134,13 @@
 }
 
 /* El video se funde sobre la portada con un desenfoque leve, para que no se vean dos
-   imágenes cruzándose; mientras YouTube arranca, no se ve. */
+   imágenes cruzándose; mientras YouTube arranca, no se ve. Más grande que la tarjeta,
+   que lo recorta: la franja de arriba de YouTube (título y canal) queda fuera, y así se
+   enseña en cuanto corre (`enCuantoCorra`) sin esperar a que se vaya. */
 .se-calle__previa {
+  inset: -14%;
+  width: 128%;
+  height: 128%;
   border: 0;
   opacity: 0;
   filter: blur(6px);
@@ -146,6 +151,18 @@
 .se-calle__previa.is-lista {
   opacity: 1;
   filter: none;
+}
+
+/* Mientras el video llega, el ▷ late: pasar el ratón ya hizo algo. */
+@media (prefers-reduced-motion: no-preference) {
+  .se-calle__previa:not(.is-lista) ~ .se-calle__texto .se-calle__dura svg {
+    animation: se-calle-late 0.9s ease-in-out infinite;
+  }
+}
+
+@keyframes se-calle-late {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.6; }
 }
 
 .se-calle__tarjeta::after {

@@ -10,7 +10,7 @@
  */
 const BASE = "https://www.youtube-nocookie.com/embed/";
 
-export const urlVistaPrevia = (id) =>
+export const urlVistaPrevia = (id, { origen } = {}) =>
   `${BASE}${encodeURIComponent(id)}?${new URLSearchParams({
     autoplay: "1",
     mute: "1",
@@ -21,6 +21,8 @@ export const urlVistaPrevia = (id) =>
     disablekb: "1",
     iv_load_policy: "3",
     fs: "0",
+    // Con `origen` (la web), el reproductor contesta por mensaje cuándo corre (`alEmpezar`).
+    ...(origen ? { enablejsapi: "1", origin: origen } : {}),
   })}`;
 
 /** El id de un video en cualquier enlace de YouTube: watch, youtu.be, embed, shorts o live. */
@@ -54,6 +56,64 @@ export const pausar = (iframe) => {
   } catch {
     /* si el reproductor aún no está, no hay nada que pausar */
   }
+};
+
+const ORIGEN = "https://www.youtube-nocookie.com";
+
+/**
+ * Avisa una vez cuando un reproductor con `enablejsapi` empieza a correr, sin cargar el
+ * script de YouTube (que pesa más de 100 KB): se le dice por mensaje que escuchamos, como
+ * hace su script, y él contesta con su estado. Se insiste unos segundos, porque al cargar
+ * el marco el reproductor aún puede no estar atento. Devuelve con qué dejar de escuchar.
+ */
+export const alEmpezar = (iframe, aviso) => {
+  let insistir = null;
+  let tope = null;
+  const parar = () => {
+    window.removeEventListener("message", alMensaje);
+    window.clearInterval(insistir);
+    window.clearTimeout(tope);
+  };
+  function alMensaje(e) {
+    if (e.origin !== ORIGEN || !iframe || e.source !== iframe.contentWindow) return;
+    let datos;
+    try {
+      datos = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+    } catch {
+      return;
+    }
+    const info = datos?.info;
+    const corre = datos?.event === "onStateChange" ? info === 1 : info?.playerState === 1;
+    if (!corre) return;
+    parar();
+    aviso();
+  }
+  const decir = () => {
+    try {
+      iframe?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), ORIGEN);
+    } catch {
+      /* el marco ya no está */
+    }
+  };
+  window.addEventListener("message", alMensaje);
+  decir();
+  insistir = window.setInterval(decir, 250);
+  tope = window.setTimeout(() => window.clearInterval(insistir), 5000);
+  return parar;
+};
+
+/**
+ * Abre de antemano la conexión con el reproductor, una vez por página: lo usa «En la
+ * calle» cuando la fila ya está a la vista y puede asomar un video, nunca al cargar.
+ */
+let precalentado = false;
+export const precalentarReproductor = () => {
+  if (precalentado || typeof document === "undefined") return;
+  precalentado = true;
+  const enlace = document.createElement("link");
+  enlace.rel = "preconnect";
+  enlace.href = ORIGEN;
+  document.head.appendChild(enlace);
 };
 
 /**

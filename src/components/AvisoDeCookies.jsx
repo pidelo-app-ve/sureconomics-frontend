@@ -93,7 +93,8 @@ export const AvisoDeCookies = () => {
   // `scroll-padding-bottom` (ver `accesibilidad.css`) y el navegador deja el foco por
   // encima. El alto se mide en vivo y no se supone: cambia con el ancho, con el tamaño
   // de letra y con el texto, y una cifra fija se queda corta en cuanto algo de eso se
-  // mueve.
+  // mueve. La primera medida la da el `ResizeObserver` al observar, con el diseño ya
+  // hecho: medir aquí mismo, recién puesta la clase, obligaba a recalcularlo a destiempo.
   useEffect(() => {
     if (!visible) return undefined;
     const raiz = document.documentElement;
@@ -102,11 +103,12 @@ export const AvisoDeCookies = () => {
       const alto = barra.current?.getBoundingClientRect().height;
       if (alto) raiz.style.setProperty("--se-aviso-cookies-alto", `${Math.ceil(alto)}px`);
     };
-    medir();
     let vigia = null;
     if (typeof ResizeObserver !== "undefined" && barra.current) {
       vigia = new ResizeObserver(medir);
       vigia.observe(barra.current);
+    } else {
+      medir();
     }
     return () => {
       vigia?.disconnect();

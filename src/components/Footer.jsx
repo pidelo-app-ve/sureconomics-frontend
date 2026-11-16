@@ -3,7 +3,7 @@ import { Enlace } from "./Enlace";
 import { sinPrefijo } from "../i18n/motor";
 import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
 import { IconInstagram, IconTikTok, IconX } from "./icons/social";
-import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
+import { BRAND as MARCA, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useState } from "react";
 import { subscribeToNewsletter } from "../services/newsletterService";
@@ -97,14 +97,18 @@ export const Footer = () => {
         <div className="se-footer__grid se-footer__grid--cinco">
           <div className="se-footer__about">
             <h2 className="se-footer__brand">
-              <img
-                className="se-footer__brand-mark"
-                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
-                alt=""
-                width={220}
-                height={48}
-                decoding="async"
-              />
+              {/* El mismo WebP sin pérdida que la cabecera (ver `Navbar.jsx`). */}
+              <picture>
+                <source srcSet={MARCA.lockupNegativoWebp} type="image/webp" />
+                <img
+                  className="se-footer__brand-mark"
+                  src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                  alt=""
+                  width={220}
+                  height={48}
+                  decoding="async"
+                />
+              </picture>
               <span className="se-sr-only">{BRAND.name}</span>
             </h2>
             <p className="se-footer__description">{t("marca.descripcion")}</p>

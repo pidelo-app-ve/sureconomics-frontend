@@ -26,6 +26,9 @@ export const BRAND = {
   lockupCobre: file("lockup-cobre.png"),
   /** En negativo, todo en blanco. Sobre la franja verde de la cabecera. */
   lockupNegativo: file("lockup-negativo.png"),
+  /** El mismo en WebP sin pérdida (los mismos píxeles, 22 KB y no 41). La carpeta v2 se
+   * sirve con caché de un año e `immutable`: un cambio de marca va en otra carpeta (v3). */
+  lockupNegativoWebp: file("lockup-negativo.webp"),
 
   /** Versión secundaria "Sur E", para cuando no cabe el lockup. */
   corta: file("sure-verde.png"),

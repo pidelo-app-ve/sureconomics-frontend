@@ -129,7 +129,9 @@ const filaBilingue = (ruta, extra = "") => {
 
 /** El mapa completo: páginas fijas en los dos idiomas y cada pieza con su última edición. */
 export const mapaCompleto = (piezas) => {
-  const filas = PAGINAS_FIJAS.flatMap(filaBilingue);
+  // Con la flecha y no `flatMap(filaBilingue)`: flatMap pasa también el índice, que
+  // entraba como `extra` y dejaba un «0», «1»… suelto dentro de cada <url>.
+  const filas = PAGINAS_FIJAS.flatMap((ruta) => filaBilingue(ruta));
   for (const p of piezas) {
     const loc = urlDe(p);
     if (!loc) continue;

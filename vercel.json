@@ -83,7 +83,7 @@
             "destination": "/api/sitemap?tipo=noticias"
         },
         {
-            "source": "/((?!assets/).*)",
+            "source": "/((?!assets/)(?!.*\\.[A-Za-z0-9]{1,8}$).*)",
             "destination": "/index.html"
         }
     ],
@@ -103,6 +103,33 @@
                 {
                     "key": "Cache-Control",
                     "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/brand/v2/(.*\\.[A-Za-z0-9]{1,8})",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/brand/((?!v2/).*\\.[A-Za-z0-9]{1,8})",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=604800"
+                }
+            ]
+        },
+        {
+            "source": "/lvbp/(.*\\.[A-Za-z0-9]{1,8})",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=604800"
                 }
             ]
         },

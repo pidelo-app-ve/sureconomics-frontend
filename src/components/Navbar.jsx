@@ -4,12 +4,15 @@ import { Enlace } from "./Enlace";
 import { sinPrefijo } from "../i18n/motor";
 import PropTypes from "prop-types";
 import { PRIMARY_NAV } from "../data/surEconomicsMock";
-import { BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
+import { BRAND, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { Relojes, RelojesEnLista } from "./Relojes";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useUserAuth } from "../context/UserAuthContext";
 
 const MENU_ID = "se-header-menu";
+
+/** El logotipo de la barra y del cajón en WebP sin pérdida: los mismos píxeles que el PNG, en 22 KB y no 41. */
+const LOGO_WEBP = BRAND.lockupNegativoWebp;
 
 /** Lo que se puede tabular dentro del cajón: el mismo criterio que el cuadro de TikTok. */
 const FOCALES =
@@ -286,14 +289,23 @@ export const Navbar = () => {
     closeMenu();
   }, [location.pathname, closeMenu]);
 
+  // La sombra sale al bajar más de 50 px. Lo dice un testigo invisible de 50 px pegado
+  // arriba del documento: cuando deja de verse, se ha bajado. Antes se leía `scrollY` en
+  // cada scroll, y esa lectura obligaba al navegador a recalcular el diseño a destiempo.
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    if (!("IntersectionObserver" in window)) return undefined;
+    const testigo = document.createElement("div");
+    testigo.setAttribute("aria-hidden", "true");
+    testigo.style.cssText = "position:absolute;top:0;left:0;width:1px;height:50px;visibility:hidden";
+    document.body.prepend(testigo);
+    const vigia = new IntersectionObserver((cambios) => {
+      setIsScrolled(!cambios[cambios.length - 1].isIntersecting);
+    });
+    vigia.observe(testigo);
+    return () => {
+      vigia.disconnect();
+      testigo.remove();
     };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Al abrir, el foco entra en el cajón -- en el primer enlace, que es a lo que se
@@ -365,12 +377,17 @@ export const Navbar = () => {
         >
           {/* La marca entera también en el teléfono: sin el reloj en la barra cabe a
               24 px de alto, y la versión comprimida («Sur E») se leía como un logo roto. */}
-          <img
-            src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
-            alt=""
-            className="se-header__logo"
-            decoding="async"
-          />
+          <picture>
+            <source srcSet={LOGO_WEBP} type="image/webp" />
+            <img
+              src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+              alt=""
+              className="se-header__logo"
+              width="900"
+              height="117"
+              decoding="async"
+            />
+          </picture>
         </Enlace>
 
         {/* Desktop nav — visible only from 992px up */}
@@ -502,13 +519,16 @@ export const Navbar = () => {
                   es lo que hace que ese se lea bien y el cajón no. Antes decía
                   "Menú", una etiqueta que no dice nada que el cajón abierto no
                   diga ya, y que además chocaba con el logo de la barra. */}
-              <img
-                className="se-header__menu-brand"
-                src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
-                alt="SurEconomics"
-                width="150"
-                height="20"
-              />
+              <picture>
+                <source srcSet={LOGO_WEBP} type="image/webp" />
+                <img
+                  className="se-header__menu-brand"
+                  src={BRAND_PUBLIC_LOGO.dark.wordmarkNoTagline}
+                  alt="SurEconomics"
+                  width="150"
+                  height="20"
+                />
+              </picture>
               <button
                 type="button"
                 className="se-header__menu-close"

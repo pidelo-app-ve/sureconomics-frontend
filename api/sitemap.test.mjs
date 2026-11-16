@@ -48,6 +48,7 @@ const aMedias = mapaCompleto([{ ...pieza(1, 2), title_en: "Piece one", en_ingles
 check("una traducción a medias no entra en inglés", !aMedias.includes("/en/noticias/pieza-1"));
 check("la pieza con inglés va en los dos idiomas", conIngles.includes("<loc>https://www.sureconomics.com/en/noticias/pieza-1</loc>"));
 check("y los dos enlazados", conIngles.includes('hreflang="en" href="https://www.sureconomics.com/en/noticias/pieza-1"'));
+check("dentro de cada <url> solo etiquetas, sin texto suelto", !/<\/loc>[^<\s]/.test(completo) && !/<url>[^<\s]/.test(completo));
 check("enIngles", enIngles("/") === "/en" && enIngles("/articulos?formato=noticias") === "/en/articulos?formato=noticias");
 
 // 3. El de noticias: solo 48 horas, y escapado.

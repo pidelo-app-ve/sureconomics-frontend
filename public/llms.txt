@@ -1,0 +1,31 @@
+# SurEconomics
+
+> Medio digital de economía, mercados e inversión en América Latina. Publica en español; la versión en inglés del sitio está en https://www.sureconomics.com/en, con las piezas que ya están traducidas.
+
+Publica noticias, artículos de análisis con firma, editoriales de la casa, informes y reportes de investigación, entrevistas y podcast. Cada pieza tiene su propia dirección (https://www.sureconomics.com/noticias/…, /articulos/…, /editorial/…, /informes/…, /entrevistas/…, /podcast/…) y llega con su texto completo en el HTML. Los listados se dibujan en el navegador con JavaScript: para recorrer todo lo publicado, sirve mejor el mapa del sitio.
+
+## Secciones
+
+- [Noticias](https://www.sureconomics.com/articulos?formato=noticias): las noticias de economía, mercados e inversión de la región.
+- [Artículos](https://www.sureconomics.com/articulos): artículos de análisis con firma.
+- [Editorial](https://www.sureconomics.com/articulos?formato=editorial): los editoriales de la casa.
+- [Informes](https://www.sureconomics.com/informes): informes y reportes de investigación.
+- [Al punto](https://www.sureconomics.com/audiovisual): los videos del canal de YouTube de SurEconomics (entrevistas, análisis y lo que dice la calle) y el podcast.
+- [Resumen diario](https://www.sureconomics.com/resumen): tres veces al día, lo más importante desde la edición anterior, con las cifras.
+- [Monedas de la región](https://www.sureconomics.com/monedas): cuánto vale un dólar hoy en bolívares, pesos, reales, soles, guaraníes y euros, según cada banco central.
+- [Explorar](https://www.sureconomics.com/explorar): todo lo publicado, con buscador y filtros por tema y por lugar.
+
+## Sobre el medio
+
+- [Quiénes somos](https://www.sureconomics.com/quienes-somos): el equipo, con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires, y sus aliados institucionales.
+- [Contacto](https://www.sureconomics.com/contacto): consultas, alianzas, publicidad y proyectos de investigación o asesoría.
+- [Anúnciate](https://www.sureconomics.com/anunciate): los formatos publicitarios del sitio y cómo contratarlos.
+
+## Mapas
+
+- [Mapa del sitio](https://www.sureconomics.com/sitemap.xml): cada pieza publicada con su fecha de última edición, y las páginas fijas en los dos idiomas.
+- [Mapa de noticias](https://www.sureconomics.com/sitemap-noticias.xml): lo publicado en las últimas 48 horas, en el formato de Google Noticias.
+
+## Optional
+
+- [Política de cookies](https://www.sureconomics.com/cookies): qué guarda cada cookie propia del sitio, durante cuánto tiempo y cómo retirar el permiso.

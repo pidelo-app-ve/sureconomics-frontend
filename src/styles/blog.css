@@ -7429,8 +7429,10 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   padding-bottom: 0;
   /* Se despliega desde el mástil, como un cajón: se recorta de arriba abajo y baja
      unos píxeles. Al cerrar, lo mismo al revés (`--cierra`; la portada lo mantiene
-     pintado `CIERRE_CAJON_MS` para que dé tiempo). */
-  animation: se-cajon-abre 260ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+     pintado `CIERRE_CAJON_MS` para que dé tiempo). Sin `forwards`: al acabar no queda
+     puesto el `clip-path` del final, que recortaba a ras del cajón los desplegables de
+     Tema y Dónde (16-nov). */
+  animation: se-cajon-abre 260ms cubic-bezier(0.2, 0.9, 0.25, 1) backwards;
 }
 
 .se-explorer-section--cierra {
@@ -10825,6 +10827,7 @@ html {
   }
 
   .se-publico .se-explorer-section--primera .se-explorer__bar {
+    position: relative;
     gap: 4px 14px;
   }
 
@@ -10833,7 +10836,15 @@ html {
   }
 
   .se-publico .se-explorer-section--primera .se-explorer__sel {
+    position: static;
     flex: 0 0 auto;
+  }
+
+  /* El desplegable, a lo ancho de la barra y no del botón: medía lo que «Dónde», 66 px. */
+  .se-publico .se-explorer-section--primera .se-explorer__panel {
+    left: 0;
+    right: 0;
+    width: auto;
   }
 
   .se-explorer__rapidos {

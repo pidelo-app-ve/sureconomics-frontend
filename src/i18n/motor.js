@@ -11,9 +11,11 @@
  *    `es/` y `en/`. Cambiar un texto es editar una línea. Las claves van por nombre
  *    (`cuenta.entrar.titulo`) y no por el texto en español: si el español cambia, el
  *    inglés sigue enganchado.
- * 3. **El inglés no pesa en el español.** Los JSON en español entran en el paquete
- *    (sustituyen a los textos sueltos que había: peso neto cero); los de inglés se
- *    descargan solo al entrar en `/en`, antes de pintar (ver el `loader` en `routes.jsx`).
+ * 3. **Cada texto viaja con quien lo usa.** Con el sitio va solo lo que usa lo que se
+ *    carga siempre (cabecera, pie, portada, pieza: `es/index.js`). El resto va por zonas
+ *    (`cuenta`, `educacion`, `juegos`…) y se descarga con la página que lo usa, antes de
+ *    pintarla: el `lazy` de cada ruta en `routes.jsx` pide su código y sus zonas a la vez.
+ *    El inglés, igual, y solo en `/en` (ver el `loader` de esa ruta).
  *
  * Este archivo no importa ningún diccionario: `diccionarios.js` los registra. Así las
  * pruebas (`motor.test.mjs`) lo cargan en Node con diccionarios de mentira.
@@ -33,8 +35,14 @@ export const NOMBRE_DEL_IDIOMA = { es: "Español", en: "English" };
 export const REGION = { es: "es", en: "en-US" };
 
 const diccionarios = { es: null, en: null };
+/** Lo que ya está pedido de cada idioma: "base" (lo que va siempre) y cada zona, con su promesa. */
+const pedidos = { es: new Map(), en: new Map() };
+/** Lo que ya llegó. */
+const listos = { es: new Set(), en: new Set() };
 let actual = IDIOMA_BASE;
 let cargarEn = null;
+/** `{ zona: { es: () => dic, en: () => dic } }`: lo registra `diccionarios.js`. */
+const cargadoresDeZona = {};
 
 export const idiomaActual = () => actual;
 
@@ -43,8 +51,28 @@ export const fijarIdioma = (lang) => {
   actual = IDIOMAS.includes(lang) ? lang : IDIOMA_BASE;
 };
 
+/**
+ * Junta un diccionario dentro de otro, apartado a apartado: una zona puede traer el resto
+ * de un apartado que ya estaba (`cuenta.api` va siempre; lo demás de `cuenta`, con su
+ * zona). Copia lo que trae: los JSON importados no se tocan.
+ */
+const juntar = (destino, fuente) => {
+  for (const [k, v] of Object.entries(fuente)) {
+    const esObjeto = v !== null && typeof v === "object" && !Array.isArray(v);
+    if (esObjeto && destino[k] !== null && typeof destino[k] === "object") juntar(destino[k], v);
+    else destino[k] = esObjeto ? juntar({}, v) : v;
+  }
+  return destino;
+};
+
+const anadir = (lang, nombre, dic) => {
+  diccionarios[lang] = juntar(diccionarios[lang] ?? {}, dic);
+  listos[lang].add(nombre);
+};
+
 export const registrarDiccionario = (lang, dic) => {
-  diccionarios[lang] = dic;
+  anadir(lang, "base", dic);
+  pedidos[lang].set("base", Promise.resolve());
 };
 
 /** `diccionarios.js` deja aquí cómo descargar el inglés; el motor no sabe de archivos. */
@@ -52,14 +80,46 @@ export const registrarCargador = (lang, cargador) => {
   if (lang === "en") cargarEn = cargador;
 };
 
-/** Descarga el diccionario de un idioma si aún no está. El español ya viene. */
-export const cargarIdioma = async (lang) => {
-  if (lang === IDIOMA_BASE || diccionarios[lang]) return;
-  if (!cargarEn) throw new Error("[i18n] nadie registró cómo cargar el inglés: importa i18n/diccionarios antes de las rutas");
-  diccionarios[lang] = await cargarEn();
+/** Pide una parte de un diccionario una sola vez; si falla (sin red), el siguiente intento la vuelve a pedir. */
+const pedir = (lang, nombre, cargador) => {
+  if (!pedidos[lang].has(nombre)) {
+    const promesa = cargador().then((dic) => anadir(lang, nombre, dic));
+    promesa.catch(() => pedidos[lang].delete(nombre));
+    pedidos[lang].set(nombre, promesa);
+  }
+  return pedidos[lang].get(nombre);
 };
 
-export const diccionarioCargado = (lang) => Boolean(diccionarios[lang]);
+/** Descarga lo que va siempre de un idioma si aún no está. El español ya viene. */
+export const cargarIdioma = async (lang) => {
+  if (lang === IDIOMA_BASE) return;
+  if (!cargarEn) throw new Error("[i18n] nadie registró cómo cargar el inglés: importa i18n/diccionarios antes de las rutas");
+  await pedir(lang, "base", cargarEn);
+};
+
+export const diccionarioCargado = (lang) => listos[lang]?.has("base") ?? false;
+
+/** `diccionarios.js` deja aquí cómo descargar cada zona en cada idioma. */
+export const registrarZonas = (zonas) => {
+  Object.assign(cargadoresDeZona, zonas);
+};
+
+/**
+ * Descarga las zonas de una página en un idioma (las que aún no estén) y las junta con lo
+ * demás. La llama el `lazy` de cada ruta, a la vez que pide el código de la página: la
+ * página no se pinta hasta que sus textos están.
+ */
+export const cargarZonas = async (lang, zonas = []) => {
+  await Promise.all(
+    zonas.map((zona) => {
+      const cargador = cargadoresDeZona[zona]?.[lang];
+      if (!cargador) throw new Error(`[i18n] no hay zona «${zona}» en «${lang}»: regístrala en i18n/diccionarios`);
+      return pedir(lang, zona, cargador);
+    })
+  );
+};
+
+export const zonaCargada = (lang, zona) => listos[lang]?.has(zona) ?? false;
 
 const buscar = (dic, clave) => {
   if (!dic) return undefined;

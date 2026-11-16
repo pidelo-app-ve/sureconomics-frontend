@@ -58,26 +58,6 @@
       "noGracias": "No, thanks — go to SurEconomics",
       "letra": "No spam. Unsubscribe with one click from any issue.",
       "escribaCorreo": "Enter your email to subscribe."
-    },
-    "invitacion": {
-      "kicker": "Weekly newsletter · Monday mornings",
-      "texto": "The week's economic landscape, told in vignettes. It arrives every Monday, before the week starts moving.",
-      "suCorreo": "Your email",
-      "placeholder": "name@email.com",
-      "unirse": "Join the newsletter",
-      "enviando": "Sending…",
-      "ahoraNo": "Not now",
-      "ok": "Done. The first issue arrives on Monday.",
-      "exitoTitulo": "You're in",
-      "exitoTexto": "The first issue of {boletin} arrives Monday morning{correo}.",
-      "exitoA": "at",
-      "exitoNota": "If you don't see it, check «Promotions» or your spam folder."
-    },
-    "nombre": "Entorno en Viñetas",
-    "errores": {
-      "correoIncompleto": "That email address looks incomplete. Check it and try again.",
-      "demasiados": "Too many attempts in a row. Wait a moment.",
-      "fallo": "We couldn't complete your subscription. Please try again."
     }
   }
 }

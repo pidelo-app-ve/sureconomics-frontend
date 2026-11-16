@@ -13,19 +13,6 @@
       "fuente": "Source",
       "fecha": "As of"
     },
-    "nombres": {
-      "VES": "Bolívar",
-      "MXN": "Mexican peso",
-      "BRL": "Real",
-      "COP": "Colombian peso",
-      "ARS": "Argentine peso",
-      "PEN": "Sol",
-      "CLP": "Chilean peso",
-      "PYG": "Guaraní",
-      "DOP": "Dominican peso",
-      "KYD": "Cayman Islands dollar",
-      "EUR": "Euro"
-    },
     "paises": {
       "VES": "Venezuela",
       "MXN": "Mexico",
@@ -47,28 +34,11 @@
     "aviso": "These are official closes and reference rates, not live quotes. To trade, check with your bank.",
     "error": "The currencies couldn't be loaded. Try again in a moment.",
     "grafica": {
-      "titulo": "{nombre} per dollar, last 30 days",
       "abrir": "See the chart for {nombre}",
       "cerrar": "Close the chart for {nombre}",
       "cargando": "Loading the chart…",
-      "pocosDatos": "There is not enough data yet to draw the chart.",
-      "variacion": "{n} in 30 days",
-      "resumen": "From {desde} to {hasta}: {n}",
-      "datos": "See the data",
-      "colFecha": "Date",
-      "colValor": "Per 1 USD",
       "comparar": "Compare with",
-      "ninguna": "None",
-      "tituloComparar": "Change against the dollar since {desde}",
-      "sinComparar": "There is not enough data for {nombre} to compare it; only the selected currency is shown.",
-      "resumenComparar": "From {desde} to {hasta}, change against the dollar: {a} {na}, {b} {nb}",
-      "lectura": "Going up means it takes more of the currency to buy one dollar: the currency is weakening. This is not inflation, though the two often move together.",
-      "colMoneda": "{codigo} per 1 USD"
-    },
-    "ficha": {
-      "etiqueta": "{codigo}: {valor} per dollar, {variacion} today",
-      "sinVariacion": "no change"
-    },
-    "masMovidas": "The ones that moved most today"
+      "ninguna": "None"
+    }
   }
 }

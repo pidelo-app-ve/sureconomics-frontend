@@ -427,11 +427,6 @@
       "vistaPreviaOk": "Preview loaded successfully.",
       "quitar": "Remove image"
     },
-    "api": {
-      "debeIniciarSesion": "You need to sign in",
-      "sesionExpirada": "Your session expired",
-      "errorSolicitud": "Request error"
-    },
     "temas": {
       "meta": {
         "titulo": "My topics — {marca}",

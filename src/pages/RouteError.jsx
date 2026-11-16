@@ -1,7 +1,15 @@
+import { Suspense, lazy } from "react";
 import { useRouteError } from "react-router-dom";
 import { useIdioma } from "../i18n/ProveedorIdioma";
+import { cargarZonas } from "../i18n/motor";
 import { esErrorDeCarga, recargarUnaVez } from "../lib/recargaTrasDespliegue";
-import { NotFound } from "./NotFound";
+
+// La 404 se descarga cuando hace falta, con los textos de su juego, como en `routes.jsx`:
+// importarla aquí de golpe la metería otra vez en el archivo de la portada. Una por
+// idioma, porque cada una pide las zonas del suyo.
+const noEncontradaEn = (lang) =>
+  lazy(() => Promise.all([import("./NotFound"), cargarZonas(lang, ["juegos"])]).then(([m]) => ({ default: m.NotFound })));
+const NO_ENCONTRADA = { es: noEncontradaEn("es"), en: noEncontradaEn("en") };
 
 /**
  * Lo que se pinta cuando una ruta falla.
@@ -13,9 +21,16 @@ import { NotFound } from "./NotFound";
  */
 export const RouteError = () => {
   const error = useRouteError();
-  const { t } = useIdioma();
+  const { t, lang } = useIdioma();
 
-  if (!esErrorDeCarga(error)) return <NotFound />;
+  if (!esErrorDeCarga(error)) {
+    const NotFound = NO_ENCONTRADA[lang] ?? NO_ENCONTRADA.es;
+    return (
+      <Suspense fallback={null}>
+        <NotFound />
+      </Suspense>
+    );
+  }
   if (recargarUnaVez()) return null;
 
   return (

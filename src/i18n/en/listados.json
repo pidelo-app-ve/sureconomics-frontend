@@ -81,13 +81,6 @@
       "suscribirse": "Subscribe to the channel",
       "verEnYoutube": "Watch on YouTube",
       "todosLosVideos": "All videos"
-    },
-    "estados": {
-      "vacioTitulo": "No results",
-      "vacioTexto": "There's no content to show yet.",
-      "errorTitulo": "Error",
-      "errorGenerico": "Something went wrong while loading the data.",
-      "demasiadasSolicitudes": "Too many requests in a short time. Wait a few minutes and try again."
     }
   }
 }

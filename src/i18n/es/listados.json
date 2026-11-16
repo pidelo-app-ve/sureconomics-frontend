@@ -81,13 +81,6 @@
       "suscribirse": "Suscribirse al canal",
       "verEnYoutube": "Ver en YouTube",
       "todosLosVideos": "Todos los videos"
-    },
-    "estados": {
-      "vacioTitulo": "No hay resultados",
-      "vacioTexto": "Todavía no hay contenido para mostrar.",
-      "errorTitulo": "Error",
-      "errorGenerico": "Ocurrió un error al cargar los datos.",
-      "demasiadasSolicitudes": "Demasiadas solicitudes en poco tiempo. Espere unos minutos e inténtelo de nuevo."
     }
   }
 }

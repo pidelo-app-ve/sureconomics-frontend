@@ -23,27 +23,8 @@
         "region": "También en SurEconomics",
         "resumen": "Lo importante de hoy",
         "resumenTexto": "El resumen del día, cada mañana a las 7:00 (hora de Caracas).",
-        "monedas": "Monedas de la región",
         "monedasTexto": "Doce monedas frente al dólar, con su fuente oficial y la variación del día."
       }
-    },
-    "tarjeta": {
-      "etiqueta": "Última hora"
-    },
-    "hace": {
-      "ahora": "Ahora",
-      "corto": "{n} min",
-      "minutos": "Hace {n} min",
-      "horas": "Hace {n} h"
-    },
-    "pestanas": {
-      "rotulo": "Qué enseñar",
-      "todo": "Todo",
-      "misTemas": "Mis temas",
-      "vacio": "Todavía no sigue ningún tema.",
-      "elegir": "Elegir temas",
-      "sinNuevo": "Nada nuevo en sus temas por ahora.",
-      "todoLoMio": "Todo lo de mis temas"
     }
   }
 }

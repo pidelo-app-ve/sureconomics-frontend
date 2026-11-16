@@ -13,19 +13,6 @@
       "fuente": "Fuente",
       "fecha": "Dato del"
     },
-    "nombres": {
-      "VES": "Bolívar",
-      "MXN": "Peso mexicano",
-      "BRL": "Real",
-      "COP": "Peso colombiano",
-      "ARS": "Peso argentino",
-      "PEN": "Sol",
-      "CLP": "Peso chileno",
-      "PYG": "Guaraní",
-      "DOP": "Peso dominicano",
-      "KYD": "Dólar de Islas Caimán",
-      "EUR": "Euro"
-    },
     "paises": {
       "VES": "Venezuela",
       "MXN": "México",
@@ -47,28 +34,11 @@
     "aviso": "Son cierres y referencias oficiales, no cotizaciones en vivo. Para operar, consulte a su banco.",
     "error": "No se pudieron cargar las monedas. Inténtalo de nuevo en un momento.",
     "grafica": {
-      "titulo": "{nombre} por dólar, últimos 30 días",
       "abrir": "Ver la gráfica de {nombre}",
       "cerrar": "Cerrar la gráfica de {nombre}",
       "cargando": "Cargando la gráfica…",
-      "pocosDatos": "Todavía no hay suficientes datos para dibujar la gráfica.",
-      "variacion": "{n} en 30 días",
-      "resumen": "Del {desde} al {hasta}: {n}",
-      "datos": "Ver los datos",
-      "colFecha": "Fecha",
-      "colValor": "Por 1 USD",
       "comparar": "Comparar con",
-      "ninguna": "Ninguna",
-      "tituloComparar": "Variación frente al dólar desde el {desde}",
-      "sinComparar": "No hay datos suficientes de {nombre} para compararla; se muestra solo la moneda elegida.",
-      "resumenComparar": "Del {desde} al {hasta}, variación frente al dólar: {a} {na}, {b} {nb}",
-      "lectura": "Subir es que hace falta más moneda para comprar un dólar: la moneda se debilita. No es la inflación, aunque suelen ir juntas.",
-      "colMoneda": "{codigo} por 1 USD"
-    },
-    "ficha": {
-      "etiqueta": "{codigo}: {valor} por dólar, {variacion} hoy",
-      "sinVariacion": "sin variación"
-    },
-    "masMovidas": "Las que más se movieron hoy"
+      "ninguna": "Ninguna"
+    }
   }
 }

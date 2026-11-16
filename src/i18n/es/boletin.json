@@ -58,26 +58,6 @@
       "noGracias": "No, gracias — ir a SurEconomics",
       "letra": "Sin spam. Se da de baja con un clic desde cualquier boletín.",
       "escribaCorreo": "Escriba su correo para suscribirse."
-    },
-    "invitacion": {
-      "kicker": "Boletín semanal · los lunes por la mañana",
-      "texto": "El entorno económico de la semana, contado en viñetas. Le llega cada lunes, antes de que la semana empiece a moverse.",
-      "suCorreo": "Su correo",
-      "placeholder": "nombre@correo.com",
-      "unirse": "Únase al boletín",
-      "enviando": "Enviando…",
-      "ahoraNo": "Ahora no",
-      "ok": "Listo. El primer número le llega el lunes.",
-      "exitoTitulo": "Ya está dentro",
-      "exitoTexto": "El primer número de {boletin} le llega el lunes por la mañana{correo}.",
-      "exitoA": "a",
-      "exitoNota": "Si no lo ve, búsquelo en «Promociones» o en el correo no deseado."
-    },
-    "nombre": "Entorno en Viñetas",
-    "errores": {
-      "correoIncompleto": "Ese correo no parece completo. Revíselo y vuelva a probar.",
-      "demasiados": "Demasiados intentos seguidos. Espere un momento.",
-      "fallo": "No se pudo completar la suscripción. Inténtelo de nuevo."
     }
   }
 }

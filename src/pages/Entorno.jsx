@@ -1,3 +1,4 @@
+import "../styles/institucional.css";
 import { useState } from "react";
 import { BRAND } from "../data/surEconomicsMock";
 import { Enlace } from "../components/Enlace";

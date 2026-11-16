@@ -427,11 +427,6 @@
       "vistaPreviaOk": "Vista previa cargada correctamente.",
       "quitar": "Quitar imagen"
     },
-    "api": {
-      "debeIniciarSesion": "Debe iniciar sesión",
-      "sesionExpirada": "Sesión expirada",
-      "errorSolicitud": "Error en la solicitud"
-    },
     "temas": {
       "meta": {
         "titulo": "Mis temas — {marca}",

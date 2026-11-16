@@ -1,14 +1,6 @@
 {
   "paginas": {
     "cookies": {
-      "aviso": {
-        "region": "Aviso de cookies",
-        "titulo": "Medimos cuánta gente nos lee",
-        "cuerpo": "Con su permiso usamos cuatro cookies propias para saber cuántas personas nos leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten con nadie y no le siguen fuera de este sitio. Si acepta, algunos videos de YouTube de la portada podrán además empezar solos, sin sonido.",
-        "enlace": "Qué guarda cada una",
-        "rechazar": "Rechazar",
-        "aceptar": "Aceptar"
-      },
       "meta": {
         "titulo": "Política de cookies — {marca}",
         "descripcion": "Qué guarda cada una de las cuatro cookies propias de SurEconomics, durante cuánto tiempo y cómo retirar el permiso en un clic."
@@ -143,25 +135,10 @@
       "titulo": "Contacto",
       "claim": "Contacto institucional para consultas, alianzas y proyectos de investigación/asesoría.",
       "campos": {
-        "nombre": "Nombre",
-        "correo": "Correo electrónico",
         "asunto": "Asunto",
         "mensaje": "Mensaje"
       },
-      "errores": {
-        "nombre": "Escriba su nombre.",
-        "correo": "Escriba su correo.",
-        "asunto": "Diga de qué se trata.",
-        "mensaje": "Escriba su mensaje.",
-        "correoIncompleto": "Ese correo no parece completo.",
-        "mensajeCorto": "Cuéntenos un poco más.",
-        "revise": "Revise los campos marcados.",
-        "demasiadas": "Demasiadas solicitudes. Intente de nuevo en unos minutos.",
-        "fallo": "No se pudo enviar el mensaje. Intente de nuevo o escríbanos directamente por email."
-      },
       "gracias": "Gracias por escribirnos. Le responderemos a la brevedad.",
-      "enviado": "Enviado.",
-      "enviando": "Enviando…",
       "enviar": "Enviar",
       "enviarFormulario": "Enviar formulario",
       "directoTitulo": "Escríbanos directamente",
@@ -325,10 +302,7 @@
       "perfilLinkedin": "Perfil de {nombre} en LinkedIn",
       "arbol": {
         "pista": "Señale un nombre y verá todos sus cargos."
-      },
-      "aliadosRegion": "Partners y aliados",
-      "aliados": "Aliados institucionales",
-      "aliadosTexto": "Una red de marcas asociadas al ecosistema de investigación, inversión y asesoría."
+      }
     }
   }
 }

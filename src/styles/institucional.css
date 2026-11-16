@@ -1,0 +1,933 @@
+/* ═══ Las páginas institucionales ═══
+   Consultoría, Anúnciese, Entorno, Cookies y Suscribirse: las reglas que solo usan esas
+   páginas (Quiénes somos tiene la suya, `quienes-somos.css`).
+   Vivían en `blog.css`, que se descarga con la portada; aquí llegan con la página que
+   las usa. Los bloques están tal cual y en el mismo orden que tenían allí.
+
+   Ojo con la cascada: esta hoja entra DESPUÉS de `blog.css` y `accesibilidad.css`, y se
+   queda puesta al navegar a otra página. Una regla de aquí gana a una de allí con la
+   misma especificidad, así que todo lo que se escriba aquí tiene que llevar una clase
+   de estas páginas, y no puede contar con que una regla de `blog.css` la corrija. */
+
+.se-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--se-space-2xl);
+}
+
+.se-two-col--align-start {
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .se-two-col {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(3.25rem, 4vw, 4.5rem);
+  }
+}
+
+.se-compact-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--se-space-md) 0 0;
+  display: grid;
+  gap: var(--se-space-sm);
+}
+
+.se-compact-list li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--se-gray-700);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-body);
+}
+
+.se-compact-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--se-gray-400);
+}
+
+/* —— Consultoria —— */
+.se-consulting__hero {
+  padding-top: clamp(2.75rem, 6vw, 4.25rem);
+  padding-bottom: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+.se-consulting__hero .se-container {
+  display: block;
+  grid-template-columns: none;
+  gap: 0;
+}
+
+.se-consulting__hero-grid {
+  max-width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: 0 var(--se-content-gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(1rem, 3vw, 1.75rem);
+  align-items: start;
+}
+
+@media (max-width: 959px) {
+  .se-consulting__hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.se-consulting__hero-copy {
+  animation: se-page-rise 0.6s var(--se-suite-ease) both;
+}
+
+.se-consulting__kicker {
+  margin: 0 0 0.65rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--se-suite-dim);
+}
+
+.se-consulting__title {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.85rem, 4.2vw, 3.1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  color: var(--se-suite-text);
+}
+
+.se-consulting__lead {
+  margin: 0.9rem 0 0;
+  color: rgba(var(--se-tinte), 0.78);
+}
+
+.se-consulting__deliverables {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.se-consulting__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--se-tinte), 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(var(--se-tinte), 0.84);
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+}
+
+.se-consulting__contact {
+  border-color: var(--se-suite-border);
+}
+
+.se-consulting__contact-cta {
+  margin-top: 1.25rem;
+}
+
+.se-consulting__services {
+  margin-top: clamp(2rem, 4vw, 2.75rem);
+}
+
+.se-consulting__service-meta {
+  margin: 0 0 0.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-slate);
+}
+
+.se-consulting__service-card {
+  border-radius: 18px;
+  border: 1px solid rgba(var(--se-tinte), 0.12);
+  background:
+    #ffffff;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.se-consulting__service-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(185, 83, 42, 0.22);
+  box-shadow: 0 26px 62px rgba(0, 0, 0, 0.62);
+}
+
+.se-consulting__service-cta {
+  margin-top: 0.75rem;
+}
+
+/* Estas dos estaban en `blog.css`, dentro de un `@media` compartido con otras páginas:
+   tienen que ir después de las de arriba, a las que corrigen, como allí. */
+@media (prefers-reduced-motion: reduce) {
+  .se-consulting__service-card,
+  .se-consulting__service-card:hover {
+    transition: none !important;
+    transform: none;
+  }
+}
+
+.se-research-cta {
+  border: 1px solid var(--se-border);
+  background: var(--se-white);
+  border-radius: 14px;
+  padding: var(--se-space-xl);
+}
+
+.se-subscription-price,
+.se-subscription-method {
+  margin-top: var(--se-space-md);
+}
+
+.se-subscription-price__value,
+.se-subscription-method__value {
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.35rem, 1rem + 1.6vw, 1.9rem); /* era el tamaño de portada: desbordaba en el teléfono */
+  font-weight: 400;
+  line-height: var(--se-line-height-tight);
+  letter-spacing: -0.02em;
+  color: var(--se-black);
+  margin-top: var(--se-space-xs);
+}
+
+.se-services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--se-space-md);
+}
+
+@media (min-width: 768px) {
+  .se-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
+  /* 0,68rem son 10,9 px: por debajo del suelo, y en las ocho pantallas tactiles,
+     de 320 a 1024. Se le habia escapado a la auditoria movil porque /consultoria
+     no estaba en su lista de rutas. */
+  .se-consulting__service-meta {
+    font-size: 0.72rem;
+  }
+}
+
+/* ═══ PAGINAS LEGALES ═════════════════════════════════════════════════
+   Una columna de lectura y nada mas. Un aviso legal que no se lee no protege a
+   nadie, asi que aqui manda la medida del renglon y no aprovechar el ancho. */
+
+.se-legal {
+  max-width: 40em; /* en em: el `ch` de la Grotesk es ancho, ver el cuerpo de las piezas */
+  margin: 0 auto;
+  padding: clamp(2.5rem, 6vw, 4.5rem) var(--se-content-gutter) 5rem;
+  font-family: var(--se-font-reading);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+
+.se-legal p { margin: 0 0 1.1rem; }
+.se-legal code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: rgba(var(--se-tinte), 0.06);
+}
+
+.se-legal__cabeza { margin-bottom: 2.75rem; }
+
+.se-legal__kicker {
+  margin: 0 0 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-legal__titulo {
+  margin: 0 0 1rem;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.se-legal__entrada { font-size: 1.1rem; line-height: 1.65; }
+
+.se-legal__fecha {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  color: var(--color-slate);
+}
+
+/* El aviso de "en revision": mismo filete de acento que el resto de avisos del sitio,
+   para que se lea como un estado real de la pagina y no como una nota suelta. */
+.se-legal__revision {
+  margin: 1.25rem 0 0;
+  padding: 0.85rem 0 0;
+  border-top: 1px solid var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
+.se-legal__bloque { margin-bottom: 2.75rem; }
+
+.se-legal__h2 {
+  margin: 0 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--se-font-heading);
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+.se-legal__lista { margin: 0 0 1.1rem; padding-left: 1.15rem; }
+.se-legal__lista li { margin-bottom: 0.55rem; }
+
+.se-legal__afirmacion { font-weight: 600; }
+
+.se-legal__enlace {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.se-legal__nota {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-slate-2);
+}
+
+/* El texto del banner, citado tal cual aparece. Se dibuja parecido para que se
+   reconozca, pero sin botones de verdad: aqui es una cita, no un control. */
+.se-legal__cita {
+  margin: 0 0 1.3rem;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.se-legal__cita p { margin: 0; }
+.se-legal__cita-enlace { color: var(--color-accent); text-decoration: underline; }
+.se-legal__cita-btn {
+  display: inline-block;
+  margin-left: 0.25rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid rgba(var(--se-tinte), 0.35);
+  border-radius: 7px;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* --- La tabla --- */
+.se-legal__tabla-caja {
+  /* Cinco columnas no caben en un telefono: la tabla rueda dentro de su caja y la
+     pagina no se va de lado. */
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+}
+
+/* La tabla es la pieza central del aviso, y encerrada en la columna de lectura -- 74
+   caracteres -- llega cortada por la mitad en un escritorio: las columnas de duracion y
+   base quedan fuera. Asi que se sale de la columna y se centra sobre ella. Solo en
+   pantallas anchas; en un telefono rueda dentro de su caja, que es lo correcto ahi. */
+@media (min-width: 900px) {
+  .se-legal__tabla-caja {
+    width: min(1080px, calc(100vw - 2 * var(--se-content-gutter)));
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.se-legal__tabla {
+  width: 100%;
+  min-width: 660px;
+  border-collapse: collapse;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.se-legal__tabla thead th {
+  padding: 0.85rem 0.95rem;
+  border-bottom: 1px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.se-legal__tabla tbody th,
+.se-legal__tabla td {
+  padding: 0.85rem 0.95rem;
+  border-top: 1px solid var(--color-hairline);
+  vertical-align: top;
+}
+
+.se-legal__tabla tbody th { font-weight: 400; white-space: nowrap; }
+.se-legal__tabla tbody tr:nth-child(odd) td,
+.se-legal__tabla tbody tr:nth-child(odd) th { background: var(--se-offwhite); }
+.se-legal__tabla td:nth-child(3) { min-width: 26ch; }
+
+/* --- El interruptor de verdad --- */
+.se-legal__estado {
+  padding: 1.35rem 1.4rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: var(--se-offwhite);
+  font-family: var(--se-font-ui);
+}
+.se-legal__estado--si { border-top-color: var(--marca-verde); }
+.se-legal__estado--no { border-top-color: var(--color-accent); }
+
+.se-legal__estado-titulo {
+  margin: 0 0 0.5rem;
+  font-family: var(--se-font-label);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.se-legal__estado-texto { margin: 0 0 1rem; font-size: 0.93rem; line-height: 1.6; }
+
+.se-legal__valores {
+  margin: 0 0 1.15rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.se-legal__valor {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+}
+.se-legal__valor dt { color: var(--color-slate-2); }
+.se-legal__valor dd {
+  margin: 0;
+  /* Un UUID no lleva espacios y desbordaria la caja en un telefono. */
+  overflow-wrap: anywhere;
+  color: var(--color-ink);
+}
+
+.se-legal__btn {
+  padding: 0.75rem 1.2rem;
+  border: 1px solid var(--marca-verde);
+  border-radius: 10px;
+  background: var(--marca-verde);
+  color: #ffffff;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.se-legal__btn:hover { background: #00250f; }
+.se-legal__btn:disabled { opacity: 0.6; cursor: default; }
+.se-legal__btn--suave {
+  border-color: rgba(var(--se-tinte), 0.35);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.se-legal__btn--suave:hover { background: #ffffff; border-color: var(--color-ink); }
+.se-legal__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.se-legal__pie {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  color: var(--color-slate-2);
+}
+.se-legal__pie a { color: var(--color-accent); text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .se-legal__valor { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
+  .se-legal__btn { width: 100%; }
+}
+
+/* ═══ ANÚNCIATE AQUÍ ══════════════════════════════════════════════════════ */
+
+/* La regla global `.se-section + .se-section { padding-top: 0 }` pega el
+   primer titular al borde de la banda verde. Aquí el fondo cambia de color,
+   así que el aire tiene que volver: sin él «Formatos» parece parte del hero. */
+.se-anunciate__hero + .se-section { padding-top: var(--se-section-gap); }
+
+.se-anunciate__hero {
+  background: var(--marca-verde);
+  color: #f6f3ed;
+  text-align: left;
+}
+.se-anunciate__kicker {
+  margin: 0 0 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e8c77a;
+}
+.se-anunciate__title {
+  max-width: 34ch;
+  margin: 0 auto 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.15;
+  text-wrap: balance;
+  color: #fff;
+}
+.se-anunciate__lead {
+  max-width: 60ch;
+  margin: 0 auto 1.4rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #c9ddd8;
+}
+
+.se-anunciate__h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-anunciate__sub {
+  max-width: 62ch;
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+
+.se-anunciate__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-anunciate__tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+.se-anunciate__letra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--se-offwhite);
+  font-family: var(--se-font-label);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+.se-anunciate__estado {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.se-anunciate__estado--disponible { background: #e4f2ee; color: #0e6b5e; }
+.se-anunciate__estado--proximamente { background: #f1e7d8; color: #7a5c1c; }
+.se-anunciate__nombre {
+  margin: 0.2rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-anunciate__texto {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--color-slate);
+}
+.se-anunciate__enlace {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* Su propio contenedor con scroll: cuatro columnas no caben en un móvil, y sin
+   esto sería la página entera la que se desplazaría de lado. */
+.se-anunciate__tabla-caja { overflow-x: auto; }
+.se-anunciate__tabla {
+  width: 100%;
+  min-width: 42rem;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+.se-anunciate__tabla th,
+.se-anunciate__tabla td {
+  padding: 0.7rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--color-slate);
+}
+.se-anunciate__tabla thead th {
+  font-family: var(--mono);
+  font-size: 0.6875rem; /* 11 px: 0,68rem daba 10,9, bajo el suelo de lo legible */
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+  border-bottom-width: 2px;
+}
+.se-anunciate__tabla tbody th { font-weight: 600; color: var(--color-ink); }
+.se-anunciate__tabla tbody tr:nth-child(odd) td,
+.se-anunciate__tabla tbody tr:nth-child(odd) th { background: var(--se-offwhite); }
+
+.se-anunciate__nota {
+  max-width: 68ch;
+  margin: 1.2rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--color-slate-2);
+}
+.se-anunciate__cierre { text-align: center; }
+.se-anunciate__cierre .se-anunciate__sub { margin-left: auto; margin-right: auto; }
+
+/* ─────────────────────────── /entorno: suscribirse desde Instagram ──
+   Una columna, una acción. Se abre en el navegador de Instagram de un teléfono, así
+   que manda el ancho de 390 px: todo centrado, el campo y el botón a lo ancho y el
+   botón por encima de los 44 px que pide un dedo. */
+.se-entorno {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2.5rem 1.25rem calc(2rem + env(safe-area-inset-bottom));
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.se-entorno__caja {
+  width: 100%;
+  max-width: 26rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.se-entorno__marca {
+  display: block;
+  margin-bottom: 2.25rem;
+}
+.se-entorno__marca img {
+  display: block;
+  width: 11.5rem;
+  height: auto;
+}
+.se-entorno__kicker {
+  margin: 0 0 0.65rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-entorno__titulo {
+  margin: 0 0 0.9rem;
+  font-family: var(--se-font-heading);
+  font-size: clamp(2.2rem, 9vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.se-entorno__texto {
+  margin: 0 0 1.9rem;
+  max-width: 34ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+  /* Sin palabra huérfana en la última línea: en 390 px quedaba «correo.» sola. */
+  text-wrap: pretty;
+}
+.se-entorno__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  text-align: left;
+}
+.se-entorno__label {
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-entorno__input {
+  width: 100%;
+  min-height: 3.1rem;
+  padding: 0 1rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+  background: #fff;
+  /* 16 px: por debajo, Safari en iPhone hace zoom al tocar el campo. */
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+.se-entorno__input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.18);
+}
+.se-entorno__input[aria-invalid="true"] { border-color: #b3261e; }
+.se-entorno__error {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #b3261e;
+}
+.se-entorno__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.1rem;
+  margin-top: 0.35rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: #fff;
+  font-family: var(--se-font-label);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.se-entorno__boton:hover { filter: brightness(0.94); }
+.se-entorno__boton:active { transform: translateY(1px); }
+.se-entorno__boton:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+.se-entorno__boton:disabled { opacity: 0.7; cursor: progress; }
+.se-entorno__boton--secundario {
+  background: var(--marca-verde);
+}
+.se-entorno__listo {
+  width: 100%;
+  padding: 1.4rem 1.2rem;
+  border-radius: 12px;
+  background: rgba(0, 51, 24, 0.06);
+  border: 1px solid rgba(0, 51, 24, 0.16);
+}
+.se-entorno__listo-titulo {
+  margin: 0 0 0.3rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.se-entorno__listo-texto {
+  margin: 0 0 1rem;
+  color: var(--color-slate);
+}
+.se-entorno__no {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  margin-top: 1.1rem;
+  font-size: 0.92rem;
+  color: var(--color-slate);
+  text-decoration: none;
+}
+.se-entorno__no:hover { color: var(--color-ink); text-decoration: underline; }
+.se-entorno__letra {
+  margin: 1.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--color-slate-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .se-entorno__boton { transition: none; }
+}
+
+.se-publico .se-consulting__chip {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.se-publico .se-consulting__chip + .se-consulting__chip::before {
+  content: "·";
+  margin-right: 0.75rem;
+  font-weight: 400;
+  color: var(--color-slate);
+}
+
+.se-publico .se-consulting__service-meta {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* —— Anúnciate: el formato en lista de prensa, la letra en la serif —— */
+.se-publico .se-anunciate__h2 {
+  margin-bottom: 0.25rem;
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+.se-publico .se-anunciate__tarjeta {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-anunciate__letra {
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-anunciate__estado {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* —— Cookies: la tabla y los estados, sin caja ni borde de color —— */
+.se-publico .se-legal__tabla-caja {
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  border-radius: 0;
+}
+
+.se-publico .se-legal__estado {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 2px solid var(--marca-verde);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-legal__estado--no {
+  border-top-color: var(--marca-rojo);
+}
+
+.se-publico .se-consulting__service-cta {
+  align-self: flex-start;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--marca-verde);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.se-publico .se-consulting__service-cta:hover {
+  background: transparent;
+  color: var(--tinta);
+}
+
+.se-publico .se-consulting__service-cta::after {
+  content: " →";
+}
+
+/* —— Suscripción: el plan, sin caja —— */
+.se-publico .se-research-cta {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* —— Anúnciate: la cabecera alineada a la izquierda y a la medida del texto —— */
+.se-publico .se-anunciate__hero :is(.se-anunciate__title, .se-anunciate__lead) {
+  margin-left: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
+.se-publico .se-consulting__aside-kicker {
+  margin: 0 0 0.5rem;
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+/* —— Suscripción: precio y método, a cuerpo de texto, no como titulares —— */
+.se-publico :is(.se-subscription-price__value, .se-subscription-method__value) {
+  font-family: var(--se-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+
+/* —— Quiénes somos y Consultoría: la cabecera en la retícula de todas las vistas ——
+   Llevaban un segundo margen dentro del contenedor y empezaban más adentro. */
+.se-publico .se-consulting__hero-grid {
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}

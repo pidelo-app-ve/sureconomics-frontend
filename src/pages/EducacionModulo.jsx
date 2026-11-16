@@ -1,3 +1,4 @@
+import "../styles/educacion.css";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Enlace } from "../components/Enlace";

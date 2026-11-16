@@ -1,3 +1,4 @@
+import "../styles/institucional.css";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";

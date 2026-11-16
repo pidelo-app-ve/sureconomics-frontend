@@ -1,0 +1,1164 @@
+/* ═══ Educación ═══
+   El catálogo, el módulo, la clase y la vuelta del pago: las reglas que solo usan esas
+   páginas.
+   Vivían en `blog.css`, que se descarga con la portada; aquí llegan con la página que
+   las usa. Los bloques están tal cual y en el mismo orden que tenían allí.
+
+   Ojo con la cascada: esta hoja entra DESPUÉS de `blog.css` y `accesibilidad.css`, y se
+   queda puesta al navegar a otra página. Una regla de aquí gana a una de allí con la
+   misma especificidad, así que todo lo que se escriba aquí tiene que llevar una clase
+   de Educación, y no puede contar con que una regla de `blog.css` la corrija. */
+
+/* ═══ EDUCACION — catalogo, temario y lector ══════════════════════════
+   Educacion es la unica seccion del sitio que vende algo, y eso cambia como se
+   maqueta. En el resto la pregunta es "que dice esto"; aqui es "que me llevo,
+   cuanto dura y cuanto cuesta", y esas tres respuestas tienen que estar
+   siempre en el mismo sitio para que dos modulos se puedan comparar de un
+   vistazo.
+
+   Sigue usando los tokens de marca -- verde, acento terracota, mono en los
+   titulares -- porque lo que vende estos modulos es que los firma esta casa.
+   Una seccion de cursos con lenguaje visual propio se leeria como un anuncio.
+
+   Tres decisiones que no se ven en el codigo y conviene no deshacer:
+
+   1. **La portada no es el hero institucional.** Llevaba `se-hero--institutional`,
+      pensado para una declaracion de principios, y dejaba ~250 px de aire antes
+      de la primera tarjeta. Aqui la cabecera es compacta y ademas trabaja:
+      contiene las tres promesas, asi que el espacio dice algo.
+   2. **La imagen del modulo es opcional de verdad.** Antes cada tarjeta abria
+      con un 16/9 que, sin portada cargada, pintaba un degradado verde -- el
+      elemento mas grande de la tarjeta, sin informacion. Ahora sin imagen no hay
+      hueco: la tarjeta empieza por el titulo.
+   3. **El panel de compra es `sticky`.** La compra se decide leyendo el temario,
+      que es lo largo de la pagina; con el precio arriba y fijo al flujo, quien se
+      convence abajo tiene que volver a subir a buscarlo. */
+
+.se-edu__aviso {
+  font-family: var(--se-font-ui);
+  font-size: 0.95rem;
+  color: var(--color-slate-2);
+}
+
+.se-edu__h2 {
+  margin: 0 0 1.25rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.se-edu__h2--separado { margin-top: 3rem; }
+
+/* --- Portada del catalogo --- */
+
+.se-edu__portada {
+  padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(2.25rem, 5vw, 3.25rem);
+  background: var(--marca-verde);
+  color: #f6f3ed;
+}
+.se-edu__portada-kicker {
+  margin: 0 0 0.7rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e8c77a;
+}
+.se-edu__portada-titulo {
+  max-width: 22ch;
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.9rem, 4.6vw, 2.9rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: #ffffff;
+}
+.se-edu__portada-claim {
+  max-width: 58ch;
+  margin: 0;
+  font-size: 1.03rem;
+  line-height: 1.6;
+  color: #c9ddd8;
+}
+
+/* Las tres promesas, dentro de la banda verde. Van aqui y no en una seccion
+   propia por lo mismo que la cabecera es compacta: son las razones para seguir
+   leyendo, y una razon que aparece despues del precio llega tarde. */
+.se-edu__promesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.1rem 2rem;
+  margin: 2rem 0 0;
+  padding: 1.6rem 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  list-style: none;
+}
+.se-edu__promesa {
+  display: flex;
+  gap: 0.7rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: #b9d2cc;
+}
+.se-edu__promesa strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+}
+.se-edu__promesa-icono {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  margin-top: 0.1rem;
+  color: #e8c77a;
+}
+
+/* --- Rejilla del catalogo --- */
+
+.se-edu__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: clamp(1rem, 2.2vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.se-edu__grid > li { display: flex; }
+
+/* --- La tarjeta de un modulo --- */
+
+.se-modulo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 1.35rem 1.4rem 1.25rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.se-modulo:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--se-tinte), 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.09);
+}
+.se-modulo:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* El modulo de cortesia es la puerta de entrada al resto del catalogo: quien lo
+   hace ya tiene cuenta verificada, que es el paso que frena las compras. Por eso
+   se distingue -- con un filete de acento, no con un color de fondo que lo
+   sacaria del lenguaje de tarjeta del sitio. */
+.se-modulo--cortesia .se-modulo__titulo {
+  color: var(--color-accent);
+}
+
+.se-modulo__foto {
+  display: block;
+  margin: -1.35rem -1.4rem 0.4rem;
+  aspect-ratio: 21 / 9;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  background: var(--se-offwhite);
+}
+.se-modulo__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.se-modulo__cabeza {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.se-modulo__etiqueta {
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+.se-modulo--cortesia .se-modulo__etiqueta { color: var(--color-accent); }
+
+/* El precio, en texto y arriba a la derecha. Antes flotaba en una pildora negra
+   sobre la portada y se leia como una marca de agua; sobre todo, cada tarjeta lo
+   ponia a una altura distinta segun lo alta que fuera su imagen, y un precio que
+   no esta a la misma altura en todas las tarjetas no se puede comparar. */
+.se-modulo__precio {
+  font-family: var(--se-font-heading);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.se-modulo__titulo {
+  font-family: var(--se-font-heading);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+.se-modulo:hover .se-modulo__titulo { color: var(--color-accent); }
+
+.se-modulo__resumen {
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.se-modulo__datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin-top: auto;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+.se-modulo__dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.se-modulo__icono {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+/* El gancho. Vivia en gris de 0,72 rem al pie de la tarjeta: el argumento que
+   mas convierte, escrito con el tamano de una nota al pie. */
+.se-modulo__gancho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-accent);
+}
+
+/* --- Como funciona y las dudas --- */
+
+/* La regla global `.se-section + .se-section { padding-top: 0 }` deja esta banda
+   sin aire arriba, y aqui el fondo cambia de color: el titular queda pegado al
+   borde gris y la seccion parece la continuacion de las tarjetas en vez de un
+   bloque aparte. Se le devuelve el espacio, con algo mas de margen por debajo de
+   las tarjetas para marcar el corte.
+
+   Va con las dos clases a proposito: `.se-section + .se-section` tiene dos
+   clases de especificidad, y un `.se-edu__banda` a secas pierde contra ella y
+   deja el padding en cero sin que nada avise. */
+.se-section.se-edu__banda {
+  margin-top: var(--se-space-xl);
+  padding-top: var(--se-section-gap);
+  background: var(--se-offwhite);
+}
+
+.se-edu__pasos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1.5rem 2.25rem;
+  margin: 0 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.se-edu__paso { display: flex; gap: 0.9rem; }
+.se-edu__paso-num {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--marca-verde);
+  color: #ffffff;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.se-edu__paso-copy {
+  font-family: var(--se-font-ui);
+  font-size: 0.89rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-edu__paso-copy strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--se-font-label);
+  font-size: 0.88rem;
+  color: var(--color-ink);
+}
+
+.se-edu__dudas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1.25rem 2.5rem;
+  margin: 0;
+}
+.se-edu__duda {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-hairline);
+}
+.se-edu__duda dt {
+  margin-bottom: 0.35rem;
+  font-family: var(--se-font-label);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__duda dd {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+/* --- Detalle del modulo --- */
+
+.se-edu__migas {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+  margin-bottom: 1.25rem;
+}
+
+.se-modulo-detalle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  grid-template-areas:
+    "cabecera panel"
+    "temario  panel";
+  grid-template-rows: auto 1fr;
+  column-gap: clamp(1.75rem, 4vw, 3.25rem);
+  row-gap: 0;
+  align-items: start;
+}
+.se-modulo-detalle__cabecera { grid-area: cabecera; }
+.se-modulo-detalle__temario { grid-area: temario; }
+.se-modulo-detalle__lado { grid-area: panel; }
+
+.se-modulo-detalle__kicker {
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+.se-modulo-detalle__titulo {
+  max-width: 24ch;
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+.se-modulo-detalle__resumen {
+  max-width: 62ch;
+  margin: 0 0 1.5rem;
+  font-family: var(--se-font-ui);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--color-slate);
+}
+.se-modulo-detalle__prueba {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.se-modulo-detalle__prueba-icono { width: 17px; height: 17px; }
+.se-modulo-detalle__h2 { margin-top: 2.75rem; }
+@media (max-width: 960px) { .se-modulo-detalle__h2 { margin-top: 0; } }
+
+/* --- Temario --- */
+
+.se-temario {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.se-temario__fila + .se-temario__fila { border-top: 1px solid var(--color-hairline); }
+
+/* La fila entera es el objetivo, no solo el titulo. Un enlace de dos centimetros
+   dentro de una fila de sesenta es un objetivo dificil en cualquier pantalla y
+   directamente hostil en una tactil. */
+.se-temario__enlace {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.15s ease;
+}
+a.se-temario__enlace:hover { background: var(--se-offwhite); }
+a.se-temario__enlace:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.se-temario__fila--cerrada { background: rgba(var(--se-tinte), 0.02); }
+
+.se-temario__num {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
+  background: var(--se-offwhite);
+  border: 1px solid var(--color-hairline);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--color-slate-2);
+}
+.se-temario__fila--cerrada .se-temario__num { opacity: 0.6; }
+
+.se-temario__copy { display: block; min-width: 0; }
+.se-temario__titulo {
+  display: block;
+  font-family: var(--se-font-heading);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+.se-temario__fila--cerrada .se-temario__titulo { color: var(--color-slate-2); }
+a.se-temario__enlace:hover .se-temario__titulo { color: var(--color-accent); }
+
+.se-temario__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.22rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+.se-temario__icono { width: 13px; height: 13px; flex: 0 0 auto; }
+.se-temario__punto { margin: 0 0.15rem; }
+
+.se-temario__sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-hairline);
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--color-slate);
+}
+/* La clase abierta se anuncia como una accion, no como una etiqueta: es la
+   prueba del producto y lo que hay que ofrecer es el boton que la abre. */
+.se-temario__sello--libre {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #ffffff;
+}
+.se-temario__sello--cerrado {
+  border-color: transparent;
+  background: none;
+  color: var(--color-slate-2);
+  font-weight: 400;
+}
+
+/* --- El panel de compra --- */
+
+/* `align-items: start` en la rejilla encoge esta columna a la altura de su
+   contenido, y entonces el `sticky` de dentro no tiene por donde viajar: se
+   comporta como un `static` y se va con el scroll. Estirarla es lo que le da
+   recorrido -- es el fallo clasico de un panel pegajoso dentro de grid. */
+.se-modulo-detalle__lado {
+  position: relative;
+  align-self: stretch;
+  height: 100%;
+}
+
+.se-compra {
+  position: sticky;
+  /* Por debajo de la cabecera fija, con un dedo de aire. */
+  top: 5.5rem;
+  padding: 1.4rem 1.45rem 1.5rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+}
+
+.se-compra__precio {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+}
+.se-compra__suyo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1.15rem;
+  color: var(--marca-verde);
+}
+.se-compra__nota {
+  margin: 0.35rem 0 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: var(--color-slate-2);
+}
+
+.se-compra__incluye {
+  margin: 1.15rem 0;
+  padding: 1.15rem 0 0;
+  border-top: 1px solid var(--color-hairline);
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.86rem;
+  color: var(--color-slate);
+}
+.se-compra__incluye li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.se-compra__icono {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--color-slate-2);
+}
+.se-compra__libre { color: var(--color-accent); font-weight: 600; }
+.se-compra__libre .se-compra__icono { color: var(--color-accent); }
+
+.se-compra__texto {
+  margin: 0 0 0.9rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-compra__acciones .se-btn { width: 100%; justify-content: center; }
+.se-compra__pie {
+  margin: 0.8rem 0 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  color: var(--color-slate-2);
+}
+
+/* Los botones de pasarela, a lo ancho del panel y uno debajo de otro: son la
+   accion de la pagina, y un boton a media caja se lee como algo secundario. */
+.se-edu__pago-texto {
+  margin: 0 0 0.85rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+.se-edu__pago-titulo {
+  margin: 0 0 0.4rem;
+  font-family: var(--se-font-label);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__pago-acciones {
+  display: grid;
+  gap: 0.55rem;
+}
+.se-edu__pago-acciones .se-btn { width: 100%; justify-content: center; }
+.se-edu__pago-error {
+  margin: 0.7rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  color: var(--color-accent);
+}
+
+/* --- Lector --- */
+.se-edu__lectura { max-width: 74ch; }
+
+.se-edu__titulo {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--color-ink);
+}
+
+.se-edu__leccion-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0 0 0.4rem;
+}
+
+/* La barra de avance. Saber cuanto queda es lo que sostiene la lectura hasta el
+   final de un modulo, y es tambien lo que convierte "compre esto" en "termine
+   esto" -- que es lo que hace que la siguiente compra ocurra. */
+.se-edu__leccion-kicker-dato {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-slate-2);
+  letter-spacing: 0.04em;
+}
+.se-edu__leccion-kicker-icono { width: 13px; height: 13px; }
+
+.se-edu__avance {
+  height: 3px;
+  margin: 0 0 1.5rem;
+  border-radius: 999px;
+  background: var(--color-hairline);
+  overflow: hidden;
+}
+.se-edu__avance-barra {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.se-edu__video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 1.25rem 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000000;
+}
+.se-edu__video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.se-edu__audio { width: 100%; margin: 1.25rem 0; }
+
+.se-edu__descarga {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+.se-edu__descarga-meta {
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  color: var(--color-slate-2);
+}
+
+.se-edu__cuerpo { margin-top: 1.25rem; }
+
+/* El cierre de una clase abierta dentro de un modulo de pago. Va antes de la
+   navegacion entre lecciones y no despues: quien acaba de leer una clase
+   completa esta en el unico momento en que la compra se explica sola. */
+.se-edu__continuar {
+  margin-top: 2.5rem;
+  padding: 14px 0 0;
+  border-top: 2px solid var(--color-ink);
+}
+.se-edu__continuar-titulo {
+  margin: 0 0 0.35rem;
+  font-family: var(--se-font-label);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.se-edu__continuar-texto {
+  margin: 0 0 1.1rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+/* Aqui los botones si van en fila: hay ancho de sobra en la columna de
+   lectura, y apilarlos a lo ancho de 74 caracteres se veria desproporcionado. */
+.se-edu__continuar .se-edu__pago-acciones {
+  grid-auto-flow: column;
+  justify-content: start;
+  gap: 0.6rem;
+}
+.se-edu__continuar .se-edu__pago-acciones .se-btn { width: auto; }
+
+.se-edu__vecinas {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-hairline);
+  font-family: var(--se-font-label);
+  font-size: 0.8125rem;
+}
+
+.se-edu__muro {
+  max-width: 34rem;
+  padding: 1.75rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.07);
+}
+.se-edu__muro .se-edu__titulo { font-size: clamp(1.3rem, 2.6vw, 1.6rem); }
+.se-edu__muro .se-edu__pago { margin-top: 1.25rem; }
+.se-edu__muro .se-edu__pago-acciones { grid-auto-flow: row; }
+
+.se-edu__vuelta { max-width: 56ch; text-align: left; }
+.se-edu__vuelta .se-btn { margin-top: 1rem; }
+
+@media (max-width: 960px) {
+  /* El panel deja de estar anclado antes de que la columna se estreche del todo:
+     pegado en una pantalla angosta se come la mitad del alto util, que es
+     justamente donde esta el temario que se vino a leer. */
+  .se-modulo-detalle {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    /* Titulo, luego precio, luego temario. El panel se cuela en medio en vez de
+       saltar al principio: abrir la pagina con una cifra y sin nombre obliga a
+       recordar en que modulo se entro. */
+    grid-template-areas: "cabecera" "panel" "temario";
+    row-gap: 1.75rem;
+  }
+  .se-compra { position: static; }
+}
+
+@media (max-width: 600px) {
+  .se-temario__enlace {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.55rem;
+  }
+  /* El sello salta de fila y se alinea con el texto, no con el numeral. */
+  .se-temario__estado { grid-column: 2; }
+  .se-modulo__cabeza { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-modulo,
+  .se-temario__enlace { transition: none; }
+  .se-modulo:hover { transform: none; }
+}
+
+/* El aviso de que un contenido (un módulo o una lección de Educación) solo existe en
+   español: en `/en` va encima del contenido, en letra pequeña y tenue. */
+.se-solo-espanol {
+  margin: 0 0 var(--se-space-sm);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: var(--se-gray-500);
+}
+
+/* —— Educación: tarjetas de módulo y secciones de prensa —— */
+.se-publico .se-edu__h2 {
+  padding-top: 10px;
+  border-top: 2px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+.se-publico .se-modulo {
+  padding: 0 0 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-modulo:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.se-publico .se-modulo--cortesia {
+  box-shadow: none;
+}
+
+.se-publico .se-modulo__foto {
+  margin: 0 0 0.5rem;
+  border-radius: 0;
+}
+
+.se-publico .se-modulo__titulo {
+  font-family: var(--titular);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.se-publico .se-modulo__etiqueta {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-edu__paso-num {
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__duda dt {
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.se-publico .se-edu__promesa-icono {
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__promesas {
+  border-top-color: var(--filete);
+}
+
+/* ═══ Educación como suplemento del diario ═══
+   El catálogo es una mesa de recortes: cada módulo, un pedazo de papel rasgado que se
+   asienta al asomarse (`Recorte`). El módulo abre con su índice, como la portadilla
+   de un suplemento: números grandes en la serif, filetes entre clases y la abierta
+   marcada en rojo. El precio va en un cupón recortado. */
+.se-publico .se-edu__grid {
+  gap: clamp(1.75rem, 3vw, 2.75rem) clamp(1.25rem, 2.5vw, 2rem);
+  padding-top: 8px;
+}
+
+.se-edu__grid > .se-recorte > .se-recorte__papel {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.se-edu__grid > .se-recorte {
+  display: flex;
+}
+
+.se-publico .se-edu__grid .se-modulo {
+  padding: 0;
+}
+
+.se-publico .se-edu__grid .se-modulo__titulo {
+  font-size: 1.375rem;
+  line-height: 1.15;
+}
+
+/* —— El índice del módulo —— */
+.se-publico .se-temario {
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-temario__fila + .se-temario__fila {
+  border-top-color: var(--filete);
+}
+
+.se-publico .se-temario__fila--cerrada {
+  background: transparent;
+}
+
+.se-publico .se-temario__enlace {
+  padding: 1rem 0;
+  gap: 1.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.se-publico a.se-temario__enlace:hover {
+  background: transparent;
+}
+
+.se-publico .se-temario__num {
+  width: auto;
+  min-width: 2ch;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--titular);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tinta);
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), color 0.2s ease;
+}
+
+.se-publico .se-temario__fila--cerrada .se-temario__num {
+  opacity: 1;
+  color: var(--filete-fuerte);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .se-publico a.se-temario__enlace:hover .se-temario__num {
+    transform: translateX(4px);
+    color: var(--marca-rojo);
+  }
+}
+
+.se-publico .se-temario__titulo {
+  font-family: var(--titular);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.se-publico a.se-temario__enlace:hover .se-temario__titulo {
+  color: var(--tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.se-publico .se-temario__meta {
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-temario__sello {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--se-font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.se-publico .se-temario__sello--libre {
+  background: transparent;
+  color: var(--marca-rojo);
+}
+
+/* —— El cupón del precio —— */
+.se-publico .se-modulo-detalle__lado .se-compra {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.se-publico .se-compra__precio {
+  font-family: var(--titular);
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+.se-publico .se-modulo-detalle__titulo {
+  font-size: clamp(2.25rem, 1.4rem + 2.8vw, 3.75rem);
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+/* ═══ La clase: una lectura larga ═══
+   Portadilla con el título grande en la serif; debajo, dónde está uno (lección y
+   duración) y el avance del módulo. El cuerpo, a medida de lectura, con letra capital,
+   intertítulos en la serif y la cita como destacado entre reglas. Arriba de la
+   pantalla, una barra cobre se llena al leer. */
+.se-publico .se-edu__lectura {
+  max-width: calc(68ch + 2 * var(--se-content-gutter));
+}
+
+.se-publico .se-edu__titulo {
+  margin: clamp(1rem, 2vw, 1.75rem) 0 0.75rem;
+  font-size: clamp(2.5rem, 1.5rem + 3.2vw, 4.25rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.se-publico .se-edu__leccion-kicker {
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__leccion-kicker-dato {
+  letter-spacing: 0;
+  color: var(--color-slate);
+}
+
+.se-publico .se-edu__avance {
+  height: 2px;
+  margin: 0 0 clamp(1.75rem, 3vw, 2.5rem);
+  border-radius: 0;
+  background: var(--filete);
+}
+
+.se-publico .se-edu__avance-barra {
+  border-radius: 0;
+  background: var(--tinta);
+}
+
+.se-publico .se-edu__video {
+  border-radius: 0;
+}
+
+.se-publico .se-edu__cuerpo {
+  margin-top: 0;
+  font-size: 1.1875rem;
+  line-height: 1.7;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo > p:first-of-type::first-letter {
+  float: left;
+  margin: 0.06em 0.1em 0 0;
+  font-family: var(--titular);
+  font-size: 4.4em;
+  font-weight: 600;
+  line-height: 0.82;
+  color: var(--marca-rojo);
+}
+
+.se-publico .se-edu__cuerpo :is(h2, h3) {
+  margin: 2.25rem 0 0.75rem;
+  font-family: var(--titular);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo h2 { font-size: 1.75rem; }
+.se-publico .se-edu__cuerpo h3 { font-size: 1.375rem; }
+
+.se-publico .se-edu__cuerpo ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.se-publico .se-edu__cuerpo ul > li {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.se-publico .se-edu__cuerpo ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.75rem;
+  height: 2px;
+  background: var(--marca-rojo);
+}
+
+.se-publico .se-edu__cuerpo blockquote {
+  margin: 2.25rem 0;
+  padding: 1rem 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  font-style: italic;
+  line-height: 1.25;
+  color: var(--tinta);
+}
+
+.se-publico .se-edu__cuerpo blockquote p {
+  margin: 0;
+}
+
+/* La invitación del final, en un recorte. */
+.se-publico .se-edu__continuar {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.se-publico .se-edu__continuar .se-recorte__papel {
+  padding-top: 22px;
+}
+
+.se-publico .se-edu__continuar-titulo {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+/* Anterior y siguiente, como el pie de una página de diario. */
+.se-publico .se-edu__vecinas {
+  margin-top: 2.5rem;
+  padding-top: 14px;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-publico .se-edu__vecinas .se-link {
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-bottom: 0;
+}
+
+/* El recorte del final de la clase no lleva la regla del bloque que sustituye. */
+.se-publico .se-recorte.se-edu__continuar {
+  padding: 0;
+  border-top: 0;
+}

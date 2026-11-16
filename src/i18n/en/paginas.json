@@ -1,14 +1,6 @@
 {
   "paginas": {
     "cookies": {
-      "aviso": {
-        "region": "Cookie notice",
-        "titulo": "We measure how many people read us",
-        "cuerpo": "With your permission we use four first-party cookies to know how many people read us, whether they come back and what actually gets read. They don't carry your name, aren't shared with anyone and don't follow you off this site. If you accept, some YouTube videos on the front page may also start on their own, muted.",
-        "enlace": "What each one stores",
-        "rechazar": "Decline",
-        "aceptar": "Accept"
-      },
       "meta": {
         "titulo": "Cookie policy — {marca}",
         "descripcion": "What each of SurEconomics' four first-party cookies stores, for how long, and how to withdraw your permission in one click."
@@ -143,25 +135,10 @@
       "titulo": "Contact",
       "claim": "Institutional contact for inquiries, partnerships and research or advisory projects.",
       "campos": {
-        "nombre": "Name",
-        "correo": "Email address",
         "asunto": "Subject",
         "mensaje": "Message"
       },
-      "errores": {
-        "nombre": "Enter your name.",
-        "correo": "Enter your email address.",
-        "asunto": "Tell us what it's about.",
-        "mensaje": "Write your message.",
-        "correoIncompleto": "That email address looks incomplete.",
-        "mensajeCorto": "Tell us a bit more.",
-        "revise": "Check the highlighted fields.",
-        "demasiadas": "Too many requests. Try again in a few minutes.",
-        "fallo": "The message couldn't be sent. Try again or email us directly."
-      },
       "gracias": "Thank you for writing. We'll get back to you shortly.",
-      "enviado": "Sent.",
-      "enviando": "Sending…",
       "enviar": "Send",
       "enviarFormulario": "Send the form",
       "directoTitulo": "Email us directly",
@@ -325,10 +302,7 @@
       "perfilLinkedin": "{nombre}'s LinkedIn profile",
       "arbol": {
         "pista": "Point to a name to see every role they hold."
-      },
-      "aliadosRegion": "Partners and allies",
-      "aliados": "Institutional partners",
-      "aliadosTexto": "A network of brands connected to the research, investment and advisory ecosystem."
+      }
     }
   }
 }

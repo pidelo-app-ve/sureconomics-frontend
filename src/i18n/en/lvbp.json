@@ -1,25 +1,11 @@
 {
   "lvbp": {
-    "titulo": "Venezuelan baseball: LVBP",
     "nombre": "Venezuelan Professional Baseball League",
-    "temporada": "{temporada} season",
-    "verTabla": "Standings and results",
     "meta": {
       "titulo": "LVBP: today's games, results and standings — {marca}",
       "descripcion": "Today's games, live scores and the standings of the Venezuelan Professional Baseball League, {temporada} season."
     },
     "entrada": "The day's games, live scores and the league standings, updated while the games are on.",
-    "dia": { "ayer": "Yesterday", "hoy": "Today", "manana": "Tomorrow" },
-    "estado": {
-      "enVivo": "Live",
-      "programado": "Scheduled",
-      "final": "Final",
-      "suspendido": "Suspended",
-      "pospuesto": "Postponed",
-      "cancelado": "Cancelled"
-    },
-    "inning": "{n}th",
-    "mitad": { "alta": "top", "baja": "bottom" },
     "juegos": { "titulo": "Games", "sinJuegos": "No games scheduled for this day." },
     "estadio": "{equipo}'s ballpark",
     "compartir": {

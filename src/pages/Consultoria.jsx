@@ -1,3 +1,4 @@
+import "../styles/institucional.css";
 import { BRAND, CONTACT, SERVICES } from "../data/surEconomicsMock";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";

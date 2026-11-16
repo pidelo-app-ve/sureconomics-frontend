@@ -1,3 +1,4 @@
+import "../styles/institucional.css";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace } from "../components/Enlace";

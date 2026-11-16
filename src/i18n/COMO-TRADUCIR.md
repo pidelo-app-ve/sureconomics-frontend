@@ -9,15 +9,31 @@ Octubre de 2026. Léelo antes de tocar un texto visible del sitio público.
    un `ProveedorIdioma` cada una. Nada de cookies ni `?lang=`.
 2. **Ningún texto visible va escrito en el código.** Todos salen de los JSON de `es/` y
    `en/`, por zonas: `comun`, `portada`, `piezas`, `listados`, `cuenta`, `boletin`,
-   `educacion`, `juegos`, `paginas`, `publicidad`. Cada JSON trae sus apartados de
-   primer nivel; `es/index.js` y `en/index.js` los juntan.
-3. **El español entra en el paquete; el inglés se descarga solo en `/en`**, antes de
-   pintar (`loader` de la ruta). Ver `motor.js` y `diccionarios.js`.
+   `educacion`, `juegos`, `paginas`, `publicidad`… Cada JSON trae sus apartados de
+   primer nivel.
+3. **Cada texto viaja con quien lo usa.** Con el sitio va solo lo que usa lo que se
+   carga siempre (cabecera, pie, portada, pieza): los JSON que junta `es/index.js`
+   (`comun`, `portada`, `piezas`, `publicidad` y `siempre`). Las demás zonas se descargan
+   con la página que las usa: en `routes.jsx`, cada `pagina(…, { zonas: ["cuenta"], lang })`
+   pide su código y sus textos a la vez, y no se pinta hasta tenerlos. `siempre.json`
+   guarda las claves de otras zonas que usa lo que va siempre (el aviso de cookies, la
+   invitación al boletín, La Clave dentro de una pieza…), con su apartado de siempre
+   (`boletin.invitacion.*`). El inglés, igual, y solo en `/en` (`loader` de la ruta). Ver
+   `motor.js` y `diccionarios.js`.
 4. **El panel (`/admin`) sigue en español** y no cuelga de ningún proveedor: los
    componentes compartidos funcionan igual allí porque el contexto por defecto es español.
-5. **`npm run i18n`** comprueba que ninguna clave falte en un idioma, que las variables
-   coincidan, que todas las claves se usen y que no quede texto en español suelto en los
-   `.jsx` públicos. `npm run i18n -- --restos` lista lo que falta, archivo por archivo.
+5. **`npm run i18n`** comprueba que ninguna clave falte en un idioma (y que viva en el
+   mismo archivo en los dos), que las variables coincidan, que todas las claves se usen,
+   que cada página pida las zonas que usa y lo que va siempre esté en `es/index.js`, y que
+   no quede texto en español suelto en los `.jsx` públicos. `npm run i18n -- --restos`
+   lista lo que falta, archivo por archivo.
+
+## Dónde va una clave nueva
+
+En el JSON de su zona, en `es/` y en `en/`. Si la usa algo que se carga siempre (la
+cabecera, el pie, la portada, la pieza o lo que estas cargan después sin pasar por una
+ruta), en `siempre.json`; y si una página empieza a usar otra zona, se añade a su lista
+`zonas` en `routes.jsx`. `npm run i18n` dice cuál de las dos cosas falta.
 
 ## Las claves
 

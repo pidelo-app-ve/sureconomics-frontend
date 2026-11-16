@@ -1,0 +1,827 @@
+/* ═══ Quiénes somos ═══
+   La cabecera, el propósito y las fichas del equipo: las reglas que solo usa esta página.
+   Hoja propia, y no la de las demás institucionales, para que entre antes que la de
+   `ArbolDelEquipo`, como cuando estaba en `blog.css`: una hoja que comparten varias
+   páginas se carga después de la de cada página.
+   Vivían en `blog.css`, que se descarga con la portada; aquí llegan con la página que
+   las usa. Los bloques están tal cual y en el mismo orden que tenían allí.
+
+   Ojo con la cascada: esta hoja entra DESPUÉS de `blog.css` y `accesibilidad.css`, y se
+   queda puesta al navegar a otra página. Una regla de aquí gana a una de allí con la
+   misma especificidad, así que todo lo que se escriba aquí tiene que llevar una clase
+   de esta página, y no puede contar con que una regla de `blog.css` la corrija. */
+
+/* —— About: Quienes Somos (Editorial A, bold — brand manual) —— */
+.se-about {
+  --about-canvas: #ffffff;
+  --about-surface: #ffffff;
+  /* Era `--adm-ink-3`, que fuera del panel no existe: la variable quedaba invalida. */
+  --about-surface-2: var(--se-gray-100);
+  --about-border: rgba(var(--se-tinte), 0.12);
+  --about-border-strong: rgba(var(--se-tinte), 0.18);
+  --about-text: rgba(var(--se-tinte), 0.92);
+  --about-muted: rgba(var(--se-tinte), 0.68);
+  --about-dim: rgba(var(--se-tinte), 0.56);
+  --about-accent: var(--color-accent);
+  --about-accent-soft: rgba(185, 83, 42, 0.22);
+  --about-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --about-dur: 0.18s;
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--about-canvas) 55%, #ffffff 100%);
+}
+
+.se-about .se-text-body {
+  color: var(--about-muted);
+}
+
+.se-about .se-heading-section::before {
+  background: var(--about-accent);
+}
+
+.se-about__hero {
+  padding-top: clamp(2.75rem, 6vw, 4.25rem);
+  padding-bottom: clamp(1.75rem, 4.5vw, 3rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.se-about__hero .se-container {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+  /* Override the global `.se-hero .se-container` grid */
+  display: block;
+  grid-template-columns: none;
+  gap: 0;
+  align-items: stretch;
+}
+
+/* La cabecera pone su propio ancho porque dentro del hero el `.se-container` va a
+   sangre -- 1440 px sin margenes, para que el fondo cubra la pantalla entera -- asi
+   que si esto no lo repone, el texto arranca pegado al borde.
+
+   Con los MISMOS valores que `.se-container`, no con unos propios. Llevaba 1080 px,
+   de cuando era una fila de dos columnas que se estrechaba a proposito, y eso dejaba
+   la cabecera 60 px a la derecha de todo lo demas: medido, 220 px contra los 160 px
+   donde arrancan "Objetivos", "Proposito" y "Equipo". Centrada no se notaba; alineada
+   a la izquierda, es un escalon. La medida de lectura la ponen ahora los propios
+   parrafos, cada uno la suya. */
+.se-about__hero-grid {
+  max-width: var(--se-container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--se-content-gutter);
+  padding-right: var(--se-content-gutter);
+}
+
+.se-about__hero::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background:
+    repeating-linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.06) 0px,
+      rgba(255, 255, 255, 0.06) 1px,
+      transparent 1px,
+      transparent 10px
+    );
+  opacity: 0.35;
+  pointer-events: none;
+  mask-image: radial-gradient(80% 70% at 24% 18%, #000 0%, transparent 70%);
+}
+
+.se-about__hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1rem, 3vw, 1.75rem);
+  align-items: start;
+  justify-content: center;
+  justify-items: center;
+}
+
+@media (max-width: 959px) {
+  .se-about__hero-grid {
+    grid-template-columns: 1fr;
+    /* `start` y no `center`: centrado, el bloque de texto quedaba a 104 px del
+       borde a 768 mientras "Proposito" y "Equipo" arrancan a 32 -- justo el
+       escalon que el comentario de `.se-about__hero-copy` dice evitar. */
+    justify-items: start;
+  }
+}
+
+/* Alineado a la izquierda, no centrado.
+   Lo estaba de cuando la cabecera iba a dos columnas y el texto compartia fila con
+   la tarjeta de "Enfoque": centrado dentro de su mitad, tenia sentido. Al irse esa
+   tarjeta el texto se quedo centrado en una fila entera, con un hueco muerto a la
+   derecha y cada renglon empezando en un sitio distinto. Alineado a la izquierda
+   arranca donde arrancan los "Objetivos" y el "Equipo" de mas abajo, que es lo que
+   hace que la pagina se lea como una sola columna y no como tres cosas sueltas. */
+.se-about__hero-copy {
+  position: relative;
+  text-align: left;
+}
+
+.se-about__kicker {
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--about-dim);
+  animation: se-about-reveal 0.65s var(--about-ease) both;
+}
+
+.se-about__title {
+  margin: 0;
+  font-family: var(--se-font-heading);
+  font-size: clamp(1.85rem, 4.2vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  color: var(--about-text);
+  animation: se-about-reveal 0.65s var(--about-ease) both;
+  animation-delay: 70ms;
+}
+
+/* El logotipo de la portada. Fluido y con techo, para que no domine el hero en una
+   pantalla ancha ni se vuelva ilegible en una estrecha. `height: auto` conserva la
+   proporcion del archivo (445x57), asi que el isotipo no se deforma. */
+.se-about__logo {
+  display: block;
+  width: 100%;
+  max-width: clamp(240px, 34vw, 420px);
+  height: auto;
+}
+
+.se-about__tagline {
+  margin: 0.85rem 0 0;
+  font-family: var(--se-font-ui);
+  font-size: clamp(1rem, 1.55vw, 1.15rem);
+  line-height: 1.6;
+  color: rgba(var(--se-tinte), 0.82);
+  /* Mas corta que las 72ch de antes: centrada podia permitirselas, alineada a la
+     izquierda una linea tan larga hace que el ojo pierda el renglon al volver. */
+  max-width: 54ch;
+  text-wrap: balance;
+  animation: se-about-reveal 0.65s var(--about-ease) both;
+  animation-delay: 140ms;
+}
+
+/* La cabecera: las dos lineas cortas bajo la entradilla. */
+.se-about__intro {
+  margin: 0.75rem 0 0;
+  max-width: 76ch;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: se-about-reveal 0.65s var(--about-ease) both;
+  animation-delay: 210ms;
+}
+
+.se-about__intro-line {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: clamp(0.95rem, 1.35vw, 1.05rem);
+  line-height: 1.6;
+  color: rgba(var(--se-tinte), 0.68);
+}
+
+.se-about__bands {
+  padding-top: clamp(1.75rem, 4vw, 2.75rem);
+  padding-bottom: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.se-about__band {
+  border: 1px solid var(--about-border);
+  border-radius: 18px;
+  padding: clamp(1.05rem, 2.4vw, 1.35rem);
+  background:
+    var(--about-surface);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform var(--about-dur) var(--about-ease), border-color var(--about-dur) var(--about-ease);
+}
+
+.se-about__band:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--se-tinte), 0.18);
+}
+
+.se-about__band:focus-within {
+  outline: 2px solid rgba(185, 83, 42, 0.55);
+  outline-offset: 4px;
+}
+
+.se-about__band-title {
+  margin: 0 0 0.75rem;
+  font-family: var(--se-font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(var(--se-tinte), 0.92);
+}
+
+.se-about__band-text {
+  margin: 0;
+  color: rgba(var(--se-tinte), 0.72);
+  line-height: 1.7;
+}
+
+/* Al tamano normal del cuerpo, como el resto de la pagina -- no mas grande.
+   Llevaba `font-size` propio (21.6px, contra los 14.4px del texto de los pasos
+   justo al lado) con la idea de que el proposito, una sola frase, se leyera
+   como la tesis de la casa. En la practica chocaba: al lado de tarjetas mas
+   chicas se leia como un cuerpo extrano y no como enfasis. Se retira el tamano
+   y el color propios -- `.se-about__band-text` ya pone los suyos -- y se
+   conserva solo lo que sigue siendo necesario ahora que la tarjeta ocupa el
+   ancho entero: acotar la medida de lectura, para que una frase de lado a lado
+   en pantalla grande no pierda el renglon al volver. */
+.se-about__band-text--lead {
+  max-width: 62ch;
+  text-wrap: balance;
+}
+
+.se-about__team {
+  padding-top: clamp(2rem, 4vw, 3rem);
+}
+
+.se-about__team-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+.se-about__team-title {
+  margin: 0;
+}
+
+.se-about__team-lead {
+  margin: 0;
+  color: rgba(var(--se-tinte), 0.72);
+  max-width: 70ch;
+}
+
+.se-about__acc-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.se-about__acc {
+  border: 1px solid var(--about-border);
+  border-radius: 18px;
+  background:
+    var(--about-surface);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color var(--about-dur) var(--about-ease), transform var(--about-dur) var(--about-ease);
+}
+
+.se-about__acc:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--se-tinte), 0.18);
+}
+
+.se-about__acc-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  user-select: none;
+}
+
+.se-about__acc-summary::-webkit-details-marker {
+  display: none;
+}
+
+.se-about__acc-summary:focus-visible {
+  outline: 2px solid rgba(185, 83, 42, 0.55);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.se-about__acc-summary:hover .se-about__acc-chevron {
+  border-color: rgba(var(--se-tinte), 0.22);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.se-about__acc-title {
+  font-family: var(--se-font-heading);
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgba(var(--se-tinte), 0.92);
+}
+
+.se-about__acc-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.se-about__acc-meta {
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: rgba(var(--se-tinte), 0.82);
+  border: 1px solid rgba(var(--se-tinte), 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+}
+
+.se-about__acc-chevron {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--se-tinte), 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: transform var(--about-dur) var(--about-ease), border-color var(--about-dur) var(--about-ease),
+    background var(--about-dur) var(--about-ease);
+}
+
+.se-about__acc-chevron::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(var(--se-tinte), 0.82);
+  border-bottom: 2px solid rgba(var(--se-tinte), 0.82);
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+.se-about__acc[open] .se-about__acc-chevron {
+  transform: rotate(-180deg);
+  border-color: rgba(185, 83, 42, 0.32);
+  background: rgba(185, 83, 42, 0.12);
+}
+
+.se-about__acc-body {
+  padding: 0.25rem 1.1rem 1.1rem;
+  border-top: 1px solid rgba(var(--se-tinte), 0.1);
+}
+
+.se-about__acc[open] .se-about__acc-body {
+  animation: se-about-acc-body 0.42s var(--about-ease) both;
+}
+
+@keyframes se-about-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes se-about-acc-body {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-about__kicker,
+  .se-about__title,
+  .se-about__tagline,
+  .se-about__intro {
+    animation: none !important;
+  }
+
+  .se-about__acc[open] .se-about__acc-body {
+    animation: none !important;
+  }
+
+  .se-about__band,
+  .se-about__acc {
+    transition: none !important;
+  }
+
+  .se-about__band:hover,
+  .se-about__acc:hover {
+    transform: none;
+  }
+}
+
+.se-member-card {
+  position: relative;
+  border: 1px solid rgba(var(--se-tinte), 0.12);
+  border-radius: 18px;
+  /* Era un gris neutro que sobre papel no decía nada. Mismo par que la cabecera:
+     verde de base y el cobrizo entrando por una esquina. */
+  background:
+    linear-gradient(105deg, var(--marca-verde) 0%, #0a3520 70%, #24301f 100%);
+  color: #ffffff;
+  padding: clamp(1rem, 2.2vw, 1.25rem);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  /* Columna, y el bloque de enlaces empujado al fondo con `margin-top: auto`. Sin
+     esto "Correo" quedaba a una altura distinta en cada ficha de la fila, porque un
+     cargo de dos lineas ("Director de operaciones y comercializacion") baja todo lo
+     que viene detras. Las fichas ya median igual -- las estira la rejilla -- pero su
+     contenido no estaba alineado, que es lo que se ve. */
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.se-member-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.06) 40%, transparent 70%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.se-member-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(185, 83, 42, 0.26);
+  box-shadow: 0 26px 62px rgba(0, 0, 0, 0.62);
+}
+
+.se-member-card:hover::before {
+  opacity: 1;
+}
+
+.se-member-card:focus-within {
+  outline: 2px solid rgba(185, 83, 42, 0.65);
+  outline-offset: 4px;
+}
+
+.se-member-card__top {
+  display: flex;
+  gap: var(--se-space-md);
+  align-items: center;
+}
+
+.se-member-card__avatar {
+  width: 54px;
+  height: 54px;
+  /* Sin esto no es un circulo: es un elemento flexible dentro de `__top`, y un nombre
+     largo lo comprimia. Medido, 49x54 en vez de 54x54 -- un ovalo. No se veia porque
+     todas las fichas tenian el mismo defecto; con fotos de por medio, que si conservan
+     su tamano, la fila habria quedado a saltos. */
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(var(--se-tinte), 0.12) 0%, rgba(255, 255, 255, 0.06) 60%),
+    rgba(var(--se-tinte), 0.04);
+  border: 2px solid rgba(var(--se-tinte), 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--se-font-label);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  /* Blanco, no `--se-tinte`. El token es "0, 0, 0", asi que sobre este verde daba
+     negro sobre negro: las iniciales estaban ahi y no se leian. Es el mismo fallo
+     que ya esta avisado en `.se-header__nav-link`, que se arreglo alli y quedo sin
+     arreglar aqui -- y la auditoria de contraste no lo caza porque recorre paginas
+     en reposo y estas fichas viven dentro de un acordeon. */
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* La misma pieza, con foto en vez de iniciales: mismo tamano y mismo borde, para que
+   una fila mezclada -- unos con foto y otros sin ella, que es como va a estar casi
+   siempre -- no quede a saltos.
+
+   `object-fit: cover` recorta al centro en vez de deformar: un retrato vertical
+   metido a la fuerza en un circulo saldria con la cara aplastada. */
+.se-member-card__avatar--foto {
+  display: block;
+  padding: 0;
+  object-fit: cover;
+  /* Centrado arriba y no en el medio. `cover` recorta al centro del cuadrado por
+     omision, y una foto de medio cuerpo suele tener mas aire sobre la cabeza que
+     debajo de la barbilla -- el centro cae en el pecho y la cabeza queda mocha.
+     Sesgar el recorte hacia arriba deja la cara dentro casi siempre, a costa de
+     perder un poco mas de hombros en las fotos ya encuadradas de cerca -- que
+     sigue siendo mejor perdida que una cabeza cortada. */
+  object-position: center 20%;
+  background: rgba(var(--se-tinte), 0.04);
+}
+
+.se-member-card__name {
+  font-family: var(--se-font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #ffffff;
+  /* Un nombre largo parte por donde toca en vez de desbordar la ficha. */
+  overflow-wrap: break-word;
+}
+
+/* El cargo se quito de las fichas (15/09/2026); solo Colaboradores lleva algo debajo
+   del nombre, y es la credencial de abajo -- una linea corrida, no una etiqueta en
+   versalitas. */
+.se-member-card__bio {
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+  margin: var(--se-space-xs) 0 0;
+  overflow-wrap: break-word;
+}
+
+/* `.se-about .se-text-body` (0,2,0) pinta `--about-muted`, que es negro al 68%, y
+   el resumen lleva las dos clases. Con un solo nombre esta regla es 0,1,0 y perdia
+   siempre -- daba igual que fuera despues. De ahi que el nombre y el cargo salieran
+   blancos y la descripcion siguiera negra sobre verde: los otros dos no llevan
+   `se-text-body`. Se sube a 0,2,0 con el ancestro y gana por orden. */
+.se-member-card__links {
+  /* `auto` y no una medida: pega el bloque al fondo de la ficha, que es lo que
+     alinea los "Correo" de una fila entre si. */
+  margin-top: auto;
+  padding-top: var(--se-space-md);
+  display: flex;
+  gap: var(--se-space-sm);
+  flex-wrap: wrap;
+}
+
+.se-member-card__link {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Al pasar por encima iba a un rosa (#ffb4b4) que no esta en la paleta: es de la
+   familia del #ff4d6d que ya se saco de los avisos del panel. Va al cobre, que es
+   el acento de la casa y el mismo que subraya el enlace activo del nav. */
+.se-member-card__link:hover {
+  color: #f0a17c;
+  border-color: rgba(240, 161, 124, 0.7);
+}
+
+.se-member-card__link:focus-visible {
+  outline: 2px solid rgba(185, 83, 42, 0.65);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-member-card,
+  .se-member-card::before {
+    transition: none;
+  }
+  .se-member-card:hover {
+    transform: none;
+  }
+}
+
+/* —— Quiénes somos: el propósito como entradilla, el equipo en listas de prensa —— */
+.se-publico .se-about {
+  --about-canvas: var(--papel);
+  --about-surface: transparent;
+}
+
+.se-publico .se-about__band,
+.se-publico .se-about__acc {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.se-publico .se-about__band {
+  padding: 12px 0 0;
+  border-top: 2px solid var(--tinta);
+}
+
+.se-publico .se-about__band:hover,
+.se-publico .se-about__acc:hover {
+  transform: none;
+}
+
+/* «Propósito», como «Equipo»: un título de sección, y la declaración debajo. */
+.se-publico .se-about__band-title {
+  margin-bottom: 0.75rem;
+  font-family: var(--titular);
+  font-size: clamp(1.625rem, 1.25rem + 1.1vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.se-publico .se-about__band-text--lead {
+  max-width: 44ch;
+  font-family: var(--titular);
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  line-height: 1.4;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__acc {
+  overflow: visible;
+  border-top: 1px solid var(--tinta);
+}
+
+.se-publico .se-about__acc-summary {
+  padding: 14px 0;
+}
+
+.se-publico .se-about__acc-summary:focus-visible {
+  border-radius: 0;
+  outline-color: var(--marca-verde);
+}
+
+.se-publico .se-about__acc-title {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__acc-meta {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--cifras);
+  font-weight: 500;
+  color: var(--color-slate);
+}
+
+.se-publico .se-about__acc-chevron,
+.se-publico .se-about__acc[open] .se-about__acc-chevron,
+.se-publico .se-about__acc-summary:hover .se-about__acc-chevron {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.se-publico .se-about__acc-body {
+  padding: 0 0 1.5rem;
+  border-top: 0;
+}
+
+.se-publico .se-member-card {
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid var(--filete);
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.se-publico .se-member-card::before {
+  display: none;
+}
+
+.se-publico .se-member-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--filete);
+}
+
+.se-publico .se-member-card__avatar {
+  border: 1px solid var(--filete-fuerte);
+  background: #ffffff;
+  box-shadow: none;
+  font-family: var(--titular);
+  color: var(--tinta);
+}
+
+.se-publico .se-member-card__name {
+  font-family: var(--titular);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--tinta);
+}
+
+.se-publico .se-member-card__bio {
+  color: var(--color-slate);
+}
+
+.se-publico .se-member-card__link {
+  font-size: 0.8125rem;
+  color: var(--tinta);
+  border-bottom-color: var(--filete-fuerte);
+}
+
+.se-publico .se-member-card__link:hover {
+  color: var(--marca-verde);
+  border-color: var(--marca-verde);
+}
+
+/* En Quiénes somos el contenedor iba sin relleno y la rejilla de dos columnas, con un
+   solo hijo, lo centraba en la primera: el bloque quedaba corrido 20 px. */
+.se-publico .se-about__hero .se-container {
+  max-width: var(--se-container-max);
+  padding-inline: var(--se-content-gutter);
+}
+
+.se-publico .se-about__hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* ═══ Quiénes somos ═══
+   El propósito, en un recorte; las ciudades, entre reglas como la línea de fecha de una
+   cabecera. El equipo es un organigrama con su propia hoja
+   (`components/institutional/arbolDelEquipo.css`). */
+.se-publico .se-about__intro {
+  margin-top: 1rem;
+  padding: 8px 0;
+  border-top: 1px solid var(--tinta);
+  border-bottom: 1px solid var(--tinta);
+}
+
+.se-publico .se-about__intro-line {
+  margin: 0;
+  font-family: var(--titular);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--color-slate);
+}
+
+.se-publico .se-about__tagline {
+  max-width: 34ch;
+  margin-top: 1rem;
+  font-family: var(--titular);
+  font-size: clamp(1.375rem, 1.1rem + 1vw, 1.875rem);
+  line-height: 1.25;
+  color: var(--tinta);
+}
+
+.se-publico .se-about__proposito {
+  max-width: 46rem;
+  margin: 0 0 var(--se-space-xl);
+}
+
+.se-publico .se-about__proposito .se-about__band-title {
+  font-size: 1rem;
+  font-family: var(--se-font-ui);
+  font-weight: 700;
+  color: var(--marca-rojo);
+}
+
+/* El perfil del árbol, pegado al nombre y no al borde de la casilla. */
+.se-publico .se-member-card__nombre-fila {
+  display: block;
+  line-height: 1.2;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__name {
+  display: inline;
+}
+
+/* Del tamaño del icono, para no estirar el renglón; el área que responde al dedo la
+   da una capa invisible alrededor. */
+.se-publico .se-member-card__nombre-fila .se-member-card__in {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin: 0 0 0 5px;
+  vertical-align: -1px;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__in::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.se-publico .se-member-card__nombre-fila .se-member-card__in-svg {
+  display: block;
+  transform: none;
+}

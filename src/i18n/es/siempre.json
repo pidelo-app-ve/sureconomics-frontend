@@ -1,0 +1,273 @@
+{
+  "boletin": {
+    "invitacion": {
+      "kicker": "Boletín semanal · los lunes por la mañana",
+      "texto": "El entorno económico de la semana, contado en viñetas. Le llega cada lunes, antes de que la semana empiece a moverse.",
+      "suCorreo": "Su correo",
+      "placeholder": "nombre@correo.com",
+      "unirse": "Únase al boletín",
+      "enviando": "Enviando…",
+      "ahoraNo": "Ahora no",
+      "ok": "Listo. El primer número le llega el lunes.",
+      "exitoTitulo": "Ya está dentro",
+      "exitoTexto": "El primer número de {boletin} le llega el lunes por la mañana{correo}.",
+      "exitoA": "a",
+      "exitoNota": "Si no lo ve, búsquelo en «Promociones» o en el correo no deseado."
+    },
+    "nombre": "Entorno en Viñetas",
+    "errores": {
+      "correoIncompleto": "Ese correo no parece completo. Revíselo y vuelva a probar.",
+      "demasiados": "Demasiados intentos seguidos. Espere un momento.",
+      "fallo": "No se pudo completar la suscripción. Inténtelo de nuevo."
+    }
+  },
+  "cuenta": {
+    "api": {
+      "debeIniciarSesion": "Debe iniciar sesión",
+      "sesionExpirada": "Sesión expirada",
+      "errorSolicitud": "Error en la solicitud"
+    }
+  },
+  "juegos": {
+    "clave": {
+      "titulo": "La Clave",
+      "elegir": "¿De qué va la palabra de hoy?",
+      "cambiar": "Cambiar de categoría",
+      "cargando": "Buscando la palabra…",
+      "sinPalabras": "Todavía no hay palabras en esta categoría.",
+      "error": "No se pudo cargar la palabra de hoy.",
+      "reintentar": "Intentar de nuevo",
+      "palabras": {
+        "one": "{n} palabra",
+        "other": "{n} palabras"
+      },
+      "letras": {
+        "one": "{n} letra",
+        "other": "{n} letras"
+      },
+      "reto": "Reto del {fecha} · {categoria} · {letras}",
+      "retoPieza": "La palabra de esta pieza · {letras}",
+      "otrasRedes": "o compártelo en",
+      "categorias": {
+        "economia": "Economía",
+        "empresas": "Empresas",
+        "venezuela": "Venezuela",
+        "mundo": "Mundo",
+        "deportes": "Deportes",
+        "entretenimiento": "Entretenimiento",
+        "tecnologia": "Tecnología",
+        "sabor": "Sabor"
+      },
+      "reglas": {
+        "bien": "Verde: la letra está y en su sitio.",
+        "casi": "Naranja: está, pero en otro sitio.",
+        "no": "Blanco: no está en la palabra."
+      },
+      "teclado": {
+        "etiqueta": "Teclado",
+        "enter": "Probar",
+        "borrar": "Borrar"
+      },
+      "avisos": {
+        "pocasLetras": "Faltan letras: son {n}."
+      },
+      "pista": {
+        "boton": "Ver una pista",
+        "texto": "Pista: {pista}"
+      },
+      "fin": {
+        "gano": "¡La tienes!",
+        "perdio": "Esta vez no",
+        "enIntentos": {
+          "one": "En {n} intento",
+          "other": "En {n} intentos"
+        },
+        "sinAcertar": "Se acabaron los intentos",
+        "saleEn": "Sale en:",
+        "dolar": "Mientras pensabas, el dólar oficial del BCV estaba en {valor}.",
+        "verNoticias": "Ver las noticias de hoy",
+        "stats": {
+          "jugadas": "Jugadas",
+          "acertadas": "Acertadas",
+          "racha": "Racha",
+          "mejorRacha": "Mejor racha"
+        },
+        "distribucion": "En cuántos intentos aciertas",
+        "cuadricula": "Tu resultado, en cuadros",
+        "whatsapp": "Compartir por WhatsApp",
+        "copiar": "Copiar resultado",
+        "copiado": "Resultado copiado",
+        "manana": "Mañana hay otra palabra. Vuelve.",
+        "otraCategoria": "Jugar otra categoría",
+        "masEnClave": "Hay una palabra nueva cada día, de lo que tú elijas.",
+        "irAClave": "Jugar la palabra del día"
+      },
+      "compartir": {
+        "dia": "La Clave de {marca} · {categoria} · {fecha}: {resultado}",
+        "pieza": "La Clave de {marca}, la palabra de la pieza: {resultado}"
+      },
+      "invitar": {
+        "texto": "Reta a un pana: hoy la palabra es la misma para todos.",
+        "boton": "Retar por WhatsApp",
+        "mensaje": "¿Adivinas la palabra de hoy? La Clave de {marca}: {categoria}, {letras}, seis intentos."
+      },
+      "pieza": {
+        "titulo": "Adivina la palabra de esta pieza",
+        "texto": "Una palabra que tiene que ver con lo que acabas de leer. Seis intentos.",
+        "jugar": "Jugar"
+      },
+      "tarjeta": {
+        "kicker": "La palabra del día",
+        "titulo": "La Clave",
+        "texto": "Adivina la palabra de hoy en seis intentos: economía, deportes, entretenimiento, Venezuela y más.",
+        "jugar": "Jugar la palabra de hoy",
+        "banner": "Adivina la palabra del día"
+      }
+    },
+    "tarjetaPausa": {
+      "kicker": "Un minuto de pausa",
+      "titulo": "Vuela, guacamaya",
+      "texto": "Siete vuelos de un minuto sobre Venezuela y un reto nuevo cada día. Con un dedo.",
+      "jugar": "Jugar el reto de hoy",
+      "memoria": {
+        "mejorHoy": "Su mejor de hoy: {n} pts.",
+        "mejorHoyConRacha": "Su mejor de hoy: {n} pts · racha de {racha} días.",
+        "noRompa": {
+          "one": "No rompa su racha de {n} día.",
+          "other": "No rompa su racha de {n} días."
+        }
+      },
+      "banner": {
+        "kicker": "¿Terminó de leer? Un minuto de pausa",
+        "titulo": "Lleve la guacamaya a casa antes de que oscurezca"
+      }
+    }
+  },
+  "listados": {
+    "estados": {
+      "vacioTitulo": "No hay resultados",
+      "vacioTexto": "Todavía no hay contenido para mostrar.",
+      "errorTitulo": "Error",
+      "errorGenerico": "Ocurrió un error al cargar los datos.",
+      "demasiadasSolicitudes": "Demasiadas solicitudes en poco tiempo. Espere unos minutos e inténtelo de nuevo."
+    }
+  },
+  "lvbp": {
+    "titulo": "Béisbol venezolano: LVBP",
+    "temporada": "Temporada {temporada}",
+    "verTabla": "Tabla y resultados",
+    "dia": {
+      "ayer": "Ayer",
+      "hoy": "Hoy",
+      "manana": "Mañana"
+    },
+    "estado": {
+      "enVivo": "En vivo",
+      "programado": "Por jugar",
+      "final": "Final",
+      "suspendido": "Suspendido",
+      "pospuesto": "Pospuesto",
+      "cancelado": "Cancelado"
+    },
+    "inning": "{n}.º",
+    "mitad": {
+      "alta": "alta",
+      "baja": "baja"
+    }
+  },
+  "monedas": {
+    "nombres": {
+      "VES": "Bolívar",
+      "MXN": "Peso mexicano",
+      "BRL": "Real",
+      "COP": "Peso colombiano",
+      "ARS": "Peso argentino",
+      "PEN": "Sol",
+      "CLP": "Peso chileno",
+      "PYG": "Guaraní",
+      "DOP": "Peso dominicano",
+      "KYD": "Dólar de Islas Caimán",
+      "EUR": "Euro"
+    },
+    "grafica": {
+      "titulo": "{nombre} por dólar, últimos 30 días",
+      "pocosDatos": "Todavía no hay suficientes datos para dibujar la gráfica.",
+      "variacion": "{n} en 30 días",
+      "resumen": "Del {desde} al {hasta}: {n}",
+      "datos": "Ver los datos",
+      "colFecha": "Fecha",
+      "colValor": "Por 1 USD",
+      "tituloComparar": "Variación frente al dólar desde el {desde}",
+      "sinComparar": "No hay datos suficientes de {nombre} para compararla; se muestra solo la moneda elegida.",
+      "resumenComparar": "Del {desde} al {hasta}, variación frente al dólar: {a} {na}, {b} {nb}",
+      "lectura": "Subir es que hace falta más moneda para comprar un dólar: la moneda se debilita. No es la inflación, aunque suelen ir juntas.",
+      "colMoneda": "{codigo} por 1 USD"
+    },
+    "ficha": {
+      "etiqueta": "{codigo}: {valor} por dólar, {variacion} hoy",
+      "sinVariacion": "sin variación"
+    },
+    "masMovidas": "Las que más se movieron hoy"
+  },
+  "paginas": {
+    "cookies": {
+      "aviso": {
+        "region": "Aviso de cookies",
+        "titulo": "Medimos cuánta gente nos lee",
+        "cuerpo": "Con su permiso usamos cuatro cookies propias para saber cuántas personas nos leen, si vuelven y qué se lee de verdad. No llevan su nombre, no se comparten con nadie y no le siguen fuera de este sitio. Si acepta, algunos videos de YouTube de la portada podrán además empezar solos, sin sonido.",
+        "enlace": "Qué guarda cada una",
+        "rechazar": "Rechazar",
+        "aceptar": "Aceptar"
+      }
+    },
+    "contacto": {
+      "campos": {
+        "nombre": "Nombre",
+        "correo": "Correo electrónico"
+      },
+      "errores": {
+        "nombre": "Escriba su nombre.",
+        "correo": "Escriba su correo.",
+        "asunto": "Diga de qué se trata.",
+        "mensaje": "Escriba su mensaje.",
+        "correoIncompleto": "Ese correo no parece completo.",
+        "mensajeCorto": "Cuéntenos un poco más.",
+        "revise": "Revise los campos marcados.",
+        "demasiadas": "Demasiadas solicitudes. Intente de nuevo en unos minutos.",
+        "fallo": "No se pudo enviar el mensaje. Intente de nuevo o escríbanos directamente por email."
+      },
+      "enviado": "Enviado.",
+      "enviando": "Enviando…"
+    },
+    "quienesSomos": {
+      "aliadosRegion": "Partners y aliados",
+      "aliados": "Aliados institucionales",
+      "aliadosTexto": "Una red de marcas asociadas al ecosistema de investigación, inversión y asesoría."
+    }
+  },
+  "titulares": {
+    "seccion": {
+      "lateral": {
+        "monedas": "Monedas de la región"
+      }
+    },
+    "tarjeta": {
+      "etiqueta": "Última hora"
+    },
+    "hace": {
+      "ahora": "Ahora",
+      "corto": "{n} min",
+      "minutos": "Hace {n} min",
+      "horas": "Hace {n} h"
+    },
+    "pestanas": {
+      "rotulo": "Qué enseñar",
+      "todo": "Todo",
+      "misTemas": "Mis temas",
+      "vacio": "Todavía no sigue ningún tema.",
+      "elegir": "Elegir temas",
+      "sinNuevo": "Nada nuevo en sus temas por ahora.",
+      "todoLoMio": "Todo lo de mis temas"
+    }
+  }
+}

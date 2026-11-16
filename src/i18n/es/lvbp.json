@@ -1,25 +1,11 @@
 {
   "lvbp": {
-    "titulo": "Béisbol venezolano: LVBP",
     "nombre": "Liga Venezolana de Béisbol Profesional",
-    "temporada": "Temporada {temporada}",
-    "verTabla": "Tabla y resultados",
     "meta": {
       "titulo": "LVBP: juegos de hoy, resultados y tabla de posiciones — {marca}",
       "descripcion": "Los juegos del día, los marcadores en vivo y la tabla de posiciones de la Liga Venezolana de Béisbol Profesional, temporada {temporada}."
     },
     "entrada": "Los juegos del día, los marcadores en vivo y la tabla de posiciones de la liga, actualizados mientras se juega.",
-    "dia": { "ayer": "Ayer", "hoy": "Hoy", "manana": "Mañana" },
-    "estado": {
-      "enVivo": "En vivo",
-      "programado": "Por jugar",
-      "final": "Final",
-      "suspendido": "Suspendido",
-      "pospuesto": "Pospuesto",
-      "cancelado": "Cancelado"
-    },
-    "inning": "{n}.º",
-    "mitad": { "alta": "alta", "baja": "baja" },
     "juegos": { "titulo": "Juegos", "sinJuegos": "No hay juegos programados este día." },
     "estadio": "Estadio de {equipo}",
     "compartir": {

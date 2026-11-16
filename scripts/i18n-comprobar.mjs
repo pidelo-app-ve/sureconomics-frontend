@@ -4,20 +4,28 @@
  *   npm run i18n              (falla si hay algo que arreglar)
  *   npm run i18n -- --restos  (además lista, archivo por archivo, los textos que faltan por mover)
  *
- * Tres comprobaciones:
- * 1. **Paridad:** toda clave de `es/` existe en `en/` y al revés, ninguna está vacía, y
- *    las variables `{asi}` y las formas del plural coinciden en los dos idiomas.
+ * Cuatro comprobaciones:
+ * 1. **Paridad:** toda clave de `es/` existe en `en/` y al revés, en el mismo archivo,
+ *    ninguna está vacía, y las variables `{asi}` y las formas del plural coinciden en los
+ *    dos idiomas. Un apartado puede repartirse entre varios archivos (`siempre.json` y su
+ *    zona); una clave, no.
  * 2. **Claves usadas:** cada `t("clave")` del código existe en el diccionario, y cada
  *    clave del diccionario se usa en algún sitio (si no, es basura que confunde al
  *    traductor). Las claves que se arman en tiempo de ejecución (`t(\`formatos.${x}\`)`)
  *    no se pueden seguir; se marcan como dinámicas con su prefijo.
- * 3. **Restos:** texto visible en español que sigue escrito en los `.jsx` públicos
+ * 3. **Zonas:** lo que va siempre (los JSON que importa `es/index.js`) viaja con el sitio;
+ *    el resto, una zona por archivo, se descarga con la página que lo usa (`lazy` en
+ *    `routes.jsx`, con su lista de `zonas`). Se sigue el grafo de `import` desde
+ *    `main.jsx`: lo que se carga con él solo puede usar claves que van siempre; cada
+ *    `import()` solo las que van siempre o las de las zonas que pide en su misma línea.
+ *    Si no, la página pintaría la clave en lugar del texto.
+ * 4. **Restos:** texto visible en español que sigue escrito en los `.jsx` públicos
  *    (entre etiquetas o en `aria-label`, `placeholder`, `title`, `alt`). Es la lista de
  *    lo que falta por traducir. Una línea se puede eximir con `// i18n:ignorar` al final
  *    o en la línea anterior: nombres propios, marcas, cosas que no se traducen.
  */
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -48,17 +56,25 @@ const aplanar = (obj, prefijo = "", salida = {}) => {
   return salida;
 };
 
+/** Todas las claves de un idioma y el archivo donde vive cada una. */
 const cargar = (lang) => {
   const carpeta = join(SRC, "i18n", lang);
-  const todo = {};
+  const claves = {};
+  const archivoDe = {};
   for (const archivo of readdirSync(carpeta).filter((a) => a.endsWith(".json")).sort()) {
-    const datos = JSON.parse(readFileSync(join(carpeta, archivo), "utf8"));
+    const datos = aplanar(JSON.parse(readFileSync(join(carpeta, archivo), "utf8")));
     for (const [k, v] of Object.entries(datos)) {
-      if (k in todo) fallo(`${lang}/${archivo}: el apartado «${k}» ya existe en otro archivo`);
-      todo[k] = v;
+      if (k in claves) fallo(`${lang}/${archivo}: la clave «${k}» ya está en ${archivoDe[k]}`);
+      claves[k] = v;
+      archivoDe[k] = archivo;
     }
   }
-  return aplanar(todo);
+  // Una clave no puede ser a la vez texto y apartado de otras (`a.b` y `a.b.c`).
+  const ordenadas = Object.keys(claves).sort();
+  for (let i = 1; i < ordenadas.length; i++) {
+    if (ordenadas[i].startsWith(`${ordenadas[i - 1]}.`)) fallo(`${lang}: «${ordenadas[i - 1]}» es un texto y también un apartado («${ordenadas[i]}»)`);
+  }
+  return { claves, archivoDe };
 };
 
 const variablesDe = (v) => {
@@ -66,17 +82,18 @@ const variablesDe = (v) => {
   return [...new Set(textos.flatMap((t) => [...String(t).matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map((m) => m[1])))].sort().join(",");
 };
 
-const es = cargar("es");
-const en = cargar("en");
+const { claves: es, archivoDe: archivoEs } = cargar("es");
+const { claves: en, archivoDe: archivoEn } = cargar("en");
 let paridad = 0;
 for (const clave of Object.keys(es)) {
   if (!(clave in en)) { fallo(`falta en inglés: ${clave}`); paridad++; continue; }
+  if (archivoEs[clave] !== archivoEn[clave]) { fallo(`${clave}: está en es/${archivoEs[clave]} y en en/${archivoEn[clave]}; tiene que vivir en el mismo archivo en los dos`); paridad++; }
   if (es[clave] === "" || en[clave] === "") { fallo(`vacía: ${clave}`); paridad++; }
   if (variablesDe(es[clave]) !== variablesDe(en[clave])) { fallo(`variables distintas: ${clave} (es {${variablesDe(es[clave])}} / en {${variablesDe(en[clave])}})`); paridad++; }
   if ((typeof es[clave] === "object") !== (typeof en[clave] === "object")) { fallo(`una es plural y la otra no: ${clave}`); paridad++; }
 }
 for (const clave of Object.keys(en)) if (!(clave in es)) { fallo(`sobra en inglés (no está en español): ${clave}`); paridad++; }
-if (!paridad) ok(`paridad: ${Object.keys(es).length} claves, iguales en los dos idiomas`);
+if (!paridad) ok(`paridad: ${Object.keys(es).length} claves, iguales en los dos idiomas y en los mismos archivos`);
 
 /* —— 2. Claves usadas ———————————————————————————————————————————————— */
 
@@ -91,22 +108,32 @@ const recorrer = (dir) => {
 recorrer(SRC);
 const publicos = archivos.filter((a) => !IGNORADOS.some((re) => re.test(a)));
 
-const usadas = new Set();
-const prefijosDinamicos = new Set();
-for (const archivo of publicos) {
-  const codigo = readFileSync(archivo, "utf8");
-  for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*"([^"]+)"/g)) usadas.add(m[1]);
-  for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*`([^`$]+)\$\{/g)) prefijosDinamicos.add(m[1]);
-  for (const m of codigo.matchAll(/labelKey:\s*"([^"]+)"/g)) usadas.add(m[1]);
+/** Las claves que nombra un archivo: directas y prefijos de las que se arman en tiempo de ejecución. */
+const clavesQueNombra = (codigo) => {
+  const directas = new Set();
+  const prefijos = new Set();
+  // Con comillas dobles o simples: `t('clave')` también es una clave.
+  for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*(["'])([^"'\n]+)\1/g)) directas.add(m[2]);
+  for (const m of codigo.matchAll(/\bt(?:Actual)?\(\s*`([^`$]+)\$\{/g)) prefijos.add(m[1]);
+  for (const m of codigo.matchAll(/labelKey:\s*(["'])([^"'\n]+)\1/g)) directas.add(m[2]);
   // Guías traducibles (`crearRecorrido(…, { traducir: true })`): `titulo`, `texto` y
   // `puntos` son claves. Solo cuenta lo que parece una clave (palabras con puntos, sin
   // espacios): las guías del panel llevan el texto tal cual y no entran aquí.
   if (codigo.includes("traducir: true")) {
-    for (const m of codigo.matchAll(/(?:titulo|texto):\s*"([a-z]\w*(?:\.\w+)+)"/g)) usadas.add(m[1]);
+    for (const m of codigo.matchAll(/(?:titulo|texto):\s*"([a-z]\w*(?:\.\w+)+)"/g)) directas.add(m[1]);
     for (const lista of codigo.matchAll(/puntos:\s*\[([^\]]*)\]/g)) {
-      for (const m of lista[1].matchAll(/"([a-z]\w*(?:\.\w+)+)"/g)) usadas.add(m[1]);
+      for (const m of lista[1].matchAll(/"([a-z]\w*(?:\.\w+)+)"/g)) directas.add(m[1]);
     }
   }
+  return { directas, prefijos };
+};
+
+const usadas = new Set();
+const prefijosDinamicos = new Set();
+for (const archivo of publicos) {
+  const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"));
+  for (const k of directas) usadas.add(k);
+  for (const p of prefijos) prefijosDinamicos.add(p);
 }
 let usoMal = 0;
 for (const clave of usadas) if (!(clave in es)) { fallo(`se usa t("${clave}") y no existe en el diccionario`); usoMal++; }
@@ -117,7 +144,163 @@ if (sinUso.length) {
 }
 if (!usoMal) ok(`claves usadas: ${usadas.size} directas, ${prefijosDinamicos.size} prefijos dinámicos, ninguna sobra ni falta`);
 
-/* —— 3. Restos en español ————————————————————————————————————————————— */
+/* —— 3. Zonas: cada texto, cargado antes de que se pinte ——————————————— */
+
+const rel = (a) => relative(RAIZ, a).split("\\").join("/");
+
+// Lo que va siempre: los JSON que junta `es/index.js` (y los mismos en `en/index.js`).
+const jsonDelIndice = (lang) => [...readFileSync(join(SRC, "i18n", lang, "index.js"), "utf8").matchAll(/from\s+"\.\/([\w-]+\.json)"/g)].map((m) => m[1]).sort();
+const SIEMPRE = new Set(jsonDelIndice("es"));
+const ZONAS = new Set(Object.values(archivoEs).filter((a) => !SIEMPRE.has(a)).map((a) => a.replace(/\.json$/, "")));
+let zonasMal = 0;
+const falloZona = (m) => { fallo(m); zonasMal++; };
+if (jsonDelIndice("en").join() !== [...SIEMPRE].join()) falloZona(`es/index.js y en/index.js no juntan los mismos archivos`);
+// Cada zona se puede descargar en los dos idiomas.
+const registro = readFileSync(join(SRC, "i18n", "diccionarios.js"), "utf8");
+for (const zona of ZONAS) {
+  for (const lang of ["es", "en"]) if (!registro.includes(`import("./${lang}/${zona}.json")`)) falloZona(`la zona «${zona}» no se puede descargar en ${lang}: falta en i18n/diccionarios.js`);
+}
+
+/** El código sin comentarios: un `import()` comentado no carga nada. */
+const quitarComentarios = (codigo) => {
+  let salida = "";
+  let cadena = null;
+  for (let i = 0; i < codigo.length; i++) {
+    const c = codigo[i];
+    if (cadena) {
+      salida += c;
+      if (c === "\\") { salida += codigo[i + 1] ?? ""; i++; }
+      else if (c === cadena) cadena = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") { cadena = c; salida += c; continue; }
+    if (c === "/" && codigo[i + 1] === "/") { while (i < codigo.length && codigo[i] !== "\n") i++; salida += "\n"; continue; }
+    if (c === "/" && codigo[i + 1] === "*") { const fin = codigo.indexOf("*/", i + 2); salida += codigo.slice(i, fin + 2).replace(/[^\n]/g, " "); i = fin + 1; continue; }
+    salida += c;
+  }
+  return salida;
+};
+
+const resolverImport = (desde, especificador) => {
+  if (!especificador.startsWith(".")) return null;
+  const base = resolve(dirname(desde), especificador);
+  for (const c of [base, `${base}.jsx`, `${base}.js`, join(base, "index.jsx"), join(base, "index.js")]) if (existsSync(c) && statSync(c).isFile() && /\.jsx?$/.test(c)) return c;
+  return null;
+};
+
+const importsCache = new Map();
+/** Los `import` de un archivo: los de arriba y los `import()`, con las zonas que piden en su misma línea. */
+const importsDe = (archivo) => {
+  if (importsCache.has(archivo)) return importsCache.get(archivo);
+  const codigo = quitarComentarios(readFileSync(archivo, "utf8"));
+  const estaticos = [];
+  for (const m of codigo.matchAll(/(?:^|[\s;}])(?:import|export)\s+(?:[^"'`;]*?\s+from\s+)?["']([^"']+)["']/g)) {
+    const f = resolverImport(archivo, m[1]);
+    if (f) estaticos.push(f);
+  }
+  const dinamicos = [];
+  for (const linea of codigo.split(/\r?\n/)) {
+    for (const m of linea.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g)) {
+      const f = resolverImport(archivo, m[1]);
+      if (!f) continue;
+      // Solo una lista que pide zonas de verdad: `zonas: [...]` (las rutas) o
+      // `cargarZonas(lang, [...])`; cualquier otro `[...]` de la línea no carga nada.
+      const lista = /(?:\bzonas:\s*|\bcargarZonas\([^,()]*,\s*)\[([^\]]*)\]/.exec(linea.slice(m.index + m[0].length));
+      dinamicos.push({ archivo: f, zonas: lista ? [...lista[1].matchAll(/["']([\w-]+)["']/g)].map((x) => x[1]) : [] });
+    }
+  }
+  const r = { estaticos, dinamicos };
+  importsCache.set(archivo, r);
+  return r;
+};
+
+const cierre = (inicio, { dinamicos, excluir = new Set() }) => {
+  const vistos = new Set();
+  const pila = [inicio];
+  while (pila.length) {
+    const a = pila.pop();
+    if (vistos.has(a) || excluir.has(a)) continue;
+    vistos.add(a);
+    const { estaticos, dinamicos: dins } = importsDe(a);
+    pila.push(...estaticos);
+    if (dinamicos) pila.push(...dins.map((d) => d.archivo));
+  }
+  return vistos;
+};
+
+// Las claves (del diccionario) que usa cada archivo, contando los prefijos dinámicos.
+const todasLasClaves = Object.keys(es);
+const clavesCache = new Map();
+const clavesDe = (archivo) => {
+  if (!clavesCache.has(archivo)) {
+    const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"));
+    const s = new Set([...directas].filter((k) => k in es));
+    for (const p of prefijos) for (const k of todasLasClaves) if (k.startsWith(p)) s.add(k);
+    clavesCache.set(archivo, s);
+  }
+  return clavesCache.get(archivo);
+};
+const zonaDe = (clave) => (SIEMPRE.has(archivoEs[clave]) ? null : archivoEs[clave].replace(/\.json$/, ""));
+
+const principal = cierre(join(SRC, "main.jsx"), { dinamicos: false });
+const usadasSiempre = new Set();
+for (const a of principal) {
+  if (a.startsWith(join(SRC, "i18n"))) continue;
+  for (const k of clavesDe(a)) {
+    usadasSiempre.add(k);
+    if (zonaDe(k)) falloZona(`«${k}» la usa ${rel(a)}, que se carga con el sitio, y vive en la zona «${zonaDe(k)}»: pásala a siempre.json (en es/ y en/)`);
+  }
+}
+// Cada `import()` que sale de lo que se carga con el sitio: su página y todo lo que esa
+// página carga después solo pueden usar lo que va siempre y las zonas que pide.
+let entradas = 0;
+for (const a of principal) {
+  if (a.startsWith(join(SRC, "i18n"))) continue;
+  for (const d of importsDe(a).dinamicos) {
+    entradas++;
+    const pide = new Set(d.zonas);
+    const usa = new Set();
+    for (const f of cierre(d.archivo, { dinamicos: true, excluir: principal })) {
+      for (const k of clavesDe(f)) {
+        const z = zonaDe(k);
+        if (!z) continue;
+        usa.add(z);
+        if (!pide.has(z)) {
+          falloZona(`«${k}» (zona «${z}») la usa ${rel(f)}, que se carga con ${rel(d.archivo)} (desde ${rel(a)}) sin pedir esa zona: añádela a sus zonas, o pásala a siempre.json si ahí no se pueden pedir`);
+          pide.add(z); // un aviso por zona y página basta
+        }
+      }
+    }
+    for (const z of d.zonas) {
+      if (!ZONAS.has(z)) falloZona(`${rel(a)} pide la zona «${z}» para ${rel(d.archivo)} y esa zona no existe`);
+      else if (!usa.has(z)) falloZona(`${rel(a)} pide la zona «${z}» para ${rel(d.archivo)} y no usa ninguna de sus claves: quítala`);
+    }
+  }
+}
+// En siempre.json, solo lo que usa lo que se carga con el sitio, o lo que este carga
+// después sin poder pedir zonas (La Clave dentro de una pieza, por ejemplo).
+const sinZonaPosible = new Set();
+for (const a of principal) {
+  if (a.startsWith(join(SRC, "i18n"))) continue;
+  for (const d of importsDe(a).dinamicos) if (d.zonas.length === 0) for (const f of cierre(d.archivo, { dinamicos: true, excluir: principal })) for (const k of clavesDe(f)) sinZonaPosible.add(k);
+}
+for (const [k, archivo] of Object.entries(archivoEs)) {
+  if (archivo === "siempre.json" && !usadasSiempre.has(k) && !sinZonaPosible.has(k)) falloZona(`«${k}» está en siempre.json y nada de lo que se carga con el sitio la usa: devuélvela a su zona («${k.split(".")[0]}»)`);
+}
+// En las rutas públicas cada página pide sus zonas en el idioma de su rama: sin `lang`,
+// `pagina` las pide en español, y en `/en` la página saldría con los textos en español.
+{
+  const rutas = quitarComentarios(readFileSync(join(SRC, "routes.jsx"), "utf8"));
+  const desde = rutas.indexOf("const rutasPublicas");
+  const hasta = rutas.indexOf("export const router");
+  if (desde < 0 || hasta < desde) falloZona("routes.jsx: no encuentro `rutasPublicas` para comprobar que cada página pasa `lang`");
+  else for (const linea of rutas.slice(desde, hasta).split(/\r?\n/)) {
+    if (/\bpagina\(/.test(linea) && !/\blang\b/.test(linea)) falloZona(`routes.jsx: una ruta pública no pasa \`lang\` a \`pagina\` (en /en pediría sus zonas en español): ${linea.trim().slice(0, 120)}`);
+  }
+}
+if (!zonasMal) ok(`zonas: ${ZONAS.size} zonas; lo que se carga con el sitio y ${entradas} importaciones diferidas tienen sus textos a tiempo`);
+
+/* —— 4. Restos en español ————————————————————————————————————————————— */
 
 const PALABRAS = /[a-záéíóúñüA-ZÁÉÍÓÚÑÜ]{3,}/;
 const PERMITIDOS = new Set(["SurEconomics", "Sur", "Economics", "Al punto", "El Analista", "Instagram", "TikTok", "LinkedIn", "WhatsApp", "Facebook", "Telegram", "USD", "BCV", "LVBP", "IBC", "TradingView", "Spotify", "YouTube", "pts", "Bs", "BTC", "EUR", "Google", "Caracas"]);
@@ -133,6 +316,8 @@ const esTextoHumano = (texto) => {
 const restos = [];
 for (const archivo of publicos) {
   if (!archivo.endsWith(".jsx")) continue;
+  // Con `\r?\n`: en un archivo con CRLF cada línea acabaría en `\r`, y `//.*$` ya no
+  // quitaría el comentario (`.` no cruza el `\r`).
   const lineas = readFileSync(archivo, "utf8").split(/\r?\n/);
   const encontrados = [];
   // Un comentario de bloque abierto en una línea anterior: nada de lo que diga es texto visible.

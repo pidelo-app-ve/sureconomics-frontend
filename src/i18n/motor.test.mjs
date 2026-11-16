@@ -3,16 +3,20 @@
  */
 import {
   cargarIdioma,
+  cargarZonas,
+  diccionarioCargado,
   fijarIdioma,
   formatearFecha,
   formatearNumero,
   idiomaDeRuta,
   registrarCargador,
   registrarDiccionario,
+  registrarZonas,
   rutaEnIdioma,
   sinPrefijo,
   tActual,
   traducir,
+  zonaCargada,
 } from "./motor.js";
 
 let fallos = 0;
@@ -59,7 +63,31 @@ fijarIdioma("en");
 check("tActual usa el idioma del documento", tActual("nav.inicio") === "Home");
 fijarIdioma("es");
 
-// 5. Direcciones
+// 5. Zonas: se descargan con su página y se juntan apartado a apartado
+let pedidasCuenta = 0;
+registrarZonas({
+  cuenta: {
+    es: async () => { pedidasCuenta++; return { nav: { salir: "Salir" }, cuenta: { titulo: "Su cuenta" } }; },
+    en: async () => ({ nav: { salir: "Log out" }, cuenta: { titulo: "Your account" } }),
+  },
+  rota: { es: async () => { throw new Error("sin red"); }, en: async () => ({}) },
+});
+check("zona sin cargar: se ve la clave", traducir("es", "cuenta.titulo") === "cuenta.titulo");
+await Promise.all([cargarZonas("es", ["cuenta"]), cargarZonas("es", ["cuenta"])]);
+check("zona cargada", traducir("es", "cuenta.titulo") === "Su cuenta" && zonaCargada("es", "cuenta"));
+check("la zona se pide una sola vez", pedidasCuenta === 1, pedidasCuenta);
+check("un apartado repartido entre la base y una zona", traducir("es", "nav.inicio") === "Inicio" && traducir("es", "nav.salir") === "Salir");
+await cargarZonas("en", ["cuenta"]);
+check("zona en inglés junto a su base", traducir("en", "nav.salir") === "Log out" && traducir("en", "nav.inicio") === "Home");
+let fallo1 = false;
+try { await cargarZonas("es", ["rota"]); } catch { fallo1 = true; }
+check("una zona que no llega falla (la ruta enseña su error)", fallo1 && !zonaCargada("es", "rota"));
+let falloNoExiste = false;
+try { await cargarZonas("es", ["noExiste"]); } catch { falloNoExiste = true; }
+check("una zona sin registrar falla", falloNoExiste);
+check("la base sigue cargada", diccionarioCargado("en") && diccionarioCargado("es"));
+
+// 6. Direcciones
 check("idiomaDeRuta /en", idiomaDeRuta("/en") === "en");
 check("idiomaDeRuta /en/x", idiomaDeRuta("/en/noticias/x") === "en");
 check("idiomaDeRuta /entorno NO es inglés", idiomaDeRuta("/entorno") === "es");
@@ -70,7 +98,7 @@ check("rutaEnIdioma conserva la consulta", rutaEnIdioma("/articulos?formato=noti
 check("rutaEnIdioma no duplica", rutaEnIdioma("/en/noticias", "en") === "/en/noticias");
 check("rutaEnIdioma deja lo externo", rutaEnIdioma("https://x.com/a", "en") === "https://x.com/a" && rutaEnIdioma("#ancla", "en") === "#ancla");
 
-// 6. Fechas y cifras
+// 7. Fechas y cifras
 check("fecha corta es", formatearFecha("2026-08-01T12:00:00Z", "corta", "es") === "1 ago 2026", formatearFecha("2026-08-01T12:00:00Z", "corta", "es"));
 check("fecha corta en", formatearFecha("2026-08-01T12:00:00Z", "corta", "en") === "Aug 1, 2026", formatearFecha("2026-08-01T12:00:00Z", "corta", "en"));
 check("fecha larga es", formatearFecha("2026-09-05", "larga", "es") === "5 de septiembre de 2026", formatearFecha("2026-09-05", "larga", "es"));

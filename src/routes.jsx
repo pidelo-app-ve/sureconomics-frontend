@@ -5,12 +5,11 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Pieza } from "./pages/Pieza";
-import { NotFound } from "./pages/NotFound";
 import { RouteError } from "./pages/RouteError";
 import { RequireAdmin } from "./components/admin/RequireAdmin";
 import { ProveedorIdioma } from "./i18n/ProveedorIdioma";
 import { Redirigir } from "./components/Enlace";
-import { cargarIdioma } from "./i18n/motor";
+import { IDIOMA_BASE, cargarIdioma, cargarZonas } from "./i18n/motor";
 
 /**
  * Una página que se descarga al entrar en ella, no con el resto del sitio.
@@ -20,8 +19,15 @@ import { cargarIdioma } from "./i18n/motor";
  * redacción y quien tiene sesión. Antes iban en el mismo archivo que la portada, y cada
  * lector se descargaba el panel entero para leer una noticia. Con `lazy` del router cada
  * página va en su propio archivo y se pide la primera vez que alguien la abre.
+ *
+ * Con el código vienen sus textos: las zonas del diccionario que usa (`zonas`, en el
+ * idioma de su rama), pedidas a la vez y antes de pintar, así que nunca se ve una clave
+ * en lugar del texto. `npm run i18n` comprueba que cada página pida las que usa.
  */
-const pagina = (cargar, nombre) => async () => ({ Component: (await cargar())[nombre] });
+const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => async () => {
+    const [modulo] = await Promise.all([cargar(), cargarZonas(lang, zonas)]);
+    return { Component: modulo[nombre] };
+};
 
 
 /**
@@ -30,10 +36,10 @@ const pagina = (cargar, nombre) => async () => ({ Component: (await cargar())[no
  * idiomas sin escribirla dos veces, y el idioma vive en la dirección, que es lo que
  * Google indexa. Ver `i18n/motor.js`.
  */
-const rutasPublicas = () => [
+const rutasPublicas = (lang) => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
-    { path: "entorno", lazy: pagina(() => import("./pages/Entorno"), "Entorno"), errorElement: <RouteError /> },
+    { path: "entorno", lazy: pagina(() => import("./pages/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
     // El Analista está EN PAUSA (octubre de 2026): la dirección lleva a /juegos, en el
     // idioma de la página, y el juego no se descarga. La página, el servicio y el panel
     // del ranking siguen en su sitio. Para volver a encenderlo, cambiar esta línea por
@@ -47,34 +53,34 @@ const rutasPublicas = () => [
         errorElement: <RouteError />,
         children: [
             { index: true, element: <Home /> },
-            { path: "suscribirse", lazy: pagina(() => import("./pages/Subscribe"), "Subscribe") },
+            { path: "suscribirse", lazy: pagina(() => import("./pages/Subscribe"), "Subscribe", { zonas: ["boletin"], lang }) },
             // A donde apunta el enlace de baja de cada boletin. Sin sesion: el
             // token de la direccion es la unica credencial. Ver `BoletinBaja`.
-            { path: "boletin/baja", lazy: pagina(() => import("./pages/BoletinBaja"), "BoletinBaja") },
-            { path: "quienes-somos", lazy: pagina(() => import("./pages/QuienesSomos"), "QuienesSomos") },
-            { path: "articulos", lazy: pagina(() => import("./pages/Articulos"), "Articulos") },
-            { path: "informes", lazy: pagina(() => import("./pages/Informes"), "Informes") },
+            { path: "boletin/baja", lazy: pagina(() => import("./pages/BoletinBaja"), "BoletinBaja", { zonas: ["boletin"], lang }) },
+            { path: "quienes-somos", lazy: pagina(() => import("./pages/QuienesSomos"), "QuienesSomos", { zonas: ["paginas"], lang }) },
+            { path: "articulos", lazy: pagina(() => import("./pages/Articulos"), "Articulos", { zonas: ["listados"], lang }) },
+            { path: "informes", lazy: pagina(() => import("./pages/Informes"), "Informes", { zonas: ["listados"], lang }) },
             // «Al punto»: entrevistas y podcast juntos. Antes cada uno era un filtro de
             // /articulos; esas direcciones redirigen aquí (ver `Articulos`).
-            { path: "audiovisual", lazy: pagina(() => import("./pages/Audiovisual"), "Audiovisual") },
-            { path: "explorar", lazy: pagina(() => import("./pages/Explorar"), "Explorar") },
+            { path: "audiovisual", lazy: pagina(() => import("./pages/Audiovisual"), "Audiovisual", { zonas: ["listados"], lang }) },
+            { path: "explorar", lazy: pagina(() => import("./pages/Explorar"), "Explorar", { zonas: ["listados"], lang }) },
             // Cruza los seis formatos, como /explorar, pero por un valor de la pieza
             // en vez de por los filtros. De ahi su propia ruta y no un parametro mas.
-            { path: "educacion", lazy: pagina(() => import("./pages/Educacion"), "Educacion") },
+            { path: "educacion", lazy: pagina(() => import("./pages/Educacion"), "Educacion", { zonas: ["educacion"], lang }) },
             // La pagina de venta del inventario. Publica y sin publicidad propia:
             // no declara ningun espacio, asi que no pide ninguno.
-            { path: "anunciate", lazy: pagina(() => import("./pages/Anunciate"), "Anunciate") },
+            { path: "anunciate", lazy: pagina(() => import("./pages/Anunciate"), "Anunciate", { zonas: ["paginas"], lang }) },
             // La vuelta del pago va ANTES que "/educacion/:slug": si fuera despues, la
             // ruta comodin se tragaria "pago" como si fuera el slug de un modulo.
-            { path: "educacion/pago/volver", lazy: pagina(() => import("./pages/EducacionPagoVuelta"), "EducacionPagoVuelta") },
-            { path: "educacion/:slug", lazy: pagina(() => import("./pages/EducacionModulo"), "EducacionModulo") },
-            { path: "educacion/:slug/:leccionSlug", lazy: pagina(() => import("./pages/EducacionLeccion"), "EducacionLeccion") },
+            { path: "educacion/pago/volver", lazy: pagina(() => import("./pages/EducacionPagoVuelta"), "EducacionPagoVuelta", { zonas: ["educacion"], lang }) },
+            { path: "educacion/:slug", lazy: pagina(() => import("./pages/EducacionModulo"), "EducacionModulo", { zonas: ["educacion"], lang }) },
+            { path: "educacion/:slug/:leccionSlug", lazy: pagina(() => import("./pages/EducacionLeccion"), "EducacionLeccion", { zonas: ["educacion"], lang }) },
             // Everything published before the redesign lives at "articulo/<slug>".
             // Those addresses are indexed and shared, so they redirect to wherever
             // the piece sits now instead of 404ing. Same for "categoria/<slug>":
             // categories no longer exist, and the nearest thing a reader wanted is
             // the cross-format explorer.
-            { path: "articulo/:slug", lazy: pagina(() => import("./pages/PiezaRedirect"), "PiezaRedirect") },
+            { path: "articulo/:slug", lazy: pagina(() => import("./pages/PiezaRedirect"), "PiezaRedirect", { lang }) },
             { path: "categoria/:slug", element: <Navigate to="/explorar" replace /> },
             // One detail page for all six formats; the format sits in the path so
             // the URL reads as what it is.
@@ -84,56 +90,57 @@ const rutasPublicas = () => [
             { path: "entrevistas/:slug", element: <Pieza /> },
             { path: "informes/:slug", element: <Pieza /> },
             { path: "podcast/:slug", element: <Pieza /> },
-            { path: "consultoria", lazy: pagina(() => import("./pages/Consultoria"), "Consultoria") },
-            { path: "contacto", lazy: pagina(() => import("./pages/Contacto"), "Contacto") },
-            { path: "cookies", lazy: pagina(() => import("./pages/Cookies"), "Cookies") },
+            { path: "consultoria", lazy: pagina(() => import("./pages/Consultoria"), "Consultoria", { zonas: ["paginas"], lang }) },
+            { path: "contacto", lazy: pagina(() => import("./pages/Contacto"), "Contacto", { zonas: ["paginas"], lang }) },
+            { path: "cookies", lazy: pagina(() => import("./pages/Cookies"), "Cookies", { zonas: ["paginas"], lang }) },
             // Todos los juegos del sitio, una tarjeta por juego. A ella lleva el botón
             // «Juegos» de la cabecera.
-            { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos") },
+            { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos", { zonas: ["juegos"], lang }) },
             // El juego se descarga al abrir la página, no con el resto del sitio.
-            { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa") },
-            { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage") },
+            { path: "pausa", lazy: pagina(() => import("./pages/Pausa"), "Pausa", { zonas: ["juegos"], lang }) },
+            { path: "clave", lazy: pagina(() => import("./pages/Clave"), "ClavePage", { zonas: ["juegos"], lang }) },
             // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
-            { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp") },
+            { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp", { zonas: ["lvbp"], lang }) },
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
-            { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas") },
+            { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
             // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
-            { path: "ultima-hora", lazy: pagina(() => import("./pages/UltimaHora"), "UltimaHora") },
+            { path: "ultima-hora", lazy: pagina(() => import("./pages/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
             // El resumen diario, en tres ediciones: la última, las de un día o una (adonde
             // llevan Telegram y WhatsApp).
-            { path: "resumen", lazy: pagina(() => import("./pages/Resumen"), "Resumen") },
-            { path: "resumen/:fecha", lazy: pagina(() => import("./pages/Resumen"), "Resumen") },
-            { path: "resumen/:fecha/:edicion", lazy: pagina(() => import("./pages/Resumen"), "Resumen") },
+            { path: "resumen", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
+            { path: "resumen/:fecha", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
+            { path: "resumen/:fecha/:edicion", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
-            { path: "cuenta/entrar", lazy: pagina(() => import("./pages/cuenta/CuentaEntrar"), "CuentaEntrar") },
-            { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro") },
-            { path: "cuenta/verificar-email", lazy: pagina(() => import("./pages/cuenta/CuentaVerificarEmail"), "CuentaVerificarEmail") },
-            { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./pages/cuenta/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo") },
+            { path: "cuenta/entrar", lazy: pagina(() => import("./pages/cuenta/CuentaEntrar"), "CuentaEntrar", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/verificar-email", lazy: pagina(() => import("./pages/cuenta/CuentaVerificarEmail"), "CuentaVerificarEmail", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./pages/cuenta/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo", { zonas: ["cuenta"], lang }) },
             // «¿Olvidó su contraseña?»: código por correo y contraseña nueva (equipo y lectores).
-            { path: "cuenta/recuperar", lazy: pagina(() => import("./pages/cuenta/CuentaRecuperar"), "CuentaRecuperar") },
-            { path: "*", element: <NotFound /> },
+            { path: "cuenta/recuperar", lazy: pagina(() => import("./pages/cuenta/CuentaRecuperar"), "CuentaRecuperar", { zonas: ["cuenta"], lang }) },
+            // La 404 también se descarga al llegar a ella (y con ella, su juego).
+            { path: "*", lazy: pagina(() => import("./pages/NotFound"), "NotFound", { zonas: ["juegos"], lang }) },
         ],
     },
     {
         path: "cuenta",
-        lazy: pagina(() => import("./pages/cuenta/CuentaDashboardLayout"), "CuentaDashboardLayout"),
+        lazy: pagina(() => import("./pages/cuenta/CuentaDashboardLayout"), "CuentaDashboardLayout", { zonas: ["cuenta"], lang }),
         children: [
-            { index: true, lazy: pagina(() => import("./pages/cuenta/CuentaDashboardHome"), "CuentaDashboardHome") },
-            { path: "perfil", lazy: pagina(() => import("./pages/cuenta/CuentaPerfil"), "CuentaPerfil") },
-            { path: "lo-mio", lazy: pagina(() => import("./pages/cuenta/CuentaLoMio"), "CuentaLoMio") },
-            { path: "marcadores", lazy: pagina(() => import("./pages/cuenta/CuentaMarcadores"), "CuentaMarcadores") },
+            { index: true, lazy: pagina(() => import("./pages/cuenta/CuentaDashboardHome"), "CuentaDashboardHome", { zonas: ["cuenta"], lang }) },
+            { path: "perfil", lazy: pagina(() => import("./pages/cuenta/CuentaPerfil"), "CuentaPerfil", { zonas: ["cuenta"], lang }) },
+            { path: "lo-mio", lazy: pagina(() => import("./pages/cuenta/CuentaLoMio"), "CuentaLoMio", { zonas: ["cuenta", "educacion"], lang }) },
+            { path: "marcadores", lazy: pagina(() => import("./pages/cuenta/CuentaMarcadores"), "CuentaMarcadores", { zonas: ["cuenta"], lang }) },
             // Los temas que sigue y lo nuevo de ellos («Siga este tema»).
-            { path: "temas", lazy: pagina(() => import("./pages/cuenta/CuentaTemas"), "CuentaTemas") },
-            { path: "envios", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosList"), "CuentaEnviosList") },
-            { path: "envios/nuevo", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosNuevo"), "CuentaEnviosNuevo") },
-            { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar") },
-            { path: "envios/:id", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioDetail"), "CuentaEnvioDetail") },
+            { path: "temas", lazy: pagina(() => import("./pages/cuenta/CuentaTemas"), "CuentaTemas", { zonas: ["cuenta"], lang }) },
+            { path: "envios", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosList"), "CuentaEnviosList", { zonas: ["cuenta"], lang }) },
+            { path: "envios/nuevo", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosNuevo"), "CuentaEnviosNuevo", { zonas: ["cuenta"], lang }) },
+            { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar", { zonas: ["cuenta"], lang }) },
+            { path: "envios/:id", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioDetail"), "CuentaEnvioDetail", { zonas: ["cuenta"], lang }) },
         ],
     },
 ];
 
 export const router = createBrowserRouter([
-    { path: "/", element: <ProveedorIdioma lang="es" />, errorElement: <RouteError />, children: rutasPublicas() },
+    { path: "/", element: <ProveedorIdioma lang="es" />, errorElement: <RouteError />, children: rutasPublicas("es") },
     {
         path: "/en",
         element: <ProveedorIdioma lang="en" />,
@@ -144,7 +151,7 @@ export const router = createBrowserRouter([
             await cargarIdioma("en");
             return null;
         },
-        children: rutasPublicas(),
+        children: rutasPublicas("en"),
     },
     {
         path: "/admin/login",
@@ -159,8 +166,8 @@ export const router = createBrowserRouter([
                 children: [
                     { index: true, element: <Navigate to="posts" replace /> },
                     { path: "posts", lazy: pagina(() => import("./pages/admin/AdminPostsList"), "AdminPostsList") },
-                    { path: "posts/new", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor") },
-                    { path: "posts/:postId", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor") },
+                    { path: "posts/new", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor", { zonas: ["cuenta"] }) },
+                    { path: "posts/:postId", lazy: pagina(() => import("./pages/admin/AdminPostEditor"), "AdminPostEditor", { zonas: ["cuenta"] }) },
                     // The two axes. Neither has a create route: topics are a
                     // closed list of fourteen and places only grow by country,
                     // which the Lugares screen does inline.
@@ -179,7 +186,7 @@ export const router = createBrowserRouter([
                     // La vuelta de TikTok tras dar permiso: es la Redirect URI de Login Kit,
                     // así que la dirección no puede cambiar sin cambiarla también allí.
                     { path: "redes/tiktok", lazy: pagina(() => import("./pages/admin/AdminRedesTikTok"), "AdminRedesTikTok") },
-                    { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion") },
+                    { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion", { zonas: ["cuenta"] }) },
                     { path: "publicidad", lazy: pagina(() => import("./pages/admin/AdminPublicidad"), "AdminPublicidad") },
                     { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
@@ -197,13 +204,13 @@ export const router = createBrowserRouter([
                     { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.
-                    { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin") },
-                    { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList") },
-                    { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail") },
+                    { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin", { zonas: ["cuenta"] }) },
+                    { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList", { zonas: ["cuenta"] }) },
+                    { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail", { zonas: ["cuenta"] }) },
                     // Era una página con una sola casilla; ahora es un interruptor en Propuestas.
                     { path: "settings/collaboration", element: <Navigate to="/admin/submissions" replace /> },
                     { path: "users", lazy: pagina(() => import("./pages/admin/AdminUsersList"), "AdminUsersList") },
-                    { path: "users/:id", lazy: pagina(() => import("./pages/admin/AdminUserDetail"), "AdminUserDetail") },
+                    { path: "users/:id", lazy: pagina(() => import("./pages/admin/AdminUserDetail"), "AdminUserDetail", { zonas: ["cuenta"] }) },
                     { path: "staff", lazy: pagina(() => import("./pages/admin/AdminStaffList"), "AdminStaffList") },
                     { path: "perfil", lazy: pagina(() => import("./pages/admin/AdminMiPerfil"), "AdminMiPerfil") },
                 ],

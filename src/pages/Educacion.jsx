@@ -1,3 +1,4 @@
+import "../styles/educacion.css";
 import { useEffect, useState } from "react";
 import { getCatalogo } from "../services/educacionService";
 import { TarjetaDeModulo } from "../components/educacion/TarjetaDeModulo";

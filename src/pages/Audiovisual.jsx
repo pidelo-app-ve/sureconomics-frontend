@@ -4,7 +4,7 @@ import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
-import { ContentExplorer } from "../components/home";
+import { ContentExplorer } from "../components/home/ContentExplorer";
 import { CargarMas } from "../components/comun/CargarMas";
 import { enTandas } from "../lib/tandas";
 import { AudiovisualGrid, AudiovisualHero } from "../components/home/AudiovisualGrid";

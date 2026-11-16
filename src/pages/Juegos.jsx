@@ -2,6 +2,7 @@ import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { TarjetaClave, TarjetaPausa } from "../components/home/TarjetaPausa";
+import { resumen } from "../juegos/guacamaya/registro";
 import "./pausa.css";
 
 /**
@@ -31,7 +32,9 @@ export const Juegos = () => {
 
           <ul className="se-pausa__juegos" aria-label={t("juegos.lista.etiqueta", { marca: BRAND.name })}>
             <li>
-              <TarjetaPausa suelta />
+              {/* Con el registro del juego, que viaja en este trozo: la línea de lo que
+                  recuerda no espera a otra descarga. */}
+              <TarjetaPausa suelta leerMemoria={resumen} />
             </li>
             <li>
               <TarjetaClave />

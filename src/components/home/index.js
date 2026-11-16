@@ -1,5 +1,5 @@
 export { MarketTicker } from "./MarketTicker";
-export { ContentExplorer } from "./ContentExplorer";
+// `ContentExplorer` no va aquí: la portada lo baja aparte (`cargarBuscador`, en `pages/Home.jsx`).
 export { FormatSection } from "./FormatSection";
 export { CardMedia } from "./CardMedia";
 export { SelloEducativo } from "./SelloEducativo";

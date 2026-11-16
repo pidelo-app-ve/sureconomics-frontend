@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Enlace } from "../Enlace";
 import { formatearNumero } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { resumen } from "../../juegos/guacamaya/registro";
 import "./tarjetaPausa.css";
 import { Recorte, Recortes } from "../comun/Recorte";
 
@@ -96,11 +95,15 @@ const lineaDeMemoria = (t, m) => {
  * La tarjeta grande de la guacamaya. Con `suelta`, solo la tarjeta, sin la sección ni el
  * contenedor que la rodean: así va en la lista de `/juegos`, que ya pone los suyos.
  */
-export const TarjetaPausa = ({ suelta }) => {
+export const TarjetaPausa = ({ suelta, leerMemoria }) => {
   const { t } = useIdioma();
-  // La memoria vive en el navegador: se lee después de montar.
+  // La memoria vive en el navegador: se lee después de montar, con el registro del juego,
+  // que trae quien pinta la tarjeta (`/juegos`): es del juego, y así no viaja con la
+  // portada. Sin él, la tarjeta sale sin la línea.
   const [memoria, setMemoria] = useState(null);
-  useEffect(() => setMemoria(resumen()), []);
+  useEffect(() => {
+    if (leerMemoria) setMemoria(leerMemoria());
+  }, [leerMemoria]);
   const linea = lineaDeMemoria(t, memoria);
 
   const tarjeta = (
@@ -129,8 +132,12 @@ export const TarjetaPausa = ({ suelta }) => {
     </section>
   );
 };
-TarjetaPausa.propTypes = { suelta: PropTypes.bool };
-TarjetaPausa.defaultProps = { suelta: false };
+TarjetaPausa.propTypes = {
+  suelta: PropTypes.bool,
+  /** `resumen` del registro de la guacamaya: lo que recuerda de quien ya jugó. */
+  leerMemoria: PropTypes.func,
+};
+TarjetaPausa.defaultProps = { suelta: false, leerMemoria: null };
 
 /**
  * El banner del final de las piezas (premia a quien leyó entero) y, con `enPortada`, la

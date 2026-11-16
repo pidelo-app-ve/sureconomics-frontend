@@ -22,6 +22,26 @@ import "./marcadorLvbp.css";
 
 const CADA = 60_000;
 
+// La portada adelanta la primera petición al montarse, a la vez que las piezas (ver
+// `Home`), y la usa el primer marcador que se monte. Si un marcador pidió hace menos de
+// un minuto, no se adelanta nada; lo adelantado de hace más, ya no vale.
+let adelantada = null;
+let ultima = 0;
+const pedirLvbp = () => {
+  ultima = Date.now();
+  return getLvbp();
+};
+export const precargarLvbp = () => {
+  if (Date.now() - ultima < CADA) return;
+  adelantada = pedirLvbp();
+  adelantada.catch(() => {});
+};
+const tomarAdelantada = () => {
+  const p = Date.now() - ultima < CADA ? adelantada : null;
+  adelantada = null;
+  return p;
+};
+
 export const useLvbp = () => {
   const [state, setState] = useState({ status: "loading", datos: null });
   const reloj = useRef(null);
@@ -30,7 +50,7 @@ export const useLvbp = () => {
     let vivo = true;
     const pedir = async () => {
       try {
-        const datos = await getLvbp();
+        const datos = await (tomarAdelantada() ?? pedirLvbp());
         if (vivo) setState({ status: "success", datos });
         return datos;
       } catch {

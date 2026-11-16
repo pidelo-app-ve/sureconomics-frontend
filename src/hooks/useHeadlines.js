@@ -79,10 +79,16 @@ const revisar = async (lang) => {
   return undefined;
 };
 
+/** La primera carga, sin el reloj: la portada la adelanta antes de montar quien la pinta. */
+export const precargarTitulares = (lang) => {
+  const a = almacen(lang);
+  if (a.estado.version == null && !a.enVuelo) a.enVuelo = cargarTodo(lang).finally(() => { a.enVuelo = null; });
+};
+
 const arrancar = (lang) => {
   const a = almacen(lang);
   if (a.estado.version == null) {
-    if (!a.enVuelo) a.enVuelo = cargarTodo(lang).finally(() => { a.enVuelo = null; });
+    precargarTitulares(lang);
   } else if (Date.now() - a.ultima > CADA_MS) {
     revisar(lang);
   }

@@ -5,7 +5,7 @@ import { consulta, usePuedePrevisualizar } from "../../hooks/useVistaPrevia";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { duracionReloj } from "../../lib/youtube";
 import { IconoPausa } from "../comun/IconoPausa";
-import { VisorDeShorts } from "./VisorDeShorts";
+import { VisorDeShorts, precargarVisor } from "./VisorDeShorts";
 import { IconoPlay, VistaPrevia } from "./VistaPrevia";
 import "./enLaCalle.css";
 
@@ -59,7 +59,17 @@ const Tarjeta = ({ v, indice, previa, onAbrir, onAsomar, onRetirar, onAgotada })
         onBlur={() => onRetirar(indice)}
         aria-label={dura ? t("portada.calle.abrirConDuracion", { titulo: v.titulo, duracion: dura }) : t("portada.calle.abrir", { titulo: v.titulo })}
       >
-        <img className="se-calle__foto" src={v.portada} alt="" width="640" height="1138" loading="lazy" decoding="async" />
+        <img
+          className="se-calle__foto"
+          src={v.portada}
+          srcSet={v.portada_srcset || undefined}
+          sizes={v.portada_srcset ? "(min-width: 1200px) 16vw, (min-width: 900px) 20vw, (min-width: 600px) 30vw, 44vw" : undefined}
+          alt=""
+          width="640"
+          height="1138"
+          loading="lazy"
+          decoding="async"
+        />
         {previa ? (
           <VistaPrevia id={v.id} titulo={v.titulo} className="se-calle__previa" onAgotada={() => onAgotada(indice)} />
         ) : null}
@@ -80,6 +90,7 @@ Tarjeta.propTypes = {
     id: PropTypes.string.isRequired,
     titulo: PropTypes.string,
     portada: PropTypes.string,
+    portada_srcset: PropTypes.string,
     enlace: PropTypes.string.isRequired,
     duracion: PropTypes.number,
   }).isRequired,
@@ -129,8 +140,16 @@ export const EnLaCalle = () => {
     };
   }, [hay]);
 
+  // A la vista, el visor baja ya si no bajó: para abrirse dentro del gesto.
+  useEffect(() => {
+    if (enPantalla) precargarVisor();
+  }, [enPantalla]);
+
   // Hasta dónde se ha desplazado la fila (para las flechas) y, en el teléfono, cuál
-  // quedó al centro cuando se detiene.
+  // quedó al centro cuando se detiene. Se mide al desplazarla y cuando cambia su tamaño
+  // (las columnas van a lo ancho de la pista o de la pantalla, así que también al cambiar
+  // la ventana). El `ResizeObserver` da la primera medida con el diseño ya hecho: medirla
+  // aquí mismo, recién pintada, o al vuelo de `resize`, obligaba a recalcularlo a destiempo.
   useEffect(() => {
     const p = pista.current;
     if (!p) return undefined;
@@ -155,13 +174,14 @@ export const EnLaCalle = () => {
         programar(mejor, ESPERA_TACTIL);
       }, 160);
     };
-    medir();
+    const vigia = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(medir);
+    if (vigia) vigia.observe(p);
+    else medir();
     p.addEventListener("scroll", medir, { passive: true });
-    window.addEventListener("resize", medir);
     return () => {
       window.clearTimeout(quieta);
+      vigia?.disconnect();
       p.removeEventListener("scroll", medir);
-      window.removeEventListener("resize", medir);
     };
   }, [hay, fino, programar]);
 

@@ -12,7 +12,7 @@ import { PausaPortada } from "../components/home/PausaPortada";
 import { ContactoComercial } from "../components/home/ContactoComercial";
 import { EnLaCalle } from "../components/canal/EnLaCalle";
 import { AudiovisualGrid } from "../components/home/AudiovisualGrid";
-import { ArticleCardGrid, ContentExplorer, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
+import { ArticleCardGrid, EditorialList, FormatSection, InterviewGrid, MasLeido, MINIMO_MAS_LEIDAS, NoticiasDensas, PodcastGrid, ReportGrid } from "../components/home";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { useFondoQueCambia } from "../hooks/useFondoQueCambia";
@@ -20,6 +20,9 @@ import { CargarMas } from "../components/comun/CargarMas";
 import { enTandas } from "../lib/tandas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
+import { pedirCotizaciones } from "../hooks/useMonedas";
+import { precargarTitulares } from "../hooks/useHeadlines";
+import { precargarLvbp } from "../components/lvbp/MarcadorLvbp";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { ESPACIOS } from "../services/publicidadService";
 import { AnuncioEntreTandas, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
@@ -54,6 +57,20 @@ import { AnuncioEntreTandas, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } fro
  * Entrevistas e Informes, y los grupos vacios se caen. Sin filtrar, cada bloque
  * muestra su punado mas reciente.
  */
+
+/**
+ * El buscador baja aparte, en cuanto la portada está pintada (o al abrirlo, si alguien
+ * se adelanta), y el cajón sale cuando ya está: la lupa lo abre en el acto, como cuando
+ * venía con todo. Para que baje aparte no puede venir además del índice de
+ * `components/home`, que lo trae con todo lo demás.
+ */
+const cargarBuscador = () => import("../components/home/ContentExplorer").then((m) => m.ContentExplorer);
+
+/** Si no llega (sin red, o una versión nueva del sitio), el cajón lo dice en vez de no abrirse. */
+const SinBuscador = () => {
+  const { t } = useIdioma();
+  return <ErrorState title={t("portada.inicio.noSePudoCargar")} />;
+};
 
 /** Lo que tarda el cajón del buscador en cerrarse: `se-cajon-cierra` en el CSS. */
 const CIERRE_CAJON_MS = 200;
@@ -166,7 +183,20 @@ export const Home = () => {
   // hueco que no se pinta.
   const [tarjetaBajoMonedas] = useState(() => coincide(TRES_COLUMNAS));
   const taxonomy = useTaxonomy();
-  const { items: pieces, status, error } = usePieces();
+  // La portada pide solo lo que pinta (ver `usePieces`) hasta que hace falta la lista
+  // entera (abajo, `hacenFaltaTodas`).
+  const [todas, setTodas] = useState(false);
+  const { items: pieces, status, error, faltan } = usePieces({ portada: !todas });
+  // La primera plana y el béisbol se montan cuando ya están las piezas y los temas, y lo
+  // que pintan se pedía entonces. Se adelanta aquí, a la vez que las piezas: las mismas
+  // peticiones compartidas que después leen ellos, sin pedir nada dos veces.
+  useEffect(() => {
+    pedirCotizaciones();
+    precargarLvbp();
+  }, []);
+  useEffect(() => {
+    precargarTitulares(lang);
+  }, [lang]);
 
   const tree = {
     geoTop: taxonomy.geoTop,
@@ -196,6 +226,16 @@ export const Home = () => {
   // a enfocar el campo) al reabrir aunque el cierre anterior no hubiera terminado.
   const [aperturas, setAperturas] = useState(0);
   const cajonRef = useRef(null);
+  const [Buscador, setBuscador] = useState(null);
+  useEffect(() => {
+    // El aviso de que no llegó dura lo que el cajón abierto: al cerrarlo se vuelve a probar.
+    if (Buscador === SinBuscador && !buscadorAbierto) setBuscador(null);
+    if (Buscador || (status !== "success" && !buscadorAbierto)) return;
+    cargarBuscador().then(
+      (componente) => setBuscador(() => componente),
+      () => buscadorAbierto && setBuscador(() => SinBuscador)
+    );
+  }, [status, buscadorAbierto, Buscador]);
   useEffect(() => {
     if (buscadorAbierto) {
       setCajon("abierto");
@@ -314,6 +354,14 @@ export const Home = () => {
       return { ...b, items, tandas, expandido: Boolean(cargadas[b.formatoApi]) };
     });
 
+  // Lo que obliga a pedir la lista entera mientras la portada tiene solo lo suyo: el
+  // buscador, que filtra todo el sitio, y el primer «Cargar más» de Noticias, la única
+  // sección a la que le faltan piezas (llegan mucho antes de que se acaben las que hay).
+  const hacenFaltaTodas = faltan !== 0 && (buscadorAbierto || (faltan > 0 && Boolean(cargadas.noticia)));
+  useEffect(() => {
+    if (hacenFaltaTodas) setTodas(true);
+  }, [hacenFaltaTodas]);
+
   // Qué pieza de su ciclo lleva el anuncio de cada tanda nueva. Por hueco y en el orden
   // de la página: la 0 la enseña el hueco de siempre, y dos secciones que comparten
   // hueco no repiten pieza entre ellas.
@@ -407,7 +455,7 @@ export const Home = () => {
       {/* El filtro, pegado al navbar, solo cuando la lupa lo abre. Nada que explorar
           antes de que haya algo publicado, y una barra de filtros vacia el dia del
           lanzamiento se lee como un control roto y no como uno honesto. */}
-      {cajon !== "cerrado" && !cargando && status === "success" && taxonomy.ready && pieces.length ? (
+      {cajon !== "cerrado" && !cargando && status === "success" && taxonomy.ready && pieces.length && Buscador ? (
         <section
           ref={cajonRef}
           className={`se-section se-explorer-section se-explorer-section--primera${
@@ -419,7 +467,7 @@ export const Home = () => {
             {/* `nombreTraducido` y no `name`: las piezas ya traen sus temas traducidos
                 (`piezaFromApi`), y las opciones tienen que decir lo mismo que ellas
                 para que las cuentas casen. */}
-            <ContentExplorer
+            <Buscador
               pieces={pieces}
               temasDisponibles={taxonomy.topics.map((tema) => nombreTraducido(tema))}
               geoTop={taxonomy.geoTop}
@@ -505,7 +553,7 @@ export const Home = () => {
               isFiltered ? null : (
                 <CargarMas
                   mostradas={items.length}
-                  total={todos.length}
+                  total={todos.length + (formatoApi === "noticia" ? faltan ?? 0 : 0)}
                   unidad={(formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)).toLowerCase()}
                   onCargar={() =>
                     setCargadas((antes) => ({ ...antes, [formatoApi]: (antes[formatoApi] ?? 0) + PASO[formatoApi] }))

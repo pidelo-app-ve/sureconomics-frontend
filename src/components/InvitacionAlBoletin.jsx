@@ -1,20 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useIdioma } from "../i18n/ProveedorIdioma";
 import { EVENTO_CONSENTIMIENTO, consentimiento } from "../lib/analitica";
 import {
   ESPERA_MS,
   debeInvitar,
   contarVista,
+  enEnfriamiento,
   fraccionLeida,
   leerInvitacion,
-  marcarSuscrito,
-  registrarCierre,
   rutaExcluida,
   yaSuscrito,
 } from "../lib/invitacionBoletin";
-import { subscribeToNewsletter } from "../services/newsletterService";
-import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 
 /**
  * La invitación al boletín: una ventana en medio de la pantalla, sobre una capa oscura,
@@ -47,17 +43,24 @@ import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificaci
  * recuerda catorce días; tres seguidos, noventa. Y un acierto en cualquiera de los
  * cuatro formularios la apaga del todo.
  *
+ * ## Dos trozos
+ *
+ * Lo que mide va aquí, con la página, porque empieza con ella: el reloj de la visita, las
+ * páginas vistas y cuánto se bajó. La ventana (el formulario, la verificación, el foco)
+ * baja aparte, `InvitacionAlBoletinAbierta`, en cuanto la página está quieta: cuando toca
+ * abrirla ya está, y se abre en el acto.
  */
 
 /** Cuándo se cargó el sitio. Al evaluarse el módulo y no al montar: es la visita, no el componente. */
 const INICIO_VISITA = Date.now();
 
-/** El acierto se queda en pantalla este tiempo y se va solo: ya cumplió. */
-const AUTOCIERRE_MS = 6000;
-
-/** Lo que recibe el foco dentro de la ventana, para que Tab dé la vuelta sin salir. */
-const FOCALES =
-  'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), [tabindex]:not([tabindex="-1"])';
+const cargarVentana = () => import("./InvitacionAlBoletinAbierta");
+// Si no llega (sin red, o una versión nueva del sitio, que recarga la página), no hay invitación.
+const Ventana = lazy(() =>
+  cargarVentana()
+    .then((m) => ({ default: m.InvitacionAlBoletinAbierta }))
+    .catch(() => ({ default: () => null }))
+);
 
 const medirLectura = () =>
   fraccionLeida({
@@ -68,23 +71,7 @@ const medirLectura = () =>
 
 export const InvitacionAlBoletin = () => {
   const { pathname } = useLocation();
-  const { t } = useIdioma();
-  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
-  const humano = useVerificacionHumana();
   const [abierta, setAbierta] = useState(false);
-
-  const [email, setEmail] = useState("");
-  // El campo trampa, el mismo que en los otros formularios: una persona no lo ve y
-  // los rastreadores rellenan todo lo que encuentran.
-  const [trampa, setTrampa] = useState("");
-  const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
-  // El correo con el que se suscribió, para decírselo en la bienvenida: el campo se
-  // vacía al acertar y el lector merece ver a dónde le va a llegar.
-  const [correoSuscrito, setCorreoSuscrito] = useState("");
-
-  const enviando = estado.status === "loading";
-  const hayError = estado.status === "error";
-  const listo = estado.status === "success";
 
   // Lo que miden los efectos, en referencias y no en estado: cambia en cada scroll y
   // no hay nada que repintar hasta que la decisión sea «sí».
@@ -93,12 +80,6 @@ export const InvitacionAlBoletin = () => {
   const maximoLeido = useRef(0);
   const abiertaRef = useRef(false);
   abiertaRef.current = abierta;
-  const cajaRef = useRef(null);
-  const campoRef = useRef(null);
-  const exitoRef = useRef(null);
-  // Dónde estaba el foco antes de abrir, para devolverlo al cerrar: quien leía con el
-  // teclado no puede quedarse en lo alto de la página.
-  const focoPrevio = useRef(null);
 
   const evaluar = useCallback(() => {
     if (abiertaRef.current) return;
@@ -165,243 +146,24 @@ export const InvitacionAlBoletin = () => {
     return () => window.removeEventListener(EVENTO_CONSENTIMIENTO, evaluar);
   }, [evaluar]);
 
-  // El acierto se despide solo. Y mientras dura, el foco va a la bienvenida: el campo
-  // donde estaba ya no existe, y un foco perdido cae al fondo de la página.
+  // La ventana baja cuando la página ya está quieta (el turno de la cinta mundial, ver
+  // `MarketTicker`). A quien ya no se va a invitar, no.
   useEffect(() => {
-    if (!listo) return undefined;
-    exitoRef.current?.focus({ preventScroll: true });
-    const reloj = window.setTimeout(() => setAbierta(false), AUTOCIERRE_MS);
-    return () => window.clearTimeout(reloj);
-  }, [listo]);
-
-  const cerrar = useCallback(() => {
-    registrarCierre();
-    setAbierta(false);
+    if (yaSuscrito() || enEnfriamiento(leerInvitacion())) return undefined;
+    const bajar = () => cargarVentana().catch(() => {});
+    const ocioso = typeof window.requestIdleCallback === "function";
+    const turno = ocioso ? window.requestIdleCallback(bajar, { timeout: 2500 }) : window.setTimeout(bajar, 1200);
+    return () => (ocioso ? window.cancelIdleCallback(turno) : window.clearTimeout(turno));
   }, []);
 
-  // Abierta: la página de detrás queda quieta y el foco entra al campo. Al cerrarse,
-  // por la vía que sea, todo vuelve como estaba.
-  useEffect(() => {
-    if (!abierta) return undefined;
-    focoPrevio.current = document.activeElement;
-    const html = document.documentElement;
-    const antes = html.style.overflow;
-    html.style.overflow = "hidden";
-    // Un fotograma de margen: el campo existe ya, pero la entrada todavía no se pintó.
-    const id = window.requestAnimationFrame(() =>
-      campoRef.current?.focus({ preventScroll: true })
-    );
-    return () => {
-      window.cancelAnimationFrame(id);
-      html.style.overflow = antes;
-      const previo = focoPrevio.current;
-      if (previo && typeof previo.focus === "function" && document.contains(previo)) {
-        previo.focus({ preventScroll: true });
-      }
-    };
-  }, [abierta]);
-
-  // Escape y Tab, escuchados en el documento y no en la caja: si un clic deja el foco
-  // en el fondo, Escape sigue cerrando y Tab lo trae de vuelta.
-  useEffect(() => {
-    if (!abierta) return undefined;
-    const alPulsarTecla = (e) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        cerrar();
-        return;
-      }
-      if (e.key !== "Tab") return;
-      const caja = cajaRef.current;
-      if (!caja) return;
-      const focales = Array.from(caja.querySelectorAll(FOCALES)).filter(
-        (el) => el.getClientRects().length > 0
-      );
-      if (!focales.length) return;
-      const primero = focales[0];
-      const ultimo = focales[focales.length - 1];
-      const activo = document.activeElement;
-      if (!caja.contains(activo)) {
-        e.preventDefault();
-        (e.shiftKey ? ultimo : primero).focus();
-      } else if (e.shiftKey && activo === primero) {
-        e.preventDefault();
-        ultimo.focus();
-      } else if (!e.shiftKey && activo === ultimo) {
-        e.preventDefault();
-        primero.focus();
-      }
-    };
-    document.addEventListener("keydown", alPulsarTecla);
-    return () => document.removeEventListener("keydown", alPulsarTecla);
-  }, [abierta, cerrar]);
-
-
-  const enviar = async (e) => {
-    e.preventDefault();
-    if (enviando) return;
-    const correo = email.trim();
-    if (!correo) return;
-
-    setEstado({ status: "loading", mensaje: "" });
-    try {
-      const turnstile = await humano.pedirToken();
-      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
-      await subscribeToNewsletter(correo, { turnstile, source: "invitacion", honeypot: trampa });
-      humano.reiniciar();
-      marcarSuscrito();
-      setCorreoSuscrito(correo);
-      setEmail("");
-      setEstado({ status: "success", mensaje: t("boletin.invitacion.ok") });
-    } catch (err) {
-      humano.reiniciar();
-      setEstado({
-        status: "error",
-        mensaje:
-          err?.code === NO_PARECE_PERSONA
-            ? t("comun.antiBots.noPaso")
-            : err?.status === 422
-            ? t("boletin.errores.correoIncompleto")
-            : err?.status === 429
-              ? t("boletin.errores.demasiados")
-              : t("boletin.errores.fallo"),
-      });
-    }
-  };
+  // Sin contarlo como un «ahora no»: el acierto, que se despide solo.
+  const retirar = useCallback(() => setAbierta(false), []);
 
   if (!abierta) return null;
 
   return (
-    <div className="se-invitacion">
-      <div
-        className="se-invitacion__caja"
-        ref={cajaRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="invitacion-boletin-titulo"
-        aria-describedby={listo ? undefined : "invitacion-boletin-texto"}
-      >
-        <button
-          type="button"
-          className="se-invitacion__cerrar"
-          onClick={cerrar}
-          aria-label={t("comun.cerrar")}
-        >
-          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
-            <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" strokeWidth="1.75" />
-          </svg>
-        </button>
-
-        {listo ? (
-          // El único momento de celebración del sitio, y se vive una vez: un sello que se
-          // dibuja, la bienvenida con su correo y una barra que se vacía mientras la
-          // ventana se despide sola. `role="status"` y no `alert`: es una confirmación,
-          // no una urgencia. El título conserva el id para que el diálogo siga teniendo
-          // nombre.
-          <div className="se-invitacion__exito" role="status" tabIndex={-1} ref={exitoRef}>
-            <span className="se-invitacion__sello" aria-hidden="true">
-              <svg viewBox="0 0 52 52" focusable="false">
-                <circle className="se-invitacion__sello-aro" cx="26" cy="26" r="25" />
-                <path className="se-invitacion__sello-marca" d="M15.5 27.5l7 7 14.5-16" />
-              </svg>
-            </span>
-            <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
-              {t("boletin.invitacion.exitoTitulo")}
-            </h2>
-            <p className="se-invitacion__texto se-invitacion__texto--exito">
-              {t("boletin.invitacion.exitoTexto", {
-                boletin: <strong>{t("boletin.nombre")}</strong>,
-                correo: correoSuscrito ? (
-                  <>
-                    {" "}
-                    {t("boletin.invitacion.exitoA")}{" "}
-                    <span className="se-invitacion__correo">{correoSuscrito}</span>
-                  </>
-                ) : (
-                  ""
-                ),
-              })}
-            </p>
-            <p className="se-invitacion__nota">{t("boletin.invitacion.exitoNota")}</p>
-            <span
-              className="se-invitacion__cuenta"
-              aria-hidden="true"
-              style={{ animationDuration: `${AUTOCIERRE_MS}ms` }}
-            />
-          </div>
-        ) : (
-          <>
-            <p className="se-invitacion__kicker">{t("boletin.invitacion.kicker")}</p>
-            <h2 className="se-invitacion__titulo" id="invitacion-boletin-titulo">
-              {t("boletin.nombre")}
-            </h2>
-            <p className="se-invitacion__texto" id="invitacion-boletin-texto">
-              {t("boletin.invitacion.texto")}
-            </p>
-
-            {/* La verificación arranca al escribir (`onInput`: teclear, pegar o el
-                autocompletado) y no con el foco, como en los otros formularios: aquí el
-                foco entra solo al abrirse, y Cloudflare, si pedía marcar la casilla, la
-                pintaba sin que nadie tocara nada y la caja crecía y se recentraba. Quien
-                envía sin haber escrito la arranca igual al enviar (`pedirToken`). */}
-            <form
-              onInput={humano.activar}
-              className="se-invitacion__form"
-              onSubmit={enviar}
-              aria-busy={enviando}
-              aria-labelledby="invitacion-boletin-titulo"
-              noValidate
-            >
-              <label htmlFor="invitacion-boletin-email" className="se-invitacion__label">
-                {t("boletin.invitacion.suCorreo")}
-              </label>
-              <input
-                ref={campoRef}
-                id="invitacion-boletin-email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                className="se-invitacion__input"
-                placeholder={t("boletin.invitacion.placeholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={enviando}
-                required
-                aria-invalid={hayError || undefined}
-                aria-describedby={hayError ? "invitacion-boletin-error" : undefined}
-              />
-              {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
-                  rellenara sin querer, su suscripción se descartaría. */}
-              <input
-                type="text"
-                name="website"
-                className="se-sr-only"
-                tabIndex={-1}
-                aria-hidden="true"
-                autoComplete="off"
-                value={trampa}
-                onChange={(e) => setTrampa(e.target.value)}
-              />
-
-              {hayError ? (
-                <p id="invitacion-boletin-error" className="se-invitacion__error" role="alert">
-                  {estado.mensaje}
-                </p>
-              ) : null}
-
-              <div className="se-invitacion__acciones">
-                <button type="submit" className="se-invitacion__btn" disabled={enviando}>
-                  {enviando ? t("boletin.invitacion.enviando") : t("boletin.invitacion.unirse")}
-                </button>
-                <button type="button" className="se-invitacion__luego" onClick={cerrar}>
-                  {t("boletin.invitacion.ahoraNo")}
-                </button>
-              </div>
-              {humano.control}
-            </form>
-          </>
-        )}
-      </div>
-    </div>
+    <Suspense fallback={null}>
+      <Ventana onRetirar={retirar} />
+    </Suspense>
   );
 };

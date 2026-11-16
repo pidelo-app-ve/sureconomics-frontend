@@ -6,7 +6,6 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import {
   ArticleCardGrid,
-  ContentExplorer,
   EditorialList,
   FormatSection,
   InterviewGrid,
@@ -14,6 +13,7 @@ import {
   PodcastGrid,
   ReportGrid,
 } from "../components/home";
+import { ContentExplorer } from "../components/home/ContentExplorer";
 import { FORMATO_META, nombreDeFormato, nombreTraducido, rutaDeFormato } from "../lib/pieza";
 import { applyFilter } from "../lib/contentFilter";
 import { usePieces } from "../hooks/usePieces";

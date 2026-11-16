@@ -5,7 +5,7 @@ import { usePuedePrevisualizar } from "../../hooks/useVistaPrevia";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { imagenAncho } from "../../lib/pieza";
 import { duracionReloj } from "../../lib/youtube";
-import { VisorDeShorts } from "./VisorDeShorts";
+import { VisorDeShorts, precargarVisor } from "./VisorDeShorts";
 import { IconoPlay, VistaPrevia } from "./VistaPrevia";
 import "./aperturaShort.css";
 
@@ -32,6 +32,9 @@ export const AperturaShort = ({ pieza, id }) => {
   const [pestana, setPestana] = useState(true);
   const [agotada, setAgotada] = useState(false);
   const [abierto, setAbierto] = useState(null);
+
+  // Se puede tocar nada más llegar: el visor baja ya, para abrirse dentro del gesto.
+  useEffect(() => precargarVisor(), []);
 
   useEffect(() => {
     const el = marco.current;

@@ -9,7 +9,8 @@ import { getHistoriaMoneda, getMonedas } from "../services/monedasService";
 let cotizaciones = null;
 const historias = new Map();
 
-const pedirCotizaciones = () => {
+/** También la adelanta la portada al montarse, para no esperar a la primera plana. */
+export const pedirCotizaciones = () => {
   cotizaciones = cotizaciones ?? getMonedas().catch(() => ({ monedas: [] }));
   return cotizaciones;
 };

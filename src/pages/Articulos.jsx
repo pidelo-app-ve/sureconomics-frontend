@@ -8,13 +8,13 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import {
   ArticleCardGrid,
-  ContentExplorer,
   EditorialList,
   InterviewGrid,
   NewsList,
   PodcastGrid,
   ReportGrid,
 } from "../components/home";
+import { ContentExplorer } from "../components/home/ContentExplorer";
 import { FORMATO_META, FORMATO_POR_RUTA, nombreDeFormato, nombreTraducido } from "../lib/pieza";
 import { useContentFilter } from "../hooks/useContentFilter";
 import { usePagedList } from "../hooks/usePagedList";

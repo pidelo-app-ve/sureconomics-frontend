@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useState } from "react";
-import { CommentComposer } from "../comments/CommentComposer";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { CommentList } from "../comments/CommentList";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
@@ -29,6 +28,14 @@ import { postComment } from "../../services/userMeService";
 
 /** Se piden de una vez; con más de esto la conversación ya pide su propia página. */
 const POR_PAGINA = 50;
+
+// La caja de comentar baja aparte, a la vez que los comentarios: va al final de la pieza.
+// Si no llega, se calla, como la lista.
+const CommentComposer = lazy(() =>
+  import("../comments/CommentComposer")
+    .then((m) => ({ default: m.CommentComposer }))
+    .catch(() => ({ default: () => null }))
+);
 
 export const PieceComments = ({ pieza }) => {
   const { t } = useIdioma();
@@ -98,12 +105,14 @@ export const PieceComments = ({ pieza }) => {
         />
       )}
 
-      <CommentComposer
-        isAuthenticated={isAuthenticated}
-        isEmailVerified={isEmailVerified}
-        volverA={pieza.rutaCanonica}
-        onSubmitComment={enviar}
-      />
+      <Suspense fallback={null}>
+        <CommentComposer
+          isAuthenticated={isAuthenticated}
+          isEmailVerified={isEmailVerified}
+          volverA={pieza.rutaCanonica}
+          onSubmitComment={enviar}
+        />
+      </Suspense>
     </section>
   );
 };

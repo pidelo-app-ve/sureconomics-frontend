@@ -220,6 +220,17 @@ const fechaRelativa = (iso, t) => {
 const retardo = (i) => `${Math.min(i, 6) * 55}ms`;
 
 /**
+ * El `sizes` de una foto: el lado de la tarjeta (`--redes-alto` en `blog.css`: 152 px, 140
+ * en el teléfono) y, si la foto es apaisada, más, porque `cover` la estira a lo alto y
+ * desborda a lo ancho. Con eso el navegador elige del `srcset` la talla de 320 o 480 que
+ * le toca a su pantalla, en vez de bajar la de 640 para una caja de 152.
+ */
+const sizesDeFoto = ({ ancho, alto }) => {
+  const apaisada = ancho && alto ? Math.max(1, ancho / alto) : 1;
+  return `(max-width: 640px) ${Math.ceil(140 * apaisada)}px, ${Math.ceil(152 * apaisada)}px`;
+};
+
+/**
  * Una fila: rótulo, pista y línea de progreso. Toda la interacción vive aquí.
  */
 const Fila = ({ red, piezas, onAbrirVideo }) => {
@@ -266,15 +277,26 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
       }
     };
     p.addEventListener("scroll", medir, { passive: true });
+    // Se vuelve a medir cuando cambia el tamaño de la fila o de una tarjeta, y lo avisa
+    // el navegador con el diseño ya hecho. Antes se medía en el `load` de cada foto, y
+    // cada medida le obligaba a rehacer el diseño a mitad de carga (reflujo forzado); y
+    // para nada: las tarjetas tienen su tamaño fijado en la hoja, así que una foto que
+    // llega no cambia lo que hay que medir.
+    if (typeof ResizeObserver === "function") {
+      const ojo = new ResizeObserver(medir);
+      ojo.observe(p);
+      Array.from(p.children).forEach((tarjeta) => ojo.observe(tarjeta));
+      return () => {
+        ojo.disconnect();
+        p.removeEventListener("scroll", medir);
+      };
+    }
     window.addEventListener("resize", medir);
-    const imagenes = Array.from(p.querySelectorAll("img"));
-    imagenes.forEach((img) => img.addEventListener("load", medir));
     const cuadro = requestAnimationFrame(medir);
     return () => {
       cancelAnimationFrame(cuadro);
       p.removeEventListener("scroll", medir);
       window.removeEventListener("resize", medir);
-      imagenes.forEach((img) => img.removeEventListener("load", medir));
     };
   }, [piezas]);
 
@@ -374,8 +396,20 @@ const Fila = ({ red, piezas, onAbrirVideo }) => {
             >
               {/* `alt` vacío: el pie de foto va dentro del mismo enlace, y
                   describirla otra vez haría que un lector de pantalla lo dijera
-                  dos veces. */}
-              <img src={p.url} alt="" loading="lazy" decoding="async" draggable="false" />
+                  dos veces. Las tallas (`srcset`) y las medidas las manda el
+                  servidor; una publicación copiada antes de que las hubiera llega
+                  sin ellas y se pinta como entonces. */}
+              <img
+                src={p.url}
+                srcSet={p.srcset || undefined}
+                sizes={p.srcset ? sizesDeFoto(p) : undefined}
+                width={p.ancho || undefined}
+                height={p.alto || undefined}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+              />
               {esVideo ? <IconReproducir className="se-redes__reproducir" /> : null}
               <span className="se-redes__pie">{p.texto}</span>
             </a>
@@ -415,6 +449,9 @@ Fila.propTypes = {
   piezas: PropTypes.arrayOf(
     PropTypes.shape({
       url: PropTypes.string,
+      srcset: PropTypes.string,
+      ancho: PropTypes.number,
+      alto: PropTypes.number,
       texto: PropTypes.string,
       enlace: PropTypes.string.isRequired,
       fecha: PropTypes.string,

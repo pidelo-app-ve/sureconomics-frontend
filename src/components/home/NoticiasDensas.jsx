@@ -28,6 +28,13 @@ import { TituloDePieza } from "../content/TituloDePieza";
  * (`lista`) y no como ficha: la ficha pintaba un logotipo pequeño sobre un recuadro
  * vacío y se veía como algo que no cargó.
  */
+/**
+ * Lo ancho que se ve la foto de una miniatura: la caja mide 112×84 (80×80 en el teléfono) y
+ * la foto, apaisada, la llena a lo alto con `cover` y desborda a lo ancho: unos 150 px (142
+ * en el teléfono). Con «128px» el navegador se quedaba corto.
+ */
+const SIZES_DE_MINI = "(max-width: 700px) 142px, 150px";
+
 /** La línea «Lugar · fecha» de una nota. */
 const Meta = ({ pieza }) => (
   <span className="se-noticias__meta">
@@ -73,7 +80,7 @@ export const NoticiasDensas = ({ items, espacioDeAnuncio, carril = null, sinAper
             {resto.map((n) => (
               <li key={n.id} className="se-noticias__nota">
                 <Enlace to={rutaDePieza(n)} className="se-noticias__mini" aria-hidden="true" tabIndex={-1}>
-                  <CardMedia pieza={n} ancho={400} etiqueta={null} sizes="128px" />
+                  <CardMedia pieza={n} ancho={400} etiqueta={null} sizes={SIZES_DE_MINI} pequena />
                 </Enlace>
                 <div className="se-noticias__texto">
                   <Meta pieza={n} />

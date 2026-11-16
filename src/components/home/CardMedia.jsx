@@ -65,8 +65,13 @@ const MarcaDeVideo = ({ pieza }) =>
 
 MarcaDeVideo.propTypes = { pieza: PropTypes.object.isRequired };
 
-export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad }) => {
+export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad, pequena }) => {
   const [fallo, setFallo] = useState(false);
+  // `pequena`: la tarjeta se ve a menos de 320 px (la miniatura de una noticia), así que
+  // se ofrecen también las tallas pequeñas y la original. Una foto de antes de esas tallas
+  // no las tiene: si la elegida no carga, se vuelve a las de siempre, no al relleno.
+  const [sinPequenas, setSinPequenas] = useState(false);
+  const conPequenas = Boolean(pequena) && !sinPequenas;
 
   // El sello va aquí y no en cada rejilla porque cinco de las seis pintan su imagen
   // a través de este componente. La que falta es la de entrevistas, que tiene su
@@ -84,7 +89,12 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad }) => {
           style={estiloDeFoto(pieza)}
           // El ancho original decide qué tallas existen en nuestro bucket. Para
           // Cloudinary se ignora: allí los anchos los calcula el servidor.
-          srcSet={imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal) ?? undefined}
+          srcSet={
+            imagenSrcSet(pieza.imagenUrl, ANCHOS, pieza.imagenAnchoOriginal, {
+              pequenas: conPequenas,
+              original: conPequenas,
+            }) ?? undefined
+          }
           sizes={sizes}
           alt=""
           // Con `prioridad`, ya y antes que lo demás: es la foto que abre la portada, lo
@@ -95,7 +105,7 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad }) => {
           // eslint-disable-next-line react/no-unknown-property
           fetchpriority={prioridad ? "high" : undefined}
           decoding="async"
-          onError={() => setFallo(true)}
+          onError={() => (conPequenas ? setSinPequenas(true) : setFallo(true))}
         />
         <SelloEducativo pieza={pieza} />
         <MarcaDeVideo pieza={pieza} />
@@ -127,6 +137,8 @@ CardMedia.propTypes = {
   sizes: PropTypes.string,
   /** La foto que abre la página: se pide ya y con prioridad alta. Solo una por página. */
   prioridad: PropTypes.bool,
+  /** Se ve pequeña (menos de 320 px): ofrece también las tallas pequeñas. */
+  pequena: PropTypes.bool,
 };
 
-CardMedia.defaultProps = { ancho: 800, etiqueta: null, sizes: SIZES, prioridad: false };
+CardMedia.defaultProps = { ancho: 800, etiqueta: null, sizes: SIZES, prioridad: false, pequena: false };

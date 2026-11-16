@@ -263,6 +263,8 @@ export const piezaFromApi = (row) => {
     // un retrato sin firma al lado no es nada.
     autorFoto:
       row.content_format?.shows_author === false ? null : row.byline_photo?.url || null,
+    // Su ancho: el retrato se ve a 44 px y con él se pide su talla pequeña (`Retrato`).
+    autorFotoAncho: row.byline_photo?.width ?? null,
     entrevistado: row.interviewee || null,
     entrevistadoCargo: row.interviewee_role || null,
     unidad: row.unit || null,

@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { tActual } from "../../i18n/motor";
 
 import { enlaceDeClic } from "../../services/publicidadService";
 import { esArteTelefonoAutomatico } from "../../lib/arteTelefono";
+import { imagenSrcSet } from "../../lib/fotoDePieza";
 import { useAnunciosPendientes, useCiclo, useHueco } from "./ProveedorDePublicidad";
 import { useRotacion } from "./useRotacion";
 
@@ -63,12 +64,35 @@ Envoltorio.propTypes = {
   children: PropTypes.node,
 };
 
+// Con su ancho y su alto, que manda el servidor (`imagen_medidas`). Dicen la proporción;
+// el tamaño lo sigue poniendo la hoja, que fija el ancho en `auto` pero no el alto: sin el
+// `height: auto` el atributo lo fijaría, y un SVG sin medidas propias saldría más grande.
 const Logo = ({ hueco, className }) =>
   hueco.imagen ? (
-    <img className={className} src={hueco.imagen} alt={hueco.alt || hueco.anunciante || ""} loading="lazy" />
+    <img
+      className={className}
+      src={hueco.imagen}
+      width={hueco.imagen_medidas?.ancho}
+      height={hueco.imagen_medidas?.alto}
+      style={hueco.imagen_medidas ? { height: "auto" } : undefined}
+      alt={hueco.alt || hueco.anunciante || ""}
+      loading="lazy"
+    />
   ) : null;
 
 Logo.propTypes = { hueco: PropTypes.object.isRequired, className: PropTypes.string };
+
+/**
+ * Las tallas de un arte (`srcset`) con la original al final: la tira se sube a 2.912 px
+ * y en un portátil se ve a 1.360, así que le llega la de 1.400 (unos 20 KB en vez de 100);
+ * la original solo a quien de verdad la necesita. Sin el ancho (un anuncio viejo, la vista
+ * previa del panel) o en un SVG, nada: se pinta la original como antes.
+ */
+const tallasDelArte = (url, medidas) =>
+  imagenSrcSet(url, null, medidas?.ancho ?? null, { original: true }) ?? undefined;
+
+/** Lo ancho que se ve una cinta: a todo el ancho de su columna, que no pasa de 1.600. */
+const SIZES_DE_CINTA = "(max-width: 1600px) 100vw, 1600px";
 
 /* ------------------------------------------------------------------ formatos */
 
@@ -101,6 +125,10 @@ Logo.propTypes = { hueco: PropTypes.object.isRequired, className: PropTypes.stri
  * que hay debajo.
  */
 const Montaje = ({ hueco, modificador }) => {
+  // Si una talla no carga (no se generó, o aún no existe en una pieza vieja), el arte
+  // vuelve a la original en vez de quedarse roto. Se guarda de qué arte fue, para que el
+  // siguiente de la rotación vuelva a probar sus tallas.
+  const [sinTallasDe, setSinTallasDe] = useState(null);
   // La cinta primero y el logotipo de respaldo: una campaña antigua que solo trae
   // logotipo sigue pintando algo —centrado y con franjas— en vez de dejar el hueco en
   // blanco mientras la redacción sube los artes nuevos.
@@ -113,6 +141,9 @@ const Montaje = ({ hueco, modificador }) => {
   // el teléfono se le da su propio recuadro (ver `.se-ad--logo` en la hoja): en el de la
   // tira, de 8:1, el logo quedaba de 48 px de alto.
   const esLogo = !movil && (!hueco.cinta || hueco.cinta === hueco.imagen);
+  const sinTallas = sinTallasDe === arte;
+  const tallas = sinTallas ? undefined : tallasDelArte(arte, hueco.cinta_medidas);
+  const tallasMovil = movil && !sinTallas ? tallasDelArte(movil, hueco.cinta_movil_medidas) : undefined;
 
   return (
     <Envoltorio
@@ -127,13 +158,20 @@ const Montaje = ({ hueco, modificador }) => {
             cambia la forma del recuadro. */}
         <picture>
           {movil ? (
-            <source media="(max-width: 640px)" srcSet={movil} />
+            <source
+              media="(max-width: 640px)"
+              srcSet={tallasMovil || movil}
+              sizes={tallasMovil ? "100vw" : undefined}
+            />
           ) : null}
           <img
             className="se-ad__cinta-img"
             src={arte}
+            srcSet={tallas}
+            sizes={tallas ? SIZES_DE_CINTA : undefined}
             alt={hueco.alt || hueco.anunciante || ""}
             loading="lazy"
+            onError={tallas || tallasMovil ? () => setSinTallasDe(arte) : undefined}
           />
         </picture>
       </div>

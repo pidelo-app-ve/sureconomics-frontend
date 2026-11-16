@@ -56,8 +56,17 @@ export const imagenAncho = (url, ancho) => {
  *  genera, el navegador se lleva un 404 y la tarjeta se queda sin foto. */
 const ANCHOS_EN_R2 = [640, 1100, 1400];
 
+/** Las pequeñas, desde el 13-nov-2026 (`ANCHOS_PEQUENOS` en el backend): el retrato de una
+ *  firma se ve a 56 px (44 en la portada) y la miniatura de una noticia a 112-150, y la talla menor era la de
+ *  640. Fuera de `ANCHOS_EN_R2` a propósito: una foto de antes no las tiene hasta que se
+ *  corre `flask tallas-jpeg-a-webp`, así que solo las pide quien sabe caer a las de siempre
+ *  si faltan, y solo de un JPEG, que es lo que esa orden alcanza. */
+const ANCHOS_PEQUENOS = [160, 320];
+
 /** Una imagen guardada en nuestro bucket llega como ruta relativa, no como URL. */
 const esDeNuestroBucket = (url) => typeof url === "string" && url.startsWith("/media/");
+
+const esJpeg = (url) => /\.jpe?g(\?|$)/i.test(url);
 
 /** La clave hermana de un ancho: `foo-abc.jpg` -> `foo-abc-640.jpg`. Igual que
  *  `clave_de_talla` en el backend. */
@@ -69,7 +78,13 @@ const tallaEnR2 = (ruta, ancho) => {
   return `${ruta.slice(0, barra + 1)}${nombre.slice(0, punto)}-${ancho}${nombre.slice(punto)}`;
 };
 
-export const imagenSrcSet = (url, anchos, anchoOriginal = null) => {
+/**
+ * Con `pequenas`, también las tallas pequeñas (si es un JPEG; ver `ANCHOS_PEQUENOS`), y
+ * con `original`, la original al final con su ancho: en una foto de menos de 640 las
+ * pequeñas son las únicas tallas, y sin ella un teléfono que necesite más se quedaría con
+ * la de 320; en la tira de un anuncio, de 2.912 px, la sigue recibiendo quien la necesita.
+ */
+export const imagenSrcSet = (url, anchos, anchoOriginal = null, { pequenas = false, original = false } = {}) => {
   if (!url) return null;
 
   // —— Nuestro bucket ——
@@ -80,12 +95,17 @@ export const imagenSrcSet = (url, anchos, anchoOriginal = null) => {
   if (esDeNuestroBucket(url)) {
     // Un SVG no las tiene: el backend lo guarda tal cual, sin tallas (`subir_imagen`),
     // porque el navegador lo dibuja al tamaño que haga falta. Pedir `-640.svg` era un 404.
-    if (/\.svg(\?|$)/i.test(url)) return null;
+    // Un GIF animado tampoco (reescalarlo lo aplanaría a un fotograma), y desde aquí no se
+    // sabe si lo es: un GIF se sirve entero.
+    if (/\.(svg|gif)(\?|$)/i.test(url)) return null;
+    const lista = pequenas && esJpeg(url) ? [...ANCHOS_PEQUENOS, ...ANCHOS_EN_R2] : ANCHOS_EN_R2;
     const utiles = anchoOriginal
-      ? ANCHOS_EN_R2.filter((a) => a < anchoOriginal)
-      : ANCHOS_EN_R2;
+      ? lista.filter((a) => a < anchoOriginal)
+      : lista;
     if (!utiles.length) return null;
-    return utiles.map((a) => `${tallaEnR2(url, a)} ${a}w`).join(", ");
+    const tallas = utiles.map((a) => `${tallaEnR2(url, a)} ${a}w`);
+    if (original && anchoOriginal) tallas.push(`${url} ${anchoOriginal}w`);
+    return tallas.join(", ");
   }
 
   // —— Cloudinary ——
@@ -97,6 +117,19 @@ export const imagenSrcSet = (url, anchos, anchoOriginal = null) => {
     .filter(([, u]) => u !== url);
   if (!candidatos.length) return null;
   return candidatos.map(([a, u]) => `${u} ${a}w`).join(", ");
+};
+
+/**
+ * La mayor talla pequeña de una foto, para lo que se ve muy pequeño: el retrato de una firma
+ * se ve a 56 px, 168 en una pantalla 3x, y con `cover` una foto apaisada necesita aún más
+ * alto; la de 160 se quedaba corta, la de 320 no (la original llegaba a 93 KB). Nula si no
+ * la hay. Puede faltar en una foto de antes (ver `ANCHOS_PEQUENOS`): quien la usa cae a la
+ * original si no carga (`Retrato`).
+ */
+export const fotoPequena = (url, anchoOriginal) => {
+  if (!esDeNuestroBucket(url) || !esJpeg(url)) return null;
+  const ancho = [...ANCHOS_PEQUENOS].reverse().find((a) => a < anchoOriginal);
+  return ancho ? tallaEnR2(url, ancho) : null;
 };
 
 /**

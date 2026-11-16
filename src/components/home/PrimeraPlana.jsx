@@ -10,6 +10,7 @@ import { LugarYFecha } from "./LugarYFecha";
 import { ANCHOS, CardMedia } from "./CardMedia";
 import { CintaMundial } from "./MarketTicker";
 import { TablaDeMonedas, useMonedas } from "../monedas/TablaDeMonedas";
+import { Retrato } from "../piece/PieceByline";
 import { AperturaMoneda } from "../monedas/AperturaMoneda";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
@@ -142,7 +143,7 @@ const Opinion = ({ editorial, analisis }) => {
         <article key={a.id} className={`se-plana__analisis${a.autorFoto ? " se-plana__analisis--con-retrato" : ""}`}>
           {/* El retrato de quien firma, si la pieza lo trae: cuadrado y en gris, como
               la columna de un diario. Sin retrato, el texto ocupa todo el ancho. */}
-          {a.autorFoto ? <img className="se-plana__retrato" src={a.autorFoto} alt="" width="44" height="44" loading="lazy" decoding="async" /> : null}
+          {a.autorFoto ? <Retrato className="se-plana__retrato" url={a.autorFoto} ancho={a.autorFotoAncho} alt="" width="44" height="44" loading="lazy" decoding="async" /> : null}
           <div className="se-plana__analisis-texto">
             <h3 className="se-plana__titulo-analisis">
               <Enlace to={rutaDePieza(a)}>

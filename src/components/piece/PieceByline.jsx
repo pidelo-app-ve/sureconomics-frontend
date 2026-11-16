@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BRAND } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
+import { fotoPequena } from "../../lib/fotoDePieza";
 
 /**
  * La firma de una pieza, como la define el brandbook.
@@ -52,6 +53,32 @@ const IconoFecha = () => (
   </svg>
 );
 
+/**
+ * El retrato de quien firma, en su talla pequeña (`fotoPequena`): se ve a 56 px (44 en la
+ * portada) y la original llegaba a pesar 93 KB. Una foto de antes de las tallas pequeñas no la tiene hasta que
+ * se rehacen sus tallas: entonces, la original. `onError` solo se llama si tampoco esa
+ * carga. Lo usan la firma de la pieza y los análisis de la portada (`PrimeraPlana`).
+ */
+export const Retrato = ({ url, ancho, onError, ...resto }) => {
+  const pequena = fotoPequena(url, ancho);
+  const [rota, setRota] = useState(null);
+  const usaPequena = Boolean(pequena) && rota !== pequena;
+  return (
+    <img
+      {...resto}
+      src={usaPequena ? pequena : url}
+      onError={usaPequena ? () => setRota(pequena) : onError}
+    />
+  );
+};
+
+Retrato.propTypes = {
+  url: PropTypes.string.isRequired,
+  /** El ancho de la original; sin él no se sabe si hay talla pequeña y va la original. */
+  ancho: PropTypes.number,
+  onError: PropTypes.func,
+};
+
 /** Lo que va cuando firma una persona de la que no hay retrato. */
 const IconoPersona = () => (
   <svg
@@ -68,7 +95,7 @@ const IconoPersona = () => (
   </svg>
 );
 
-export const PieceByline = ({ autor, autorFoto, fecha, fechaIso, minutos, unidad, esEditorial }) => {
+export const PieceByline = ({ autor, autorFoto, autorFotoAncho, fecha, fechaIso, minutos, unidad, esEditorial }) => {
   const { t, lang } = useIdioma();
   // Una foto que no carga dejaría el hueco vacío y la firma descuadrada. Al fallar se
   // cae a la silueta, que es justamente el estado previsto para "no hay retrato".
@@ -99,9 +126,10 @@ export const PieceByline = ({ autor, autorFoto, fecha, fechaIso, minutos, unidad
       ) : null}
 
       {retrato ? (
-        <img
+        <Retrato
           className="se-firma__retrato"
-          src={retrato}
+          url={retrato}
+          ancho={autorFotoAncho}
           // Vacío a propósito: el nombre va escrito justo al lado, así que describir la
           // foto haría que un lector de pantalla dijera la misma persona dos veces.
           alt=""
@@ -148,6 +176,8 @@ PieceByline.propTypes = {
   autor: PropTypes.string,
   /** La dirección del retrato. Nulo es el caso normal: entonces va la silueta. */
   autorFoto: PropTypes.string,
+  /** El ancho de su original, para pedir su talla pequeña. */
+  autorFotoAncho: PropTypes.number,
   fecha: PropTypes.string,
   /** La fecha completa (con hora) de la que sale `fecha`. */
   fechaIso: PropTypes.string,
@@ -160,6 +190,7 @@ PieceByline.propTypes = {
 PieceByline.defaultProps = {
   autor: null,
   autorFoto: null,
+  autorFotoAncho: null,
   fecha: null,
   fechaIso: null,
   minutos: null,

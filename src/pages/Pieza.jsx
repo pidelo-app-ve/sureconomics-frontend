@@ -458,6 +458,7 @@ export const Pieza = () => {
               <PieceByline
                 autor={pieza.autor}
                 autorFoto={pieza.autorFoto}
+                autorFotoAncho={pieza.autorFotoAncho}
                 fecha={pieza.fecha}
                 fechaIso={pieza.fechaIso}
                 minutos={minutos}

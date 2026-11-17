@@ -6,6 +6,7 @@ import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { IconoPlay } from "../canal/VistaPrevia";
 import { duracionReloj } from "../../lib/youtube";
+import { fotoPrincipalLista } from "../../lib/trasLaFoto";
 import { piezaShape } from "./piezaShape";
 
 /**
@@ -107,7 +108,14 @@ export const CardMedia = ({ pieza, ancho, etiqueta, sizes, prioridad, pequena })
           // eslint-disable-next-line react/no-unknown-property
           fetchpriority={prioridad ? "high" : undefined}
           decoding="async"
-          onError={() => (conPequenas ? setSinPequenas(true) : setFallo(true))}
+          // La foto que abre la portada avisa al llegar (o al fallar): lo de debajo del
+          // pliegue la esperaba para no quitarle ancho de banda (ver `trasLaFoto`).
+          onLoad={prioridad ? fotoPrincipalLista : undefined}
+          onError={() => {
+            if (prioridad) fotoPrincipalLista();
+            if (conPequenas) setSinPequenas(true);
+            else setFallo(true);
+          }}
         />
         <SelloEducativo pieza={pieza} />
         <MarcaDeVideo pieza={pieza} />

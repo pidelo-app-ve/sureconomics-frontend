@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIdioma } from "../i18n/ProveedorIdioma";
-import { elegirApertura } from "../components/home/PrimeraPlana";
+import { elegirApertura, precargarApertura } from "../components/home/PrimeraPlana";
 import { FORMATO_META, piezasFromApi } from "../lib/pieza";
+import { trasLaFoto } from "../lib/trasLaFoto";
 import { getPieces } from "../services/publicContentService";
 
 /**
@@ -98,6 +99,10 @@ const pedirPortada = async (primera, vigente = () => true) => {
   // Detrás de la primera página, como antes las otras cuatro: que nada le quite turno.
   const p1 = await primera;
   if ((p1.pages || 1) <= 1) return { filas: p1.filas, total: p1.total, truncated: false, faltan: 0 };
+  // Y detrás de la foto que abre la portada: todo esto es de debajo del pliegue, y en el
+  // teléfono le quitaba ancho de banda a la foto que Google mide (ver `trasLaFoto`).
+  await trasLaFoto();
+  if (!vigente()) return { filas: p1.filas, total: p1.total, truncated: false, faltan: null, incompleta: true };
   // La pieza quinientos sin contar la fijada, que la API saca del orden y pone delante
   // en la primera página. Sin quinientas no hay corte: la lista entera es todo.
   const corte = pedirPagina(undefined, false, MAX_PAGES * PER_PAGE, 1).then((r) => r.filas[0] ?? null);
@@ -185,7 +190,11 @@ export const usePieces = ({ format, educational, portada = false } = {}) => {
       // las veintitantas piezas de arriba que ya venían en la primera.
       const reusada = !portada && primeraEnPantalla.current;
       const primera = (reusada ? Promise.resolve(reusada) : pedirPagina(format, educational, 1)).then((p1) => {
-        if (alive && portada) primeraEnPantalla.current = { ...p1, en: Date.now() };
+        if (alive && portada) {
+          primeraEnPantalla.current = { ...p1, en: Date.now() };
+          // La foto de la apertura, pedida ya: antes de que React pinte la portada entera.
+          precargarApertura(piezasFromApi(p1.filas));
+        }
         if (alive) {
           const pinta = { filas: p1.filas, total: p1.total ?? p1.filas.length, truncated: (p1.pages || 1) > MAX_PAGES };
           setState((s) => (sigue(s) ? s : { ...pinta, status: "success", faltan: portada ? null : 0, error: null, de: clave }));

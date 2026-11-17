@@ -35,6 +35,11 @@ const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => asyn
  * `/en` (inglés), bajo un `ProveedorIdioma` cada una. Así una página existe en los dos
  * idiomas sin escribirla dos veces, y el idioma vive en la dirección, que es lo que
  * Google indexa. Ver `i18n/motor.js`.
+ *
+ * **Una ruta nueva aquí va también en `vercel.json`**, en la lista de las que van a
+ * `/index.html`. Lo que no está en esa lista responde 404 desde el borde
+ * (`api/no-encontrada.js`): la página se seguiría viendo, pero el buscador la olvidaría.
+ * `npm run test:rutas` lo comprueba.
  */
 const rutasPublicas = (lang) => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin

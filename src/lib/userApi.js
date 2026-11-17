@@ -1,6 +1,7 @@
 import { tActual } from "../i18n/motor";
 import { ApiError } from "../services/apiClient";
 import { clearUserAuth, persistUserAuth, readUserAuth } from "./userAuthStorage";
+import { baseDelQuiosco, vaPorElQuiosco } from "./quiosco.js";
 
 export const USER_AUTH_SYNC_EVENT = "sureconomics-user-auth-sync";
 
@@ -12,9 +13,9 @@ export const dispatchUserAuthSync = () => {
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
-const buildUrl = (path, query) => {
+const buildUrl = (path, query, base = API_BASE) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = new URL(`${API_BASE}${normalizedPath}`);
+  const url = new URL(`${base}${normalizedPath}`);
   if (query && typeof query === "object") {
     Object.entries(query).forEach(([key, value]) => {
       if (value === undefined || value === null || value === "") return;
@@ -73,7 +74,6 @@ const unwrapUserResponseData = (payload) => {
  */
 const rawUserFetch = async (path, options = {}) => {
   const { token, json, headers: initHeaders, body, query, idempotencyKey, ...rest } = options;
-  const url = buildUrl(path, query);
   const headers = { ...initHeaders };
   if (json !== undefined) {
     headers["Content-Type"] = "application/json";
@@ -81,6 +81,11 @@ const rawUserFetch = async (path, options = {}) => {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
+  // Las lecturas públicas (monedas, titulares, béisbol, resumen…), por el quiosco de este
+  // dominio, como en `services/apiClient.js` (ver `lib/quiosco.js`).
+  const quiosco = baseDelQuiosco();
+  const porElQuiosco = Boolean(quiosco) && vaPorElQuiosco(path, { method: rest.method ?? "GET", headers });
+  const url = buildUrl(path, query, porElQuiosco ? quiosco : API_BASE);
   // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
   // crear otra cosa. Ver `lib/idempotencia.js`.
   if (idempotencyKey) {

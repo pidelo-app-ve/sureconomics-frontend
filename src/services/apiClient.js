@@ -1,4 +1,5 @@
 import { tActual } from "../i18n/motor";
+import { baseDelQuiosco, vaPorElQuiosco } from "../lib/quiosco.js";
 
 const normalizeBaseUrl = (raw) => {
   const base = typeof raw === "string" ? raw.trim() : "";
@@ -73,13 +74,17 @@ export const createApiClient = ({
    * }} [options]
    */
   const request = async (path, options = {}) => {
-    const url = buildUrl(resolvedBaseUrl, path, options.query);
     const method = options.method ?? "GET";
 
     const headers = {
       ...defaultHeaders,
       ...(options.headers ?? {}),
     };
+
+    // Las lecturas públicas, por el quiosco de este dominio (`lib/quiosco.js`).
+    const quiosco = baseDelQuiosco();
+    const porElQuiosco = Boolean(quiosco) && vaPorElQuiosco(path, { method, headers });
+    const url = buildUrl(porElQuiosco ? quiosco : resolvedBaseUrl, path, options.query);
 
     // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
     // crear otra cosa. Ver `lib/idempotencia.js`.

@@ -19,6 +19,46 @@
             "destination": "https://sureconomics-backend.onrender.com/media/:ruta*"
         },
         {
+            "source": "/datos/:ruta(posts|formats|topics|places|cinta|monedas|headlines|canal|social|equipo)",
+            "destination": "https://sureconomics-backend.onrender.com/:ruta"
+        },
+        {
+            "source": "/datos/posts/:slug",
+            "destination": "https://sureconomics-backend.onrender.com/posts/:slug"
+        },
+        {
+            "source": "/datos/monedas/:codigo/historia",
+            "destination": "https://sureconomics-backend.onrender.com/monedas/:codigo/historia"
+        },
+        {
+            "source": "/datos/lvbp/:que",
+            "destination": "https://sureconomics-backend.onrender.com/lvbp/:que"
+        },
+        {
+            "source": "/datos/analitica/mas-leidas",
+            "destination": "https://sureconomics-backend.onrender.com/analitica/mas-leidas"
+        },
+        {
+            "source": "/datos/resumen/:fecha(ultimo|\\d{4}-\\d{2}-\\d{2})",
+            "destination": "https://sureconomics-backend.onrender.com/resumen/:fecha"
+        },
+        {
+            "source": "/datos/resumen/:fecha(\\d{4}-\\d{2}-\\d{2})/:edicion",
+            "destination": "https://sureconomics-backend.onrender.com/resumen/:fecha/:edicion"
+        },
+        {
+            "source": "/datos/juegos/clave/:que",
+            "destination": "https://sureconomics-backend.onrender.com/juegos/clave/:que"
+        },
+        {
+            "source": "/datos/equipo/fotos",
+            "destination": "https://sureconomics-backend.onrender.com/equipo/fotos"
+        },
+        {
+            "source": "/datos/admin/diagnostico/cliente",
+            "destination": "https://sureconomics-backend.onrender.com/admin/diagnostico/cliente"
+        },
+        {
             "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
             "has": [
                 {
@@ -135,6 +175,15 @@
         },
         {
             "source": "/media/:ruta*",
+            "headers": [
+                {
+                    "key": "x-vercel-enable-rewrite-caching",
+                    "value": "1"
+                }
+            ]
+        },
+        {
+            "source": "/datos/:ruta*",
             "headers": [
                 {
                     "key": "x-vercel-enable-rewrite-caching",

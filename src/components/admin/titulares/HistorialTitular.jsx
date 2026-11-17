@@ -9,7 +9,8 @@ import { ModalDelPanel } from "../ModalDelPanel";
  * El historial de un titular: cada versión del texto (la que escribió el sistema, las
  * que reescribió al llegar más fuentes, las corregidas a mano) y lo que hizo la
  * redacción con él (borrar, restaurar, editar, fijar), con quién y cuándo. También si la
- * IA lo retiró al rehacerlo («Automático»).
+ * IA lo retiró al rehacerlo («Automático»). Cada versión de la máquina dice, plegado,
+ * de dónde salió (`DeDondeSalio`).
  */
 
 const VERSION = {
@@ -20,6 +21,79 @@ const VERSION = {
 
 const cuando = (iso) =>
   iso ? new Date(iso).toLocaleString("es-VE", { timeZone: "America/Caracas", dateStyle: "short", timeStyle: "short" }) : "—";
+
+/** Solo enlaces web: la dirección viene del medio, y un `javascript:` no puede ir en un href. */
+const esWeb = (url) => typeof url === "string" && /^https?:\/\//i.test(url);
+
+/**
+ * «De dónde salió» una versión que escribió la máquina (auditoría del 17-nov-2026,
+ * D-07): qué modelo la redactó, con qué versión de las instrucciones (la huella) y qué
+ * notas leyó, con su enlace y el trozo que vio. Las notas originales se borran a los 7
+ * días; esto se guarda con la versión para poder contestar un reclamo meses después.
+ * Plegado: se abre cuando hace falta comprobar algo.
+ */
+const DeDondeSalio = ({ version }) => {
+  const notas = Array.isArray(version.notas_leidas) ? version.notas_leidas : [];
+  if (version.motivo === "manual_edit") return null;
+  if (!version.modelo && !notas.length) {
+    return <span className="se-admin-meta-hint">No se guardó de dónde salió: esta versión es de antes de que el sistema lo apuntara.</span>;
+  }
+  return (
+    <details className="se-tit-origen">
+      <summary className="se-admin-meta-hint">
+        De dónde salió · {notas.length} nota{notas.length === 1 ? "" : "s"} leída{notas.length === 1 ? "" : "s"}
+      </summary>
+      <p className="se-admin-meta-hint se-tit-origen__datos">
+        Lo redactó {version.modelo || "un modelo sin nombre"}
+        {version.huella_prompt ? (
+          <>
+            {" "}con las instrucciones <code title={version.huella_prompt}>{version.huella_prompt.slice(0, 12)}</code>
+          </>
+        ) : null}
+        .
+      </p>
+      {notas.length ? (
+        <ol className="se-tit-origen__notas">
+          {notas.map((n, k) => (
+            <li key={`${n.url || n.titulo || ""}-${k}`}>
+              <span className="se-admin-meta-hint">
+                {n.medio || "Medio sin nombre"}
+                {n.nivel ? ` · nivel ${n.nivel}` : ""}
+                {n.publicada ? ` · ${cuando(n.publicada)}` : ""}
+              </span>
+              {esWeb(n.url) ? (
+                <a href={n.url} target="_blank" rel="noopener noreferrer nofollow">
+                  {n.titulo || n.url}
+                </a>
+              ) : (
+                <span>{n.titulo || "Sin título"}</span>
+              )}
+              {n.extracto ? <span className="se-tit-origen__extracto">{n.extracto}</span> : null}
+            </li>
+          ))}
+        </ol>
+      ) : null}
+    </details>
+  );
+};
+
+DeDondeSalio.propTypes = {
+  version: PropTypes.shape({
+    motivo: PropTypes.string,
+    modelo: PropTypes.string,
+    huella_prompt: PropTypes.string,
+    notas_leidas: PropTypes.arrayOf(
+      PropTypes.shape({
+        medio: PropTypes.string,
+        nivel: PropTypes.number,
+        url: PropTypes.string,
+        titulo: PropTypes.string,
+        extracto: PropTypes.string,
+        publicada: PropTypes.string,
+      }),
+    ),
+  }).isRequired,
+};
 
 const accion = (a, motivos) => {
   const d = a.datos || {};
@@ -102,6 +176,7 @@ export const HistorialTitular = ({ grupo, motivos, onCerrar }) => {
                   <strong>{v.titulo}</strong>
                   <span>{v.resumen}</span>
                   <span className="se-admin-meta-hint">{v.titulo_en} — {v.resumen_en}</span>
+                  <DeDondeSalio version={v} />
                 </li>
               ))}
             </ol>

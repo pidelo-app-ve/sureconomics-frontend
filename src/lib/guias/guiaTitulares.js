@@ -12,7 +12,9 @@ export const PASOS_TITULARES = [
       "Los titulares de «Última hora»: los que salen solos cada 10 minutos en la tarjeta verde de la " +
       "portada y en la sección. El sistema lee lo que publican otros medios, elige lo más importante y " +
       "lo redacta en español y en inglés. Desde aquí se corrige, se pone arriba o se quita lo que haga " +
-      "falta, y se decide qué medios no deben contar.",
+      "falta, y se decide qué medios cuentan y cuáles no. En la web, debajo de los titulares, una línea " +
+      "avisa al lector de que están redactados automáticamente con inteligencia artificial a partir de " +
+      "las fuentes citadas.",
   },
   {
     clave: "interruptores",
@@ -64,19 +66,48 @@ export const PASOS_TITULARES = [
     puntos: [
       "Editar: corregir el título o el resumen, en español y en inglés. Lo editado a mano ya no lo reescribe el sistema aunque lleguen más fuentes.",
       "Fijar arriba: lo pone el primero en la portada y en la sección durante media hora, una o dos horas.",
-      "Historial: qué escribió el sistema, qué cambió alguien del equipo y quién.",
+      "Historial: qué escribió el sistema, qué cambió alguien del equipo y quién. En cada versión del sistema, «De dónde salió» enseña las notas que leyó (medio, enlace y el trozo que vio) y con qué inteligencia artificial se escribió: sirve para comprobar un dato o contestar un reclamo.",
       "Borrar: lo quita de la web en menos de dos minutos y no vuelve aunque lleguen más fuentes. Pide un motivo, que sirve para ajustar los medios y las instrucciones.",
     ],
   },
   {
     clave: "fuentes",
     titulo: "Los medios que lee el sistema",
+    abrirFuentes: true,
     texto:
       "Cada medio con su nivel (1 oficial, 2 agencia de noticias, 3 medio reconocido, 4 Google News o " +
       "medio pequeño) y cuántas notas mandó en las últimas 24 horas.",
     puntos: [
       "Silenciar: sus notas nuevas dejan de contar. Si quiere, borra a la vez los titulares donde era el único medio.",
-      "Reactivar: vuelve a contar desde ese momento.",
+      "Reactivar: vuelve a contar desde ese momento. Antes pregunta el nivel, por si hay que corregirlo.",
+    ],
+  },
+  {
+    clave: "fuentes-nuevas",
+    titulo: "Medios nuevos, sin activar",
+    abrirFuentes: true,
+    texto:
+      "Cuando el sistema empieza a leer un medio que no conocía, llega silenciado: sus notas no sirven " +
+      "para elegir ni redactar titulares hasta que alguien del equipo lo revisa y lo activa. Así no se " +
+      "cuela un medio dudoso sin que nadie lo vea.",
+    puntos: [
+      "Nueva, sin activar: la marca de esos medios. Salen los primeros de la lista y el título plegado dice cuántos esperan.",
+      "Enseñar: deja ver solo los nuevos, los silenciados o los que cuentan.",
+      "Activar: compruebe antes que es un medio serio. Si no lo es, déjelo como está.",
+    ],
+  },
+  {
+    clave: "fuentes-nivel",
+    titulo: "El nivel de cada medio",
+    abrirFuentes: true,
+    texto:
+      "Al activar o reactivar un medio se elige su nivel. Dice cuánto se fía el sistema de él: cuanto " +
+      "más bajo el número, más pesa al elegir qué sale y antes se publica.",
+    puntos: [
+      "1, oficial: bancos centrales, gobiernos y organismos públicos. Basta él solo para publicar.",
+      "2, agencia de noticias: EFE, Reuters, AFP. Basta él solo para publicar.",
+      "3, medio reconocido: diarios nacionales. Basta solo para una noticia normal; una delicada pide otro medio.",
+      "4, Google News o medio pequeño: nunca basta solo; hacen falta tres medios distintos (dos si es de Venezuela).",
     ],
   },
   {

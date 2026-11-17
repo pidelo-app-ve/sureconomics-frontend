@@ -302,6 +302,23 @@
 }
 .se-uh-item__fuentes a:hover { color: var(--color-accent); }
 
+/* La línea fija de la IA (D-04): al pie de la lista, como las fuentes de cada titular. */
+.se-uh-seccion__nota {
+  margin: var(--se-space-md, 1rem) 0 0;
+  font-family: var(--se-font-label);
+  font-size: 0.8rem;
+  color: var(--color-slate);
+}
+
+/* La misma línea al pie de la tarjeta de la portada (`UltimaHoraColumna`). */
+.se-plana__uh-nota {
+  margin: 8px 0 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-slate);
+}
+
 .se-uh-nuevos__boton .se-uh__punto {
   background: #ffffff;
 }

@@ -11,6 +11,8 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { nombreTraducido, rutaDePieza } from "../../lib/pieza";
 import { getPiezasDeMisTemas } from "../../services/userMeService";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMisTemas } from "../../lib/guias/guiaMisTemas";
 import "../../styles/cuenta.css";
 
 /**
@@ -19,6 +21,8 @@ import "../../styles/cuenta.css";
  * y del botón «Seguir» de cada pieza.
  */
 const CUANTAS = 20;
+
+const { ancla } = recorridoMisTemas;
 
 export const CuentaTemas = () => {
   const { t, lang } = useIdioma();
@@ -68,12 +72,15 @@ export const CuentaTemas = () => {
 
   return (
     <div className="se-reader-dash__page">
-      <header className="se-reader-page-head">
-        <h1 className="se-reader-page-title">{t("cuenta.temas.titulo")}</h1>
-        <p className="se-reader-page-lead">{t("cuenta.temas.lead")}</p>
+      <header className="se-reader-page-head se-reader-page-head--row">
+        <div>
+          <h1 className="se-reader-page-title">{t("cuenta.temas.titulo")}</h1>
+          <p className="se-reader-page-lead">{t("cuenta.temas.lead")}</p>
+        </div>
+        <BotonGuia recorrido={recorridoMisTemas} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
 
-      <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-sigo">
+      <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-sigo" {...ancla("siguiendo")}>
         <h2 id="temas-sigo" className="se-reader-temas__subtitulo">{t("cuenta.temas.siguiendo")}</h2>
         {!listo ? (
           <p className="se-reader-empty__text">{t("cuenta.temas.cargando")}</p>
@@ -92,7 +99,7 @@ export const CuentaTemas = () => {
       </section>
 
       {otros.length ? (
-        <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-otros">
+        <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-otros" {...ancla("otros")}>
           <h2 id="temas-otros" className="se-reader-temas__subtitulo">{t("cuenta.temas.otros")}</h2>
           <ul className="se-reader-temas">
             {otros.map((tema) => (
@@ -105,7 +112,7 @@ export const CuentaTemas = () => {
         </section>
       ) : null}
 
-      <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-nuevo">
+      <section className="se-reader-card se-reader-temas__bloque" aria-labelledby="temas-nuevo" {...ancla("nuevo")}>
         <h2 id="temas-nuevo" className="se-reader-temas__subtitulo">{t("cuenta.temas.loNuevo")}</h2>
         {piezas === null ? (
           <p className="se-reader-empty__text">{t("comun.cargando")}</p>
@@ -127,6 +134,8 @@ export const CuentaTemas = () => {
           <p className="se-reader-empty__text">{t("cuenta.temas.nadaNuevo")}</p>
         )}
       </section>
+
+      <RecorridoVista recorrido={recorridoMisTemas} />
     </div>
   );
 };

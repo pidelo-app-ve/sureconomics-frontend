@@ -7,7 +7,11 @@ import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
 import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMarcadores } from "../../lib/guias/guiaMarcadores";
 import "../../styles/cuenta.css";
+
+const { ancla } = recorridoMarcadores;
 
 export const CuentaMarcadores = () => {
   const { t } = useIdioma();
@@ -71,13 +75,16 @@ export const CuentaMarcadores = () => {
 
   return (
     <div className="se-reader-dash__page">
-      <header className="se-reader-page-head">
-        <h1 className="se-reader-page-title">{t("cuenta.marcadores.titulo")}</h1>
-        <p className="se-reader-page-lead">{t("cuenta.marcadores.lead")}</p>
+      <header className="se-reader-page-head se-reader-page-head--row">
+        <div>
+          <h1 className="se-reader-page-title">{t("cuenta.marcadores.titulo")}</h1>
+          <p className="se-reader-page-lead">{t("cuenta.marcadores.lead")}</p>
+        </div>
+        <BotonGuia recorrido={recorridoMarcadores} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
 
       {items.length === 0 ? (
-        <div className="se-reader-empty se-reader-card">
+        <div className="se-reader-empty se-reader-card" {...ancla("lista")}>
           <p className="se-reader-empty__title">{t("cuenta.marcadores.vacioTitulo")}</p>
           <p className="se-reader-empty__text">{t("cuenta.marcadores.vacioTexto")}</p>
           <Enlace to="/articulos" className="se-btn se-btn--secondary">
@@ -85,7 +92,7 @@ export const CuentaMarcadores = () => {
           </Enlace>
         </div>
       ) : (
-        <ul className="se-reader-marks">
+        <ul className="se-reader-marks" {...ancla("lista")}>
           {items.map((post) => (
             <li key={post.id || post.slug} className="se-reader-marks__item">
               <Enlace to={`/articulo/${encodeURIComponent(post.slug)}`} className="se-reader-marks__link">
@@ -112,6 +119,8 @@ export const CuentaMarcadores = () => {
           onPageChange={(p) => handleLoad(p)}
         />
       </div>
+
+      <RecorridoVista recorrido={recorridoMarcadores} />
     </div>
   );
 };

@@ -9,8 +9,12 @@ import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissio
 import * as userMeService from "../../services/userMeService";
 import { ErrorState, LoadingState, Pagination } from "../../components/content";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMiPropuesta } from "../../lib/guias/guiaMisPropuestas";
 import "../../styles/cuenta.css";
 import { enlaceWeb } from "../../lib/enlaces";
+
+const { ancla } = recorridoMiPropuesta;
 
 const PencilIcon = () => (
   <svg className="se-submission-detail__edit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -148,11 +152,14 @@ export const CuentaEnvioDetail = () => {
 
   return (
     <div className="se-reader-dash__page">
-      <p className="se-reader-page-lead" style={{ marginTop: 0 }}>
-        <Enlace to="/cuenta/envios" className="se-link se-reader-backlink">
-          {t("cuenta.envio.misEnvios")}
-        </Enlace>
-      </p>
+      <div className="se-fila-guia">
+        <p className="se-reader-page-lead" style={{ margin: 0 }}>
+          <Enlace to="/cuenta/envios" className="se-link se-reader-backlink">
+            {t("cuenta.envio.misEnvios")}
+          </Enlace>
+        </p>
+        <BotonGuia recorrido={recorridoMiPropuesta} className="se-btn se-btn--secondary se-boton-guia" />
+      </div>
       {flash ? (
         <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
           {flash}
@@ -167,20 +174,21 @@ export const CuentaEnvioDetail = () => {
                 to={`/cuenta/envios/${encodeURIComponent(id)}/editar`}
                 className="se-btn se-btn--secondary se-submission-detail__edit"
                 aria-label={t("cuenta.envio.editarEnvio")}
+                {...ancla("editar")}
               >
                 <PencilIcon />
                 <span>{t("cuenta.envio.editar")}</span>
               </Enlace>
             ) : null}
           </div>
-          <p className="se-reader-article__meta">
+          <p className="se-reader-article__meta" {...ancla("estado")}>
             <span className="se-reader-subs__pill se-submission-detail__meta-pill">{statusLabel}</span>
             {dateLabel ? <span>{dateLabel}</span> : null}
           </p>
         </header>
 
         {hasImageUrl && !featuredImageFailed ? (
-          <div className="se-submission-detail__media">
+          <div className="se-submission-detail__media" {...ancla("foto")}>
             <div className="se-submission-detail__media-thumb">
               <img
                 src={s.featuredImageUrl}
@@ -200,7 +208,7 @@ export const CuentaEnvioDetail = () => {
         ) : null}
 
         {hasImageUrl && featuredImageFailed ? (
-          <p className="se-submission-detail__media-fallback" role="alert">
+          <p className="se-submission-detail__media-fallback" role="alert" {...ancla("foto")}>
             {t("cuenta.envio.sinVistaPrevia")}{" "}
             <a href={enlaceWeb(s.featuredImageUrl) || undefined} className="se-link" rel="noopener noreferrer" target="_blank">
               {t("cuenta.envio.abrirUrl")}
@@ -209,7 +217,7 @@ export const CuentaEnvioDetail = () => {
         ) : null}
 
         {!hasImageUrl ? (
-          <div className="se-submission-detail__media-placeholder">
+          <div className="se-submission-detail__media-placeholder" {...ancla("foto")}>
             {canEdit ? (
               <>
                 {t("cuenta.envio.sinImagen")}{" "}
@@ -223,7 +231,7 @@ export const CuentaEnvioDetail = () => {
           </div>
         ) : null}
 
-        <section className="se-submission-detail__section" aria-labelledby="submission-excerpt-label">
+        <section className="se-submission-detail__section" aria-labelledby="submission-excerpt-label" {...ancla("texto")}>
           <span id="submission-excerpt-label" className="se-submission-detail__section-label">
             {t("cuenta.envio.resumen")}
           </span>
@@ -251,6 +259,7 @@ export const CuentaEnvioDetail = () => {
       <section
         className="se-reader-card se-submission-detail__notes"
         aria-label={t("cuenta.envio.notasTitulo")}
+        {...ancla("notas")}
       >
         <h2 className="se-submission-detail__notes-title">{t("cuenta.envio.notasTitulo")}</h2>
         {!(notesState.status === "success" && notesState.items.length > 0) ? (
@@ -297,6 +306,8 @@ export const CuentaEnvioDetail = () => {
           />
         ) : null}
       </section>
+
+      <RecorridoVista recorrido={recorridoMiPropuesta} />
     </div>
   );
 };

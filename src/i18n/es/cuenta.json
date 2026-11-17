@@ -544,6 +544,125 @@
           "titulo": "Vuelva aquí cuando quiera",
           "texto": "Este botón abre esta guía otra vez."
         }
+      },
+      "volver": {
+        "titulo": "Vuelva aquí cuando quiera",
+        "texto": "Este botón abre esta guía otra vez."
+      },
+      "miEspacio": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "El inicio de su cuenta: cómo está, lo que tiene y lo que puede hacer con ella. Dónde queda cada sección se lo enseña la visita guiada de la cuenta, en el botón «?» de arriba."
+        },
+        "estado": {
+          "titulo": "Su cuenta",
+          "texto": "Cómo está su cuenta, punto por punto.",
+          "p1": "Con ✓: ya está hecho; no tiene que hacer nada.",
+          "p2": "Con aviso: falta algo; el enlace de al lado le lleva a donde se resuelve."
+        },
+        "cifras": {
+          "titulo": "Lo que tiene",
+          "texto": "Cuántos módulos ha comprado, cuántos artículos ha guardado y cuántas propuestas ha enviado. Pulse una cifra para ir a su página."
+        },
+        "usos": {
+          "titulo": "Qué puede hacer aquí",
+          "texto": "Para qué sirve la cuenta: guardar artículos, comentar, proponer piezas a la redacción y comprar módulos de Educación, cada cosa con su enlace."
+        }
+      },
+      "loMio": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Los módulos de Educación que ha comprado, con su recibo. El acceso no caduca: son suyos. Si todavía no ha comprado ninguno, aquí verá el enlace al catálogo."
+        },
+        "modulos": {
+          "titulo": "Sus módulos",
+          "texto": "Cada módulo comprado, con su nivel, lo que dura y de qué trata. Arriba, cuántos tiene y cuánto ha pagado en total."
+        },
+        "recibo": {
+          "titulo": "El recibo",
+          "texto": "Lo que pagó, el día y la referencia del pago. Si nos escribe por un cobro, díganos esa referencia: con ella lo encontramos enseguida."
+        },
+        "abrir": {
+          "titulo": "Abrir un módulo",
+          "p1": "Abrir: le lleva a la primera clase del módulo.",
+          "p2": "Ver el temario: la página del módulo, con todas sus clases.",
+          "p3": "Fuera del catálogo: el módulo ya no está a la venta, pero sigue siendo suyo; escríbanos si lo necesita."
+        },
+        "pendientes": {
+          "titulo": "Pagos a medias",
+          "texto": "Un pago que se empezó y cuya confirmación aún no nos ha llegado. Si ya pagó, suele tardar unos minutos; si no llegó a pagar, puede volver a intentarlo desde el módulo sin que se le cobre dos veces. Si no tiene ninguno, esta parte no aparece."
+        }
+      },
+      "marcadores": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Las piezas que ha guardado para leer después. Se guardan con el botón «Guardar» que lleva cada pieza, y aquí las ve desde cualquier aparato en el que entre con su cuenta."
+        },
+        "lista": {
+          "titulo": "Sus piezas guardadas",
+          "texto": "El título y el resumen de cada una; púlsela para leerla. Para quitar una de la lista, ábrala y pulse otra vez su botón, que ahora dice «Guardado». Van de diez en diez: si tiene más, los números de abajo pasan de página."
+        }
+      },
+      "misTemas": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Los temas de SurEconomics que usted sigue y lo último que se ha publicado en ellos. Lo mismo sale en la pestaña «Mis temas» de Última hora."
+        },
+        "siguiendo": {
+          "titulo": "Temas que sigue",
+          "texto": "Pulse el nombre de un tema para ver todas sus piezas. El botón «Siguiendo» deja de seguirlo y lo pasa a la lista de abajo."
+        },
+        "otros": {
+          "titulo": "Otros temas",
+          "texto": "Los que todavía no sigue: «Seguir» lo añade a sus temas al momento. También puede seguir un tema desde cualquier pieza, con el botón que hay junto a sus temas."
+        },
+        "nuevo": {
+          "titulo": "Lo nuevo en sus temas",
+          "texto": "Las últimas veinte piezas publicadas en los temas que sigue, con su formato y su fecha. Se pone al día sola cuando sigue o deja de seguir un tema."
+        }
+      },
+      "estados": {
+        "titulo": "En qué va cada propuesta",
+        "enviado": "Enviado: la recibimos y la redacción todavía no ha empezado a revisarla. Mientras siga así, puede corregirla.",
+        "enRevision": "En revisión: alguien de la redacción la está leyendo. Ya no se puede corregir.",
+        "aceptado": "Aceptado: la redacción la aceptó y la publicó en SurEconomics.",
+        "rechazado": "Rechazado: esta vez no se publica. Si la redacción le dejó una nota, la verá en las notas de la propuesta."
+      },
+      "misPropuestas": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Las piezas que ha propuesto a la redacción de SurEconomics y en qué va cada una."
+        },
+        "nueva": {
+          "titulo": "Proponer una pieza",
+          "texto": "Abre el formulario para mandar a la redacción un análisis o una noticia escrita por usted."
+        },
+        "lista": {
+          "titulo": "Sus propuestas",
+          "texto": "De la más nueva a la más vieja, cada una con su título, su estado y el día en que la mandó. Púlsela para verla entera, con las notas de la redacción. Van de diez en diez."
+        }
+      },
+      "miPropuesta": {
+        "queHay": {
+          "titulo": "Qué hay en esta página",
+          "texto": "Una de sus propuestas tal como la mandó, con su estado y las notas que le deje la redacción."
+        },
+        "editar": {
+          "titulo": "Editar",
+          "texto": "Mientras la propuesta siga en «Enviado», este botón abre el formulario para corregirla. En cuanto la redacción empieza a revisarla ya no se puede cambiar, y el botón desaparece."
+        },
+        "foto": {
+          "titulo": "La foto",
+          "texto": "La foto que propuso para acompañar la pieza; «Abrir original» la abre a tamaño completo. Si no puso ninguna, puede añadirla mientras la propuesta se pueda editar."
+        },
+        "texto": {
+          "titulo": "El resumen y el texto",
+          "texto": "Lo que escribió, tal como le llegó a la redacción: primero el resumen y, debajo, el texto completo."
+        },
+        "notas": {
+          "titulo": "Notas del equipo editorial",
+          "texto": "Lo que la redacción le comenta sobre la propuesta: qué cambiaría, o por qué se aceptó o no. Cada nota dice quién la escribió y cuándo. Desde aquí no se contestan: si quiere responder, escríbanos desde la página de contacto."
+        }
       }
     }
   }

@@ -544,6 +544,125 @@
           "titulo": "Come back whenever you like",
           "texto": "This button opens this guide again."
         }
+      },
+      "volver": {
+        "titulo": "Come back whenever you like",
+        "texto": "This button opens this guide again."
+      },
+      "miEspacio": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The home of your account: how it stands, what you have and what you can do with it. To see where each section is, take the account's guided tour with the «?» button at the top."
+        },
+        "estado": {
+          "titulo": "Your account",
+          "texto": "How your account stands, item by item.",
+          "p1": "With ✓: it's done; nothing to do.",
+          "p2": "With a warning: something is missing; the link next to it takes you where you can fix it."
+        },
+        "cifras": {
+          "titulo": "What you have",
+          "texto": "How many modules you've bought, how many articles you've saved and how many proposals you've sent. Press a number to go to its page."
+        },
+        "usos": {
+          "titulo": "What you can do here",
+          "texto": "What your account is for: saving articles, commenting, pitching pieces to the newsroom and buying Education modules, each with its own link."
+        }
+      },
+      "loMio": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The Education modules you've bought, with their receipts. Access never expires: they're yours. If you haven't bought any yet, you'll find a link to the catalog here."
+        },
+        "modulos": {
+          "titulo": "Your modules",
+          "texto": "Each module you bought, with its level, how long it takes and what it covers. At the top, how many you have and how much you've paid in total."
+        },
+        "recibo": {
+          "titulo": "The receipt",
+          "texto": "What you paid, the date and the payment reference. If you write to us about a charge, give us that reference: it lets us find the payment right away."
+        },
+        "abrir": {
+          "titulo": "Opening a module",
+          "p1": "Open: takes you to the module's first lesson.",
+          "p2": "See the syllabus: the module's page, with all its lessons.",
+          "p3": "Out of the catalog: the module is no longer on sale, but it's still yours; contact us if you need it."
+        },
+        "pendientes": {
+          "titulo": "Incomplete payments",
+          "texto": "A payment that was started and whose confirmation hasn't reached us yet. If you already paid, it usually takes a few minutes; if you didn't get to pay, you can try again from the module without being charged twice. If you have none, this section doesn't appear."
+        }
+      },
+      "marcadores": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The pieces you've saved to read later. You save them with the «Save» button on each piece, and you'll find them here on any device where you sign in."
+        },
+        "lista": {
+          "titulo": "Your saved pieces",
+          "texto": "The title and summary of each one; press it to read it. To remove one from the list, open it and press its button again, which now says «Saved». They come ten at a time: if you have more, the page numbers below take you through them."
+        }
+      },
+      "misTemas": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The SurEconomics topics you follow and the latest pieces published in them. The same shows up in the «My topics» tab of Latest."
+        },
+        "siguiendo": {
+          "titulo": "Topics you follow",
+          "texto": "Press a topic's name to see all its pieces. The «Following» button unfollows it and moves it to the list below."
+        },
+        "otros": {
+          "titulo": "Other topics",
+          "texto": "The ones you don't follow yet: «Follow» adds it to your topics right away. You can also follow a topic from any piece, with the button next to its topics."
+        },
+        "nuevo": {
+          "titulo": "New in your topics",
+          "texto": "The latest twenty pieces published in the topics you follow, with their format and date. It updates by itself when you follow or unfollow a topic."
+        }
+      },
+      "estados": {
+        "titulo": "Where each proposal stands",
+        "enviado": "Submitted: we received it and the newsroom hasn't started reviewing it yet. While it stays like this, you can edit it.",
+        "enRevision": "Under review: someone in the newsroom is reading it. It can no longer be edited.",
+        "aceptado": "Accepted: the newsroom accepted it and published it on SurEconomics.",
+        "rechazado": "Rejected: it won't be published this time. If the newsroom left you a note, you'll find it in the proposal's notes."
+      },
+      "misPropuestas": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "The pieces you've proposed to the SurEconomics newsroom and where each one stands."
+        },
+        "nueva": {
+          "titulo": "Propose a piece",
+          "texto": "Opens the form to send the newsroom an analysis or a news item you wrote."
+        },
+        "lista": {
+          "titulo": "Your proposals",
+          "texto": "Newest first, each with its title, its status and the day you sent it. Press one to see it in full, with the newsroom's notes. They come ten at a time."
+        }
+      },
+      "miPropuesta": {
+        "queHay": {
+          "titulo": "What's on this page",
+          "texto": "One of your proposals as you sent it, with its status and any notes the newsroom leaves you."
+        },
+        "editar": {
+          "titulo": "Edit",
+          "texto": "While the proposal is still «Submitted», this button opens the form to correct it. Once the newsroom starts reviewing it, it can no longer be changed and the button disappears."
+        },
+        "foto": {
+          "titulo": "The photo",
+          "texto": "The photo you suggested to go with the piece; «Open original» opens it full size. If you didn't add one, you can add it while the proposal can still be edited."
+        },
+        "texto": {
+          "titulo": "The summary and the text",
+          "texto": "What you wrote, exactly as it reached the newsroom: first the summary and, below it, the full text."
+        },
+        "notas": {
+          "titulo": "Notes from the editorial team",
+          "texto": "What the newsroom tells you about the proposal: what it would change, or why it was accepted or not. Each note shows who wrote it and when. They can't be answered from here: if you want to reply, write to us from the contact page."
+        }
       }
     }
   }

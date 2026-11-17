@@ -1796,13 +1796,26 @@ select.se-campo__input {
   outline-offset: 2px;
 }
 
-/* Perfil: título a la izquierda, «Guía» a la derecha. */
+/* Título a la izquierda, «Guía» a la derecha (Perfil, Lo mío). */
 .se-cuenta__cabecera--con-guia {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
+}
+
+/* En el inicio, «Guía» al otro lado del saludo con la cara. */
+.se-cuenta__cabecera--con-cara .se-boton-guia {
+  margin-left: auto;
+}
+
+/* Mis propuestas: «Guía» junto a «Proponer una pieza». */
+.se-reader-page-head__botones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 /* —— Proponer una pieza —— */

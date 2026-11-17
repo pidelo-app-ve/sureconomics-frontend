@@ -1,4 +1,4 @@
-import { formatearFecha, idiomaActual, tActual } from "../i18n/motor";
+import { formatearFecha, idiomaActual, tActual } from "../i18n/motor.js";
 
 /**
  * Fecha y hora de un envío en el idioma del documento: «5 oct 2026, 14:30» en español,
@@ -13,8 +13,18 @@ export const formatSubmissionDate = (iso) => {
   return formatearFecha(d, "corta", idiomaActual(), { hour: "numeric", minute: "2-digit" });
 };
 
+/**
+ * Los estados de una propuesta, los mismos que el servidor (el `CHECK` de
+ * `collaborative_article_submissions.status`): llega como `submitted`, la redacción puede
+ * pasarla a `under_review`, y acaba en `approved` (se publica) o en `rejected`.
+ *
+ * No existen ni `pending` ni `accepted`. Aquí estaban en su lugar: el panel filtraba por
+ * ellos y no encontraba nada, y al lector se le enseñaba «approved» tal cual.
+ */
+export const ESTADOS_DE_PROPUESTA = ["submitted", "under_review", "approved", "rejected"];
+
 /** Los estados que tienen nombre en `cuenta.estadoEnvio.*`; cualquier otro se enseña tal cual. */
-const ESTADOS_CONOCIDOS = new Set(["submitted", "pending", "under_review", "accepted", "rejected"]);
+const ESTADOS_CONOCIDOS = new Set(ESTADOS_DE_PROPUESTA);
 
 /**
  * @param {string | undefined} status
@@ -26,7 +36,7 @@ export const submissionStatusLabel = (status) => {
   return status ? String(status) : "—";
 };
 
-const KNOWN_STATUS_MODIFIERS = new Set(["pending", "under_review", "accepted", "rejected", "submitted"]);
+const KNOWN_STATUS_MODIFIERS = new Set(ESTADOS_DE_PROPUESTA);
 
 /**
  * CSS modifier for `se-admin-submissions__status--${modifier}` (admin list pills).

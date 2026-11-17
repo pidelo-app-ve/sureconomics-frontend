@@ -29,11 +29,7 @@ import { recorridoRevisarPropuesta } from "../../lib/guias/guiaPropuestasDeLecto
 
 const { ancla } = recorridoRevisarPropuesta;
 
-const normalizeStatusForSelect = (value) => {
-  const s = String(value || "").toLowerCase();
-  if (s === "approved") return "accepted";
-  return s;
-};
+const normalizeStatusForSelect = (value) => String(value || "").toLowerCase();
 
 export const AdminSubmissionDetail = () => {
   const { role } = useAuth();
@@ -41,7 +37,7 @@ export const AdminSubmissionDetail = () => {
   const { id } = useParams();
   const [row, setRow] = useState(null);
   const [loadState, setLoadState] = useState({ status: "idle", error: null });
-  const [status, setStatus] = useState("pending");
+  const [status, setStatus] = useState("submitted");
   const [saveState, setSaveState] = useState({ status: "idle", error: null, message: "", publishedSlug: null });
   const [notesPage, setNotesPage] = useState(1);
   const [notesState, setNotesState] = useState({ status: "idle", items: [], meta: null, error: null });
@@ -69,7 +65,7 @@ export const AdminSubmissionDetail = () => {
     try {
       const data = await getAdminSubmission(numericId);
       setRow(data);
-      setStatus(normalizeStatusForSelect(adminPick(data, ["status"], "pending") || "pending"));
+      setStatus(normalizeStatusForSelect(adminPick(data, ["status"], "submitted") || "submitted"));
       setLoadState({ status: "success", error: null });
     } catch (err) {
       setLoadState({ status: "error", error: err });
@@ -154,7 +150,7 @@ export const AdminSubmissionDetail = () => {
     e.preventDefault();
     if (!numericId) return;
     const normalized = String(status || "").toLowerCase();
-    if (!["under_review", "accepted", "rejected"].includes(normalized)) {
+    if (!["under_review", "approved", "rejected"].includes(normalized)) {
       setSaveState({
         status: "error",
         error: new Error(
@@ -172,11 +168,11 @@ export const AdminSubmissionDetail = () => {
       const newStatus = adminPick(updated, ["status"], normalized) || normalized;
       setStatus(normalizeStatusForSelect(newStatus));
       const message =
-        normalized === "accepted"
+        normalized === "approved"
           ? "Estado cambiado a Aceptado. El artículo se publicó correctamente."
           : `Estado cambiado a ${submissionStatusLabel(normalized === "under_review" ? "under_review" : "rejected")}.`;
       const publishedSlug =
-        normalized === "accepted" ? adminPick(updated, ["published_post_slug"], null) : null;
+        normalized === "approved" ? adminPick(updated, ["published_post_slug"], null) : null;
       setSaveState({ status: "success", error: null, message, publishedSlug: publishedSlug || null });
     } catch (err) {
       setSaveState({ status: "error", error: err, message: "", publishedSlug: null });
@@ -448,9 +444,8 @@ export const AdminSubmissionDetail = () => {
               <span className="se-form-label">Estado del flujo</span>
               <select id="rev-status" className="se-form-control" value={status} onChange={(e) => setStatus(e.target.value)}>
                 <option value="submitted">Enviado</option>
-                <option value="pending">Pendiente</option>
                 <option value="under_review">En revisión</option>
-                <option value="accepted">Aceptado</option>
+                <option value="approved">Aceptado</option>
                 <option value="rejected">Rechazado</option>
               </select>
             </label>

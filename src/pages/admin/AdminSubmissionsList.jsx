@@ -20,9 +20,8 @@ const { ancla } = recorridoPropuestas;
 const STATUS_FILTERS = [
   { value: "", label: "Todos" },
   { value: "submitted", label: "Enviado" },
-  { value: "pending", label: "Pendiente" },
   { value: "under_review", label: "En revisión" },
-  { value: "accepted", label: "Aceptado" },
+  { value: "approved", label: "Aceptado" },
   { value: "rejected", label: "Rechazado" },
 ];
 

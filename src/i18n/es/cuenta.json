@@ -334,9 +334,8 @@
     },
     "estadoEnvio": {
       "submitted": "Enviado",
-      "pending": "Pendiente",
       "under_review": "En revisión",
-      "accepted": "Aceptado",
+      "approved": "Aceptado",
       "rejected": "Rechazado"
     },
     "loMio": {

@@ -1096,17 +1096,12 @@
   color: #475569;
 }
 
-.se-admin-submissions__status--pending {
-  background: #f1f5f9;
-  color: #334155;
-}
-
 .se-admin-submissions__status--under_review {
   background: #fef3c7;
   color: #92400e;
 }
 
-.se-admin-submissions__status--accepted {
+.se-admin-submissions__status--approved {
   background: #d1fae5;
   color: #065f46;
 }
@@ -1439,8 +1434,7 @@
   border: 1px solid rgba(232, 64, 64, 0.28);
 }
 
-.se-admin-app .se-admin-submissions__status--default,
-.se-admin-app .se-admin-submissions__status--pending {
+.se-admin-app .se-admin-submissions__status--default {
   background: rgba(255, 255, 255, 0.06);
   color: rgba(var(--se-tinte), 0.78);
   border: 1px solid rgba(var(--se-tinte), 0.12);
@@ -1452,7 +1446,7 @@
   border: 1px solid rgba(250, 204, 21, 0.28);
 }
 
-.se-admin-app .se-admin-submissions__status--accepted {
+.se-admin-app .se-admin-submissions__status--approved {
   background: rgba(34, 197, 94, 0.14);
   color: rgba(var(--se-tinte), 0.92);
   border: 1px solid rgba(34, 197, 94, 0.28);

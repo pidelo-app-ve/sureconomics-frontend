@@ -87,7 +87,7 @@ export const PASOS_REVISAR_PROPUESTA = [
       "En revisión: avisa de que alguien la está mirando. Solo mientras siga como «Enviado».",
       "Aceptado: la publica en el sitio en ese momento, tal como está. Después se puede retocar desde «Contenido», como cualquier otra pieza.",
       "Rechazado: no se publica.",
-      "Enviado y Pendiente: son estados de llegada; no se aplican a mano.",
+      "Enviado: es el estado con el que llega; no se aplica a mano.",
     ],
   },
   {

@@ -30,7 +30,7 @@
     "fija": "Paridad fija",
     "vieja": "El último dato es del {fecha}; no se publica por antiguo.",
     "actualizado": "Última lectura: {fecha} a las {hora} (hora de Caracas).",
-    "nota": "Tasas oficiales de cada banco central (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay y BCE). Donde un banco no publica una API, el dato viene de open.er-api.com. La paridad del dólar de Islas Caimán es fija.",
+    "nota": "Cada fila dice de dónde sale su dato. Cuando el banco central responde, es su tasa oficial (Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay y BCE); cuando no responde, o no publica una API, el dato viene de open.er-api.com y la fila lo dice. El bolívar es la tasa del BCV, leída de bcv.today o de la web del propio BCV. La paridad del dólar de Islas Caimán es fija.",
     "aviso": "Son cierres y referencias oficiales, no cotizaciones en vivo. Para operar, consulte a su banco.",
     "error": "No se pudieron cargar las monedas. Inténtalo de nuevo en un momento.",
     "grafica": {

@@ -30,7 +30,7 @@
     "fija": "Fixed peg",
     "vieja": "The latest figure is from {fecha}; it isn't published because it's outdated.",
     "actualizado": "Last reading: {fecha} at {hora} (Caracas time).",
-    "nota": "Official rates from each central bank (BCV, Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay and the ECB). Where a bank publishes no API, the figure comes from open.er-api.com. The Cayman Islands dollar is pegged.",
+    "nota": "Each row shows where its figure comes from. When the central bank responds, it is the official rate (Banxico, Banco Central do Brasil, Superfinanciera, BCRA, SUNAT, Banco Central de Chile, Banco Central del Paraguay and the ECB); when it does not, or publishes no API, the figure comes from open.er-api.com and the row says so. The bolívar is the BCV rate, read from bcv.today or from the BCV's own website. The Cayman Islands dollar is pegged.",
     "aviso": "These are official closes and reference rates, not live quotes. To trade, check with your bank.",
     "error": "The currencies couldn't be loaded. Try again in a moment.",
     "grafica": {

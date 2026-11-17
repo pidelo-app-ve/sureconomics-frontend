@@ -12,6 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoCinta } from "../../lib/guias/guiaCinta";
+import { MonedasDelPanel } from "../../components/admin/MonedasDelPanel";
 
 const DIRECCIONES = [
     { value: "up", label: "Subió" },
@@ -290,6 +291,8 @@ export const AdminMarketTicker = () => {
                     Solo publicador y admin pueden cambiar las cifras de mercado.
                 </p>
             )}
+
+            <MonedasDelPanel puedeEditar={canEdit} />
         </main>
     );
 };

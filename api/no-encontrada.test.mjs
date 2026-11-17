@@ -7,7 +7,7 @@
  * `noindex` una sola vez, y que sus textos son los de `src/i18n/`.
  */
 import { readFileSync } from "node:fs";
-import handler, { TEXTOS, paginaMinima, shellNoEncontrada } from "./no-encontrada.js";
+import handler, { TEXTOS, olvidarShell, paginaMinima, shellNoEncontrada } from "./no-encontrada.js";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -42,7 +42,8 @@ const conFetch = async (impl, fn) => {
 const contar = (texto, patron) => (texto.match(patron) || []).length;
 
 console.log("con la aplicación");
-await conFetch(async () => ({ ok: true, status: 200, text: async () => SHELL }), async () => {
+let pedidas = 0;
+await conFetch(async () => { pedidas++; return { ok: true, status: 200, text: async () => SHELL }; }, async () => {
   const res = respuestaFalsa();
   await handler({ query: {} }, res);
   check("responde 404", res.code === 404);
@@ -57,15 +58,18 @@ await conFetch(async () => ({ ok: true, status: 200, text: async () => SHELL }),
   const en = respuestaFalsa();
   await handler({ query: { lang: "en" } }, en);
   check("/en: 404 en inglés", en.code === 404 && en.body.includes('<html lang="en">') && en.body.includes(`<title>${TEXTOS.en.pestana}</title>`));
+  check("el shell se pide una vez y se reutiliza", pedidas === 1, `${pedidas} peticiones`);
 });
 
 console.log("sin la aplicación");
+olvidarShell();
 await conFetch(async () => { throw new Error("sin red"); }, async () => {
   const res = respuestaFalsa();
   await handler({ query: {} }, res);
   check("sin red: 404 igual, con la página mínima", res.code === 404 && res.body.includes(TEXTOS.es.volver));
   check("la mínima dice noindex", res.body.includes('content="noindex, follow"'));
 });
+olvidarShell();
 await conFetch(async () => ({ ok: true, status: 200, text: async () => "<html>login de otro</html>" }), async () => {
   const res = respuestaFalsa();
   await handler({ query: { lang: "en" } }, res);

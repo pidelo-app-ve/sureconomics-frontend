@@ -4,7 +4,7 @@
  * foto no llega nunca, el tope lo suelta igual. En ese orden: el aviso es de la página
  * entera y no se puede deshacer.
  */
-import { fotoPrincipalLista, trasLaFoto } from "./trasLaFoto.js";
+import { alLlegarLaFoto, fotoPrincipalLista, trasLaFoto } from "./trasLaFoto.js";
 
 let fallos = 0;
 const check = (nombre, ok) => {
@@ -28,16 +28,21 @@ console.log("sin foto");
 console.log("con foto");
 {
   let soltada = false;
+  let recogida = false;
+  alLlegarLaFoto(() => {
+    recogida = true;
+  });
   const inicio = Date.now();
   trasLaFoto(5000).then(() => {
     soltada = true;
   });
   await dormir(20);
-  check("mientras la foto no llega, espera", !soltada);
+  check("mientras la foto no llega, espera", !soltada && !recogida);
   fotoPrincipalLista();
   fotoPrincipalLista();
   await dormir(30);
   check("en cuanto llega, sale (sin esperar al tope)", soltada && Date.now() - inicio < 1000);
+  check("y lo que esperaba solo a la foto, también", recogida);
 }
 
 console.log("después de la foto");

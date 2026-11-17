@@ -15,6 +15,17 @@
  * El shell se lee del dominio público y se comprueba, igual que en `api/pieza.js` (allí
  * está la historia de por qué). Si no se puede, sale una página mínima, también con 404:
  * aquí no hay nada que salvar con un 200.
+ *
+ * ## Por qué una función y no un `404.html` estático
+ *
+ * Se pensó en generar `dist/404.html` al construir (una copia de `index.html` con
+ * `noindex`) y dejar que Vercel la sirva a lo que no case. Sería más barato, pero que
+ * Vercel sirva ese archivo con 404 cuando el proyecto tiene una lista de reescrituras no
+ * se puede comprobar sin desplegar, y si no lo hiciera las direcciones inventadas
+ * acabarían en la 404 genérica de Vercel, sin la aplicación. Esta función se comporta
+ * como `api/pieza.js`, que ya está probada en producción, y da la 404 en el idioma de la
+ * dirección. Para que no cueste una petición al propio dominio por cada visita, el shell
+ * se guarda en memoria unos minutos (`GUARDA_SHELL_MS`), y la respuesta, en el borde.
  */
 
 import { esNuestroShell } from "./pieza.js";
@@ -26,6 +37,42 @@ const SHELL_URL = process.env.SHELL_URL || `${SITIO}/index.html`;
 
 /** Un shell que no llega no puede dejar al lector esperando: lo mismo que `api/pieza.js`. */
 const LIMITE_MS = 3500;
+
+const conDeadline = async (url, ms) => {
+  const corta = new AbortController();
+  const reloj = setTimeout(() => corta.abort(), ms);
+  try {
+    return await fetch(url, { signal: corta.signal });
+  } finally {
+    clearTimeout(reloj);
+  }
+};
+
+/**
+ * Cuánto se reutiliza el shell ya leído. Solo cambia al desplegar, y un despliegue nuevo
+ * arranca funciones nuevas, con la memoria vacía; lo que pudiera quedar viejo dura como
+ * mucho esto.
+ */
+const GUARDA_SHELL_MS = 5 * 60_000;
+let guardado = null;
+
+/** Para las pruebas: olvida el shell guardado. */
+export const olvidarShell = () => {
+  guardado = null;
+};
+
+/** El shell, de memoria si se leyó hace poco; si no, del dominio. Solo se guarda uno bueno. */
+const leerShell = async () => {
+  if (guardado && Date.now() - guardado.en < GUARDA_SHELL_MS) return guardado.shell;
+  try {
+    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS);
+    const shell = await respuesta.text();
+    if (esNuestroShell(shell)) guardado = { shell, en: Date.now() };
+    return shell;
+  } catch {
+    return "";
+  }
+};
 
 /**
  * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor
@@ -86,29 +133,13 @@ export const paginaMinima = (idioma = "es") => {
 </html>`;
 };
 
-const conDeadline = async (url, ms) => {
-  const corta = new AbortController();
-  const reloj = setTimeout(() => corta.abort(), ms);
-  try {
-    return await fetch(url, { signal: corta.signal });
-  } finally {
-    clearTimeout(reloj);
-  }
-};
-
 export default async function handler(req, res) {
   // `/en/...` llega con `lang=en` (ver `vercel.json`).
   const idioma = req.query?.lang === "en" ? "en" : "es";
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("X-Robots-Tag", "noindex");
 
-  let shell = "";
-  try {
-    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS);
-    shell = await respuesta.text();
-  } catch {
-    shell = "";
-  }
+  const shell = await leerShell();
 
   if (!esNuestroShell(shell)) {
     // Sin la aplicación: la página mínima, guardada poco para que la próxima pruebe otra vez.

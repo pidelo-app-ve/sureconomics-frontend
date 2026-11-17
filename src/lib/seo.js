@@ -83,7 +83,9 @@ export const applyPageMeta = ({
   if (canonicalUrl) upsertMeta("og:url", canonicalUrl, true);
 
   if (noindex) {
-    upsertMeta("robots", "noindex, nofollow");
+    // «follow», como lo que manda el servidor (`api/pieza.js`, `api/no-encontrada.js`):
+    // la página no se guarda, pero sus enlaces sí se pueden seguir.
+    upsertMeta("robots", "noindex, follow");
   } else {
     // Imagen grande y fragmento sin límite: sin `max-image-preview:large`, Google no
     // usa la foto en grande en Noticias destacadas ni en Discover.

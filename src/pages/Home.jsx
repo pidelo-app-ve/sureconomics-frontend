@@ -189,7 +189,9 @@ export const Home = () => {
   // La portada pide solo lo que pinta (ver `usePieces`) hasta que hace falta la lista
   // entera (abajo, `hacenFaltaTodas`).
   const [todas, setTodas] = useState(false);
-  const { items: pieces, status, error, faltan } = usePieces({ portada: !todas });
+  // Lo de debajo del pliegue espera a la foto de la apertura solo en el teléfono: donde la
+  // plana va a tres columnas, la opinión (arriba a la derecha) sale de esas listas.
+  const { items: pieces, status, error, faltan } = usePieces({ portada: !todas, aplazar: !tarjetaBajoMonedas });
   // La primera plana se monta cuando ya están las piezas, y lo que pinta se pedía
   // entonces. Se adelanta aquí, a la vez que las piezas: las mismas peticiones
   // compartidas que después lee ella, sin pedir nada dos veces. El béisbol ya no se
@@ -397,6 +399,11 @@ export const Home = () => {
   const nombrePlural = (formatoApi) =>
     (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
     nombreDeFormato(formatoApi);
+  // Por eso, en español, las secciones de abajo esperan a los temas: pintadas antes,
+  // «Informes» pasaba a «Informes y reportes» delante del lector. Mientras tanto ocupa su
+  // sitio una pantalla de alto, como al cargar: lo de detrás no sube y luego baja. La
+  // plana no espera (ver `cargando`).
+  const esperanNombres = lang === "es" && taxonomy.status === "loading";
 
   // Los huecos de la portada, declarados de una vez: el sorteo necesita ver la
   // pagina entera para no repetir anunciante entre el banner y la tarjeta.
@@ -433,8 +440,8 @@ export const Home = () => {
   //
   // Los temas (`taxonomy`) no se esperan: la primera plana no los usa, y esperarlos
   // retrasaba la foto que Google mide en el teléfono (auditoría 17-nov-2026, B-01). Solo
-  // los usan el buscador, que ya los espera para pintarse, y el nombre de cada sección,
-  // que mientras tanto sale del diccionario. Salvo si se llegó con el buscador abierto
+  // los usan el buscador, que ya los espera para pintarse, y el nombre de las secciones
+  // de abajo, que lo esperan ellas (`esperanNombres`). Salvo si se llegó con el buscador abierto
   // (`?buscar=1`): ahí el cajón va encima de la plana, y si llegara después la empujaría
   // hacia abajo. Abrirlo con la portada ya pintada no la vuelve a esconder.
   const cargando =
@@ -448,7 +455,7 @@ export const Home = () => {
 
   // El papel cambia de tono, casi sin notarse, con la sección que se está leyendo.
   const portadaRef = useRef(null);
-  useFondoQueCambia(portadaRef, `${status}-${cargando}-${isFiltered}-${cajon}`);
+  useFondoQueCambia(portadaRef, `${status}-${cargando}-${esperanNombres}-${isFiltered}-${cajon}`);
 
   return (
     <main ref={portadaRef} className="se-blog se-portada" role="main">
@@ -563,7 +570,15 @@ export const Home = () => {
       {hayNoticias || isFiltered ? null : <EnLaCalle />}
       {hayNoticias ? null : pausa}
 
-      {(cargando ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
+      {!cargando && esperanNombres && blocks.length ? (
+        <section className="se-section se-portada-cargando" aria-busy="true">
+          <div className="se-container">
+            <LoadingState title={t("portada.inicio.cargando")} />
+          </div>
+        </section>
+      ) : null}
+
+      {(cargando || esperanNombres ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}

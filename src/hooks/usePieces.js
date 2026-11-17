@@ -95,14 +95,28 @@ const hastaElCorte = async (filtro, corte, vigente, basta = () => false) => {
   return filas;
 };
 
-const pedirPortada = async (primera, vigente = () => true) => {
+/** La primera página y, detrás, lo que se le añade de las otras cuatro (sin repetir y hasta el corte). */
+const coser = (p1, fin, filas) => {
+  const vistas = new Set(p1.filas.map((f) => f.id));
+  const extra = filas.filter((f) => !(fin && vaDetras(f, fin)) && !vistas.has(f.id) && vistas.add(f.id));
+  return [...p1.filas, ...extra.sort((a, b) => (vaDetras(a, b) ? 1 : -1))];
+};
+
+/**
+ * `aplazar` (la portada en el teléfono): las listas de los formatos esperan a la foto que
+ * abre la portada, porque todo eso va debajo del pliegue y le quitaba ancho de banda a
+ * la foto que Google mide (ver `trasLaFoto`). En escritorio no se aplaza: la columna de
+ * opinión va arriba a la derecha y sale de estas listas.
+ *
+ * El corte (una sola fila) y los temas del contexto de la apertura no esperan nunca: el
+ * contexto va bajo la foto, también en el teléfono. En cuanto están, `alAvanzar` recibe
+ * la lista con ellos, para pintarlo sin esperar a los formatos. Son las mismas filas que
+ * trae después la lista completa, así que lo pintado no cambia.
+ */
+const pedirPortada = async (primera, vigente = () => true, { aplazar = false, alAvanzar = null } = {}) => {
   // Detrás de la primera página, como antes las otras cuatro: que nada le quite turno.
   const p1 = await primera;
   if ((p1.pages || 1) <= 1) return { filas: p1.filas, total: p1.total, truncated: false, faltan: 0 };
-  // Y detrás de la foto que abre la portada: todo esto es de debajo del pliegue, y en el
-  // teléfono le quitaba ancho de banda a la foto que Google mide (ver `trasLaFoto`).
-  await trasLaFoto();
-  if (!vigente()) return { filas: p1.filas, total: p1.total, truncated: false, faltan: null, incompleta: true };
   // La pieza quinientos sin contar la fijada, que la API saca del orden y pone delante
   // en la primera página. Sin quinientas no hay corte: la lista entera es todo.
   const corte = pedirPagina(undefined, false, MAX_PAGES * PER_PAGE, 1).then((r) => r.filas[0] ?? null);
@@ -126,14 +140,20 @@ const pedirPortada = async (primera, vigente = () => true) => {
     incompleta = true;
     return [];
   };
-  const listas = Promise.all([
-    ...formatos.map((format) => hastaElCorte({ format }, corte, vigente)),
-    ...temas.map((topic) => hastaElCorte({ topic }, corte, vigente, lasDos(topic)).catch(sinTema)),
-  ]);
-  const [fin, filasDe] = await Promise.all([corte, listas]);
-  const vistas = new Set(p1.filas.map((f) => f.id));
-  const extra = filasDe.flat().filter((f) => !(fin && vaDetras(f, fin)) && !vistas.has(f.id) && vistas.add(f.id));
-  const filas = [...p1.filas, ...extra.sort((a, b) => (vaDetras(a, b) ? 1 : -1))];
+  const deTemas = Promise.all(temas.map((topic) => hastaElCorte({ topic }, corte, vigente, lasDos(topic)).catch(sinTema)));
+  const conTemas = Promise.all([corte, deTemas]).then(([fin, listas]) => {
+    if (temas.length && alAvanzar && vigente()) alAvanzar(coser(p1, fin, listas.flat()));
+    return listas;
+  });
+  // Si quien pidió se va mientras se espera, que un fallo de estas no quede sin atender.
+  conTemas.catch(() => {});
+  if (aplazar) {
+    await trasLaFoto();
+    if (!vigente()) return { filas: p1.filas, total: p1.total, truncated: false, faltan: null, incompleta: true };
+  }
+  const deFormatos = Promise.all(formatos.map((format) => hastaElCorte({ format }, corte, vigente)));
+  const [fin, filasDeTemas, filasDeFormatos] = await Promise.all([corte, conTemas, deFormatos]);
+  const filas = coser(p1, fin, [...filasDeFormatos.flat(), ...filasDeTemas.flat()]);
   // La lista entera: la primera página y cuatro más de cien, o todas si no llegan a quinientas.
   const entera = fin ? p1.filas.length + (MAX_PAGES - 1) * PER_PAGE : p1.total;
   return { filas, total: p1.total, truncated: p1.pages > MAX_PAGES, faltan: Math.max(0, entera - filas.length), incompleta };
@@ -156,7 +176,7 @@ const pedirLasCinco = async (primera, format, educational) => {
  * `faltan`: cuántas piezas de la lista entera no se pidieron. `0` si está entera; con
  * `portada`, `null` mientras no se sabe.
  */
-export const usePieces = ({ format, educational, portada = false } = {}) => {
+export const usePieces = ({ format, educational, portada = false, aplazar = false } = {}) => {
   const { lang } = useIdioma();
   const entera = `${format ?? ""}|${educational ? 1 : 0}`;
   const clave = portada ? "portada" : entera;
@@ -204,7 +224,12 @@ export const usePieces = ({ format, educational, portada = false } = {}) => {
 
       // El resto por detrás: completan el buscador y los contadores de los filtros sin
       // que nadie mire una pantalla vacía mientras tanto.
-      const lista = await (portada ? pedirPortada(primera, () => alive) : primera.then((p1) => pedirLasCinco(p1, format, educational)));
+      // Lo que llega antes que el resto (el contexto de la apertura) se pinta sobre la
+      // primera página, si es esa la que está en pantalla.
+      const alAvanzar = (filas) => setState((s) => (s.de === clave && s.status === "success" ? { ...s, filas } : s));
+      const lista = await (portada
+        ? pedirPortada(primera, () => alive, { aplazar, alAvanzar })
+        : primera.then((p1) => pedirLasCinco(p1, format, educational)));
       if (!alive) return;
       // Hecha sobre la primera página que la portada tenía en pantalla, la lista es tan
       // vieja como ella: con la hora de ahora, Explorar la tomaría por recién pedida.
@@ -227,7 +252,7 @@ export const usePieces = ({ format, educational, portada = false } = {}) => {
     return () => {
       alive = false;
     };
-  }, [clave, entera, portada, format, educational]);
+  }, [clave, entera, portada, format, educational, aplazar]);
 
   // `lang` en las dependencias aunque no se use dentro: es lo que hace que las piezas
   // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).

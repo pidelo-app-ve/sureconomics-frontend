@@ -455,7 +455,7 @@
         },
         "loMio": {
           "titulo": "My purchases",
-          "texto": "The courses and materials you bought, with your receipt and a link to pick up where you left off."
+          "texto": "The Education modules you bought, with their receipts and a link to open them."
         },
         "marcadores": {
           "titulo": "Bookmarks",
@@ -475,7 +475,7 @@
         },
         "ayuda": {
           "titulo": "Come back whenever you like",
-          "texto": "This button replays this tour. On the busier pages, the «Guide» button explains each one."
+          "texto": "This button replays this tour. On each page, the «Guide» button explains what's on it."
         }
       },
       "propuesta": {

@@ -455,7 +455,7 @@
         },
         "loMio": {
           "titulo": "Lo mío",
-          "texto": "Los cursos y materiales que compró, con su recibo y el enlace para seguir donde lo dejó."
+          "texto": "Los módulos de Educación que compró, con su recibo y el enlace para abrirlos."
         },
         "marcadores": {
           "titulo": "Marcadores",
@@ -475,7 +475,7 @@
         },
         "ayuda": {
           "titulo": "Vuelva aquí cuando quiera",
-          "texto": "Este botón repite esta visita. En las páginas con más cosas, el botón «Guía» le explica cada una."
+          "texto": "Este botón repite esta visita. Dentro de cada página, el botón «Guía» le explica lo que hay en ella."
         }
       },
       "propuesta": {

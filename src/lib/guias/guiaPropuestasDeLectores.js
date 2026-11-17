@@ -85,7 +85,8 @@ export const PASOS_REVISAR_PROPUESTA = [
       "aceptada o rechazada ya no puede cambiar de estado.",
     puntos: [
       "En revisión: avisa de que alguien la está mirando. Solo mientras siga como «Enviado».",
-      "Aceptado: la publica en el sitio en ese momento, tal como está. Después se puede retocar desde «Contenido», como cualquier otra pieza.",
+      "Aceptado: pide el tema de la pieza y la publica en ese momento, tal como está, en el formato que eligió el lector (artículo o noticia). Después se puede retocar desde «Contenido», como cualquier otra pieza.",
+      "La firma: la pieza aceptada es crédito del lector y sale con su nombre y la foto de su perfil, «Firmada por … (colaborador)». Si después cambia su nombre o su foto, la pieza lo sigue.",
       "Rechazado: no se publica.",
       "Enviado y Pendiente: son estados de llegada; no se aplican a mano.",
     ],

@@ -223,6 +223,24 @@ await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Redacción SurEconomics" })
   check("la redacción firma como organización", JSON.parse(ld).author["@type"] === "Organization");
 });
 
+// La pieza de un lector (propuesta aceptada) es su crédito: la API ya trae su nombre en
+// `byline`, y la ficha lo da como persona aunque su nombre recuerde a la redacción.
+await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Ana Pérez", firma_de_colaborador: true }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "noticias", slug: "x" } }, res);
+  const ld = JSON.parse((res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1]);
+  check("el colaborador firma como persona, con su nombre",
+    ld.author["@type"] === "Person" && ld.author.name === "Ana Pérez", JSON.stringify(ld.author));
+  check("y su nombre sale en la firma del HTML y en la meta author",
+    res.body.includes("Por Ana Pérez") && res.body.includes('<meta name="author" content="Ana Pérez" />'));
+});
+await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Sureconomics Fan", firma_de_colaborador: true }), async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "x" } }, res);
+  const ld = JSON.parse((res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1]);
+  check("un colaborador nunca se confunde con el medio", ld.author["@type"] === "Person", JSON.stringify(ld.author));
+});
+
 // —— 2b. La descripción sale de donde la haya ——
 //
 // Tres de ochenta y cuatro piezas en producción tenían resumen. Sin respaldo, la

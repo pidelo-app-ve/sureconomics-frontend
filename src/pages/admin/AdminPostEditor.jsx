@@ -67,6 +67,7 @@ import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEditor } from "../../lib/guias/guiaEditor";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { textoFirmaDeColaborador } from "../../lib/firmaDeColaborador";
 
 /**
  * Which extra fields each format asks for.
@@ -475,6 +476,9 @@ export const AdminPostEditor = () => {
     const [vistaPrevia, setVistaPrevia] = useState(false);
     const [placeGroups, setPlaceGroups] = useState([]);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
+    // El lector que la propuso, si la pieza salió de una propuesta aceptada: entonces la
+    // firma y la foto públicas salen de su cuenta y no de los campos de aquí.
+    const [colaborador, setColaborador] = useState(null);
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
     // La misma clave mientras la creación no cuaje. El caso que evita: se pulsa Crear,
@@ -538,6 +542,7 @@ export const AdminPostEditor = () => {
             setBase(inicial);
             saltarGuarda.current = false;
             setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
+            setColaborador(null);
             setLoadState({ status: "success", error: null });
             return;
         }
@@ -554,6 +559,7 @@ export const AdminPostEditor = () => {
                 audio: post.audio_asset ?? null,
                 bylinePhoto: post.byline_photo ?? null,
             });
+            setColaborador(post.colaborador ?? null);
             setLoadState({ status: "success", error: null });
         } catch (err) {
             setLoadState({ status: "error", error: err });
@@ -1333,9 +1339,18 @@ export const AdminPostEditor = () => {
                                 movil={esMovil}
                                 plegable
                                 titulo="Firma y foto"
-                                resumen={form.byline.trim() || "Sin firma"}
-                                miniatura={assets.bylinePhoto?.url || undefined}
+                                resumen={colaborador ? textoFirmaDeColaborador(colaborador.nombre) : form.byline.trim() || "Sin firma"}
+                                miniatura={(colaborador ? colaborador.foto_url : assets.bylinePhoto?.url) || undefined}
                             >
+                                {colaborador ? (
+                                    <p className="se-admin-meta-hint" role="note">
+                                        <strong>{textoFirmaDeColaborador(colaborador.nombre)}.</strong> La propuso
+                                        un lector desde su cuenta y es su crédito: sale con el nombre y la foto
+                                        de su perfil, y si los cambia, cambian aquí. La firma de abajo es la copia
+                                        que queda si un día borra la cuenta; la foto de abajo solo sale si su
+                                        perfil no tiene una.
+                                    </p>
+                                ) : null}
                                 <label className="se-form-field" htmlFor="post-byline">
                                     <span className="se-form-label">
                                         Firma — nombre con el que se publica

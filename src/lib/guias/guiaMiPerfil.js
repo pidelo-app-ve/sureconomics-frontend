@@ -19,7 +19,10 @@ export const PASOS_MI_PERFIL = [
       "Nombre: el suyo, tal como lo verá el resto del equipo.",
       "Correo electrónico: con el que entra al panel, y adonde llega el código si olvida la contraseña.",
       "Celular: el mismo con el que usa Telegram; así le reconoce el bot de la redacción.",
-      "Guardar cambios: guarda estos tres datos. La contraseña va aparte, abajo.",
+      "Contraseña actual: aparece solo si cambia el correo o el celular. Con su sesión abierta nadie puede " +
+        "cambiárselos sin ella, y le llega un aviso al correo de antes.",
+      "Guardar cambios: guarda estos datos. Si cambia el celular, vuelva a conectar Telegram compartiendo su " +
+        "contacto con el bot. La contraseña se cambia aparte, abajo.",
     ],
   },
   {
@@ -27,7 +30,8 @@ export const PASOS_MI_PERFIL = [
     titulo: "Cambiar la contraseña",
     texto:
       "Escriba la actual y dos veces la nueva, de ocho caracteres como mínimo. Al cambiarla se cierran sus " +
-      "sesiones en los demás aparatos; en este sigue dentro.",
+      "sesiones en los demás aparatos (en este sigue dentro) y se desconecta Telegram: vuelva a compartir su " +
+      "contacto con el bot.",
   },
   {
     clave: "guia",

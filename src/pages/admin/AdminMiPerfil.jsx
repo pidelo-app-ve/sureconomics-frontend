@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { changeAdminMyPassword, getAdminMe, updateAdminMe } from "../../services/adminMeService";
 import { ErrorState, LoadingState } from "../../components/content";
 import { dispatchAdminAuthSync } from "../../lib/api";
+import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { persistAuth } from "../../lib/authStorage";
 import { applyPageMeta } from "../../lib/seo";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
@@ -10,6 +11,19 @@ import { recorridoMiPerfil } from "../../lib/guias/guiaMiPerfil";
 
 /** `584121234567` → `+584121234567`, como se escribe un teléfono. */
 const conMas = (telefono) => (telefono ? `+${telefono}` : "");
+
+/** Solo las cifras, para comparar con el guardado (`584121234567`). */
+const cifras = (telefono) => String(telefono ?? "").replace(/\D/g, "");
+
+/**
+ * Si el formulario cambia el correo o el celular guardados. Entonces el servidor pide la
+ * contraseña actual (con el correo se recupera la cuenta y con el celular se vincula el
+ * bot que publica), y el campo aparece. Un número escrito de otra forma (`0412…`) puede
+ * contar como cambio aquí y no allí: el campo sale y el servidor no lo exige; no pasa nada.
+ */
+const cambiaDatoSensible = (form, guardado) =>
+  form.email.trim().toLowerCase() !== String(guardado?.email ?? "").toLowerCase() ||
+  cifras(form.telefono) !== cifras(guardado?.telefono);
 
 const { ancla } = recorridoMiPerfil;
 
@@ -21,7 +35,7 @@ const ROLE_LABELS = {
 
 export const AdminMiPerfil = () => {
   const [state, setState] = useState({ status: "idle", data: null, error: null });
-  const [profileForm, setProfileForm] = useState({ name: "", email: "" });
+  const [profileForm, setProfileForm] = useState({ name: "", email: "", current_password: "" });
   const [profileState, setProfileState] = useState({ status: "idle", error: null, message: "" });
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm_password: "" });
   const [passwordState, setPasswordState] = useState({ status: "idle", error: null, message: "" });
@@ -35,7 +49,7 @@ export const AdminMiPerfil = () => {
     try {
       const data = await getAdminMe();
       setState({ status: "success", data, error: null });
-      setProfileForm({ name: data?.name ?? "", email: data?.email ?? "", telefono: conMas(data?.telefono) });
+      setProfileForm({ name: data?.name ?? "", email: data?.email ?? "", telefono: conMas(data?.telefono), current_password: "" });
     } catch (err) {
       setState({ status: "error", data: null, error: err });
     }
@@ -45,18 +59,42 @@ export const AdminMiPerfil = () => {
     load();
   }, [load]);
 
+  const pideContrasena = state.status === "success" && cambiaDatoSensible(profileForm, state.data);
+
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+    if (pideContrasena && !profileForm.current_password) {
+      setProfileState({
+        status: "error",
+        error: new Error("Para cambiar el correo o el celular, escriba su contraseña actual."),
+        message: "",
+      });
+      return;
+    }
+    const celularAntes = state.data?.telefono ?? null;
     setProfileState({ status: "loading", error: null, message: "" });
     try {
       const data = await updateAdminMe({
         name: profileForm.name.trim(),
         email: profileForm.email.trim(),
         telefono: (profileForm.telefono ?? "").trim(),
+        ...(pideContrasena ? { current_password: profileForm.current_password } : {}),
       });
       setState((s) => ({ ...s, data }));
-      setProfileForm((f) => ({ ...f, telefono: conMas(data?.telefono) }));
-      setProfileState({ status: "success", error: null, message: "Datos actualizados correctamente." });
+      setProfileForm((f) => ({ ...f, telefono: conMas(data?.telefono), current_password: "" }));
+      // Lo que guardó el servidor, no lo que se escribió: el mismo número escrito de otra
+      // forma no cambia nada y no suelta Telegram.
+      const celularAhora = data?.telefono ?? null;
+      setProfileState({
+        status: "success",
+        error: null,
+        message:
+          celularAhora === celularAntes
+            ? "Datos actualizados correctamente."
+            : celularAhora
+              ? "Datos actualizados. Como cambió el celular, vuelva a conectar Telegram: abra el bot de la redacción y comparta su contacto."
+              : "Datos actualizados. Como quitó el celular, Telegram quedó desconectado.",
+      });
     } catch (err) {
       setProfileState({ status: "error", error: err, message: "" });
     }
@@ -87,7 +125,12 @@ export const AdminMiPerfil = () => {
         dispatchAdminAuthSync();
       }
       setPasswordForm({ current_password: "", new_password: "", confirm_password: "" });
-      setPasswordState({ status: "success", error: null, message: "Contraseña actualizada correctamente." });
+      setPasswordState({
+        status: "success",
+        error: null,
+        message:
+          "Contraseña actualizada. Por seguridad, Telegram quedó desconectado: abra el bot de la redacción y comparta su contacto para volver a recibir los avisos.",
+      });
     } catch (err) {
       setPasswordState({ status: "error", error: err, message: "" });
     }
@@ -125,7 +168,7 @@ export const AdminMiPerfil = () => {
         </h2>
         {profileState.status === "error" ? (
           <p className="se-admin-login__error" role="alert">
-            {profileState.error instanceof Error ? profileState.error.message : "No se pudo actualizar."}
+            {adminErrorMessage(profileState.error, "No se pudo actualizar.")}
           </p>
         ) : null}
         {profileState.status === "success" ? (
@@ -176,6 +219,25 @@ export const AdminMiPerfil = () => {
             El mismo con el que usa Telegram: así lo reconoce el bot de la redacción.
           </span>
         </label>
+        {pideContrasena ? (
+          <label className="se-form-field" htmlFor="me-profile-password">
+            <span className="se-form-label">Contraseña actual</span>
+            <input
+              id="me-profile-password"
+              type="password"
+              autoComplete="current-password"
+              className="se-form-control"
+              value={profileForm.current_password}
+              onChange={(e) => setProfileForm((f) => ({ ...f, current_password: e.target.value }))}
+              required
+              disabled={profileState.status === "loading"}
+            />
+            <span className="se-admin-meta-hint">
+              Para cambiar el correo o el celular hace falta su contraseña: así nadie que use su sesión abierta
+              puede quedarse con su cuenta. Le avisaremos al correo de antes.
+            </span>
+          </label>
+        ) : null}
         <button type="submit" className="se-btn" disabled={profileState.status === "loading"}>
           {profileState.status === "loading" ? "Guardando…" : "Guardar cambios"}
         </button>
@@ -193,7 +255,7 @@ export const AdminMiPerfil = () => {
         </h2>
         {passwordState.status === "error" ? (
           <p className="se-admin-login__error" role="alert">
-            {passwordState.error instanceof Error ? passwordState.error.message : "No se pudo cambiar la contraseña."}
+            {adminErrorMessage(passwordState.error, "No se pudo cambiar la contraseña.")}
           </p>
         ) : null}
         {passwordState.status === "success" ? (

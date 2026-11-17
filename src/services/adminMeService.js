@@ -4,7 +4,8 @@ import { unwrapEntity } from "./adminResponseUtils";
 /** @returns {Promise<{ id: number, name: string, email: string, role: string }>} */
 export const getAdminMe = async () => unwrapEntity(await adminRequest("/admin/me"));
 
-/** @param {{ name?: string, email?: string }} body */
+/** @param {{ name?: string, email?: string, telefono?: string, current_password?: string }} body
+ *  `current_password` hace falta si cambian el correo o el celular. */
 export const updateAdminMe = async (body) =>
   unwrapEntity(await adminRequest("/admin/me", { method: "PATCH", json: body }));
 

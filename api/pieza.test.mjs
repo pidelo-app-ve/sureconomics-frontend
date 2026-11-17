@@ -424,6 +424,19 @@ await conFetch(async (url) => {
   check("resumen que no salió: 404 con noindex y la app intacta",
     res.code === 404 && res.body.includes('name="robots" content="noindex, follow"') && res.body.includes('id="root"'));
 });
+await conFetch(async (url) => {
+  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  return { ok: false, status: 410 };
+}, async () => {
+  const res = respuestaFalsa();
+  await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "tarde" } }, res);
+  check("resumen retirado: 410 con noindex, la app intacta y nada de lo que llevaba",
+    res.code === 410 && res.headers["X-Pieza-Meta"] === "resumen-retirado" &&
+      res.body.includes('name="robots" content="noindex, follow"') && res.body.includes('id="root"') &&
+      res.body.includes("Resumen retirado") && !res.body.includes("PDVSA"),
+    res.headers["X-Pieza-Meta"]);
+  check("resumen retirado: se cachea poco", /s-maxage=60\b/.test(res.headers["Cache-Control"]));
+});
 await conFetch(fetchNormal(RESUMEN), async () => {
   const res = respuestaFalsa();
   await handler({ query: { seccion: "resumen", fecha: "ayer", edicion: "manana" } }, res);

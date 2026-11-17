@@ -26,6 +26,13 @@
     "porDolar": "Por dólar",
     "lvbp": "LVBP",
     "frase": "Frase del día",
-    "ultimo": "Ver el último resumen"
+    "ultimo": "Ver el último resumen",
+    "retirada": {
+      "titulo": "Esta edición fue retirada",
+      "texto": "Se retiró después de publicarse y ya no está disponible.",
+      "tituloDia": "El resumen de este día fue retirado",
+      "textoDia": "Se retiró después de publicarse y ya no está disponible.",
+      "cuando": "Se retiró el {cuando}."
+    }
   }
 }

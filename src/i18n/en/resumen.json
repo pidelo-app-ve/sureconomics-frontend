@@ -26,6 +26,13 @@
     "porDolar": "Per US dollar",
     "lvbp": "Venezuelan baseball (LVBP)",
     "frase": "Quote of the day",
-    "ultimo": "See the latest briefing"
+    "ultimo": "See the latest briefing",
+    "retirada": {
+      "titulo": "This edition was withdrawn",
+      "texto": "It was withdrawn after publication and is no longer available.",
+      "tituloDia": "This day's briefing was withdrawn",
+      "textoDia": "It was withdrawn after publication and is no longer available.",
+      "cuando": "Withdrawn on {cuando}."
+    }
   }
 }

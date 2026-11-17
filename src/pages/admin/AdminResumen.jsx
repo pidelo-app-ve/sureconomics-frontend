@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { AssetField } from "../../components/admin/AssetField";
 import { ErrorState, LoadingState } from "../../components/content";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
+import { useAuth } from "../../context/AuthContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
@@ -29,6 +30,17 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * Los cambios se guardan con «Guardar cambios»: el borrador se edita aquí, en el
  * navegador, y solo se manda entero al guardar. La foto se ve en la maqueta al elegirla;
  * el texto, al guardar (lo arma el servidor, y es el mismo que se manda).
+ *
+ * Desde el 17-nov-2026 (auditoría D-02, D-03, D-08):
+ * - **«Resumen activo»**, el interruptor general: apagado, no se arma, no sale ni se manda
+ *   nada nuevo (las ediciones que iban a salir quedan «en pausa»). Para una emergencia de
+ *   varias horas, sin tener que retener cada edición.
+ * - **«Retirar edición»**: una que ya salió deja de verse en la web y el servidor la borra
+ *   del canal de Telegram. No se deshace. Lo que ya salió por WhatsApp hay que borrarlo a
+ *   mano en el canal (lo publica el VPS): la ficha lo avisa. Si el borrado de Telegram
+ *   falla, el mismo botón lo reintenta.
+ * - La ficha dice **quién hizo qué** con cada edición (`historial`) y qué se borró después
+ *   de armarla (`caidos`, `quitados`).
  */
 
 const ESTADO = {
@@ -36,6 +48,7 @@ const ESTADO = {
   borrador: { texto: "Borrador", clase: "se-res-adm-chip--borrador" },
   retenido: { texto: "Retenida", clase: "se-res-adm-chip--retenido" },
   publicado: { texto: "Publicado", clase: "se-res-adm-chip--publicado" },
+  retirado: { texto: "Retirada", clase: "se-res-adm-chip--vacio" },
 };
 const CANAL = {
   apagado: "sin configurar",
@@ -43,16 +56,120 @@ const CANAL = {
   enviando: "enviando…",
   enviado: "enviado",
   fallo: "falló",
+  borrando: "borrándolo del canal…",
+  retirado: "retirado",
 };
+/** Cómo quedó cada canal en una edición retirada. */
+const CANAL_RETIRADA = {
+  telegram: {
+    apagado: "sin configurar",
+    pendiente: "borrándolo del canal…",
+    enviando: "borrándolo del canal…",
+    enviado: "borrándolo del canal…",
+    borrando: "borrándolo del canal…",
+    retirado: "retirado del canal",
+    fallo: "no se pudo borrar",
+  },
+  whatsapp: {
+    apagado: "sin configurar",
+    retirado: "no llegó a salir",
+    enviando: "salió: hay que borrarlo a mano",
+    enviado: "salió: hay que borrarlo a mano",
+  },
+};
+const canal = (r, nombre, estado) =>
+  (r.estado === "retirado" ? CANAL_RETIRADA[nombre][estado] : null) ?? CANAL[estado] ?? estado;
 const MOMENTO = { manana: "Mañana", tarde: "Tarde", noche: "Noche" };
 const { ancla } = recorridoResumen;
 const zona = { timeZone: "America/Caracas" };
 const hora = (iso) => (iso ? new Date(iso).toLocaleTimeString("es-VE", { ...zona, hour: "2-digit", minute: "2-digit" }) : "—");
+/** «17-nov 02:03 p. m.»: el día y la hora, en la de Caracas. */
+const cuando = (iso) => {
+  if (!iso) return "—";
+  const f = new Date(iso);
+  const dia = f.toLocaleDateString("es-VE", { ...zona, day: "numeric" });
+  const mes = f.toLocaleDateString("es-VE", { ...zona, month: "short" }).replace(".", "");
+  return `${dia}-${mes} ${hora(iso)}`;
+};
 /** El chip de una edición: un borrador dice a qué hora sale solo o, si ya no va a salir, que no salió. */
 const chipDe = (r) => {
   if (r.estado !== "borrador") return ESTADO[r.estado] ?? { texto: r.estado, clase: "" };
+  if (r.en_pausa) return { texto: "En pausa: el resumen está apagado", clase: "se-res-adm-chip--retenido" };
   if (r.sale_sola_a_las) return { texto: `Sale sola · ${hora(r.sale_sola_a_las)}`, clase: "se-res-adm-chip--borrador" };
   return { texto: r.pasa_a ? "No salió: pasó a la siguiente" : "No salió", clase: "se-res-adm-chip--vacio" };
+};
+
+/** Lo que cambió al guardar, con el nombre que le da la redacción. */
+const CAMPO = { secciones: "los puntos", frase: "la frase", imagen_id: "la foto", cifras_manuales: "las cifras a mano" };
+const enumerar = (cosas) => (cosas.length > 1 ? `${cosas.slice(0, -1).join(", ")} y ${cosas[cosas.length - 1]}` : cosas[0] ?? "");
+
+/** Una línea del historial de la edición: «retiró la edición: «motivo»». Sin el nombre. */
+const queHizo = (a) => {
+  const d = a.datos || {};
+  switch (a.accion) {
+    case "armar":
+      return `armó la edición${d.armado_con === "ia" ? " con la IA" : d.armado_con ? " por reglas" : ""}`;
+    case "rehacer":
+      return `rehízo la edición${d.armado_con === "ia" ? " con la IA" : d.armado_con ? " por reglas" : ""}`;
+    case "editar": {
+      const campos = (d.campos ?? []).map((c) => CAMPO[c]).filter(Boolean);
+      return campos.length ? `cambió ${enumerar(campos)}` : "guardó cambios";
+    }
+    case "retener":
+      return "la retuvo: no sale";
+    case "soltar":
+      return "dejó que saliera";
+    case "retirar":
+      return `${d.reintento ? "volvió a intentar borrarla de Telegram" : "retiró la edición"}${d.motivo ? `: «${d.motivo}»` : ""}`;
+    case "whatsapp_reintentar":
+      return "volvió a mandarla a WhatsApp";
+    default:
+      return a.accion;
+  }
+};
+
+/**
+ * El motivo de «Retirar edición», dentro del diálogo de confirmación. Lleva su propio
+ * estado (el diálogo pinta lo que se le pasó al abrirlo) y avisa cada cambio hacia fuera.
+ */
+const MOTIVO_MAX = 300;
+const CampoMotivo = ({ onCambio }) => {
+  const [motivo, setMotivo] = useState("");
+  return (
+    <div className="se-form-field" style={{ marginTop: "0.75rem" }}>
+      <label className="se-form-label" htmlFor="res-retirar-motivo">Motivo (opcional)</label>
+      <textarea id="res-retirar-motivo" className="se-form-control" rows={2} maxLength={MOTIVO_MAX} value={motivo}
+        onChange={(e) => {
+          setMotivo(e.target.value);
+          onCambio(e.target.value);
+        }} />
+      <p className="se-admin-meta-hint">
+        Queda en el historial de la edición, para el equipo; en la web no se enseña. {motivo.length}/{MOTIVO_MAX}
+      </p>
+    </div>
+  );
+};
+
+CampoMotivo.propTypes = { onCambio: PropTypes.func.isRequired };
+
+/** Qué pasa en cada canal al retirar esta edición, para el diálogo. */
+const alRetirar = (r) => {
+  const t = r.canales?.telegram ?? {};
+  const w = r.canales?.whatsapp ?? {};
+  return [
+    "Deja de verse en la web enseguida: quien abra su enlace verá que se retiró.",
+    t.estado === "apagado"
+      ? null
+      : t.mensajes > 0 || ["enviando", "enviado"].includes(t.estado)
+        ? "Se borra del canal de Telegram en el próximo minuto."
+        : "No sale por Telegram.",
+    w.estado === "apagado"
+      ? null
+      : ["enviando", "enviado"].includes(w.estado)
+        ? "En WhatsApp ya salió y desde aquí no se puede borrar: después tendrás que borrarlo a mano en el canal."
+        : "No sale por WhatsApp.",
+    "Lo que llevaba no vuelve a entrar solo en la siguiente edición.",
+  ].filter(Boolean);
 };
 const conVariacion = (c) =>
   typeof c.variacion === "number" && Math.abs(c.variacion) >= 0.005
@@ -261,9 +378,89 @@ Punto.propTypes = {
   onBajar: PropTypes.func.isRequired,
 };
 
+/**
+ * Lo que se borró después de armar la edición (un titular que se borró, una pieza que se
+ * despublicó): `caidos`, lo que la edición todavía lleva pero ya no sale (ni se ve, si ya
+ * salió), y `quitados`, lo que el servidor sacó al publicarla. No se puede volver a poner.
+ */
+const LoQueSeCayo = ({ resumen }) => {
+  const caidos = resumen.caidos ?? [];
+  const quitados = resumen.quitados ?? [];
+  if (!caidos.length && !quitados.length) return null;
+  const salio = ["publicado", "retirado"].includes(resumen.estado);
+  const linea = (p) => `«${p.linea || p.id}»${p.motivo ? `: ${p.motivo}` : ""}`;
+  return (
+    <div className="se-tit-aviso" role="status">
+      {caidos.length ? (
+        <>
+          <strong>
+            {salio
+              ? "Se borró después de salir y ya no se ve en la web:"
+              : "Se borró después de armarla y ya no saldrá:"}
+          </strong>
+          <ul className="se-tit-historial__lista">
+            {caidos.map((p) => <li key={`c-${p.id}`}>{linea(p)}</li>)}
+          </ul>
+        </>
+      ) : null}
+      {quitados.length ? (
+        <>
+          <strong>Se quitó al publicarla, porque se había borrado:</strong>
+          <ul className="se-tit-historial__lista">
+            {quitados.map((p, i) => <li key={`q-${p.id}-${i}`}>{linea(p)}</li>)}
+          </ul>
+        </>
+      ) : null}
+    </div>
+  );
+};
+
+const PUNTO_CAIDO = PropTypes.shape({ id: PropTypes.string, linea: PropTypes.string, motivo: PropTypes.string });
+LoQueSeCayo.propTypes = {
+  resumen: PropTypes.shape({
+    estado: PropTypes.string,
+    caidos: PropTypes.arrayOf(PUNTO_CAIDO),
+    quitados: PropTypes.arrayOf(PUNTO_CAIDO),
+  }).isRequired,
+};
+
+/** Quién hizo qué con la edición, lo último primero: «Ramón retiró la edición · 17-nov 02:03 p. m.». */
+const HistorialDeLaEdicion = ({ historial }) => (
+  <>
+    <h2 className="se-form-label">Lo que se hizo con esta edición</h2>
+    {historial.length ? (
+      <ul className="se-tit-historial__lista">
+        {historial.map((a, k) => (
+          <li key={`${a.cuando}-${k}`}>
+            <span>
+              {a.quien || "Alguien del equipo"} {queHizo(a)}
+            </span>
+            <span className="se-admin-meta-hint">{cuando(a.cuando)}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="se-admin-meta-hint">Nadie la ha tocado desde el panel.</p>
+    )}
+  </>
+);
+
+HistorialDeLaEdicion.propTypes = {
+  historial: PropTypes.arrayOf(
+    PropTypes.shape({ accion: PropTypes.string, cuando: PropTypes.string, quien: PropTypes.string, datos: PropTypes.object }),
+  ).isRequired,
+};
+
 export const AdminResumen = () => {
+  const { role } = useAuth();
+  // Retirar y el interruptor: publicador y admin, como el resto de esta página en el servidor.
+  const puede = role === "publicador" || role === "admin";
   const { toastSuccess, toastError } = useAdminToast();
   const { confirm, ConfirmDialog } = useAdminConfirm();
+  // El motivo que se escribe en el diálogo de «Retirar edición», y la petición en curso:
+  // un doble clic muy rápido en «Retirar edición» espera a la misma, no manda otra.
+  const motivoRef = useRef("");
+  const retirandoRef = useRef(null);
   const [lista, setLista] = useState({ status: "loading", datos: null, error: null });
   const [actual, setActual] = useState(null);
   const [edicion, setEdicion] = useState(null);
@@ -355,6 +552,110 @@ export const AdminResumen = () => {
     if (ok) await hacer(() => adminRequest(`/admin/resumen/${actual.id}/rehacer`, { method: "POST" }), "Rehecho.", "No se pudo rehacer.");
   };
 
+  /** Volver a cargar sin tapar el aviso que ya se dio: tras un 409, lo más probable es que alguien llegó antes. */
+  const ponerAlDia = (id) => cargar(id).catch(() => {});
+
+  /**
+   * «Retirar edición»: no se deshace, así que se confirma dentro del panel con su motivo.
+   * La petición corre desde el diálogo (`onConfirm`): mientras trabaja, el botón no se
+   * puede volver a pulsar, y si falla (sin conexión, 409 porque otro ya la retiró, motivo
+   * largo) el error sale en el propio diálogo, con el motivo escrito intacto.
+   */
+  const retirar = async () => {
+    const r = actual;
+    motivoRef.current = "";
+    const ok = await confirm({
+      title: "Retirar esta edición",
+      description: (
+        <>
+          <p className="se-adm-dialog__text">
+            {MOMENTO[r.edicion]} · {r.fecha_larga}. Al retirarla:
+          </p>
+          <ul className="se-adm-dialog__text">
+            {alRetirar(r).map((linea) => <li key={linea}>{linea}</li>)}
+          </ul>
+          <CampoMotivo onCambio={(v) => { motivoRef.current = v; }} />
+        </>
+      ),
+      warning: "No se puede deshacer.",
+      confirmLabel: "Retirar edición",
+      busyLabel: "Retirando…",
+      onConfirm: () => {
+        if (retirandoRef.current) return retirandoRef.current;
+        retirandoRef.current = (async () => {
+          try {
+            await adminRequest(`/admin/resumen/${r.id}/retirar`, {
+              method: "POST",
+              json: { motivo: motivoRef.current.trim() || null },
+            });
+          } catch (err) {
+            if (err?.status === 409) ponerAlDia(r.id);
+            if (err?.status === 404) ponerAlDia();
+            // El 422 trae la frase exacta («El motivo: pasa de 300 caracteres.»).
+            throw new Error(err?.status === 422 && err.message ? err.message : adminErrorMessage(err, "No se pudo retirar."));
+          } finally {
+            retirandoRef.current = null;
+          }
+        })();
+        return retirandoRef.current;
+      },
+    });
+    if (!ok) return;
+    const t = r.canales?.telegram ?? {};
+    const w = r.canales?.whatsapp ?? {};
+    toastSuccess(
+      [
+        "Retirada: ya no se ve en la web.",
+        t.estado !== "apagado" && (t.mensajes > 0 || ["enviando", "enviado"].includes(t.estado))
+          ? "De Telegram se borra en el próximo minuto."
+          : null,
+        ["enviando", "enviado"].includes(w.estado) ? "En WhatsApp hay que borrarla a mano." : null,
+      ].filter(Boolean).join(" "),
+      "Resumen",
+    );
+    setOcupado(true);
+    try {
+      await ponerAlDia(r.id);
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  /** Ya retirada, si el borrado de Telegram falló: el mismo «retirar» lo vuelve a intentar. */
+  const reintentarBorrado = async () => {
+    const ok = await hacer(() => adminRequest(`/admin/resumen/${actual.id}/retirar`, { method: "POST", json: {} }),
+      "Se vuelve a intentar borrarla de Telegram en el próximo minuto.", "No se pudo reintentar.");
+    if (!ok) await ponerAlDia(actual.id);
+  };
+
+  /** «Resumen activo»: el interruptor general, con su confirmación. */
+  const alternarActivo = async (activo, esperando) => {
+    const encender = !activo;
+    const ok = await confirm(
+      encender
+        ? {
+            title: "Encender el resumen",
+            description:
+              "En el próximo minuto se arma la edición en curso si falta, y las ediciones vuelven a salir solas a su hora en la web, Telegram y WhatsApp.",
+            warning: esperando
+              ? `${esperando === 1 ? "Una edición de hoy está en pausa" : `${esperando} ediciones de hoy están en pausa`}: si ya pasó su hora, sale en el próximo minuto. Si no debe salir, ábrela y pulsa «No mandar esta edición» antes de encender.`
+              : undefined,
+            confirmLabel: "Encender",
+          }
+        : {
+            title: "Apagar el resumen",
+            description:
+              "No se arma, no sale ni se manda ninguna edición nueva hasta que lo vuelvas a encender: es para una emergencia, sin tener que frenar cada edición. Lo que ya salió sigue en la web, y «Retirar edición» sigue funcionando.",
+            confirmLabel: "Apagar",
+          },
+    );
+    if (!ok) return;
+    const hecho = await hacer(() => adminRequest("/admin/resumen/ajustes", { method: "PUT", json: { activo: encender } }),
+      encender ? "Resumen encendido: vuelve a salir solo." : "Resumen apagado: no sale nada hasta que lo enciendas.",
+      "No se pudo cambiar.");
+    if (!hecho) await ponerAlDia(actual?.id);
+  };
+
   const copiar = async () => {
     try {
       await navigator.clipboard.writeText(actual.texto_whatsapp);
@@ -409,8 +710,16 @@ export const AdminResumen = () => {
       : edicion.imagen_id === actual?.imagen_id
         ? actual.imagen
         : null;
-  const bloqueado = !actual || ["publicado", "vacio"].includes(actual.estado) || ocupado;
+  const bloqueado = !actual || ["publicado", "vacio", "retirado"].includes(actual.estado) || ocupado;
   const deHoy = new Map(datos.resumenes.filter((r) => r.fecha === datos.hoy).map((r) => [r.edicion, r]));
+  // Sin el campo (un servidor anterior), encendido: así estaba antes de existir el interruptor.
+  const activo = datos.resumen_activo !== false;
+  const enPausa = datos.resumenes.filter((r) => r.en_pausa).length;
+  const retirada = actual?.estado === "retirado";
+  const tg = actual?.canales?.telegram ?? {};
+  const wa = actual?.canales?.whatsapp ?? {};
+  // Ya retirada y con el borrado de Telegram en fallo: el mismo botón lo reintenta.
+  const reintentaBorrado = retirada && tg.estado === "fallo" && tg.mensajes > 0;
   const armar = (clave) =>
     hacer(() => adminRequest("/admin/resumen/armar", { method: "POST", json: { edicion: clave } }),
       "Armado.", "No se pudo armar.");
@@ -433,6 +742,29 @@ export const AdminResumen = () => {
         guia={recorridoResumen}
       />
       <RecorridoVista recorrido={recorridoResumen} />
+
+      {/* «Resumen activo»: el interruptor general, para una emergencia de varias horas. */}
+      <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("activo")}>
+        <div className="se-res-adm-estado">
+          <span className="se-form-label">Resumen activo</span>
+          <button type="button" role="switch" aria-checked={activo} aria-label="Resumen activo"
+            className={`se-alaire${activo ? " is-on" : ""}`} disabled={ocupado || !puede}
+            title={puede ? undefined : "Lo cambia un publicador o el administrador"}
+            onClick={() => alternarActivo(activo, enPausa)}>
+            <span className="se-alaire__pista" aria-hidden="true" />
+            <span className="se-alaire__texto">{activo ? "Encendido" : "Apagado"}</span>
+          </button>
+        </div>
+        {activo ? (
+          <p className="se-admin-meta-hint">Cada edición se arma y sale sola a su hora.</p>
+        ) : (
+          <p className="se-tit-aviso" role="status">
+            Apagado: no se arma, no sale ni se manda ninguna edición nueva
+            {enPausa ? ` (${enPausa === 1 ? "una está en pausa" : `${enPausa} están en pausa`})` : ""}. Lo que ya salió
+            sigue en la web; «Retirar edición» sigue funcionando.
+          </p>
+        )}
+      </section>
 
       {/* Las tres de hoy: su estado de un vistazo, y abrir o armar cada una. */}
       <section className="se-admin-table-wrap se-res-adm-bloque se-res-adm-jornada" {...ancla("hoy")}>
@@ -472,8 +804,10 @@ export const AdminResumen = () => {
               <span className="se-admin-meta-hint">
                 {actual.estado === "borrador" && actual.sale_sola_a_las ? `sale sola a las ${hora(actual.sale_sola_a_las)} · ` : ""}
                 {actual.estado === "borrador" && !actual.sale_sola_a_las && actual.pasa_a ? `ya no sale: lo suyo entra en la de ${actual.pasa_a} · ` : ""}
+                {actual.estado === "borrador" && actual.en_pausa ? "en pausa: el resumen está apagado · " : ""}
                 {actual.estado === "retenido" ? "retenida: no sale · " : ""}
-                {actual.estado === "publicado" ? `salió a las ${hora(actual.publicado_en)} · ` : ""}
+                {["publicado", "retirado"].includes(actual.estado) && actual.publicado_en ? `salió a las ${hora(actual.publicado_en)} · ` : ""}
+                {retirada ? `retirada el ${cuando(actual.retirado_en)} · ` : ""}
                 armado {actual.armado_con === "ia" ? "con IA" : "por reglas"} a las {hora(actual.armado_en)}
               </span>
             </div>
@@ -483,28 +817,55 @@ export const AdminResumen = () => {
                 la maqueta. Si cambias la foto o el texto antes y guardas, sale cambiada.
               </p>
             ) : null}
+            {actual.estado === "borrador" && actual.en_pausa ? (
+              <p className="se-tit-aviso" role="status">
+                En pausa: el resumen está apagado (arriba, «Resumen activo») y esta edición no sale. Al encenderlo, sale a su
+                hora o, si ya pasó, en el próximo minuto. Si no debe salir, pulsa «No mandar esta edición».
+              </p>
+            ) : null}
+            {retirada ? (
+              <p className="se-admin-meta-hint" role="status">
+                Retirada: ya no se ve en la web (quien abra su enlace ve que se retiró). No se puede deshacer.
+              </p>
+            ) : null}
             {actual.estado === "vacio" ? (
               <p className="se-admin-meta-hint" role="status">
                 No sale: {actual.motivo_vacio ?? "no había bastante nuevo"}. Si después llega algo, pulse «Rehacer».
               </p>
             ) : null}
-            {actual.armado_con !== "ia" && !["publicado", "vacio"].includes(actual.estado) ? (
+            {actual.armado_con !== "ia" && !["publicado", "vacio", "retirado"].includes(actual.estado) ? (
               <p className="se-tit-aviso" role="alert">
                 Este borrador salió por reglas, no por la IA
                 {actual.motivo_reglas ? ` (${actual.motivo_reglas})` : ""}: es un reparto mecánico, sin
                 redactar y con huecos. Pulse «Rehacer» para que lo arme la IA antes de que salga, o «No mandar esta edición».
               </p>
             ) : null}
-            {actual.estado === "publicado" ? (
+            {["publicado", "retirado"].includes(actual.estado) ? (
               <p className="se-admin-meta-hint se-res-adm-canales">
-                Telegram: {CANAL[actual.canales.telegram.estado]}
-                {actual.canales.telegram.error ? ` (${actual.canales.telegram.error})` : ""} · WhatsApp:{" "}
-                {CANAL[actual.canales.whatsapp.estado]}
-                {actual.canales.whatsapp.error ? ` (${actual.canales.whatsapp.error})` : ""}
+                Telegram: {canal(actual, "telegram", tg.estado)}
+                {tg.error && !(retirada && tg.estado === "fallo") ? ` (${tg.error})` : ""} · WhatsApp:{" "}
+                {canal(actual, "whatsapp", wa.estado)}
+                {wa.error && !wa.borrar_a_mano ? ` (${wa.error})` : ""}
               </p>
             ) : null}
+            {retirada && tg.estado === "fallo" ? (
+              <p className="se-tit-aviso" role="alert">
+                No se pudo borrar de Telegram{tg.error ? `: ${tg.error.replace(/^no se pudo borrar:\s*/i, "")}` : ""}.{" "}
+                {tg.mensajes > 0
+                  ? "Pulsa «Reintentar borrado» o bórralo a mano en el canal."
+                  : "Bórralo a mano en el canal de Telegram."}
+              </p>
+            ) : null}
+            {wa.borrar_a_mano ? (
+              <p className="se-tit-aviso" role="alert">
+                Hay que borrarla a mano en WhatsApp: esta edición ya había salido en el canal de WhatsApp y desde aquí no se
+                puede borrar. Desde un teléfono que administre el canal, mantén pulsado el mensaje (y su foto, si la lleva) y
+                elige «Eliminar». Este aviso no se quita solo: el panel no puede saber si ya lo borraste.
+              </p>
+            ) : null}
+            <LoQueSeCayo resumen={actual} />
             <div className="se-tit-acciones" {...ancla("acciones")}>
-              {actual.estado === "borrador" && esHoy && actual.sale_sola_a_las ? (
+              {actual.estado === "borrador" && esHoy && (actual.sale_sola_a_las || actual.en_pausa) ? (
                 <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={retener}>
                   No mandar esta edición
                 </button>
@@ -515,7 +876,7 @@ export const AdminResumen = () => {
                   Dejar que salga
                 </button>
               ) : null}
-              {actual.estado !== "publicado" ? (
+              {!["publicado", "retirado"].includes(actual.estado) ? (
                 <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={rehacer}>Rehacer</button>
               ) : null}
               <button type="button" className="se-btn se-btn--secondary" onClick={copiar}>Copiar el texto</button>
@@ -527,6 +888,16 @@ export const AdminResumen = () => {
                   onClick={() => hacer(() => adminRequest(`/admin/resumen/${actual.id}/whatsapp/reintentar`, { method: "POST" }),
                     "WhatsApp vuelve a la cola: sale en el próximo minuto.", "No se pudo.")}>
                   Reintentar WhatsApp
+                </button>
+              ) : null}
+              {puede && actual.estado === "publicado" ? (
+                <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={retirar} {...ancla("retirar")}>
+                  Retirar edición
+                </button>
+              ) : null}
+              {puede && reintentaBorrado ? (
+                <button type="button" className="se-btn se-btn--secondary" disabled={ocupado} onClick={reintentarBorrado} {...ancla("retirar")}>
+                  Reintentar borrado
                 </button>
               ) : null}
             </div>
@@ -672,6 +1043,10 @@ export const AdminResumen = () => {
               </details>
             </section>
           </div>
+
+          <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("registro")}>
+            <HistorialDeLaEdicion historial={actual.historial ?? []} />
+          </section>
         </>
       ) : null}
 
@@ -698,8 +1073,8 @@ export const AdminResumen = () => {
                     <td>{MOMENTO[r.edicion]}</td>
                     <td>{chipDe(r).texto}</td>
                     <td className="se-tit-num">{r.puntos}</td>
-                    <td>{r.estado === "publicado" ? CANAL[r.telegram] : "—"}</td>
-                    <td>{r.estado === "publicado" ? CANAL[r.whatsapp] : "—"}</td>
+                    <td>{["publicado", "retirado"].includes(r.estado) ? canal(r, "telegram", r.telegram) : "—"}</td>
+                    <td>{["publicado", "retirado"].includes(r.estado) ? canal(r, "whatsapp", r.whatsapp) : "—"}</td>
                     <td className="se-admin-table__actions">
                       <button type="button" className="se-btn se-btn--secondary" disabled={r.id === actual?.id || ocupado}
                         onClick={() => abrirOtra(r.id)}>

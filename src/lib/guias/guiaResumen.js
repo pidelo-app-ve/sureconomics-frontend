@@ -15,6 +15,19 @@ export const PASOS_RESUMEN = [
       "mensaje, y si quieres lo ajustas antes de la hora: si lo cambias, sale cambiado; si no lo tocas, sale tal cual.",
   },
   {
+    clave: "activo",
+    titulo: "Resumen activo",
+    texto:
+      "El interruptor general del resumen. Encendido, cada edición se arma y sale sola a su hora. Apagado, no se arma, " +
+      "no sale ni se manda ninguna edición nueva, ni a la web ni a Telegram ni a WhatsApp: es para una emergencia de " +
+      "varias horas, sin tener que frenar las ediciones una por una.",
+    puntos: [
+      "En pausa: así quedan las ediciones que iban a salir mientras está apagado.",
+      "Al volver a encenderlo: una edición en pausa sale a su hora o, si ya pasó, en el próximo minuto. Si no debe salir, ábrela y pulsa «No mandar esta edición» antes de encender.",
+      "Lo que ya salió: sigue en la web. Para quitar una edición que ya salió está «Retirar edición».",
+    ],
+  },
+  {
     clave: "hoy",
     titulo: "Las tres de hoy",
     puntos: [
@@ -30,8 +43,11 @@ export const PASOS_RESUMEN = [
     puntos: [
       "Sale sola: armada; a la hora que dice sale tal como la ves, sin que nadie haga nada. Una que no salió antes de que se arme la siguiente ya no sale: lo suyo entra en la siguiente.",
       "Retenida: alguien pulsó «No mandar esta edición», así que no sale. Se puede seguir retocando y, con «Dejar que salga», vuelve a salir.",
-      "Publicado: ya salió. Ya no se puede cambiar.",
+      "En pausa: el resumen está apagado (arriba, «Resumen activo») y por eso no sale.",
+      "Publicado: ya salió. Ya no se puede cambiar; si hay que quitarla, «Retirar edición».",
+      "Retirada: salió y alguien la retiró. Ya no se ve en la web.",
       "Telegram y WhatsApp: si el mensaje llegó a cada canal. Si WhatsApp falla tres veces, aparece el botón para reintentarlo.",
+      "Se borró después de armarla: si un titular o una pieza del mensaje se borra, aquí se avisa, y eso ya no sale.",
     ],
   },
   {
@@ -42,6 +58,18 @@ export const PASOS_RESUMEN = [
       "Dejar que salga: deshace lo anterior. Sale a su hora o, si ya pasó, en el próximo minuto.",
       "Rehacer: la arma otra vez desde cero con lo nuevo desde la edición anterior. Se pierden los cambios a las líneas; la frase, las cifras a mano y la foto que hayas elegido se conservan. Corre la salida diez minutos, para que te dé tiempo a mirarla.",
       "Copiar el texto: el mensaje tal cual sale en WhatsApp, por si hace falta pegarlo a mano en otro sitio.",
+    ],
+  },
+  {
+    clave: "retirar",
+    titulo: "Retirar una edición que ya salió",
+    texto:
+      "Solo aparece en una edición que ya salió. Sirve para quitarla si salió con un error: deja de verse en la web, " +
+      "y quien abra su enlace ve que se retiró, y se borra sola del canal de Telegram en el próximo minuto. No se puede deshacer.",
+    puntos: [
+      "Motivo: opcional. Queda en el historial de la edición para el equipo; en la web no se enseña.",
+      "WhatsApp: si ya había salido allí, desde aquí no se puede borrar. La ficha lo avisa y hay que borrarlo a mano en el canal.",
+      "Reintentar borrado: si Telegram no dejó borrarla, el mismo botón lo vuelve a intentar. Telegram no deja borrar mensajes de más de 48 horas: esos, a mano.",
     ],
   },
   {
@@ -85,6 +113,12 @@ export const PASOS_RESUMEN = [
     clave: "frase",
     titulo: "La frase del día",
     texto: "Opcional. Si la escribes, sale al final del mensaje en cursiva. Si la dejas vacía, no sale nada.",
+  },
+  {
+    clave: "registro",
+    titulo: "Lo que se hizo con esta edición",
+    texto:
+      "Quién la armó, la cambió, la retuvo o la retiró, y cuándo; lo último, arriba. Si se retiró con un motivo, aparece aquí.",
   },
   {
     clave: "historial",

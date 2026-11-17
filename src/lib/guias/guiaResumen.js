@@ -23,7 +23,7 @@ export const PASOS_RESUMEN = [
       "varias horas, sin tener que frenar las ediciones una por una.",
     puntos: [
       "En pausa: así quedan las ediciones que iban a salir mientras está apagado.",
-      "Al volver a encenderlo: una edición en pausa sale a su hora o, si ya pasó, en el próximo minuto. Si no debe salir, ábrela y pulsa «No mandar esta edición» antes de encender.",
+      "Al volver a encenderlo: una edición en pausa sale a su hora o, si ya llegó, en el próximo minuto. Una a la que ya se le pasó la hora no sale: lo que llevaba entra en la siguiente. Al encender, un aviso dice qué sale en ese momento.",
       "Lo que ya salió: sigue en la web. Para quitar una edición que ya salió está «Retirar edición».",
     ],
   },
@@ -44,6 +44,7 @@ export const PASOS_RESUMEN = [
       "Sale sola: armada; a la hora que dice sale tal como la ves, sin que nadie haga nada. Una que no salió antes de que se arme la siguiente ya no sale: lo suyo entra en la siguiente.",
       "Retenida: alguien pulsó «No mandar esta edición», así que no sale. Se puede seguir retocando y, con «Dejar que salga», vuelve a salir.",
       "En pausa: el resumen está apagado (arriba, «Resumen activo») y por eso no sale.",
+      "Caducada: ya pasó su hora sin salir (estaba retenida o el resumen apagado). Ya no sale, ni con «Dejar que salga»: lo que llevaba entra en la siguiente.",
       "Publicado: ya salió. Ya no se puede cambiar; si hay que quitarla, «Retirar edición».",
       "Retirada: salió y alguien la retiró. Ya no se ve en la web.",
       "Telegram y WhatsApp: si el mensaje llegó a cada canal. Si WhatsApp falla tres veces, aparece el botón para reintentarlo.",
@@ -68,8 +69,10 @@ export const PASOS_RESUMEN = [
       "y quien abra su enlace ve que se retiró, y se borra sola del canal de Telegram en el próximo minuto. No se puede deshacer.",
     puntos: [
       "Motivo: opcional. Queda en el historial de la edición para el equipo; en la web no se enseña.",
-      "WhatsApp: si ya había salido allí, desde aquí no se puede borrar. La ficha lo avisa y hay que borrarlo a mano en el canal.",
-      "Reintentar borrado: si Telegram no dejó borrarla, el mismo botón lo vuelve a intentar. Telegram no deja borrar mensajes de más de 48 horas: esos, a mano.",
+      "WhatsApp: si ya había salido allí (aunque fuera solo la foto), desde aquí no se puede borrar. La ficha lo avisa en rojo y hay que borrarlo a mano en el canal.",
+      "Telegram a mano: si salió antes de que se guardaran sus mensajes, o tenían más de 48 horas, tampoco se borra solo. La ficha lo avisa en rojo con lo que hay que hacer.",
+      "Reintentar borrado: si Telegram no dejó borrarla, el mismo botón lo vuelve a intentar.",
+      "La web: puede tardar unos minutos en dejar de enseñarla, lo que dura la copia guardada.",
     ],
   },
   {

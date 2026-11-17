@@ -631,7 +631,10 @@ export default async function handler(req, res) {
     }
     const imagen = imagenParaCompartir(resumen.imagen?.url) ?? IMAGEN_DE_MARCA;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=86400");
+    // Menos que una pieza: una edición se puede retirar desde el panel, y su tarjeta (con
+    // sus primeras líneas) no debe seguir saliendo en las vistas previas 10 minutos más.
+    // Dos minutos guardada y cinco más sirviendo la vieja mientras se renueva.
+    res.setHeader("Cache-Control", "public, s-maxage=120, stale-while-revalidate=300");
     res.setHeader("X-Pieza-Meta", "resumen");
     res.status(200).send(
       inyectar(shell, {

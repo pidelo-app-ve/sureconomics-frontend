@@ -408,7 +408,11 @@ await conFetch(fetchNormal(RESUMEN), async () => {
     h.includes('property="og:description" content="PDVSA designa juntas para Citgo · El BCV sube la tasa · Chile investiga a las AFP"'));
   check("resumen: la dirección del canal como canónica",
     h.includes('rel="canonical" href="https://www.sureconomics.com/resumen/2026-11-09/manana"'));
-  check("resumen: se cachea", /s-maxage=600/.test(res.headers["Cache-Control"]));
+  // Poco: una edición retirada no debe seguir en las vistas previas 10 minutos (una pieza
+  // sí se guarda 600 s). Dos minutos en el borde y cinco más sirviendo la vieja.
+  check("resumen: se cachea poco, por si se retira",
+    /s-maxage=120\b/.test(res.headers["Cache-Control"]) && /stale-while-revalidate=300\b/.test(res.headers["Cache-Control"]),
+    res.headers["Cache-Control"]);
 });
 await conFetch(fetchNormal({ ...RESUMEN, imagen: null }), async () => {
   const res = respuestaFalsa();

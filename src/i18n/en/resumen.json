@@ -1,7 +1,7 @@
 {
   "resumen": {
     "meta": "{titulo} — {marca}",
-    "descripcion": "The SurEconomics daily briefing, three times a day: the most important stories since the previous edition, the figures and, in the morning, Venezuelan baseball.",
+    "descripcion": "The SurEconomics daily briefing, put together automatically with AI three times a day: the most important stories since the previous edition, the figures and, in the morning, Venezuelan baseball.",
     "titulo": "Today's essentials",
     "tituloDia": "The day's essentials",
     "titulos": {
@@ -11,6 +11,7 @@
     },
     "todasDelDia": "All of this day's editions",
     "sale": "Out three times a day: at 7:00 a.m., 1:00 p.m. and 7:00 p.m., Caracas time.",
+    "hechoConIa": "Briefing put together automatically with AI from SurEconomics headlines and stories.",
     "cargando": "Loading the briefing…",
     "vacioTitulo": "No briefing yet",
     "vacio": "The briefing comes out three times a day: at 7:00 a.m., 1:00 p.m. and 7:00 p.m., Caracas time.",

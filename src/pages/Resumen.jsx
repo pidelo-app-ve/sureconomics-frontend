@@ -20,7 +20,8 @@ import "../styles/resumen.css";
  * - `/resumen/<AAAA-MM-DD>/<edicion>`: una edición.
  *
  * Cada punto enlaza a su pieza o a su titular de «Última hora», dentro del sitio y en el
- * idioma de la página; los titulares llevan su fuente. Todo se pinta como texto.
+ * idioma de la página; los titulares llevan su fuente. Todo se pinta como texto. Abajo,
+ * siempre, que lo prepara la IA (auditoría D-04).
  */
 
 const fechaLarga = (fecha, lang) =>
@@ -271,6 +272,8 @@ export const Resumen = () => {
               </p>
             ) : null}
             <p className="se-res__nota">{t("resumen.sale")}</p>
+            {/* Etiqueta de IA (auditoría D-04): lo arma la IA, no lo redacta nadie. */}
+            <p className="se-res__nota">{t("resumen.hechoConIa")}</p>
           </>
         ) : null}
       </div>

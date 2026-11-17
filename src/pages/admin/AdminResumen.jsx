@@ -72,7 +72,8 @@ const CANAL_RETIRADA = {
   },
   whatsapp: {
     apagado: "sin configurar",
-    retirado: "no llegó a salir",
+    // Retirada antes de salir, o tras un fallo: puede que saliera la foto (la ficha lo dice).
+    retirado: "ya no se manda",
     enviando: "salió: hay que borrarlo a mano",
     enviado: "salió: hay que borrarlo a mano",
   },
@@ -93,10 +94,35 @@ const cuando = (iso) => {
 };
 /** El chip de una edición: un borrador dice a qué hora sale solo o, si ya no va a salir, que no salió. */
 const chipDe = (r) => {
+  // No salió y ya no sale: se le pasó la franja (el servidor lo dice con `caducada`).
+  if (r.caducada) return { texto: "Caducada: ya pasó su hora, lo que llevaba entra en la siguiente", clase: "se-res-adm-chip--vacio" };
   if (r.estado !== "borrador") return ESTADO[r.estado] ?? { texto: r.estado, clase: "" };
   if (r.en_pausa) return { texto: "En pausa: el resumen está apagado", clase: "se-res-adm-chip--retenido" };
   if (r.sale_sola_a_las) return { texto: `Sale sola · ${hora(r.sale_sola_a_las)}`, clase: "se-res-adm-chip--borrador" };
   return { texto: r.pasa_a ? "No salió: pasó a la siguiente" : "No salió", clase: "se-res-adm-chip--vacio" };
+};
+
+/** «esta tarde»: como lo nombra el servidor (`momento`). */
+const MOMENTO_LARGO = { manana: "esta mañana", tarde: "esta tarde", noche: "esta noche" };
+
+/**
+ * El aviso tras encender el resumen, con lo que el servidor dice que hará en el minuto
+ * (`al_encender`): «Sale ya: la edición de esta tarde.», «Se arma ahora la de esta noche:
+ * sale a las 19:00.».
+ */
+const queHaraAlEncender = (alEncender, ediciones) => {
+  const salen = alEncender?.salen_ya ?? [];
+  const seArma = alEncender?.se_arma ?? null;
+  const partes = ["Resumen encendido."];
+  if (salen.length) {
+    partes.push(`Sale ya: ${enumerar(salen.map((s) => `la edición de ${s.momento ?? MOMENTO_LARGO[s.edicion] ?? s.edicion}`))}.`);
+  }
+  if (seArma) {
+    const sale = ediciones.find((e) => e.clave === seArma.edicion)?.sale;
+    partes.push(`Se arma ahora la de ${seArma.momento ?? MOMENTO_LARGO[seArma.edicion]}${sale ? `: sale a las ${sale} o, si esa hora ya pasó, unos minutos después de armarse` : ""}.`);
+  }
+  if (!salen.length && !seArma) partes.push("No sale nada ahora: la próxima edición sale a su hora.");
+  return partes.join(" ");
 };
 
 /** Lo que cambió al guardar, con el nombre que le da la redacción. */
@@ -152,21 +178,30 @@ const CampoMotivo = ({ onCambio }) => {
 
 CampoMotivo.propTypes = { onCambio: PropTypes.func.isRequired };
 
+/**
+ * Qué pasa en Telegram al retirarla. Solo se borra sola si se guardaron sus mensajes; una
+ * que salió antes de guardarlos se borra a mano (el servidor lo marca al retirarla).
+ */
+const telegramAlRetirar = (t) => {
+  if (t.estado === "apagado") return null;
+  if (t.mensajes > 0) return "Se borra del canal de Telegram en el próximo minuto.";
+  if (t.estado === "enviado") return "En Telegram salió sin que se guardaran sus mensajes: después tendrás que borrarlo a mano.";
+  if (t.estado === "enviando") return "Lo que se estaba mandando a Telegram se borra al terminar de mandarse.";
+  if (t.estado === "fallo") return "Si algo llegó a salir por Telegram, la ficha te dirá si hay que borrarlo a mano.";
+  return "No sale por Telegram.";
+};
+
 /** Qué pasa en cada canal al retirar esta edición, para el diálogo. */
 const alRetirar = (r) => {
   const t = r.canales?.telegram ?? {};
   const w = r.canales?.whatsapp ?? {};
   return [
     "Deja de verse en la web enseguida: quien abra su enlace verá que se retiró.",
-    t.estado === "apagado"
-      ? null
-      : t.mensajes > 0 || ["enviando", "enviado"].includes(t.estado)
-        ? "Se borra del canal de Telegram en el próximo minuto."
-        : "No sale por Telegram.",
+    telegramAlRetirar(t),
     w.estado === "apagado"
       ? null
       : ["enviando", "enviado"].includes(w.estado)
-        ? "En WhatsApp ya salió y desde aquí no se puede borrar: después tendrás que borrarlo a mano en el canal."
+        ? "En WhatsApp ya salió (o al menos su foto) y desde aquí no se puede borrar: después tendrás que borrarlo a mano en el canal."
         : "No sale por WhatsApp.",
     "Lo que llevaba no vuelve a entrar solo en la siguiente edición.",
   ].filter(Boolean);
@@ -606,10 +641,9 @@ export const AdminResumen = () => {
     toastSuccess(
       [
         "Retirada: ya no se ve en la web.",
-        t.estado !== "apagado" && (t.mensajes > 0 || ["enviando", "enviado"].includes(t.estado))
-          ? "De Telegram se borra en el próximo minuto."
-          : null,
+        t.mensajes > 0 ? "De Telegram se borra en el próximo minuto." : null,
         ["enviando", "enviado"].includes(w.estado) ? "En WhatsApp hay que borrarla a mano." : null,
+        "Mira la ficha: dice si queda algo por borrar a mano.",
       ].filter(Boolean).join(" "),
       "Resumen",
     );
@@ -628,17 +662,23 @@ export const AdminResumen = () => {
     if (!ok) await ponerAlDia(actual.id);
   };
 
-  /** «Resumen activo»: el interruptor general, con su confirmación. */
-  const alternarActivo = async (activo, esperando) => {
+  /**
+   * «Resumen activo»: el interruptor general, con su confirmación. Antes de encender se
+   * avisa de lo que se ve en la lista (las ediciones en pausa salen; las caducadas, no);
+   * después, de lo que el servidor dice que hará en el minuto (`al_encender`), que es lo
+   * que cuenta.
+   */
+  const alternarActivo = async (activo, enPausaHoy) => {
     const encender = !activo;
+    const nombres = enumerar(enPausaHoy.map((r) => `la de ${MOMENTO_LARGO[r.edicion] ?? r.edicion}`));
     const ok = await confirm(
       encender
         ? {
             title: "Encender el resumen",
             description:
-              "En el próximo minuto se arma la edición en curso si falta, y las ediciones vuelven a salir solas a su hora en la web, Telegram y WhatsApp.",
-            warning: esperando
-              ? `${esperando === 1 ? "Una edición de hoy está en pausa" : `${esperando} ediciones de hoy están en pausa`}: si ya pasó su hora, sale en el próximo minuto. Si no debe salir, ábrela y pulsa «No mandar esta edición» antes de encender.`
+              "Las ediciones vuelven a armarse y a salir solas a su hora en la web, Telegram y WhatsApp. Una edición a la que ya se le pasó la hora no sale: lo que llevaba entra en la siguiente.",
+            warning: enPausaHoy.length
+              ? `En pausa ahora: ${nombres}. Al encender, sale a su hora o, si ya llegó, en el próximo minuto. Si no debe salir, ábrela y pulsa «No mandar esta edición» antes de encender.`
               : undefined,
             confirmLabel: "Encender",
           }
@@ -650,10 +690,16 @@ export const AdminResumen = () => {
           },
     );
     if (!ok) return;
-    const hecho = await hacer(() => adminRequest("/admin/resumen/ajustes", { method: "PUT", json: { activo: encender } }),
-      encender ? "Resumen encendido: vuelve a salir solo." : "Resumen apagado: no sale nada hasta que lo enciendas.",
-      "No se pudo cambiar.");
-    if (!hecho) await ponerAlDia(actual?.id);
+    setOcupado(true);
+    try {
+      const d = unwrapEntity(await adminRequest("/admin/resumen/ajustes", { method: "PUT", json: { activo: encender } }));
+      toastSuccess(encender ? queHaraAlEncender(d?.al_encender, lista.datos?.ediciones ?? []) : "Resumen apagado: no sale nada hasta que lo enciendas.", "Resumen");
+    } catch (err) {
+      toastError(adminErrorMessage(err, "No se pudo cambiar."), "Resumen");
+    } finally {
+      await ponerAlDia(actual?.id);
+      setOcupado(false);
+    }
   };
 
   const copiar = async () => {
@@ -714,7 +760,8 @@ export const AdminResumen = () => {
   const deHoy = new Map(datos.resumenes.filter((r) => r.fecha === datos.hoy).map((r) => [r.edicion, r]));
   // Sin el campo (un servidor anterior), encendido: así estaba antes de existir el interruptor.
   const activo = datos.resumen_activo !== false;
-  const enPausa = datos.resumenes.filter((r) => r.en_pausa).length;
+  const enPausaHoy = datos.resumenes.filter((r) => r.en_pausa && r.fecha === datos.hoy);
+  const enPausa = enPausaHoy.length;
   const retirada = actual?.estado === "retirado";
   const tg = actual?.canales?.telegram ?? {};
   const wa = actual?.canales?.whatsapp ?? {};
@@ -750,7 +797,7 @@ export const AdminResumen = () => {
           <button type="button" role="switch" aria-checked={activo} aria-label="Resumen activo"
             className={`se-alaire${activo ? " is-on" : ""}`} disabled={ocupado || !puede}
             title={puede ? undefined : "Lo cambia un publicador o el administrador"}
-            onClick={() => alternarActivo(activo, enPausa)}>
+            onClick={() => alternarActivo(activo, enPausaHoy)}>
             <span className="se-alaire__pista" aria-hidden="true" />
             <span className="se-alaire__texto">{activo ? "Encendido" : "Apagado"}</span>
           </button>
@@ -819,13 +866,20 @@ export const AdminResumen = () => {
             ) : null}
             {actual.estado === "borrador" && actual.en_pausa ? (
               <p className="se-tit-aviso" role="status">
-                En pausa: el resumen está apagado (arriba, «Resumen activo») y esta edición no sale. Al encenderlo, sale a su
-                hora o, si ya pasó, en el próximo minuto. Si no debe salir, pulsa «No mandar esta edición».
+                En pausa: el resumen está apagado (arriba, «Resumen activo») y esta edición no sale. Si lo enciendes antes
+                de que se le pase la hora, sale a su hora o, si ya llegó, en el próximo minuto. Si no debe salir, pulsa «No
+                mandar esta edición».
               </p>
             ) : null}
             {retirada ? (
               <p className="se-admin-meta-hint" role="status">
                 Retirada: ya no se ve en la web (quien abra su enlace ve que se retiró). No se puede deshacer.
+                {actual.aviso_retirada ? ` ${actual.aviso_retirada}` : ""}
+              </p>
+            ) : null}
+            {actual.caducada ? (
+              <p className="se-admin-meta-hint" role="status">
+                Caducada: ya pasó su hora y no sale. Lo que llevaba entra en la siguiente edición.
               </p>
             ) : null}
             {actual.estado === "vacio" ? (
@@ -842,24 +896,25 @@ export const AdminResumen = () => {
             ) : null}
             {["publicado", "retirado"].includes(actual.estado) ? (
               <p className="se-admin-meta-hint se-res-adm-canales">
-                Telegram: {canal(actual, "telegram", tg.estado)}
-                {tg.error && !(retirada && tg.estado === "fallo") ? ` (${tg.error})` : ""} · WhatsApp:{" "}
-                {canal(actual, "whatsapp", wa.estado)}
+                Telegram: {tg.borrar_a_mano ? (reintentaBorrado ? "no se pudo borrar" : "hay que borrarlo a mano") : canal(actual, "telegram", tg.estado)}
+                {tg.error && !tg.borrar_a_mano ? ` (${tg.error})` : ""} · WhatsApp:{" "}
+                {wa.borrar_a_mano ? "hay que borrarlo a mano" : canal(actual, "whatsapp", wa.estado)}
                 {wa.error && !wa.borrar_a_mano ? ` (${wa.error})` : ""}
               </p>
             ) : null}
-            {retirada && tg.estado === "fallo" ? (
+            {tg.borrar_a_mano ? (
               <p className="se-tit-aviso" role="alert">
-                No se pudo borrar de Telegram{tg.error ? `: ${tg.error.replace(/^no se pudo borrar:\s*/i, "")}` : ""}.{" "}
-                {tg.mensajes > 0
-                  ? "Pulsa «Reintentar borrado» o bórralo a mano en el canal."
-                  : "Bórralo a mano en el canal de Telegram."}
+                {reintentaBorrado ? "No se pudo borrar de Telegram" : "Hay que borrarla a mano en Telegram"}
+                {tg.error ? `: ${tg.error}` : "."}{" "}
+                {reintentaBorrado
+                  ? "Pulsa «Reintentar borrado» o bórrala a mano en el canal de Telegram."
+                  : "Desde una cuenta que administre el canal, mantén pulsado cada mensaje de esta edición y elige «Eliminar». Este aviso no se quita solo."}
               </p>
             ) : null}
             {wa.borrar_a_mano ? (
               <p className="se-tit-aviso" role="alert">
-                Hay que borrarla a mano en WhatsApp: esta edición ya había salido en el canal de WhatsApp y desde aquí no se
-                puede borrar. Desde un teléfono que administre el canal, mantén pulsado el mensaje (y su foto, si la lleva) y
+                Hay que borrarla a mano en WhatsApp: esta edición ya había salido en el canal de WhatsApp (entera o solo su
+                foto) y desde aquí no se puede borrar. Desde un teléfono que administre el canal, mantén pulsado el mensaje (y su foto, si la lleva) y
                 elige «Eliminar». Este aviso no se quita solo: el panel no puede saber si ya lo borraste.
               </p>
             ) : null}
@@ -870,7 +925,7 @@ export const AdminResumen = () => {
                   No mandar esta edición
                 </button>
               ) : null}
-              {actual.estado === "retenido" && esHoy ? (
+              {actual.estado === "retenido" && esHoy && !actual.caducada ? (
                 <button type="button" className="se-btn se-btn--primary" disabled={ocupado || sucio} onClick={soltar}
                   title={sucio ? "Guarda los cambios antes" : undefined}>
                   Dejar que salga
@@ -905,9 +960,6 @@ export const AdminResumen = () => {
               <p className="se-tit-aviso" role="status">
                 Hay cambios sin guardar{actual.sale_sola_a_las ? `: si no los guardas antes de las ${hora(actual.sale_sola_a_las)}, sale sin ellos` : ""}.
               </p>
-            ) : null}
-            {["borrador", "retenido"].includes(actual.estado) && !esHoy ? (
-              <p className="se-admin-meta-hint">Es de un día que ya pasó: no salió y ya no sale.</p>
             ) : null}
           </section>
 

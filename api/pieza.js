@@ -588,7 +588,8 @@ export default async function handler(req, res) {
   }
 
   // Una edición del resumen diario: el enlace del canal. La tarjeta lleva la foto del
-  // día y el nombre de la edición; una que no salió es un 404, como una pieza que no existe.
+  // día y el nombre de la edición; una que no salió es un 404, como una pieza que no existe,
+  // y una retirada desde el panel, un 410 (la API lo dice así): sin nada de lo que llevaba.
   if (seccion === "resumen") {
     if (!FECHA_DEL_RESUMEN.test(fecha ?? "") || !EDICIONES_DEL_RESUMEN.has(edicion ?? "")) {
       seco("ruta-desconocida");
@@ -598,14 +599,15 @@ export default async function handler(req, res) {
     let resumen = null;
     try {
       const respuesta = await conDeadline(`${API}/resumen/${fecha}/${edicion}`, LIMITE_MS);
-      if (respuesta.status === 404) {
+      if (respuesta.status === 404 || respuesta.status === 410) {
+        const retirado = respuesta.status === 410;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Cache-Control", "public, s-maxage=60");
-        res.setHeader("X-Pieza-Meta", "resumen-inexistente");
-        res.status(404).send(
+        res.setHeader("X-Pieza-Meta", retirado ? "resumen-retirado" : "resumen-inexistente");
+        res.status(respuesta.status).send(
           inyectar(shell, {
             ...GENERICO,
-            titulo: "Resumen no encontrado — SurEconomics",
+            titulo: retirado ? "Resumen retirado — SurEconomics" : "Resumen no encontrado — SurEconomics",
             imagen: IMAGEN_DE_MARCA,
             url,
             noindex: true,
@@ -629,7 +631,10 @@ export default async function handler(req, res) {
     }
     const imagen = imagenParaCompartir(resumen.imagen?.url) ?? IMAGEN_DE_MARCA;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", "public, s-maxage=600, stale-while-revalidate=86400");
+    // Menos que una pieza: una edición se puede retirar desde el panel, y su tarjeta (con
+    // sus primeras líneas) no debe seguir saliendo en las vistas previas 10 minutos más.
+    // Dos minutos guardada y cinco más sirviendo la vieja mientras se renueva.
+    res.setHeader("Cache-Control", "public, s-maxage=120, stale-while-revalidate=300");
     res.setHeader("X-Pieza-Meta", "resumen");
     res.status(200).send(
       inyectar(shell, {

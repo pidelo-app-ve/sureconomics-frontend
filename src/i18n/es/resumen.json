@@ -1,7 +1,7 @@
 {
   "resumen": {
     "meta": "{titulo} — {marca}",
-    "descripcion": "El resumen diario de SurEconomics, tres veces al día: lo más trascendente desde la edición anterior, las cifras y, por la mañana, la LVBP.",
+    "descripcion": "El resumen diario de SurEconomics, preparado automáticamente con IA tres veces al día: lo más trascendente desde la edición anterior, las cifras y, por la mañana, la LVBP.",
     "titulo": "Lo importante de hoy",
     "tituloDia": "Lo importante del día",
     "titulos": {
@@ -11,6 +11,7 @@
     },
     "todasDelDia": "Todas las ediciones de este día",
     "sale": "Sale tres veces al día: a las 7:00, a las 13:00 y a las 19:00, hora de Caracas.",
+    "hechoConIa": "Resumen preparado automáticamente con IA a partir de titulares y piezas de SurEconomics.",
     "cargando": "Cargando el resumen…",
     "vacioTitulo": "Todavía no hay resumen",
     "vacio": "El resumen sale tres veces al día: a las 7:00, a las 13:00 y a las 19:00, hora de Caracas.",
@@ -26,6 +27,13 @@
     "porDolar": "Por dólar",
     "lvbp": "LVBP",
     "frase": "Frase del día",
-    "ultimo": "Ver el último resumen"
+    "ultimo": "Ver el último resumen",
+    "retirada": {
+      "titulo": "Esta edición fue retirada",
+      "texto": "Se retiró después de publicarse y ya no está disponible.",
+      "tituloDia": "El resumen de este día fue retirado",
+      "textoDia": "Se retiró después de publicarse y ya no está disponible.",
+      "cuando": "Se retiró el {cuando}."
+    }
   }
 }

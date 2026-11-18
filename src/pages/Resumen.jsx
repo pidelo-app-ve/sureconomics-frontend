@@ -20,7 +20,8 @@ import "../styles/resumen.css";
  * - `/resumen/<AAAA-MM-DD>/<edicion>`: una edición.
  *
  * Cada punto enlaza a su pieza o a su titular de «Última hora», dentro del sitio y en el
- * idioma de la página; los titulares llevan su fuente. Todo se pinta como texto.
+ * idioma de la página; los titulares llevan su fuente. Todo se pinta como texto. Abajo,
+ * siempre, que lo prepara la IA (auditoría D-04).
  */
 
 const fechaLarga = (fecha, lang) =>
@@ -35,6 +36,28 @@ const horaDeSalida = (iso, lang) =>
         hour: "numeric", minute: "2-digit", timeZone: "America/Caracas",
       }).format(new Date(iso))
     : "";
+
+const EDICIONES = ["manana", "tarde", "noche"];
+
+/** Cuándo se retiró, en la hora de Caracas: «17 de noviembre, 2:03 p. m.». */
+const momentoDeRetirada = (iso, lang) => {
+  const f = iso ? new Date(iso) : null;
+  if (!f || Number.isNaN(f.getTime())) return "";
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "es-VE", {
+    day: "numeric", month: "long", hour: "numeric", minute: "2-digit", timeZone: "America/Caracas",
+  }).format(f);
+};
+
+/**
+ * Qué decir cuando la API no da el resumen. Una edición retirada desde el panel responde
+ * 410 con `resumen_retirado` (el día entero, si se retiró todo lo que salió ese día):
+ * existió y ya no está, que no es lo mismo que «no salió» (404).
+ */
+const estadoDelError = (error) => {
+  if (error?.status === 410 && error?.code === "resumen_retirado") return "retirado";
+  if (error?.status === 404) return "vacio";
+  return "error";
+};
 
 const variacion = (v, lang) => {
   if (typeof v !== "number" || Math.abs(v) < 0.005) return "";
@@ -159,7 +182,7 @@ export const Resumen = () => {
     setEstado({ status: "loading", datos: null, error: null });
     getResumen(fecha, edicion)
       .then((r) => vivo && setEstado({ status: "success", datos: r?.data ?? r, error: null }))
-      .catch((error) => vivo && setEstado({ status: error?.status === 404 ? "vacio" : "error", datos: null, error }));
+      .catch((error) => vivo && setEstado({ status: estadoDelError(error), datos: null, error }));
     return () => {
       vivo = false;
     };
@@ -169,13 +192,21 @@ export const Resumen = () => {
   // El día entero trae `ediciones` (en su orden: la más reciente va arriba); una sola, no.
   const delDia = Array.isArray(datos?.ediciones);
   const ediciones = delDia ? [...datos.ediciones].reverse() : datos ? [datos] : [];
-  const titulo = delDia
+  const retirado = status === "retirado";
+  // Retirada, no llegan datos: el título sale de la dirección (la API ya la dio por buena).
+  const edicionPedida = datos?.edicion ?? (retirado && EDICIONES.includes(edicion) ? edicion : null);
+  const titulo = delDia || (retirado && !edicionPedida)
     ? t("resumen.tituloDia")
-    : datos?.edicion
-      ? t(`resumen.titulos.${datos.edicion}`)
+    : edicionPedida
+      ? t(`resumen.titulos.${edicionPedida}`)
       : t("resumen.titulo");
+  const retiradoEn = retirado ? momentoDeRetirada(error?.details?.retirado_en, lang) : "";
 
-  useMetaPagina({ title: t("resumen.meta", { titulo, marca: BRAND.name }), description: t("resumen.descripcion") });
+  useMetaPagina({
+    title: t("resumen.meta", { titulo, marca: BRAND.name }),
+    description: t("resumen.descripcion"),
+    noindex: retirado,
+  });
 
   return (
     // Mientras carga, una pantalla de alto: el pie no asoma bajo «Cargando» para que el
@@ -189,10 +220,26 @@ export const Resumen = () => {
             {!delDia && datos.sale_a_las ? <span className="se-res__hora"> · {horaDeSalida(datos.sale_a_las, lang)}</span> : null}
           </p>
         ) : null}
+        {retirado && fecha ? <p className="se-res__fecha">{fechaLarga(fecha, lang)}</p> : null}
 
         {status === "loading" ? <LoadingState title={t("resumen.cargando")} /> : null}
         {status === "error" ? (
           <ErrorState title={t("resumen.error")} error={error} onRetry={() => window.location.reload()} />
+        ) : null}
+        {retirado ? (
+          <>
+            {/* Sin motivo ni nombres: eso es del panel. */}
+            <EmptyState
+              title={edicionPedida ? t("resumen.retirada.titulo") : t("resumen.retirada.tituloDia")}
+              description={[
+                edicionPedida ? t("resumen.retirada.texto") : t("resumen.retirada.textoDia"),
+                retiradoEn ? t("resumen.retirada.cuando", { cuando: retiradoEn }) : "",
+              ].filter(Boolean).join(" ")}
+            />
+            <p className="se-res__nota">
+              <Enlace to="/resumen">{t("resumen.ultimo")}</Enlace>
+            </p>
+          </>
         ) : null}
         {status === "vacio" ? (
           <>
@@ -225,6 +272,8 @@ export const Resumen = () => {
               </p>
             ) : null}
             <p className="se-res__nota">{t("resumen.sale")}</p>
+            {/* Etiqueta de IA (auditoría D-04): lo arma la IA, no lo redacta nadie. */}
+            <p className="se-res__nota">{t("resumen.hechoConIa")}</p>
           </>
         ) : null}
       </div>

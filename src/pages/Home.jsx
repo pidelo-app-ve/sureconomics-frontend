@@ -22,8 +22,8 @@ import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { pedirCotizaciones } from "../hooks/useMonedas";
 import { precargarTitulares } from "../hooks/useHeadlines";
-import { precargarLvbp } from "../components/lvbp/MarcadorLvbp";
 import { useTaxonomy } from "../hooks/useTaxonomy";
+import { trasLaFoto } from "../lib/trasLaFoto";
 import { ESPACIOS } from "../services/publicidadService";
 import { AnuncioEntreTandas, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
 
@@ -119,6 +119,8 @@ const PASO = {
    portada. Con dos basta. */
 /** Donde la primera plana va a tres columnas y hay sitio bajo las monedas. */
 const TRES_COLUMNAS = "(min-width: 960px)";
+/** Donde «Lo más leído» va al lado de las noticias y no debajo (`.se-noticias--con-carril`). */
+const CARRIL_AL_LADO = "(min-width: 1024px)";
 
 const coincide = (consulta) =>
   typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(consulta).matches;
@@ -182,17 +184,20 @@ export const Home = () => {
   // decide al cargar y ni se pide en el teléfono, para no darle un anunciante a un
   // hueco que no se pinta.
   const [tarjetaBajoMonedas] = useState(() => coincide(TRES_COLUMNAS));
+  const [carrilAlLado] = useState(() => coincide(CARRIL_AL_LADO));
   const taxonomy = useTaxonomy();
   // La portada pide solo lo que pinta (ver `usePieces`) hasta que hace falta la lista
   // entera (abajo, `hacenFaltaTodas`).
   const [todas, setTodas] = useState(false);
-  const { items: pieces, status, error, faltan } = usePieces({ portada: !todas });
-  // La primera plana y el béisbol se montan cuando ya están las piezas y los temas, y lo
-  // que pintan se pedía entonces. Se adelanta aquí, a la vez que las piezas: las mismas
-  // peticiones compartidas que después leen ellos, sin pedir nada dos veces.
+  // Lo de debajo del pliegue espera a la foto de la apertura solo en el teléfono: donde la
+  // plana va a tres columnas, la opinión (arriba a la derecha) sale de esas listas.
+  const { items: pieces, status, error, faltan } = usePieces({ portada: !todas, aplazar: !tarjetaBajoMonedas });
+  // La primera plana se monta cuando ya están las piezas, y lo que pinta se pedía
+  // entonces. Se adelanta aquí, a la vez que las piezas: las mismas peticiones
+  // compartidas que después lee ella, sin pedir nada dos veces. El béisbol ya no se
+  // adelanta: va debajo del pliegue y espera a la foto de la apertura (`useLvbp`).
   useEffect(() => {
     pedirCotizaciones();
-    precargarLvbp();
   }, []);
   useEffect(() => {
     precargarTitulares(lang);
@@ -205,7 +210,8 @@ export const Home = () => {
   };
   const { temas, geos, query, results, setSelection, setQuery, reset, isFiltered } =
     useContentFilter(pieces, tree);
-  const masLeidas = useMasLeidas();
+  // En el teléfono el carril va debajo de las noticias: espera a la foto de la apertura.
+  const masLeidas = useMasLeidas(7, { aplazar: !carrilAlLado });
 
   // El explorador solo se pinta con `?buscar=1` en la URL (la lupa de la cabecera).
   //
@@ -222,6 +228,8 @@ export const Home = () => {
   const desdeLaLupa = Boolean(ubicacion.state?.desdeLaLupa);
   const buscadorAbierto = parametros.get("buscar") === "1";
   const [cajon, setCajon] = useState(buscadorAbierto ? "abierto" : "cerrado");
+  // Si se llegó con el cajón abierto (un enlace con `?buscar=1`): ver `cargando`, abajo.
+  const [conBuscadorAlLlegar] = useState(buscadorAbierto);
   // Cuántas veces se ha abierto: la clave del explorador, para que vuelva a montarse (y
   // a enfocar el campo) al reabrir aunque el cierre anterior no hubiera terminado.
   const [aperturas, setAperturas] = useState(0);
@@ -230,11 +238,20 @@ export const Home = () => {
   useEffect(() => {
     // El aviso de que no llegó dura lo que el cajón abierto: al cerrarlo se vuelve a probar.
     if (Buscador === SinBuscador && !buscadorAbierto) setBuscador(null);
-    if (Buscador || (status !== "success" && !buscadorAbierto)) return;
-    cargarBuscador().then(
-      (componente) => setBuscador(() => componente),
-      () => buscadorAbierto && setBuscador(() => SinBuscador)
-    );
+    if (Buscador || (status !== "success" && !buscadorAbierto)) return undefined;
+    // Sin el cajón abierto, el código del buscador espera también a la foto de la
+    // apertura: bajarlo a la vez le quitaba ancho de banda (ver `trasLaFoto`).
+    let vigente = true;
+    (buscadorAbierto ? Promise.resolve() : trasLaFoto()).then(() => {
+      if (!vigente) return;
+      cargarBuscador().then(
+        (componente) => setBuscador(() => componente),
+        () => buscadorAbierto && setBuscador(() => SinBuscador)
+      );
+    });
+    return () => {
+      vigente = false;
+    };
   }, [status, buscadorAbierto, Buscador]);
   useEffect(() => {
     if (buscadorAbierto) {
@@ -382,6 +399,11 @@ export const Home = () => {
   const nombrePlural = (formatoApi) =>
     (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
     nombreDeFormato(formatoApi);
+  // Por eso, en español, las secciones de abajo esperan a los temas: pintadas antes,
+  // «Informes» pasaba a «Informes y reportes» delante del lector. Mientras tanto ocupa su
+  // sitio una pantalla de alto, como al cargar: lo de detrás no sube y luego baja. La
+  // plana no espera (ver `cargando`).
+  const esperanNombres = lang === "es" && taxonomy.status === "loading";
 
   // Los huecos de la portada, declarados de una vez: el sorteo necesita ver la
   // pagina entera para no repetir anunciante entre el banner y la tarjeta.
@@ -412,13 +434,19 @@ export const Home = () => {
   const hayNoticias = blocks.some((b) => b.formatoApi === "noticia");
   const hayEditorial = blocks.some((b) => b.formatoApi === "editorial");
 
-  // Mientras llega el contenido -- y el arbol de temas, sin el cual el filtro de arriba
-  // no se pinta -- la portada guarda una pantalla de alto. Antes no dibujaba nada: el
-  // boletin, los aliados y el pie subian hasta la cabecera y bajaban de golpe al
+  // Mientras llega el contenido la portada guarda una pantalla de alto. Antes no dibujaba
+  // nada: el boletin, los aliados y el pie subian hasta la cabecera y bajaban de golpe al
   // llegar las piezas. Medido, un CLS de 0,9, casi todo de ese salto.
+  //
+  // Los temas (`taxonomy`) no se esperan: la primera plana no los usa, y esperarlos
+  // retrasaba la foto que Google mide en el teléfono (auditoría 17-nov-2026, B-01). Solo
+  // los usan el buscador, que ya los espera para pintarse, y el nombre de las secciones
+  // de abajo, que lo esperan ellas (`esperanNombres`). Salvo si se llegó con el buscador abierto
+  // (`?buscar=1`): ahí el cajón va encima de la plana, y si llegara después la empujaría
+  // hacia abajo. Abrirlo con la portada ya pintada no la vuelve a esconder.
   const cargando =
     status === "loading" ||
-    (status === "success" && pieces.length > 0 && taxonomy.status === "loading");
+    (conBuscadorAlLlegar && status === "success" && pieces.length > 0 && taxonomy.status === "loading");
 
   // El béisbol y los juegos, discretos: solo sin filtro (quien busca algo concreto no
   // vino a jugar), y en el teléfono plegados.
@@ -427,7 +455,7 @@ export const Home = () => {
 
   // El papel cambia de tono, casi sin notarse, con la sección que se está leyendo.
   const portadaRef = useRef(null);
-  useFondoQueCambia(portadaRef, `${status}-${cargando}-${isFiltered}-${cajon}`);
+  useFondoQueCambia(portadaRef, `${status}-${cargando}-${esperanNombres}-${isFiltered}-${cajon}`);
 
   return (
     <main ref={portadaRef} className="se-blog se-portada" role="main">
@@ -542,7 +570,15 @@ export const Home = () => {
       {hayNoticias || isFiltered ? null : <EnLaCalle />}
       {hayNoticias ? null : pausa}
 
-      {(cargando ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
+      {!cargando && esperanNombres && blocks.length ? (
+        <section className="se-section se-portada-cargando" aria-busy="true">
+          <div className="se-container">
+            <LoadingState title={t("portada.inicio.cargando")} />
+          </div>
+        </section>
+      ) : null}
+
+      {(cargando || esperanNombres ? [] : blocks).map(({ formatoApi, items, todos, tandas, total, expandido }) => (
         <Fragment key={formatoApi}>
           <FormatSection
             title={formatoApi === "alpunto" ? t("nav.alPunto") : nombrePlural(formatoApi)}

@@ -11,6 +11,46 @@
             "source": "/categoria/:slug",
             "destination": "/explorar",
             "permanent": true
+        },
+        {
+            "source": "/noticias{/}?",
+            "destination": "/articulos?formato=noticias",
+            "permanent": false
+        },
+        {
+            "source": "/editorial{/}?",
+            "destination": "/articulos?formato=editorial",
+            "permanent": false
+        },
+        {
+            "source": "/entrevistas{/}?",
+            "destination": "/audiovisual?ver=entrevistas",
+            "permanent": false
+        },
+        {
+            "source": "/podcast{/}?",
+            "destination": "/audiovisual?ver=podcast",
+            "permanent": false
+        },
+        {
+            "source": "/en/noticias{/}?",
+            "destination": "/en/articulos?formato=noticias",
+            "permanent": false
+        },
+        {
+            "source": "/en/editorial{/}?",
+            "destination": "/en/articulos?formato=editorial",
+            "permanent": false
+        },
+        {
+            "source": "/en/entrevistas{/}?",
+            "destination": "/en/audiovisual?ver=entrevistas",
+            "permanent": false
+        },
+        {
+            "source": "/en/podcast{/}?",
+            "destination": "/en/audiovisual?ver=podcast",
+            "permanent": false
         }
     ],
     "rewrites": [
@@ -53,10 +93,6 @@
         {
             "source": "/datos/equipo/fotos",
             "destination": "https://sureconomics-backend.onrender.com/equipo/fotos"
-        },
-        {
-            "source": "/datos/admin/diagnostico/cliente",
-            "destination": "https://sureconomics-backend.onrender.com/admin/diagnostico/cliente"
         },
         {
             "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
@@ -123,8 +159,28 @@
             "destination": "/api/sitemap?tipo=noticias"
         },
         {
-            "source": "/((?!assets/)(?!.*\\.[A-Za-z0-9]{1,8}$).*)",
+            "source": "/((?:en/?)?)",
             "destination": "/index.html"
+        },
+        {
+            "source": "/((?:en/)?(?:entorno|el-analista|suscribirse|boletin/baja|quienes-somos|articulos|informes|audiovisual|explorar|educacion|educacion/pago/volver|anunciate|consultoria|contacto|cookies|juegos|pausa|clave|lvbp|monedas|ultima-hora|resumen|backoffice|cuenta|cuenta/(?:entrar|registro|verificar-email|solicitar-codigo|recuperar|perfil|lo-mio|marcadores|temas|envios|envios/nuevo))/?)",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/((?!.*\\.[A-Za-z0-9]{1,8}$)(?:en/)?(?:(?:noticias|articulos|editorial|entrevistas|informes|podcast|articulo|categoria|educacion|resumen)/[^/]+|(?:educacion|resumen)/[^/]+/[^/]+|cuenta/envios/[^/]+(?:/editar)?)/?)",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/((?!.*\\.[A-Za-z0-9]{1,8}$)admin(?:/.*)?)",
+            "destination": "/index.html"
+        },
+        {
+            "source": "/en/((?!.*\\.[A-Za-z0-9]{1,8}$).*)",
+            "destination": "/api/no-encontrada?lang=en"
+        },
+        {
+            "source": "/((?!assets/)(?!.*\\.[A-Za-z0-9]{1,8}$).*)",
+            "destination": "/api/no-encontrada"
         }
     ],
     "headers": [

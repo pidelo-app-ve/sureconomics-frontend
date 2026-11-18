@@ -5,6 +5,7 @@ import { formatearFecha } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { LOGO_LIGA_PEQUENO, TALLAS_LOGO_LIGA, diasParaLaFranja, equipo, escudoDe, fechaDelDia, hayJuegoVivo, horaBonita, tallasDeEscudo } from "../../lib/lvbp";
 import { getLvbp } from "../../services/lvbpService";
+import { trasLaFoto } from "../../lib/trasLaFoto";
 import "./marcadorLvbp.css";
 
 /**
@@ -22,27 +23,13 @@ import "./marcadorLvbp.css";
 
 const CADA = 60_000;
 
-// La portada adelanta la primera petición al montarse, a la vez que las piezas (ver
-// `Home`), y la usa el primer marcador que se monte. Si un marcador pidió hace menos de
-// un minuto, no se adelanta nada; lo adelantado de hace más, ya no vale.
-let adelantada = null;
-let ultima = 0;
-const pedirLvbp = () => {
-  ultima = Date.now();
-  return getLvbp();
-};
-export const precargarLvbp = () => {
-  if (Date.now() - ultima < CADA) return;
-  adelantada = pedirLvbp();
-  adelantada.catch(() => {});
-};
-const tomarAdelantada = () => {
-  const p = Date.now() - ultima < CADA ? adelantada : null;
-  adelantada = null;
-  return p;
-};
-
-export const useLvbp = () => {
+/**
+ * `aplazar`: la franja de la portada va debajo del pliegue, así que su primera petición
+ * espera a la foto que abre la portada (`trasLaFoto`). Antes la portada la adelantaba a
+ * la vez que las piezas, y en el teléfono le quitaba ancho de banda a esa foto. La página
+ * /lvbp pide en seguida: ahí el béisbol es lo primero que se ve.
+ */
+export const useLvbp = ({ aplazar = false } = {}) => {
   const [state, setState] = useState({ status: "loading", datos: null });
   const reloj = useRef(null);
 
@@ -50,7 +37,7 @@ export const useLvbp = () => {
     let vivo = true;
     const pedir = async () => {
       try {
-        const datos = await (tomarAdelantada() ?? pedirLvbp());
+        const datos = await getLvbp();
         if (vivo) setState({ status: "success", datos });
         return datos;
       } catch {
@@ -70,7 +57,10 @@ export const useLvbp = () => {
         programar(await pedir());
       }, CADA);
     };
-    pedir().then(programar);
+    const primera = aplazar ? trasLaFoto().then(() => (vivo ? pedir() : null)) : pedir();
+    primera.then((datos) => {
+      if (vivo) programar(datos);
+    });
     const alVolver = () => {
       if (document.visibilityState === "visible") pedir().then(programar);
     };
@@ -80,7 +70,7 @@ export const useLvbp = () => {
       clearTimeout(reloj.current);
       document.removeEventListener("visibilitychange", alVolver);
     };
-  }, []);
+  }, [aplazar]);
 
   return state;
 };
@@ -199,7 +189,7 @@ TarjetaJuego.defaultProps = { grande: false, children: null };
 /** La franja de la portada. Nada que enseñar → nada que pintar. */
 export const MarcadorLvbp = () => {
   const { t } = useIdioma();
-  const { datos } = useLvbp();
+  const { datos } = useLvbp({ aplazar: true });
   const grupos = diasParaLaFranja(datos?.dias);
   if (!grupos.length) return null;
 

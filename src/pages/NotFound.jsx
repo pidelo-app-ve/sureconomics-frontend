@@ -14,8 +14,9 @@ export const NotFound = () => {
   useMetaPagina({
     title: t("piezas.paginaNoEncontrada.meta.titulo", { marca: BRAND.name }),
     description: t("piezas.paginaNoEncontrada.meta.descripcion"),
-    // Responde 200 (el sitio es una sola página), así que esto es lo que le dice al
-    // buscador que no la guarde.
+    // Una dirección que no existe ya llega con 404 y `noindex` desde el borde
+    // (`api/no-encontrada.js`). Esto queda para cuando se llega navegando dentro del
+    // sitio, sin pasar por el servidor.
     noindex: true,
   });
 

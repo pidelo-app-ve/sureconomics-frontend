@@ -1,0 +1,6 @@
+# Lo que no se sube a Vercel.
+#
+# Las pruebas de las funciones: todo lo que hay en `api/` se despliega como una función,
+# y cada una cuenta para el límite del plan. Las pruebas las corren `npm test` y la CI
+# (GitHub), que no leen este archivo.
+api/*.test.mjs

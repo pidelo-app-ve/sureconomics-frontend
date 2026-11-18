@@ -19,6 +19,7 @@ import { UltimaHoraColumna } from "../titulares/UltimaHoraColumna";
 import { NuestroCanal } from "../canal/NuestroCanal";
 import { AperturaShort } from "../canal/AperturaShort";
 import { esShort, idDeYoutube } from "../../lib/youtube";
+import { alLlegarLaFoto, fotoPrincipalLista, trasLaFoto } from "../../lib/trasLaFoto";
 import { EspacioPublicitario } from "../publicidad";
 import { ESPACIOS } from "../../services/publicidadService";
 import "./primeraPlana.css";
@@ -88,6 +89,56 @@ export const elegirApertura = (piezas, noticias = null, ahora = Date.now()) => {
   const principal = delDia[0].imagenUrl ? delDia[0] : conFoto ?? delDia[0];
   const secundarias = delDia.filter((n) => n.id !== principal.id).slice(0, EN_LA_COLUMNA);
   return { principal, secundarias, fijada: false };
+};
+
+/** Si la apertura abre con un short en vertical (`AperturaShort`) y no con su foto. */
+const abreConShort = (pieza, rota) => !rota && esShort(pieza?.videoUrl);
+
+const precargadas = new Set();
+/** Los `<link rel=preload>` puestos en la cabecera, para quitarlos cuando ya no sirven. */
+const enlaces = new Set();
+
+/** Quita las precargas: al llegar la foto ya no hacen nada, y fuera de la portada, menos. */
+export const quitarPrecargas = () => {
+  enlaces.forEach((enlace) => enlace.remove());
+  enlaces.clear();
+};
+
+/**
+ * La foto de la apertura, pedida en cuanto se sabe cuál es: al llegar la primera página
+ * (`usePieces`), y no cuando React llega a pintarla, después de armar la portada entera
+ * (en un teléfono lento, un rato que no se ha medido). Con el mismo `srcset` y `sizes`
+ * que pinta `CardMedia`, así que el navegador elige la misma talla y la `<img>` la
+ * encuentra ya pedida.
+ *
+ * Sin `href` cuando hay `srcset`, a propósito: un navegador que no entiende
+ * `imagesrcset` se salta la precarga entera, en vez de bajar la talla grande y luego otra
+ * para la `<img>`. Ante la duda (un short, sin foto) no se precarga nada.
+ *
+ * El enlace se quita al llegar la foto (`alLlegarLaFoto`) o al salir de la portada
+ * (`PrimeraPlana` al desmontarse).
+ */
+export const precargarApertura = (piezas) => {
+  if (typeof document === "undefined") return;
+  const { principal } = elegirApertura(piezas);
+  if (!principal?.imagenUrl || esShort(principal.videoUrl)) return;
+  const src = imagenAncho(principal.imagenUrl, 1200);
+  if (precargadas.has(src)) return;
+  precargadas.add(src);
+  const enlace = document.createElement("link");
+  enlace.setAttribute("rel", "preload");
+  enlace.setAttribute("as", "image");
+  const srcset = imagenSrcSet(principal.imagenUrl, ANCHOS, principal.imagenAnchoOriginal);
+  if (srcset) {
+    enlace.setAttribute("imagesrcset", srcset);
+    enlace.setAttribute("imagesizes", SIZES_PRINCIPAL);
+  } else {
+    enlace.setAttribute("href", src);
+  }
+  enlace.setAttribute("fetchpriority", "high");
+  document.head.appendChild(enlace);
+  enlaces.add(enlace);
+  alLlegarLaFoto(quitarPrecargas);
 };
 
 const Monedas = ({ monedas }) => {
@@ -177,18 +228,37 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
 
   // La siguiente foto se pide antes de que le toque, con el mismo `srcset` y `sizes`
   // que pinta `CardMedia`: el navegador la encuentra en caché y el barrido no enseña
-  // el relleno de color.
+  // el relleno de color. Pero después de la que abre la portada (`trasLaFoto`): pedida a
+  // la vez, le quitaba ancho de banda a la foto que Google mide. Le toca a los segundos.
   const siguiente = rota ? conjunto[(indice + 1) % conjunto.length] : null;
   useEffect(() => {
-    if (!siguiente?.imagenUrl) return;
-    const img = new Image();
-    const srcset = imagenSrcSet(siguiente.imagenUrl, ANCHOS, siguiente.imagenAnchoOriginal);
-    if (srcset) {
-      img.sizes = SIZES_PRINCIPAL;
-      img.srcset = srcset;
-    }
-    img.src = imagenAncho(siguiente.imagenUrl, 1200);
+    if (!siguiente?.imagenUrl) return undefined;
+    let vigente = true;
+    trasLaFoto().then(() => {
+      if (!vigente) return;
+      const img = new Image();
+      const srcset = imagenSrcSet(siguiente.imagenUrl, ANCHOS, siguiente.imagenAnchoOriginal);
+      if (srcset) {
+        img.sizes = SIZES_PRINCIPAL;
+        img.srcset = srcset;
+      }
+      img.src = imagenAncho(siguiente.imagenUrl, 1200);
+    });
+    return () => {
+      vigente = false;
+    };
   }, [siguiente?.imagenUrl, siguiente?.imagenAnchoOriginal]);
+
+  // Fuera de la portada, la precarga de su foto ya no tiene a quién servir.
+  useEffect(() => quitarPrecargas, []);
+
+  // Lo de debajo del pliegue espera a la foto de la apertura (`trasLaFoto`), que avisa al
+  // cargar (`CardMedia`). Una apertura sin foto, o con su short, no tiene a quién
+  // esperar: avisa aquí.
+  const sinFoto = Boolean(principal) && (!principal.imagenUrl || abreConShort(principal, rota));
+  useEffect(() => {
+    if (sinFoto) fotoPrincipalLista();
+  }, [sinFoto]);
 
   if (!principal) return null;
   const actual = rota ? conjunto[Math.min(indice, conjunto.length - 1)] : principal;
@@ -203,7 +273,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
   // Una apertura cuyo video es un short abre en vertical (`AperturaShort`). Solo quieta:
   // un video que se mueve en medio de la rotación de cuatro piezas sería un mareo, así
   // que para salir así la redacción la fija.
-  const short = !rota && esShort(actual.videoUrl) ? idDeYoutube(actual.videoUrl) : null;
+  const short = abreConShort(actual, rota) ? idDeYoutube(actual.videoUrl) : null;
 
   return (
     <section className="se-plana" aria-labelledby="plana-titulo">

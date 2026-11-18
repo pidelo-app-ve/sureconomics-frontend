@@ -13,7 +13,7 @@
  * la publicidad, las estadísticas) sigue yendo directo a la API: guardarlo en el borde
  * daría los datos de una persona a otra. La misma lista, regla por regla, está en
  * `vercel.json`; si se añade aquí una ruta, hay que añadirla allí (lo que el cliente mande a
- * `/datos` sin regla allí acabaría en el `index.html` del sitio).
+ * `/datos` sin regla allí acabaría en la 404 del sitio, `api/no-encontrada.js`).
  *
  * Sin importaciones, para poder probarlo con `node` solo (`quiosco.test.mjs`).
  */

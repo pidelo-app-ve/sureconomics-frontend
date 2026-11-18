@@ -366,6 +366,8 @@ export const AdminTitulares = () => {
   const pausa = pausaDeLaIa(resumen, ciclo, Date.now());
   const descartadas = descartadasDeNuevos(ciclo);
   const juez = ajustes?.juez_modo;
+  // Un servidor sin el juez no manda `juez_modo`: el selector no aparenta ningún modo.
+  const hayJuez = typeof juez === "string" && juez !== "";
   const sinJuez = avisoDelJuez(ciclo?.juez);
   const rechazos = Array.isArray(ciclo?.juez_rechazos) ? ciclo.juez_rechazos : [];
 
@@ -416,25 +418,31 @@ export const AdminTitulares = () => {
             </div>
             <div className="se-admin-filters__field se-tit-juez" {...ancla("juez")}>
               <label className="se-form-label" htmlFor="tit-juez">Juez de los titulares</label>
-              <select id="tit-juez" className="se-form-control" value={juez ?? ""} disabled={!puedeJuez || ocupado}
+              <select id="tit-juez" className="se-form-control" value={hayJuez ? juez : ""}
+                disabled={!hayJuez || !puedeJuez || ocupado}
                 onChange={(e) => {
                   const modo = e.target.value;
+                  if (!hayJuez || !MODOS_DEL_JUEZ[modo]) return;
                   cambiar("juez_modo", modo, {
                     titulo: `Juez: ${MODOS_DEL_JUEZ[modo].nombre.toLowerCase()}`,
                     texto: `${MODOS_DEL_JUEZ[modo].texto} Cuenta desde el próximo ciclo.`,
                     boton: "Cambiar",
                   });
                 }}>
-                {juez && !MODOS_DEL_JUEZ[juez] ? <option value={juez}>{juez}</option> : null}
-                {Object.entries(MODOS_DEL_JUEZ).map(([clave, m]) => (
-                  <option key={clave} value={clave}>
-                    {m.nombre}
-                  </option>
-                ))}
+                {!hayJuez ? <option value="">No disponible en este servidor</option> : null}
+                {hayJuez && !MODOS_DEL_JUEZ[juez] ? <option value={juez}>{juez}</option> : null}
+                {hayJuez
+                  ? Object.entries(MODOS_DEL_JUEZ).map(([clave, m]) => (
+                    <option key={clave} value={clave}>
+                      {m.nombre}
+                    </option>
+                  ))
+                  : null}
               </select>
               <span className="se-admin-meta-hint">
-                {MODOS_DEL_JUEZ[juez]?.texto ?? ""}
-                {puedeJuez ? "" : " Solo un administrador lo cambia."}
+                {hayJuez
+                  ? `${MODOS_DEL_JUEZ[juez]?.texto ?? ""}${puedeJuez ? "" : " Solo un administrador lo cambia."}`
+                  : "Este servidor todavía no tiene el juez."}
               </span>
             </div>
           </div>

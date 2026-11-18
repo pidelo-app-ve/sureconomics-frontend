@@ -5649,7 +5649,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    a los dos días el lector deja de mirar la página entera. */
 
 /* Fondo blanco y no `--se-offwhite`. Parece un detalle y era el fallo: las tarjetas
-   de contenido (`.se-card--default`) son #f7f7f5, exactamente el mismo gris, así que
+   de contenido eran #f7f7f5, exactamente el mismo gris, así que
    en un listado el anuncio se leía como una tarjeta de la redacción a la que le
    faltaba la foto. Blanco sobre el gris de la página lo separa sin subirle el
    contraste, que es lo que no puede hacer: un anuncio que grita más que la pieza que

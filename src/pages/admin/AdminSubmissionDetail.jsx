@@ -467,16 +467,19 @@ export const AdminSubmissionDetail = () => {
                 <strong>{textoFirmaDeColaborador(firma.nombre)}.</strong>
               ) : (
                 <>
-                  Si la acepta, sale <strong>{firmadaPorColaborador(firma.nombre)}</strong>
+                  Si la acepta, se publica firmada «<strong>{firma.nombre}</strong>»
                   {firma.tieneFoto
                     ? ", con la foto de su perfil."
-                    : ". Todavía no tiene foto de perfil: saldrá con su nombre y el icono de persona."}
+                    : ", sin foto: todavía no tiene en su perfil (sale el icono de persona)."}{" "}
+                  El nombre y la foto se copian de su cuenta y no cambian solos; la firma se puede
+                  editar en la pieza, como cualquier otra.
                 </>
-              )}
+              )}{" "}
+              <span className="se-admin-meta-hint">«(colaborador)» es una marca del panel: la web no la enseña.</span>
             </p>
           ) : pendiente ? (
             <p className="se-text-body" role="note">
-              La cuenta de quien la mandó no tiene nombre: la pieza saldría sin firma.
+              La cuenta de quien la mandó no tiene nombre: no se puede aceptar hasta que lo complete en su perfil.
             </p>
           ) : null}
           <form className="se-contact-form" onSubmit={handleSave}>

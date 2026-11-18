@@ -369,8 +369,8 @@ const fechaLarga = (iso, idioma = "es") => {
  * elegido es peor que el genérico.
  */
 export const fichaDeNoticia = (pieza, { url, imagen, idioma = "es" }) => {
-  // `byline` ya trae la firma que ve el lector: en la pieza de un colaborador, su nombre
-  // de hoy (la resuelve la API). Esa es siempre una persona, se llame como se llame.
+  // En la pieza de un lector (`firma_de_colaborador`), `byline` es el nombre que se copió
+  // de su cuenta al aceptarla: una persona, se llame como se llame.
   const autor = String(pieza.byline || "").trim();
   const esRedaccion =
     !autor || (!pieza.firma_de_colaborador && /redacci[oó]n|sureconomics/i.test(autor));

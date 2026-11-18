@@ -241,6 +241,37 @@ await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Sureconomics Fan", firma_de
   check("un colaborador nunca se confunde con el medio", ld.author["@type"] === "Person", JSON.stringify(ld.author));
 });
 
+// El nombre de un colaborador lo escribió un lector: no puede colar HTML ni romper la
+// ficha. Ni tags, ni scripts de más, ni patrones de `String.replace` ($&, $1) que
+// expandan otra cosa. La ficha (JSON-LD) devuelve el nombre tal cual.
+for (const nombre of [
+  `</script><script>alert(1)</script>`,
+  `"><img src=x onerror=alert(1)>`,
+  `Ana' onmouseover='alert(1)`,
+  "$& $' $` $<x> $1",
+  "\u2028</SCRIPT >\u2029",
+]) {
+  await conFetch(fetchNormal({ ...CON_CUERPO, byline: nombre, firma_de_colaborador: true }), async () => {
+    const res = respuestaFalsa();
+    await handler({ query: { seccion: "articulos", slug: "x" } }, res);
+    const h = res.body;
+    const scripts = (h.match(/<script\b/gi) || []).length;
+    let autor = null;
+    try {
+      autor = JSON.parse((h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1]).author;
+    } catch { /* falla abajo */ }
+    check(`firma de lector sin inyección: ${JSON.stringify(nombre)}`,
+      !/<img src=x|<script>alert/i.test(h) && scripts === 3 && autor?.name === nombre.trim(),
+      `scripts=${scripts} autor=${JSON.stringify(autor)}`);
+  });
+}
+check("los patrones de replace salen literales en la firma",
+  await conFetch(fetchNormal({ ...CON_CUERPO, byline: "$& $1", firma_de_colaborador: true }), async () => {
+    const res = respuestaFalsa();
+    await handler({ query: { seccion: "articulos", slug: "x" } }, res);
+    return res.body.includes('<meta name="author" content="$&amp; $1" />') && res.body.includes("Por $&amp; $1");
+  }));
+
 // —— 2b. La descripción sale de donde la haya ——
 //
 // Tres de ochenta y cuatro piezas en producción tenían resumen. Sin respaldo, la

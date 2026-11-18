@@ -2,9 +2,10 @@
  * La firma de las piezas que salen de una propuesta de un lector.
  *
  * Decisión de Ramón (17-nov-2026): la pieza aceptada es crédito de quien la escribió y
- * sale firmada con su nombre y su foto. El servidor ya resuelve la firma pública
- * (`byline` y `byline_photo` traen las del lector), así que el sitio no necesita nada
- * aparte; esto es solo para que el panel lo diga claro: «Firmada por … (colaborador)».
+ * sale firmada con su nombre y apellido y su foto. El servidor los copia de su cuenta a
+ * la firma de la pieza al aceptarla (`byline`, `byline_photo`) y se quedan ahí: la web
+ * los pinta como cualquier firma. Esto es solo para el panel, que lo dice claro:
+ * «Firmada por … (colaborador)». La web pública no enseña esa marca.
  */
 
 const limpio = (valor) => String(valor ?? "").trim();
@@ -24,8 +25,9 @@ export const textoFirmaDeColaborador = (nombre) => {
 /**
  * Con qué firma sale (o saldrá, si se acepta) la pieza de una propuesta.
  *
- * Aceptada, la que tiene la pieza publicada (`firma_publicada`, el nombre de hoy de la
- * cuenta). Antes, el nombre de quien la mandó (`autor.nombre`).
+ * Aceptada, la que tiene la pieza publicada (`firma_publicada`: la copiada de su cuenta
+ * al aceptarla, o la que puso después la redacción). Antes, el nombre de quien la mandó
+ * (`autor.nombre`), que es lo que se copiará.
  *
  * @param {Record<string, any> | null | undefined} propuesta - la fila del panel
  * @returns {{ nombre: string, publicada: boolean, tieneFoto: boolean }}

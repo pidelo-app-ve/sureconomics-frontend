@@ -49,6 +49,21 @@ export const createAdminPost = async (body, idempotencyKey) =>
 export const patchAdminPost = async (postId, body) =>
     unwrapEntity(await adminRequest(`/admin/posts/${postId}`, { method: "PATCH", json: body }));
 
+/**
+ * La pieza de un lector (propuesta aceptada): copia otra vez a la firma el nombre y la
+ * foto que tiene hoy su cuenta. Guarda al momento y devuelve la pieza.
+ * @param {string|number} postId
+ */
+export const usarFirmaDeSuCuenta = async (postId) =>
+    unwrapEntity(await adminRequest(`/admin/posts/${postId}/colaborador/usar-su-cuenta`, { method: "POST" }));
+
+/**
+ * La pieza deja de contar como del lector que la propuso. La firma no se toca.
+ * @param {string|number} postId
+ */
+export const quitarVinculoConElLector = async (postId) =>
+    unwrapEntity(await adminRequest(`/admin/posts/${postId}/colaborador`, { method: "DELETE" }));
+
 /** Si el servidor puede traducir con Claude (tiene la clave): `{ disponible, modelo }`. */
 export const getTraductor = async () => unwrapEntity(await adminRequest("/admin/posts/traducir"));
 

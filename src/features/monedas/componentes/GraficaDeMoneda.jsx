@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { useId, useMemo, useState } from "react";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { formatearFecha, formatearNumero } from "../../i18n/motor";
-import { porDolar } from "../../lib/monedas";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { formatearFecha, formatearNumero } from "../../../i18n/motor";
+import { porDolar } from "../formato";
 import { Flecha } from "./FichaDeMoneda";
 import "./graficaDeMoneda.css";
 

@@ -107,7 +107,7 @@ const rutasPublicas = (lang) => [
             // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
             { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp", { zonas: ["lvbp"], lang }) },
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
-            { path: "monedas", lazy: pagina(() => import("./pages/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
+            { path: "monedas", lazy: pagina(() => import("./features/monedas/paginas/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
             // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
             { path: "ultima-hora", lazy: pagina(() => import("./pages/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
             // El resumen diario, en tres ediciones: la última, las de un día o una (adonde

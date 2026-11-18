@@ -1,8 +1,14 @@
-import { userPublicRequest } from "../lib/userApi";
+import { userPublicRequest } from "../../lib/userApi";
+
+/**
+ * Lo que el sitio le pide al servidor de las monedas, sin sesión
+ * (`app/dominios/monedas/rutas.py` en el backend). Lo del panel va en `admin/api.js`:
+ * un módulo que usan el sitio y el panel viaja entero en el paquete del sitio.
+ */
 
 /**
  * Las monedas de la región: la última cotización de cada una (unidades por un dólar),
- * su fuente y su fecha. Sin sesión. El servidor guarda una foto por hora.
+ * su fuente y su fecha. El servidor guarda una foto por hora.
  */
 export const getMonedas = async () => userPublicRequest("/monedas");
 

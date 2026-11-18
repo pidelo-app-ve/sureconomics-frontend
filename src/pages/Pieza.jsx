@@ -9,7 +9,7 @@ import { useMetaPagina } from "../i18n/useMetaPagina";
 import { ErrorState, LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
-import { FichaDeMoneda } from "../components/monedas/FichaDeMoneda";
+import { FichaDeMoneda, TablaDeMonedas, useMonedas } from "../features/monedas";
 import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
 import {
   Media,
@@ -22,7 +22,6 @@ import {
 } from "../components/piece";
 import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
 import { UltimaHoraColumna } from "../components/titulares/UltimaHoraColumna";
-import { TablaDeMonedas, useMonedas } from "../components/monedas/TablaDeMonedas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { temaPrincipal } from "../lib/contentFilter";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";

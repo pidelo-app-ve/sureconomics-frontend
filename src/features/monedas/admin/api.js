@@ -1,8 +1,8 @@
-import { adminRequest } from "../lib/api";
-import { unwrapEntity } from "./adminResponseUtils";
+import { adminRequest } from "../../../lib/api";
+import { unwrapEntity } from "../../../services/adminResponseUtils";
 
 /**
- * Las monedas de la región en el panel (`routes/admin/monedas.py` en el backend).
+ * Las monedas de la región en el panel (`app/dominios/monedas/rutas.py` en el backend).
  *
  * Una lectura que no cuadra (fuera de su banda, o un salto grande frente al último dato
  * bueno) queda «sospechosa»: no se publica hasta que alguien la acepta como buena o la

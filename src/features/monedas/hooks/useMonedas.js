@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getHistoriaMoneda, getMonedas } from "../services/monedasService";
+import { getHistoriaMoneda, getMonedas } from "../api";
 
 /**
  * Las cotizaciones, pedidas una vez por visita y compartidas: la primera plana, el

@@ -82,7 +82,7 @@ export const PASOS_CINTA = [
       "juntas en una fila y lo que se decida vale para todas.",
     puntos: [
       "Aceptar como buena: si la cifra es real, por ejemplo con una devaluación. Se publica y la próxima lectura se compara con ella.",
-      "Ocultar esta cotización: si es un error del banco o de la lectura. No se publica, y si la fuente vuelve a dar la misma cifra en los próximos días, tampoco: vuelve aquí para decidir.",
+      "Ocultar esta cotización: si es un error del banco o de la lectura. No se publica, y si la fuente vuelve a dar la misma cifra en los próximos días, tampoco: se guarda oculta sin volver a preguntar.",
       "Un aviso por el bot cuando empieza una racha, y un recordatorio al día mientras quede algo sin decidir.",
       "Lo que se decide aquí se ve en todas partes en unos minutos.",
     ],

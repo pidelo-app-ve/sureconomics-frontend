@@ -31,7 +31,7 @@ const ACCIONES = { aceptar: aceptarCotizacion, ocultar: ocultarCotizacion, desha
  * - «Aceptar como buena» si es de verdad (una devaluación): se publica y pasa a ser la
  *   referencia de la lectura siguiente;
  * - «Ocultar esta cotización» si es un error. Si la fuente vuelve a dar la misma cifra
- *   estos días, tampoco se publica: vuelve aquí como sospechosa.
+ *   estos días, tampoco se publica: se guarda oculta con las demás, sin volver a preguntar.
  * Una racha (lecturas malas seguidas de la misma fuente, desde la última buena) se decide
  * de una vez. Lo oculto se lista abajo con quién y cuándo, y se puede deshacer.
  *
@@ -93,7 +93,7 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
                 : `${cifra(fila.valor)} por dólar (${fila.fuente}) no se publicará. En el sitio sigue el último dato bueno. ${EN_MINUTOS}`,
             warning: [
                 !publicada && fila.pendientes > 1 ? `Vale también para las ${fila.pendientes - 1} lecturas anteriores de esta racha.` : "",
-                "Si la fuente vuelve a dar esta misma cifra en los próximos días, tampoco se publicará: volverá aquí para decidir.",
+                "Si la fuente vuelve a dar esta misma cifra en los próximos días, tampoco se publicará: se guardará oculta con esta, sin volver a preguntar.",
             ]
                 .filter(Boolean)
                 .join(" "),

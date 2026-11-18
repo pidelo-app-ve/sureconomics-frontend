@@ -11,6 +11,7 @@ export { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
  *   status?: string,
  *   q?: string,
  *   unclassified?: boolean,
+ *   firmaDesactualizada?: boolean,
  * }} [params]
  */
 export const listAdminPosts = async (params = {}) => {
@@ -24,6 +25,10 @@ export const listAdminPosts = async (params = {}) => {
             // The re-tagging backlog: pieces carried over from the old
             // categorisation that nobody has given a topic yet.
             unclassified: params.unclassified ? 1 : undefined,
+            // Piezas de lectores cuya cuenta cambió de nombre o foto desde que se
+            // aceptaron (su firma está congelada). El servidor lo atiende solo, sin
+            // los demás filtros.
+            firma_desactualizada: params.firmaDesactualizada ? 1 : undefined,
         },
     });
     return unwrapListResponse(raw);

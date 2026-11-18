@@ -24,6 +24,18 @@ export const PASOS_CONTENIDO = [
     ],
   },
   {
+    clave: "colaboradores",
+    titulo: "Piezas de lectores con cambios en su cuenta",
+    texto:
+      "Cuando se acepta la propuesta de un lector, su nombre y su foto se copian a la firma y se quedan así. " +
+      "Si después los cambia en su cuenta, la pieza no cambia sola: aparece aquí, con un contador, hasta " +
+      "que alguien decide. Sale solo cuando hay alguna.",
+    puntos: [
+      "El botón: enseña solo esas piezas. «Ver todas las piezas» vuelve al listado completo.",
+      "En la pieza, «Firma y foto»: usar el nombre y la foto nuevos de su cuenta, dejar la firma como está o quitar el vínculo con el lector.",
+    ],
+  },
+  {
     clave: "lista",
     titulo: "La lista",
     puntos: [

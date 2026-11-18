@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { ErrorState, LoadingState } from "../content";
-import { useAdminToast } from "../../context/AdminToastContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { porDolar } from "../../lib/monedas";
-import { recorridoCinta } from "../../lib/guias/guiaCinta";
+import { ErrorState, LoadingState } from "../../../components/content";
+import { useAdminToast } from "../../../context/AdminToastContext";
+import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { adminErrorMessage } from "../../../lib/adminErrorMessage";
+import { porDolar } from "../formato";
+import { recorridoCinta } from "../../../lib/guias/guiaCinta";
 import {
     aceptarCotizacion,
     deshacerOcultar,
     getMonedasDelPanel,
     ocultarCotizacion,
-} from "../../services/monedasPanelService";
+} from "./api";
 
 const { ancla } = recorridoCinta;
 

@@ -1,14 +1,14 @@
 import { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { BRAND } from "../data/surEconomicsMock";
-import { formatearFecha } from "../i18n/motor";
-import { porDolar } from "../lib/monedas";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
-import { getMonedas } from "../services/monedasService";
+import { BRAND } from "../../../data/surEconomicsMock";
+import { formatearFecha } from "../../../i18n/motor";
+import { porDolar } from "../formato";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { getMonedas } from "../api";
 import { useHistoriaMoneda } from "../hooks/useMonedas";
-import { GraficaDeMoneda } from "../components/monedas/GraficaDeMoneda";
-import { Flecha, variacionTexto } from "../components/monedas/FichaDeMoneda";
+import { GraficaDeMoneda } from "../componentes/GraficaDeMoneda";
+import { Flecha, variacionTexto } from "../componentes/FichaDeMoneda";
 import "./monedas.css";
 
 /**
@@ -16,8 +16,8 @@ import "./monedas.css";
  *
  * Una tabla y nada más: el valor, la variación contra el día anterior, la fuente y la
  * fecha del dato. Las cifras son las que guarda el recolector cada hora
- * (`monedas_service.py`); la misma regla del cintillo manda aquí: un dato viejo se
- * enseña como «sin dato reciente», nunca como una cifra con fecha de hoy.
+ * (`app/dominios/monedas` en el backend); la misma regla del cintillo manda aquí: un
+ * dato viejo se enseña como «sin dato reciente», nunca como una cifra con fecha de hoy.
  *
  * Cada fila se abre con la gráfica de sus últimos 30 días (`GraficaDeMoneda`): el
  * nombre de la moneda es el botón. Las de paridad fija no tienen gráfica.

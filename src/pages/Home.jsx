@@ -20,7 +20,7 @@ import { CargarMas } from "../components/comun/CargarMas";
 import { enTandas } from "../lib/tandas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
-import { pedirCotizaciones } from "../hooks/useMonedas";
+import { pedirCotizaciones } from "../features/monedas";
 import { precargarTitulares } from "../hooks/useHeadlines";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { trasLaFoto } from "../lib/trasLaFoto";

@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
-import { Enlace } from "../Enlace";
-import { useCotizaciones } from "../../hooks/useMonedas";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { formatearNumero } from "../../i18n/motor";
-import { porDolar } from "../../lib/monedas";
+import { Enlace } from "../../../components/Enlace";
+import { useCotizaciones } from "../hooks/useMonedas";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { formatearNumero } from "../../../i18n/motor";
+import { porDolar } from "../formato";
 import "./fichaDeMoneda.css";
 
 /**

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
 import { Enlace } from "../components/Enlace";
 import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
-import { TablaDeMonedas, useMonedas } from "../components/monedas/TablaDeMonedas";
+import { TablaDeMonedas, useMonedas } from "../features/monedas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { lineaDelPunto, rutaInterna } from "../lib/resumen";
 import { getResumen } from "../services/resumenService";

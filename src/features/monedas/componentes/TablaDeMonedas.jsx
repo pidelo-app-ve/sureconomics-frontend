@@ -1,9 +1,6 @@
 import PropTypes from "prop-types";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { porDolar } from "../../lib/monedas";
-// `useMonedas` vivía aquí; ahora está en `hooks/useMonedas` (cotizaciones compartidas)
-// y se reexporta para que quien lo importaba de aquí siga igual.
-export { useMonedas } from "../../hooks/useMonedas";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { porDolar } from "../formato";
 import { Flecha, variacionTexto } from "./FichaDeMoneda";
 import "./tablaDeMonedas.css";
 

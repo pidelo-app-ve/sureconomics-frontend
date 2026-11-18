@@ -1,20 +1,7 @@
-import { formatearNumero } from "../i18n/motor";
-
 /**
- * Cuánto vale un dólar en una moneda, escrito para leerse: dos decimales a partir de
- * 100 y cuatro por debajo (0,8333 no se lee con dos). Lo usan la página /monedas y la
- * franja de la portada, para que la misma cifra se escriba igual en los dos sitios.
+ * **Fachada.** Las monedas viven ahora en `features/monedas` (ADR-001, piloto de
+ * nov-2026). Esto reexporta lo de siempre para quien aún lo importa de aquí (el editor
+ * de piezas). Código nuevo: `import { porDolar } from "../features/monedas"`. Se borra
+ * cuando nadie la use.
  */
-export const porDolar = (valor, lang) => {
-  const n = Number(valor);
-  if (!Number.isFinite(n)) return "";
-  const decimales = n >= 100 ? 2 : 4;
-  return formatearNumero(n, lang, {
-    minimumFractionDigits: decimales,
-    maximumFractionDigits: decimales,
-    useGrouping: "always",
-  });
-};
-
-/** Las monedas de la región, en el orden del servidor (`monedas_service.MONEDAS`). */
-export const CODIGOS_MONEDA = ["VES", "MXN", "BRL", "COP", "ARS", "PEN", "CLP", "PYG", "DOP", "KYD", "EUR"];
+export { CODIGOS_MONEDA, porDolar } from "../features/monedas/formato.js";

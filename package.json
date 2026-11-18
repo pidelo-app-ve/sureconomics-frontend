@@ -9,7 +9,7 @@
     "scripts": {
         "dev": "vite",
         "start": "vite",
-        "build": "vite build",
+        "build": "vite build && node scripts/shell-como-app.mjs",
         "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0 && node scripts/i18n-comprobar.mjs",
         "test": "node --test",
         "preview": "vite preview",

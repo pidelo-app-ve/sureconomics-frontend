@@ -8,6 +8,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { PrimeraPlana, elegirApertura } from "../components/home/PrimeraPlana";
+import { AL_PUNTO, ANALISIS_EN_PLANA, PREVIEW } from "../lib/apertura";
 import { PausaPortada } from "../components/home/PausaPortada";
 import { ContactoComercial } from "../components/home/ContactoComercial";
 import { EnLaCalle } from "../components/canal/EnLaCalle";
@@ -75,28 +76,9 @@ const SinBuscador = () => {
 /** Lo que tarda el cajón del buscador en cerrarse: `se-cajon-cierra` en el CSS. */
 const CIERRE_CAJON_MS = 200;
 
-/** Cuántos análisis con firma lleva la columna de opinión de la primera plana. */
-const ANALISIS_EN_PLANA = 2;
-
-/**
- * How many pieces each block shows when nothing is filtered.
- *
- * `editorial` en 3 y no en 2: la rejilla tiene tres columnas, asi que con dos tarjetas
- * quedaba un hueco a la derecha -- y con una de las dos repitiendo la editorial del dia,
- * el lector veia **una sola** editorial nueva de las diez publicadas.
- */
-const PREVIEW = {
-  // Once: la primera manda a todo el ancho y las otras diez van
-  // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
-  noticia: 11,
-  // Cinco: la primera manda, a dos filas, y las otras cuatro van a su lado de dos en
-  // dos. El anuncio, si lo hay, ocupa el sitio de la última: el bloque mide igual.
-  articulo: 5,
-  editorial: 4,
-  entrevista: 3,
-  informe: 2,
-  podcast: 3,
-};
+// Cuántas piezas enseña cada sección al cargar (`PREVIEW`, `AL_PUNTO`,
+// `ANALISIS_EN_PLANA`): viven en `lib/apertura.js`, porque `api/portada.js` mete en el HTML
+// exactamente esas, y no otra cuenta copiada.
 
 /**
  * Cuántas trae cada «Cargar más», por sección: una fila más de la rejilla de cada una
@@ -168,13 +150,6 @@ const CONTINUACION = {
 const espacioDeTanda = (formatoApi) =>
   formatoApi === "articulo" ? ESPACIOS.PORTADA_NATIVO_ARTICULOS : ESPACIOS.PORTADA_NATIVO;
 
-/**
- * «Al punto» en la portada: Entrevistas y Podcast en una sola sección,
- * las cuatro piezas más recientes de los dos formatos, intercaladas. Eran dos
- * bloques seguidos de tres tarjetas oscuras y alargaban el final. Con un filtro puesto
- * vuelven a ir por separado: ahí son resultados de búsqueda, agrupados por formato.
- */
-const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 4 };
 
 export const Home = () => {
   const { t, lang } = useIdioma();

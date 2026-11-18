@@ -21,6 +21,15 @@ import handler, {
   tituloParaBuscadores,
 } from "./pieza.js";
 import { fotoDePortada } from "../src/lib/fotoDePieza.js";
+import { olvidarShell } from "./_comun.js";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+// El shell viaja con la función (`dist/app.html`, ver `leerShell`). Aquí, sin archivo: así
+// cada prueba decide qué shell llega, por el respaldo de la red (el `fetch` simulado).
+// Al final, una prueba con el archivo.
+process.env.SHELL_ARCHIVO = "";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -54,11 +63,12 @@ const respuestaFalsa = () => {
 const conFetch = async (impl, fn) => {
   const previo = globalThis.fetch;
   globalThis.fetch = impl;
-  try { return await fn(); } finally { globalThis.fetch = previo; }
+  olvidarShell();
+  try { return await fn(); } finally { globalThis.fetch = previo; olvidarShell(); }
 };
 
 const fetchNormal = (pieza) => async (url) => {
-  if (String(url).endsWith("/index.html")) {
+  if (String(url).endsWith("/app.html")) {
     return { ok: true, status: 200, text: async () => SHELL };
   }
   return { ok: true, status: 200, json: async () => ({ data: pieza }) };
@@ -140,11 +150,11 @@ await conFetch(fetchNormal(PIEZA), async () => {
 // —— 3. Falla abierto: la página funciona aunque la API no ——
 const casos = [
   ["la API no responde", async (url) => {
-    if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+    if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
     throw new Error("ECONNREFUSED");
   }, "api-sin-respuesta"],
   ["la API devuelve 500", async (url) => {
-    if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+    if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
     return { ok: false, status: 500 };
   }, "api-500"],
 ];
@@ -166,7 +176,7 @@ for (const [nombre, impl, marca] of casos) {
 // Antes respondía 200 con la portada, y para un buscador eso es una página más igual a
 // todas. La aplicación sigue intacta: es ella la que dice «No encontramos esta pieza».
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
   return { ok: false, status: 404 };
 }, async () => {
   const res = respuestaFalsa();
@@ -414,7 +424,7 @@ check("y pide tarjeta grande", medida.includes("summary_large_image"));
 
 // --- 8. /entorno: la puerta del boletín, con su propia tarjeta ---
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, status: 200, text: async () => SHELL };
+  if (String(url).endsWith("/app.html")) return { ok: true, status: 200, text: async () => SHELL };
   throw new Error("no debería pedir la API");
 }, async () => {
   const res = respuestaFalsa();
@@ -469,7 +479,7 @@ await conFetch(fetchNormal({ ...RESUMEN, imagen: null }), async () => {
   check("resumen sin foto: la tarjeta de marca", res.body.includes(`property="og:image" content="${IMAGEN_DE_MARCA.url}"`));
 });
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
   return { ok: false, status: 404 };
 }, async () => {
   const res = respuestaFalsa();
@@ -478,7 +488,7 @@ await conFetch(async (url) => {
     res.code === 404 && res.body.includes('name="robots" content="noindex, follow"') && res.body.includes('id="root"'));
 });
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => SHELL };
+  if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
   return { ok: false, status: 410 };
 }, async () => {
   const res = respuestaFalsa();
@@ -497,7 +507,7 @@ await conFetch(fetchNormal(RESUMEN), async () => {
     res.code === 200 && res.headers["X-Pieza-Meta"] === "ruta-desconocida", res.headers["X-Pieza-Meta"]);
 });
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => "no es nuestro" };
+  if (String(url).endsWith("/app.html")) return { ok: true, text: async () => "no es nuestro" };
   return { ok: true, status: 200, json: async () => ({ data: RESUMEN }) };
 }, async () => {
   const res = respuestaFalsa();
@@ -557,7 +567,7 @@ await conFetch(fetchNormal({ ...PIEZA, format: "articulo", en_ingles: false, tit
   check("en sin traducción: sin hreflang", !h.includes("hreflang="));
 });
 await conFetch(async (url) => {
-  if (String(url).endsWith("/index.html")) return { ok: true, text: async () => "no es nuestro" };
+  if (String(url).endsWith("/app.html")) return { ok: true, text: async () => "no es nuestro" };
   return { ok: true, status: 200, json: async () => ({ data: EN_INGLES }) };
 }, async () => {
   const res = respuestaFalsa();
@@ -653,6 +663,26 @@ const CON_FOTO = { ...CON_CUERPO, image_asset: { url: EN_R2, width: 1733, height
 check("fotoDePortada: medidas raras no se ponen",
   [[0, 400], [800, null], ["800", "600"], [Number.NaN, 3], [1.5, 2], [-4, 3]]
     .every(([w, h]) => fotoDePortada(EN_R2, w, h).width === undefined && fotoDePortada(EN_R2, w, h).height === undefined));
+
+// —— El shell empaquetado con la función (18-nov-2026) ——
+// En Vercel viaja como `dist/app.html` (`includeFiles`). Con él, la red no se toca para
+// el shell: solo se pide la pieza a la API.
+{
+  const carpeta = mkdtempSync(join(tmpdir(), "se-shell-"));
+  writeFileSync(join(carpeta, "app.html"), SHELL);
+  process.env.SHELL_ARCHIVO = join(carpeta, "app.html");
+  const pedidas = [];
+  const res = respuestaFalsa();
+  await conFetch(async (url) => {
+    pedidas.push(String(url));
+    if (String(url).endsWith("/app.html")) throw new Error("no debería pedir el shell a la red");
+    return { ok: true, status: 200, json: async () => ({ data: PIEZA }) };
+  }, () => handler({ query: { seccion: "articulos", slug: "concertacion-tripartita" } }, res));
+  check("shell del archivo: 200 y X-Shell archivo", res.code === 200 && res.headers["X-Shell"] === "archivo", res.headers["X-Shell"]);
+  check("shell del archivo: a la red solo va la pieza", pedidas.length === 1 && !pedidas[0].endsWith("/app.html"), pedidas.join(" "));
+  check("twitter:site en la tarjeta de la pieza", res.body.split('name="twitter:site" content="@Sur_economics"').length === 2);
+  process.env.SHELL_ARCHIVO = "";
+}
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

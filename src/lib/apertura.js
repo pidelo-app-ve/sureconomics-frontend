@@ -21,6 +21,41 @@ export const EN_LA_COLUMNA = 3;
 /** El `sizes` de la foto de la apertura: todo el ancho en el teléfono, media página en escritorio. */
 export const SIZES_PRINCIPAL = "(max-width: 959px) 100vw, 50vw";
 
+/* —— Lo que pinta la portada al cargar ——
+   Desde `pages/Home.jsx` (18-nov-2026): la portada servida (`api/portada.js`) mete en su
+   HTML las mismas piezas que la página enseña sin filtros, con estos topes. */
+
+/** Cuántos análisis con firma lleva la columna de opinión de la primera plana. */
+export const ANALISIS_EN_PLANA = 2;
+
+/**
+ * How many pieces each block shows when nothing is filtered.
+ *
+ * `editorial` en 3 y no en 2: la rejilla tiene tres columnas, asi que con dos tarjetas
+ * quedaba un hueco a la derecha -- y con una de las dos repitiendo la editorial del dia,
+ * el lector veia **una sola** editorial nueva de las diez publicadas.
+ */
+export const PREVIEW = {
+  // Once: la primera manda a todo el ancho y las otras diez van
+  // en dos columnas parejas de cinco (con diez quedaba una nota suelta abajo).
+  noticia: 11,
+  // Cinco: la primera manda, a dos filas, y las otras cuatro van a su lado de dos en
+  // dos. El anuncio, si lo hay, ocupa el sitio de la última: el bloque mide igual.
+  articulo: 5,
+  editorial: 4,
+  entrevista: 3,
+  informe: 2,
+  podcast: 3,
+};
+
+/**
+ * «Al punto» en la portada: Entrevistas y Podcast en una sola sección,
+ * las cuatro piezas más recientes de los dos formatos, intercaladas. Eran dos
+ * bloques seguidos de tres tarjetas oscuras y alargaban el final. Con un filtro puesto
+ * vuelven a ir por separado: ahí son resultados de búsqueda, agrupados por formato.
+ */
+export const AL_PUNTO = { formatos: ["entrevista", "podcast"], cuantas: 4 };
+
 /** El ancho que se pide sin `srcset` (y el `src` de la `<img>`, ver `CardMedia`). */
 const ANCHO_PRINCIPAL = 1200;
 

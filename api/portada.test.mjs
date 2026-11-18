@@ -6,26 +6,35 @@
  * Lo que se vigila, sobre todo los fallos: con la API caída sale la aplicación con la
  * cabecera de la portada (nunca un error); sin shell, al archivo estático; un titular con
  * caracteres raros no rompe el HTML ni mete código; `/en` sale en inglés y con su
- * canónica; y la foto que se precarga es la misma que pinta la página.
+ * canónica; la foto que se precarga es la misma que pinta la página; y en el HTML va lo
+ * que la página enseña al cargar, ni una pieza más.
  */
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import handler, {
-  CUANTOS,
   DATOS_URL,
+  ORDEN_DE_SECCIONES,
   TEXTOS,
   armarPortada,
+  loQuePintaLaPortada,
   rutaDeFormato,
   titularDe,
 } from "./portada.js";
-import { fuenteDelShell, olvidarShell } from "./_comun.js";
-import middleware, { config as configDelMiddleware } from "../middleware.js";
+import { olvidarShell, textoLlano } from "./_comun.js";
 import {
+  AL_PUNTO,
+  PREVIEW,
   SIZES_PRINCIPAL,
   elegirApertura,
   paraLaApertura,
   precargaDeLaApertura,
 } from "../src/lib/apertura.js";
 import { ANCHOS_DE_TARJETA, imagenSrcSet } from "../src/lib/fotoDePieza.js";
+
+// El shell viaja con la función (`dist/app.html`). Aquí, sin archivo: cada prueba decide
+// qué shell llega, por el respaldo de la red (el `fetch` simulado). Al final, con archivo.
+process.env.SHELL_ARCHIVO = "";
 
 const SHELL = `<!doctype html>
 <html lang="es">
@@ -66,9 +75,9 @@ const conFetch = async (impl, fn) => {
 
 const contar = (texto, patron) => (texto.match(patron) || []).length;
 
-/** El shell de `/index.html` y, para lo demás, `datos` (o lo que diga `api`). */
+/** El shell de `/app.html` y, para lo demás, `datos` (o lo que diga `api`). */
 const fetchCon = ({ datos = [], api = null, shell = SHELL, shellStatus = 200 } = {}) => async (url) => {
-  if (String(url).endsWith("/index.html")) {
+  if (String(url).endsWith("/app.html")) {
     if (shell instanceof Error) throw shell;
     return { ok: shellStatus === 200, status: shellStatus, text: async () => shell };
   }
@@ -101,9 +110,20 @@ const fila = (n, extra = {}) => ({
   ...extra,
 });
 
-const MUCHAS = Array.from({ length: 40 }, (_, i) => fila(i + 1));
+/** Una página 1 como la de producción: todos los formatos, ordenada por fecha. */
+const tanda = (formato, desde, cuantas) =>
+  Array.from({ length: cuantas }, (_, i) => fila(desde + i, { format: formato }));
+const MUCHAS = [
+  ...tanda("noticia", 1, 40),
+  ...tanda("articulo", 101, 8),
+  ...tanda("editorial", 201, 6),
+  ...tanda("entrevista", 301, 4),
+  ...tanda("podcast", 401, 4),
+  ...tanda("informe", 501, 3),
+].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
 
-// —— 1. El camino feliz ——
+const enlaces = (html) => [...html.matchAll(/<h3><a href="([^"]+)">/g)].map((m) => m[1]);
+
 console.log("la portada, con titulares");
 await conFetch(fetchCon({ datos: MUCHAS }), async () => {
   const res = respuestaFalsa();
@@ -112,9 +132,10 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
   const dentro = raiz(h);
   check("responde 200", res.code === 200);
   check("HTML", res.headers["Content-Type"] === "text/html; charset=utf-8");
-  check("guardada un minuto en el borde, y renovada por detrás",
-    res.headers["Cache-Control"] === "public, s-maxage=60, stale-while-revalidate=300", res.headers["Cache-Control"]);
+  check("guardada como el listado",
+    res.headers["Cache-Control"] === "public, s-maxage=30, stale-while-revalidate=60, stale-if-error=86400", res.headers["Cache-Control"]);
   check("marca portada", res.headers["X-Pieza-Meta"] === "portada");
+  check("dice de dónde salió el shell", res.headers["X-Shell"] === "red", res.headers["X-Shell"]);
   check("un solo <title>, el de la portada",
     contar(h, /<title>/g) === 1 && h.includes(`<title>${TEXTOS.es.titulo}</title>`));
   check("descripción real", h.includes(`<meta name="description" content="${TEXTOS.es.descripcion}" />`));
@@ -124,23 +145,41 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
       h.includes('hreflang="en" href="https://www.sureconomics.com/en"') &&
       h.includes('hreflang="x-default" href="https://www.sureconomics.com/"'));
   check("og:type website", h.includes('<meta property="og:type" content="website" />'));
+  check("twitter:site, una vez", contar(h, /name="twitter:site" content="@Sur_economics"/g) === 1);
   check("la tarjeta genérica, una sola vez", contar(h, /property="og:image"/g) === 1 && !h.includes("og:generico"));
   check("sigue indexable", h.includes('content="index, follow') && !h.includes("noindex"));
   check("en español", h.includes('<html lang="es">'));
 
-  check(`${CUANTOS} titulares en la lista`, contar(dentro, /<li>/g) === CUANTOS, String(contar(dentro, /<li>/g)));
-  check("más la apertura: la noticia más reciente con foto",
-    dentro.includes('<h2>Apertura</h2><article><h3><a href="/noticias/pieza-1">Titular número 1</a></h3>'));
-  check("la apertura no se repite en la lista", contar(dentro, /href="\/noticias\/pieza-1"/g) === 1);
-  check("cada titular con su enlace", dentro.includes('<a href="/noticias/pieza-2">Titular número 2</a>'));
-  check("con su sección enlazada", dentro.includes('<a href="/articulos?formato=noticias">Noticias</a>'));
+  // Lo que pinta la página: la plana (apertura, 3 secundarias, la editorial del día y 2
+  // análisis) y la entrada de cada sección (11 noticias, 5 artículos, 4 editoriales, 4 de
+  // Al punto, 2 informes), sin repetir nada.
+  const vistos = enlaces(dentro);
+  const esperados = [
+    "/noticias/pieza-1", "/noticias/pieza-2", "/noticias/pieza-3", "/noticias/pieza-4",
+    "/editorial/pieza-201", "/articulos/pieza-101", "/articulos/pieza-102",
+    ...Array.from({ length: 11 }, (_, i) => `/noticias/pieza-${5 + i}`),
+    ...[103, 104, 105, 106, 107].map((n) => `/articulos/pieza-${n}`),
+    ...[202, 203, 204, 205].map((n) => `/editorial/pieza-${n}`),
+    "/entrevistas/pieza-301", "/podcast/pieza-401", "/entrevistas/pieza-302", "/podcast/pieza-402",
+    "/informes/pieza-501", "/informes/pieza-502",
+  ];
+  check("exactamente lo que pinta la página, en su orden", vistos.join() === esperados.join(), `${vistos.length}: ${vistos.join(" ")}`);
+  check("sin repetidos", new Set(vistos).size === vistos.length);
+  check("la plana: «Lo más reciente» si nada está fijado, como React",
+    dentro.includes('<section><h2>Lo más reciente</h2><article><h3><a href="/noticias/pieza-1">Titular número 1</a></h3><p>Entradilla de la pieza 1.</p>'));
+  check("las secciones con su nombre y su enlace",
+    dentro.includes('<h2><a href="/articulos?formato=noticias">Noticias</a></h2>') &&
+      dentro.includes('<h2><a href="/audiovisual">Al punto</a></h2>') &&
+      dentro.includes('<h2><a href="/articulos?formato=informes">Informes y reportes</a></h2>'));
+  check("cada titular con su sección enlazada", dentro.includes('<a href="/articulos?formato=noticias">Noticias</a> · <time'));
   check("y su fecha", /<time datetime="2026-11-18T10:00:00\.000Z">18 de noviembre de 2026<\/time>/.test(dentro));
   check("el h1 de la portada", dentro.includes(`<h1>${TEXTOS.es.encabezado}</h1>`));
-  check("la 32.ª no entra", !dentro.includes("pieza-32\""));
+  check("la descripción, al pie como en la página", dentro.includes(`<footer><p>${TEXTOS.es.descripcion}</p></footer>`));
   check("recortado a la vista, sin display:none",
     dentro.startsWith('<div class="se-portada-previa">') &&
       /\.se-portada-previa\{position:absolute;[^}]*width:1px;height:1px;[^}]*clip-path:inset\(50%\)/.test(h) && !/display:\s*none/.test(h) && !/visibility:\s*hidden/.test(h));
-  check("con salida si React no llega", /@keyframes se-portada-previa\{to\{width:auto;height:auto;[^}]*clip-path:none/.test(h));
+  check("con salida a los 9 s si React no llega",
+    /animation:se-portada-previa 0s linear 9s forwards/.test(h) && /@keyframes se-portada-previa\{to\{width:auto;height:auto;[^}]*clip-path:none/.test(h));
   check("la aplicación sigue ahí", h.includes('src="/assets/index-abc123.js"'));
 
   // La precarga: el mismo srcset y sizes que pinta `CardMedia` en la apertura.
@@ -161,9 +200,10 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
   const lista = grafo.find((n) => n["@type"] === "ItemList");
   check("WebPage atada al sitio y al medio",
     pagina?.isPartOf?.["@id"] === "https://www.sureconomics.com/#sitio" && pagina?.publisher?.["@id"] === "https://www.sureconomics.com/#medio");
-  check("ItemList con la apertura y los 30", lista?.itemListElement?.length === CUANTOS + 1 && lista.numberOfItems === CUANTOS + 1);
+  check("ItemList con lo mismo que el HTML", lista?.itemListElement?.length === esperados.length && lista.numberOfItems === esperados.length);
   check("con direcciones absolutas y en orden",
-    lista?.itemListElement?.[0]?.url === "https://www.sureconomics.com/noticias/pieza-1" && lista.itemListElement[0].position === 1);
+    lista?.itemListElement?.map((e) => e.url.replace("https://www.sureconomics.com", "")).join() === esperados.join() &&
+      lista.itemListElement[0].position === 1);
 });
 
 // —— 2. La API caída ——
@@ -211,23 +251,28 @@ console.log("la apertura y su foto");
   const haceUnaHora = new Date(HORA - 3600_000).toISOString();
   const sinFoto = (n, extra = {}) => fila(n, { image_asset: null, ...extra });
 
-  const sinNoticias = armarPortada(SHELL, { filas: [fila(1, { format: "articulo" }), fila(2, { format: "editorial" })], ahora: HORA });
-  check("sin noticias ni fijada: sin apertura ni precarga, pero con la lista",
-    !sinNoticias.includes("<h2>Apertura</h2>") && !sinNoticias.includes('rel="preload" as="image"') &&
-      sinNoticias.includes('<a href="/articulos/pieza-1">') && sinNoticias.includes('<a href="/editorial/pieza-2">'));
+  // Sin principal la página no pinta la plana (ni su columna de opinión), y las secciones
+  // de abajo igual se saltan los dos análisis y la editorial del día: se replica tal cual.
+  const sinNoticias = armarPortada(SHELL, {
+    filas: [1, 2, 3].map((n) => fila(n, { format: "articulo" })).concat([4, 5].map((n) => fila(n, { format: "editorial" }))),
+    ahora: HORA,
+  });
+  check("sin noticias ni fijada: sin plana ni precarga, y lo de abajo como en la página",
+    !sinNoticias.includes("<h2>Lo más reciente</h2>") && !sinNoticias.includes('rel="preload" as="image"') &&
+      enlaces(raiz(sinNoticias)).join() === "/articulos/pieza-3,/editorial/pieza-5", enlaces(raiz(sinNoticias)).join());
 
   const sinFotos = armarPortada(SHELL, { filas: [sinFoto(1), sinFoto(2)], ahora: HORA });
-  check("apertura sin foto: sin precarga", sinFotos.includes("<h2>Apertura</h2>") && !sinFotos.includes('rel="preload" as="image"'));
+  check("apertura sin foto: sin precarga", sinFotos.includes("<h2>Lo más reciente</h2>") && !sinFotos.includes('rel="preload" as="image"'));
 
   const conFotoDetras = armarPortada(SHELL, { filas: [sinFoto(1), sinFoto(2), fila(3)], ahora: HORA });
   check("la más reciente sin foto cede a la tercera con foto",
-    conFotoDetras.includes('<h2>Apertura</h2><article><h3><a href="/noticias/pieza-3">') && conFotoDetras.includes("foto-3-640.jpg"));
+    conFotoDetras.includes('<h2>Lo más reciente</h2><article><h3><a href="/noticias/pieza-3">') && conFotoDetras.includes("foto-3-640.jpg"));
 
   const fijada = armarPortada(SHELL, {
     filas: [fila(1), fila(2, { format: "informe", en_portada: true, destacada_hasta: enUnaHora })],
     ahora: HORA,
   });
-  check("la fijada manda, sea del formato que sea",
+  check("la fijada manda, sea del formato que sea, y el <h2> dice «Apertura»",
     fijada.includes('<h2>Apertura</h2><article><h3><a href="/informes/pieza-2">') && fijada.includes("foto-2-640.jpg"));
 
   const vencida = armarPortada(SHELL, {
@@ -235,7 +280,7 @@ console.log("la apertura y su foto");
     ahora: HORA,
   });
   check("una fijada que ya venció no manda (aunque la API diga en_portada)",
-    vencida.includes('<h2>Apertura</h2><article><h3><a href="/noticias/pieza-1">'));
+    vencida.includes('<h2>Lo más reciente</h2><article><h3><a href="/noticias/pieza-1">'));
 
   const short = armarPortada(SHELL, {
     filas: [fila(1, { video_asset: { url: "https://www.youtube.com/shorts/abcdefghijk" } })],
@@ -286,6 +331,21 @@ console.log("titulares con caracteres raros");
   check("la ficha se puede leer", fichas(h)[1]?.["@graph"]?.[1]?.itemListElement?.[0]?.name?.startsWith("</script>"));
 }
 
+console.log("entidades del editor");
+{
+  check("textoLlano deshace las entidades una vez",
+    textoLlano("P&amp;G &lt;b&gt; &quot;x&quot; &#8364; &#x41; a&nbsp;b &bogus; &#0; &#xD800; &amp;lt;") ===
+      'P&G <b> "x" € A a b &bogus; &#0; &#xD800; &lt;', textoLlano("P&amp;G &lt;b&gt; &amp;lt;"));
+  const h = armarPortada(SHELL, {
+    filas: [fila(1, { excerpt: "<p>P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &amp;lt;img&amp;gt;</p>" })],
+    ahora: HORA,
+  });
+  const dentro = raiz(h);
+  check("en el HTML, una sola vez escapadas (sin &amp;amp;)",
+    dentro.includes("<p>P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &amp;lt;img&amp;gt;</p>"), dentro.slice(0, 400));
+  check("y sin abrir etiquetas", !/<script>alert|<img/.test(h));
+}
+
 // —— 6. /en ——
 console.log("/en");
 {
@@ -311,7 +371,7 @@ console.log("/en");
     check("secciones en inglés y bajo /en",
       dentro.includes('<a href="/en/articulos?formato=noticias">News</a>') && dentro.includes('<a href="/en/audiovisual?ver=entrevistas">Interviews</a>'));
     check("fecha en inglés", dentro.includes(">November 18, 2026</time>"));
-    check("los rótulos en inglés", dentro.includes(`<h2>${TEXTOS.en.apertura}</h2>`) && dentro.includes(`<h2>${TEXTOS.en.recientes}</h2>`));
+    check("los rótulos en inglés", dentro.includes(`<h2>${TEXTOS.en.recientes}</h2>`) && dentro.includes('<h2><a href="/en/audiovisual">Al punto</a></h2>'));
     check("ItemList con direcciones /en", fichas(h)[1]?.["@graph"]?.[1]?.itemListElement?.[0]?.url === "https://www.sureconomics.com/en/noticias/pieza-1");
   });
 }
@@ -337,11 +397,11 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
   else process.env.PORTADA_HTML = previo;
 }
 
-// El shell se guarda: dos portadas seguidas, una sola lectura de /index.html.
+// El shell se guarda: dos portadas seguidas, una sola lectura de /app.html.
 {
   let lecturas = 0;
   const base = fetchCon({ datos: MUCHAS });
-  await conFetch(async (url) => { if (String(url).endsWith("/index.html")) lecturas++; return base(url); }, async () => {
+  await conFetch(async (url) => { if (String(url).endsWith("/app.html")) lecturas++; return base(url); }, async () => {
     await handler({ query: {} }, respuestaFalsa());
     await handler({ query: { lang: "en" } }, respuestaFalsa());
   });
@@ -361,19 +421,9 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
         t.descripcion === comun.marca.descripcion &&
         t.encabezado === marca(portada.inicio.encabezado) &&
         t.apertura === portada.apertura.apertura &&
-        t.recientes === portada.apertura.loMasReciente);
+        t.recientes === portada.apertura.loMasReciente &&
+        t.alPunto === comun.nav.alPunto);
   }
-}
-
-// —— 8. middleware.js: `/` a la función ——
-console.log("middleware.js");
-{
-  const destino = (url) => middleware(new Request(url))?.headers?.get("x-middleware-rewrite") ?? null;
-  check("solo corre en /", configDelMiddleware.matcher === "/");
-  check("/ va a la función", destino("https://www.sureconomics.com/") === "https://www.sureconomics.com/api/portada");
-  check("sin la consulta (una sola copia en el borde)", destino("https://www.sureconomics.com/?utm_source=x&fbclid=y") === "https://www.sureconomics.com/api/portada");
-  check("con ?_s=1 sigue al archivo", middleware(new Request("https://www.sureconomics.com/?_s=1")) === undefined);
-  check("otra ruta no se toca", middleware(new Request("https://www.sureconomics.com/en")) === undefined);
 }
 
 // Que la página use la misma regla y la misma precarga (no una copia).
@@ -385,17 +435,46 @@ console.log("middleware.js");
   check("CardMedia usa los anchos de fotoDePieza", /export const ANCHOS = ANCHOS_DE_TARJETA;/.test(tarjeta));
 }
 
-// De dónde sale el shell: producción, salvo una vista previa con su clave de acceso.
-console.log("el shell, de dónde");
+// Los topes son los de la página, no una copia.
 {
-  const prod = fuenteDelShell({});
-  check("por defecto, el dominio público", prod.url === "https://www.sureconomics.com/index.html" && !Object.keys(prod.headers).length);
-  check("en producción no cambia", fuenteDelShell({ VERCEL_ENV: "production", VERCEL_URL: "x.vercel.app", VERCEL_AUTOMATION_BYPASS_SECRET: "k" }).url === prod.url);
-  check("vista previa sin clave: como siempre", fuenteDelShell({ VERCEL_ENV: "preview", VERCEL_URL: "x.vercel.app" }).url === prod.url);
-  const previa = fuenteDelShell({ VERCEL_ENV: "preview", VERCEL_URL: "x.vercel.app", VERCEL_AUTOMATION_BYPASS_SECRET: "k" });
-  check("vista previa con clave: su propio shell, con la clave",
-    previa.url === "https://x.vercel.app/index.html" && previa.headers["x-vercel-protection-bypass"] === "k");
-  check("SHELL_URL manda", fuenteDelShell({ SHELL_URL: "https://otro/index.html", VERCEL_ENV: "preview", VERCEL_URL: "x", VERCEL_AUTOMATION_BYPASS_SECRET: "k" }).url === "https://otro/index.html");
+  const home = readFileSync(new URL("../src/pages/Home.jsx", import.meta.url), "utf8");
+  check("Home toma PREVIEW, AL_PUNTO y ANALISIS_EN_PLANA de lib/apertura",
+    /import \{ AL_PUNTO, ANALISIS_EN_PLANA, PREVIEW \} from "\.\.\/lib\/apertura";/.test(home) &&
+      !/const (PREVIEW|AL_PUNTO|ANALISIS_EN_PLANA)\s*=/.test(home));
+  check("PREVIEW y AL_PUNTO, los de la portada", PREVIEW.noticia === 11 && AL_PUNTO.cuantas === 4);
+  const pieza = readFileSync(new URL("../src/lib/pieza.js", import.meta.url), "utf8");
+  const meta = pieza.slice(pieza.indexOf("export const FORMATO_META = {"), pieza.indexOf("\n};", pieza.indexOf("export const FORMATO_META = {")));
+  const claves = [...meta.matchAll(/^ {2}([a-z]+): \{/gm)].map((m) => m[1]);
+  check("el orden de las secciones, el de FORMATO_META", claves.join() === ORDEN_DE_SECCIONES.join(), claves.join());
+  const vacia = loQuePintaLaPortada([]);
+  check("sin piezas: ni plana ni secciones", vacia.plana === null && vacia.secciones.length === 0);
+}
+
+// El shell empaquetado con la función: del disco, sin tocar la red.
+console.log("el shell, del archivo");
+{
+  const carpeta = mkdtempSync(join(tmpdir(), "se-portada-"));
+  writeFileSync(join(carpeta, "app.html"), SHELL);
+  process.env.SHELL_ARCHIVO = join(carpeta, "app.html");
+  let alShell = 0;
+  const base = fetchCon({ datos: MUCHAS });
+  const res = respuestaFalsa();
+  await conFetch(async (url) => { if (String(url).endsWith("/app.html")) alShell++; return base(url); },
+    () => handler({ query: {} }, res));
+  check("del archivo: 200, X-Shell archivo y sin pedir el shell a la red",
+    res.code === 200 && res.headers["X-Shell"] === "archivo" && alShell === 0, `${res.headers["X-Shell"]} ${alShell}`);
+
+  process.env.SHELL_ARCHIVO = join(carpeta, "no-esta.html");
+  const respaldo = respuestaFalsa();
+  await conFetch(fetchCon({ datos: MUCHAS }), () => handler({ query: {} }, respaldo));
+  check("sin archivo: el respaldo de la red", respaldo.code === 200 && respaldo.headers["X-Shell"] === "red");
+
+  writeFileSync(join(carpeta, "malo.html"), "<html>no es la aplicación</html>");
+  process.env.SHELL_ARCHIVO = join(carpeta, "malo.html");
+  const malo = respuestaFalsa();
+  await conFetch(fetchCon({ datos: MUCHAS }), () => handler({ query: {} }, malo));
+  check("un archivo que no es la aplicación no se sirve: la red", malo.code === 200 && malo.headers["X-Shell"] === "red");
+  process.env.SHELL_ARCHIVO = "";
 }
 
 if (fallos) {

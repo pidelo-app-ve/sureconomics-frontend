@@ -32,7 +32,8 @@
  * Y una dirección que no corresponde a ninguna pieza responde 404 con `noindex`. Antes
  * respondía 200 con la portada: para un buscador, miles de páginas iguales.
  *
- * The shell is read from the public domain and then *checked*, which is not
+ * The shell travels with the function (`dist/app.html`, see `leerShell` in `_comun.js`;
+ * until 18-nov-2026 it was read from the public domain) and is then *checked*, which is not
  * belt-and-braces caution -- it is the lesson from breaking this once. The first
  * version fetched `VERCEL_URL`, which has deployment protection on it, so what
  * came back was Vercel's own login page: 487 KB of somebody else's HTML, served to
@@ -60,7 +61,7 @@ import {
   conDeadline,
   escapar,
   esNuestroShell,
-  fuenteDelShell,
+  leerShell,
   fechaLarga,
   inyectar,
   textoLlano,
@@ -318,12 +319,10 @@ export default async function handler(req, res) {
     res.redirect(307, `${rutaPropia}?${SIN_META}=1`);
   };
 
-  let shell = "";
-  try {
-    const fuente = fuenteDelShell();
-    const respuesta = await conDeadline(fuente.url, LIMITE_MS, { headers: fuente.headers });
-    shell = await respuesta.text();
-  } catch {
+  // El shell viaja con la función (`leerShell`, en `_comun.js`); la red es solo el respaldo.
+  const { shell, fuente } = await leerShell();
+  res.setHeader("X-Shell", fuente);
+  if (shell === null) {
     alEstatico("shell-sin-respuesta");
     return;
   }

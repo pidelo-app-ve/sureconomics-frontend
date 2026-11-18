@@ -24,8 +24,8 @@
  * se puede comprobar sin desplegar, y si no lo hiciera las direcciones inventadas
  * acabarían en la 404 genérica de Vercel, sin la aplicación. Esta función se comporta
  * como `api/pieza.js`, que ya está probada en producción, y da la 404 en el idioma de la
- * dirección. Para que no cueste una petición al propio dominio por cada visita, el shell
- * se guarda en memoria unos minutos (`leerShell`), y la respuesta, en el borde.
+ * dirección. El shell viaja con la función y se lee del disco (`leerShell`), y la
+ * respuesta se guarda en el borde.
  */
 
 // El shell (leído del dominio y guardado unos minutos) y su comprobación son los mismos
@@ -100,7 +100,8 @@ export default async function handler(req, res) {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("X-Robots-Tag", "noindex");
 
-  const shell = await leerShell();
+  const { shell, fuente } = await leerShell();
+  res.setHeader("X-Shell", fuente);
 
   if (!esNuestroShell(shell)) {
     // Sin la aplicación: la página mínima, guardada poco para que la próxima pruebe otra vez.

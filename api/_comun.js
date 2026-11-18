@@ -10,8 +10,12 @@
  * El guion bajo del nombre no es estética: Vercel convierte en función cada archivo de
  * `api/`, salvo los que empiezan por `_`. Esto es una biblioteca, no una dirección.
  *
- * Sin importaciones, como `src/lib/fotoDePieza.js`: lo carga Node tal cual.
+ * Solo importa módulos de Node (`node:fs`, …): lo carga Node tal cual, sin Vite.
  */
+
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const SITIO = "https://www.sureconomics.com";
 
@@ -25,29 +29,37 @@ export const API =
 export const LIMITE_MS = 3500;
 
 /**
- * Where the shell comes from: the public domain, never a bare deployment URL.
- * A deployment URL can be behind Vercel's protection, and what it returns then is
- * a login page that looks like a perfectly valid HTTP 200.
+ * El shell de la aplicación (`dist/app.html`) viaja empaquetado con cada función:
+ * `vercel.json` -> `functions` -> `includeFiles`. Se lee del disco, del mismo despliegue
+ * que sirve la función, así que sus `/assets/` son siempre los de ese despliegue: ni una
+ * petición a la red por visita, ni un shell de otro despliegue (el de producción en una
+ * vista previa, o el anterior durante el cambio de uno a otro).
  *
- * Con una excepción, la vista previa (tanda 3, 18-nov-2026): el dominio público sirve el
- * despliegue de producción, y su shell pide los `/assets/` de producción, que en la vista
- * previa no existen (cada despliegue tiene los suyos): la página se quedaba sin
- * JavaScript. Si el proyecto tiene activada en Vercel la «Protection Bypass for
- * Automation», Vercel pone su clave en `VERCEL_AUTOMATION_BYPASS_SECRET` y con ella la
- * vista previa puede leer su propio shell. Sin esa clave, como siempre. En producción no
- * cambia nada. `SHELL_URL`, si está puesta, manda sobre todo.
+ * Antes se pedía al dominio público, y eso traía tres problemas: un viaje más en cada
+ * visita sin caché, el desfase entre despliegues y que en una vista previa la página
+ * pedía los `/assets/` de producción, que allí no existen.
+ *
+ * En Vercel el archivo queda en `process.cwd()/dist/app.html`; en local y en las pruebas,
+ * junto a este archivo (`../dist/app.html`). `SHELL_ARCHIVO` manda sobre los dos (las
+ * pruebas lo usan; vacío = no hay archivo).
+ *
+ * **Respaldo**, por si un día el archivo no viajara (otro `includeFiles`, otra
+ * estructura): el dominio público, `SHELL_URL`. Solo `/app.html` y sin seguir
+ * redirecciones: `/index.html` ya redirige a `/`, que es la portada, que es esta función.
+ *
+ * **Cómo se comprueba en la vista previa:** cada respuesta dice de dónde sacó el shell en
+ * la cabecera `X-Shell` (`archivo` o `red`). Tiene que decir `archivo`:
+ * `curl -sI https://<vista-previa>/ | grep -i x-shell`.
  */
-export const fuenteDelShell = (entorno = process.env) => {
-  if (entorno.SHELL_URL) return { url: entorno.SHELL_URL, headers: {} };
-  const clave = entorno.VERCEL_AUTOMATION_BYPASS_SECRET;
-  if (entorno.VERCEL_ENV === "preview" && entorno.VERCEL_URL && clave) {
-    return {
-      url: `https://${entorno.VERCEL_URL}/index.html`,
-      headers: { "x-vercel-protection-bypass": clave },
-    };
-  }
-  return { url: `${SITIO}/index.html`, headers: {} };
+const archivosDelShell = () => {
+  const elegido = process.env.SHELL_ARCHIVO;
+  if (elegido !== undefined) return elegido ? [elegido] : [];
+  return [join(process.cwd(), "dist", "app.html"), fileURLToPath(new URL("../dist/app.html", import.meta.url))];
 };
+
+/** El respaldo: el dominio público, nunca la dirección de un despliegue (puede tener la
+ *  protección de Vercel delante, y lo que devuelve entonces es su página de acceso). */
+export const SHELL_URL = process.env.SHELL_URL || `${SITIO}/app.html`;
 
 /** Query flag that routes straight to the static file, so a function has
  *  somewhere to send a request it cannot serve honestly. */
@@ -114,12 +126,40 @@ export const escapar = (valor) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-/** Rich text in, plain sentence out: a description full of tags is not a
- *  description, and `<p></p>` is not a summary. */
+/** Las entidades con nombre que deja el editor; el resto se queda como llegó. */
+const ENTIDADES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+/**
+ * Una entidad de HTML, deshecha: `&amp;` -> `&`, `&#8364;` -> `€`. Una que no se conoce, o
+ * un número que no es un carácter que se pueda escribir, se queda tal cual.
+ */
+const sinEntidad = (todo, cuerpo) => {
+  if (cuerpo[0] !== "#") return ENTIDADES[cuerpo.toLowerCase()] ?? todo;
+  const codigo = /^#x/i.test(cuerpo) ? parseInt(cuerpo.slice(2), 16) : parseInt(cuerpo.slice(1), 10);
+  const valido =
+    Number.isInteger(codigo) &&
+    codigo <= 0x10ffff &&
+    !(codigo >= 0xd800 && codigo <= 0xdfff) &&
+    (codigo >= 0x20 || codigo === 0x09 || codigo === 0x0a || codigo === 0x0d) &&
+    codigo !== 0x7f;
+  return valido ? String.fromCodePoint(codigo) : todo;
+};
+
+/**
+ * Rich text in, plain sentence out: a description full of tags is not a
+ * description, and `<p></p>` is not a summary.
+ *
+ * Las entidades se deshacen (18-nov-2026): el texto llano se vuelve a escapar al
+ * escribirlo (`escapar`, `jsonEnScript`), y sin esto «P&amp;G» salía como «P&amp;amp;G» en
+ * la descripción. Primero se quitan las etiquetas y después se deshacen las entidades, en
+ * una sola pasada: un `&lt;script&gt;` queda como texto «<script>», que `escapar` vuelve a
+ * convertir en `&lt;script&gt;` al escribirlo. Por eso lo que sale de aquí **siempre** se
+ * escapa antes de ir al HTML; nunca se pega tal cual.
+ */
 export const textoLlano = (html, maximo = 200) => {
   const limpio = String(html ?? "")
     .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
+    .replace(/&(#x[0-9a-f]{1,6}|#[0-9]{1,7}|[a-z]{2,8});/gi, sinEntidad)
     .replace(/\s+/g, " ")
     .trim();
   if (limpio.length <= maximo) return limpio;
@@ -163,9 +203,8 @@ export const esNuestroShell = (html) =>
   html.includes("/assets/");
 
 /**
- * Cuánto se reutiliza el shell ya leído (`leerShell`). Solo cambia al desplegar, y un
- * despliegue nuevo arranca funciones nuevas, con la memoria vacía; lo que pudiera quedar
- * viejo dura como mucho esto.
+ * Cuánto se reutiliza el shell leído de la red (el respaldo). El del archivo no caduca: es
+ * el de este despliegue y no cambia mientras la función viva.
  */
 const GUARDA_SHELL_MS = 5 * 60_000;
 let guardado = null;
@@ -176,24 +215,37 @@ export const olvidarShell = () => {
 };
 
 /**
- * El shell, de memoria si se leyó hace poco; si no, del dominio. Solo se guarda uno que
- * llegó con 200 y es nuestro: la 404 del sitio también es la aplicación (con `noindex`),
- * y servirla como portada le diría a Google que no indexe la portada.
+ * El shell: de memoria, del archivo empaquetado o, si no está, de la red. Devuelve
+ * `{ shell, fuente }`: `shell` es el texto (o `null` si no se pudo leer de ningún sitio)
+ * y `fuente`, de dónde salió (`archivo` o `red`), para la cabecera `X-Shell`.
  *
- * Devuelve el texto tal como llegó (o "" si no llegó): quien llama decide con
- * `esNuestroShell` qué hace si no sirve.
+ * Solo se guarda uno que es nuestro y, de la red, que llegó con 200: la 404 del sitio
+ * también es la aplicación (con `noindex`), y servirla como portada le diría a Google que
+ * no indexe la portada. Quien llama decide con `esNuestroShell` qué hace si no sirve.
  */
 export const leerShell = async () => {
-  if (guardado && Date.now() - guardado.en < GUARDA_SHELL_MS) return guardado.shell;
+  const vigente =
+    guardado && (guardado.fuente === "archivo" || Date.now() - guardado.en < GUARDA_SHELL_MS);
+  if (vigente) return { shell: guardado.shell, fuente: guardado.fuente };
+  for (const ruta of archivosDelShell()) {
+    try {
+      const shell = readFileSync(ruta, "utf8");
+      if (esNuestroShell(shell)) {
+        guardado = { shell, en: Date.now(), fuente: "archivo" };
+        return { shell, fuente: "archivo" };
+      }
+    } catch {
+      // No está ahí: el siguiente sitio.
+    }
+  }
   try {
-    const fuente = fuenteDelShell();
-    const respuesta = await conDeadline(fuente.url, LIMITE_MS, { headers: fuente.headers });
-    if (respuesta.ok === false) return "";
+    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS, { redirect: "manual" });
+    if (respuesta.ok === false) return { shell: "", fuente: "red" };
     const shell = await respuesta.text();
-    if (esNuestroShell(shell)) guardado = { shell, en: Date.now() };
-    return shell;
+    if (esNuestroShell(shell)) guardado = { shell, en: Date.now(), fuente: "red" };
+    return { shell, fuente: "red" };
   } catch {
-    return "";
+    return { shell: null, fuente: "red" };
   }
 };
 
@@ -213,6 +265,9 @@ export const etiquetas = ({
   const filas = [
     `<meta property="og:type" content="${escapar(tipo)}" />`,
     `<meta property="og:site_name" content="SurEconomics" />`,
+    // La cuenta del medio en X. Iba en el bloque genérico del shell, que se quita al poner
+    // la tarjeta propia, y con él se perdía en piezas y portada.
+    `<meta name="twitter:site" content="@Sur_economics" />`,
     `<meta property="og:locale" content="${escapar(locale)}" />`,
     `<meta property="og:title" content="${escapar(titulo)}" />`,
     `<meta property="og:url" content="${escapar(url)}" />`,

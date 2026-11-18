@@ -266,7 +266,7 @@ export const UltimaHora = () => {
               ))}
             </ol>
           ) : null}
-          {items.length ? <p className="se-uh-seccion__nota">{t("titulares.notaIa")}</p> : null}
+          {items.length ? <p className="se-uh-seccion__nota">{t("titulares.seccion.notaIa")}</p> : null}
         </div>
 
         {/* Lo que se busca después de la última hora: el resumen del día, las monedas en

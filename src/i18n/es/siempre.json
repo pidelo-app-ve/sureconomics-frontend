@@ -252,9 +252,9 @@
       }
     },
     "tarjeta": {
-      "etiqueta": "Última hora"
+      "etiqueta": "Última hora",
+      "notaIa": "Redactado automáticamente con IA a partir de fuentes de otros medios."
     },
-    "notaIa": "Redactado automáticamente con IA a partir de las fuentes citadas.",
     "hace": {
       "ahora": "Ahora",
       "corto": "{n} min",

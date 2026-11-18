@@ -27,7 +27,8 @@ import "../../styles/titulares.css";
  * explica que hay que entrar: seguir temas es de las razones para crear una cuenta.
  *
  * Con titulares en caliente, una línea al pie avisa de que los redacta una IA a partir
- * de sus fuentes (auditoría del 17-nov-2026, D-04). Con las noticias del sitio o con
+ * de fuentes de otros medios (auditoría del 17-nov-2026, D-04); no dice «citadas»,
+ * porque la tarjeta no enseña las fuentes. Con las noticias del sitio o con
  * «Mis temas» no sale: esas las escribe la redacción.
  */
 
@@ -183,7 +184,7 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
           {t("portada.plana.todaLaUltimaHora")}
         </Enlace>
       )}
-      {!mios && hayTitulares ? <p className="se-plana__uh-nota">{t("titulares.notaIa")}</p> : null}
+      {!mios && hayTitulares ? <p className="se-plana__uh-nota">{t("titulares.tarjeta.notaIa")}</p> : null}
     </section>
   );
 };

@@ -66,6 +66,9 @@ const resumenDelCiclo = (c) => {
     // vacía y el panel solo decía «notas agrupadas… caducados».
     [n("redacciones_fallidas"), "redacciones fallidas (el motivo, en el registro de Render: «sin redactar»)"],
     [n("errores_ia"), "consultas a la IA con error"],
+    // La IA no contestó: no cuenta como intento, y tras un ciclo entero así se descansa.
+    [n("redacciones_sin_ia"), "sin redactar porque la IA no respondió"],
+    [n("redaccion_en_pausa"), "esperando a que vuelva la IA"],
     [n("publicados"), "publicados"],
     [n("sin_cupo"), "sin presupuesto"],
     [n("zona_gris_sin_saldo"), "dudosas sin consultar (día gastado)"],
@@ -77,6 +80,31 @@ const resumenDelCiclo = (c) => {
   const fallos = Object.keys(c).filter((k) => k.startsWith("fallo_")).map((k) => ETAPAS[k.slice(6)] || k.slice(6));
   return { texto: partes.length ? partes.join(" · ") : "sin nada nuevo", fallos };
 };
+
+/**
+ * Cuánto descansa la redacción tras un ciclo entero sin respuesta de la IA: 2 ciclos de
+ * 10 minutos (`CICLOS_DE_PAUSA_TRAS_CAIDA * CICLO_MINUTOS` en `titulares_ajustes`). Solo
+ * para calcular la hora si el backend no la manda.
+ */
+const PAUSA_TRAS_CAIDA_MS = 20 * 60 * 1000;
+
+/**
+ * Si la redacción está en pausa porque la IA no respondió (el cortacircuitos, D-06), y
+ * hasta cuándo. La hora sale de `redaccion_en_pausa_hasta` si el resumen la trae; si no,
+ * del ciclo que puso la pausa (`redaccion_pausada`) más su duración. Un ciclo que solo
+ * se la encontró (`redaccion_en_pausa`) sin hora conocida da `hasta: null`.
+ */
+const pausaDeLaIa = (resumen, c, ahora) => {
+  const hasta = resumen?.redaccion_en_pausa_hasta ?? c?.redaccion_en_pausa_hasta
+    ?? (c?.redaccion_pausada && c?.empezo ? new Date(Date.parse(c.empezo) + PAUSA_TRAS_CAIDA_MS).toISOString() : null);
+  const ms = Date.parse(hasta || "");
+  if (ms) return ms > ahora ? { hasta } : null;
+  return c?.redaccion_en_pausa ? { hasta: null } : null;
+};
+
+/** Las notas de medios nuevos, sin activar, que el último ciclo tiró: `{source_id: n}`. */
+const descartadasDeNuevos = (c) =>
+  Object.values(c?.notas_de_fuentes_nuevas ?? {}).reduce((total, n) => total + (Number(n) || 0), 0);
 
 const FormularioBorrar = ({ motivos, ocupado, onBorrar, onCancelar }) => {
   const [motivo, setMotivo] = useState("");
@@ -170,6 +198,7 @@ export const AdminTitulares = () => {
   const [editando, setEditando] = useState(null);
   const [historial, setHistorial] = useState(null);
   const [ocupado, setOcupado] = useState(false);
+  const [verNuevas, setVerNuevas] = useState(0);
 
   useEffect(() => {
     applyPageMeta({ title: "Admin — Titulares", description: "Los titulares en caliente: corregir, fijar, borrar y silenciar medios." });
@@ -259,6 +288,8 @@ export const AdminTitulares = () => {
   const motivos = ajustes?.motivos ?? {};
   const ciclo = resumen?.ultimo_ciclo;
   const vuelta = resumenDelCiclo(ciclo);
+  const pausa = pausaDeLaIa(resumen, ciclo, Date.now());
+  const descartadas = descartadasDeNuevos(ciclo);
 
   return (
     <main role="main">
@@ -319,6 +350,22 @@ export const AdminTitulares = () => {
               {vuelta.fallos.length ? (
                 <span className="se-tit-aviso" role="status">
                   Falló: {vuelta.fallos.join(", ")}. El resto del ciclo siguió; si se repite, avise.
+                </span>
+              ) : null}
+              {pausa ? (
+                <span className="se-tit-aviso" role="status">
+                  {pausa.hasta
+                    ? `La IA no respondió en el último ciclo; la redacción se retoma sola a las ${hora(pausa.hasta)}.`
+                    : "La IA no respondió hace poco; la redacción está en pausa y se retoma sola en unos minutos."}
+                </span>
+              ) : null}
+              {descartadas ? (
+                <span className="se-tit-aviso" role="status">
+                  {descartadas} nota{descartadas === 1 ? "" : "s"} de medios nuevos sin activar se
+                  {descartadas === 1 ? " descartó" : " descartaron"} en el último ciclo.{" "}
+                  <button type="button" className="se-tit-enlace" onClick={() => setVerNuevas((n) => n + 1)}>
+                    Ver esos medios
+                  </button>
                 </span>
               ) : null}
             </div>
@@ -403,7 +450,7 @@ export const AdminTitulares = () => {
         </ul>
       )}
 
-      <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} />
+      <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} verNuevas={verNuevas} />
 
       <EditarTitular grupo={editando} onCerrar={() => setEditando(null)}
         onGuardado={() => { setEditando(null); cargar(); }} />

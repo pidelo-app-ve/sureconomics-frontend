@@ -11,6 +11,7 @@
       "fuente": "Source",
       "fuentes": "Sources",
       "masFuentes": "+{n}",
+      "notaIa": "Written automatically with AI from the sources cited.",
       "nuevos": {
         "one": "Show {n} new headline",
         "other": "Show {n} new headlines"

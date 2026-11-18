@@ -7331,6 +7331,25 @@
   accent-color: var(--marca-verde);
 }
 
+/* El 1 y el 2 para quien no es admin: se ven, pero no se eligen. */
+.se-admin-app .se-tit-nivel--vetado {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* «Ver esos medios» dentro de un aviso: un botón con aspecto de enlace. */
+.se-admin-app .se-tit-enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 .se-admin-app .se-tit-nivel__texto {
   display: block;
   font-size: 0.88rem;

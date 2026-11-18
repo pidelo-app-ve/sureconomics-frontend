@@ -1,6 +1,7 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useAdminToast } from "../../../context/AdminToastContext";
+import { useAuth } from "../../../context/AuthContext";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import { adminRequest } from "../../../lib/api";
 import { recorridoTitulares } from "../../../lib/guias/guiaTitulares";
@@ -20,8 +21,14 @@ const { ancla } = recorridoTitulares;
  * **Un medio nuevo llega silenciado** (`"nueva": true`; auditoría del 17-nov-2026,
  * D-12): nadie lo ha revisado y sus notas no cuentan hasta que alguien lo activa aquí,
  * eligiendo su nivel. Van los primeros de la lista, con su marca, y el resumen plegado
- * dice cuántos esperan. Activar y reactivar pasan por la misma ventana, con el nivel:
- * es la única forma de cambiarlo (el que dice el recolector solo vale la primera vez).
+ * dice cuántos esperan. Un medio nuevo nace con nivel 3 o peor, y es el que se propone.
+ *
+ * **El nivel va por su propia ruta** (`POST …/fuentes/<id>/nivel`): «Activar»,
+ * «Reactivar» y «Cambiar nivel» abren la misma ventana. Activar o reactivar son dos
+ * llamadas, primero el nivel (solo si cambió) y luego `unmute`; si la segunda falla, el
+ * nivel ya quedó guardado y el medio sigue silenciado, y la ventana lo dice así y deja
+ * reintentar. Los niveles 1 y 2 solo los pone un admin (el backend contesta 403 al
+ * publicador): al resto se le enseñan deshabilitados, con el porqué.
  */
 
 const NIVEL = { 1: "1 · oficial", 2: "2 · agencia", 3: "3 · medio", 4: "4 · Google News o pequeño" };
@@ -55,22 +62,65 @@ const pasa = {
   cuentan: (f) => !f.silenciada,
 };
 
+/** Los niveles que solo pone un admin (`titulares_moderacion.NIVELES_SOLO_ADMIN`). */
+const SOLO_ADMIN = [1, 2];
+
+/** Lo que dice la ventana del nivel según para qué se abrió. */
+const MODO = {
+  activar: {
+    titulo: "Activar",
+    texto: "Llegó solo y todavía no cuenta. Antes de activarlo, compruebe que es un medio serio. Desde ahora sus notas sirven para elegir y redactar titulares.",
+    boton: "Activar con nivel",
+    hecho: "activado: sus notas cuentan desde ahora",
+    verbo: "activar",
+  },
+  reactivar: {
+    titulo: "Reactivar",
+    texto: "Sus notas vuelven a contar desde ahora.",
+    boton: "Reactivar con nivel",
+    hecho: "vuelve a contar",
+    verbo: "reactivar",
+  },
+  nivel: {
+    titulo: "Cambiar el nivel de",
+    texto: "El nivel nuevo cuenta desde ahora: también para sus notas guardadas y para los titulares publicados que lo citan.",
+    boton: "Guardar nivel",
+    hecho: "nivel cambiado",
+    verbo: "cambiar el nivel",
+  },
+};
+
+const nivelValido = (n) => (NIVEL[n] ? n : 3);
+
 const estadoDe = (f) => {
-  if (f.nueva) return <span className="se-tit-marca se-tit-marca--nueva">Nueva, sin activar</span>;
+  if (f.nueva) return <span className="se-tit-marca se-tit-marca--nueva">Nuevo, sin activar</span>;
   if (f.silenciada) return `Silenciado${f.silenciada_por ? ` por ${f.silenciada_por}` : ""}`;
   return "Cuenta";
 };
 
-export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje }) => {
+export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }) => {
   const { toastSuccess, toastError } = useAdminToast();
+  const { role } = useAuth();
+  const esAdmin = role === "admin";
   const [silenciando, setSilenciando] = useState(null);
   const [retirar, setRetirar] = useState(false);
-  const [activando, setActivando] = useState(null);
+  const [ventana, setVentana] = useState(null); // { fuente, modo: "activar" | "reactivar" | "nivel" }
   const [nivel, setNivel] = useState(3);
+  const [fallo, setFallo] = useState(null);
   const [filtro, setFiltro] = useState("todas");
   const [ocupado, setOcupado] = useState(false);
   const [abierta, setAbierta] = useState(false);
   const grupoNivel = useId();
+  const caja = useRef(null);
+
+  // «Ver esos medios» del aviso de arriba (notas de medios nuevos descartadas): abre la
+  // lista, deja solo los nuevos y la trae a la vista. Cada pulsación sube el número.
+  useEffect(() => {
+    if (!verNuevas) return;
+    setFiltro("nuevas");
+    setAbierta(true);
+    caja.current?.scrollIntoView({ block: "start" });
+  }, [verNuevas]);
 
   // Los pasos de la guía que hablan de los medios (`abrirFuentes`) despliegan la lista:
   // lo que el paso explica tiene que verse. Solo abre; cerrarla es cosa de quien mira.
@@ -110,35 +160,54 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje }) => {
     }
   };
 
-  /** Abre la ventana de activar con el nivel que tiene ahora (el que propuso el recolector, si es nueva). */
-  const abrirActivar = (f) => {
-    setNivel(NIVEL[f.nivel] ? f.nivel : 3);
-    setActivando(f);
+  /**
+   * Abre la ventana del nivel. Propone el que tiene; a un medio nuevo, 3 o peor (así nace
+   * en el backend: el recolector no puede subirlo a oficial ni a agencia).
+   */
+  const abrirVentana = (f, modo) => {
+    setNivel(f.nueva ? Math.max(3, nivelValido(f.nivel)) : nivelValido(f.nivel));
+    setFallo(null);
+    setVentana({ fuente: f, modo });
   };
 
-  const activar = async () => {
-    const f = activando;
+  const guardar = async () => {
+    const { fuente: f, modo } = ventana;
+    const ruta = `/admin/headlines/fuentes/${encodeURIComponent(f.id)}`;
+    const cambia = nivel !== f.nivel;
+    let paso = "nivel";
     setOcupado(true);
+    setFallo(null);
     try {
-      await adminRequest(`/admin/headlines/fuentes/${encodeURIComponent(f.id)}/unmute`, {
-        method: "POST",
-        json: { nivel },
-      });
-      toastSuccess(
-        `${f.nombre} ${f.nueva ? "activado" : "vuelve a contar"}, con nivel ${nivel}.`,
-        "Titulares",
-      );
-      setActivando(null);
+      if (cambia) await adminRequest(`${ruta}/nivel`, { method: "POST", json: { nivel } });
+      paso = "activar";
+      if (modo !== "nivel") await adminRequest(`${ruta}/unmute`, { method: "POST" });
+      toastSuccess(`${f.nombre}: ${MODO[modo].hecho}, con nivel ${nivel}.`, "Titulares");
+      setVentana(null);
       onCambio();
     } catch (err) {
-      toastError(adminErrorMessage(err, f.nueva ? "No se pudo activar." : "No se pudo reactivar."), "Titulares");
+      if (paso === "activar" && cambia) {
+        // A medias: el nivel ya está guardado y el medio sigue silenciado. Se dice tal
+        // cual, la ventana se queda para reintentar (ya sin volver a mandar el nivel) y
+        // la lista se recarga para enseñar el nivel nuevo.
+        setFallo(
+          `Se guardó el nivel ${nivel}, pero no se pudo ${MODO[modo].verbo}: ${adminErrorMessage(err, "error del servidor.")} ` +
+            `El medio sigue silenciado; pulse «${MODO[modo].boton} ${nivel}» para intentarlo otra vez.`,
+        );
+        setVentana((v) => (v ? { ...v, fuente: { ...v.fuente, nivel } } : v));
+        onCambio();
+      } else {
+        setFallo(adminErrorMessage(err, paso === "nivel" ? "No se pudo guardar el nivel." : `No se pudo ${MODO[modo].verbo}.`));
+      }
     } finally {
       setOcupado(false);
     }
   };
 
+  const activa = ventana?.fuente;
+  const modo = ventana ? MODO[ventana.modo] : null;
+
   return (
-    <details className="se-admin-table-wrap se-tit-fuentes" open={abierta}
+    <details ref={caja} className="se-admin-table-wrap se-tit-fuentes" open={abierta}
       onToggle={(e) => setAbierta(e.currentTarget.open)} {...anclaje}>
       <summary className="se-tit-fuentes__resumen">
         <span className="se-heading-card">Medios que lee el sistema</span>
@@ -194,14 +263,20 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje }) => {
                       <td className="se-admin-table__actions">
                         {f.silenciada ? (
                           <button type="button" className={`se-btn ${f.nueva ? "se-btn--primary" : "se-btn--secondary"}`}
-                            disabled={ocupado} onClick={() => abrirActivar(f)}>
+                            disabled={ocupado} onClick={() => abrirVentana(f, f.nueva ? "activar" : "reactivar")}>
                             {f.nueva ? "Activar…" : "Reactivar…"}
                           </button>
                         ) : (
-                          <button type="button" className="se-btn se-btn--secondary" disabled={ocupado}
-                            onClick={() => { setRetirar(false); setSilenciando(f); }}>
-                            Silenciar
-                          </button>
+                          <>
+                            <button type="button" className="se-btn se-btn--secondary" disabled={ocupado}
+                              onClick={() => abrirVentana(f, "nivel")}>
+                              Cambiar nivel…
+                            </button>
+                            <button type="button" className="se-btn se-btn--secondary" disabled={ocupado}
+                              onClick={() => { setRetirar(false); setSilenciando(f); }}>
+                              Silenciar
+                            </button>
+                          </>
                         )}
                       </td>
                     </tr>
@@ -218,47 +293,56 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje }) => {
       )}
 
       <ModalDelPanel
-        abierto={Boolean(activando)}
+        abierto={Boolean(ventana)}
         ocupado={ocupado}
-        onCerrar={() => setActivando(null)}
-        titulo={`${activando?.nueva ? "Activar" : "Reactivar"} ${activando?.nombre ?? ""}`}
-        subtitulo={activando?.pais ? `País: ${activando.pais}` : undefined}
+        onCerrar={() => setVentana(null)}
+        titulo={`${modo?.titulo ?? ""} ${activa?.nombre ?? ""}`}
+        subtitulo={activa?.pais ? `País: ${activa.pais}` : undefined}
         pie={
           <>
-            <button type="button" className="se-btn se-btn--secondary" onClick={() => setActivando(null)} disabled={ocupado}>
+            <button type="button" className="se-btn se-btn--secondary" onClick={() => setVentana(null)} disabled={ocupado}>
               Cancelar
             </button>
-            <button type="button" className="se-btn se-btn--primary" onClick={activar} disabled={ocupado}>
-              {ocupado ? "Activando…" : `${activando?.nueva ? "Activar" : "Reactivar"} con nivel ${nivel}`}
+            <button type="button" className="se-btn se-btn--primary" onClick={guardar}
+              disabled={ocupado || (ventana?.modo === "nivel" && nivel === activa?.nivel)}>
+              {ocupado ? "Guardando…" : `${modo?.boton ?? ""} ${nivel}`}
             </button>
           </>
         }
       >
-        <p style={{ marginTop: 0 }}>
-          {activando?.nueva
-            ? "Llegó solo y todavía no cuenta. Antes de activarlo, compruebe que es un medio serio. Desde ahora sus notas sirven para elegir y redactar titulares."
-            : "Sus notas vuelven a contar desde ahora."}
-        </p>
+        <p style={{ marginTop: 0 }}>{modo?.texto}</p>
         <fieldset className="se-tit-niveles">
           <legend className="se-form-label">¿Qué tipo de medio es?</legend>
-          {NIVELES.map((n) => (
-            <label key={n.nivel} className="se-tit-nivel">
-              <input type="radio" name={grupoNivel} value={n.nivel} checked={nivel === n.nivel}
-                onChange={() => setNivel(n.nivel)} disabled={ocupado} />
-              <span>
-                <strong>{n.nivel} · {n.nombre}</strong>
-                {activando?.nivel === n.nivel ? (
-                  <span className="se-admin-meta-hint"> ({activando.nueva ? "el que propone el sistema" : "el que tiene ahora"})</span>
-                ) : null}
-                <span className="se-tit-nivel__texto">{n.ejemplo} {n.pesa}</span>
-              </span>
-            </label>
-          ))}
+          {NIVELES.map((n) => {
+            // El publicador no pone el 1 ni el 2; si ya lo tiene, puede dejarlo como está.
+            const vetado = !esAdmin && SOLO_ADMIN.includes(n.nivel) && n.nivel !== activa?.nivel;
+            return (
+              <label key={n.nivel} className={`se-tit-nivel${vetado ? " se-tit-nivel--vetado" : ""}`}>
+                <input type="radio" name={grupoNivel} value={n.nivel} checked={nivel === n.nivel}
+                  onChange={() => setNivel(n.nivel)} disabled={ocupado || vetado} />
+                <span>
+                  <strong>{n.nivel} · {n.nombre}</strong>
+                  {activa?.nivel === n.nivel ? (
+                    <span className="se-admin-meta-hint"> ({activa.nueva ? "el que propone el sistema" : "el que tiene ahora"})</span>
+                  ) : null}
+                  {vetado ? <span className="se-admin-meta-hint"> (solo un administrador)</span> : null}
+                  <span className="se-tit-nivel__texto">{n.ejemplo} {n.pesa}</span>
+                </span>
+              </label>
+            );
+          })}
         </fieldset>
+        {!esAdmin ? (
+          <p className="se-admin-meta-hint">
+            Los niveles 1 y 2 solo los pone un administrador: con ellos, un medio basta solo para publicar, también lo delicado.
+            Si cree que este medio lo merece, pídaselo.
+          </p>
+        ) : null}
         <p className="se-admin-meta-hint" style={{ marginBottom: 0 }}>
           Las noticias delicadas (política, sucesos, tribunales) piden más: dos medios distintos o uno de nivel 1 o 2;
-          un caso judicial con nombres, siempre dos medios. Cuanto más bajo el número, más pesa el medio al elegir qué sale. El nivel se aplica también a las notas suyas ya guardadas.
+          un caso judicial con nombres, siempre dos medios. Cuanto más bajo el número, más pesa el medio al elegir qué sale.
         </p>
+        {fallo ? <p className="se-tit-aviso" role="alert">{fallo}</p> : null}
       </ModalDelPanel>
 
       <ModalDelPanel
@@ -305,4 +389,6 @@ FuentesDeTitulares.propTypes = {
   ).isRequired,
   onCambio: PropTypes.func.isRequired,
   anclaje: PropTypes.object,
+  /** Sube en uno cada vez que hay que enseñar los medios nuevos (el aviso de la página). */
+  verNuevas: PropTypes.number,
 };

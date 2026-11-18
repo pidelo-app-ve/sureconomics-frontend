@@ -39,6 +39,8 @@ export const PASOS_TITULARES = [
       "Notas agrupadas: lo que llegó de los medios y se juntó por noticia.",
       "Redactados y publicados: lo que salió de esa vuelta.",
       "Sin presupuesto: lo que no se pudo pagar en esa vuelta; se intenta en la siguiente.",
+      "La IA no respondió: si en una vuelta entera la inteligencia artificial no contesta, la redacción descansa unos 20 minutos y se retoma sola a la hora que dice el aviso. No hay que hacer nada; si se repite muchas veces, avise.",
+      "Notas de medios nuevos descartadas: llegaron de medios que nadie ha activado todavía y no contaron. «Ver esos medios» lleva a la lista para revisarlos.",
       "Falló: si alguna parte del ciclo dio error. El resto sigue funcionando; si se repite, hay que avisar.",
     ],
   },
@@ -80,6 +82,7 @@ export const PASOS_TITULARES = [
     puntos: [
       "Silenciar: sus notas nuevas dejan de contar. Si quiere, borra a la vez los titulares donde era el único medio.",
       "Reactivar: vuelve a contar desde ese momento. Antes pregunta el nivel, por si hay que corregirlo.",
+      "Cambiar nivel: en los medios que ya cuentan, corrige su nivel sin silenciarlos.",
     ],
   },
   {
@@ -91,7 +94,7 @@ export const PASOS_TITULARES = [
       "para elegir ni redactar titulares hasta que alguien del equipo lo revisa y lo activa. Así no se " +
       "cuela un medio dudoso sin que nadie lo vea.",
     puntos: [
-      "Nueva, sin activar: la marca de esos medios. Salen los primeros de la lista y el título plegado dice cuántos esperan.",
+      "Nuevo, sin activar: la marca de esos medios. Salen los primeros de la lista y el título plegado dice cuántos esperan.",
       "Enseñar: deja ver solo los nuevos, los silenciados o los que cuentan.",
       "Activar: compruebe antes que es un medio serio. Si no lo es, déjelo como está.",
     ],
@@ -101,8 +104,10 @@ export const PASOS_TITULARES = [
     titulo: "El nivel de cada medio",
     abrirFuentes: true,
     texto:
-      "Al activar o reactivar un medio se elige su nivel. Dice cuánto se fía el sistema de él: cuanto " +
-      "más bajo el número, más pesa al elegir qué sale y antes se publica.",
+      "Al activar o reactivar un medio se elige su nivel, y con «Cambiar nivel» se corrige el de uno que ya " +
+      "cuenta. Dice cuánto se fía el sistema de él: cuanto más bajo el número, más pesa al elegir qué sale y " +
+      "antes se publica. Un medio nuevo llega como mucho con el 3; el 1 y el 2 solo los pone un administrador, " +
+      "porque con ellos un medio basta solo para publicar, también lo delicado.",
     puntos: [
       "1, oficial: bancos centrales, gobiernos y organismos públicos. Basta él solo para publicar.",
       "2, agencia de noticias: EFE, Reuters, AFP. Basta él solo para publicar.",

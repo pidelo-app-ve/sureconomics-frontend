@@ -25,6 +25,11 @@ import "../../styles/titulares.css";
  * **Dos pestañas: «Todo» y «Mis temas».** La segunda enseña lo último publicado en los
  * temas que sigue el lector («Siga este tema»). Sin cuenta se ve igual y, al pulsarla,
  * explica que hay que entrar: seguir temas es de las razones para crear una cuenta.
+ *
+ * Con titulares en caliente, una línea al pie avisa de que los redacta una IA a partir
+ * de fuentes de otros medios (auditoría del 17-nov-2026, D-04); no dice «citadas»,
+ * porque la tarjeta no enseña las fuentes. Con las noticias del sitio o con
+ * «Mis temas» no sale: esas las escribe la redacción.
  */
 
 /** Lo nuevo de los temas que sigue: se pide al abrir la pestaña, una vez por visita. */
@@ -179,6 +184,7 @@ export const UltimaHoraColumna = ({ recientes = [] }) => {
           {t("portada.plana.todaLaUltimaHora")}
         </Enlace>
       )}
+      {!mios && hayTitulares ? <p className="se-plana__uh-nota">{t("titulares.tarjeta.notaIa")}</p> : null}
     </section>
   );
 };

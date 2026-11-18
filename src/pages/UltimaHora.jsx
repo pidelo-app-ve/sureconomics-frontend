@@ -44,6 +44,10 @@ import "../styles/titulares.css";
  * texto (revisión del 22-oct-2026, 3.2), y entra solo en cuanto vuelve arriba. Los dos
  * casos se anuncian a los lectores de pantalla. Lo que sí cambia en el acto: un texto
  * corregido, y lo que la redacción borra u oculta, que desaparece aunque nadie pulse nada.
+ *
+ * Debajo de la lista, una línea fija dice que los redacta una IA a partir de las fuentes
+ * que cita cada uno (auditoría del 17-nov-2026, D-04): el lector tiene que saberlo.
+ * La página no lleva JSON-LD (va sin indexar), así que no hay `isBasedOn` que poner.
  */
 
 const EN_LA_SECCION = 6;
@@ -262,6 +266,7 @@ export const UltimaHora = () => {
               ))}
             </ol>
           ) : null}
+          {items.length ? <p className="se-uh-seccion__nota">{t("titulares.seccion.notaIa")}</p> : null}
         </div>
 
         {/* Lo que se busca después de la última hora: el resumen del día, las monedas en

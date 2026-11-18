@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
+import { MODOS_DEL_JUEZ, nombreDelProblema } from "../../lib/juezDeTitulares";
 import { recorridoTitulares } from "../../lib/guias/guiaTitulares";
 import { applyPageMeta } from "../../lib/seo";
 import { unwrapEntity } from "../../services/adminResponseUtils";
@@ -24,7 +25,10 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * para el sistema; **fijar** lo pone el primero durante un rato; el **historial** dice
  * quién hizo qué. Abajo, los medios que lee el sistema, para silenciar el que no sirva.
  * Un admin puede además parar la publicación automática u ocultar la sección entera (la
- * emergencia). El botón «Guía» lo explica sobre la propia página.
+ * emergencia), y elegir qué hace **el juez**: la IA que lee cada titular antes de
+ * publicarlo y frena el que afirma algo que las notas no dicen. Lo que frenó en el último
+ * ciclo se ve en «Titulares que el juez frenó». El botón «Guía» lo explica sobre la
+ * propia página.
  */
 
 const VISTAS = [
@@ -66,6 +70,9 @@ const resumenDelCiclo = (c) => {
     // vacía y el panel solo decía «notas agrupadas… caducados».
     [n("redacciones_fallidas"), "redacciones fallidas (el motivo, en el registro de Render: «sin redactar»)"],
     [n("errores_ia"), "consultas a la IA con error"],
+    // La IA no contestó: no cuenta como intento, y tras un ciclo entero así se descansa.
+    [n("redacciones_sin_ia"), "sin redactar porque la IA no respondió"],
+    [n("redaccion_en_pausa"), "esperando a que vuelva la IA"],
     [n("publicados"), "publicados"],
     [n("sin_cupo"), "sin presupuesto"],
     [n("zona_gris_sin_saldo"), "dudosas sin consultar (día gastado)"],
@@ -74,9 +81,103 @@ const resumenDelCiclo = (c) => {
     [n("tope_por_medio"), "en espera por el tope por medio"],
     [n("caducados"), "caducados"],
   ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
+  // El juez, si actuó: `{modo, aprobados, rechazados, fallos, sin_saldo}`.
+  const j = c.juez;
+  if (j && typeof j === "object") {
+    const sinRevisar = Number(j.fallos || 0) + Number(j.sin_saldo || 0);
+    const del = [
+      [Number(j.aprobados || 0), "aprobados"],
+      [Number(j.rechazados || 0), j.modo === "observar" ? "que habría frenado" : "frenados"],
+      [sinRevisar, "sin revisar"],
+    ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
+    if (del.length) partes.push(`juez (${MODOS_DEL_JUEZ[j.modo]?.nombre.toLowerCase() ?? j.modo}): ${del.join(", ")}`);
+  }
   const fallos = Object.keys(c).filter((k) => k.startsWith("fallo_")).map((k) => ETAPAS[k.slice(6)] || k.slice(6));
   return { texto: partes.length ? partes.join(" · ") : "sin nada nuevo", fallos };
 };
+
+/**
+ * Lo que el juez no pudo revisar en el último ciclo (la IA no respondió o no quedaba
+ * saldo). En «bloquear» eso no sale; en «observar», sí.
+ */
+const avisoDelJuez = (j) => {
+  if (!j || typeof j !== "object") return null;
+  const n = Number(j.fallos || 0) + Number(j.sin_saldo || 0);
+  if (!n) return null;
+  const titulares = `${n} titular${n === 1 ? "" : "es"}`;
+  const saldo = Number(j.sin_saldo || 0) ? ` A ${j.sin_saldo} no les alcanzó el saldo del día.` : "";
+  return j.modo === "observar"
+    ? `El juez no pudo revisar ${titulares}; en modo observar salieron igual.${saldo}`
+    : `El juez no pudo revisar ${titulares}: no salieron.${saldo}`;
+};
+
+/**
+ * Los últimos titulares que el juez rechazó (`ultimo_ciclo.juez_rechazos`, hasta 10),
+ * cada uno con sus problemas. Plegado: se abre para ver por qué no salió algo.
+ */
+const FrenadosPorElJuez = ({ rechazos, modo, anclaje }) => (
+  <details className="se-admin-table-wrap se-tit-frenados" {...anclaje}>
+    <summary className="se-tit-fuentes__resumen">
+      <span className="se-heading-card">
+        {modo === "observar" ? "Titulares que el juez habría frenado" : "Titulares que el juez frenó"}
+      </span>
+      <span className="se-admin-meta-hint">
+        {rechazos.length} en el último ciclo{modo === "observar" ? " · salieron igual (modo observar)" : ""}
+      </span>
+    </summary>
+    <ul className="se-tit-historial__lista se-tit-frenados__lista">
+      {rechazos.map((r, k) => (
+        <li key={`${r.grupo}-${k}`}>
+          <strong>{r.titulo || "Sin título"}</strong>
+          <ul className="se-tit-frenados__problemas">
+            {(r.problemas ?? []).map((p, i) => (
+              <li key={i}>
+                <span className="se-tit-marca">{nombreDelProblema(p.tipo)}</span> {p.explicacion}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </details>
+);
+
+FrenadosPorElJuez.propTypes = {
+  rechazos: PropTypes.arrayOf(
+    PropTypes.shape({
+      grupo: PropTypes.number,
+      titulo: PropTypes.string,
+      problemas: PropTypes.arrayOf(PropTypes.shape({ tipo: PropTypes.string, explicacion: PropTypes.string })),
+    }),
+  ).isRequired,
+  modo: PropTypes.string,
+  anclaje: PropTypes.object,
+};
+
+/**
+ * Cuánto descansa la redacción tras un ciclo entero sin respuesta de la IA: 2 ciclos de
+ * 10 minutos (`CICLOS_DE_PAUSA_TRAS_CAIDA * CICLO_MINUTOS` en `titulares_ajustes`). Solo
+ * para calcular la hora si el backend no la manda.
+ */
+const PAUSA_TRAS_CAIDA_MS = 20 * 60 * 1000;
+
+/**
+ * Si la redacción está en pausa porque la IA no respondió (el cortacircuitos, D-06), y
+ * hasta cuándo. La hora sale de `redaccion_en_pausa_hasta` si el resumen la trae; si no,
+ * del ciclo que puso la pausa (`redaccion_pausada`) más su duración. Un ciclo que solo
+ * se la encontró (`redaccion_en_pausa`) sin hora conocida da `hasta: null`.
+ */
+const pausaDeLaIa = (resumen, c, ahora) => {
+  const hasta = resumen?.redaccion_en_pausa_hasta ?? c?.redaccion_en_pausa_hasta
+    ?? (c?.redaccion_pausada && c?.empezo ? new Date(Date.parse(c.empezo) + PAUSA_TRAS_CAIDA_MS).toISOString() : null);
+  const ms = Date.parse(hasta || "");
+  if (ms) return ms > ahora ? { hasta } : null;
+  return c?.redaccion_en_pausa ? { hasta: null } : null;
+};
+
+/** Las notas de medios nuevos, sin activar, que el último ciclo tiró: `{source_id: n}`. */
+const descartadasDeNuevos = (c) =>
+  Object.values(c?.notas_de_fuentes_nuevas ?? {}).reduce((total, n) => total + (Number(n) || 0), 0);
 
 const FormularioBorrar = ({ motivos, ocupado, onBorrar, onCancelar }) => {
   const [motivo, setMotivo] = useState("");
@@ -162,6 +263,8 @@ FijarArriba.propTypes = {
 export const AdminTitulares = () => {
   const { role } = useAuth();
   const esAdmin = role === "publicador" || role === "admin";
+  // El modo del juez solo lo cambia un admin (el backend contesta 403 a los demás).
+  const puedeJuez = role === "admin";
   const { toastSuccess, toastError } = useAdminToast();
   const { confirm, ConfirmDialog } = useAdminConfirm();
   const [vista, setVista] = useState("publicados");
@@ -170,6 +273,7 @@ export const AdminTitulares = () => {
   const [editando, setEditando] = useState(null);
   const [historial, setHistorial] = useState(null);
   const [ocupado, setOcupado] = useState(false);
+  const [verNuevas, setVerNuevas] = useState(0);
 
   useEffect(() => {
     applyPageMeta({ title: "Admin — Titulares", description: "Los titulares en caliente: corregir, fijar, borrar y silenciar medios." });
@@ -259,6 +363,13 @@ export const AdminTitulares = () => {
   const motivos = ajustes?.motivos ?? {};
   const ciclo = resumen?.ultimo_ciclo;
   const vuelta = resumenDelCiclo(ciclo);
+  const pausa = pausaDeLaIa(resumen, ciclo, Date.now());
+  const descartadas = descartadasDeNuevos(ciclo);
+  const juez = ajustes?.juez_modo;
+  // Un servidor sin el juez no manda `juez_modo`: el selector no aparenta ningún modo.
+  const hayJuez = typeof juez === "string" && juez !== "";
+  const sinJuez = avisoDelJuez(ciclo?.juez);
+  const rechazos = Array.isArray(ciclo?.juez_rechazos) ? ciclo.juez_rechazos : [];
 
   return (
     <main role="main">
@@ -305,6 +416,35 @@ export const AdminTitulares = () => {
                 ) : null}
               </span>
             </div>
+            <div className="se-admin-filters__field se-tit-juez" {...ancla("juez")}>
+              <label className="se-form-label" htmlFor="tit-juez">Juez de los titulares</label>
+              <select id="tit-juez" className="se-form-control" value={hayJuez ? juez : ""}
+                disabled={!hayJuez || !puedeJuez || ocupado}
+                onChange={(e) => {
+                  const modo = e.target.value;
+                  if (!hayJuez || !MODOS_DEL_JUEZ[modo]) return;
+                  cambiar("juez_modo", modo, {
+                    titulo: `Juez: ${MODOS_DEL_JUEZ[modo].nombre.toLowerCase()}`,
+                    texto: `${MODOS_DEL_JUEZ[modo].texto} Cuenta desde el próximo ciclo.`,
+                    boton: "Cambiar",
+                  });
+                }}>
+                {!hayJuez ? <option value="">No disponible en este servidor</option> : null}
+                {hayJuez && !MODOS_DEL_JUEZ[juez] ? <option value={juez}>{juez}</option> : null}
+                {hayJuez
+                  ? Object.entries(MODOS_DEL_JUEZ).map(([clave, m]) => (
+                    <option key={clave} value={clave}>
+                      {m.nombre}
+                    </option>
+                  ))
+                  : null}
+              </select>
+              <span className="se-admin-meta-hint">
+                {hayJuez
+                  ? `${MODOS_DEL_JUEZ[juez]?.texto ?? ""}${puedeJuez ? "" : " Solo un administrador lo cambia."}`
+                  : "Este servidor todavía no tiene el juez."}
+              </span>
+            </div>
           </div>
           <div className="se-admin-filters__field se-admin-filters__field--grow" {...ancla("gasto")}>
             <span className="se-form-label">IA este mes</span>
@@ -321,10 +461,33 @@ export const AdminTitulares = () => {
                   Falló: {vuelta.fallos.join(", ")}. El resto del ciclo siguió; si se repite, avise.
                 </span>
               ) : null}
+              {pausa ? (
+                <span className="se-tit-aviso" role="status">
+                  {pausa.hasta
+                    ? `La IA no respondió en el último ciclo; la redacción se retoma sola a las ${hora(pausa.hasta)}.`
+                    : "La IA no respondió hace poco; la redacción está en pausa y se retoma sola en unos minutos."}
+                </span>
+              ) : null}
+              {sinJuez ? (
+                <span className="se-tit-aviso" role="status">{sinJuez}</span>
+              ) : null}
+              {descartadas ? (
+                <span className="se-tit-aviso" role="status">
+                  {descartadas} nota{descartadas === 1 ? "" : "s"} de medios nuevos sin activar se
+                  {descartadas === 1 ? " descartó" : " descartaron"} en el último ciclo.{" "}
+                  <button type="button" className="se-tit-enlace" onClick={() => setVerNuevas((n) => n + 1)}>
+                    Ver esos medios
+                  </button>
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>
       </section>
+
+      {rechazos.length ? (
+        <FrenadosPorElJuez rechazos={rechazos} modo={ciclo?.juez?.modo} anclaje={ancla("frenados")} />
+      ) : null}
 
       <div className="se-admin-filters" role="tablist" aria-label="Qué titulares ver" style={{ marginBottom: "0.75rem" }} {...ancla("vistas")}>
         {VISTAS.map((v) => (
@@ -403,7 +566,7 @@ export const AdminTitulares = () => {
         </ul>
       )}
 
-      <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} />
+      <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} verNuevas={verNuevas} />
 
       <EditarTitular grupo={editando} onCerrar={() => setEditando(null)}
         onGuardado={() => { setEditando(null); cargar(); }} />

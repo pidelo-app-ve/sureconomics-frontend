@@ -7275,6 +7275,150 @@
   accent-color: var(--marca-verde);
 }
 
+/* Medios nuevos, sin activar (D-12): la marca en cobrizo, que pide que alguien mire. */
+.se-admin-app .se-tit-marca--nueva {
+  border-color: var(--adm-err-border);
+  background: var(--adm-err-bg);
+  color: var(--adm-err);
+}
+
+.se-admin-app .se-tit-fuentes__filtros {
+  align-items: flex-end;
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-fuentes__filtros .se-admin-meta-hint {
+  flex: 1 1 18rem;
+}
+
+/* Activar un medio: el nivel, con lo que significa cada uno. */
+.se-admin-app .se-tit-niveles {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  border: 0;
+}
+
+.se-admin-app .se-tit-niveles legend {
+  margin-bottom: 0.35rem;
+  padding: 0;
+}
+
+.se-admin-app .se-tit-nivel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--adm-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.se-admin-app .se-tit-nivel:has(input:checked) {
+  border-color: var(--adm-ok-border);
+  background: var(--adm-ok-bg);
+}
+
+.se-admin-app .se-tit-nivel input {
+  margin-top: 0.25rem;
+  accent-color: var(--marca-verde);
+}
+
+/* El 1 y el 2 para quien no es admin: se ven, pero no se eligen. */
+.se-admin-app .se-tit-nivel--vetado {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* El juez: su modo entre los interruptores, y lo que frenó en el último ciclo. */
+.se-admin-app .se-tit-juez {
+  max-width: 26rem;
+}
+
+.se-admin-app .se-tit-frenados {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.se-admin-app .se-tit-frenados__lista {
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-frenados__problemas {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.se-admin-app .se-tit-frenados__problemas .se-tit-marca {
+  margin-right: 0.35rem;
+}
+
+.se-admin-app .se-tit-origen__juez {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-origen__veredicto--no {
+  color: var(--adm-err);
+  font-weight: 600;
+}
+
+/* «Ver esos medios» dentro de un aviso: un botón con aspecto de enlace. */
+.se-admin-app .se-tit-enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.se-admin-app .se-tit-nivel__texto {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--adm-text-muted);
+}
+
+/* Historial: de dónde salió cada versión de la máquina (D-07). */
+.se-admin-app .se-tit-origen {
+  margin-top: 0.35rem;
+}
+
+.se-admin-app .se-tit-origen summary {
+  cursor: pointer;
+}
+
+.se-admin-app .se-tit-origen__datos {
+  margin: 0.4rem 0 0;
+}
+
+.se-admin-app .se-tit-origen__notas {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.se-admin-app .se-tit-origen__notas li {
+  display: grid;
+  gap: 0.1rem;
+  overflow-wrap: anywhere;
+}
+
+.se-admin-app .se-tit-origen__extracto {
+  font-size: 0.85rem;
+  color: var(--adm-text-muted);
+}
+
 /* —— Resumen diario («Lo importante de hoy») ————————————————————————————— */
 
 .se-admin-app .se-res-adm-bloque {

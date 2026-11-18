@@ -252,7 +252,8 @@
       }
     },
     "tarjeta": {
-      "etiqueta": "Breaking"
+      "etiqueta": "Breaking",
+      "notaIa": "Written automatically with AI from other outlets' reporting."
     },
     "hace": {
       "ahora": "Just now",

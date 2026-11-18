@@ -126,8 +126,8 @@ export const Cookies = () => {
   const [borrando, setBorrando] = useState(false);
   const [borrado, setBorrado] = useState(false);
 
-  // Las cookies cambian por debajo de React -- el latido reescribe `last_activity` cada
-  // veinte segundos --, así que se vuelven a leer cada pocos segundos mientras esta
+  // Las cookies cambian por debajo de React -- cada envío de la medición reescribe
+  // `last_activity`, como mucho cada minuto --, así que se vuelven a leer cada pocos segundos mientras esta
   // pagina esta abierta. Es la unica pantalla del sitio donde ese detalle importa.
   useEffect(() => {
     if (decision !== "si") return undefined;

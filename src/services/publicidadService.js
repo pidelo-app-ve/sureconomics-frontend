@@ -1,6 +1,7 @@
 import { listaDeQuery } from "../lib/listaDeQuery";
 import { userPublicRequest } from "../lib/userApi";
 import { siguienteRecarga } from "../lib/recargaDePublicidad";
+import { CLAVE_SOPORTE, crearEnvioDeVistos } from "../lib/envioDeVistos";
 
 /**
  * La publicidad, desde el lado del navegador.
@@ -105,6 +106,50 @@ export const enlaceDeClic = (ruta) => {
   return `${base}${ruta.startsWith("/") ? "" : "/"}${ruta}`;
 };
 
+const baseDeLaApi = () => String(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
+let envio = null;
+
+/** El envío de impresiones de esta carga del sitio (ver `lib/envioDeVistos`). */
+const envioDeVistos = () => {
+  if (envio) return envio;
+  envio = crearEnvioDeVistos({
+    base: baseDeLaApi(),
+    // El tipo del Blob es el Content-Type: `text/plain` la deja sin pregunta previa de
+    // CORS, que `sendBeacon` no sabe hacer.
+    beacon: (url, cuerpo) =>
+      typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function"
+        ? navigator.sendBeacon(url, new Blob([cuerpo], { type: "text/plain" }))
+        : false,
+    // `keepalive`: sigue aunque se cierre la pestaña (hasta 64 KB; un envío no pasa de 16).
+    // Sin credenciales: la ficha ya dice todo lo que hace falta.
+    peticion: (url, cuerpo) =>
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: cuerpo,
+        keepalive: true,
+        credentials: "omit",
+      }),
+    reloj: () => Date.now(),
+    programar: (fn, ms) => setTimeout(fn, ms),
+    cancelar: (id) => clearTimeout(id),
+    almacen: {
+      leer: () => window.sessionStorage.getItem(CLAVE_SOPORTE),
+      escribir: (v) => window.sessionStorage.setItem(CLAVE_SOPORTE, v),
+    },
+  });
+  // Ocultar la pestaña puede ser lo último que pase antes de cerrarla, y `pagehide` es
+  // lo único que se dispara de verdad al salir en iOS: en los dos casos sale todo.
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") envio.vaciar({ saliendo: true });
+    });
+    window.addEventListener("pagehide", () => envio.vaciar({ saliendo: true }));
+  }
+  return envio;
+};
+
 /**
  * Avisa de que una pieza acaba de aparecer en pantalla.
  *
@@ -113,27 +158,23 @@ export const enlaceDeClic = (ruta) => {
  * posible: el servidor manda tres, el lector se va a los cuatro segundos, y se han
  * facturado tres de las que vio una.
  *
- * Va por `sendBeacon` y no por `fetch`: no lleva preflight —así que no hay una petición
- * `OPTIONS` por rotación— y sobrevive a que se cierre la pestaña, que es exactamente
- * cuando hay que contar la última que se vio. El cuerpo es el token firmado, en texto
- * plano, porque `sendBeacon` no admite cabeceras.
+ * Cómo sale hacia el servidor -- la primera de cada página al momento, las rotaciones
+ * juntas, y por qué juntar no cambia lo que se factura -- está en `lib/envioDeVistos`.
+ * `pieza` es la que se vio: con su hueco, su marca y su arte se reconoce la misma pieza
+ * en el mismo hueco servida en otra carga, que es lo que mira el cupo de 30 s.
  *
  * No devuelve nada ni espera respuesta: una impresión que no se pudo reportar es una
  * cifra ligeramente baja, no un error que mostrarle a nadie.
  */
-export const reportarVisto = (enlaceDelClic) => {
+export const reportarVisto = (enlaceDelClic, pieza = null) => {
   const token = String(enlaceDelClic || "").split("/").pop();
   if (!token) return;
-  const base = String(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
-  const destino = `${base}/publicidad/visto`;
+  const clave = pieza
+    ? [pieza.espacio, pieza.anunciante, pieza.titular, pieza.imagen, pieza.cinta].join("|")
+    : null;
   try {
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(destino, new Blob([token], { type: "text/plain" }));
-      return;
-    }
-    // Sin `sendBeacon` (Safari muy viejo), el intento normal. `keepalive` hace lo
-    // mismo al cerrar la pestaña, dentro de su límite de 64 KB, que aquí sobra.
-    fetch(destino, { method: "POST", body: token, keepalive: true }).catch(() => {});
+    const pagina = typeof window !== "undefined" ? window.location.pathname : null;
+    envioDeVistos().ver(token, { clave, pagina });
   } catch {
     /* contar no puede romper la página */
   }

@@ -2,8 +2,8 @@
  * La medicion de audiencia, entera y sin dependencias.
  *
  * Cuatro cookies propias -- `user_id`, `session_id`, `last_activity`, `exit_page` --, un
- * latido cada veinte segundos y un aviso de salida que sobrevive al cierre de la
- * pestana. Nada de esto existe hasta que alguien dice que si; ver `arrancar`.
+ * latido por minuto (solo si no salio nada en ese minuto, ver `LATIDO`) y un aviso de
+ * salida que sobrevive al cierre de la pestana. Nada de esto existe hasta que alguien dice que si; ver `arrancar`.
  *
  * ## Las cinco decisiones que no son obvias
  *
@@ -38,6 +38,7 @@
  */
 
 import { aparatoDe, bloqueDeLlegada, etiquetaDeCampana, sitioDeOrigen } from "./llegada";
+import { tocaLatido, trocearEventos } from "./lotesDeEnvio";
 
 /**
  * El interruptor general. Encendido el 22/09/2026, con el texto del aviso aprobado.
@@ -75,7 +76,23 @@ export const COOKIES_DE_MEDICION = [
 const DOS_ANOS = 60 * 60 * 24 * 730;
 const SEIS_MESES = 60 * 60 * 24 * 183;
 const INACTIVIDAD = 30 * 60 * 1000;
-const LATIDO = 20 * 1000;
+/**
+ * Cada cuánto, como mucho, se le dice al servidor que la visita sigue viva.
+ *
+ * Era cada veinte segundos, y el latido era la petición más repetida del sitio: tres por
+ * lector y minuto, más que todo lo demás junto (medido en nov-2026, ver
+ * `lotesDeEnvio.js`). Lo único que mueve es la última señal de la visita, y de ella sale
+ * el contador de lectores en vivo, que cuenta a los vistos en los últimos **cinco**
+ * minutos (`VENTANA_EN_VIVO` en el backend): con un minuto, quien sigue leyendo sigue
+ * contando exactamente igual. El tiempo de lectura no sale de aquí -- lo mide el
+ * navegador y viaja en la salida --, y la salida sigue mandándose al ocultar o cerrar.
+ *
+ * Además, si algo salió hace menos de un minuto (un cambio de página, una salida), el
+ * latido sobra: cualquier envío dice lo mismo (`tocaLatido`).
+ */
+const LATIDO = 60 * 1000;
+/** Cada cuánto se mira si toca latido. Con esto el hueco máximo es LATIDO + REVISION. */
+const REVISION = 20 * 1000;
 
 /** Por debajo de esto no es una lectura, es un rebote. No se manda. */
 const MINIMO_LEGIBLE = 3;
@@ -203,6 +220,8 @@ let acumulado = 0;
 /** Cuando empezo a contar el tramo visible en curso; `null` si esta pausado. */
 let desde = null;
 let quitarOyentes = null;
+/** Cuándo salió el último envío de la medición (ms). Ver `tocaLatido`. */
+let ultimoEnvio = 0;
 
 const base = () => (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
@@ -245,11 +264,18 @@ const soltar = (url, cuerpo, { conBeacon = false } = {}) => {
   }
 };
 
-/** Manda uno o varios eventos de la medicion. */
+/**
+ * Manda uno o varios eventos de la medicion, juntos: en un solo envio todo lo que el
+ * servidor acepta en un lote (`trocearEventos`: misma visita, una salida, veinte
+ * eventos y lo que cabe en un beacon). Lo normal es un envio; mas solo si algo de eso
+ * no cabe.
+ */
 const enviar = (eventos, { conBeacon = false } = {}) => {
   if (!base() || !eventos.length) return;
-  const cuerpo = JSON.stringify(eventos.length === 1 ? eventos[0] : { eventos });
-  soltar(base() + RUTA_EVENTOS, cuerpo, { conBeacon });
+  for (const cuerpo of trocearEventos(eventos)) {
+    soltar(base() + RUTA_EVENTOS, cuerpo, { conBeacon });
+  }
+  ultimoEnvio = Date.now();
 };
 
 /**
@@ -446,6 +472,7 @@ const cerrarRuta = () => {
 
 const latir = () => {
   if (!encendido || document.visibilityState !== "visible") return;
+  if (!tocaLatido({ ahora: Date.now(), ultimoEnvio, cada: LATIDO })) return;
   const e = evento("latido");
   if (e) enviar([e]);
 };
@@ -492,7 +519,8 @@ export const arrancar = () => {
   const primera = evento("vista");
   if (primera) enviar([primera]);
 
-  temporizador = window.setInterval(latir, LATIDO);
+  // Se mira cada REVISION y se late solo si hace LATIDO que no sale nada (`latir`).
+  temporizador = window.setInterval(latir, REVISION);
   document.addEventListener("visibilitychange", alCambiarVisibilidad);
   // `pagehide` y no `beforeunload`: es el unico que se dispara de verdad en iOS, y no
   // impide que el navegador guarde la pagina en su cache de atras/adelante.
@@ -513,6 +541,7 @@ export const parar = ({ borrarCookies = false } = {}) => {
   rutaActual = null;
   acumulado = 0;
   desde = null;
+  ultimoEnvio = 0;
   if (borrarCookies) COOKIES_DE_MEDICION.forEach(borrar);
 };
 

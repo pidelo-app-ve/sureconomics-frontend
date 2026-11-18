@@ -82,7 +82,7 @@ export const useRotacion = (ciclo) => {
     const pieza = ciclo?.[indice];
     if (!pieza?.enlace || reportadas.current.has(pieza.enlace)) return;
     reportadas.current.add(pieza.enlace);
-    reportarVisto(pieza.enlace);
+    reportarVisto(pieza.enlace, pieza);
   };
   // La versión de este render, para los oyentes que se enganchan una vez (el observador
   // y la vuelta a la pestaña): si no, contarían con el índice de cuando se montaron.

@@ -223,7 +223,7 @@ let quitarOyentes = null;
 /** Cuándo salió el último envío de la medición (ms). Ver `tocaLatido`. */
 let ultimoEnvio = 0;
 
-const base =() => (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const base = () => (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 /* ─── Envio ────────────────────────────────────────────────────────────────── */
 

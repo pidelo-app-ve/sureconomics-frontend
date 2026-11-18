@@ -12,10 +12,13 @@
  *
  * 1. `src/ui/` (lo compartido: botones, tablas, diálogos) no importa **ninguna** feature,
  *    ni siquiera por su puerta: es la feature la que usa `ui/`, no al revés.
- * 2. Lo del panel (`features/<tema>/admin/**`) solo se importa desde una carpeta `admin/`
- *    (`src/pages/admin`, `src/components/admin`, el `admin/` de una feature). Tampoco
- *    desde la propia feature: si `index.js` o un componente del sitio importaran su
- *    `admin/`, el panel viajaría en el paquete de cada lector.
+ * 2. Nada que viva en una carpeta `admin/` (`src/pages/admin`, `src/components/admin`, el
+ *    `admin/` de una feature) se importa desde fuera de una carpeta `admin/`: ni el panel
+ *    de una feature, ni un componente del panel que a su vez lo importe (la fuga
+ *    indirecta). Tampoco desde la propia feature: si `index.js` o un componente del sitio
+ *    importaran su `admin/`, el panel viajaría en el paquete de cada lector. La única
+ *    salvedad es el `import()` de `routes.jsx` a una página del panel (`src/pages/admin/…`
+ *    o `features/<tema>/admin/paginas/…`): así es como el panel se carga aparte.
  * 3. Una feature solo importa de otra sus puertas (`index.js` o `admin/index.js`).
  * 4. El resto del sitio también entra por la puerta, con tres salvedades, cada una por
  *    una razón que no es de gusto:
@@ -26,6 +29,11 @@
  *      guías de `lib/guias/` los leen desde una prueba que corre en node, que no entiende
  *      el JSX que trae `index.js`;
  *    - las fachadas de la mudanza (`FACHADAS`, con quién las quita).
+ * 5. Los pasos de las guías de una feature (`features/<tema>/guias/`) son datos: solo
+ *    importan otros archivos `.js` o `.json` de una carpeta `guias/`. Nada de componentes
+ *    ni JSX (los lee node).
+ * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
+ *    comprobar: solo se admite en `routes.jsx`.
  *
  * Cada regla tiene su trampa en «la prueba ve las trampas»: un sitio de mentira en una
  * carpeta temporal donde cada falta está puesta a propósito.
@@ -46,6 +54,20 @@ const RAIZ = fileURLToPath(new URL("../", import.meta.url));
 /** Las fachadas de la mudanza: pueden importar las tripas de una feature. Ruta → quién la quita. */
 const FACHADAS = {
   "src/lib/monedas.js": "monedas, cuando el editor de piezas importe de features/monedas",
+};
+
+/**
+ * Lo que hoy sale del panel hacia el sitio y no es del piloto (18-nov-2026): se anotan
+ * para que no crezcan. Lo compartido con el panel va a `src/ui/` (ADR-001); al moverlo,
+ * se borra su línea. `importador → importado` → por qué sigue y quién lo quita.
+ */
+const FUGAS_CONOCIDAS = {
+  "src/routes.jsx → src/components/admin/RequireAdmin.jsx":
+    "la guarda de /admin, que va en la ruta y no en una página; la quita quien mude el panel (o la pase a src/app/)",
+  "src/hooks/useAdminConfirm.jsx → src/components/admin/AdminConfirmDialog.jsx":
+    "el diálogo de confirmar lo usan el panel y la cuenta; la quita quien cree src/ui/ (diálogos)",
+  "src/components/cuenta/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
+    "el recorte del retrato lo usan el panel y la cuenta del lector; la quita quien lo mude a src/ui/",
 };
 
 const OPCIONES = { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true }, loc: true };
@@ -72,6 +94,9 @@ export const importaciones = (fuente) => {
       : n.type === "ImportExpression" ? n.source : null;
     if (fuenteDe?.type === "Literal" && typeof fuenteDe.value === "string") {
       salida.push({ especificador: fuenteDe.value, linea: n.loc.start.line, dinamico: n.type === "ImportExpression" });
+    } else if (n.type === "ImportExpression") {
+      // `import(`./x/${y}`)` o `import(ruta)`: adónde va no se sabe sin ejecutarlo.
+      salida.push({ especificador: null, linea: n.loc.start.line, dinamico: true });
     }
     for (const clave of espree.VisitorKeys[n.type] ?? []) {
       const hijo = n[clave];
@@ -88,7 +113,7 @@ const dentroDe = (ruta, carpeta) => {
 };
 
 /** Las reglas sobre el sitio que cuelga de `raiz`: una lista de faltas, en palabras. */
-export const faltas = (raiz = RAIZ, fachadas = FACHADAS) => {
+export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS) => {
   const SRC = path.join(raiz, "src");
   const FEATURES = path.join(SRC, "features");
   const UI = path.join(SRC, "ui");
@@ -106,24 +131,45 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS) => {
         .filter((r) => /\.(jsx?|mjs)$/.test(r) && !/\.test\./.test(r) && !relativa(r).startsWith("src/juegos/el-analista/"))
     : [];
 
+  const RUTAS = path.join(SRC, "routes.jsx");
+  /** El `import()` de `routes.jsx` a una página del panel: así se carga aparte. */
+  const lazyDelPanel = (ruta, destino, dinamico) =>
+    dinamico && ruta === RUTAS &&
+    (dentroDe(destino, path.join(SRC, "pages", "admin")) ||
+      (featureDe(destino) && dentroDe(destino, path.join(FEATURES, featureDe(destino), "admin", "paginas"))));
+  const enGuiasDeFeature = (r) => {
+    const f = featureDe(r);
+    return Boolean(f) && dentroDe(r, path.join(FEATURES, f, "guias"));
+  };
+
   const salida = [];
   for (const ruta of archivos) {
     const rel = relativa(ruta);
     const suya = featureDe(ruta);
     for (const { especificador, linea, dinamico } of importaciones(readFileSync(ruta, "utf8"))) {
+      if (especificador === null) {
+        if (ruta !== RUTAS) salida.push(`${rel}:${linea}: importa (ruta calculada); un import() con plantilla solo en routes.jsx`);
+        continue;
+      }
       const destino = resolver(ruta, especificador);
-      const otra = destino && featureDe(destino);
-      if (!otra) continue;
+      if (!destino) continue;
       const donde = `${rel}:${linea}: importa ${relativa(destino)}`;
-      if (dentroDe(ruta, UI)) {
+      if (enGuiasDeFeature(ruta) && !(/\.(js|json)$/.test(destino) && path.basename(path.dirname(destino)) === "guias")) {
+        salida.push(`${donde}; los pasos de una guía son datos: solo importan otros datos de guias/`);
+        continue;
+      }
+      const otra = featureDe(destino);
+      if (otra && dentroDe(ruta, UI)) {
         salida.push(`${donde}; ui/ no conoce las features, ni por su puerta (son ellas las que usan ui/)`);
-      } else if (dentroDe(destino, path.join(FEATURES, otra, "admin")) && !enAdmin(ruta)) {
+      } else if (enAdmin(destino) && !enAdmin(ruta) && !lazyDelPanel(ruta, destino, dinamico) &&
+        !(`${rel} → ${relativa(destino)}` in fugas)) {
         salida.push(`${donde}; lo del panel solo se importa desde una carpeta admin/`);
-      } else if (otra === suya || esLaPuerta(destino, otra) || rel in fachadas) {
+      } else if (!otra || otra === suya || esLaPuerta(destino, otra) || rel in fachadas) {
         continue;
       } else if (suya) {
         salida.push(`${donde}; de otra feature, solo sus puertas (features/${otra}/index.js o admin/index.js)`);
-      } else if (dinamico && rel === "src/routes.jsx" && dentroDe(destino, path.join(FEATURES, otra, "paginas"))) {
+      } else if (dinamico && ruta === RUTAS && (dentroDe(destino, path.join(FEATURES, otra, "paginas")) ||
+        dentroDe(destino, path.join(FEATURES, otra, "admin", "paginas")))) {
         continue;
       } else if (dentroDe(destino, path.join(FEATURES, otra, "guias")) && destino.endsWith(".js")) {
         continue;
@@ -149,6 +195,11 @@ test("cada feature, ui/ y el resto del sitio entran a una feature por sus puerta
 
 test("cada fachada de la lista existe (una borrada se quita también de FACHADAS)", () => {
   assert.deepEqual(Object.keys(FACHADAS).filter((f) => !existsSync(path.join(RAIZ, f))), []);
+});
+
+test("cada fuga conocida del panel sigue ahí (una arreglada se quita de FUGAS_CONOCIDAS)", () => {
+  const vistas = new Set(faltas(RAIZ, FACHADAS, {}).map((f) => f.split(";")[0].replace(/:\d+: importa /, " → ")));
+  assert.deepEqual(Object.keys(FUGAS_CONOCIDAS).filter((f) => !vistas.has(f)), []);
 });
 
 test("cada feature tiene su index.js", () => {
@@ -181,7 +232,15 @@ test("la prueba ve las trampas", () => {
     "src/features/b/componentes/Y.jsx": [],
     "src/features/b/admin/index.js": [],
     "src/features/b/paginas/Pag.jsx": [],
-    "src/features/b/guias/pasos.js": [],
+    "src/features/b/admin/paginas/Panel.jsx": [],
+    "src/features/b/guias/pasos.js": [
+      'import { MAS } from "./mas.js";', //             bien: datos de otra guía
+      'import { Y } from "../componentes/Y";', //       ✗ 5: una guía no importa componentes
+    ],
+    "src/features/b/guias/mas.js": [],
+    "src/components/admin/X.jsx": [
+      'import { Q } from "../../features/b/admin";', // bien: panel con panel
+    ],
     "src/ui/Boton.jsx": [
       'import { B } from "../features/b";', //         ✗ 1: ui no usa features, ni por la puerta
     ],
@@ -192,10 +251,16 @@ test("la prueba ve las trampas", () => {
       'import { B } from "../features/b";', //         bien
       'import { Q } from "../features/b/admin";', //   ✗ 2
       'import { Y } from "../features/b/componentes/Y";', // ✗ 4
+      'import { X } from "../components/admin/X";', // ✗ 2: la fuga indirecta (X importa el panel)
+      "const M = (n) => import(`./mapas/${n}.js`);", // ✗ 6: una ruta calculada
     ],
     "src/routes.jsx": [
       'const P = () => import("./features/b/paginas/Pag");', // bien: el lazy de una página
       'import { Y } from "./features/b/componentes/Y";', //     ✗ 4: lo demás, por la puerta
+      'const A = () => import("./features/b/admin/paginas/Panel");', // bien: el lazy del panel
+      'const C = () => import("./pages/admin/Cinta");', //               bien: también
+      'import { Cinta } from "./pages/admin/Cinta";', //                ✗ 2: sin lazy, no
+      "const I = (n) => import(`./pages/${n}`);", //                     bien: en routes.jsx sí
     ],
     "src/lib/guias/g.js": [
       'import { pasos } from "../../features/b/guias/pasos.js";', // bien: datos de una guía
@@ -209,15 +274,19 @@ test("la prueba ve las trampas", () => {
       mkdirSync(path.dirname(path.join(raiz, ruta)), { recursive: true });
       writeFileSync(path.join(raiz, ruta), lineas.join("\n"));
     }
-    const claves = faltas(raiz, { "src/lib/fachada.js": "prueba" }).map((f) => f.split(";")[0].replace(": importa ", " "));
+    const claves = faltas(raiz, { "src/lib/fachada.js": "prueba" }, {}).map((f) => f.split(";")[0].replace(": importa ", " "));
     assert.deepEqual(claves.sort(), [
       "src/features/a/componentes/X.jsx:2 src/features/b/componentes/Y.jsx",
       "src/features/a/componentes/X.jsx:3 src/features/b/admin/index.js",
       "src/features/a/componentes/X.jsx:4 src/features/a/admin/Panel.jsx",
       "src/features/a/index.js:2 src/features/a/admin/Panel.jsx",
+      "src/features/b/guias/pasos.js:2 src/features/b/componentes/Y.jsx",
       "src/pages/Home.jsx:2 src/features/b/admin/index.js",
       "src/pages/Home.jsx:3 src/features/b/componentes/Y.jsx",
+      "src/pages/Home.jsx:4 src/components/admin/X.jsx",
+      "src/pages/Home.jsx:5 (ruta calculada)",
       "src/routes.jsx:2 src/features/b/componentes/Y.jsx",
+      "src/routes.jsx:5 src/pages/admin/Cinta.jsx",
       "src/ui/Boton.jsx:1 src/features/b/index.js",
     ]);
   } finally {
@@ -233,6 +302,7 @@ test("el lector de importaciones ve las trampas", () => {
     'export * from "./c";',
     "const P = lazy(() => import('./d'));",
     'import "./estilos.css";',
+    "const Q = (n) => import(`./e/${n}`);",
   ].join("\n");
   assert.deepEqual(importaciones(codigo).map((i) => [i.especificador, i.linea, i.dinamico]), [
     ["./a", 2, false],
@@ -240,5 +310,6 @@ test("el lector de importaciones ve las trampas", () => {
     ["./c", 4, false],
     ["./d", 5, true],
     ["./estilos.css", 6, false],
+    [null, 7, true],
   ]);
 });

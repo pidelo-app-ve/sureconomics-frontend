@@ -28,8 +28,10 @@ export const MAX_EVENTOS_POR_LOTE = 20;
  */
 export const MAX_BYTES_POR_ENVIO = 48 * 1024;
 
-/** El tope del servidor para las impresiones: `MAXIMO_VISTOS_POR_ENVIO`. */
+/** Los topes del servidor para las impresiones (`/publicidad/vistos`): treinta fichas
+ * (`MAXIMO_VISTOS_POR_ENVIO`) y 16 KB (`MAX_CUERPO_VISTOS`); lo que pase no cuenta. */
 export const MAX_FICHAS_POR_ENVIO = 30;
+export const MAX_BYTES_DE_FICHAS = 16 * 1024;
 
 const bytes = (texto) => {
   try {
@@ -88,7 +90,9 @@ export const trocearEventos = (eventos) => {
  * milisegundos, el latido sobra.
  */
 export const tocaLatido = ({ ahora, ultimoEnvio, cada }) =>
-  !ultimoEnvio || ahora - ultimoEnvio >= cada;
+  // Un reloj que va hacia atrás (el aparato corrigió la hora) no puede dejar la visita
+  // sin latido hasta que vuelva a pasar la hora vieja: en la duda, se late.
+  !ultimoEnvio || ahora < ultimoEnvio || ahora - ultimoEnvio >= cada;
 
 /**
  * Parte las fichas de anuncio vistas en envíos de una ficha por línea, sin repetir y
@@ -101,7 +105,7 @@ export const trocearFichas = (fichas) => {
   let tamano = 0;
   for (const f of unicas) {
     const peso = bytes(f) + 1;
-    if (actual.length >= MAX_FICHAS_POR_ENVIO || (actual.length && tamano + peso > MAX_BYTES_POR_ENVIO)) {
+    if (actual.length >= MAX_FICHAS_POR_ENVIO || (actual.length && tamano + peso > MAX_BYTES_DE_FICHAS)) {
       envios.push(actual.join("\n"));
       actual = [];
       tamano = 0;

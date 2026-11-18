@@ -2,6 +2,7 @@
  * Cómo se juntan los avisos al servidor. `npm run test:lotes`.
  */
 import {
+  MAX_BYTES_DE_FICHAS,
   MAX_BYTES_POR_ENVIO,
   MAX_EVENTOS_POR_LOTE,
   MAX_FICHAS_POR_ENVIO,
@@ -51,6 +52,8 @@ console.log("\nel latido");
 check("sin nada enviado, toca", tocaLatido({ ahora: 1000, ultimoEnvio: 0, cada: 60000 }));
 check("si algo salió hace menos de un latido, sobra", !tocaLatido({ ahora: 30000, ultimoEnvio: 1000, cada: 60000 }));
 check("pasado el plazo, toca", tocaLatido({ ahora: 61000, ultimoEnvio: 1000, cada: 60000 }));
+check("si el reloj del aparato va hacia atrás, toca (no se queda sin latir)",
+  tocaLatido({ ahora: 5000, ultimoEnvio: 900000, cada: 60000 }));
 
 console.log("\nlas impresiones");
 r = trocearFichas(["a.b.c", "d.e.f", "a.b.c"]);
@@ -61,6 +64,9 @@ check("como mucho treinta por envío (el tope del servidor)",
 r = trocearFichas(["", null, "con espacio", "con\nsalto", "buena"]);
 check("una ficha con espacios no es una ficha (partiría el envío)", r.length === 1 && r[0] === "buena", r);
 check("sin fichas no hay envío", trocearFichas([]).length === 0);
+r = trocearFichas(Array.from({ length: 25 }, (_, i) => `${i}.`.padEnd(1000, "x")));
+check("ni más de 16 KB por envío (el tope del servidor)",
+  r.length === 2 && r.every((c) => new TextEncoder().encode(c).length <= MAX_BYTES_DE_FICHAS), r.map((c) => c.length));
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

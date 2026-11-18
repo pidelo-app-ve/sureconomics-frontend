@@ -1,7 +1,7 @@
 import { listaDeQuery } from "../lib/listaDeQuery";
 import { userPublicRequest } from "../lib/userApi";
 import { siguienteRecarga } from "../lib/recargaDePublicidad";
-import { MAX_FICHAS_POR_ENVIO, trocearFichas } from "../lib/lotesDeEnvio";
+import { CLAVE_SOPORTE, crearEnvioDeVistos } from "../lib/envioDeVistos";
 
 /**
  * La publicidad, desde el lado del navegador.
@@ -106,58 +106,48 @@ export const enlaceDeClic = (ruta) => {
   return `${base}${ruta.startsWith("/") ? "" : "/"}${ruta}`;
 };
 
-/**
- * Cuánto espera una impresión antes de salir hacia el servidor, juntándose con las que
- * vengan detrás. Quince segundos cubren las tres piezas de un hueco (una cada siete
- * segundos, ver `useRotacion`) y las de los demás huecos de la pantalla: lo normal es un
- * envío por página en vez de uno por pieza, que era la petición más repetida del sitio
- * (medido en nov-2026; ver `lib/lotesDeEnvio.js`). Al ocultar o cerrar la pestaña sale
- * todo lo pendiente en el momento, así que esperar no pierde ninguna.
- */
-const ESPERA_DE_VISTOS_MS = 15 * 1000;
+const baseDeLaApi = () => String(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
-let fichasPendientes = [];
-let relojDeVistos = null;
-let salidaEnganchada = false;
+let envio = null;
 
-const destinoDeVistos = () =>
-  `${String(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/publicidad/visto`;
-
-const soltarFichas = (cuerpo) => {
-  try {
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(destinoDeVistos(), new Blob([cuerpo], { type: "text/plain" }));
-      return;
-    }
-    // Sin `sendBeacon` (Safari muy viejo), el intento normal. `keepalive` hace lo
-    // mismo al cerrar la pestaña, dentro de su límite de 64 KB, que aquí sobra.
-    fetch(destinoDeVistos(), { method: "POST", body: cuerpo, keepalive: true }).catch(() => {});
-  } catch {
-    /* contar no puede romper la página */
-  }
-};
-
-/** Manda ya todas las impresiones pendientes. */
-const vaciarVistos = () => {
-  if (relojDeVistos) clearTimeout(relojDeVistos);
-  relojDeVistos = null;
-  const pendientes = fichasPendientes;
-  fichasPendientes = [];
-  for (const cuerpo of trocearFichas(pendientes)) soltarFichas(cuerpo);
-};
-
-/**
- * Ocultar la pestaña puede ser lo último que pase antes de cerrarla, y `pagehide` es lo
- * único que se dispara de verdad al salir en iOS: en los dos casos sale lo pendiente,
- * con beacon, que sobrevive al cierre. Se engancha una vez, con la primera impresión.
- */
-const engancharSalida = () => {
-  if (salidaEnganchada || typeof window === "undefined" || typeof document === "undefined") return;
-  salidaEnganchada = true;
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") vaciarVistos();
+/** El envío de impresiones de esta carga del sitio (ver `lib/envioDeVistos`). */
+const envioDeVistos = () => {
+  if (envio) return envio;
+  envio = crearEnvioDeVistos({
+    base: baseDeLaApi(),
+    // El tipo del Blob es el Content-Type: `text/plain` la deja sin pregunta previa de
+    // CORS, que `sendBeacon` no sabe hacer.
+    beacon: (url, cuerpo) =>
+      typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function"
+        ? navigator.sendBeacon(url, new Blob([cuerpo], { type: "text/plain" }))
+        : false,
+    // `keepalive`: sigue aunque se cierre la pestaña (hasta 64 KB; un envío no pasa de 16).
+    // Sin credenciales: la ficha ya dice todo lo que hace falta.
+    peticion: (url, cuerpo) =>
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: cuerpo,
+        keepalive: true,
+        credentials: "omit",
+      }),
+    reloj: () => Date.now(),
+    programar: (fn, ms) => setTimeout(fn, ms),
+    cancelar: (id) => clearTimeout(id),
+    almacen: {
+      leer: () => window.sessionStorage.getItem(CLAVE_SOPORTE),
+      escribir: (v) => window.sessionStorage.setItem(CLAVE_SOPORTE, v),
+    },
   });
-  window.addEventListener("pagehide", vaciarVistos);
+  // Ocultar la pestaña puede ser lo último que pase antes de cerrarla, y `pagehide` es
+  // lo único que se dispara de verdad al salir en iOS: en los dos casos sale todo.
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") envio.vaciar({ saliendo: true });
+    });
+    window.addEventListener("pagehide", () => envio.vaciar({ saliendo: true }));
+  }
+  return envio;
 };
 
 /**
@@ -168,27 +158,24 @@ const engancharSalida = () => {
  * posible: el servidor manda tres, el lector se va a los cuatro segundos, y se han
  * facturado tres de las que vio una.
  *
- * Va por `sendBeacon` y no por `fetch`: no lleva preflight —así que no hay una petición
- * `OPTIONS` por envío— y sobrevive a que se cierre la pestaña, que es exactamente
- * cuando hay que contar la última que se vio. El cuerpo son los tokens firmados, uno por
- * línea, en texto plano, porque `sendBeacon` no admite cabeceras.
- *
- * **Se juntan** (nov-2026): cada impresión espera hasta `ESPERA_DE_VISTOS_MS` a las que
- * vengan detrás y salen todas en un envío; al ocultar o cerrar la pestaña, en el
- * momento. El servidor comprueba y cuenta cada token igual que si llegara solo, así que
- * juntar no cambia lo que se factura.
+ * Cómo sale hacia el servidor -- la primera de cada página al momento, las rotaciones
+ * juntas, y por qué juntar no cambia lo que se factura -- está en `lib/envioDeVistos`.
+ * `pieza` es la que se vio: con su hueco, su marca y su arte se reconoce la misma pieza
+ * en el mismo hueco servida en otra carga, que es lo que mira el cupo de 30 s.
  *
  * No devuelve nada ni espera respuesta: una impresión que no se pudo reportar es una
  * cifra ligeramente baja, no un error que mostrarle a nadie.
  */
-export const reportarVisto = (enlaceDelClic) => {
+export const reportarVisto = (enlaceDelClic, pieza = null) => {
   const token = String(enlaceDelClic || "").split("/").pop();
   if (!token) return;
-  fichasPendientes.push(token);
-  engancharSalida();
-  if (fichasPendientes.length >= MAX_FICHAS_POR_ENVIO) {
-    vaciarVistos();
-    return;
+  const clave = pieza
+    ? [pieza.espacio, pieza.anunciante, pieza.titular, pieza.imagen, pieza.cinta].join("|")
+    : null;
+  try {
+    const pagina = typeof window !== "undefined" ? window.location.pathname : null;
+    envioDeVistos().ver(token, { clave, pagina });
+  } catch {
+    /* contar no puede romper la página */
   }
-  if (!relojDeVistos) relojDeVistos = setTimeout(vaciarVistos, ESPERA_DE_VISTOS_MS);
 };

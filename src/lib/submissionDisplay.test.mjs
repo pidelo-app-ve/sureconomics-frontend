@@ -73,7 +73,10 @@ const valores = [...filtros.matchAll(/value:\s*"([^"]*)"/g)].map((m) => m[1]).fi
 check("los filtros son los cuatro estados, sin repetir", JSON.stringify([...valores].sort()) === JSON.stringify([...DEL_SERVIDOR].sort()), valores);
 
 const ficha = leer("src/pages/admin/AdminSubmissionDetail.jsx");
-const opciones = [...ficha.matchAll(/<option value="([^"]*)"/g)].map((m) => m[1]);
+// Solo el desplegable del estado (`rev-status`): la ficha tiene otro, el del tema al
+// aceptar, que empieza con `<option value="">` («Elija un tema») y no es un estado.
+const desplegable = /<select id="rev-status"[\s\S]*?<\/select>/.exec(ficha)?.[0] ?? "";
+const opciones = [...desplegable.matchAll(/<option value="([^"]*)"/g)].map((m) => m[1]);
 check("el desplegable de la ficha solo ofrece estados que existen", opciones.length > 0 && opciones.every((v) => DEL_SERVIDOR.includes(v)), opciones);
 
 for (const ruta of [

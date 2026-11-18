@@ -157,8 +157,7 @@
   transition: opacity 0.2s ease;
 }
 
-.se-reader-dash__rail-logo:hover .se-reader-dash__rail-logo-word,
-.se-reader-dash__rail-logo:hover .se-reader-dash__rail-logo-iso {
+.se-reader-dash__rail-logo:hover .se-reader-dash__rail-logo-word {
   opacity: 0.9;
 }
 
@@ -1090,15 +1089,6 @@
   background: #fff;
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.07);
 }
-.se-entrada__kicker {
-  margin: 0 0 0.5rem;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 .se-entrada__titulo {
   margin: 0 0 0.7rem;
   font-size: clamp(1.5rem, 3.4vw, 1.95rem);
@@ -1248,15 +1238,6 @@
   padding: clamp(1.25rem, 3vw, 2rem);
 }
 .se-cuenta__cabecera { display: grid; gap: 0.4rem; }
-.se-cuenta__kicker {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 .se-cuenta__titulo {
   margin: 0;
   font-size: clamp(1.6rem, 3.6vw, 2.1rem);

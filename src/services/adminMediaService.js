@@ -31,9 +31,6 @@ export const listAdminMedia = async (params = {}) => {
   return unwrapListResponse(raw);
 };
 
-export const getAdminMedia = async (id) =>
-  unwrapEntity(await adminRequest(`/admin/media/${encodeURIComponent(id)}`));
-
 /** Register a file hosted elsewhere: a YouTube interview, a PDF on another site. */
 export const createAdminExternalMedia = async (body) =>
   unwrapEntity(await adminRequest("/admin/media/external", { method: "POST", json: body }));
@@ -50,10 +47,8 @@ export const ACCEPTED_IMAGE_MIME =
 /** Reports are PDFs and nothing else — the backend checks the magic bytes. */
 export const ACCEPTED_DOCUMENT_MIME = "application/pdf";
 
-/** Both match the backend defaults; used only for a hint before uploading. */
+/** Matches the backend default; used only for a hint before uploading. */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-export const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
-export const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
 
 /**
  * `adminRequest` leaves `Content-Type` unset for a `FormData` body, so the browser

@@ -1902,108 +1902,6 @@
   border: none;
 }
 
-.se-card__media-link {
-  display: block;
-  overflow: hidden;
-}
-
-.se-card__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  aspect-ratio: 4 / 3;
-  display: block;
-  transition: transform 0.6s ease;
-  filter: saturate(0.9);
-}
-
-.se-card__img--hero {
-  aspect-ratio: 16 / 10;
-}
-
-.se-card--default {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.se-card--default:hover .se-heading-card a {
-  color: var(--color-accent);
-}
-
-.se-card--default .se-card__media-link {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  background: #f7f7f5;
-  margin-bottom: 18px;
-}
-
-.se-card--default .se-card__media-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--color-accent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.se-card--default:hover .se-card__media-link::after {
-  opacity: 1;
-}
-
-.se-card--default:hover .se-card__img {
-  transform: scale(1.04);
-}
-
-.se-card--hero {
-  background: rgba(var(--se-tinte), 0.03);
-  border: 1px solid var(--color-hairline);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.se-card--hero:hover {
-  border-color: var(--color-accent);
-}
-
-.se-card--hero .se-card__media-link {
-  aspect-ratio: 16 / 10;
-  background: linear-gradient(135deg, #0d1b3e 0%, #f2f2f0 100%);
-  position: relative;
-}
-
-.se-card--hero .se-card__media-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(26, 26, 26, 0) 40%,
-    rgba(26, 26, 26, 0.85) 100%
-  );
-}
-
-.se-card--hero .se-card__img {
-  opacity: 0.78;
-}
-
-.se-card--hero:hover .se-card__img {
-  transform: scale(1.04);
-  opacity: 0.9;
-}
-
-.se-card--hero .se-card__body {
-  color: var(--color-cream);
-}
-
 .se-card__body {
   display: flex;
   flex-direction: column;
@@ -2016,38 +1914,6 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.se-card__meta {
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.02em;
-  color: var(--color-slate-2);
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-hairline);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.se-card__author {
-  font-weight: 500;
-  color: var(--color-slate);
-}
-
-.se-card__read-time::before {
-  content: " · ";
-}
-
-.se-card__cta {
-  display: inline-block;
-  margin-top: var(--se-space-xs);
-}
-
-.se-card__share {
-  margin-top: 0.75rem;
 }
 
 /* Share buttons */
@@ -2374,25 +2240,6 @@
 .se-about .se-heading-section {
   color: var(--about-text);
   border-bottom-color: rgba(var(--se-tinte), 0.12);
-}
-
-.se-team-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--se-space-md);
-  margin-top: var(--se-space-xl);
-}
-
-@media (min-width: 768px) {
-  .se-team-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .se-team-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 .se-partners {
@@ -2727,16 +2574,6 @@
   animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
 }
 
-.se-articles__kicker {
-  margin: 0 0 0.65rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.56);
-}
-
 .se-articles__title {
   margin: 0;
   font-family: var(--se-font-heading);
@@ -2760,19 +2597,6 @@
 }
 
 /* Reports */
-.se-card--compact {
-  border: 0;
-  border-top: 1px solid var(--color-ink);
-}
-
-.se-card--compact .se-card__body {
-  padding: 24px 26px;
-  gap: 8px;
-}
-
-.se-card--compact .se-heading-card--small {
-  margin-top: 0;
-}
 
 .se-heading-card--small {
   font-size: var(--se-text-body);
@@ -3641,102 +3465,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 /* Results below the explorer on a listing page. */
 .se-listing { margin-top: var(--se-space-2xl); }
 
-/* —— Paginación de listados ——
-   Count on the left, controls on the right, separated from the results by the
-   same hairline the lists use so it reads as the foot of the list rather than a
-   floating widget. */
-.se-pager {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--se-space-sm);
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--se-space-xl);
-  padding-top: var(--se-space-lg);
-  border-top: 1px solid var(--color-hairline);
-}
-
-.se-pager__count strong { font-family: var(--mono); }
-
-.se-pager__count {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--color-slate-2);
-  font-variant-numeric: tabular-nums;
-}
-
-.se-pager__count strong {
-  color: var(--color-cream);
-  font-weight: 700;
-}
-
-.se-pager__controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-  margin-left: auto;
-}
-
-.se-pager__btn {
-  min-width: 38px;
-  height: 38px;
-  padding: 0 11px;
-  border: 1px solid var(--color-hairline);
-  border-radius: 9px;
-  background: transparent;
-  color: var(--color-slate);
-  font-family: var(--mono);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
-}
-
-.se-pager__btn:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-cream);
-}
-
-.se-pager__btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.se-pager__btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.se-pager__btn--edge {
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  font-family: var(--se-font-label);
-  font-size: 11px;
-}
-
-.se-pager__btn--on {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.se-pager__gap {
-  padding: 0 2px;
-  font-family: var(--mono);
-  font-size: 12px; /* el mismo cuerpo que los botones de al lado */
-  color: var(--color-slate-2);
-}
-
-@media (max-width: 640px) {
-  .se-pager { justify-content: center; }
-  .se-pager__count { flex: 1 1 100%; text-align: center; }
-  .se-pager__controls { margin-left: 0; justify-content: center; }
-}
-
 @media (max-width: 860px) {
   .se-explorer__total { margin-left: 0; }
   .se-explorer__sel { flex: 1 1 160px; }
@@ -3914,8 +3642,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    an ancestor is drawn across its descendants and cannot be cancelled from within,
    so the topic on the colour field came out underlined like a link. */
 .se-artcard__media,
-.se-doccard__media,
-.se-card__media-link {
+.se-doccard__media {
   text-decoration: none;
 }
 
@@ -4016,18 +3743,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   gap: 6px;
   height: 100%;
   padding: var(--se-space-sm);
-}
-
-/* The hero's fill is four times the area of a card's, so the type scales with it
-   instead of sitting lost in the middle of a colour field. */
-.se-cardfill--hero {
-  height: 100%;
-  min-height: 260px;
-  padding: var(--se-space-md);
-}
-
-.se-cardfill--hero .se-cardfill__tema {
-  font-size: clamp(22px, 2.6vw, 34px);
 }
 
 .se-cardfill__tema {
@@ -5934,7 +5649,7 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    a los dos días el lector deja de mirar la página entera. */
 
 /* Fondo blanco y no `--se-offwhite`. Parece un detalle y era el fallo: las tarjetas
-   de contenido (`.se-card--default`) son #f7f7f5, exactamente el mismo gris, así que
+   de contenido eran #f7f7f5, exactamente el mismo gris, así que
    en un listado el anuncio se leía como una tarjeta de la redacción a la que le
    faltaba la foto. Blanco sobre el gris de la página lo separa sin subirle el
    contraste, que es lo que no puede hacer: un anuncio que grita más que la pieza que
@@ -7567,7 +7282,6 @@ html {
 @media (pointer: coarse) {
   .se-share__btn,
 .se-marcar__btn,
-.se-pager__btn,
 .se-explorer-section__cerrar,
 .se-header__buscar {
     min-width: 44px;
@@ -9904,35 +9618,6 @@ html {
   color: #ffffff;
 }
 
-/* —— El paginador: casillas rectas, la página actual en tinta —— */
-.se-publico .se-pager__btn {
-  border-radius: 0;
-  border-color: var(--filete-fuerte);
-  font-family: var(--cifras);
-}
-
-.se-publico .se-pager__btn--edge {
-  font-family: var(--se-font-ui);
-  font-size: 0.8125rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.se-publico .se-pager__btn:hover:not(:disabled) {
-  border-color: var(--tinta);
-  color: var(--tinta);
-}
-
-.se-publico .se-pager__btn--on {
-  border-color: var(--tinta);
-  background: var(--tinta);
-  color: #ffffff;
-}
-
-.se-publico .se-pager__count strong {
-  font-family: var(--cifras);
-}
-
 /* —— Botones y campos de la parte pública: sin mayúsculas, sin elevarse, rectos —— */
 .se-publico .se-btn {
   text-transform: none;
@@ -9957,11 +9642,6 @@ html {
 .se-publico .se-link {
   text-transform: none;
   letter-spacing: 0;
-}
-
-.se-publico .se-team-grid {
-  margin-top: 0;
-  gap: 0 var(--se-space-lg);
 }
 
 /* —— Contacto y Consultoría: sin tarjetas; filetes y la letra del sitio —— */

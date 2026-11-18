@@ -122,17 +122,6 @@
   text-align: left;
 }
 
-.se-about__kicker {
-  margin: 0 0 0.75rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--about-dim);
-  animation: se-about-reveal 0.65s var(--about-ease) both;
-}
-
 .se-about__title {
   margin: 0;
   font-family: var(--se-font-heading);
@@ -193,28 +182,6 @@
   padding-bottom: clamp(1.75rem, 4vw, 2.75rem);
 }
 
-.se-about__band {
-  border: 1px solid var(--about-border);
-  border-radius: 18px;
-  padding: clamp(1.05rem, 2.4vw, 1.35rem);
-  background:
-    var(--about-surface);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: transform var(--about-dur) var(--about-ease), border-color var(--about-dur) var(--about-ease);
-}
-
-.se-about__band:hover {
-  transform: translateY(-2px);
-  border-color: rgba(var(--se-tinte), 0.18);
-}
-
-.se-about__band:focus-within {
-  outline: 2px solid rgba(185, 83, 42, 0.55);
-  outline-offset: 4px;
-}
-
 .se-about__band-title {
   margin: 0 0 0.75rem;
   font-family: var(--se-font-heading);
@@ -265,117 +232,6 @@
   max-width: 70ch;
 }
 
-.se-about__acc-list {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.se-about__acc {
-  border: 1px solid var(--about-border);
-  border-radius: 18px;
-  background:
-    var(--about-surface);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: border-color var(--about-dur) var(--about-ease), transform var(--about-dur) var(--about-ease);
-}
-
-.se-about__acc:hover {
-  transform: translateY(-1px);
-  border-color: rgba(var(--se-tinte), 0.18);
-}
-
-.se-about__acc-summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem 1.1rem;
-  user-select: none;
-}
-
-.se-about__acc-summary::-webkit-details-marker {
-  display: none;
-}
-
-.se-about__acc-summary:focus-visible {
-  outline: 2px solid rgba(185, 83, 42, 0.55);
-  outline-offset: 4px;
-  border-radius: 14px;
-}
-
-.se-about__acc-summary:hover .se-about__acc-chevron {
-  border-color: rgba(var(--se-tinte), 0.22);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.se-about__acc-title {
-  font-family: var(--se-font-heading);
-  font-size: 0.98rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-about__acc-right {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.se-about__acc-meta {
-  font-family: var(--se-font-ui);
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: rgba(var(--se-tinte), 0.82);
-  border: 1px solid rgba(var(--se-tinte), 0.16);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
-}
-
-.se-about__acc-chevron {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(var(--se-tinte), 0.16);
-  background: rgba(255, 255, 255, 0.06);
-  display: grid;
-  place-items: center;
-  position: relative;
-  transition: transform var(--about-dur) var(--about-ease), border-color var(--about-dur) var(--about-ease),
-    background var(--about-dur) var(--about-ease);
-}
-
-.se-about__acc-chevron::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid rgba(var(--se-tinte), 0.82);
-  border-bottom: 2px solid rgba(var(--se-tinte), 0.82);
-  transform: rotate(45deg);
-  margin-top: -2px;
-}
-
-.se-about__acc[open] .se-about__acc-chevron {
-  transform: rotate(-180deg);
-  border-color: rgba(185, 83, 42, 0.32);
-  background: rgba(185, 83, 42, 0.12);
-}
-
-.se-about__acc-body {
-  padding: 0.25rem 1.1rem 1.1rem;
-  border-top: 1px solid rgba(var(--se-tinte), 0.1);
-}
-
-.se-about__acc[open] .se-about__acc-body {
-  animation: se-about-acc-body 0.42s var(--about-ease) both;
-}
-
 @keyframes se-about-reveal {
   from {
     opacity: 0;
@@ -387,37 +243,11 @@
   }
 }
 
-@keyframes se-about-acc-body {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .se-about__kicker,
   .se-about__title,
   .se-about__tagline,
   .se-about__intro {
     animation: none !important;
-  }
-
-  .se-about__acc[open] .se-about__acc-body {
-    animation: none !important;
-  }
-
-  .se-about__band,
-  .se-about__acc {
-    transition: none !important;
-  }
-
-  .se-about__band:hover,
-  .se-about__acc:hover {
-    transform: none;
   }
 }
 
@@ -603,26 +433,6 @@
   --about-surface: transparent;
 }
 
-.se-publico .se-about__band,
-.se-publico .se-about__acc {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.se-publico .se-about__band {
-  padding: 12px 0 0;
-  border-top: 2px solid var(--tinta);
-}
-
-.se-publico .se-about__band:hover,
-.se-publico .se-about__acc:hover {
-  transform: none;
-}
-
 /* «Propósito», como «Equipo»: un título de sección, y la declaración debajo. */
 .se-publico .se-about__band-title {
   margin-bottom: 0.75rem;
@@ -638,52 +448,6 @@
   font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
   line-height: 1.4;
   color: var(--tinta);
-}
-
-.se-publico .se-about__acc {
-  overflow: visible;
-  border-top: 1px solid var(--tinta);
-}
-
-.se-publico .se-about__acc-summary {
-  padding: 14px 0;
-}
-
-.se-publico .se-about__acc-summary:focus-visible {
-  border-radius: 0;
-  outline-color: var(--marca-verde);
-}
-
-.se-publico .se-about__acc-title {
-  font-family: var(--titular);
-  font-size: 1.375rem;
-  font-weight: 600;
-  color: var(--tinta);
-}
-
-.se-publico .se-about__acc-meta {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  font-family: var(--cifras);
-  font-weight: 500;
-  color: var(--color-slate);
-}
-
-.se-publico .se-about__acc-chevron,
-.se-publico .se-about__acc[open] .se-about__acc-chevron,
-.se-publico .se-about__acc-summary:hover .se-about__acc-chevron {
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.se-publico .se-about__acc-body {
-  padding: 0 0 1.5rem;
-  border-top: 0;
 }
 
 .se-publico .se-member-card {

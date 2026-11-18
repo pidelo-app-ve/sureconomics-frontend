@@ -960,15 +960,6 @@
   max-width: 100%;
 }
 
-.se-admin-submissions__intro {
-  margin: 0.35rem 0 0;
-  max-width: 40rem;
-  font-family: var(--se-font-ui);
-  font-size: var(--se-text-small);
-  line-height: 1.55;
-  color: var(--adm-text-muted);
-}
-
 .se-admin-submissions__toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -2634,31 +2625,6 @@
   flex: 1 1 auto;
   height: 1px;
   background: var(--adm-border);
-}
-
-.se-editor-advanced {
-  margin: 0 0 var(--se-space-lg);
-  border: 1px solid var(--adm-border);
-  border-radius: var(--adm-radius-md);
-  background: var(--adm-surface);
-}
-
-.se-editor-advanced > summary {
-  padding: 0.9rem 1.25rem;
-  color: var(--adm-text-muted);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.se-editor-advanced > summary:hover {
-  color: var(--adm-text);
-}
-
-.se-editor-advanced[open] > summary {
-  border-bottom: 1px solid var(--adm-border);
 }
 
 .se-editor-advanced__body {
@@ -5288,7 +5254,6 @@
   margin-top: 0.9rem;
 }
 .se-admin-pub__nueva .se-form-control { flex: 1 1 16rem; min-width: 0; }
-.se-admin-pub__nueva--alta { margin-bottom: 1.25rem; }
 
 /* ─────────────────────────── Boletín: los números de "Entorno en Viñetas" ──
    La pantalla va en el orden del correo -- bandeja, portada, introducción, páginas,
@@ -5889,15 +5854,6 @@
 .se-campo-movil__cuerpo select,
 .se-campo-movil__cuerpo textarea {
   font-size: 16px;
-}
-
-.se-campo-movil__cuerpo .se-editor-advanced {
-  margin: 0;
-  border: 0;
-}
-
-.se-campo-movil__cuerpo .se-editor-advanced > summary {
-  display: none;
 }
 
 .se-campo-movil__cuerpo .se-editor-advanced__body {
@@ -7106,19 +7062,6 @@
 }
 
 /* —— Titulares: el panel completo (editar, fijar, historial, medios) ——————————————— */
-
-.se-admin-app .se-tit-cabecera {
-  align-items: flex-start;
-}
-
-.se-admin-app .se-tit-cabecera > div {
-  flex: 1 1 32rem;
-}
-
-.se-admin-app .se-tit-guia {
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
 
 .se-admin-app .se-tit-interruptores {
   display: flex;

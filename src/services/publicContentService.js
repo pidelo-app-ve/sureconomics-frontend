@@ -224,7 +224,3 @@ export const getRelatedFilas = async (pieza, limite = 4) => {
   }
   return out;
 };
-
-/** Las relacionadas ya convertidas, para quien no necesita cambiar de idioma en vivo. */
-export const getRelated = async (pieza, limite = 4) =>
-  piezasFromApi(await getRelatedFilas(pieza, limite));

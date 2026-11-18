@@ -65,8 +65,3 @@ export const BRAND_PUBLIC_LOGO = {
     isotypeWithBox: BRAND.isotipoNegativo,
   },
 };
-
-export const BRAND_PUBLIC_FAVICON = {
-  icon: BRAND.isotipo,
-  appleTouch: BRAND.isotipo,
-};

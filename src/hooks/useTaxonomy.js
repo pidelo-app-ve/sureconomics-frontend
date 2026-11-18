@@ -29,7 +29,7 @@ const vacio = () => ({
   conteoPorNombre: {},
 });
 
-let cache = {};
+const cache = {};
 
 const load = async () => {
   const [formats, topics, places] = await Promise.all([
@@ -38,11 +38,6 @@ const load = async () => {
     getPlaces(),
   ]);
   return { formats, topics, ...places };
-};
-
-/** Drop the cache. Only used by tests and by a hard reload of reference data. */
-export const resetTaxonomyCache = () => {
-  cache = {};
 };
 
 export const useTaxonomy = () => {

@@ -21,6 +21,21 @@ module.exports = {
       // jerarquia desaparece. Fuera de una plantilla siguen marcandose, que es donde
       // de verdad indican un caracter colado por error al copiar y pegar.
       'no-irregular-whitespace': ['error', { skipTemplates: true }],
+      // Más estrictas que las de serie: también los argumentos y los `catch` sin usar
+      // (un `_` delante dice «lo sé, no lo uso»), y const/var/=== como costumbre. Se
+      // activaron el 18-nov-2026 sin cambiar nada de comportamiento: lo único que saltó
+      // fue un `let` que debía ser `const`. `ignoreReadBeforeAssign` deja pasar el
+      // `let io` de useRevealOnScroll, que su propio callback lee antes de asignarse.
+      'no-unused-vars': ['error', {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+      'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
+      'no-var': 'error',
+      eqeqeq: ['error', 'smart'],
+      'no-unused-expressions': 'error',
     },
     // Estos tres no corren en el navegador y por eso usan `process`: la funcion de
     // Vercel que inyecta las etiquetas meta, la configuracion de Vite y su prueba.
@@ -30,6 +45,12 @@ module.exports = {
       {
         files: ['vite.config.js', 'api/**/*.js', '**/*.test.mjs', 'scripts/**/*.mjs'],
         env: { node: true, browser: false },
+      },
+      // pico.js es una copia literal de un detector de caras ajeno (ver su cabecera):
+      // se deja como vino, con su `var`, su `==` y sus expresiones sueltas.
+      {
+        files: ['src/lib/pico.js'],
+        rules: { 'no-var': 'off', eqeqeq: 'off', 'no-unused-expressions': 'off' },
       },
     ],
   }

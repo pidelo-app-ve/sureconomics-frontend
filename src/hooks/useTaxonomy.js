@@ -29,7 +29,7 @@ const vacio = () => ({
   conteoPorNombre: {},
 });
 
-let cache = {};
+const cache = {};
 
 const load = async () => {
   const [formats, topics, places] = await Promise.all([

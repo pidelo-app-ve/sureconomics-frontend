@@ -1,7 +1,17 @@
 {
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
+    "functions": {
+        "api/*.js": {
+            "includeFiles": "dist/app.html"
+        }
+    },
     "redirects": [
+        {
+            "source": "/index.html",
+            "destination": "/",
+            "permanent": true
+        },
         {
             "source": "/articulo/:slug",
             "destination": "/articulos/:slug",
@@ -102,7 +112,7 @@
                     "key": "_s"
                 }
             ],
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
@@ -116,7 +126,7 @@
                     "key": "_s"
                 }
             ],
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug",
@@ -130,7 +140,7 @@
                     "key": "_s"
                 }
             ],
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/entorno",
@@ -144,7 +154,7 @@
                     "key": "_s"
                 }
             ],
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/resumen/:fecha/:edicion",
@@ -159,20 +169,48 @@
             "destination": "/api/sitemap?tipo=noticias"
         },
         {
+            "source": "/",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/app.html"
+        },
+        {
+            "source": "/",
+            "destination": "/api/portada"
+        },
+        {
+            "source": "/en{/}?",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/app.html"
+        },
+        {
+            "source": "/en{/}?",
+            "destination": "/api/portada?lang=en"
+        },
+        {
             "source": "/((?:en/?)?)",
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/((?:en/)?(?:entorno|el-analista|suscribirse|boletin/baja|quienes-somos|articulos|informes|audiovisual|explorar|educacion|educacion/pago/volver|anunciate|consultoria|contacto|cookies|juegos|pausa|clave|lvbp|monedas|ultima-hora|resumen|backoffice|cuenta|cuenta/(?:entrar|registro|verificar-email|solicitar-codigo|recuperar|perfil|lo-mio|marcadores|temas|envios|envios/nuevo))/?)",
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/((?!.*\\.[A-Za-z0-9]{1,8}$)(?:en/)?(?:(?:noticias|articulos|editorial|entrevistas|informes|podcast|articulo|categoria|educacion|resumen)/[^/]+|(?:educacion|resumen)/[^/]+/[^/]+|cuenta/envios/[^/]+(?:/editar)?)/?)",
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/((?!.*\\.[A-Za-z0-9]{1,8}$)admin(?:/.*)?)",
-            "destination": "/index.html"
+            "destination": "/app.html"
         },
         {
             "source": "/en/((?!.*\\.[A-Za-z0-9]{1,8}$).*)",

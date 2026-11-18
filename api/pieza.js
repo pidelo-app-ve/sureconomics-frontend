@@ -32,7 +32,8 @@
  * Y una dirección que no corresponde a ninguna pieza responde 404 con `noindex`. Antes
  * respondía 200 con la portada: para un buscador, miles de páginas iguales.
  *
- * The shell is read from the public domain and then *checked*, which is not
+ * The shell travels with the function (`dist/app.html`, see `leerShell` in `_comun.js`;
+ * until 18-nov-2026 it was read from the public domain) and is then *checked*, which is not
  * belt-and-braces caution -- it is the lesson from breaking this once. The first
  * version fetched `VERCEL_URL`, which has deployment protection on it, so what
  * came back was Vercel's own login page: 487 KB of somebody else's HTML, served to
@@ -44,47 +45,29 @@
 // pinta React. Con extensión y sin importaciones propias: Node los carga sin Vite.
 import { enlaceWeb } from "../src/lib/enlaces.js";
 import { fotoDePortada, posicionDeFoco } from "../src/lib/fotoDePieza.js";
+// Lo que comparte con la portada y la 404: el shell, cómo se escapa un texto y cómo
+// se escribe la `<head>`. Se reexporta lo que otros (y las pruebas) importaban de aquí.
+import {
+  API,
+  FORMAT_NAME,
+  GENERICO,
+  IMAGEN_DE_MARCA,
+  LIMITE_MS,
+  LOGO,
+  NOMBRE_DE_FORMATO,
+  SECCIONES,
+  SIN_META,
+  SITIO,
+  conDeadline,
+  escapar,
+  esNuestroShell,
+  leerShell,
+  fechaLarga,
+  inyectar,
+  textoLlano,
+} from "./_comun.js";
 
-const API =
-  process.env.VITE_API_URL ||
-  process.env.API_BASE_URL ||
-  "https://sureconomics-backend.onrender.com";
-
-/** A slow API must not become a blank page, and the function's own ceiling is ten
- *  seconds. Past this, the page goes out with the site's generic card instead. */
-const LIMITE_MS = 3500;
-
-const SITIO = "https://www.sureconomics.com";
-
-/** Where the shell comes from: the public domain, never a deployment URL.
- *  A deployment URL can be behind Vercel's protection, and what it returns then is
- *  a login page that looks like a perfectly valid HTTP 200. */
-const SHELL_URL = process.env.SHELL_URL || `${SITIO}/index.html`;
-
-/** Query flag that routes straight to the static file, so this function has
- *  somewhere to send a request it cannot serve honestly. */
-const SIN_META = "_s";
-
-/** URL section -> the format slug the API knows, and the shape of the piece. */
-const SECCIONES = {
-  noticias: "noticia",
-  articulos: "articulo",
-  editorial: "editorial",
-  entrevistas: "entrevista",
-  informes: "informe",
-  podcast: "podcast",
-};
-
-/**
- * The brand card: a static 21 KB JPEG served by Vercel itself, so it is never slow and
- * never missing. It stands in whenever the piece's own image cannot be trusted to
- * arrive -- no photograph, an SVG (X does not draw SVG), or the API not answering.
- *
- * Why never "no image": X caches a card for days, and it caches a failed one too. A
- * preview that went out bare stays bare long after the cause is fixed. The brand
- * card at least says whose link it is.
- */
-export const IMAGEN_DE_MARCA = { url: `${SITIO}/brand/og-default.jpg`, medido: true };
+export { IMAGEN_DE_MARCA, esNuestroShell, inyectar };
 
 /**
  * `/entorno`, la puerta del boletín desde Instagram. No es una pieza, pero sí se comparte
@@ -115,31 +98,6 @@ export const descripcionDelResumen = (resumen) => {
     .map((p) => (p?.linea || "").trim())
     .filter(Boolean);
   return lineas.length ? lineas.slice(0, 3).join(" · ") : null;
-};
-
-/** What a page says about itself when there is no piece to describe. */
-const GENERICO = {
-  titulo: "SurEconomics — Economía, mercados e inversión",
-  descripcion: "Economía, mercados e inversión con inteligencia regional.",
-};
-
-const escapar = (valor) =>
-  String(valor ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-
-/** Rich text in, plain sentence out: a description full of tags is not a
- *  description, and `<p></p>` is not a summary. */
-const textoLlano = (html, maximo = 200) => {
-  const limpio = String(html ?? "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (limpio.length <= maximo) return limpio;
-  return `${limpio.slice(0, maximo - 1).trimEnd()}…`;
 };
 
 /**
@@ -217,89 +175,6 @@ export const descripcionDe = (pieza) =>
  */
 export const tituloParaBuscadores = (pieza) => textoLlano(pieza?.meta_title) || pieza?.title || "";
 
-const etiquetas = ({
-  titulo,
-  descripcion,
-  imagen,
-  url,
-  publicado,
-  seccion,
-  tipo = "article",
-  locale = "es_LA",
-  alternativas = null,
-  autor = null,
-}) => {
-  const filas = [
-    `<meta property="og:type" content="${escapar(tipo)}" />`,
-    `<meta property="og:site_name" content="SurEconomics" />`,
-    `<meta property="og:locale" content="${escapar(locale)}" />`,
-    `<meta property="og:title" content="${escapar(titulo)}" />`,
-    `<meta property="og:url" content="${escapar(url)}" />`,
-    `<link rel="canonical" href="${escapar(url)}" />`,
-  ];
-  // Una pieza con versión en inglés: las dos páginas se declaran la una a la otra, y
-  // `x-default` apunta al español, la casa. Lo mismo que pone `useMetaPagina` al
-  // cargar, pero aquí lo lee también quien no ejecuta JavaScript.
-  if (alternativas) {
-    filas.push(`<link rel="alternate" hreflang="es" href="${escapar(alternativas.es)}" />`);
-    filas.push(`<link rel="alternate" hreflang="en" href="${escapar(alternativas.en)}" />`);
-    filas.push(`<link rel="alternate" hreflang="x-default" href="${escapar(alternativas.es)}" />`);
-  }
-  if (descripcion) {
-    filas.push(`<meta name="description" content="${escapar(descripcion)}" />`);
-    filas.push(`<meta property="og:description" content="${escapar(descripcion)}" />`);
-  }
-  if (imagen?.url) {
-    filas.push(`<meta property="og:image" content="${escapar(imagen.url)}" />`);
-    // Some clients read only `secure_url`.
-    filas.push(`<meta property="og:image:secure_url" content="${escapar(imagen.url)}" />`);
-    // Size and type only when this function produced the file and therefore knows
-    // them. They used to be printed always, and were wrong for every piece whose
-    // image is served straight from storage: 1200x630 declared over a 679x452
-    // photograph. A crawler that trusts those numbers crops to a size that does
-    // not exist; one that checks decides the tags are unreliable. Left out, every
-    // client measures the file itself, which is right by definition.
-    if (imagen.medido) {
-      filas.push(`<meta property="og:image:type" content="image/jpeg" />`);
-      filas.push(`<meta property="og:image:width" content="1200" />`);
-      filas.push(`<meta property="og:image:height" content="630" />`);
-    }
-    filas.push(`<meta property="og:image:alt" content="${escapar(titulo)}" />`);
-    filas.push(`<meta name="twitter:image" content="${escapar(imagen.url)}" />`);
-    // Large card only when there is a photograph to fill it; asking for one
-    // without an image gets a broken-looking empty card.
-    filas.push(`<meta name="twitter:card" content="summary_large_image" />`);
-  } else {
-    filas.push(`<meta name="twitter:card" content="summary" />`);
-  }
-  filas.push(`<meta name="twitter:title" content="${escapar(titulo)}" />`);
-  if (descripcion) {
-    filas.push(`<meta name="twitter:description" content="${escapar(descripcion)}" />`);
-  }
-  if (publicado) {
-    filas.push(`<meta property="article:published_time" content="${escapar(publicado)}" />`);
-  }
-  if (seccion) {
-    filas.push(`<meta property="article:section" content="${escapar(seccion)}" />`);
-  }
-  // La firma, para el modo lectura del navegador: es de donde saca el nombre que pone
-  // debajo del titular (la ficha JSON-LD solo la leen algunos).
-  if (autor) {
-    filas.push(`<meta name="author" content="${escapar(autor)}" />`);
-  }
-  return filas.join("\n    ");
-};
-
-/** La versión inglesa del kicker del HTML previo. */
-const FORMAT_NAME = {
-  noticia: "News",
-  articulo: "Articles",
-  editorial: "Editorial",
-  entrevista: "Interviews",
-  informe: "Reports & research",
-  podcast: "Podcast",
-};
-
 /**
  * La pieza leída en inglés: los campos `_en` en el sitio de los españoles, para que el
  * resto de este archivo -- descripción, HTML previo, ficha -- no tenga que saber de
@@ -315,18 +190,6 @@ export const enSuIngles = (pieza) => ({
   meta_description: null,
 });
 
-/** El nombre del formato tal como lo ve el lector, para el kicker del HTML previo. */
-const NOMBRE_DE_FORMATO = {
-  noticia: "Noticias",
-  articulo: "Artículos",
-  editorial: "Editorial",
-  entrevista: "Entrevistas",
-  informe: "Informes y reportes",
-  podcast: "Podcast",
-};
-
-const LOGO = `${SITIO}/brand/v2/lockup-verde.png`;
-
 /**
  * El cuerpo de la redacción, sin nada que pueda ejecutarse.
  *
@@ -341,24 +204,6 @@ export const cuerpoSeguro = (html) =>
     .replace(/<(script|style|iframe|object|embed|form|link|meta)[^>]*>/gi, "")
     .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
     .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, '$1="#"');
-
-/** Para meter datos en un `<script>`: un `</script>` dentro del texto lo cortaría. */
-const jsonEnScript = (valor) =>
-  JSON.stringify(valor)
-    .replace(/</g, "\\u003c")
-    .replace(/\u2028/g, "\\u2028")
-    .replace(/\u2029/g, "\\u2029");
-
-const fechaLarga = (iso, idioma = "es") => {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString(idioma === "en" ? "en-US" : "es", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "America/Caracas",
-  });
-};
 
 /**
  * La ficha de la pieza para Google (schema.org `NewsArticle`).
@@ -453,81 +298,6 @@ export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
   return partes.filter(Boolean).join("");
 };
 
-/**
- * Replace the shell's title and add the piece's tags.
- *
- * Exported for the tests, which is the only way to check this without deploying:
- * a wrong `<head>` looks fine to a person and is invisible to every crawler.
- */
-export const inyectar = (
-  shell,
-  { titulo, tituloDePestana = null, html, ficha, datos, noindex = false, idioma = "es", ...resto }
-) => {
-  // `titulo` va a las tarjetas de las redes; `tituloDePestana`, si viene, al `<title>`.
-  const pestana = tituloDePestana || titulo;
-  let bloque = etiquetas({ titulo, ...resto });
-  if (ficha) {
-    bloque += `\n    <script type="application/ld+json">${jsonEnScript(ficha)}</script>`;
-  }
-  if (datos) {
-    // La pieza tal como la da la API, para que la página no la pida otra vez.
-    // Como JSON y no como `window.__SE_PIEZA__ = …`: un `<script type="application/json">`
-    // no se ejecuta, así que la política de seguridad del navegador (CSP) no tiene que
-    // permitir scripts en línea. La página lo lee con `JSON.parse` (ver `Pieza.jsx`).
-    bloque += `\n    <script type="application/json" id="se-pieza">${jsonEnScript(datos)}</script>`;
-  }
-  if (noindex) {
-    bloque += `\n    <meta name="robots" content="noindex, follow" />`;
-  }
-  // The shell carries the site's generic card for every other page (`index.html`,
-  // between these markers). Left in, a piece would have two `og:image` tags and each
-  // crawler would pick whichever it likes.
-  let sinGenerico = shell.replace(
-    /<!-- og:generico -->[\s\S]*?<!-- \/og:generico -->\s*/i,
-    ""
-  );
-  // El shell dice «indexar» para todo el sitio; una pieza que no existe lo cambia por
-  // «no indexar», en vez de dejar las dos y que cada buscador elija.
-  if (noindex) sinGenerico = sinGenerico.replace(/\s*<meta name="robots"[^>]*>/i, "");
-  // Lo que viene de la pieza (título, cabecera con su JSON, cuerpo) entra como FUNCIÓN
-  // de reemplazo, nunca como cadena: en una cadena `replace` interpreta `$&`, `$'`,
-  // `` $` `` y `$$`, y «US$&nbsp;36,5» llegaba al lector y a Google como «USnbsp;36,5».
-  const tal = (texto) => () => texto;
-  const conTitulo = sinGenerico.replace(
-    /<title>[\s\S]*?<\/title>/i,
-    tal(
-      pestana.includes("SurEconomics")
-        ? `<title>${escapar(pestana)}</title>`
-        : `<title>${escapar(pestana)} — SurEconomics</title>`
-    )
-  );
-  // El shell dice `<html lang="es">`; una pieza leída en inglés lo dice en inglés.
-  const conIdioma =
-    idioma === "es" ? conTitulo : conTitulo.replace(/<html lang="[^"]*">/i, `<html lang="${idioma}">`);
-  const conCabecera = conIdioma.replace(/<\/head>/i, tal(`  ${bloque}\n  </head>`));
-  if (!html) return conCabecera;
-  // El shell trae `<div id="root"></div>` vacío: la pieza va dentro.
-  return conCabecera.replace(/<div id="root"><\/div>/i, tal(`<div id="root">${html}</div>`));
-};
-
-const conDeadline = async (url, ms) => {
-  const corta = new AbortController();
-  const reloj = setTimeout(() => corta.abort(), ms);
-  try {
-    return await fetch(url, { signal: corta.signal });
-  } finally {
-    clearTimeout(reloj);
-  }
-};
-
-/** Is this actually our application, or something that merely returned 200? */
-export const esNuestroShell = (html) =>
-  typeof html === "string" &&
-  html.length > 200 &&
-  html.length < 60_000 &&
-  html.includes('id="root"') &&
-  html.includes("/assets/");
-
 export default async function handler(req, res) {
   const { seccion, slug, lang, fecha, edicion } = req.query ?? {};
   // `/en/noticias/x` llega aquí con `lang=en` (ver `vercel.json`).
@@ -549,11 +319,10 @@ export default async function handler(req, res) {
     res.redirect(307, `${rutaPropia}?${SIN_META}=1`);
   };
 
-  let shell = "";
-  try {
-    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS);
-    shell = await respuesta.text();
-  } catch {
+  // El shell viaja con la función (`leerShell`, en `_comun.js`); la red es solo el respaldo.
+  const { shell, fuente } = await leerShell();
+  res.setHeader("X-Shell", fuente);
+  if (shell === null) {
     alEstatico("shell-sin-respuesta");
     return;
   }

@@ -9,6 +9,10 @@
 import { readFileSync } from "node:fs";
 import handler, { TEXTOS, olvidarShell, paginaMinima, shellNoEncontrada } from "./no-encontrada.js";
 
+// Sin el archivo empaquetado (`dist/app.html`): el shell llega por el respaldo de la red,
+// que aquí es el `fetch` simulado.
+process.env.SHELL_ARCHIVO = "";
+
 const SHELL = `<!doctype html>
 <html lang="es">
   <head>

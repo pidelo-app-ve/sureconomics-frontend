@@ -56,6 +56,11 @@ export const imagenAncho = (url, ancho) => {
  *  genera, el navegador se lleva un 404 y la tarjeta se queda sin foto. */
 const ANCHOS_EN_R2 = [640, 1100, 1400];
 
+/** Los anchos que se le ofrecen al navegador en una tarjeta (`CardMedia`) y en la foto de
+ *  la apertura. Cubren la caja de una tarjeta de 1x a 3x. Aquí y no en `CardMedia` porque
+ *  también los usa `api/portada.js` para precargar la foto de la apertura (ver `apertura.js`). */
+export const ANCHOS_DE_TARJETA = [400, 640, 800, 1100, 1400];
+
 /** Las pequeñas, desde el 13-nov-2026 (`ANCHOS_PEQUENOS` en el backend): el retrato de una
  *  firma se ve a 56 px (44 en la portada) y la miniatura de una noticia a 112-150, y la talla menor era la de
  *  640. Fuera de `ANCHOS_EN_R2` a propósito: una foto de antes no las tiene hasta que se

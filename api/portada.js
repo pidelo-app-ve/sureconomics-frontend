@@ -1,0 +1,460 @@
+/**
+ * La portada (`/` y `/en`) servida como las piezas: con su título, su canónica, sus
+ * `hreflang`, su ficha para Google, los titulares que la página enseña al cargar dentro de
+ * `#root` y la foto de la apertura pedida desde la `<head>` (auditoría 17-nov-2026, B-01
+ * fase 2 y B-10).
+ *
+ * ## Por qué
+ *
+ * La portada llegaba como el cascarón de la aplicación: 4 KB, el título genérico y ni un
+ * enlace. Bing, las redes y los rastreadores de IA, que no ejecutan JavaScript o lo hacen
+ * poco, veían vacía la página con más autoridad del sitio, y `/en` les parecía un duplicado
+ * en español. Y en el teléfono la foto de la apertura no empezaba a bajar hasta que llegaba
+ * el JavaScript, se pedían los datos y React pintaba: era el LCP de 4,5 s.
+ *
+ * ## Cómo
+ *
+ * - El shell (`dist/app.html`) viaja empaquetado con la función y se lee del disco
+ *   (`leerShell`, en `_comun.js`). Los titulares salen del quiosco (`/datos/posts`), que el
+ *   borde ya guarda: la misma dirección que pide la portada en el navegador, así que una
+ *   calienta la caché de la otra.
+ * - **Solo lo que la página pinta al cargar**, de la página 1 del listado: la apertura y sus
+ *   secundarias, la editorial del día y los análisis de la columna de opinión, y la entrada
+ *   de cada sección con los topes de la página (`PREVIEW`, `AL_PUNTO` y
+ *   `ANALISIS_EN_PLANA`, compartidos con `pages/Home.jsx` en `src/lib/apertura.js`).
+ *   Ni una más: lo que el robot ve es lo que ve el lector.
+ * - La apertura se elige con el mismo código que la página (`elegirApertura`) y su foto se
+ *   precarga con el mismo `srcset` y `sizes` que pinta `CardMedia`: el navegador la pide al
+ *   leer el HTML, en paralelo con el JavaScript, y la `<img>` la encuentra ya.
+ * - React no hidrata este HTML: lo reemplaza al montar (`createRoot`), igual que en las piezas.
+ *
+ * ## Oculto a la vista, no a los buscadores
+ *
+ * La pieza (`api/pieza.js`) pinta su HTML previo con las mismas clases que la página, así
+ * que el relevo no se nota. La portada no se puede copiar así: es una rejilla de tres
+ * columnas, cintas, monedas y publicidad, y una lista de titulares en su lugar daría un
+ * salto de página entera al llegar React. Por eso la lista va recortada a un píxel, con
+ * el mismo recorte que `.se-sr-only` (lo que solo oye un lector de pantalla), sin
+ * `display: none` ni `visibility: hidden`: está en el documento, la leen los buscadores y
+ * los lectores de pantalla, y es el mismo texto que React pinta después. Así no cuenta
+ * para el LCP, no alarga la página (ni saca una barra de desplazamiento que luego se va)
+ * y no mueve nada (CLS) cuando React la reemplaza.
+ *
+ * Si React no llega a montar (el JavaScript no carga), a los nueve segundos el recorte se
+ * quita solo (una animación CSS, sin JavaScript) y el lector ve al menos los titulares
+ * con sus enlaces, en vez de una página en blanco.
+ *
+ * ## Si algo falla
+ *
+ * Falla abierta, como las piezas. Sin datos de la API sale el shell con el título, la
+ * canónica y los `hreflang` de la portada, sin titulares. Sin shell (no debería pasar: va
+ * en el paquete) se manda al archivo estático (`?_s=1`). Nunca un error.
+ *
+ * ## Cómo llega aquí
+ *
+ * Por `vercel.json`: `/` y `/en` (con `?_s=1`, a `/app.html`). Para eso el shell se llama
+ * `app.html` y no `index.html` (`scripts/shell-como-app.mjs`, después de `vite build`):
+ * Vercel sirve los archivos antes de mirar las reescrituras, y con un `index.html` en
+ * `dist/` la regla de `/` no se aplicaría nunca.
+ *
+ * ## Pendiente
+ *
+ * - Dejar la página 1 en un `<script type="application/json" id="se-portada">` para que
+ *   `usePieces` no la vuelva a pedir, como hace `Pieza.jsx` con `#se-pieza`. Es lo que más
+ *   adelantaría el LCP después de esto, pero toca `usePieces` y `Home`: otra tanda.
+ * - `/?fbclid=…`, `/en?utm_…`: Vercel pasa la consulta de la dirección a la función, y
+ *   cada consulta distinta puede ser otra copia en el borde (y otra llamada a la función).
+ *   Igual que en las piezas; se deja así. Se ve en la vista previa: `/?a=1` y `/?a=2`, ¿el
+ *   segundo da `x-vercel-cache: HIT`?
+ */
+
+import {
+  AL_PUNTO,
+  ANALISIS_EN_PLANA,
+  PREVIEW,
+  elegirApertura,
+  paraLaApertura,
+  precargaDeLaApertura,
+} from "../src/lib/apertura.js";
+import {
+  FORMAT_NAME,
+  IMAGEN_DE_MARCA,
+  LIMITE_MS,
+  NOMBRE_DE_FORMATO,
+  SECCION_DE_FORMATO,
+  SIN_META,
+  SITIO,
+  conDeadline,
+  escapar,
+  esNuestroShell,
+  fechaLarga,
+  inyectar,
+  leerShell,
+  textoLlano,
+} from "./_comun.js";
+
+/**
+ * De dónde salen los titulares: el quiosco del dominio público, que el borde guarda. Con
+ * `page` y `limit` en este orden, el mismo que arma la portada en el navegador
+ * (`getPieces`): es la misma clave de caché.
+ */
+export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}/datos/posts?page=1&limit=100`;
+
+/**
+ * El orden de las secciones bajo la primera plana: el de `FORMATO_META` en
+ * `src/lib/pieza.js` (que aquí no se puede cargar: arrastra el motor de idiomas). La prueba
+ * vigila que sea el mismo.
+ */
+export const ORDEN_DE_SECCIONES = ["noticia", "articulo", "editorial", "entrevista", "informe", "podcast"];
+
+/** Cuándo se quita el recorte si React no ha montado (ver arriba). */
+const REVELAR_TRAS = "9s";
+
+/**
+ * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor de la
+ * página; la prueba (`portada.test.mjs`) vigila que digan lo mismo.
+ * - `titulo`: `portada.meta.titulo`, el que pone la portada al cargar.
+ * - `descripcion`: `marca.descripcion`, la de la portada al cargar y la del pie de página.
+ * - `encabezado`: `portada.inicio.encabezado`, el `<h1>` de la portada.
+ * - `apertura` y `recientes`: `portada.apertura.apertura` y `portada.apertura.loMasReciente`,
+ *   el `<h2>` de la primera plana (con pieza fijada o sin ella).
+ * - `alPunto`: `nav.alPunto`, la sección de entrevistas y podcast.
+ */
+export const TEXTOS = {
+  es: {
+    titulo: "SurEconomics — Economía, mercados e inversión",
+    descripcion:
+      "Plataforma editorial de economía, mercados e inversión en América Latina. Grupo intergeneracional de profesionales con presencia en Miami, Caracas, Bogotá, Asunción y Buenos Aires.",
+    encabezado: "SurEconomics — análisis y perspectiva sobre economía, mercados e inversión en América Latina",
+    apertura: "Apertura",
+    recientes: "Lo más reciente",
+    alPunto: "Al punto",
+  },
+  en: {
+    titulo: "SurEconomics — Economics, markets and investing",
+    descripcion:
+      "An editorial platform on economics, markets and investing in Latin America. An intergenerational group of professionals based in Miami, Caracas, Bogotá, Asunción and Buenos Aires.",
+    encabezado: "SurEconomics — analysis and perspective on economics, markets and investing in Latin America",
+    apertura: "Lead story",
+    recientes: "Latest",
+    alPunto: "Al punto",
+  },
+};
+
+/** Las dos direcciones de la portada, como las escribe `useMetaPagina` al cargar. */
+const URL_ES = `${SITIO}/`;
+const URL_EN = `${SITIO}/en`;
+
+/**
+ * Dónde vive el listado de un formato. Copia de `rutaDeFormato` (`src/lib/pieza.js`, que
+ * aquí no se puede cargar: arrastra el motor de idiomas).
+ */
+export const rutaDeFormato = (formato) => {
+  if (formato === "alpunto") return "/audiovisual";
+  if (formato === "entrevista") return "/audiovisual?ver=entrevistas";
+  if (formato === "podcast") return "/audiovisual?ver=podcast";
+  const seccion = SECCION_DE_FORMATO[formato];
+  return seccion ? `/articulos?formato=${seccion}` : "/articulos";
+};
+
+/**
+ * Una fila de la API como la lee la portada en el idioma pedido: en `/en`, el título y la
+ * entradilla en inglés si la pieza los tiene (`en_ingles`, la regla del servidor); si no,
+ * en español, igual que hace la página (`piezaFromApi`). Nula si no se puede enlazar.
+ */
+export const titularDe = (row, idioma = "es") => {
+  const seccion = SECCION_DE_FORMATO[row?.format];
+  const titulo = idioma === "en" && row?.en_ingles ? row.title_en : row?.title;
+  if (!seccion || !row?.slug || !String(titulo ?? "").trim()) return null;
+  const prefijo = idioma === "en" ? "/en" : "";
+  const entradilla = idioma === "en" && row.en_ingles ? row.excerpt_en : row.excerpt;
+  return {
+    id: String(row.id ?? ""),
+    titulo: String(titulo).trim(),
+    resumen: textoLlano(entradilla, 300),
+    ruta: `${prefijo}/${seccion}/${encodeURIComponent(row.slug)}`,
+    seccion: (idioma === "en" ? FORMAT_NAME : NOMBRE_DE_FORMATO)[row.format],
+    rutaSeccion: `${prefijo}${rutaDeFormato(row.format)}`,
+    fechaIso: row.published_at || null,
+    fecha: row.published_at ? fechaLarga(row.published_at, idioma) : "",
+  };
+};
+
+/** Dos listas intercaladas, como «Al punto» en la página: una de cada, por turnos. */
+const intercaladas = (x, y) => {
+  const mezcla = [];
+  for (let k = 0; k < Math.max(x.length, y.length); k += 1) {
+    if (x[k]) mezcla.push(x[k]);
+    if (y[k]) mezcla.push(y[k]);
+  }
+  return mezcla;
+};
+
+/**
+ * Qué piezas enseña la portada al cargar, sin filtros, y en qué orden: lo mismo que arma
+ * `pages/Home.jsx` (la primera plana y la entrada de cada sección), con sus mismos topes.
+ * Devuelve piezas de `paraLaApertura` (con `id`); quien llama busca la fila por él.
+ */
+export const loQuePintaLaPortada = (piezas, ahora = Date.now()) => {
+  const { principal, secundarias, fijada } = elegirApertura(piezas, null, ahora);
+  const enApertura = new Set([principal, ...secundarias].filter(Boolean).map((p) => p.id));
+  // La columna de opinión: los análisis más recientes que no están arriba y la editorial
+  // del día. Las secciones de abajo no los repiten.
+  const analisis = piezas
+    .filter((p) => p.formatoApi === "articulo" && !enApertura.has(p.id))
+    .slice(0, ANALISIS_EN_PLANA);
+  const enOpinion = new Set(analisis.map((p) => p.id));
+  const editorialDelDia = piezas.find((p) => p.formatoApi === "editorial" && !enApertura.has(p.id)) ?? null;
+
+  const bloques = [];
+  for (const formato of ORDEN_DE_SECCIONES) {
+    const todos = piezas.filter(
+      (p) =>
+        p.formatoApi === formato &&
+        !enApertura.has(p.id) &&
+        !enOpinion.has(p.id) &&
+        !(formato === "editorial" && editorialDelDia && p.id === editorialDelDia.id)
+    );
+    if (!todos.length) continue;
+    if (!AL_PUNTO.formatos.includes(formato)) {
+      bloques.push({ formato, todos });
+      continue;
+    }
+    // Entrevistas y podcast van juntos en «Al punto», donde estaba el primero de los dos.
+    const previo = bloques.find((b) => b.formato === "alpunto");
+    if (previo) previo.todos = intercaladas(previo.todos, todos);
+    else bloques.push({ formato: "alpunto", todos });
+  }
+
+  return {
+    // Sin principal, la página no pinta la primera plana (ni su columna de opinión).
+    plana: principal ? { principal, secundarias, fijada, editorial: editorialDelDia, analisis } : null,
+    secciones: bloques.map((b) => ({
+      formato: b.formato,
+      piezas: b.todos.slice(0, b.formato === "alpunto" ? AL_PUNTO.cuantas : PREVIEW[b.formato]),
+    })),
+  };
+};
+
+/** Lo que va debajo del titular: la sección (enlazada) y la fecha. */
+const pie = (t) =>
+  `<p><a href="${escapar(t.rutaSeccion)}">${escapar(t.seccion)}</a>` +
+  (t.fecha ? ` · <time datetime="${escapar(t.fechaIso)}">${escapar(t.fecha)}</time>` : "") +
+  `</p>`;
+
+const articulo = (t, { resumen = false } = {}) =>
+  `<article><h3><a href="${escapar(t.ruta)}">${escapar(t.titulo)}</a></h3>` +
+  (resumen && t.resumen ? `<p>${escapar(t.resumen)}</p>` : "") +
+  `${pie(t)}</article>`;
+
+/**
+ * La portada en HTML semántico ligero, para el `<div id="root">`. Sin las clases de la
+ * página: va recortada a la vista (ver arriba) y React la sustituye al montar.
+ *
+ * `plana`: `{ titulo, principal, otras }` en titulares (`titularDe`), o nula;
+ * `secciones`: `[{ titulo, ruta, titulares }]`.
+ */
+export const portadaEnHtml = ({ plana, secciones, idioma = "es" }) => {
+  const t = TEXTOS[idioma];
+  const partes = [`<div class="se-portada-previa"><main>`, `<h1>${escapar(t.encabezado)}</h1>`];
+  if (plana) {
+    partes.push(`<section><h2>${escapar(plana.titulo)}</h2>`, articulo(plana.principal, { resumen: true }));
+    if (plana.otras.length) {
+      partes.push(`<ul>${plana.otras.map((o) => `<li>${articulo(o)}</li>`).join("")}</ul>`);
+    }
+    partes.push(`</section>`);
+  }
+  for (const seccion of secciones) {
+    partes.push(
+      `<section><h2><a href="${escapar(seccion.ruta)}">${escapar(seccion.titulo)}</a></h2>`,
+      `<ol>${seccion.titulares.map((s) => `<li>${articulo(s)}</li>`).join("")}</ol></section>`
+    );
+  }
+  // La descripción del medio va en el pie de todas las páginas (`Footer`): aquí, también al pie.
+  partes.push(`</main><footer><p>${escapar(t.descripcion)}</p></footer></div>`);
+  return partes.join("");
+};
+
+/**
+ * El recorte del HTML previo y su salida de emergencia. En `<style>` porque una animación
+ * no cabe en un atributo `style`; la política de seguridad (CSP) ya permite estilos en línea.
+ *
+ * Fuera del flujo y de un píxel, como `.se-sr-only`: en el documento, pero sin ocupar nada.
+ * A los `REVELAR_TRAS` la animación le devuelve su tamaño (un salto, no una transición:
+ * `auto` no se interpola): solo se ve si para entonces React no ha reemplazado el
+ * contenido de `#root`, que es cuando hace falta. Un navegador que no anime algo de esto
+ * se queda con la página como era antes, en blanco hasta que llega React.
+ */
+export const ESTILO_PREVIO =
+  `<style>.se-portada-previa{position:absolute;top:0;left:0;width:1px;height:1px;margin:-1px;` +
+  `overflow:hidden;clip-path:inset(50%);white-space:nowrap;` +
+  `animation:se-portada-previa 0s linear ${REVELAR_TRAS} forwards}` +
+  `.se-portada-previa main,.se-portada-previa footer{max-width:44rem;margin:0 auto;padding:1.5rem 1rem}` +
+  `@keyframes se-portada-previa{to{width:auto;height:auto;margin:0;right:0;` +
+  `overflow:visible;clip-path:none;white-space:normal}}</style>`;
+
+/** El `<link rel="preload">` de la foto de la apertura (o nada, si no hay que pedirla). */
+export const enlaceDePrecarga = (precarga) => {
+  if (!precarga) return "";
+  const destino = precarga.imagesrcset
+    ? ` imagesrcset="${escapar(precarga.imagesrcset)}" imagesizes="${escapar(precarga.imagesizes)}"`
+    : ` href="${escapar(precarga.href)}"`;
+  return `<link rel="preload" as="image"${destino} fetchpriority="high" />`;
+};
+
+/**
+ * La ficha para Google: la página y su lista de titulares (`ItemList`), atadas al medio y
+ * al sitio que el shell ya declara en todas las páginas (`#medio`, `#sitio`, en `index.html`:
+ * `NewsMediaOrganization` y `WebSite`). Se enlazan por `@id` en vez de repetirlos.
+ */
+export const fichaDePortada = ({ url, idioma, titulares }) => {
+  const t = TEXTOS[idioma];
+  const pagina = {
+    "@type": "WebPage",
+    "@id": `${url}#pagina`,
+    url,
+    name: t.titulo,
+    description: t.descripcion,
+    inLanguage: idioma,
+    isPartOf: { "@id": `${SITIO}/#sitio` },
+    about: { "@id": `${SITIO}/#medio` },
+    publisher: { "@id": `${SITIO}/#medio` },
+  };
+  if (!titulares.length) return { "@context": "https://schema.org", "@graph": [pagina] };
+  pagina.mainEntity = { "@id": `${url}#titulares` };
+  const lista = {
+    "@type": "ItemList",
+    "@id": `${url}#titulares`,
+    name: t.titulo,
+    numberOfItems: titulares.length,
+    itemListElement: titulares.map((titular, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITIO}${titular.ruta}`,
+      name: titular.titulo.slice(0, 110),
+    })),
+  };
+  return { "@context": "https://schema.org", "@graph": [pagina, lista] };
+};
+
+/** Las filas de la primera página del listado, o un motivo si no llegaron. */
+const leerTitulares = async () => {
+  try {
+    const respuesta = await conDeadline(DATOS_URL, LIMITE_MS);
+    if (!respuesta.ok) return { motivo: `api-${respuesta.status}` };
+    const cuerpo = await respuesta.json();
+    const filas = Array.isArray(cuerpo) ? cuerpo : cuerpo?.data;
+    if (!Array.isArray(filas)) return { motivo: "api-sin-lista" };
+    return { filas };
+  } catch {
+    return { motivo: "api-sin-respuesta" };
+  }
+};
+
+/**
+ * La página entera a partir del shell y las filas (o sin filas). Separada del `handler`
+ * para las pruebas.
+ */
+export const armarPortada = (shell, { filas = [], idioma = "es", ahora = Date.now() } = {}) => {
+  const t = TEXTOS[idioma];
+  const url = idioma === "en" ? URL_EN : URL_ES;
+
+  const validas = filas.filter((f) => f && typeof f === "object");
+  const porId = new Map(validas.map((f) => [String(f.id ?? ""), f]));
+  const { plana, secciones } = loQuePintaLaPortada(validas.map(paraLaApertura), ahora);
+  const titular = (p) => (p ? titularDe(porId.get(p.id), idioma) : null);
+
+  const principal = plana ? titular(plana.principal) : null;
+  const planaHtml = principal
+    ? {
+        titulo: plana.fijada ? t.apertura : t.recientes,
+        principal,
+        otras: [...plana.secundarias, plana.editorial, ...plana.analisis].map(titular).filter(Boolean),
+      }
+    : null;
+  const seccionesHtml = secciones
+    .map((s) => ({
+      titulo:
+        s.formato === "alpunto" ? t.alPunto : (idioma === "en" ? FORMAT_NAME : NOMBRE_DE_FORMATO)[s.formato],
+      ruta: `${idioma === "en" ? "/en" : ""}${rutaDeFormato(s.formato)}`,
+      titulares: s.piezas.map(titular).filter(Boolean),
+    }))
+    .filter((s) => s.titulares.length);
+
+  const todos = [
+    ...(planaHtml ? [planaHtml.principal, ...planaHtml.otras] : []),
+    ...seccionesHtml.flatMap((s) => s.titulares),
+  ];
+  // La precarga va con la apertura aunque no se haya podido enlazar (un formato que esta
+  // función no conoce): la foto la pinta React igual. El estilo, solo si hay HTML previo.
+  const cabecera = [
+    enlaceDePrecarga(precargaDeLaApertura(plana?.principal)),
+    todos.length ? ESTILO_PREVIO : "",
+  ]
+    .filter(Boolean)
+    .join("\n    ");
+
+  return inyectar(shell, {
+    titulo: t.titulo,
+    descripcion: t.descripcion,
+    imagen: IMAGEN_DE_MARCA,
+    url,
+    tipo: "website",
+    idioma,
+    locale: idioma === "en" ? "en_US" : "es_LA",
+    alternativas: { es: URL_ES, en: URL_EN },
+    ficha: fichaDePortada({ url, idioma, titulares: todos }),
+    cabecera,
+    html: todos.length ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) : null,
+  });
+};
+
+/**
+ * Lo mismo que guarda el borde para el listado (`/posts`, en el backend): medio minuto, un
+ * minuto más sirviendo la anterior mientras se renueva, y un día si la función fallara. Una
+ * noticia nueva sale aquí tan pronto como en el quiosco.
+ */
+const CACHE_PORTADA = "public, s-maxage=30, stale-while-revalidate=60, stale-if-error=86400";
+
+export default async function handler(req, res) {
+  // `/` llega sin nada y `/en` con `lang=en` (los dos por `vercel.json`).
+  const idioma = req.query?.lang === "en" ? "en" : "es";
+  const rutaPropia = idioma === "en" ? "/en" : "/";
+
+  const [{ shell, fuente }, datos] = await Promise.all([leerShell(), leerTitulares()]);
+  res.setHeader("X-Shell", fuente);
+
+  if (!esNuestroShell(shell)) {
+    // Sin la aplicación no hay nada que servir con honradez: al archivo estático, que
+    // `vercel.json` deja pasar con `?_s=1`. No debería pasar (el shell va en el paquete de
+    // la función); guardado muy poco por si pasa.
+    res.setHeader("X-Pieza-Meta", "portada-shell-no-reconocido");
+    res.setHeader("Cache-Control", "public, s-maxage=10");
+    res.redirect(307, `${rutaPropia}?${SIN_META}=1`);
+    return;
+  }
+
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+
+  // Interruptor: `PORTADA_HTML=no` en Vercel (y volver a desplegar) sirve el shell tal
+  // cual, como antes de esta función, sin tocar código.
+  if (process.env.PORTADA_HTML === "no") {
+    res.setHeader("Cache-Control", CACHE_PORTADA);
+    res.setHeader("X-Pieza-Meta", "portada-apagada");
+    res.status(200).send(shell);
+    return;
+  }
+
+  if (!datos.filas) {
+    // Sin titulares: la portada con su título, su canónica y sus `hreflang`, y React pinta
+    // como siempre. Guardada poco, para que la próxima pruebe otra vez.
+    res.setHeader("Cache-Control", "public, s-maxage=30");
+    res.setHeader("X-Pieza-Meta", `portada-sin-datos-${datos.motivo}`);
+    res.status(200).send(armarPortada(shell, { idioma }));
+    return;
+  }
+
+  res.setHeader("Cache-Control", CACHE_PORTADA);
+  res.setHeader("X-Pieza-Meta", "portada");
+  res.status(200).send(armarPortada(shell, { filas: datos.filas, idioma }));
+}

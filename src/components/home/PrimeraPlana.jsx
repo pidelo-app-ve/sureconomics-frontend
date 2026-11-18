@@ -20,6 +20,7 @@ import { NuestroCanal } from "../canal/NuestroCanal";
 import { AperturaShort } from "../canal/AperturaShort";
 import { esShort, idDeYoutube } from "../../lib/youtube";
 import { alLlegarLaFoto, fotoPrincipalLista, trasLaFoto } from "../../lib/trasLaFoto";
+import { EN_LA_COLUMNA, SIZES_PRINCIPAL, elegirApertura, precargaDeLaApertura } from "../../lib/apertura";
 import { EspacioPublicitario } from "../publicidad";
 import { ESPACIOS } from "../../services/publicidadService";
 import "./primeraPlana.css";
@@ -46,50 +47,16 @@ import "./primeraPlana.css";
  * últimas haya una con foto y ella no; una apertura con imagen se lee como apertura.
  */
 
-/** Cuántas noticias acompañan a la principal bajo ella. */
-export const EN_LA_COLUMNA = 3;
+// Cuál manda y qué foto se precarga viven en `lib/apertura.js`: también los usa
+// `api/portada.js`, que sirve el HTML de la portada. Se reexportan para quien los
+// importaba de aquí.
+export { EN_LA_COLUMNA, elegirApertura };
 
 /** Lo que tarda la foto saliente en irse: `se-plana-barre` en el CSS. */
 const SALIDA_MS = 900;
 
 /** Cuántas monedas caben en la columna derecha sin alargarla más que el centro. */
 const MONEDAS = 6;
-
-const SIZES_PRINCIPAL = "(max-width: 959px) 100vw, 50vw";
-
-/**
- * Si una pieza está fijada **ahora**. La fecha se vuelve a mirar aquí porque una lista
- * servida desde caché puede traer un «sí» de hace horas.
- */
-const fijadaAhora = (p, ahora) =>
-  Boolean(p?.enPortada) && p.destacadaHasta instanceof Date && p.destacadaHasta.getTime() > ahora;
-
-const msDe = (p) => Date.parse(p?.fechaIso ?? "") || 0;
-
-/**
- * La principal y las que van bajo ella. `piezas` es la lista entera, de todos los
- * formatos y ordenada por fecha: ahí se busca la fijada.
- */
-export const elegirApertura = (piezas, noticias = null, ahora = Date.now()) => {
-  const todas = piezas ?? [];
-  const delDia = noticias ?? todas.filter((p) => p.formatoApi === "noticia");
-
-  // Con más de una fijada (restos de una lista cosida de varias páginas) manda la más reciente.
-  const fijada = todas
-    .filter((p) => fijadaAhora(p, ahora))
-    .sort((a, b) => msDe(b) - msDe(a))[0];
-
-  if (fijada) {
-    const secundarias = delDia.filter((n) => n.id !== fijada.id).slice(0, EN_LA_COLUMNA);
-    return { principal: fijada, secundarias, fijada: true };
-  }
-
-  if (!delDia.length) return { principal: null, secundarias: [], fijada: false };
-  const conFoto = delDia.slice(0, 3).find((n) => n.imagenUrl);
-  const principal = delDia[0].imagenUrl ? delDia[0] : conFoto ?? delDia[0];
-  const secundarias = delDia.filter((n) => n.id !== principal.id).slice(0, EN_LA_COLUMNA);
-  return { principal, secundarias, fijada: false };
-};
 
 /** Si la apertura abre con un short en vertical (`AperturaShort`) y no con su foto. */
 const abreConShort = (pieza, rota) => !rota && esShort(pieza?.videoUrl);
@@ -120,20 +87,17 @@ export const quitarPrecargas = () => {
  */
 export const precargarApertura = (piezas) => {
   if (typeof document === "undefined") return;
-  const { principal } = elegirApertura(piezas);
-  if (!principal?.imagenUrl || esShort(principal.videoUrl)) return;
-  const src = imagenAncho(principal.imagenUrl, 1200);
-  if (precargadas.has(src)) return;
-  precargadas.add(src);
+  const precarga = precargaDeLaApertura(elegirApertura(piezas).principal);
+  if (!precarga || precargadas.has(precarga.clave)) return;
+  precargadas.add(precarga.clave);
   const enlace = document.createElement("link");
   enlace.setAttribute("rel", "preload");
   enlace.setAttribute("as", "image");
-  const srcset = imagenSrcSet(principal.imagenUrl, ANCHOS, principal.imagenAnchoOriginal);
-  if (srcset) {
-    enlace.setAttribute("imagesrcset", srcset);
-    enlace.setAttribute("imagesizes", SIZES_PRINCIPAL);
+  if (precarga.imagesrcset) {
+    enlace.setAttribute("imagesrcset", precarga.imagesrcset);
+    enlace.setAttribute("imagesizes", precarga.imagesizes);
   } else {
-    enlace.setAttribute("href", src);
+    enlace.setAttribute("href", precarga.href);
   }
   enlace.setAttribute("fetchpriority", "high");
   document.head.appendChild(enlace);

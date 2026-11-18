@@ -9,7 +9,8 @@
  * aplicación la pinta igual), pero respondería 404 y el buscador la olvidaría sin que
  * nadie lo notara. Esta prueba lo nota.
  *
- * Las reglas de la lista tienen la forma `/(expresión)` y van a `/index.html`: así se
+ * Las reglas de la lista tienen la forma `/(expresión)` y van a `/app.html` (el shell; desde
+ * el 18-nov-2026 no se llama `index.html`, ver `scripts/shell-como-app.mjs`): así se
  * pueden leer como expresiones de JavaScript sin la librería de Vercel
  * (`path-to-regexp`, con `strict`: la barra final no se da por supuesta).
  */
@@ -26,7 +27,7 @@ const check = (nombre, ok, detalle) => {
 };
 
 const lista = config.rewrites
-  .filter((r) => r.destination === "/index.html" && !r.has && /^\/\(.*\)$/.test(r.source))
+  .filter((r) => r.destination === "/app.html" && !r.has && /^\/\(.*\)$/.test(r.source))
   .map((r) => new RegExp(`^\\/${r.source.slice(1)}$`));
 const aLaAplicacion = (camino) => lista.some((rx) => rx.test(camino));
 const a404 = (camino) => !aLaAplicacion(camino);
@@ -62,6 +63,21 @@ console.log("lo que va antes de la lista sigue ahí");
 const fuentes = config.rewrites.map((r) => r.source);
 check("las piezas, por su función", fuentes.includes("/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug"));
 check("y la 404 al final", config.rewrites.at(-1).destination === "/api/no-encontrada");
+// La portada, `/` y `/en`, por su función; con `?_s=1` (la función no pudo leer el shell),
+// al archivo. `/` puede ir aquí porque el shell ya no se llama `index.html`: con él, Vercel
+// servía el archivo antes de mirar las reescrituras.
+const indice = (fuente, destino, conS) =>
+  config.rewrites.findIndex((r) => r.source === fuente && r.destination === destino && Boolean(r.has) === conS);
+const laLista = config.rewrites.findIndex((r) => r.source === "/((?:en/?)?)");
+for (const [fuente, funcion] of [["/", "/api/portada"], ["/en{/}?", "/api/portada?lang=en"]]) {
+  check(`${fuente}, por la función de la portada`, indice(fuente, funcion, false) !== -1);
+  check(`${fuente}?_s=1, al archivo, antes`, indice(fuente, "/app.html", true) !== -1 && indice(fuente, "/app.html", true) < indice(fuente, funcion, false));
+  check(`${fuente}: las dos antes de la lista`, indice(fuente, funcion, false) < laLista);
+}
+check("ningún destino a /index.html (ya no existe)", !JSON.stringify(config.rewrites).includes('"/index.html"'));
+check("/index.html redirige a /", config.redirects.some((r) => r.source === "/index.html" && r.destination === "/"));
+check("el build deja app.html", /vite build && node scripts\/shell-como-app\.mjs/.test(leer("../package.json")));
+check("el shell viaja con las funciones", config.functions?.["api/*.js"]?.includeFiles === "dist/app.html");
 check("/noticias a su listado", config.redirects.some((r) => r.source === "/noticias{/}?" && r.destination === "/articulos?formato=noticias"));
 
 if (fallos) {

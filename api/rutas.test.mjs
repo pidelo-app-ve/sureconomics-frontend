@@ -62,6 +62,15 @@ console.log("lo que va antes de la lista sigue ahí");
 const fuentes = config.rewrites.map((r) => r.source);
 check("las piezas, por su función", fuentes.includes("/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug"));
 check("y la 404 al final", config.rewrites.at(-1).destination === "/api/no-encontrada");
+// La portada en inglés, por su función; con `?_s=1` (la función no pudo leer el shell), al
+// archivo. `/` no va aquí: lo lleva `middleware.js`, porque para `/` Vercel sirve antes el
+// `index.html` y una reescritura no se aplicaría nunca.
+const indice = (destino, conS) => config.rewrites.findIndex((r) => r.source === "/en{/}?" && r.destination === destino && Boolean(r.has) === conS);
+check("/en, por la función de la portada", indice("/api/portada?lang=en", false) !== -1);
+check("/en?_s=1, al archivo, antes", indice("/index.html", true) !== -1 && indice("/index.html", true) < indice("/api/portada?lang=en", false));
+check("y las dos antes de la lista", indice("/api/portada?lang=en", false) < config.rewrites.findIndex((r) => r.source === "/((?:en/?)?)"));
+check("ninguna reescritura de / (no se aplicaría)", !config.rewrites.some((r) => r.source === "/"));
+check("/ lo lleva middleware.js", /matcher: "\/"/.test(leer("../middleware.js")) && leer("../middleware.js").includes("/api/portada"));
 check("/noticias a su listado", config.redirects.some((r) => r.source === "/noticias{/}?" && r.destination === "/articulos?formato=noticias"));
 
 if (fallos) {

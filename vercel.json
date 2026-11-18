@@ -159,6 +159,20 @@
             "destination": "/api/sitemap?tipo=noticias"
         },
         {
+            "source": "/en{/}?",
+            "has": [
+                {
+                    "type": "query",
+                    "key": "_s"
+                }
+            ],
+            "destination": "/index.html"
+        },
+        {
+            "source": "/en{/}?",
+            "destination": "/api/portada?lang=en"
+        },
+        {
             "source": "/((?:en/?)?)",
             "destination": "/index.html"
         },

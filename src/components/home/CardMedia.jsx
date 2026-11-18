@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import { temaPrincipal } from "../../lib/contentFilter";
 import { estiloDeFoto, imagenAncho, imagenSrcSet } from "../../lib/pieza";
+import { ANCHOS_DE_TARJETA } from "../../lib/fotoDePieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { IconoPlay } from "../canal/VistaPrevia";
@@ -45,8 +46,9 @@ import { piezaShape } from "./piezaShape";
  * parte de la foto se ve (`EncuadreDeFoto`, `estiloDeFoto`) y la tarjeta recorta por
  * ahí. Sin encuadre, por el centro.
  */
-/** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x. */
-export const ANCHOS = [400, 640, 800, 1100, 1400];
+/** Anchos que se le ofrecen al navegador. Cubren la caja de una tarjeta de 1x a 3x.
+ *  Viven en `fotoDePieza.js`: la portada servida (`api/portada.js`) precarga con ellos. */
+export const ANCHOS = ANCHOS_DE_TARJETA;
 /** Una columna en telefono, dos en tablet, tres en escritorio. En el telefono, el ancho
  *  menos los 24 px de margen a cada lado (`--se-content-gutter`), y no un 92 % que se pasaba:
  *  a 412 px y 1,75x pedia 663 y bajaba la de 1100 cuando la de 640 llenaba la caja (364 px). */

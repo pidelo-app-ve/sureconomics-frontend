@@ -25,54 +25,15 @@
  * acabarían en la 404 genérica de Vercel, sin la aplicación. Esta función se comporta
  * como `api/pieza.js`, que ya está probada en producción, y da la 404 en el idioma de la
  * dirección. Para que no cueste una petición al propio dominio por cada visita, el shell
- * se guarda en memoria unos minutos (`GUARDA_SHELL_MS`), y la respuesta, en el borde.
+ * se guarda en memoria unos minutos (`leerShell`), y la respuesta, en el borde.
  */
 
-import { esNuestroShell } from "./pieza.js";
-
-const SITIO = "https://www.sureconomics.com";
-
-/** Igual que en `api/pieza.js`: el dominio público, nunca la dirección de un despliegue. */
-const SHELL_URL = process.env.SHELL_URL || `${SITIO}/index.html`;
-
-/** Un shell que no llega no puede dejar al lector esperando: lo mismo que `api/pieza.js`. */
-const LIMITE_MS = 3500;
-
-const conDeadline = async (url, ms) => {
-  const corta = new AbortController();
-  const reloj = setTimeout(() => corta.abort(), ms);
-  try {
-    return await fetch(url, { signal: corta.signal });
-  } finally {
-    clearTimeout(reloj);
-  }
-};
-
-/**
- * Cuánto se reutiliza el shell ya leído. Solo cambia al desplegar, y un despliegue nuevo
- * arranca funciones nuevas, con la memoria vacía; lo que pudiera quedar viejo dura como
- * mucho esto.
- */
-const GUARDA_SHELL_MS = 5 * 60_000;
-let guardado = null;
+// El shell (leído del dominio y guardado unos minutos) y su comprobación son los mismos
+// que usan la portada y las piezas: `api/_comun.js`.
+import { esNuestroShell, leerShell, olvidarShell } from "./_comun.js";
 
 /** Para las pruebas: olvida el shell guardado. */
-export const olvidarShell = () => {
-  guardado = null;
-};
-
-/** El shell, de memoria si se leyó hace poco; si no, del dominio. Solo se guarda uno bueno. */
-const leerShell = async () => {
-  if (guardado && Date.now() - guardado.en < GUARDA_SHELL_MS) return guardado.shell;
-  try {
-    const respuesta = await conDeadline(SHELL_URL, LIMITE_MS);
-    const shell = await respuesta.text();
-    if (esNuestroShell(shell)) guardado = { shell, en: Date.now() };
-    return shell;
-  } catch {
-    return "";
-  }
-};
+export { olvidarShell };
 
 /**
  * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor

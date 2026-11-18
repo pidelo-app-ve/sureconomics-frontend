@@ -7337,6 +7337,44 @@
   opacity: 0.6;
 }
 
+/* El juez: su modo entre los interruptores, y lo que frenó en el último ciclo. */
+.se-admin-app .se-tit-juez {
+  max-width: 26rem;
+}
+
+.se-admin-app .se-tit-frenados {
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.se-admin-app .se-tit-frenados__lista {
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-frenados__problemas {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.se-admin-app .se-tit-frenados__problemas .se-tit-marca {
+  margin-right: 0.35rem;
+}
+
+.se-admin-app .se-tit-origen__juez {
+  display: grid;
+  gap: 0.15rem;
+  margin-top: 0.75rem;
+}
+
+.se-admin-app .se-tit-origen__veredicto--no {
+  color: var(--adm-err);
+  font-weight: 600;
+}
+
 /* «Ver esos medios» dentro de un aviso: un botón con aspecto de enlace. */
 .se-admin-app .se-tit-enlace {
   padding: 0;

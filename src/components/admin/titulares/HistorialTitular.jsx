@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import { adminRequest } from "../../../lib/api";
+import { MODOS_DEL_JUEZ, VEREDICTOS, nombreDelProblema } from "../../../lib/juezDeTitulares";
 import { unwrapEntity } from "../../../services/adminResponseUtils";
 import { ModalDelPanel } from "../ModalDelPanel";
 
@@ -22,13 +23,58 @@ const VERSION = {
 const cuando = (iso) =>
   iso ? new Date(iso).toLocaleString("es-VE", { timeZone: "America/Caracas", dateStyle: "short", timeStyle: "short" }) : "—";
 
+const usd = (n) =>
+  typeof n === "number" ? `${n.toLocaleString("es-VE", { minimumFractionDigits: 4, maximumFractionDigits: 4 })} USD` : null;
+
+/**
+ * «Lo que dijo el juez» de una versión: `{modo, estado, aprobado, problemas, modelo,
+ * prompt_hash, costo}`. En «observar» un titular rechazado sale igual, y aquí se ve por qué
+ * lo habría frenado.
+ */
+const LoQueDijoElJuez = ({ juez }) => {
+  const problemas = Array.isArray(juez.problemas) ? juez.problemas : [];
+  const costo = usd(juez.costo);
+  return (
+    <div className="se-tit-origen__juez">
+      <span className="se-form-label">Lo que dijo el juez</span>
+      <span className={juez.estado === "rechazado" ? "se-tit-origen__veredicto--no" : undefined}>
+        {VEREDICTOS[juez.estado] || juez.estado || "Sin veredicto"}
+      </span>
+      <span className="se-admin-meta-hint">
+        Modo {MODOS_DEL_JUEZ[juez.modo]?.nombre.toLowerCase() ?? juez.modo ?? "—"}
+        {juez.modelo ? ` · ${juez.modelo}` : ""}
+        {costo ? ` · costó ${costo}` : ""}
+      </span>
+      {problemas.length ? (
+        <ul className="se-tit-frenados__problemas">
+          {problemas.map((p, i) => (
+            <li key={i}>
+              <span className="se-tit-marca">{nombreDelProblema(p.tipo)}</span> {p.explicacion}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+};
+
+LoQueDijoElJuez.propTypes = {
+  juez: PropTypes.shape({
+    modo: PropTypes.string,
+    estado: PropTypes.string,
+    problemas: PropTypes.arrayOf(PropTypes.shape({ tipo: PropTypes.string, explicacion: PropTypes.string })),
+    modelo: PropTypes.string,
+    costo: PropTypes.number,
+  }).isRequired,
+};
+
 /** Solo enlaces web: la dirección viene del medio, y un `javascript:` no puede ir en un href. */
 const esWeb = (url) => typeof url === "string" && /^https?:\/\//i.test(url);
 
 /**
  * «De dónde salió» una versión que escribió la máquina (auditoría del 17-nov-2026,
  * D-07): qué modelo la redactó, con qué versión de las instrucciones (la huella) y qué
- * notas leyó, con su enlace y el trozo que vio. Las notas originales se borran a los 7
+ * notas leyó, con su enlace y el trozo que vio; y, si la leyó el juez, qué dijo. Las notas originales se borran a los 7
  * días; esto se guarda con la versión para poder contestar un reclamo meses después.
  * Plegado: se abre cuando hace falta comprobar algo.
  */
@@ -73,6 +119,7 @@ const DeDondeSalio = ({ version }) => {
           ))}
         </ol>
       ) : null}
+      {version.juez ? <LoQueDijoElJuez juez={version.juez} /> : null}
     </details>
   );
 };
@@ -82,6 +129,7 @@ DeDondeSalio.propTypes = {
     motivo: PropTypes.string,
     modelo: PropTypes.string,
     huella_prompt: PropTypes.string,
+    juez: PropTypes.object,
     notas_leidas: PropTypes.arrayOf(
       PropTypes.shape({
         medio: PropTypes.string,

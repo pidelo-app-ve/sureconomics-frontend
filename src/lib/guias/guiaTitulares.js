@@ -26,6 +26,20 @@ export const PASOS_TITULARES = [
     ],
   },
   {
+    clave: "juez",
+    titulo: "El juez",
+    texto:
+      "Antes de publicar, la inteligencia artificial vuelve a leer cada titular junto a las notas de las que " +
+      "salió y dice si afirma algo que esas notas no dicen: una cifra cambiada, otro país, una fecha, una " +
+      "persona o una acusación que se da por hecha.",
+    puntos: [
+      "Bloquear: lo que el juez rechaza no sale. Es lo normal.",
+      "Observar: sale igual, pero queda anotado lo que habría rechazado. Sirve para probar si acierta.",
+      "Apagado: no se usa el juez.",
+      "Quién lo cambia: solo un administrador. Los demás ven el modo, pero no pueden tocarlo.",
+    ],
+  },
+  {
     clave: "gasto",
     titulo: "Lo que lleva gastado",
     texto:
@@ -42,7 +56,16 @@ export const PASOS_TITULARES = [
       "La IA no respondió: si en una vuelta entera la inteligencia artificial no contesta, la redacción descansa unos 20 minutos y se retoma sola a la hora que dice el aviso. No hay que hacer nada; si se repite muchas veces, avise.",
       "Notas de medios nuevos descartadas: llegaron de medios que nadie ha activado todavía y no contaron. «Ver esos medios» lleva a la lista para revisarlos.",
       "Falló: si alguna parte del ciclo dio error. El resto sigue funcionando; si se repite, hay que avisar.",
+      "Juez: cuántos titulares aprobó, cuántos frenó y cuántos no pudo revisar. Si no pudo revisar alguno (la IA no respondió o se acabó el saldo del día), un aviso lo dice: con el juez en «bloquear», esos no salen.",
     ],
+  },
+  {
+    clave: "frenados",
+    titulo: "Titulares que el juez frenó",
+    texto:
+      "Aparece cuando el juez rechazó algo en la última vuelta. Cada titular frenado lleva lo que vio mal, " +
+      "con su tipo (cifra, unidad, país, fecha, persona, atribución…) y una frase que lo explica. Si el juez " +
+      "está en «observar», la lista es de lo que habría frenado: esos titulares sí salieron.",
   },
   {
     clave: "vistas",
@@ -68,7 +91,7 @@ export const PASOS_TITULARES = [
     puntos: [
       "Editar: corregir el título o el resumen, en español y en inglés. Lo editado a mano ya no lo reescribe el sistema aunque lleguen más fuentes.",
       "Fijar arriba: lo pone el primero en la portada y en la sección durante media hora, una o dos horas.",
-      "Historial: qué escribió el sistema, qué cambió alguien del equipo y quién. En cada versión del sistema, «De dónde salió» enseña las notas que leyó (medio, enlace y el trozo que vio) y con qué inteligencia artificial se escribió: sirve para comprobar un dato o contestar un reclamo.",
+      "Historial: qué escribió el sistema, qué cambió alguien del equipo y quién. En cada versión del sistema, «De dónde salió» enseña las notas que leyó (medio, enlace y el trozo que vio) y con qué inteligencia artificial se escribió, y lo que dijo el juez si lo leyó: sirve para comprobar un dato o contestar un reclamo.",
       "Borrar: lo quita de la web en menos de dos minutos y no vuelve aunque lleguen más fuentes. Pide un motivo, que sirve para ajustar los medios y las instrucciones.",
     ],
   },

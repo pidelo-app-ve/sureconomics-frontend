@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
+import { MODOS_DEL_JUEZ, nombreDelProblema } from "../../lib/juezDeTitulares";
 import { recorridoTitulares } from "../../lib/guias/guiaTitulares";
 import { applyPageMeta } from "../../lib/seo";
 import { unwrapEntity } from "../../services/adminResponseUtils";
@@ -24,7 +25,10 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
  * para el sistema; **fijar** lo pone el primero durante un rato; el **historial** dice
  * quién hizo qué. Abajo, los medios que lee el sistema, para silenciar el que no sirva.
  * Un admin puede además parar la publicación automática u ocultar la sección entera (la
- * emergencia). El botón «Guía» lo explica sobre la propia página.
+ * emergencia), y elegir qué hace **el juez**: la IA que lee cada titular antes de
+ * publicarlo y frena el que afirma algo que las notas no dicen. Lo que frenó en el último
+ * ciclo se ve en «Titulares que el juez frenó». El botón «Guía» lo explica sobre la
+ * propia página.
  */
 
 const VISTAS = [
@@ -77,8 +81,77 @@ const resumenDelCiclo = (c) => {
     [n("tope_por_medio"), "en espera por el tope por medio"],
     [n("caducados"), "caducados"],
   ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
+  // El juez, si actuó: `{modo, aprobados, rechazados, fallos, sin_saldo}`.
+  const j = c.juez;
+  if (j && typeof j === "object") {
+    const sinRevisar = Number(j.fallos || 0) + Number(j.sin_saldo || 0);
+    const del = [
+      [Number(j.aprobados || 0), "aprobados"],
+      [Number(j.rechazados || 0), j.modo === "observar" ? "que habría frenado" : "frenados"],
+      [sinRevisar, "sin revisar"],
+    ].filter(([v]) => v > 0).map(([v, t]) => `${v} ${t}`);
+    if (del.length) partes.push(`juez (${MODOS_DEL_JUEZ[j.modo]?.nombre.toLowerCase() ?? j.modo}): ${del.join(", ")}`);
+  }
   const fallos = Object.keys(c).filter((k) => k.startsWith("fallo_")).map((k) => ETAPAS[k.slice(6)] || k.slice(6));
   return { texto: partes.length ? partes.join(" · ") : "sin nada nuevo", fallos };
+};
+
+/**
+ * Lo que el juez no pudo revisar en el último ciclo (la IA no respondió o no quedaba
+ * saldo). En «bloquear» eso no sale; en «observar», sí.
+ */
+const avisoDelJuez = (j) => {
+  if (!j || typeof j !== "object") return null;
+  const n = Number(j.fallos || 0) + Number(j.sin_saldo || 0);
+  if (!n) return null;
+  const titulares = `${n} titular${n === 1 ? "" : "es"}`;
+  const saldo = Number(j.sin_saldo || 0) ? ` A ${j.sin_saldo} no les alcanzó el saldo del día.` : "";
+  return j.modo === "observar"
+    ? `El juez no pudo revisar ${titulares}; en modo observar salieron igual.${saldo}`
+    : `El juez no pudo revisar ${titulares}: no salieron.${saldo}`;
+};
+
+/**
+ * Los últimos titulares que el juez rechazó (`ultimo_ciclo.juez_rechazos`, hasta 10),
+ * cada uno con sus problemas. Plegado: se abre para ver por qué no salió algo.
+ */
+const FrenadosPorElJuez = ({ rechazos, modo, anclaje }) => (
+  <details className="se-admin-table-wrap se-tit-frenados" {...anclaje}>
+    <summary className="se-tit-fuentes__resumen">
+      <span className="se-heading-card">
+        {modo === "observar" ? "Titulares que el juez habría frenado" : "Titulares que el juez frenó"}
+      </span>
+      <span className="se-admin-meta-hint">
+        {rechazos.length} en el último ciclo{modo === "observar" ? " · salieron igual (modo observar)" : ""}
+      </span>
+    </summary>
+    <ul className="se-tit-historial__lista se-tit-frenados__lista">
+      {rechazos.map((r, k) => (
+        <li key={`${r.grupo}-${k}`}>
+          <strong>{r.titulo || "Sin título"}</strong>
+          <ul className="se-tit-frenados__problemas">
+            {(r.problemas ?? []).map((p, i) => (
+              <li key={i}>
+                <span className="se-tit-marca">{nombreDelProblema(p.tipo)}</span> {p.explicacion}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </details>
+);
+
+FrenadosPorElJuez.propTypes = {
+  rechazos: PropTypes.arrayOf(
+    PropTypes.shape({
+      grupo: PropTypes.number,
+      titulo: PropTypes.string,
+      problemas: PropTypes.arrayOf(PropTypes.shape({ tipo: PropTypes.string, explicacion: PropTypes.string })),
+    }),
+  ).isRequired,
+  modo: PropTypes.string,
+  anclaje: PropTypes.object,
 };
 
 /**
@@ -190,6 +263,8 @@ FijarArriba.propTypes = {
 export const AdminTitulares = () => {
   const { role } = useAuth();
   const esAdmin = role === "publicador" || role === "admin";
+  // El modo del juez solo lo cambia un admin (el backend contesta 403 a los demás).
+  const puedeJuez = role === "admin";
   const { toastSuccess, toastError } = useAdminToast();
   const { confirm, ConfirmDialog } = useAdminConfirm();
   const [vista, setVista] = useState("publicados");
@@ -290,6 +365,9 @@ export const AdminTitulares = () => {
   const vuelta = resumenDelCiclo(ciclo);
   const pausa = pausaDeLaIa(resumen, ciclo, Date.now());
   const descartadas = descartadasDeNuevos(ciclo);
+  const juez = ajustes?.juez_modo;
+  const sinJuez = avisoDelJuez(ciclo?.juez);
+  const rechazos = Array.isArray(ciclo?.juez_rechazos) ? ciclo.juez_rechazos : [];
 
   return (
     <main role="main">
@@ -336,6 +414,29 @@ export const AdminTitulares = () => {
                 ) : null}
               </span>
             </div>
+            <div className="se-admin-filters__field se-tit-juez" {...ancla("juez")}>
+              <label className="se-form-label" htmlFor="tit-juez">Juez de los titulares</label>
+              <select id="tit-juez" className="se-form-control" value={juez ?? ""} disabled={!puedeJuez || ocupado}
+                onChange={(e) => {
+                  const modo = e.target.value;
+                  cambiar("juez_modo", modo, {
+                    titulo: `Juez: ${MODOS_DEL_JUEZ[modo].nombre.toLowerCase()}`,
+                    texto: `${MODOS_DEL_JUEZ[modo].texto} Cuenta desde el próximo ciclo.`,
+                    boton: "Cambiar",
+                  });
+                }}>
+                {juez && !MODOS_DEL_JUEZ[juez] ? <option value={juez}>{juez}</option> : null}
+                {Object.entries(MODOS_DEL_JUEZ).map(([clave, m]) => (
+                  <option key={clave} value={clave}>
+                    {m.nombre}
+                  </option>
+                ))}
+              </select>
+              <span className="se-admin-meta-hint">
+                {MODOS_DEL_JUEZ[juez]?.texto ?? ""}
+                {puedeJuez ? "" : " Solo un administrador lo cambia."}
+              </span>
+            </div>
           </div>
           <div className="se-admin-filters__field se-admin-filters__field--grow" {...ancla("gasto")}>
             <span className="se-form-label">IA este mes</span>
@@ -359,6 +460,9 @@ export const AdminTitulares = () => {
                     : "La IA no respondió hace poco; la redacción está en pausa y se retoma sola en unos minutos."}
                 </span>
               ) : null}
+              {sinJuez ? (
+                <span className="se-tit-aviso" role="status">{sinJuez}</span>
+              ) : null}
               {descartadas ? (
                 <span className="se-tit-aviso" role="status">
                   {descartadas} nota{descartadas === 1 ? "" : "s"} de medios nuevos sin activar se
@@ -372,6 +476,10 @@ export const AdminTitulares = () => {
           ) : null}
         </div>
       </section>
+
+      {rechazos.length ? (
+        <FrenadosPorElJuez rechazos={rechazos} modo={ciclo?.juez?.modo} anclaje={ancla("frenados")} />
+      ) : null}
 
       <div className="se-admin-filters" role="tablist" aria-label="Qué titulares ver" style={{ marginBottom: "0.75rem" }} {...ancla("vistas")}>
         {VISTAS.map((v) => (

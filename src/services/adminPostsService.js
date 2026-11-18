@@ -11,6 +11,7 @@ export { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
  *   status?: string,
  *   q?: string,
  *   unclassified?: boolean,
+ *   firmaDesactualizada?: boolean,
  * }} [params]
  */
 export const listAdminPosts = async (params = {}) => {
@@ -24,6 +25,10 @@ export const listAdminPosts = async (params = {}) => {
             // The re-tagging backlog: pieces carried over from the old
             // categorisation that nobody has given a topic yet.
             unclassified: params.unclassified ? 1 : undefined,
+            // Piezas de lectores cuya cuenta cambió de nombre o foto desde que se
+            // aceptaron (su firma está congelada). El servidor lo atiende solo, sin
+            // los demás filtros.
+            firma_desactualizada: params.firmaDesactualizada ? 1 : undefined,
         },
     });
     return unwrapListResponse(raw);
@@ -48,6 +53,21 @@ export const createAdminPost = async (body, idempotencyKey) =>
  */
 export const patchAdminPost = async (postId, body) =>
     unwrapEntity(await adminRequest(`/admin/posts/${postId}`, { method: "PATCH", json: body }));
+
+/**
+ * La pieza de un lector (propuesta aceptada): copia otra vez a la firma el nombre y la
+ * foto que tiene hoy su cuenta. Guarda al momento y devuelve la pieza.
+ * @param {string|number} postId
+ */
+export const usarFirmaDeSuCuenta = async (postId) =>
+    unwrapEntity(await adminRequest(`/admin/posts/${postId}/colaborador/usar-su-cuenta`, { method: "POST" }));
+
+/**
+ * La pieza deja de contar como del lector que la propuso. La firma no se toca.
+ * @param {string|number} postId
+ */
+export const quitarVinculoConElLector = async (postId) =>
+    unwrapEntity(await adminRequest(`/admin/posts/${postId}/colaborador`, { method: "DELETE" }));
 
 /** Si el servidor puede traducir con Claude (tiene la clave): `{ disponible, modelo }`. */
 export const getTraductor = async () => unwrapEntity(await adminRequest("/admin/posts/traducir"));

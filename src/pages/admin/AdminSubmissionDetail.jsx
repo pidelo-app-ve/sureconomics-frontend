@@ -26,6 +26,8 @@ import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoRevisarPropuesta } from "../../lib/guias/guiaPropuestasDeLectores";
+import { firmaDePropuesta, firmadaPorColaborador, textoFirmaDeColaborador } from "../../lib/firmaDeColaborador";
+import { listAdminTopics } from "../../services/adminTaxonomyService";
 
 const { ancla } = recorridoRevisarPropuesta;
 
@@ -50,6 +52,9 @@ export const AdminSubmissionDetail = () => {
   const [featuredImageFailed, setFeaturedImageFailed] = useState(false);
   const [authorUser, setAuthorUser] = useState(null);
   const [authorUserLoad, setAuthorUserLoad] = useState({ status: "idle", error: null });
+  // El tema de la pieza al aceptar: sin tema el servidor no publica (`topic_required`).
+  const [temas, setTemas] = useState({ status: "idle", items: [] });
+  const [temaId, setTemaId] = useState("");
   const { confirm, ConfirmDialog } = useAdminConfirm();
 
   const numericId = useMemo(() => {
@@ -138,6 +143,20 @@ export const AdminSubmissionDetail = () => {
     setFeaturedImageFailed(false);
   }, [numericId, imgFromRow]);
 
+  // Los temas se piden solo cuando alguien va a aceptar, no al abrir cada ficha.
+  useEffect(() => {
+    if (status !== "approved" || temas.status !== "idle") return;
+    setTemas({ status: "loading", items: [] });
+    listAdminTopics()
+      .then((items) =>
+        setTemas({
+          status: "success",
+          items: (items ?? []).filter((t) => t && t.is_active !== false),
+        })
+      )
+      .catch(() => setTemas({ status: "error", items: [] }));
+  }, [status, temas.status]);
+
   const authorBoard = useMemo(() => {
     const b = buildSubmissionAuthorBoard(row, authorUser);
     return {
@@ -161,15 +180,29 @@ export const AdminSubmissionDetail = () => {
       });
       return;
     }
+    // Una ya decidida no pide tema: el servidor contesta que no se puede cambiar.
+    const decidida = ["approved", "rejected"].includes(String(adminPick(row, ["status"], "")).toLowerCase());
+    if (normalized === "approved" && !decidida && !temaId) {
+      setSaveState({
+        status: "error",
+        error: new Error("Elija el tema de la pieza: sin tema no se puede publicar."),
+        message: "",
+        publishedSlug: null,
+      });
+      return;
+    }
     setSaveState({ status: "loading", error: null, message: "", publishedSlug: null });
     try {
-      const updated = await applyAdminSubmissionWorkflow(numericId, normalized);
+      const updated = await applyAdminSubmissionWorkflow(numericId, normalized, {
+        topicIds: normalized === "approved" && temaId ? [Number(temaId)] : undefined,
+      });
       setRow(updated);
       const newStatus = adminPick(updated, ["status"], normalized) || normalized;
       setStatus(normalizeStatusForSelect(newStatus));
+      const firma = firmadaPorColaborador(firmaDePropuesta(updated).nombre);
       const message =
         normalized === "approved"
-          ? "Estado cambiado a Aceptado. El artículo se publicó correctamente."
+          ? `Estado cambiado a Aceptado. La pieza se publicó${firma ? ` ${firma}` : ""}.`
           : `Estado cambiado a ${submissionStatusLabel(normalized === "under_review" ? "under_review" : "rejected")}.`;
       const publishedSlug =
         normalized === "approved" ? adminPick(updated, ["published_post_slug"], null) : null;
@@ -288,6 +321,10 @@ export const AdminSubmissionDetail = () => {
   const hasImageUrl = Boolean(img && img !== "—" && String(img).trim());
   const excerptTrim = excerpt && excerpt !== "—" ? String(excerpt).trim() : "";
   const contentTrim = content && content !== "—" ? String(content).trim() : "";
+  // La pieza aceptada es crédito del lector: sale con su nombre y su foto.
+  const firma = firmaDePropuesta(row);
+  const yaAceptada = String(rowStatus).toLowerCase() === "approved";
+  const pendiente = !["approved", "rejected"].includes(String(rowStatus).toLowerCase());
 
   return (
     <main role="main" className="se-admin-submission-detail">
@@ -420,6 +457,27 @@ export const AdminSubmissionDetail = () => {
 
         <aside className="se-admin-submission-detail__panel se-admin-submission-detail__panel--sticky" {...ancla("decision")}>
           <h2 className="se-admin-submission-detail__panel-title">Revisión</h2>
+          {firma.nombre && (pendiente || (yaAceptada && firma.publicada)) ? (
+            <p className="se-text-body">
+              {yaAceptada ? (
+                <strong>{textoFirmaDeColaborador(firma.nombre)}.</strong>
+              ) : (
+                <>
+                  Si la acepta, se publica firmada «<strong>{firma.nombre}</strong>»
+                  {firma.tieneFoto
+                    ? ", con la foto de su perfil."
+                    : ", sin foto: todavía no tiene en su perfil (sale el icono de persona)."}{" "}
+                  El nombre y la foto se copian de su cuenta y no cambian solos; la firma se puede
+                  editar en la pieza, como cualquier otra.
+                </>
+              )}{" "}
+              <span className="se-admin-meta-hint">«(colaborador)» es una marca del panel: la web no la enseña.</span>
+            </p>
+          ) : pendiente ? (
+            <p className="se-text-body" role="note">
+              La cuenta de quien la mandó no tiene nombre: no se puede aceptar hasta que lo complete en su perfil.
+            </p>
+          ) : null}
           <form className="se-contact-form" onSubmit={handleSave}>
             {saveState.status === "error" ? (
               <p className="se-admin-login__error" role="alert">
@@ -449,6 +507,31 @@ export const AdminSubmissionDetail = () => {
                 <option value="rejected">Rechazado</option>
               </select>
             </label>
+            {status === "approved" && pendiente ? (
+              <label className="se-form-field" htmlFor="rev-tema">
+                <span className="se-form-label">Tema de la pieza</span>
+                <select
+                  id="rev-tema"
+                  className="se-form-control"
+                  value={temaId}
+                  onChange={(e) => setTemaId(e.target.value)}
+                  disabled={temas.status === "loading"}
+                  required
+                >
+                  <option value="">{temas.status === "loading" ? "Cargando temas…" : "Elija un tema"}</option>
+                  {temas.items.map((t) => (
+                    <option key={t.id} value={String(t.id)}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+                {temas.status === "error" ? (
+                  <span className="se-admin-login__error" role="alert">
+                    No se pudieron cargar los temas. Recargue la página.
+                  </span>
+                ) : null}
+              </label>
+            ) : null}
             <button type="submit" className="se-btn" disabled={saveState.status === "loading"}>
               {saveState.status === "loading" ? "Aplicando…" : "Aplicar estado"}
             </button>

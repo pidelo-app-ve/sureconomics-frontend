@@ -15,6 +15,8 @@ import {
     deleteAdminPost,
     getAdminPost,
     patchAdminPost,
+    quitarVinculoConElLector,
+    usarFirmaDeSuCuenta,
     publishAdminPost,
     getTraductor,
     traducirTextos,
@@ -67,6 +69,7 @@ import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEditor } from "../../lib/guias/guiaEditor";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { firmadaPorColaborador } from "../../lib/firmaDeColaborador";
 
 /**
  * Which extra fields each format asks for.
@@ -475,6 +478,10 @@ export const AdminPostEditor = () => {
     const [vistaPrevia, setVistaPrevia] = useState(false);
     const [placeGroups, setPlaceGroups] = useState([]);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
+    // El lector que la propuso, si la pieza salió de una propuesta aceptada. La firma
+    // pública es la de los campos de aquí (se copió de su cuenta al aceptarla); esto
+    // solo dice de quién es el crédito y si su cuenta cambió desde entonces.
+    const [colaborador, setColaborador] = useState(null);
     const [loadState, setLoadState] = useState({ status: "idle", error: null });
     const [saveState, setSaveState] = useState({ status: "idle", message: "" });
     // La misma clave mientras la creación no cuaje. El caso que evita: se pulsa Crear,
@@ -538,6 +545,7 @@ export const AdminPostEditor = () => {
             setBase(inicial);
             saltarGuarda.current = false;
             setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
+            setColaborador(null);
             setLoadState({ status: "success", error: null });
             return;
         }
@@ -554,6 +562,7 @@ export const AdminPostEditor = () => {
                 audio: post.audio_asset ?? null,
                 bylinePhoto: post.byline_photo ?? null,
             });
+            setColaborador(post.colaborador ?? null);
             setLoadState({ status: "success", error: null });
         } catch (err) {
             setLoadState({ status: "error", error: err });
@@ -739,6 +748,7 @@ export const AdminPostEditor = () => {
             const updated = await patchAdminPost(numericPostId, payload);
             setForm(postToForm(updated));
             setBase(postToForm(updated));
+            setColaborador(updated.colaborador ?? null);
             borrador.limpiar();
             setAssets((prev) => ({
                 ...prev,
@@ -777,6 +787,7 @@ export const AdminPostEditor = () => {
             const updated = await fn(numericPostId);
             setForm(postToForm(updated));
             setBase(postToForm(updated));
+            setColaborador(updated.colaborador ?? null);
             borrador.limpiar();
             setActionState({ status: "success", message: successMessage, kind });
             setRecienPublicada(kind === "publish");
@@ -817,6 +828,40 @@ export const AdminPostEditor = () => {
 
     const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);
     const programada = form.status === "scheduled";
+
+    // La firma del colaborador: los dos botones del editor. Guardan al momento (como
+    // publicar) y traen la firma nueva al formulario sin tocar el resto de lo escrito.
+    const [colaboradorOcupado, setColaboradorOcupado] = useState(false);
+    const aplicarFirma = (post) => {
+        const firma = { byline: post.byline ?? "", byline_photo_asset_id: post.byline_photo_asset_id ?? null };
+        setForm((prev) => ({ ...prev, ...firma }));
+        setBase((prev) => (prev ? { ...prev, ...firma } : prev));
+        setAssets((prev) => ({ ...prev, bylinePhoto: post.byline_photo ?? null }));
+        setColaborador(post.colaborador ?? null);
+    };
+    const handleUsarSuCuenta = async () => {
+        setColaboradorOcupado(true);
+        setActionState({ status: "idle", message: "", kind: "" });
+        try {
+            aplicarFirma(await usarFirmaDeSuCuenta(numericPostId));
+            setActionState({ status: "success", message: "Firma puesta al día con su cuenta.", kind: "colaborador" });
+        } catch (err) {
+            setActionState({ status: "error", message: err?.message || "No se pudo cambiar la firma.", kind: "colaborador" });
+        } finally {
+            setColaboradorOcupado(false);
+        }
+    };
+    const handleQuitarVinculo = async () => {
+        await confirm({
+            title: "Quitar el vínculo con el lector",
+            description:
+                "La pieza deja de contar como suya. La firma que tiene ahora se queda: si hay que cambiarla, se cambia a mano.",
+            confirmLabel: "Quitar el vínculo",
+            onConfirm: async () => {
+                aplicarFirma(await quitarVinculoConElLector(numericPostId));
+            },
+        });
+    };
 
     const handleDelete = async () => {
         if (isCreate) return;
@@ -1336,6 +1381,48 @@ export const AdminPostEditor = () => {
                                 resumen={form.byline.trim() || "Sin firma"}
                                 miniatura={assets.bylinePhoto?.url || undefined}
                             >
+                                {colaborador ? (
+                                    <div className="se-admin-meta-hint" role="note">
+                                        <p>
+                                            <strong>Pieza de un lector.</strong> En el panel sale como «
+                                            {firmadaPorColaborador(form.byline.trim() || "sin firma")}»; la
+                                            web pública solo enseña la firma y la foto de abajo, sin esa marca.
+                                            Se copiaron de su cuenta al aceptarla y no cambian solas.
+                                        </p>
+                                        {!colaborador.al_dia ? (
+                                            <p>
+                                                En su cuenta, ahora: «{colaborador.nombre_actual || "sin nombre"}»
+                                                {(colaborador.foto_actual_id ?? null) === (form.byline_photo_asset_id ?? null)
+                                                    ? ", con la misma foto"
+                                                    : colaborador.foto_actual_id
+                                                      ? ", con otra foto"
+                                                      : ", sin foto"}
+                                                .
+                                            </p>
+                                        ) : null}
+                                        {!colaborador.cuenta_activa ? <p>Su cuenta está desactivada.</p> : null}
+                                        <p>
+                                            {!colaborador.al_dia && colaborador.nombre_actual ? (
+                                                <button
+                                                    type="button"
+                                                    className="se-btn se-btn--secondary"
+                                                    onClick={handleUsarSuCuenta}
+                                                    disabled={colaboradorOcupado}
+                                                >
+                                                    Usar el nombre y la foto actuales de su cuenta
+                                                </button>
+                                            ) : null}{" "}
+                                            <button
+                                                type="button"
+                                                className="se-btn se-btn--secondary"
+                                                onClick={handleQuitarVinculo}
+                                                disabled={colaboradorOcupado}
+                                            >
+                                                Quitar el vínculo con el lector
+                                            </button>
+                                        </p>
+                                    </div>
+                                ) : null}
                                 <label className="se-form-field" htmlFor="post-byline">
                                     <span className="se-form-label">
                                         Firma — nombre con el que se publica

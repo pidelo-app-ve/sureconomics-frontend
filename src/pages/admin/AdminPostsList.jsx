@@ -58,7 +58,12 @@ export const AdminPostsList = () => {
         status: "",
         q: "",
         unclassified: false,
+        // Piezas de lectores cuya cuenta cambió de nombre o foto (ver el contador).
+        firmaDesactualizada: false,
     });
+    // Cuántas piezas de colaboradores tienen la cuenta cambiada: el contador de arriba.
+    // No caduca: sale mientras quede alguna, hasta que la redacción decide en el editor.
+    const [cambiosDeColaboradores, setCambiosDeColaboradores] = useState(0);
     const [formats, setFormats] = useState([]);
     const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
     const [actionId, setActionId] = useState(null);
@@ -71,6 +76,9 @@ export const AdminPostsList = () => {
         try {
             const { items, meta } = await listAdminPosts({ page, limit: 20, ...filters });
             setState({ status: "success", items, meta, error: null });
+            listAdminPosts({ firmaDesactualizada: true, limit: 1 })
+                .then(({ meta: m }) => setCambiosDeColaboradores(Number(m?.total) || 0))
+                .catch(() => setCambiosDeColaboradores(0));
         } catch (err) {
             setState({ status: "error", items: [], meta: null, error: err });
         }
@@ -89,6 +97,11 @@ export const AdminPostsList = () => {
     useEffect(() => {
         load();
     }, [load]);
+
+    const verCambiosDeColaboradores = (activo) => {
+        setPage(1);
+        setFilters((prev) => ({ ...prev, firmaDesactualizada: activo }));
+    };
 
     const setFilter = (key) => (event) => {
         const value = key === "unclassified" ? event.target.checked : event.target.value;
@@ -168,6 +181,8 @@ export const AdminPostsList = () => {
             // Fijada como apertura de la portada: `en_portada` lo decide el servidor
             // (publicada y con fecha en el futuro), aquí sólo se dice hasta cuándo.
             portadaHasta: row.en_portada ? cuandoSale(row.destacada_hasta) : null,
+            // De un lector cuya cuenta ya no dice lo mismo que su firma congelada.
+            firmaCambiada: Boolean(row.firma_desactualizada),
         };
     };
 
@@ -176,6 +191,7 @@ export const AdminPostsList = () => {
             filters.format ? formatName(filters.format) : null,
             filters.status ? NOMBRE_DE_ESTADO[filters.status] : null,
             filters.unclassified ? "sin clasificar" : null,
+            filters.firmaDesactualizada ? "colaboradores con cambios" : null,
         ]
             .filter(Boolean)
             .join(" · ") || "Todas las piezas";
@@ -295,6 +311,34 @@ export const AdminPostsList = () => {
                 )}
             </div>
 
+            {filters.firmaDesactualizada || cambiosDeColaboradores > 0 ? (
+                <p className="se-text-body" {...ancla("colaboradores")}>
+                    {filters.firmaDesactualizada ? (
+                        <>
+                            Viendo solo las piezas de lectores cuya cuenta cambió de nombre o foto: su firma
+                            no cambia sola. Ábralas y decida en «Firma y foto».{" "}
+                            <button
+                                type="button"
+                                className="se-btn se-btn--secondary"
+                                onClick={() => verCambiosDeColaboradores(false)}
+                            >
+                                Ver todas las piezas
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            type="button"
+                            className="se-btn se-btn--secondary"
+                            onClick={() => verCambiosDeColaboradores(true)}
+                        >
+                            {cambiosDeColaboradores === 1
+                                ? "1 pieza de un colaborador con cambios en su cuenta"
+                                : `${cambiosDeColaboradores} piezas de colaboradores con cambios en su cuenta`}
+                        </button>
+                    )}
+                </p>
+            ) : null}
+
             {flash ? (
                 <p className="se-text-body se-admin-submission-detail__status-banner" role="status">
                     {flash}
@@ -320,11 +364,19 @@ export const AdminPostsList = () => {
 
             {state.status === "success" && state.items.length === 0 ? (
                 <EmptyState
-                    title={filters.unclassified ? "Nada sin clasificar" : "Sin resultados"}
+                    title={
+                        filters.firmaDesactualizada
+                            ? "Ningún cambio pendiente"
+                            : filters.unclassified
+                              ? "Nada sin clasificar"
+                              : "Sin resultados"
+                    }
                     description={
-                        filters.unclassified
-                            ? "Todas las piezas tienen al menos un tema."
-                            : "Ninguna pieza coincide con estos filtros."
+                        filters.firmaDesactualizada
+                            ? "La firma de todas las piezas de colaboradores coincide con su cuenta."
+                            : filters.unclassified
+                              ? "Todas las piezas tienen al menos un tema."
+                              : "Ninguna pieza coincide con estos filtros."
                     }
                 />
             ) : null}
@@ -374,6 +426,11 @@ export const AdminPostsList = () => {
                                             {d.portadaHasta ? (
                                                 <span className="se-status-pill se-status-pill--portada">
                                                     En portada hasta {d.portadaHasta}
+                                                </span>
+                                            ) : null}
+                                            {d.firmaCambiada ? (
+                                                <span className="se-status-pill se-status-pill--neutral">
+                                                    Su cuenta cambió
                                                 </span>
                                             ) : null}
                                             {d.missing ? (
@@ -443,7 +500,7 @@ export const AdminPostsList = () => {
                             </thead>
                             <tbody>
                                 {state.items.map((row) => {
-                                    const { id, slug, title, status, busy, tema, lugar, missing, portadaHasta } =
+                                    const { id, slug, title, status, busy, tema, lugar, missing, portadaHasta, firmaCambiada } =
                                         describir(row);
                                     return (
                                         <tr key={id || slug || title}>
@@ -496,6 +553,17 @@ export const AdminPostsList = () => {
                                                         <br />
                                                         <span className="se-status-pill se-status-pill--portada">
                                                             En portada hasta {portadaHasta}
+                                                        </span>
+                                                    </>
+                                                ) : null}
+                                                {firmaCambiada ? (
+                                                    <>
+                                                        <br />
+                                                        <span
+                                                            className="se-status-pill se-status-pill--neutral"
+                                                            title="Pieza de un lector: su cuenta ya no dice lo mismo que la firma"
+                                                        >
+                                                            Su cuenta cambió
                                                         </span>
                                                     </>
                                                 ) : null}

@@ -369,8 +369,11 @@ const fechaLarga = (iso, idioma = "es") => {
  * elegido es peor que el genérico.
  */
 export const fichaDeNoticia = (pieza, { url, imagen, idioma = "es" }) => {
+  // En la pieza de un lector (`firma_de_colaborador`), `byline` es el nombre que se copió
+  // de su cuenta al aceptarla: una persona, se llame como se llame.
   const autor = String(pieza.byline || "").trim();
-  const esRedaccion = !autor || /redacci[oó]n|sureconomics/i.test(autor);
+  const esRedaccion =
+    !autor || (!pieza.firma_de_colaborador && /redacci[oó]n|sureconomics/i.test(autor));
   const ficha = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",

@@ -22,14 +22,6 @@ const listOf = (raw) => {
 
 export const listAdminFormats = async () => listOf(await adminRequest("/admin/formats"));
 
-export const patchAdminFormat = async (slug, body) =>
-  unwrapEntity(
-    await adminRequest(`/admin/formats/${encodeURIComponent(slug)}`, {
-      method: "PATCH",
-      json: body,
-    })
-  );
-
 // —— Topics ——
 
 export const listAdminTopics = async () => listOf(await adminRequest("/admin/topics"));

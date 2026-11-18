@@ -46,9 +46,6 @@ export const FORMATO_POR_RUTA = Object.fromEntries(
   Object.entries(FORMATO_META).map(([apiSlug, meta]) => [meta.slug, apiSlug])
 );
 
-/** The display plurals, in the order the site presents them. */
-export const FORMATOS = Object.values(FORMATO_META).map((m) => m.plural);
-
 /** El nombre de un formato en el idioma del documento: «Noticias» / «News». */
 export const nombreDeFormato = (formatoApi, { singular = false } = {}) =>
   // Una sola plantilla que empieza por `formatos.`: así `npm run i18n` reconoce el
@@ -63,11 +60,6 @@ export const nombreDeFormato = (formatoApi, { singular = false } = {}) =>
  */
 export const nombreTraducido = (fila) =>
   (idiomaActual() === "en" && fila?.name_en) || fila?.name || "";
-
-/** Display plural → API slug. */
-export const FORMATO_API = Object.fromEntries(
-  Object.entries(FORMATO_META).map(([apiSlug, meta]) => [meta.plural, apiSlug])
-);
 
 /** `2026-08-01T12:00:00Z` → `1 ago 2026` / `Aug 1, 2026`, the form the cards print. */
 export const fechaCorta = (iso) => formatearFecha(iso, "corta");
@@ -172,13 +164,6 @@ export const rutaDeFormato = (formatoApi) => {
   const meta = FORMATO_META[formatoApi];
   return meta ? `/articulos?formato=${meta.slug}` : "/articulos";
 };
-
-/** The tag a card shows: the first, which the backend stores as the principal one. */
-export const temaPrincipal = (pieza) => pieza?.temas?.[0] ?? null;
-
-/** El lugar que enseña una tarjeta; sin país, «Las Américas» en el idioma del documento. */
-export const geoPrincipal = (pieza, geoTop = tActual("piezas.geo.americas")) =>
-  pieza?.geos?.[0] ?? geoTop;
 
 /** Un ISO de la API -> `Date`, o nulo si no hay nada o no se puede leer. */
 const fechaValida = (iso) => {

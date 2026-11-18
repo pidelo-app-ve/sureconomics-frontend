@@ -56,5 +56,3 @@ export const recorridoPanelPara = (role) => {
   if (!porRol.has(clave)) porRol.set(clave, crearRecorrido("panel", pasosPara(role)));
   return porRol.get(clave);
 };
-
-export const PASOS_PANEL_ADMIN = pasosPara("admin");

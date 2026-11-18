@@ -380,36 +380,6 @@ export const SERVICES = [
   { id: "investment-banking" },
 ];
 
-export const REPORTS = [
-  {
-    id: "r-1",
-    title: "Latinoamérica: inflación, expectativas y política monetaria",
-    date: "2026-02-15",
-    excerpt:
-      "Un research institucional con lectura de escenarios para comprender el ciclo de precios y su impacto en tasas, rentabilidad y riesgo.",
-    tier: "Acceso premium",
-    imagePlaceholder: "chart",
-  },
-  {
-    id: "r-2",
-    title: "Radar de mercados: flujos, liquidez y volatilidad cambiaria",
-    date: "2026-01-30",
-    excerpt:
-      "Síntesis de condiciones de mercado y narrativas por región para inversionistas que requieren información accionable.",
-    tier: "Acceso premium",
-    imagePlaceholder: "building",
-  },
-  {
-    id: "r-3",
-    title: "Energía y transición: oportunidades y riesgos sectoriales",
-    date: "2025-12-20",
-    excerpt:
-      "Análisis sectorial con foco en oportunidades de inversión, restricciones y supuestos macro relevantes.",
-    tier: "Acceso premium",
-    imagePlaceholder: "growth",
-  },
-];
-
 // Lo que decía la página de suscripción (beneficios, precio, pago) está en
 // `src/i18n/{es,en}/boletin.json`, bajo `boletin.suscripcion`.
 

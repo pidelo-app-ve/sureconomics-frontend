@@ -40,11 +40,6 @@ const load = async () => {
   return { formats, topics, ...places };
 };
 
-/** Drop the cache. Only used by tests and by a hard reload of reference data. */
-export const resetTaxonomyCache = () => {
-  cache = {};
-};
-
 export const useTaxonomy = () => {
   const [state, setState] = useState(() => ({ status: "loading", data: vacio(), error: null }));
 

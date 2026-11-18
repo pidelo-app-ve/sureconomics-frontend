@@ -15,14 +15,14 @@ export const listAdminSubmissions = async (params = {}) => {
 export const getAdminSubmission = async (id) =>
   unwrapEntity(await adminRequest(`/admin/submissions/${encodeURIComponent(id)}`));
 
-/** @param {string} status - `under_review` | `accepted` | `rejected` */
+/** @param {string} status - `under_review` | `approved` | `rejected` */
 export const applyAdminSubmissionWorkflow = async (id, status) => {
   const s = String(status || "").toLowerCase();
   const encoded = encodeURIComponent(id);
   if (s === "under_review") {
     return unwrapEntity(await adminRequest(`/admin/submissions/${encoded}/under-review`, { method: "PATCH" }));
   }
-  if (s === "accepted") {
+  if (s === "approved") {
     return unwrapEntity(await adminRequest(`/admin/submissions/${encoded}/approve`, { method: "PATCH" }));
   }
   if (s === "rejected") {

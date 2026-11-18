@@ -6,6 +6,8 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { getMisCompras } from "../../services/userMeService";
 import { duracionLegible, nivelLegible } from "../../services/educacionService";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoLoMio } from "../../lib/guias/guiaLoMio";
 import "../../styles/cuenta.css";
 
 /**
@@ -49,6 +51,8 @@ const dinero = (centavos, moneda) => {
 
 const fechaLegible = (iso) => formatearFecha(iso, "larga");
 
+const { ancla } = recorridoLoMio;
+
 export const CuentaLoMio = () => {
   const { t } = useIdioma();
   const [estado, setEstado] = useState({ cargando: true, error: "", datos: null });
@@ -81,11 +85,14 @@ export const CuentaLoMio = () => {
 
   return (
     <div className="se-cuenta__pagina">
-      <header className="se-cuenta__cabecera">
-        <h1 className="se-cuenta__titulo">{t("cuenta.loMio.titulo")}</h1>
-        <p className="se-cuenta__lead">
-          {t("cuenta.loMio.lead")}
-        </p>
+      <header className="se-cuenta__cabecera se-cuenta__cabecera--con-guia">
+        <div>
+          <h1 className="se-cuenta__titulo">{t("cuenta.loMio.titulo")}</h1>
+          <p className="se-cuenta__lead">
+            {t("cuenta.loMio.lead")}
+          </p>
+        </div>
+        <BotonGuia recorrido={recorridoLoMio} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
 
       {estado.cargando ? <p className="se-cuenta__aviso">{t("comun.cargando")}</p> : null}
@@ -119,7 +126,7 @@ export const CuentaLoMio = () => {
             </span>
           </h2>
 
-          <ul className="se-mio__lista">
+          <ul className="se-mio__lista" {...ancla("modulos")}>
             {d.modulos.map((m) => {
               const duracion = duracionLegible(m.duracion_minutos);
               const nivel = nivelLegible(m.nivel);
@@ -141,14 +148,14 @@ export const CuentaLoMio = () => {
                     </p>
                     {m.resumen ? <p className="se-mio__resumen">{m.resumen}</p> : null}
 
-                    <p className="se-mio__recibo">
+                    <p className="se-mio__recibo" {...ancla("recibo")}>
                       {dinero(m.recibo.importe_centavos, m.recibo.moneda)} ·{" "}
                       {fechaLegible(m.recibo.fecha)}
                       <span className="se-mio__ref">{t("cuenta.loMio.ref", { referencia: m.recibo.referencia })}</span>
                     </p>
                   </div>
 
-                  <div className="se-mio__accion">
+                  <div className="se-mio__accion" {...ancla("abrir")}>
                     {/* Un módulo despublicado sigue siendo suyo: lo que se compró no se
                         puede retirar de debajo de quien pagó. Pero el enlace a la clase
                         no serviría, así que se dice en vez de llevar a un 404. */}
@@ -180,7 +187,7 @@ export const CuentaLoMio = () => {
       {d?.pendientes?.length ? (
         <>
           <h2 className="se-cuenta__h2 se-cuenta__h2--separado">{t("cuenta.loMio.pagosAMedias")}</h2>
-          <ul className="se-mio__pendientes">
+          <ul className="se-mio__pendientes" {...ancla("pendientes")}>
             {d.pendientes.map((p) => (
               <li key={p.referencia}>
                 <strong>{p.modulo}</strong>
@@ -196,6 +203,8 @@ export const CuentaLoMio = () => {
           </ul>
         </>
       ) : null}
+
+      <RecorridoVista recorrido={recorridoLoMio} />
     </div>
   );
 };

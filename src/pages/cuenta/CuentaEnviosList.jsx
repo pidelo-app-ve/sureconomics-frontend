@@ -9,7 +9,11 @@ import { Pagination } from "../../components/content/Pagination";
 import { ErrorState, LoadingState } from "../../components/content";
 import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMisPropuestas } from "../../lib/guias/guiaMisPropuestas";
 import "../../styles/cuenta.css";
+
+const { ancla } = recorridoMisPropuestas;
 
 export const CuentaEnviosList = () => {
   const { t } = useIdioma();
@@ -79,9 +83,12 @@ export const CuentaEnviosList = () => {
           <h1 className="se-reader-page-title">{t("cuenta.envios.titulo")}</h1>
           <p className="se-reader-page-lead">{t("cuenta.envios.lead")}</p>
         </div>
-        <Enlace to="/cuenta/envios/nuevo" className="se-btn">
-          {t("cuenta.envios.nuevo")}
-        </Enlace>
+        <div className="se-reader-page-head__botones">
+          <BotonGuia recorrido={recorridoMisPropuestas} className="se-btn se-btn--secondary se-boton-guia" />
+          <Enlace to="/cuenta/envios/nuevo" className="se-btn" {...ancla("nueva")}>
+            {t("cuenta.envios.nuevo")}
+          </Enlace>
+        </div>
       </header>
 
       {flash ? (
@@ -91,7 +98,7 @@ export const CuentaEnviosList = () => {
       ) : null}
 
       {items.length === 0 ? (
-        <div className="se-reader-empty se-reader-card">
+        <div className="se-reader-empty se-reader-card" {...ancla("lista")}>
           <p className="se-reader-empty__title">{t("cuenta.envios.vacioTitulo")}</p>
           <p className="se-reader-empty__text">{t("cuenta.envios.vacioTexto")}</p>
           <Enlace to="/cuenta/envios/nuevo" className="se-btn">
@@ -99,7 +106,7 @@ export const CuentaEnviosList = () => {
           </Enlace>
         </div>
       ) : (
-        <ul className="se-reader-subs">
+        <ul className="se-reader-subs" {...ancla("lista")}>
           {items.map((s) => (
             <li key={s.id} className="se-reader-subs__item">
               <Enlace to={`/cuenta/envios/${encodeURIComponent(s.id)}`} className="se-reader-subs__link">
@@ -107,7 +114,7 @@ export const CuentaEnviosList = () => {
                 <span className="se-reader-subs__main">
                   <span className="se-reader-subs__title">{s.title || t("cuenta.envios.sinTitulo", { id: s.id })}</span>
                   <span className="se-reader-subs__meta">
-                    <span className="se-reader-subs__pill">{s.status ? submissionStatusLabel(s.status) : "—"}</span>
+                    <span className="se-reader-subs__pill" {...ancla("estado")}>{s.status ? submissionStatusLabel(s.status) : "—"}</span>
                     {s.createdAt ? <span>{formatSubmissionDate(s.createdAt)}</span> : null}
                   </span>
                 </span>
@@ -127,6 +134,8 @@ export const CuentaEnviosList = () => {
           onPageChange={(p) => handleLoad(p)}
         />
       </div>
+
+      <RecorridoVista recorrido={recorridoMisPropuestas} />
     </div>
   );
 };

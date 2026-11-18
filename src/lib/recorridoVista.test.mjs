@@ -24,6 +24,13 @@ const { PASOS_BOLETIN, recorridoBoletin } = await import("./guias/guiaBoletin.js
 const { recorridoPanelPara } = await import("./guias/guiaPanel.js");
 const { PASOS_PROPUESTA, recorridoPropuesta } = await import("./guias/guiaPropuesta.js");
 const { PASOS_PERFIL, recorridoPerfil } = await import("./guias/guiaPerfil.js");
+const { PASOS_MI_ESPACIO, recorridoMiEspacio } = await import("./guias/guiaMiEspacio.js");
+const { PASOS_LO_MIO, recorridoLoMio } = await import("./guias/guiaLoMio.js");
+const { PASOS_MARCADORES, recorridoMarcadores } = await import("./guias/guiaMarcadores.js");
+const { PASOS_MIS_TEMAS, recorridoMisTemas } = await import("./guias/guiaMisTemas.js");
+const { PASOS_MIS_PROPUESTAS, recorridoMisPropuestas, PASOS_MI_PROPUESTA, recorridoMiPropuesta } = await import(
+  "./guias/guiaMisPropuestas.js"
+);
 const { readFileSync } = await import("node:fs");
 const diccionario = (lang) => JSON.parse(readFileSync(new URL(`../i18n/${lang}/cuenta.json`, import.meta.url), "utf8"));
 const buscar = (dic, clave) => clave.split(".").reduce((nodo, parte) => (nodo == null ? undefined : nodo[parte]), dic);
@@ -104,6 +111,12 @@ for (const [nombre, pasos, recorrido, ultimo] of [
   ["la bienvenida a la cuenta", PASOS_CUENTA, recorridoCuenta, "ayuda"],
   ["«Proponer una pieza»", PASOS_PROPUESTA, recorridoPropuesta, "guia"],
   ["«Mi perfil»", PASOS_PERFIL, recorridoPerfil, "guia"],
+  ["«Inicio» de la cuenta", PASOS_MI_ESPACIO, recorridoMiEspacio, "guia"],
+  ["«Lo mío»", PASOS_LO_MIO, recorridoLoMio, "guia"],
+  ["«Marcadores»", PASOS_MARCADORES, recorridoMarcadores, "guia"],
+  ["«Mis temas»", PASOS_MIS_TEMAS, recorridoMisTemas, "guia"],
+  ["«Mis propuestas»", PASOS_MIS_PROPUESTAS, recorridoMisPropuestas, "guia"],
+  ["una propuesta del lector", PASOS_MI_PROPUESTA, recorridoMiPropuesta, "guia"],
 ]) {
   console.log(`guía de ${nombre}`);
   check("se traduce", recorrido.traducir === true);

@@ -7,6 +7,8 @@ import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";
+import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
+import { recorridoMiEspacio } from "../../lib/guias/guiaMiEspacio";
 import "../../styles/cuenta.css";
 
 /**
@@ -59,6 +61,8 @@ const Marca = ({ estado }) => {
 };
 
 Marca.propTypes = { estado: PropTypes.oneOf(["bien", "falta"]).isRequired };
+
+const { ancla } = recorridoMiEspacio;
 
 /** Lo que se puede hacer con una cuenta. Fijo: es la guía, no un estado. */
 const queSePuede = (t) => [
@@ -192,9 +196,10 @@ export const CuentaDashboardHome = () => {
         <div>
           <h1 className="se-cuenta__titulo">{t("cuenta.inicio.hola", { nombre })}</h1>
         </div>
+        <BotonGuia recorrido={recorridoMiEspacio} className="se-btn se-btn--secondary se-boton-guia" />
       </header>
 
-      <section className="se-guia" aria-label={t("cuenta.inicio.estadoDeSuCuenta")}>
+      <section className="se-guia" aria-label={t("cuenta.inicio.estadoDeSuCuenta")} {...ancla("estado")}>
         <h2 className="se-cuenta__h2">{t("cuenta.inicio.suCuenta")}</h2>
         <ul className="se-guia__lista">
           {puntos.map((p) => (
@@ -214,7 +219,7 @@ export const CuentaDashboardHome = () => {
         </ul>
       </section>
 
-      <section className="se-resumen" aria-label={t("cuenta.inicio.loQueTiene")}>
+      <section className="se-resumen" aria-label={t("cuenta.inicio.loQueTiene")} {...ancla("cifras")}>
         <Enlace to="/cuenta/lo-mio" className="se-resumen__ficha">
           <span className="se-resumen__n">
             {cifras.modulos == null ? "—" : cifras.modulos}
@@ -241,7 +246,7 @@ export const CuentaDashboardHome = () => {
         </Enlace>
       </section>
 
-      <section className="se-guia" aria-label={t("cuenta.inicio.quePuedeHacer")}>
+      <section className="se-guia" aria-label={t("cuenta.inicio.quePuedeHacer")} {...ancla("usos")}>
         <h2 className="se-cuenta__h2">{t("cuenta.inicio.quePuedeHacerAqui")}</h2>
         <ul className="se-guia__usos">
           {queSePuede(t).map((u) => (
@@ -253,6 +258,8 @@ export const CuentaDashboardHome = () => {
           ))}
         </ul>
       </section>
+
+      <RecorridoVista recorrido={recorridoMiEspacio} />
     </div>
   );
 };

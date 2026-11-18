@@ -8,7 +8,8 @@
  * «no hay conexión con ningún mercado».
  *
  * Abajo, las monedas de la región (`components/admin/MonedasDelPanel.jsx`): lo que se
- * publica de cada una y las cotizaciones que no cuadraron y esperan a una persona.
+ * publica de cada una, las cotizaciones que no cuadraron y esperan a una persona, y las
+ * ocultas (con quién y cuándo, y «Deshacer»).
  */
 import { crearRecorrido } from "../recorridoVista.js";
 
@@ -81,8 +82,9 @@ export const PASOS_CINTA = [
       "juntas en una fila y lo que se decida vale para todas.",
     puntos: [
       "Aceptar como buena: si la cifra es real, por ejemplo con una devaluación. Se publica y la próxima lectura se compara con ella.",
-      "Ocultar esta cotización: si es un error del banco o de la lectura. No se publica nunca.",
-      "Queda anotado quién tomó cada decisión.",
+      "Ocultar esta cotización: si es un error del banco o de la lectura. No se publica, y si la fuente vuelve a dar la misma cifra en los próximos días, tampoco: vuelve aquí para decidir.",
+      "Un aviso por el bot cuando empieza una racha, y un recordatorio al día mientras quede algo sin decidir.",
+      "Lo que se decide aquí se ve en todas partes en unos minutos.",
     ],
   },
   {
@@ -92,8 +94,17 @@ export const PASOS_CINTA = [
       "La cifra de cada moneda que ven los lectores en la página de monedas, el cintillo, las piezas y el resumen, " +
       "con su fuente y la fecha del dato.",
     puntos: [
-      "Ocultar esta cotización: para una cifra mala que se coló. Vuelve a verse la buena de antes.",
+      "Ocultar esta cotización: para una cifra mala que se coló. Vuelve a verse la buena de antes, también en el cintillo.",
       "Viejo, no sale: el último dato tiene más de dos días hábiles y no se enseña.",
+    ],
+  },
+  {
+    clave: "ocultas",
+    titulo: "Las cotizaciones ocultas",
+    texto:
+      "Lo que alguien ocultó en los últimos 30 días: qué cifra, quién la ocultó y cuándo. Por si fue un error.",
+    puntos: [
+      "Deshacer: la decisión entera vuelve atrás. Si eran lecturas que no cuadraban, vuelven arriba para decidir otra vez; si era una cifra publicada, vuelve a publicarse.",
     ],
   },
   {

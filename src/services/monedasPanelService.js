@@ -8,7 +8,7 @@ import { unwrapEntity } from "./adminResponseUtils";
  * bueno) queda «sospechosa»: no se publica hasta que alguien la acepta como buena o la
  * oculta. Aparte del sitio público: el sitio no carga nada de esto.
  *
- * Las tres devuelven lo mismo: `{ sync, monedas, sospechosas }`.
+ * Todas devuelven lo mismo: `{ sync, monedas, sospechosas, ocultas }`.
  */
 
 export const getMonedasDelPanel = async () => unwrapEntity(await adminRequest("/admin/monedas"));
@@ -20,3 +20,7 @@ export const ocultarCotizacion = async (id) =>
 /** «Aceptar como buena»: se publica y pasa a ser la referencia de la lectura siguiente. */
 export const aceptarCotizacion = async (id) =>
   unwrapEntity(await adminRequest(`/admin/monedas/cotizaciones/${encodeURIComponent(id)}/aceptar`, { method: "POST", json: {} }));
+
+/** «Deshacer» un ocultar: la racha entera vuelve a como estaba. `id` es el de `ocultas`. */
+export const deshacerOcultar = async (id) =>
+  unwrapEntity(await adminRequest(`/admin/monedas/ocultas/${encodeURIComponent(id)}/deshacer`, { method: "POST", json: {} }));

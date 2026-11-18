@@ -6,13 +6,20 @@ import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { porDolar } from "../../lib/monedas";
 import { recorridoCinta } from "../../lib/guias/guiaCinta";
-import { aceptarCotizacion, getMonedasDelPanel, ocultarCotizacion } from "../../services/monedasPanelService";
+import {
+    aceptarCotizacion,
+    deshacerOcultar,
+    getMonedasDelPanel,
+    ocultarCotizacion,
+} from "../../services/monedasPanelService";
 
 const { ancla } = recorridoCinta;
 
 const cuando = (iso) => (iso ? new Date(iso).toLocaleString("es-VE", { timeZone: "America/Caracas" }) : "nunca");
 const delDia = (fecha) => (fecha ? new Date(`${fecha}T12:00:00`).toLocaleDateString("es-VE", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const cifra = (valor) => (valor == null ? "—" : porDolar(valor, "es"));
+const EN_MINUTOS = "Se verá en todas partes en unos minutos.";
+const ACCIONES = { aceptar: aceptarCotizacion, ocultar: ocultarCotizacion, deshacer: deshacerOcultar };
 
 /**
  * Las monedas de la región dentro de «Cinta de mercado»: lo que se publica de cada una y,
@@ -23,9 +30,13 @@ const cifra = (valor) => (valor == null ? "—" : porDolar(valor, "es"));
  * su fecha, y al equipo le llega un aviso por el bot. Aquí alguien decide:
  * - «Aceptar como buena» si es de verdad (una devaluación): se publica y pasa a ser la
  *   referencia de la lectura siguiente;
- * - «Ocultar esta cotización» si es un error.
- * Una racha (varias lecturas seguidas de la misma fuente) se decide de una vez. Las dos
- * cosas quedan anotadas con quién las hizo.
+ * - «Ocultar esta cotización» si es un error. Si la fuente vuelve a dar la misma cifra
+ *   estos días, tampoco se publica: vuelve aquí como sospechosa.
+ * Una racha (lecturas malas seguidas de la misma fuente, desde la última buena) se decide
+ * de una vez. Lo oculto se lista abajo con quién y cuándo, y se puede deshacer.
+ *
+ * Tras decidir, /monedas cambia al momento; el cintillo y el resto del servidor, en unos
+ * minutos.
  */
 export const MonedasDelPanel = ({ puedeEditar }) => {
     const [datos, setDatos] = useState(null);
@@ -51,7 +62,7 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
     const decidir = async (id, accion, hecho) => {
         setOcupado(id);
         try {
-            const r = await (accion === "aceptar" ? aceptarCotizacion(id) : ocultarCotizacion(id));
+            const r = await ACCIONES[accion](id);
             setDatos(r);
             toastSuccess(hecho, "Monedas de la región");
         } catch (err) {
@@ -64,7 +75,7 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
     const aceptar = async (s) => {
         const si = await confirm({
             title: `Aceptar ${s.codigo} como buena`,
-            description: `${cifra(s.valor)} por dólar según ${s.fuente} pasará a publicarse en el sitio, el cintillo, las piezas y el resumen.`,
+            description: `${cifra(s.valor)} por dólar según ${s.fuente} pasará a publicarse en el sitio, el cintillo, las piezas y el resumen. ${EN_MINUTOS}`,
             warning:
                 s.pendientes > 1
                     ? `Vale también para las ${s.pendientes - 1} lecturas anteriores de esta racha. Úselo solo si la cifra es real, por ejemplo con una devaluación.`
@@ -78,15 +89,29 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
         const si = await confirm({
             title: `Ocultar la cotización de ${fila.codigo}`,
             description: publicada
-                ? `${cifra(fila.valor)} por dólar (${fila.fuente}) dejará de publicarse y volverá a verse el dato bueno anterior, con su fecha.`
-                : `${cifra(fila.valor)} por dólar (${fila.fuente}) no se publicará. En el sitio sigue el último dato bueno.`,
-            warning:
-                !publicada && fila.pendientes > 1
-                    ? `Vale también para las ${fila.pendientes - 1} lecturas anteriores de esta racha.`
-                    : undefined,
+                ? `${cifra(fila.valor)} por dólar (${fila.fuente}) dejará de publicarse y volverá a verse el dato bueno anterior, con su fecha. ${EN_MINUTOS}`
+                : `${cifra(fila.valor)} por dólar (${fila.fuente}) no se publicará. En el sitio sigue el último dato bueno. ${EN_MINUTOS}`,
+            warning: [
+                !publicada && fila.pendientes > 1 ? `Vale también para las ${fila.pendientes - 1} lecturas anteriores de esta racha.` : "",
+                "Si la fuente vuelve a dar esta misma cifra en los próximos días, tampoco se publicará: volverá aquí para decidir.",
+            ]
+                .filter(Boolean)
+                .join(" "),
             confirmLabel: "Ocultar",
         });
         if (si) decidir(fila.id, "ocultar", `${fila.codigo}: cotización oculta.`);
+    };
+
+    const deshacer = async (o) => {
+        const si = await confirm({
+            title: `Deshacer el ocultar de ${o.codigo}`,
+            description:
+                o.antes === "sospechosa"
+                    ? `${o.cuantas === 1 ? "La lectura vuelve" : `Las ${o.cuantas} lecturas vuelven`} a «Cotizaciones que no cuadran», para decidir otra vez. No se publica nada todavía.`
+                    : `${cifra(o.valor)} por dólar (${o.fuente}) vuelve a publicarse. ${EN_MINUTOS}`,
+            confirmLabel: "Deshacer",
+        });
+        if (si) decidir(o.id, "deshacer", `${o.codigo}: ocultar deshecho.`);
     };
 
     if (carga.status === "loading" && !datos) return <LoadingState title="Cargando las monedas…" />;
@@ -96,6 +121,7 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
     if (!datos) return null;
 
     const sospechosas = datos.sospechosas ?? [];
+    const ocultas = datos.ocultas ?? [];
     const sync = datos.sync ?? {};
     const fallos = Object.keys(sync.fallos ?? {});
 
@@ -103,7 +129,8 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
         <section className="se-editor-group" {...ancla("monedas")}>
             <p className="se-editor-group__title">Monedas de la región</p>
             <p className="se-admin-meta-hint">
-                Se leen solas cada hora de cada banco central (o de open.er-api.com si el banco no responde).
+                Se leen solas cada hora de cada banco central (o de open.er-api.com si el banco no responde o su
+                dato no cuadra).
                 Última lectura: {cuando(sync.sincronizado_en)}
                 {fallos.length ? ` · sin respuesta de su fuente: ${fallos.join(", ")}` : ""}.
             </p>
@@ -116,7 +143,7 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
                     <p className="se-admin-meta-hint">Ninguna pendiente: todo lo que se leyó cuadra con lo anterior.</p>
                 ) : (
                     <>
-                        <p className="se-admin-login__error se-admin-form-feedback" role="alert">
+                        <p className="se-admin-login__error se-admin-form-feedback" role="status">
                             {sospechosas.length === 1
                                 ? "Hay una cotización que no se publicó porque no cuadra. Mírela y decida."
                                 : `Hay ${sospechosas.length} cotizaciones que no se publicaron porque no cuadran. Mírelas y decida.`}
@@ -235,6 +262,61 @@ export const MonedasDelPanel = ({ puedeEditar }) => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div {...ancla("ocultas")}>
+                <p className="se-form-label" style={{ marginTop: "1rem" }}>
+                    Cotizaciones ocultas
+                </p>
+                {ocultas.length === 0 ? (
+                    <p className="se-admin-meta-hint">Nada oculto en los últimos 30 días.</p>
+                ) : (
+                    <div className="se-admin-table-wrap">
+                        <table className="se-admin-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Moneda</th>
+                                    <th scope="col">La cifra</th>
+                                    <th scope="col">Quién y cuándo</th>
+                                    <th scope="col" />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ocultas.map((o) => (
+                                    <tr key={o.id}>
+                                        <td>
+                                            <strong>{o.codigo}</strong> {o.nombre}
+                                        </td>
+                                        <td>
+                                            {cifra(o.valor)} por dólar
+                                            <br />
+                                            <span className="se-admin-meta-hint">
+                                                {o.fuente} · dato del {delDia(o.fecha_valor)}
+                                                {o.cuantas > 1 ? ` · ${o.cuantas} lecturas` : ""}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {o.por ?? "Alguien del equipo"}
+                                            <br />
+                                            <span className="se-admin-meta-hint">{cuando(o.cuando)}</span>
+                                        </td>
+                                        <td className="se-admin-table__actions">
+                                            {puedeEditar ? (
+                                                <button
+                                                    type="button"
+                                                    className="se-link se-header__nav-link--button"
+                                                    onClick={() => deshacer(o)}
+                                                    disabled={ocupado === o.id}
+                                                >
+                                                    Deshacer
+                                                </button>
+                                            ) : null}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
             <ConfirmDialog />
         </section>

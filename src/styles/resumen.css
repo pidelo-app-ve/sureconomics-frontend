@@ -11,16 +11,6 @@
   max-width: 720px;
 }
 
-.se-res__eyebrow {
-  margin: 0 0 0.35rem;
-  font-family: var(--se-font-label);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--marca-rojo);
-}
-
 .se-res__titulo {
   margin: 0;
   font-family: var(--se-font-display, var(--se-font-ui));

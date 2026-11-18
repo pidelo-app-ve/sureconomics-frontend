@@ -82,16 +82,6 @@
   animation: se-page-rise 0.6s var(--se-suite-ease) both;
 }
 
-.se-consulting__kicker {
-  margin: 0 0 0.65rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--se-suite-dim);
-}
-
 .se-consulting__title {
   margin: 0;
   font-family: var(--se-font-heading);
@@ -136,14 +126,6 @@
 
 .se-consulting__services {
   margin-top: clamp(2rem, 4vw, 2.75rem);
-}
-
-.se-consulting__service-meta {
-  margin: 0 0 0.5rem;
-  font-family: var(--se-font-ui);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-slate);
 }
 
 .se-consulting__service-card {
@@ -211,15 +193,6 @@
   }
 }
 
-@media (max-width: 900px), (pointer: coarse) {  /* tambien en tablet: un dedo es un dedo a cualquier ancho */
-  /* 0,68rem son 10,9 px: por debajo del suelo, y en las ocho pantallas tactiles,
-     de 320 a 1024. Se le habia escapado a la auditoria movil porque /consultoria
-     no estaba en su lista de rutas. */
-  .se-consulting__service-meta {
-    font-size: 0.72rem;
-  }
-}
-
 /* ═══ PAGINAS LEGALES ═════════════════════════════════════════════════
    Una columna de lectura y nada mas. Un aviso legal que no se lee no protege a
    nadie, asi que aqui manda la medida del renglon y no aprovechar el ancho. */
@@ -244,16 +217,6 @@
 }
 
 .se-legal__cabeza { margin-bottom: 2.75rem; }
-
-.se-legal__kicker {
-  margin: 0 0 0.6rem;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 
 .se-legal__titulo {
   margin: 0 0 1rem;
@@ -482,15 +445,6 @@
   color: #f6f3ed;
   text-align: left;
 }
-.se-anunciate__kicker {
-  margin: 0 0 0.6rem;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #e8c77a;
-}
 .se-anunciate__title {
   max-width: 34ch;
   margin: 0 auto 0.9rem;
@@ -659,15 +613,6 @@
   width: 11.5rem;
   height: auto;
 }
-.se-entorno__kicker {
-  margin: 0 0 0.65rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 .se-entorno__titulo {
   margin: 0 0 0.9rem;
   font-family: var(--se-font-heading);
@@ -803,11 +748,6 @@
   margin-right: 0.75rem;
   font-weight: 400;
   color: var(--color-slate);
-}
-
-.se-publico .se-consulting__service-meta {
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 /* —— Anúnciate: el formato en lista de prensa, la letra en la serif —— */

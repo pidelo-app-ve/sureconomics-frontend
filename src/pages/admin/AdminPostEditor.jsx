@@ -1,7 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { tActual } from "../../i18n/motor";
-import { CODIGOS_MONEDA } from "../../lib/monedas";
-import { CampoMovil } from "../../components/admin/CampoMovil";
 import { useEsMovil } from "../../hooks/useEsMovil";
 import {
     Link,
@@ -15,41 +12,15 @@ import {
     deleteAdminPost,
     getAdminPost,
     patchAdminPost,
-    quitarVinculoConElLector,
-    usarFirmaDeSuCuenta,
     publishAdminPost,
-    getTraductor,
-    traducirTextos,
     unpublishAdminPost,
 } from "../../services/adminPostsService";
-import {
-    groupPlaces,
-    listAdminFormats,
-    listAdminPlaces,
-    listAdminTopics,
-} from "../../services/adminTaxonomyService";
-import {
-    ACCEPTED_AUDIO_MIME,
-    ACCEPTED_DOCUMENT_MIME,
-    ACCEPTED_IMAGE_MIME,
-    ACCEPTED_VIDEO_MIME,
-    uploadAdminMediaAudio,
-    uploadAdminMediaDocument,
-    uploadAdminMediaImage,
-} from "../../services/adminMediaService";
 import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
-import { AxisPicker } from "../../components/admin/AxisPicker";
 import { ListaDeComprobacion } from "../../components/admin/ListaDeComprobacion";
 import { PiezaPublicada } from "../../components/admin/PiezaPublicada";
-import {
-    SugerenciasDeClasificacion,
-    useSugerenciasDeClasificacion,
-} from "../../components/admin/SugerenciasDeClasificacion";
-import { AssetField } from "../../components/admin/AssetField";
-import { BylinePhotoField } from "../../components/admin/BylinePhotoField";
-import { SourcesField } from "../../components/admin/SourcesField";
+import { useSugerenciasDeClasificacion } from "../../components/admin/SugerenciasDeClasificacion";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
@@ -57,401 +28,46 @@ import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { useAdminToast } from "../../context/AdminToastContext";
-import { RichTextEditor } from "../../components/editor/RichTextEditor";
-import { EditorConImagenes } from "../../components/admin/cuerpo/EditorConImagenes";
 import { VistaPreviaDePieza } from "../../components/admin/VistaPreviaDePieza";
-import { IconoOjo } from "../../components/admin/cuerpo/iconos";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
-import { enlaceWeb } from "../../lib/enlaces";
-import { EncuadreDeFoto } from "../../components/admin/EncuadreDeFoto";
 import { rutaDePieza } from "../../lib/pieza";
 import { useBorradorLocal } from "../../hooks/useBorradorLocal";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEditor } from "../../lib/guias/guiaEditor";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
-import { firmadaPorColaborador } from "../../lib/firmaDeColaborador";
+import {
+    FORMAT_FIELDS,
+    FORMATOS_SIN_PROGRAMAR,
+    comparable,
+    emptyForm,
+    fechaDeCaracas,
+    formToPayload,
+    hastaDeCaracas,
+    horaCorta,
+    isoToDateTimeLocal,
+    normalizarPieza,
+    postToForm,
+} from "../../components/admin/editorDePieza/formulario";
+import { estadoDeLaPieza, estadoDelIngles } from "../../components/admin/editorDePieza/derivadosDeLaPieza";
+import { useTraduccionDePieza } from "../../components/admin/editorDePieza/useTraduccionDePieza";
+import { useTaxonomiaDelEditor } from "../../components/admin/editorDePieza/useTaxonomiaDelEditor";
+import { useFirmaDelColaborador } from "../../components/admin/editorDePieza/useFirmaDelColaborador";
+import { useAtajosDeTeclado } from "../../components/admin/editorDePieza/useAtajosDeTeclado";
+import { GrupoFormato } from "../../components/admin/editorDePieza/GrupoFormato";
+import { GrupoLaPieza } from "../../components/admin/editorDePieza/GrupoLaPieza";
+import { GrupoCuerpo } from "../../components/admin/editorDePieza/GrupoCuerpo";
+import { GrupoArchivos } from "../../components/admin/editorDePieza/GrupoArchivos";
+import { GrupoClasificacion } from "../../components/admin/editorDePieza/GrupoClasificacion";
+import { GrupoPublicacion } from "../../components/admin/editorDePieza/GrupoPublicacion";
+import { CampoSeo } from "../../components/admin/editorDePieza/CampoSeo";
+import { EstadoDeLaPieza } from "../../components/admin/editorDePieza/EstadoDeLaPieza";
+import { BotonesDeLaPieza } from "../../components/admin/editorDePieza/BotonesDeLaPieza";
 
 /**
- * Which extra fields each format asks for.
- *
- * Kept here rather than read from the API because it is a statement about the
- * *form*, not about the content: the backend already says which file a format
- * needs (`required_media`) and whether it carries a byline (`shows_author`), and
- * those are the two rules the database enforces. This map only decides which
- * inputs are worth showing.
- *
- * ``image`` is on artículo alone, and that is deliberate. Artículos are the only
- * format whose layout prints one -- `ArticleCardGrid` renders it, and the news
- * list, the editorial list, the interview grid and the report grid all do not.
- * Asking a noticia for an image is asking an editor to find a photograph the site
- * will never display.
+ * El editor de piezas del panel. Aquí quedan el estado del formulario, la carga, el
+ * guardado y las acciones; los grupos del formulario, los datos y los hooks propios
+ * viven en `components/admin/editorDePieza/`.
  */
-// Sources are not in here: every format can cite them. Editorial having no source
-// field was reported as a bug, and there is no format for which "where did this
-// come from" is the wrong question.
-// Only the fields that genuinely belong to one format. The image is not among
-// them: it used to be listed under `articulo` alone, on the theory that only that
-// layout printed one -- which meant the newsroom had nowhere to attach the photo
-// they had for a noticia, and every noticia published with a generated placeholder.
-// Any piece can carry an image, so it is asked for unconditionally below.
-/**
- * What the image actually does, per format, because it is not the same everywhere.
- *
- * Only the artículo listing draws a card with an image. Noticias, editorial and
- * informes list as text, so for those the image appears when the piece is opened
- * and in the front-page feature -- and the hint has to say so. A field that
- * promises a thumbnail nobody will see is how the newsroom stops trusting the
- * form.
- */
-const IMAGE_HINT = {
-    articulo:
-        "Opcional. Se ve en la tarjeta del listado y al abrir el artículo. Si la deja vacía, se muestra un fondo de color.",
-    entrevista:
-        "Opcional. Al abrir la entrevista lo primero es el video; esta imagen se usa cuando la pieza sale destacada en portada.",
-    default:
-        "Opcional. Se ve al abrir la pieza y cuando sale destacada en portada. En el listado, este formato se muestra como texto, sin miniatura.",
-};
-
-const FORMAT_FIELDS = {
-    // `opinion` -- el bloque "¿Qué piensa SurEconomics?" -- salió de aquí porque
-    // nadie lo llenaba: estaba en nulo en las veinte noticias publicadas. Un campo
-    // que ocupa espacio en el formulario y nunca se usa entrena a la redacción a
-    // saltárselo. La columna sigue en la base y la vista de lectura sigue sabiendo
-    // dibujarlo, así que reponerlo es volver a listarlo aquí.
-    entrevista: ["interviewee"],
-    informe: ["unit"],
-};
-
-/** Los formatos cuyo cuerpo admite fotos entre párrafos. */
-const FORMATOS_CON_FOTOS_EN_EL_CUERPO = new Set(["articulo", "noticia", "editorial"]);
-
-const emptyForm = () => ({
-    format: "",
-    title: "",
-    slug: "",
-    excerpt: "",
-    content: "",
-    meta_title: "",
-    seo_automatico: false,
-    meta_description: "",
-    canonical_url: "",
-    byline: "",
-    featured_image_url: "",
-    status: "draft",
-    published_at: "",
-    topic_ids: [],
-    place_ids: [],
-    sources: [],
-    interviewee: "",
-    interviewee_role: "",
-    unit: "",
-    image_asset_id: null,
-    // El encuadre de la foto: «x,y» o vacío (el centro). Ver `EncuadreDeFoto`.
-    imagen_foco: "",
-    video_asset_id: null,
-    document_asset_id: null,
-    audio_asset_id: null,
-    byline_photo_asset_id: null,
-    // Cerrado por omision: crear un informe sin decir nada lo deja pidiendo cuenta.
-    // En una decision de acceso, el valor por omision tiene que ser el restrictivo.
-    document_open_access: false,
-    // Sin marcar por omision: una pieza nueva no entra en la seccion educativa sin
-    // que alguien lo decida.
-    is_educational: false,
-    sin_publicidad: false,
-    // La Clave al final de la pieza: vacío, no hay juego.
-    juego_palabra: "",
-    juego_pista: "",
-    moneda: "",
-    // La pieza en inglés, para /en. Vacía, la pieza sale en español con aviso.
-    title_en: "",
-    excerpt_en: "",
-    content_en: "",
-    traduccion_automatica: false,
-    // «Abrir la portada con esta pieza». Tres campos del formulario para un solo campo
-    // de la API (`destacada_hasta`): la casilla, cuánto dura y, si se eligió una fecha,
-    // cuál. Sin marcar por omisión: fijar la portada es una decisión, no un efecto.
-    portada: false,
-    portada_durante: "24",
-    portada_hasta: "",
-});
-
-/** Las duraciones que ofrece el selector «Durante». `fecha` abre el `datetime-local`. */
-const DURACIONES_DE_PORTADA = [
-    { value: "24", label: "24 horas" },
-    { value: "48", label: "48 horas" },
-    { value: "72", label: "72 horas" },
-    { value: "fecha", label: "Hasta una fecha" },
-];
-
-const idsFromRelation = (val) => {
-    if (!Array.isArray(val)) return [];
-    return val
-        .map((x) => (typeof x === "object" && x != null ? x.id : x))
-        .filter((x) => x !== undefined && x !== null);
-};
-
-const pickStr = (obj, keys, fallback = "") => {
-    if (!obj || typeof obj !== "object") return fallback;
-    for (const k of keys) {
-        const v = obj[k];
-        if (v !== undefined && v !== null && String(v) !== "") return String(v);
-    }
-    return fallback;
-};
-
-/**
- * Las fechas del editor van **en hora de Caracas**, se abra el panel desde donde se abra.
- *
- * Venezuela está fija en UTC-4 y no cambia de hora, así que basta un desfase constante.
- * Hacerlo explícito, y no dejarlo a la zona del navegador, es lo que evita que alguien de
- * viaje programe "las 9:00" y la pieza salga a las 9:00 de otro país.
- */
-const DESFASE_CARACAS_MS = -4 * 60 * 60 * 1000;
-
-/** ISO de la API -> valor de `datetime-local` en hora de Caracas. */
-const isoToDateTimeLocal = (iso) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "";
-    const c = new Date(d.getTime() + DESFASE_CARACAS_MS);
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${c.getUTCFullYear()}-${pad(c.getUTCMonth() + 1)}-${pad(c.getUTCDate())}T${pad(c.getUTCHours())}:${pad(c.getUTCMinutes())}`;
-};
-
-/** Valor de `datetime-local` (hora de Caracas) -> ISO en UTC para la API. */
-const caracasToIso = (valor) => {
-    const d = new Date(`${valor}:00-04:00`);
-    return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
-};
-
-/** «lunes 28 de septiembre, 9:00» en hora de Caracas. */
-const fechaDeCaracas = (valor) => {
-    const iso = caracasToIso(valor);
-    if (!iso) return "";
-    return new Date(iso).toLocaleString("es", {
-        timeZone: "America/Caracas",
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        hour: "numeric",
-        minute: "2-digit",
-    });
-};
-
-/** «lunes 5 de octubre a las 9:00», en hora de Caracas, de un ISO. Para el «hasta». */
-const hastaDeCaracas = (iso) => {
-    const d = iso ? new Date(iso) : null;
-    if (!d || Number.isNaN(d.getTime())) return "";
-    const opciones = { timeZone: "America/Caracas" };
-    const dia = d.toLocaleDateString("es", { ...opciones, weekday: "long", day: "numeric", month: "long" });
-    const hora = d.toLocaleTimeString("es", { ...opciones, hour: "numeric", minute: "2-digit" });
-    return `${dia} a las ${hora}`;
-};
-
-/** Si un ISO de la API está en el futuro: lo que decide si la pieza sigue fijada. */
-const enElFuturo = (iso) => {
-    const ms = iso ? Date.parse(iso) : NaN;
-    return Number.isFinite(ms) && ms > Date.now();
-};
-
-/**
- * El `destacada_hasta` que se manda, a partir de los tres campos del formulario.
- *
- * `null` con la casilla sin marcar: es lo que suelta la portada, y un `undefined`
- * la dejaría como estaba. Con horas se cuenta desde **ahora**, no desde que se
- * marcó la casilla: lo que la redacción quiere es «un día desde que lo guardo».
- * Con fecha pero sin fecha escrita se omite el campo -- es un formulario a medias,
- * y la barra de abajo ya lo dice -- antes que mandar un nulo que se leería como
- * «quítala».
- */
-const destacadaHastaDe = (form) => {
-    if (!form.portada) return null;
-    if (form.portada_durante === "fecha") {
-        const valor = String(form.portada_hasta ?? "").trim();
-        return valor ? caracasToIso(valor) : undefined;
-    }
-    const horas = Number(form.portada_durante);
-    if (!Number.isFinite(horas) || horas <= 0) return undefined;
-    return new Date(Date.now() + horas * 60 * 60 * 1000).toISOString();
-};
-
-/** El texto de un campo del editor, sin etiquetas: para los resúmenes de las filas. */
-const textoPlano = (html) =>
-    String(html ?? "")
-        .replace(/<[^>]*>/g, " ")
-        .replace(/&nbsp;/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-/** El formulario, listo para comparar. El editor de texto devuelve `<p></p>` por un
-    campo vacío: sin esto, abrir una pieza y no tocar nada ya contaría como cambio. Los
-    cuatro campos con editor, también los de inglés (se olvidaban, y abrir el editor ya
-    contaba como «sin guardar»). */
-// Además, las piezas viejas guardan el cuerpo como texto plano y el editor lo reescribe
-// como HTML al cargarlo (dos párrafos separados por una línea en blanco pasan a ser
-// dos <p>): el mismo texto, que
-// contaba como «sin guardar». Para comparar, los saltos de párrafo y de línea valen lo
-// mismo que un espacio; las negritas, los enlaces o un texto distinto siguen contando.
-const sinParrafosVacios = (html) =>
-    String(html ?? "")
-        .replace(/<\/?p>/g, " ")
-        .replace(/<br\s*\/?>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-const comparable = (f) =>
-    JSON.stringify({
-        ...f,
-        content: sinParrafosVacios(f?.content),
-        excerpt: sinParrafosVacios(f?.excerpt),
-        content_en: sinParrafosVacios(f?.content_en),
-        excerpt_en: sinParrafosVacios(f?.excerpt_en),
-    });
-
-/** Lo mismo que `comparable`, como objeto: el borrador local compara con esto. */
-const normalizarPieza = (f) => (f ? JSON.parse(comparable(f)) : f);
-
-const { ancla } = recorridoEditor;
-
-/** «14:32», para decir cuándo se guardó la copia en este equipo. */
-const horaCorta = (marca) =>
-    new Date(marca).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
-
-const recortar = (texto, max = 48) =>
-    texto.length > max ? `${texto.slice(0, max - 1).trimEnd()}…` : texto;
-
-const palabras = (html) => {
-    const t = textoPlano(html);
-    return t ? t.split(" ").length : 0;
-};
-
-/** Lo que no se programa: una noticia sale cuando pasa. Igual que en el backend. */
-const FORMATOS_SIN_PROGRAMAR = new Set(["noticia"]);
-
-const postToForm = (post) => {
-    if (!post || typeof post !== "object") return emptyForm();
-    const publishedAt = post.published_at ?? post.publishedAt;
-    // Fijada si la fecha está en el futuro, aunque sea un borrador y `en_portada` diga
-    // que no: lo que se edita aquí es lo que la redacción decidió, y una pieza fijada
-    // que todavía no se publicó tiene que abrir con la casilla marcada para que se vea.
-    const destacadaHasta = post.destacada_hasta ?? post.destacadaHasta ?? null;
-    const fijada = typeof destacadaHasta === "string" && enElFuturo(destacadaHasta);
-    return {
-        ...emptyForm(),
-        portada: fijada,
-        portada_durante: fijada ? "fecha" : "24",
-        portada_hasta: fijada ? isoToDateTimeLocal(destacadaHasta) : "",
-        format: pickStr(post, ["format"]),
-        title: pickStr(post, ["title"]),
-        slug: pickStr(post, ["slug"]),
-        excerpt: pickStr(post, ["excerpt", "summary"]),
-        content: pickStr(post, ["content", "body", "html"]),
-        meta_title: pickStr(post, ["meta_title"]),
-        seo_automatico: post?.seo_automatico === true,
-        meta_description: pickStr(post, ["meta_description"]),
-        canonical_url: pickStr(post, ["canonical_url"]),
-        byline: pickStr(post, ["byline"]),
-        featured_image_url: pickStr(post, ["featured_image_url"]),
-        status: pickStr(post, ["status"], "draft"),
-        published_at: typeof publishedAt === "string" ? isoToDateTimeLocal(publishedAt) : "",
-        // Order is meaning: the first of each is the principal tag, which is the
-        // one the public cards print.
-        topic_ids: idsFromRelation(post.topics ?? post.topic_ids),
-        place_ids: idsFromRelation(post.places ?? post.place_ids),
-        sources: (post?.sources ?? []).map((f) => ({ name: f.name ?? "", url: f.url ?? "" })),
-        interviewee: pickStr(post, ["interviewee"]),
-        interviewee_role: pickStr(post, ["interviewee_role"]),
-        unit: pickStr(post, ["unit"]),
-        image_asset_id: post.image_asset_id ?? null,
-        imagen_foco: pickStr(post, ["imagen_foco"]),
-        video_asset_id: post.video_asset_id ?? null,
-        document_asset_id: post.document_asset_id ?? null,
-        audio_asset_id: post.audio_asset_id ?? null,
-        byline_photo_asset_id: post.byline_photo_asset_id ?? null,
-        document_open_access: Boolean(post.document_open_access),
-        is_educational: Boolean(post.is_educational),
-        sin_publicidad: Boolean(post.sin_publicidad),
-        juego_palabra: pickStr(post, ["juego_palabra"]),
-        juego_pista: pickStr(post, ["juego_pista"]),
-        moneda: pickStr(post, ["moneda"]),
-        title_en: pickStr(post, ["title_en"]),
-        excerpt_en: pickStr(post, ["excerpt_en"]),
-        content_en: pickStr(post, ["content_en"]),
-        traduccion_automatica: Boolean(post.traduccion_automatica),
-    };
-};
-
-const formToPayload = (form) => {
-    let publishedAtValue;
-    if (form.published_at && String(form.published_at).trim()) {
-        publishedAtValue = caracasToIso(String(form.published_at).trim());
-    }
-
-    const payload = {
-        format: form.format.trim() || undefined,
-        title: form.title.trim() || undefined,
-        slug: form.slug.trim() || undefined,
-        excerpt: form.excerpt.trim() || undefined,
-        content: form.content.trim() || undefined,
-        meta_title: form.meta_title.trim() || undefined,
-        meta_description: form.meta_description.trim() || undefined,
-        canonical_url: form.canonical_url.trim() || undefined,
-        featured_image_url: form.featured_image_url.trim() || undefined,
-        status: form.status.trim() || undefined,
-        published_at: publishedAtValue,
-        // Sent even when blank so clearing a byline actually clears it.
-        byline: form.byline.trim() || null,
-        // Sent even when empty: an absent key means "leave them alone", and a piece
-        // whose last source was just removed has to say so.
-        sources: (form.sources ?? [])
-            .map((f) => ({ name: (f.name ?? "").trim(), url: (f.url ?? "").trim() || undefined }))
-            .filter((f) => f.name),
-        interviewee: form.interviewee.trim() || undefined,
-        interviewee_role: form.interviewee_role.trim() || undefined,
-        unit: form.unit.trim() || undefined,
-    };
-    // Sent even when empty: clearing every topic is a real edit, and `undefined`
-    // would read as "leave them alone".
-    payload.topic_ids = form.topic_ids;
-    payload.place_ids = form.place_ids;
-    // Same for the three slots — null is how a file gets detached.
-    payload.image_asset_id = form.image_asset_id ?? null;
-    // Vacío se manda como nulo: es «al centro».
-    payload.imagen_foco = (form.imagen_foco ?? "").trim() || null;
-    payload.video_asset_id = form.video_asset_id ?? null;
-    payload.document_asset_id = form.document_asset_id ?? null;
-    payload.audio_asset_id = form.audio_asset_id ?? null;
-    // Se manda siempre, aunque el formato no pida documento. La alternativa -- mandarlo
-    // solo en informes -- es una condicion mas que alguien puede olvidar, y la columna
-    // existe en toda pieza sin significar nada donde no hay documento. Mandarlo de mas
-    // es inocuo; olvidarlo cerraria un informe abierto al guardar.
-    payload.document_open_access = Boolean(form.document_open_access);
-    // Se manda siempre, por el mismo motivo que el de arriba: el interruptor solo se
-    // ofrece en articulo y entrevista, y condicionar el envio al formato es una
-    // condicion mas que puede desincronizarse del interruptor. Se manda lo que tiene
-    // el formulario, que es lo que la pieza traia si no se toco.
-    payload.is_educational = Boolean(form.is_educational);
-    payload.sin_publicidad = Boolean(form.sin_publicidad);
-    // Se mandan siempre: vacíos quitan el juego de la pieza (null en la API).
-    payload.juego_palabra = (form.juego_palabra ?? "").trim() || null;
-    payload.juego_pista = (form.juego_pista ?? "").trim() || null;
-    payload.moneda = (form.moneda ?? "").trim() || null;
-    // La versión en inglés: vacía se manda como nulo, que es «sin inglés».
-    payload.title_en = (form.title_en ?? "").trim() || null;
-    payload.excerpt_en = (form.excerpt_en ?? "").trim() || null;
-    payload.content_en = (form.content_en ?? "").trim() || null;
-    payload.traduccion_automatica = Boolean(form.traduccion_automatica);
-    payload.byline_photo_asset_id = form.byline_photo_asset_id ?? null;
-    // Nulo cuando la casilla no está marcada -- se manda, porque es lo que la suelta --
-    // e indefinido (se borra abajo) cuando falta la fecha. Ver `destacadaHastaDe`.
-    payload.destacada_hasta = destacadaHastaDe(form);
-
-    Object.keys(payload).forEach((k) => {
-        if (payload[k] === undefined) delete payload[k];
-    });
-    return payload;
-};
-
 export const AdminPostEditor = () => {
     const { role } = useAuth();
     const canPublish = role === "publicador" || role === "admin";
@@ -473,10 +89,7 @@ export const AdminPostEditor = () => {
     const [searchParams] = useSearchParams();
 
     const [form, setForm] = useState(emptyForm);
-    const [formats, setFormats] = useState([]);
-    const [topics, setTopics] = useState([]);
     const [vistaPrevia, setVistaPrevia] = useState(false);
-    const [placeGroups, setPlaceGroups] = useState([]);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
     // El lector que la propuso, si la pieza salió de una propuesta aceptada. La firma
     // pública es la de los campos de aquí (se copió de su cuenta al aceptarla); esto
@@ -499,41 +112,15 @@ export const AdminPostEditor = () => {
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
-    // «Traducir con Claude»: solo existe si el servidor tiene la clave (se pregunta al
-    // abrir). `versionEn` fuerza a los editores de texto en inglés a volver a montarse
-    // con lo que llegó, y `revisadaAhora` mantiene a la vista la casilla de «revisada»
-    // después de marcarla, por si alguien se equivoca y quiere desmarcarla.
-    const [traductorDisponible, setTraductorDisponible] = useState(false);
-    const [traduciendo, setTraduciendo] = useState(false);
-    const [versionEn, setVersionEn] = useState(0);
-    const [revisadaAhora, setRevisadaAhora] = useState(false);
-    useEffect(() => {
-        let vivo = true;
-        getTraductor()
-            .then((r) => vivo && setTraductorDisponible(Boolean(r?.disponible)))
-            .catch(() => {});
-        return () => {
-            vivo = false;
-        };
-    }, []);
+    // «Traducir con Claude»: ver `useTraduccionDePieza`.
+    const { traductorDisponible, traduciendo, versionEn, revisadaAhora, setRevisadaAhora, traducir } =
+        useTraduccionDePieza({ form, setForm, confirm, toastSuccess, toastError });
 
     const numericPostId = useMemo(() => {
         if (!postId) return null;
         const n = Number(postId);
         return Number.isFinite(n) ? n : postId;
     }, [postId]);
-
-    const loadReference = useCallback(async () => {
-        const [fmts, tps, pls] = await Promise.all([
-            listAdminFormats().catch(() => []),
-            listAdminTopics().catch(() => []),
-            listAdminPlaces().catch(() => []),
-        ]);
-        setFormats(fmts.filter((f) => f.is_active !== false));
-        setTopics(tps.filter((t) => t.is_active !== false));
-        const { groups } = groupPlaces(pls.filter((p) => p.is_active !== false));
-        setPlaceGroups(groups);
-    }, []);
 
     const loadPost = useCallback(async () => {
         if (isCreate || !numericPostId) {
@@ -569,9 +156,7 @@ export const AdminPostEditor = () => {
         }
     }, [isCreate, numericPostId, searchParams]);
 
-    useEffect(() => {
-        loadReference();
-    }, [loadReference]);
+    const { formats, topics, placeGroups } = useTaxonomiaDelEditor();
 
     useEffect(() => {
         loadPost();
@@ -596,69 +181,10 @@ export const AdminPostEditor = () => {
         if (flash) toastSuccess(flash);
     }, [flash, toastSuccess]);
 
-    // Traduce lo que hay en el formulario, guardado o no, y lo vuelca en los campos en
-    // inglés marcado como automático. No guarda: la redacción revisa y guarda.
-    const traducir = async () => {
-        if (!form.title.trim() || !textoPlano(form.content)) {
-            toastError("Escribe primero el título y el cuerpo en español.", "En inglés");
-            return;
-        }
-        const yaHayIngles =
-            form.title_en.trim() || textoPlano(form.excerpt_en) || textoPlano(form.content_en);
-        if (yaHayIngles) {
-            const seguir = await confirm({
-                title: "Reemplazar la traducción",
-                description: "Esto reemplaza lo que hay escrito en inglés por una traducción nueva.",
-                confirmLabel: "Reemplazar",
-                cancelLabel: "Dejarla como está",
-            });
-            if (!seguir) return;
-        }
-        setTraduciendo(true);
-        try {
-            const r = await traducirTextos({
-                title: form.title,
-                excerpt: form.excerpt,
-                content: form.content,
-            });
-            setForm((prev) => ({
-                ...prev,
-                title_en: r.title ?? "",
-                excerpt_en: r.excerpt ?? "",
-                content_en: r.content ?? "",
-                traduccion_automatica: true,
-            }));
-            setRevisadaAhora(false);
-            setVersionEn((v) => v + 1);
-            toastSuccess("Traducción lista. Revísala y guarda la pieza.", "En inglés");
-        } catch (err) {
-            toastError(adminErrorMessage(err, "No se pudo traducir."), "En inglés");
-        } finally {
-            setTraduciendo(false);
-        }
-    };
-
     // Cómo va la versión en inglés. Sale en /en con título y cuerpo; con uno solo es una
     // traducción a medias, y la pieza sigue saliendo en español: se dice aquí, no se
     // descubre en el sitio.
-    const hayTituloEn = Boolean(form.title_en.trim());
-    const hayCuerpoEn = Boolean(textoPlano(form.content_en));
-    const estadoIngles =
-        hayTituloEn && hayCuerpoEn
-            ? {
-                  resumen: form.traduccion_automatica ? "Traducción automática, sin revisar" : "Lista",
-                  estado: "ok",
-                  aviso: null,
-              }
-            : hayTituloEn || hayCuerpoEn
-              ? {
-                    resumen: "A medias",
-                    estado: "falta",
-                    aviso: hayTituloEn
-                        ? "Falta el cuerpo en inglés: hasta que lo tenga, en /en la pieza sale en español."
-                        : "Falta el título en inglés: hasta que lo tenga, en /en la pieza sale en español.",
-                }
-              : { resumen: "Sin versión en inglés", estado: undefined, aviso: null };
+    const estadoIngles = estadoDelIngles(form);
 
     const handleChange = (field) => (e) => {
         const v = e.target.value;
@@ -829,39 +355,15 @@ export const AdminPostEditor = () => {
     const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);
     const programada = form.status === "scheduled";
 
-    // La firma del colaborador: los dos botones del editor. Guardan al momento (como
-    // publicar) y traen la firma nueva al formulario sin tocar el resto de lo escrito.
-    const [colaboradorOcupado, setColaboradorOcupado] = useState(false);
-    const aplicarFirma = (post) => {
-        const firma = { byline: post.byline ?? "", byline_photo_asset_id: post.byline_photo_asset_id ?? null };
-        setForm((prev) => ({ ...prev, ...firma }));
-        setBase((prev) => (prev ? { ...prev, ...firma } : prev));
-        setAssets((prev) => ({ ...prev, bylinePhoto: post.byline_photo ?? null }));
-        setColaborador(post.colaborador ?? null);
-    };
-    const handleUsarSuCuenta = async () => {
-        setColaboradorOcupado(true);
-        setActionState({ status: "idle", message: "", kind: "" });
-        try {
-            aplicarFirma(await usarFirmaDeSuCuenta(numericPostId));
-            setActionState({ status: "success", message: "Firma puesta al día con su cuenta.", kind: "colaborador" });
-        } catch (err) {
-            setActionState({ status: "error", message: err?.message || "No se pudo cambiar la firma.", kind: "colaborador" });
-        } finally {
-            setColaboradorOcupado(false);
-        }
-    };
-    const handleQuitarVinculo = async () => {
-        await confirm({
-            title: "Quitar el vínculo con el lector",
-            description:
-                "La pieza deja de contar como suya. La firma que tiene ahora se queda: si hay que cambiarla, se cambia a mano.",
-            confirmLabel: "Quitar el vínculo",
-            onConfirm: async () => {
-                aplicarFirma(await quitarVinculoConElLector(numericPostId));
-            },
-        });
-    };
+    const { colaboradorOcupado, handleUsarSuCuenta, handleQuitarVinculo } = useFirmaDelColaborador({
+        numericPostId,
+        confirm,
+        setForm,
+        setBase,
+        setAssets,
+        setColaborador,
+        setActionState,
+    });
 
     const handleDelete = async () => {
         if (isCreate) return;
@@ -888,21 +390,7 @@ export const AdminPostEditor = () => {
     // cuenta: lo escrito sigue en el editor.
     const sinGuardar = base !== null && comparable(form) !== comparable(base);
     // Ctrl+S guarda y Ctrl+Enter publica (Cmd en Mac): quien escribe no suelta el teclado.
-    useEffect(() => {
-        const alTeclear = (e) => {
-            if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
-            const tecla = e.key.toLowerCase();
-            if (tecla === "s" && atajos.current.guardar) {
-                e.preventDefault();
-                atajos.current.guardar();
-            } else if (tecla === "enter" && atajos.current.publicar) {
-                e.preventDefault();
-                atajos.current.publicar();
-            }
-        };
-        window.addEventListener("keydown", alTeclear);
-        return () => window.removeEventListener("keydown", alTeclear);
-    }, []);
+    useAtajosDeTeclado(atajos);
 
     // Tema y lugar propuestos leyendo lo escrito (con reglas, sin IA): se aceptan con un toque.
     const sugerencias = useSugerenciasDeClasificacion({
@@ -964,63 +452,19 @@ export const AdminPostEditor = () => {
         return <EmptyState title="Ruta no válida" description="Falta el identificador de la pieza." />;
     }
 
-    /** Whether publishing would be refused for a missing file, said before trying. */
-    const missingMedia =
-        (requiredMedia === "video" && !form.video_asset_id) ||
-        (requiredMedia === "document" && !form.document_asset_id) ||
-        (requiredMedia === "audio" && !form.audio_asset_id);
-
-    const nombresDe = (ids, lista) => {
-        const porId = new Map(lista.map((x) => [String(x.id), x.name]));
-        return (ids ?? []).map((i) => porId.get(String(i))).filter(Boolean);
-    };
-    const temasElegidos = nombresDe(form.topic_ids, topics ?? []);
-    const lugaresElegidos = nombresDe(
-        form.place_ids,
-        (placeGroups ?? []).flatMap((g) => g.children ?? []),
-    );
-    const listaCorta = (nombres, vacio) =>
-        nombres.length ? `${nombres[0]}${nombres.length > 1 ? ` +${nombres.length - 1}` : ""}` : vacio;
-    const nombreDeArchivo = (asset) =>
-        asset?.label || asset?.original_filename || (asset ? "Adjunto" : "");
-    const nPalabras = palabras(form.content);
-    const nFuentes = (form.sources ?? []).filter((f) => (f.name ?? "").trim()).length;
-    // La portada: a quien puede publicar, o a cualquiera si la pieza ya está fijada,
-    // para que al menos lo vea y pueda soltarla. Decidir qué abre el sitio es del
-    // mismo rango que decidir qué se publica.
-    const muestraPortada = canPublish || form.portada;
-    const faltaFechaDePortada = form.portada && form.portada_durante === "fecha" && !form.portada_hasta;
-    // El «hasta» que se va a mandar, para decirlo antes de guardar. Con horas se cuenta
-    // desde ahora, así que el texto es una estimación por unos segundos, no una promesa.
-    const portadaHastaIso = form.portada ? destacadaHastaDe(form) : null;
-    const resumenDeEstado = [
-        form.status === "published"
-            ? "Publicado"
-            : programada
-              ? `Programado · ${fechaDeCaracas(form.published_at) || "falta la fecha"}`
-              : "Borrador",
-        form.portada ? "Abre la portada" : null,
-    ]
-        .filter(Boolean)
-        .join(" · ");
-    // Lo que impediría publicar, dicho en la barra fija de abajo antes de intentarlo.
-    const sinTema = !(form.topic_ids ?? []).length;
-    // El texto solo se pide donde la pieza ES el texto: una entrevista o un podcast son su video o su audio.
-    const sinTexto = requiredMedia === "none" && !nPalabras;
-    const faltas = [
-        !form.title.trim() ? "título" : null,
-        sinTexto ? "texto" : null,
-        sinTema ? "tema" : null,
-        missingMedia
-            ? requiredMedia === "video"
-                ? "video"
-                : requiredMedia === "audio"
-                  ? "audio"
-                  : "documento"
-            : null,
-        programada && !form.published_at ? "fecha" : null,
-        faltaFechaDePortada ? "hasta cuándo abre la portada" : null,
-    ].filter(Boolean);
+    const {
+        missingMedia,
+        temasElegidos,
+        lugaresElegidos,
+        nPalabras,
+        nFuentes,
+        muestraPortada,
+        faltaFechaDePortada,
+        portadaHastaIso,
+        resumenDeEstado,
+        faltas,
+        chequeo,
+    } = estadoDeLaPieza({ form, requiredMedia, canPublish, programada, legacyImage, topics, placeGroups });
 
     const publicarEsPrincipal = canPublish && form.status === "draft" && !faltas.length;
     const ocupado = saveState.status === "loading" || actionState.status === "loading";
@@ -1030,183 +474,25 @@ export const AdminPostEditor = () => {
             publicarEsPrincipal && !ocupado ? (isCreate ? () => guardar({ publicar: true }) : handlePublish) : null,
     };
 
-    // «Antes de publicar»: lo que bloquea, lo que conviene y lo que ya está, de un vistazo.
-    const minutosDeLectura = Math.max(1, Math.round(nPalabras / 200));
-    const tieneImagen = Boolean(form.image_asset_id || legacyImage);
-    const chequeo = [
-        !form.title.trim()
-            ? { nivel: "falta", texto: "Título" }
-            : form.title.trim().length > 90
-              ? { nivel: "conviene", texto: "Título", detalle: ` ${form.title.trim().length} letras: en las tarjetas se corta. Mejor menos de 90.` }
-              : { nivel: "bien", texto: "Título" },
-        nPalabras
-            ? { nivel: "bien", texto: "Texto", detalle: ` ${nPalabras} palabras · ${minutosDeLectura} min de lectura` }
-            : { nivel: sinTexto ? "falta" : "conviene", texto: "Texto" },
-        missingMedia || requiredMedia !== "none"
-            ? {
-                  nivel: missingMedia ? "falta" : "bien",
-                  texto: requiredMedia === "video" ? "Video" : requiredMedia === "audio" ? "Audio" : "Documento",
-              }
-            : null,
-        sinTema
-            ? { nivel: "falta", texto: "Tema", detalle: " Sin tema no se puede publicar." }
-            : { nivel: "bien", texto: "Tema", detalle: ` ${temasElegidos.join(", ")}` },
-        lugaresElegidos.length
-            ? { nivel: "bien", texto: "Lugar", detalle: ` ${lugaresElegidos.join(", ")}` }
-            : { nivel: "conviene", texto: "Lugar" },
-        { nivel: tieneImagen ? "bien" : "conviene", texto: "Foto" },
-        { nivel: nFuentes ? "bien" : "conviene", texto: "Fuente" },
-    ].filter(Boolean);
-
     // «Publicación» (estado, fecha, portada): en el teléfono, entre las demás filas; en el
     // computador, en la columna de la derecha con el estado y los botones, abierta, que es
     // donde se mira al publicar (lo pidió Ramón el 9-nov-2026).
     const grupoPublicacion = (
-                    <div className="se-editor-group" {...ancla("publicacion")}>
-                        <p className="se-editor-group__title">Publicación</p>
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            abierto
-                            titulo="Estado y fecha"
-                            resumen={resumenDeEstado}
-                            estado={(programada && !form.published_at) || faltaFechaDePortada ? "falta" : undefined}
-                        >
-                        <label className="se-form-field" htmlFor="post-status">
-                            <span className="se-form-label">Estado</span>
-                            <select
-                                id="post-status"
-                                className="se-form-control"
-                                value={form.status}
-                                onChange={handleChange("status")}
-                            >
-                                <option value="draft">Borrador</option>
-                                {sePuedeProgramar || programada ? (
-                                    <option value="scheduled">Programado</option>
-                                ) : null}
-                                {canPublish || form.status === "published" ? (
-                                    <option value="published">Publicado</option>
-                                ) : null}
-                            </select>
-                        </label>
-                        <label className="se-form-field" htmlFor="post-published-at">
-                            <span className="se-form-label">
-                                {programada
-                                    ? "Se publica el (hora de Caracas)"
-                                    : "Fecha de publicación (opcional, hora de Caracas)"}
-                            </span>
-                            <input
-                                id="post-published-at"
-                                type="datetime-local"
-                                className="se-form-control"
-                                value={form.published_at}
-                                required={programada}
-                                min={programada ? isoToDateTimeLocal(new Date().toISOString()) : undefined}
-                                onChange={handleChange("published_at")}
-                            />
-                        </label>
-                        {programada ? (
-                            <p className="se-admin-meta-hint">
-                                {form.published_at
-                                    ? `Sale sola el ${fechaDeCaracas(form.published_at)}. Hasta entonces no se ve en el sitio. Pulse «Programar» para dejarla en cola.`
-                                    : "Elija el día y la hora en que sale: tiene que ser en el futuro."}
-                            </p>
-                        ) : null}
-                        {canPublish && FORMATOS_SIN_PROGRAMAR.has(form.format) ? (
-                            <p className="se-admin-meta-hint">
-                                Las noticias no se programan: se publican cuando pasan.
-                            </p>
-                        ) : null}
-
-                        {/* Abrir la portada con esta pieza. Un solo campo en la API
-                            (`destacada_hasta`), tres controles aquí: la casilla, cuánto
-                            dura y, si hace falta, hasta cuándo. Va en esta misma hoja
-                            porque es una decisión de publicación -- qué abre el sitio y
-                            hasta cuándo -- y no un atributo de la pieza. La casilla y el
-                            selector son hermanos, no anidados: un `<select>` dentro de
-                            la etiqueta de la casilla la marcaría al tocar la lista. */}
-                        {muestraPortada ? (
-                            <div className="se-form-field se-acceso se-acceso--portada">
-                                <label className="se-acceso__fila" htmlFor="post-portada">
-                                    <input
-                                        id="post-portada"
-                                        type="checkbox"
-                                        checked={Boolean(form.portada)}
-                                        disabled={!canPublish}
-                                        onChange={(e) =>
-                                            setForm((prev) => ({ ...prev, portada: e.target.checked }))
-                                        }
-                                    />
-                                    <span className="se-form-label se-acceso__titulo">
-                                        Abrir la portada con esta pieza
-                                    </span>
-                                </label>
-                                {form.portada ? (
-                                    <>
-                                        <div className="se-portada-pin__durante">
-                                            <label className="se-form-field" htmlFor="post-portada-durante">
-                                                <span className="se-form-label">Durante</span>
-                                                <select
-                                                    id="post-portada-durante"
-                                                    className="se-form-control"
-                                                    value={form.portada_durante}
-                                                    disabled={!canPublish}
-                                                    onChange={handleChange("portada_durante")}
-                                                >
-                                                    {DURACIONES_DE_PORTADA.map((d) => (
-                                                        <option key={d.value} value={d.value}>
-                                                            {d.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </label>
-                                            {form.portada_durante === "fecha" ? (
-                                                <label className="se-form-field" htmlFor="post-portada-hasta">
-                                                    <span className="se-form-label">Hasta (hora de Caracas)</span>
-                                                    <input
-                                                        id="post-portada-hasta"
-                                                        type="datetime-local"
-                                                        className="se-form-control"
-                                                        value={form.portada_hasta}
-                                                        required
-                                                        disabled={!canPublish}
-                                                        min={isoToDateTimeLocal(new Date().toISOString())}
-                                                        onChange={handleChange("portada_hasta")}
-                                                    />
-                                                </label>
-                                            ) : null}
-                                        </div>
-                                        <p className="se-admin-meta-hint se-portada-pin__hasta">
-                                            {portadaHastaIso
-                                                ? `Hasta el ${hastaDeCaracas(portadaHastaIso)}${
-                                                      form.portada_durante === "fecha" ? "" : ", contando desde que guarde"
-                                                  }.`
-                                                : "Elija hasta cuándo: tiene que ser en el futuro."}
-                                        </p>
-                                    </>
-                                ) : null}
-                                <p className="se-admin-meta-hint">
-                                    Mientras dure, esta pieza abre la portada en grande. Cuando
-                                    venza, la portada vuelve sola a la noticia más reciente.
-                                </p>
-                                {form.portada && form.status !== "published" ? (
-                                    <p className="se-admin-meta-hint">
-                                        Sólo cuenta mientras la pieza esté publicada: un borrador
-                                        o una programada no abren nada hasta que salgan.
-                                    </p>
-                                ) : null}
-                            </div>
-                        ) : null}
-
-                        {missingMedia ? (
-                            <p className="se-admin-warning">
-                                Falta {requiredMedia === "video" ? "el video" : requiredMedia === "audio" ? "el audio" : "el documento"}.
-                                Puede guardar como borrador, pero publicar será rechazado hasta
-                                que lo adjunte.
-                            </p>
-                        ) : null}
-                        </CampoMovil>
-                    </div>
+        <GrupoPublicacion
+            esMovil={esMovil}
+            form={form}
+            setForm={setForm}
+            handleChange={handleChange}
+            canPublish={canPublish}
+            sePuedeProgramar={sePuedeProgramar}
+            programada={programada}
+            resumenDeEstado={resumenDeEstado}
+            faltaFechaDePortada={faltaFechaDePortada}
+            muestraPortada={muestraPortada}
+            portadaHastaIso={portadaHastaIso}
+            missingMedia={missingMedia}
+            requiredMedia={requiredMedia}
+        />
     );
 
     return (
@@ -1262,853 +548,76 @@ export const AdminPostEditor = () => {
 
             <div className="se-editor-rejilla">
             <div className="se-editor-rejilla__pieza">
-            <div className="se-editor-group" {...ancla("formato")}>
-                <p className="se-editor-group__title">Formato</p>
-                <CampoMovil
-                    movil={esMovil}
-                    titulo="Qué es esta pieza"
-                    resumen={currentFormat?.name || "Elija un formato"}
-                    estado={form.format ? "ok" : "falta"}
-                >
-                {/* Al crear sin formato, los formatos a la vista con lo que es cada uno: un
-                    desplegable solo, en una página vacía, no decía qué elegir ni por qué. */}
-                {isCreate && !form.format ? (
-                    <div className="se-formatos" role="group" aria-label="Qué es esta pieza">
-                        {formats.map((f) => (
-                            <button
-                                key={f.slug}
-                                type="button"
-                                className="se-formatos__opcion"
-                                onClick={() => {
-                                    // Elegir el formato es el punto de partida, no un cambio:
-                                    // sin esto, salir justo después ya preguntaba «¿salir sin
-                                    // guardar?». La copia local pasa a ser la de ese formato.
-                                    setForm((prev) => ({ ...prev, format: f.slug }));
-                                    setBase((prev) => (prev ? { ...prev, format: f.slug } : prev));
-                                }}
-                            >
-                                <strong className="se-formatos__nombre">{f.name}</strong>
-                                {f.lede ? <span className="se-formatos__lede">{f.lede}</span> : null}
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                <label className="se-form-field" htmlFor="post-format">
-                    <span className="se-form-label">Qué es esta pieza</span>
-                    <select
-                        id="post-format"
-                        className="se-form-control"
-                        value={form.format}
-                        onChange={handleChange("format")}
-                    >
-                        <option value="">Elija un formato…</option>
-                        {formats.map((f) => (
-                            <option key={f.slug} value={f.slug}>
-                                {f.name}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                )}
-                {form.format && currentFormat?.lede ? (
-                    <p className="se-admin-meta-hint">{currentFormat.lede}</p>
-                ) : null}
-                {!form.format ? (
-                    <p className="se-admin-meta-hint">
-                        El formato decide qué pide el formulario y cómo se ve la pieza en el
-                        sitio. Elija uno para continuar; se puede cambiar después.
-                    </p>
-                ) : null}
-                </CampoMovil>
-            </div>
+            <GrupoFormato
+                esMovil={esMovil}
+                isCreate={isCreate}
+                form={form}
+                setForm={setForm}
+                setBase={setBase}
+                formats={formats}
+                currentFormat={currentFormat}
+                handleChange={handleChange}
+            />
 
             {form.format ? (
                 <>
-                    <div className="se-editor-group" {...ancla("pieza")}>
-                        <p className="se-editor-group__title">La pieza</p>
-                        <CampoMovil
-                            movil={esMovil}
-                            titulo="Título"
-                            resumen={form.title.trim() ? recortar(form.title.trim()) : "Sin escribir"}
-                            estado={form.title.trim() ? "ok" : "falta"}
-                        >
-                        <label className="se-form-field" htmlFor="post-title">
-                            <span className="se-form-label">Título</span>
-                            <input
-                                id="post-title"
-                                className="se-form-control"
-                                value={form.title}
-                                onChange={handleChange("title")}
-                                required
-                            />
-                        </label>
-                        </CampoMovil>
-                        {/* The same editor as the body: a summary is prose, and a
-                            writer who needs an emphasis or a link in it should not
-                            have to give it up because the field is smaller. */}
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo={form.format === "editorial" ? "Entradilla" : "Resumen"}
-                            resumen={recortar(textoPlano(form.excerpt)) || "Vacío"}
-                            estado={textoPlano(form.excerpt) ? "ok" : undefined}
-                        >
-                        <div className="se-form-field se-form-field--brief" id="post-excerpt">
-                            <span className="se-form-label">
-                                {form.format === "editorial" ? "Entradilla" : "Resumen"}
-                            </span>
-                            <RichTextEditor
-                                value={form.excerpt}
-                                onChange={(html) => setForm((prev) => ({ ...prev, excerpt: html }))}
-                                placeholder={
-                                    form.format === "editorial"
-                                        ? "La frase con la que abre el editorial…"
-                                        : "Dos o tres líneas que resuman la pieza…"
-                                }
-                            />
-                        </div>
-                        </CampoMovil>
+                    <GrupoLaPieza
+                        esMovil={esMovil}
+                        form={form}
+                        setForm={setForm}
+                        handleChange={handleChange}
+                        currentFormat={currentFormat}
+                        assets={assets}
+                        setAsset={setAsset}
+                        colaborador={colaborador}
+                        colaboradorOcupado={colaboradorOcupado}
+                        handleUsarSuCuenta={handleUsarSuCuenta}
+                        handleQuitarVinculo={handleQuitarVinculo}
+                        nFuentes={nFuentes}
+                        shows={shows}
+                    />
 
-                        {/* The published byline. Not the account that uploads the
-                            piece -- nobody wants their personal login printed on
-                            the site, and an editor rarely publishes under their
-                            own name. */}
-                        {currentFormat?.shows_author !== false ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                plegable
-                                titulo="Firma y foto"
-                                resumen={form.byline.trim() || "Sin firma"}
-                                miniatura={assets.bylinePhoto?.url || undefined}
-                            >
-                                {colaborador ? (
-                                    <div className="se-admin-meta-hint" role="note">
-                                        <p>
-                                            <strong>Pieza de un lector.</strong> En el panel sale como «
-                                            {firmadaPorColaborador(form.byline.trim() || "sin firma")}»; la
-                                            web pública solo enseña la firma y la foto de abajo, sin esa marca.
-                                            Se copiaron de su cuenta al aceptarla y no cambian solas.
-                                        </p>
-                                        {!colaborador.al_dia ? (
-                                            <p>
-                                                En su cuenta, ahora: «{colaborador.nombre_actual || "sin nombre"}»
-                                                {(colaborador.foto_actual_id ?? null) === (form.byline_photo_asset_id ?? null)
-                                                    ? ", con la misma foto"
-                                                    : colaborador.foto_actual_id
-                                                      ? ", con otra foto"
-                                                      : ", sin foto"}
-                                                .
-                                            </p>
-                                        ) : null}
-                                        {!colaborador.cuenta_activa ? <p>Su cuenta está desactivada.</p> : null}
-                                        <p>
-                                            {!colaborador.al_dia && colaborador.nombre_actual ? (
-                                                <button
-                                                    type="button"
-                                                    className="se-btn se-btn--secondary"
-                                                    onClick={handleUsarSuCuenta}
-                                                    disabled={colaboradorOcupado}
-                                                >
-                                                    Usar el nombre y la foto actuales de su cuenta
-                                                </button>
-                                            ) : null}{" "}
-                                            <button
-                                                type="button"
-                                                className="se-btn se-btn--secondary"
-                                                onClick={handleQuitarVinculo}
-                                                disabled={colaboradorOcupado}
-                                            >
-                                                Quitar el vínculo con el lector
-                                            </button>
-                                        </p>
-                                    </div>
-                                ) : null}
-                                <label className="se-form-field" htmlFor="post-byline">
-                                    <span className="se-form-label">
-                                        Firma — nombre con el que se publica
-                                    </span>
-                                    <input
-                                        id="post-byline"
-                                        className="se-form-control"
-                                        value={form.byline}
-                                        onChange={handleChange("byline")}
-                                        placeholder="Pablo Quintero, Redacción SurEconomics, …"
-                                    />
-                                    <span className="se-admin-meta-hint">
-                                        Si lo deja vacío, la pieza se publica sin firma. No se usa el
-                                        nombre de la cuenta.
-                                    </span>
-                                </label>
+                    <GrupoCuerpo
+                        esMovil={esMovil}
+                        form={form}
+                        setForm={setForm}
+                        handleChange={handleChange}
+                        nPalabras={nPalabras}
+                        estadoIngles={estadoIngles}
+                        traductorDisponible={traductorDisponible}
+                        traducir={traducir}
+                        traduciendo={traduciendo}
+                        versionEn={versionEn}
+                        revisadaAhora={revisadaAhora}
+                        setRevisadaAhora={setRevisadaAhora}
+                    />
 
-                                {/* Dentro de la misma condición que la firma, y no al
-                                    lado de las otras tres adjunciones: un formato que no
-                                    muestra autor no tiene a quién retratar, y el campo
-                                    necesita leer el nombre de arriba para precargar la
-                                    búsqueda. */}
-                                <BylinePhotoField
-                                    value={form.byline_photo_asset_id}
-                                    asset={assets.bylinePhoto}
-                                    byline={form.byline}
-                                    onChange={setAsset("byline_photo_asset_id", "bylinePhoto")}
-                                />
-                            </CampoMovil>
-                        ) : null}
+                    <GrupoArchivos
+                        esMovil={esMovil}
+                        form={form}
+                        setForm={setForm}
+                        assets={assets}
+                        setAsset={setAsset}
+                        requiredMedia={requiredMedia}
+                        legacyImage={legacyImage}
+                        subirVideo={subirVideo}
+                    />
 
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo="Fuentes"
-                            resumen={nFuentes ? `${nFuentes} ${nFuentes === 1 ? "fuente" : "fuentes"}` : "Ninguna"}
-                        >
-                        <SourcesField
-                            value={form.sources}
-                            onChange={(sources) => setForm((prev) => ({ ...prev, sources }))}
-                        />
-                        </CampoMovil>
-
-                        {shows("interviewee") ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Entrevistado"
-                                resumen={
-                                    [form.interviewee, form.interviewee_role].filter((x) => x?.trim()).join(" · ") ||
-                                    "Sin escribir"
-                                }
-                            >
-                                <label className="se-form-field" htmlFor="post-interviewee">
-                                    <span className="se-form-label">Entrevistado</span>
-                                    <input
-                                        id="post-interviewee"
-                                        className="se-form-control"
-                                        value={form.interviewee}
-                                        onChange={handleChange("interviewee")}
-                                    />
-                                </label>
-                                <label className="se-form-field" htmlFor="post-interviewee-role">
-                                    <span className="se-form-label">Cargo</span>
-                                    <input
-                                        id="post-interviewee-role"
-                                        className="se-form-control"
-                                        value={form.interviewee_role}
-                                        onChange={handleChange("interviewee_role")}
-                                    />
-                                </label>
-                            </CampoMovil>
-                        ) : null}
-
-                        {shows("unit") ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Unidad que firma"
-                                resumen={form.unit.trim() || "Sin escribir"}
-                            >
-                            <label className="se-form-field" htmlFor="post-unit">
-                                <span className="se-form-label">Unidad que firma</span>
-                                <input
-                                    id="post-unit"
-                                    className="se-form-control"
-                                    value={form.unit}
-                                    onChange={handleChange("unit")}
-                                    placeholder="RendiGroup Advisors, …"
-                                />
-                            </label>
-                            </CampoMovil>
-                        ) : null}
-
-                        {currentFormat?.shows_author === false ? (
-                            <p className="se-admin-meta-hint">
-                                Este formato se publica sin firma personal: el sitio no muestra
-                                autor.
-                            </p>
-                        ) : null}
-                    </div>
-
-                    <div className="se-editor-group" {...ancla("cuerpo")}>
-                        <p className="se-editor-group__title">Cuerpo</p>
-                        <CampoMovil
-                            movil={esMovil}
-                            titulo={form.format === "entrevista" ? "Resumen de la conversación" : "Contenido"}
-                            resumen={nPalabras ? `${nPalabras} ${nPalabras === 1 ? "palabra" : "palabras"}` : "Sin escribir"}
-                            estado={nPalabras ? "ok" : undefined}
-                        >
-                        <div className="se-form-field se-editor-cuerpo">
-                            <span className="se-form-label">
-                                {form.format === "entrevista"
-                                    ? "Resumen escrito de la conversación"
-                                    : "Contenido"}
-                            </span>
-                            {/* Fotos entre párrafos: solo donde el cuerpo es texto que se
-                                lee de corrido. La entrevista lleva aquí el resumen de la
-                                conversación, y su imagen es el video. */}
-                            {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
-                                <EditorConImagenes
-                                    value={form.content}
-                                    onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                                    subir={uploadAdminMediaImage}
-                                />
-                            ) : (
-                                <RichTextEditor
-                                    value={form.content}
-                                    onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                                />
-                            )}
-                        </div>
-                        </CampoMovil>
-
-                        {/* La pieza en inglés, para /en. Sale en inglés con título y cuerpo en
-                            inglés; el resumen es opcional. Sin ellos, /en la enseña en español
-                            con un aviso. El botón de Claude solo aparece si el servidor tiene
-                            la clave (ver `traduccion_service.py`). */}
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo="En inglés"
-                            resumen={estadoIngles.resumen}
-                            estado={estadoIngles.estado}
-                        >
-                        <p className="se-admin-meta-hint" style={{ marginTop: 0 }}>
-                            Para que la pieza salga en inglés en la versión /en del sitio hacen
-                            falta el título y el cuerpo en inglés; el resumen es opcional. Si se
-                            dejan vacíos, en /en la pieza se muestra en español con un aviso.
-                        </p>
-                        {traductorDisponible ? (
-                            <div className="se-form-field">
-                                <div className="se-admin-filters" style={{ alignItems: "center" }}>
-                                    <button
-                                        type="button"
-                                        className="se-btn se-btn--secondary"
-                                        onClick={traducir}
-                                        disabled={traduciendo}
-                                    >
-                                        {traduciendo ? "Traduciendo…" : "Traducir con Claude"}
-                                    </button>
-                                    <span className="se-admin-meta-hint">
-                                        Traduce el título, el resumen y el cuerpo de arriba, aunque
-                                        no estén guardados. Revisa el resultado y guarda la pieza.
-                                    </span>
-                                </div>
-                            </div>
-                        ) : null}
-                        {estadoIngles.aviso ? (
-                            <p className="se-admin-meta-hint" role="status" style={{ color: "var(--color-accent)" }}>
-                                {estadoIngles.aviso}
-                            </p>
-                        ) : null}
-                        <label className="se-form-field" htmlFor="post-title-en">
-                            <span className="se-form-label">Título en inglés</span>
-                            <input
-                                id="post-title-en"
-                                className="se-form-control"
-                                value={form.title_en}
-                                onChange={handleChange("title_en")}
-                                maxLength={500}
-                            />
-                        </label>
-                        <div className="se-form-field se-form-field--brief" key={`resumen-en-${versionEn}`}>
-                            <span className="se-form-label">
-                                {form.format === "editorial" ? "Entradilla en inglés" : "Resumen en inglés"} (opcional)
-                            </span>
-                            <RichTextEditor
-                                value={form.excerpt_en}
-                                onChange={(html) => setForm((prev) => ({ ...prev, excerpt_en: html }))}
-                            />
-                            <span className="se-admin-meta-hint">
-                                El texto corto que va debajo del título y en las tarjetas de la
-                                portada en inglés.
-                            </span>
-                        </div>
-                        <div className="se-form-field se-editor-cuerpo" key={`cuerpo-en-${versionEn}`}>
-                            <span className="se-form-label">Cuerpo en inglés</span>
-                            {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
-                                <EditorConImagenes
-                                    value={form.content_en}
-                                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
-                                    subir={uploadAdminMediaImage}
-                                />
-                            ) : (
-                                <RichTextEditor
-                                    value={form.content_en}
-                                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
-                                />
-                            )}
-                        </div>
-                        {/* Solo cuando la traducción vino de Claude: una escrita a mano ya
-                            está revisada por quien la escribió. */}
-                        {form.traduccion_automatica || revisadaAhora ? (
-                            <label className="se-form-field se-acceso" htmlFor="post-traduccion-revisada">
-                                <span className="se-acceso__fila">
-                                    <input
-                                        id="post-traduccion-revisada"
-                                        type="checkbox"
-                                        checked={!form.traduccion_automatica}
-                                        onChange={(e) => {
-                                            setRevisadaAhora(true);
-                                            setForm((prev) => ({ ...prev, traduccion_automatica: !e.target.checked }));
-                                        }}
-                                    />
-                                    <span className="se-form-label se-acceso__titulo">
-                                        Ya revisé la traducción automática
-                                    </span>
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Mientras no se marque, la página en inglés avisa al lector de
-                                    que es una traducción automática sin revisar.
-                                </span>
-                            </label>
-                        ) : null}
-                        </CampoMovil>
-
-                    </div>
-
-                    <div className="se-editor-group">
-                        <p className="se-editor-group__title">Foto y archivos</p>
-
-                        {requiredMedia === "video" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Video de la entrevista"
-                                resumen={nombreDeArchivo(assets.video) || "Sin video"}
-                                estado={form.video_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-video"
-                                label="Video de la entrevista"
-                                hint="Suba el archivo y se aloja en nuestro servicio de video, o pegue un enlace de YouTube o Vimeo. Sin video, la entrevista no se puede publicar."
-                                kind="video"
-                                value={form.video_asset_id}
-                                asset={assets.video}
-                                onChange={setAsset("video_asset_id", "video")}
-                                onUpload={subirVideo}
-                                accept={ACCEPTED_VIDEO_MIME}
-                                required
-                            />
-                            </CampoMovil>
-                        ) : null}
-
-                        {requiredMedia === "document" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Documento (PDF)"
-                                resumen={
-                                    form.document_asset_id
-                                        ? `${nombreDeArchivo(assets.document)}${form.document_open_access ? " · abierto" : ""}`
-                                        : "Sin documento"
-                                }
-                                estado={form.document_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-document"
-                                label="Documento del informe (PDF)"
-                                hint="Solo los lectores registrados con sesión iniciada pueden descargarlo. Sin documento, el informe no se puede publicar."
-                                kind="document"
-                                value={form.document_asset_id}
-                                asset={assets.document}
-                                onChange={setAsset("document_asset_id", "document")}
-                                onUpload={uploadAdminMediaDocument}
-                                accept={ACCEPTED_DOCUMENT_MIME}
-                                required
-                            />
-
-                            {/* Quien puede descargarlo. Va aqui, pegado al campo del
-                                archivo, porque es una decision sobre ese archivo y no
-                                sobre la pieza en general. */}
-                            <label className="se-form-field se-acceso" htmlFor="post-open-access">
-                                <span className="se-acceso__fila">
-                                    <input
-                                        id="post-open-access"
-                                        type="checkbox"
-                                        checked={Boolean(form.document_open_access)}
-                                        onChange={(e) =>
-                                            setForm((prev) => ({
-                                                ...prev,
-                                                document_open_access: e.target.checked,
-                                            }))
-                                        }
-                                    />
-                                    <span className="se-form-label se-acceso__titulo">
-                                        Descarga abierta a todos
-                                    </span>
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Sin marcar, sólo los lectores registrados con el correo
-                                    confirmado pueden descargarlo. Marcado, cualquiera que
-                                    entre al sitio lo descarga en un clic, sin cuenta.
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Se puede cambiar después: cerrar un informe abierto
-                                    corta el acceso de inmediato, también para quien ya
-                                    tenía la dirección.
-                                </span>
-                            </label>
-                            </CampoMovil>
-                        ) : null}
-
-                        {requiredMedia === "audio" ? (
-                            <CampoMovil
-                                movil={esMovil}
-                                titulo="Audio del podcast"
-                                resumen={nombreDeArchivo(assets.audio) || "Sin audio"}
-                                estado={form.audio_asset_id ? "ok" : "falta"}
-                            >
-                            <AssetField
-                                id="post-audio"
-                                label="Audio del podcast (MP3 o M4A)"
-                                hint="Se escucha sin cuenta, como cualquier pieza. Sin audio, el podcast no se puede publicar."
-                                kind="audio"
-                                value={form.audio_asset_id}
-                                asset={assets.audio}
-                                onChange={setAsset("audio_asset_id", "audio")}
-                                onUpload={uploadAdminMediaAudio}
-                                accept={ACCEPTED_AUDIO_MIME}
-                                required
-                            />
-                            </CampoMovil>
-                        ) : null}
-
-                        {/* Every format, because every format has a card in a listing
-                            and any piece may arrive with a photo. */}
-                        <CampoMovil
-                            movil={esMovil}
-                            titulo="Imagen"
-                            resumen={
-                                form.image_asset_id
-                                    ? `${nombreDeArchivo(assets.image)}${form.imagen_foco ? " · encuadrada" : ""}`
-                                    : legacyImage
-                                      ? "Imagen antigua por dirección"
-                                      : "Sin imagen"
-                            }
-                            miniatura={assets.image?.url || undefined}
-                            estado={form.image_asset_id || legacyImage ? "ok" : undefined}
-                        >
-                                <AssetField
-                                    id="post-image-asset"
-                                    label="Imagen"
-                                    hint={IMAGE_HINT[form.format] ?? IMAGE_HINT.default}
-                                    kind="image"
-                                    value={form.image_asset_id}
-                                    asset={assets.image}
-                                    onChange={setAsset("image_asset_id", "image")}
-                                    onUpload={uploadAdminMediaImage}
-                                    accept={ACCEPTED_IMAGE_MIME}
-                                />
-                                {/* Qué punto de la foto queda a la vista en cada tarjeta. */}
-                                {enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url) ? (
-                                    <EncuadreDeFoto
-                                        url={enlaceWeb(assets.image?.url) || enlaceWeb(form.featured_image_url)}
-                                        valor={form.imagen_foco}
-                                        titulo={form.title}
-                                        onChange={(v) => setForm((prev) => ({ ...prev, imagen_foco: v }))}
-                                    />
-                                ) : null}
-                                {legacyImage ? (
-                                    <p className="se-asset__legacy">
-                                        Esta pieza trae una imagen por URL de antes de la
-                                        biblioteca de archivos:{" "}
-                                        <a
-                                            className="se-link"
-                                            href={enlaceWeb(form.featured_image_url) || undefined}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            verla
-                                        </a>
-                                        {". "}
-                                        Se sigue usando mientras no adjunte una nueva.{" "}
-                                        <button
-                                            type="button"
-                                            className="se-link se-header__nav-link--button"
-                                            onClick={() =>
-                                                setForm((prev) => ({
-                                                    ...prev,
-                                                    featured_image_url: "",
-                                                }))
-                                            }
-                                        >
-                                            Quitarla
-                                        </button>
-                                    </p>
-                                ) : null}
-                        </CampoMovil>
-                        </div>
-
-                    <div className="se-editor-group" {...ancla("clasificacion")}>
-                        <p className="se-editor-group__title">Clasificación</p>
-                        <SugerenciasDeClasificacion
-                            sugerencias={sugerencias}
-                            temasPuestos={form.topic_ids ?? []}
-                            lugaresPuestos={form.place_ids ?? []}
-                            onTema={(id) => setForm((prev) => ({ ...prev, topic_ids: [...(prev.topic_ids ?? []), id] }))}
-                            onLugar={(id) => setForm((prev) => ({ ...prev, place_ids: [...(prev.place_ids ?? []), id] }))}
-                        />
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo="Temas"
-                            resumen={listaCorta(temasElegidos, "Ninguno")}
-                            estado={temasElegidos.length ? "ok" : undefined}
-                        >
-                        <AxisPicker
-                            buscar={esMovil}
-                            id="post-topics"
-                            legend="Temas"
-                            hint="El primero es el principal: es el único que se muestra en las tarjetas."
-                            options={topics}
-                            value={form.topic_ids}
-                            onChange={(next) => setForm((prev) => ({ ...prev, topic_ids: next }))}
-                        />
-                        </CampoMovil>
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo="Lugares"
-                            resumen={listaCorta(lugaresElegidos, "Ninguno")}
-                            estado={lugaresElegidos.length ? "ok" : undefined}
-                        >
-                        <AxisPicker
-                            buscar={esMovil}
-                            id="post-places"
-                            legend="Lugares"
-                            hint="Elija el lugar más específico que aplique. Al filtrar por una región aparecen sus países."
-                            groups={placeGroups}
-                            value={form.place_ids}
-                            onChange={(next) => setForm((prev) => ({ ...prev, place_ids: next }))}
-                        />
-                        </CampoMovil>
-
-                        {/* Deliberadamente un interruptor aparte y no una entrada mas en
-                            la lista de temas. Los temas topan en tres y el primero es el
-                            que imprime la tarjeta: como tema, marcar algo de educativo
-                            habria gastado uno de esos huecos y competido por ser el
-                            principal, para decir algo que no descarta ningun tema. */}
-                        <CampoMovil
-                            movil={esMovil}
-                            plegable
-                            titulo="Sello y publicidad"
-                            resumen={[
-                                form.is_educational ? "Educativo" : null,
-                                form.sin_publicidad ? "Sin publicidad" : "Con publicidad",
-                            ]
-                                .filter(Boolean)
-                                .join(" · ")}
-                        >
-                        {muestraEducativo ? (
-                            <label
-                                className="se-form-field se-acceso se-acceso--educativo"
-                                htmlFor="post-educational"
-                            >
-                                <span className="se-acceso__fila">
-                                    <input
-                                        id="post-educational"
-                                        type="checkbox"
-                                        checked={Boolean(form.is_educational)}
-                                        onChange={(e) =>
-                                            setForm((prev) => ({
-                                                ...prev,
-                                                is_educational: e.target.checked,
-                                            }))
-                                        }
-                                    />
-                                    <span className="se-form-label se-acceso__titulo">
-                                        Es contenido educativo
-                                    </span>
-                                </span>
-                                <span className="se-admin-meta-hint">
-                                    Marcado, la pieza lleva un sello propio en las tarjetas y
-                                    entra en la sección Educación, además de seguir donde ya
-                                    estaba. No cambia sus temas ni su formato.
-                                </span>
-                            </label>
-                        ) : null}
-
-                        {/* Sin publicidad. Siempre visible y no detras de una condicion
-                            como la de educativo: los casos que la piden -- un obituario,
-                            una investigacion que toca a un anunciante, la cobertura de
-                            una tragedia -- son pocos al ano y siempre urgentes, y en esos
-                            momentos nadie deberia tener que averiguar donde esta. */}
-                        <label
-                            className="se-form-field se-acceso"
-                            htmlFor="post-sin-publicidad"
-                        >
-                            <span className="se-acceso__fila">
-                                <input
-                                    id="post-sin-publicidad"
-                                    type="checkbox"
-                                    checked={Boolean(form.sin_publicidad)}
-                                    onChange={(e) =>
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            sin_publicidad: e.target.checked,
-                                        }))
-                                    }
-                                />
-                                <span className="se-form-label se-acceso__titulo">
-                                    Esta pieza no lleva publicidad
-                                </span>
-                            </span>
-                            <span className="se-admin-meta-hint">
-                                Marcado, la página no pide ningún espacio publicitario: ni
-                                el rail, ni la tarjeta del cuerpo, ni el cintillo. No se
-                                ocultan después — no se piden.
-                            </span>
-                        </label>
-
-                        {/* La Clave al final de la pieza: una palabra que tenga que ver con lo
-                            que se acaba de leer. Solo en los formatos con cuerpo largo; en los
-                            demás no hay «leíste completo» que premiar. */}
-                        <label className="se-form-field" htmlFor="post-moneda">
-                            <span className="se-form-label">Moneda de la que habla (opcional)</span>
-                            <select
-                                id="post-moneda"
-                                className="se-form-control"
-                                value={form.moneda ?? ""}
-                                onChange={(e) => setForm((prev) => ({ ...prev, moneda: e.target.value }))}
-                            >
-                                <option value="">Ninguna</option>
-                                {CODIGOS_MONEDA.map((codigo) => (
-                                    <option key={codigo} value={codigo}>
-                                        {codigo} · {tActual(`monedas.nombres.${codigo}`)}
-                                    </option>
-                                ))}
-                            </select>
-                            <span className="se-admin-meta-hint">
-                                Con ella, junto al titular sale la cotización del día y, si la pieza
-                                abre la portada, su gráfica de 30 días.
-                            </span>
-                        </label>
-                        {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
-                            <div className="se-form-field se-acceso se-acceso--clave">
-                                <span className="se-form-label se-acceso__titulo">La Clave de esta pieza</span>
-                                <span className="se-admin-meta-hint">
-                                    Opcional. Al final de la pieza aparece el juego de adivinar
-                                    esta palabra: de 4 a 10 letras, una sola, sin espacios (las
-                                    tildes no cuentan). Elija una que salga en el texto o que lo
-                                    resuma. La pista se ofrece al tercer fallo.
-                                </span>
-                                <div className="se-admin-filters" style={{ marginTop: "0.5rem" }}>
-                                    <label className="se-admin-filters__field" htmlFor="post-juego-palabra">
-                                        <span className="se-form-label">Palabra</span>
-                                        <input
-                                            id="post-juego-palabra"
-                                            className="se-form-control"
-                                            maxLength={20}
-                                            value={form.juego_palabra ?? ""}
-                                            onChange={(e) =>
-                                                setForm((prev) => ({ ...prev, juego_palabra: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                    <label
-                                        className="se-admin-filters__field se-admin-filters__field--grow"
-                                        htmlFor="post-juego-pista"
-                                    >
-                                        <span className="se-form-label">Pista (opcional)</span>
-                                        <input
-                                            id="post-juego-pista"
-                                            className="se-form-control"
-                                            maxLength={200}
-                                            value={form.juego_pista ?? ""}
-                                            onChange={(e) =>
-                                                setForm((prev) => ({ ...prev, juego_pista: e.target.value }))
-                                            }
-                                        />
-                                    </label>
-                                </div>
-                                {(() => {
-                                    const letras = (form.juego_palabra ?? "")
-                                        .normalize("NFD")
-                                        .replace(/[\u0300-\u036f]/g, "")
-                                        .replace(/[^A-Za-z\u00d1\u00f1]/g, "").length;
-                                    const texto = (form.juego_palabra ?? "").trim();
-                                    if (!texto) return null;
-                                    const sucia = /\s/.test(texto);
-                                    const mal = sucia || letras < 4 || letras > 10;
-                                    return (
-                                        <span
-                                            className="se-admin-meta-hint"
-                                            style={mal ? { color: "var(--color-accent)" } : undefined}
-                                        >
-                                            {sucia
-                                                ? "Una sola palabra, sin espacios."
-                                                : mal
-                                                  ? `${letras} letras: tienen que ser entre 4 y 10.`
-                                                  : `${letras} letras.`}
-                                        </span>
-                                    );
-                                })()}
-                            </div>
-                        ) : null}
-                        </CampoMovil>
-                    </div>
-
+                    <GrupoClasificacion
+                        esMovil={esMovil}
+                        form={form}
+                        setForm={setForm}
+                        sugerencias={sugerencias}
+                        topics={topics}
+                        placeGroups={placeGroups}
+                        temasElegidos={temasElegidos}
+                        lugaresElegidos={lugaresElegidos}
+                        muestraEducativo={muestraEducativo}
+                    />
 
                     {esMovil ? grupoPublicacion : null}
 
-                    {/* Slug and SEO are real needs and belong to the machine, not to the
-                        story. Folded away so the form reads as editorial work first. */}
-                    {/* En el teléfono va en su tarjeta, como las demás filas. */}
-                    <div className={esMovil ? "se-editor-group" : undefined}>
-                    <CampoMovil
-                        movil={esMovil}
-                        plegable
-                        titulo="Dirección y SEO"
-                        resumen={form.slug.trim() ? `/${form.slug.trim()}` : "Automáticas"}
-                    >
-                        <div className="se-editor-advanced__body">
-                            <label className="se-form-field" htmlFor="post-slug">
-                                <span className="se-form-label">
-                                    Dirección (slug). Si la deja vacía, sale sola del título, corta
-                                </span>
-                                <input
-                                    id="post-slug"
-                                    className="se-form-control"
-                                    value={form.slug}
-                                    onChange={handleChange("slug")}
-                                />
-                            </label>
-                            <p className="se-admin-meta-hint" style={{ margin: "0 0 0.5rem" }}>
-                                {form.seo_automatico
-                                    ? "El meta título y la meta descripción los puso el sistema. Si cambia el titular o el texto, se rehacen solos; si escribe aquí los suyos, se quedan como los deje."
-                                    : "Es lo que enseña Google. Si los deja vacíos, se rellenan solos a los pocos minutos de publicar."}
-                            </p>
-                            <label className="se-form-field" htmlFor="post-meta-title">
-                                <span className="se-form-label">Meta título</span>
-                                <input
-                                    id="post-meta-title"
-                                    className="se-form-control"
-                                    value={form.meta_title}
-                                    onChange={handleChange("meta_title")}
-                                    maxLength={70}
-                                />
-                            </label>
-                            <label className="se-form-field" htmlFor="post-meta-desc">
-                                <span className="se-form-label">Meta descripción</span>
-                                <textarea
-                                    id="post-meta-desc"
-                                    className="se-form-control se-form-control--textarea"
-                                    rows={2}
-                                    value={form.meta_description}
-                                    onChange={handleChange("meta_description")}
-                                    maxLength={320}
-                                />
-                            </label>
-                            <label className="se-form-field" htmlFor="post-canonical">
-                                <span className="se-form-label">URL canónica</span>
-                                <input
-                                    id="post-canonical"
-                                    className="se-form-control"
-                                    value={form.canonical_url}
-                                    onChange={handleChange("canonical_url")}
-                                    placeholder="Solo si esta pieza se publicó primero en otro sitio"
-                                />
-                            </label>
-                            <p className="se-admin-meta-hint">
-                                Si deja el meta título y la meta descripción vacíos, los
-                                buscadores usan el título y el resumen de la pieza, que suele ser
-                                lo correcto.
-                            </p>
-                        </div>
-                    </CampoMovil>
-                    </div>
+                    <CampoSeo esMovil={esMovil} form={form} handleChange={handleChange} />
                 </>
             ) : null}
             </div>
@@ -2116,35 +625,14 @@ export const AdminPostEditor = () => {
             {form.format ? (
                 <aside className="se-editor-rejilla__estado" aria-label="Estado y acciones de la pieza">
                     {!esMovil ? (
-                        <section className="se-editor-estado" {...ancla("estado")}>
-                            <p className="se-editor-estado__rotulo">Estado</p>
-                            <p className="se-editor-estado__valor">{resumenDeEstado}</p>
-                            {form.status === "published" && form.slug ? (
-                                <a
-                                    href={rutaDePieza({ formatoApi: form.format, slug: form.slug })}
-                                    className="se-link se-editor-estado__ver"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Ver en el sitio
-                                </a>
-                            ) : null}
-                            <p
-                                className={`se-editor-estado__guardado${sinGuardar ? " is-pendiente" : ""}`}
-                                role="status"
-                            >
-                                {sinGuardar
-                                    ? borrador.guardadoEn
-                                        ? `Sin guardar · copia en este equipo a las ${horaCorta(borrador.guardadoEn)}`
-                                        : "Hay cambios sin guardar"
-                                    : isCreate
-                                      ? "Todavía no se ha creado"
-                                      : "Todo guardado"}
-                            </p>
-                            {faltas.length ? (
-                                <p className="se-editor-estado__faltas">Para publicar falta: {faltas.join(", ")}.</p>
-                            ) : null}
-                        </section>
+                        <EstadoDeLaPieza
+                            form={form}
+                            resumenDeEstado={resumenDeEstado}
+                            sinGuardar={sinGuardar}
+                            borrador={borrador}
+                            isCreate={isCreate}
+                            faltas={faltas}
+                        />
                     ) : null}
 
                     {!esMovil ? <ListaDeComprobacion titulo="Antes de publicar" puntos={chequeo} /> : null}
@@ -2162,96 +650,24 @@ export const AdminPostEditor = () => {
 
                     <AdminFormFeedback tone={feedback?.tone} message={feedback?.message} />
 
-                    <div
-                        className={`se-admin-form-actions${esMovil ? " se-admin-form-actions--movil" : ""}`}
-                        {...ancla("acciones")}
-                    >
-                        {esMovil && faltas.length ? (
-                            <p className="se-admin-form-actions__faltas">Falta: {faltas.join(", ")}</p>
-                        ) : null}
-                        <button
-                            type="button"
-                            className="se-btn se-btn--secondary se-btn--previa"
-                            onClick={() => setVistaPrevia(true)}
-                            disabled={!form.format}
-                            title={form.format ? undefined : "Elija primero el formato"}
-                        >
-                            <IconoOjo />
-                            Vista previa
-                        </button>
-                        <button
-                            type="button"
-                            className={publicarEsPrincipal ? "se-btn se-btn--secondary" : "se-btn"}
-                            onClick={handleSave}
-                            disabled={saveState.status === "loading"}
-                        >
-                            {saveState.status === "loading"
-                                ? "Guardando…"
-                                : programada
-                                  ? isCreate
-                                      ? "Crear y programar"
-                                      : "Programar"
-                                  : isCreate
-                                    ? form.status === "draft"
-                                        ? "Guardar borrador"
-                                        : "Crear"
-                                    : "Guardar cambios"}
-                        </button>
-                        {isCreate && canPublish && form.status === "draft" ? (
-                            <button
-                                type="button"
-                                className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
-                                onClick={() => guardar({ publicar: true })}
-                                disabled={saveState.status === "loading" || Boolean(faltas.length)}
-                                title={faltas.length ? `Falta: ${faltas.join(", ")}` : "Ctrl + Enter"}
-                            >
-                                Publicar
-                            </button>
-                        ) : null}
-                        {!isCreate && canPublish ? (
-                            <>
-                                {form.status !== "published" ? (
-                                <button
-                                    type="button"
-                                    className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
-                                    onClick={handlePublish}
-                                    disabled={actionState.status === "loading"}
-                                >
-                                    {actionState.status === "loading" &&
-                                    actionState.kind === "publish"
-                                        ? "Publicando…"
-                                        : programada
-                                          ? "Publicar ya"
-                                          : sinGuardar
-                                            ? "Guardar y publicar"
-                                            : "Publicar"}
-                                </button>
-                                ) : null}
-                                {form.status !== "draft" ? (
-                                <button
-                                    type="button"
-                                    className="se-btn se-btn--secondary"
-                                    onClick={handleUnpublish}
-                                    disabled={actionState.status === "loading"}
-                                >
-                                    {actionState.status === "loading" &&
-                                    actionState.kind === "unpublish"
-                                        ? "Despublicando…"
-                                        : programada
-                                          ? "Volver a borrador"
-                                          : "Despublicar"}
-                                </button>
-                                ) : null}
-                                <button
-                                    type="button"
-                                    className="se-editor-eliminar"
-                                    onClick={handleDelete}
-                                >
-                                    Eliminar la pieza
-                                </button>
-                            </>
-                        ) : null}
-                    </div>
+                    <BotonesDeLaPieza
+                        esMovil={esMovil}
+                        form={form}
+                        faltas={faltas}
+                        setVistaPrevia={setVistaPrevia}
+                        publicarEsPrincipal={publicarEsPrincipal}
+                        handleSave={handleSave}
+                        saveState={saveState}
+                        programada={programada}
+                        isCreate={isCreate}
+                        canPublish={canPublish}
+                        guardar={guardar}
+                        handlePublish={handlePublish}
+                        actionState={actionState}
+                        sinGuardar={sinGuardar}
+                        handleUnpublish={handleUnpublish}
+                        handleDelete={handleDelete}
+                    />
                 </aside>
             ) : null}
             </div>

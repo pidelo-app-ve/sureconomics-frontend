@@ -12,12 +12,21 @@
  * detrás y salen en un envío a `/publicidad/vistos` (una ficha por línea). Al ocultar o
  * cerrar la pestaña sale todo en el acto.
  *
- * **3. Da igual qué se despliegue antes.** `/vistos` es una ruta nueva; `/visto` no
- * cambió. Mientras no se sabe si el backend la tiene, el lote va por `fetch`, que sí ve
- * la respuesta: con 404 (un backend anterior) se manda ficha a ficha a `/visto` y se
- * recuerda durante la sesión; con 2xx, se recuerda que sí y desde entonces va por
- * `sendBeacon`. Al cerrar la pestaña sin saberlo aún, ficha a ficha a `/visto`, que vale
- * con cualquier backend.
+ * **3. Da igual qué se despliegue antes, o qué se revierta.** `/vistos` es una ruta
+ * nueva; `/visto` no cambió. Con la pestaña a la vista, el lote va **siempre** por
+ * `fetch`, que ve la respuesta: con 404 (un backend anterior, o uno que se revirtió
+ * mientras la pestaña estaba abierta) ese lote sale otra vez ficha a ficha a `/visto` y
+ * se recuerda «no» durante la sesión; con 2xx se recuerda «sí». `sendBeacon`, que no ve
+ * la respuesta, queda solo para cuando la pestaña se oculta o se cierra: entonces el lote
+ * va a `/vistos` si se sabe que existe, y si no, ficha a ficha a `/visto`, que vale con
+ * cualquier backend.
+ *
+ * Lo que se acepta perder: si la pestaña se cierra con el **primer** `fetch` del primer
+ * lote aún en vuelo, justo en la ventana en que el backend no tiene `/vistos` (un
+ * despliegue a medias o una vuelta atrás), ese lote no llega a saber que fue 404 y no se
+ * reenvía. Y lo mismo con un lote que sale por beacon al cerrar, si el backend se
+ * revirtió después de que esta pestaña aprendiera «sí». Son rotaciones de una pestaña, en
+ * los minutos que dura un despliegue.
  *
  * **4. Juntar no cambia lo que cuenta el cupo de 30 s.** El servidor cuenta una vista por
  * dirección, pieza y hueco cada 30 s (`VISTAS_POR_DIRECCION`) **según cuándo llegan**. Al
@@ -117,11 +126,13 @@ export const crearEnvioDeVistos = ({ base, beacon, peticion, reloj, programar, c
       return;
     }
     for (const cuerpo of trocearFichas(fichas)) {
-      if (soporte === true) {
+      if (saliendo) {
+        // Al cerrar solo sirve el beacon (sobrevive a la pestaña), aunque no vea el 404.
         soltar(RUTA_VARIAS, cuerpo);
         continue;
       }
-      // Aún no se sabe si este backend tiene `/vistos`: `fetch` sí ve la respuesta.
+      // Con la pestaña viva, siempre `fetch`: ve la respuesta, también si el backend se
+      // revirtió después de aprender «sí».
       const otraVez = () => unaAUna(cuerpo.split("\n"));
       let respuesta;
       try {

@@ -59,6 +59,10 @@ describe("qué falta para publicar", () => {
     assert.deepEqual(estado(lista({ status: "scheduled", published_at: "2026-12-01T09:00" })).faltas, []);
   });
 
+  test("programada sin fecha: el resumen lo dice, sin inventarse el 1 de enero", () => {
+    assert.equal(estado(lista({ status: "scheduled", published_at: "" })).resumenDeEstado, "Programado · falta la fecha");
+  });
+
   test("abrir la portada «hasta una fecha» sin fecha: falta hasta cuándo", () => {
     const s = estado(lista({ portada: true, portada_durante: "fecha", portada_hasta: "" }));
     assert.deepEqual(s.faltas, ["hasta cuándo abre la portada"]);

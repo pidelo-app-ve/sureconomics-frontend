@@ -152,8 +152,16 @@ export const isoToDateTimeLocal = (iso) => {
     return `${c.getUTCFullYear()}-${pad(c.getUTCMonth() + 1)}-${pad(c.getUTCDate())}T${pad(c.getUTCHours())}:${pad(c.getUTCMinutes())}`;
 };
 
-/** Valor de `datetime-local` (hora de Caracas) -> ISO en UTC para la API. */
+/**
+ * Valor de `datetime-local` (hora de Caracas) -> ISO en UTC para la API.
+ *
+ * Solo con la fecha y la hora completas («2026-09-28T09:00»). V8 lee lo demás a su
+ * manera: `new Date(":00-04:00")` -- el campo vacío -- es el 1-ene-2000, y la pieza
+ * programada sin fecha decía «sábado, 1 de enero, 4:00» en vez de «falta la fecha».
+ */
+const FECHA_Y_HORA = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 const caracasToIso = (valor) => {
+    if (!FECHA_Y_HORA.test(String(valor ?? ""))) return undefined;
     const d = new Date(`${valor}:00-04:00`);
     return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
 };

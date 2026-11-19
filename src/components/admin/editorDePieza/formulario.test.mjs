@@ -49,14 +49,25 @@ describe("las fechas, en hora de Caracas", () => {
     assert.equal(formToPayload(form({ published_at: isoToDateTimeLocal(iso) })).published_at, iso);
   });
 
-  // FALLO CONOCIDO (19-nov-2026, sin arreglar: cambia lo que se ve). V8 lee
-  // `new Date(":00-04:00")` como el 1-ene-2000 a las 4:00, así que una pieza programada
-  // sin fecha dice «Programado · sábado, 1 de enero, 4:00» en vez de «falta la fecha»
-  // (cabecera del editor y resumen del estado). Publicar sigue bloqueado: la falta
-  // «fecha» mira el campo, no esto.
-  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
-  test("un campo de fecha vacío no se dice como una fecha", { todo: "fechaDeCaracas('') da el 1-ene-2000" }, () => {
+  // Era un fallo (19-nov-2026): V8 lee `new Date(":00-04:00")` como el 1-ene-2000 a las
+  // 4:00, y una pieza programada sin fecha decía «Programado · sábado, 1 de enero, 4:00»
+  // en vez de «falta la fecha» (cabecera del editor y resumen del estado).
+  test("un campo de fecha vacío no se dice como una fecha", () => {
     assert.equal(fechaDeCaracas(""), "");
+    assert.equal(fechaDeCaracas(null), "");
+    assert.equal(fechaDeCaracas(undefined), "");
+    assert.equal(fechaDeCaracas("   "), "");
+  });
+
+  test("ni una a medias o con basura (V8 también las leía como el año 2000 o a la hora en punto)", () => {
+    for (const v of ["abc", "2026-12-01T09", "2026-12-01T", "2026-12-01", "T09:00", "2026-12-01T09:00:30"]) {
+      assert.equal(fechaDeCaracas(v), "", v);
+    }
+  });
+
+  test("con basura en el campo no se manda una fecha inventada", () => {
+    assert.equal("published_at" in formToPayload(form({ published_at: "abc" })), false);
+    assert.equal(destacadaHastaDe(form({ portada: true, portada_durante: "fecha", portada_hasta: "abc" })), undefined);
   });
 
   test("una fecha a medio escribir no se manda", () => {

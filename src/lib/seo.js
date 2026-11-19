@@ -71,6 +71,13 @@ export const applyPageMeta = ({
   }
   if (description) upsertMeta("description", description);
   if (canonicalUrl) upsertLink("canonical", canonicalUrl);
+  // `null` (no `undefined`) quiere decir «esta página no tiene canónica»: una 404. Se
+  // quita la que dejó la página anterior al navegar, y su `og:url` con ella; una 404 que
+  // declara canónica le dice a Google dos cosas opuestas a la vez.
+  if (canonicalUrl === null) {
+    document.head.querySelector('link[rel="canonical"]')?.remove();
+    document.head.querySelector('meta[property="og:url"]')?.remove();
+  }
   if (lang) {
     document.documentElement.lang = lang;
     upsertMeta("og:locale", OG_LOCALE[lang] ?? lang, true);

@@ -70,6 +70,12 @@ export const shellNoEncontrada = (shell, idioma = "es") => {
   html = /<meta name="robots"[^>]*>/i.test(html)
     ? html.replace(/<meta name="robots"[^>]*>/i, tal(NOINDEX))
     : html.replace(/<\/head>/i, tal(`  ${NOINDEX}\n  </head>`));
+  // Una 404 no declara canónica, ni `og:url`, ni `hreflang`: el shell de hoy no los trae,
+  // pero si un día `index.html` los llevara, aquí no llegan (Search Console, 19-nov-2026).
+  html = html
+    .replace(/\s*<link\b[^>]*\brel="canonical"[^>]*>/gi, "")
+    .replace(/\s*<link\b[^>]*\bhreflang=[^>]*>/gi, "")
+    .replace(/\s*<meta\b[^>]*\bproperty="og:url"[^>]*>/gi, "");
   return idioma === "es" ? html : html.replace(/<html lang="[^"]*">/i, tal(`<html lang="${idioma}">`));
 };
 

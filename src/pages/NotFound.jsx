@@ -16,8 +16,9 @@ export const NotFound = () => {
     description: t("piezas.paginaNoEncontrada.meta.descripcion"),
     // Una dirección que no existe ya llega con 404 y `noindex` desde el borde
     // (`api/no-encontrada.js`). Esto queda para cuando se llega navegando dentro del
-    // sitio, sin pasar por el servidor.
-    noindex: true,
+    // sitio, sin pasar por el servidor. Sin canónica ni `hreflang`: una 404 no tiene
+    // versión «buena» que declarar.
+    noEncontrada: true,
   });
 
   return (

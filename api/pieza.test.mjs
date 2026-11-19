@@ -186,6 +186,16 @@ await conFetch(async (url) => {
   check("pieza inexistente: noindex", res.body.includes('name="robots" content="noindex, follow"'));
   check("pieza inexistente: una sola etiqueta robots", (res.body.match(/name="robots"/g) || []).length === 1);
   check("pieza inexistente: cache corta", res.headers["Cache-Control"] === "public, s-maxage=60");
+  // Una 404 no declara canónica: con `noindex` eran dos señales opuestas (Search Console,
+  // 19-nov-2026). Ni `og:url` ni `hreflang`.
+  check("pieza inexistente: sin canónica", !res.body.includes('rel="canonical"'));
+  check("pieza inexistente: sin og:url", !res.body.includes('property="og:url"'));
+  check("pieza inexistente: sin hreflang", !res.body.includes("hreflang"));
+  const en = respuestaFalsa();
+  await handler({ query: { seccion: "articulos", slug: "riesgos-en-el-tipo-de-cambio-en-per--6", lang: "en" } }, en);
+  check("pieza inexistente en /en: 404, noindex y sin canónica ni hreflang",
+    en.code === 404 && en.body.includes('content="noindex, follow"') &&
+      !en.body.includes('rel="canonical"') && !en.body.includes("hreflang"));
 });
 
 // —— 3c. Lo que ve un buscador: la pieza dentro del HTML y su ficha ——
@@ -486,6 +496,8 @@ await conFetch(async (url) => {
   await handler({ query: { seccion: "resumen", fecha: "2026-11-09", edicion: "noche" } }, res);
   check("resumen que no salió: 404 con noindex y la app intacta",
     res.code === 404 && res.body.includes('name="robots" content="noindex, follow"') && res.body.includes('id="root"'));
+  check("resumen que no salió: sin canónica, og:url ni hreflang",
+    !res.body.includes('rel="canonical"') && !res.body.includes('property="og:url"') && !res.body.includes("hreflang"));
 });
 await conFetch(async (url) => {
   if (String(url).endsWith("/app.html")) return { ok: true, text: async () => SHELL };
@@ -499,6 +511,8 @@ await conFetch(async (url) => {
       res.body.includes("Resumen retirado") && !res.body.includes("PDVSA"),
     res.headers["X-Pieza-Meta"]);
   check("resumen retirado: se cachea poco", /s-maxage=60\b/.test(res.headers["Cache-Control"]));
+  check("resumen retirado: sin canónica, og:url ni hreflang",
+    !res.body.includes('rel="canonical"') && !res.body.includes('property="og:url"') && !res.body.includes("hreflang"));
 });
 await conFetch(fetchNormal(RESUMEN), async () => {
   const res = respuestaFalsa();

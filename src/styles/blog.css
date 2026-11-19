@@ -1828,53 +1828,6 @@
   isolation: isolate;
 }
 
-@keyframes se-hero-charts-drift {
-  0% {
-    transform: translate3d(-1.5%, 0.5%, 0) scale(1.02);
-  }
-  100% {
-    transform: translate3d(1.25%, -0.75%, 0) scale(1.03);
-  }
-}
-
-@keyframes se-hero-line-flow {
-  0% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -120;
-  }
-}
-
-@keyframes se-hero-line-breathe {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes se-hero-candles-drift {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(1.2%, -0.8%, 0);
-  }
-}
-
-@keyframes se-hero-candle-pulse {
-  0%,
-  100% {
-    transform: translateY(0) scaleY(1);
-  }
-  50% {
-    transform: translateY(-2px) scaleY(1.04);
-  }
-}
-
 .se-hero .se-container {
   position: relative;
   z-index: 1;
@@ -6972,16 +6925,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   .se-alpunto__thumb:hover .se-alpunto__play {
     transform: translate(-50%, -50%);
   }
-}
-
-@keyframes se-apertura-barre {
-  from { clip-path: inset(0 100% 0 0); }
-  to { clip-path: inset(0 0 0 0); }
-}
-
-@keyframes se-apertura-sube {
-  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: none; }
 }
 
 /* —— Noticias: la que manda con su foto, las demás con miniatura a dos columnas, y a

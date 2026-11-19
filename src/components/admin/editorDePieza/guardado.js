@@ -1,9 +1,12 @@
 /**
  * Lo que decide el editor de piezas (`pages/admin/AdminPostEditor.jsx`) al guardar, sin
  * React: si hay cambios, adónde se va tras crear, qué se le dice a quien escribe y bajo
- * qué clave se guarda la copia en este equipo. Las pruebas, en `guardado.test.mjs`.
+ * qué clave se guarda la copia en este equipo. También los manejadores de guardar,
+ * publicar/despublicar y eliminar, con lo que usan inyectado (`guardarPieza`,
+ * `ejecutarAccion`, `eliminarPieza`). Las pruebas, en `guardado.test.mjs`.
  */
-import { comparable, fechaDeCaracas, hastaDeCaracas, isoToDateTimeLocal } from "./formulario";
+import { adminErrorMessage } from "../../../lib/adminErrorMessage";
+import { comparable, fechaDeCaracas, formToPayload, hastaDeCaracas, isoToDateTimeLocal, postToForm } from "./formulario";
 
 /**
  * Si lo que hay en el formulario es distinto de lo último que se cargó o guardó. Sin
@@ -72,3 +75,135 @@ export const claveDelBorrador = ({ loadState, base, isCreate, postId }) =>
       ? `pieza-nueva-${base.format || "sin-formato"}`
       : `pieza-${postId}`
     : null;
+
+/**
+ * Si el editor está a mitad de algo: guardando, publicando, despublicando o
+ * eliminando. Con esto se apagan a la vez **todos** los botones de acción y los atajos
+ * de teclado. Antes cada botón miraba solo lo suyo, y con una pieza publicada se podía
+ * pulsar «Guardar cambios» y, mientras tanto, «Despublicar»: el PATCH manda siempre
+ * `status`, así que si llegaba el último la pieza volvía a quedar publicada aunque el
+ * aviso dijera «Se despublicó».
+ */
+export const estaOcupado = ({ saveState, actionState, eliminando = false }) =>
+  saveState?.status === "loading" || actionState?.status === "loading" || Boolean(eliminando);
+
+/**
+ * Una acción a la vez. `enMarcha` es un ref (`{ current }`) que comparten las tres
+ * acciones: los botones se apagan con `estaOcupado`, pero eso llega en el siguiente
+ * pintado, y un doble clic o un atajo podían colarse antes. Con el candado, lo que
+ * llega mientras hay algo en marcha no hace nada.
+ */
+const conCandado = async (enMarcha, fn) => {
+  if (enMarcha.current) return;
+  enMarcha.current = true;
+  try {
+    await fn();
+  } finally {
+    enMarcha.current = false;
+  }
+};
+
+/**
+ * «Guardar» (y, al crear, «Publicar»: `publicar` hace que la pieza nazca publicada).
+ * Lo que usa llega en `d`: el formulario, los `set…` del editor, la API, `borrador`
+ * (`useBorradorLocal`), `navigate`, los avisos y `enMarcha`.
+ */
+export const guardarPieza = ({ publicar = false } = {}, d) =>
+  conCandado(d.enMarcha, async () => {
+    d.setSaveState({ status: "loading", message: "" });
+    d.setActionState({ status: "idle", message: "", kind: "" });
+    try {
+      const payload = formToPayload(d.form);
+      if (publicar) payload.status = "published";
+      if (d.isCreate) {
+        const created = await d.createAdminPost(payload, d.claveDeCreacion());
+        d.saltarGuarda.current = true;
+        d.borrador.borrar();
+        // El editor sigue montado al pasar de «crear» a la pieza nueva (las dos rutas
+        // pintan el mismo componente): sin esto se quedaba «Guardando…», y con
+        // `estaOcupado`, todos los botones apagados.
+        d.setSaveState({ status: "idle", message: "" });
+        const { ruta, opciones } = destinoTrasCrear({ created, publicar, label: d.label });
+        d.navigate(ruta, opciones);
+        return;
+      }
+      const updated = await d.patchAdminPost(d.numericPostId, payload);
+      d.setForm(postToForm(updated));
+      d.setBase(postToForm(updated));
+      d.setColaborador(updated.colaborador ?? null);
+      d.borrador.limpiar();
+      d.setAssets((prev) => ({
+        ...prev,
+        image: updated.image_asset ?? null,
+        video: updated.video_asset ?? null,
+        document: updated.document_asset ?? null,
+        audio: updated.audio_asset ?? null,
+      }));
+      // Programada, con la fecha; fijada en portada, con el «hasta»: ver `avisoTrasGuardar`.
+      const aviso = avisoTrasGuardar(updated);
+      d.setSaveState({ status: "success", message: aviso.mensaje });
+      d.toastSuccess(aviso.mensaje, aviso.titulo);
+    } catch (err) {
+      const message = adminErrorMessage(
+        err,
+        d.isCreate ? "No se pudo crear la pieza." : "No se pudieron guardar los cambios."
+      );
+      d.setSaveState({ status: "error", message });
+      d.toastError(message, d.isCreate ? "No se pudo crear" : "No se pudo guardar");
+    }
+  });
+
+/**
+ * Publicar, despublicar: `fn(id)` hace la petición y devuelve la pieza. Con lo mismo
+ * en `d` que `guardarPieza`, más `setRecienPublicada`.
+ */
+export const ejecutarAccion = ({ kind, fn, successMessage, failureMessage, toastTitle }, d) => {
+  if (d.isCreate) return Promise.resolve();
+  return conCandado(d.enMarcha, async () => {
+    d.setSaveState({ status: "idle", message: "" });
+    d.setActionState({ status: "loading", message: "", kind });
+    try {
+      const updated = await fn(d.numericPostId);
+      d.setForm(postToForm(updated));
+      d.setBase(postToForm(updated));
+      d.setColaborador(updated.colaborador ?? null);
+      d.borrador.limpiar();
+      d.setActionState({ status: "success", message: successMessage, kind });
+      d.setRecienPublicada(kind === "publish");
+      d.toastSuccess(successMessage, toastTitle);
+    } catch (err) {
+      const message = adminErrorMessage(err, failureMessage);
+      d.setActionState({ status: "error", message, kind });
+      d.toastError(message, toastTitle);
+    }
+  });
+};
+
+/**
+ * «Eliminar la pieza»: pregunta (`d.confirm` con `d.dialogo`) y borra. El candado se
+ * toma desde que se abre la pregunta hasta que se cierra: con el diálogo abierto, un
+ * Ctrl+S no lanza un guardado que se cruce con el borrado. `eliminando` (lo que apaga
+ * los botones) es solo mientras se borra.
+ */
+export const eliminarPieza = (d) => {
+  if (d.isCreate) return Promise.resolve();
+  return conCandado(d.enMarcha, async () => {
+    d.setActionState({ status: "idle", message: "", kind: "" });
+    await d.confirm({
+      ...d.dialogo,
+      onConfirm: async () => {
+        d.setEliminando(true);
+        try {
+          await d.deleteAdminPost(d.numericPostId);
+        } finally {
+          d.setEliminando(false);
+        }
+        d.saltarGuarda.current = true;
+        d.navigate("/admin/posts", {
+          replace: true,
+          state: { flash: "Pieza eliminada correctamente." },
+        });
+      },
+    });
+  });
+};

@@ -9,7 +9,17 @@ import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { textoDe } from "../../../../scripts/pruebas/pintar.mjs";
 import { emptyForm } from "./formulario.js";
-import { avisoDelFormulario, avisoTrasGuardar, claveDelBorrador, destinoTrasCrear, hayCambios } from "./guardado.js";
+import {
+  avisoDelFormulario,
+  avisoTrasGuardar,
+  claveDelBorrador,
+  destinoTrasCrear,
+  ejecutarAccion,
+  eliminarPieza,
+  estaOcupado,
+  guardarPieza,
+  hayCambios,
+} from "./guardado.js";
 import { BotonesDeLaPieza } from "./BotonesDeLaPieza.jsx";
 
 const form = (extra = {}) => ({ ...emptyForm(), format: "noticia", title: "Titular", ...extra });
@@ -104,8 +114,12 @@ describe("la copia en este equipo", () => {
 
 /** La barra de botones pintada; devuelve `{ texto, boton(etiqueta) }`. */
 const barra = (props = {}) => {
+  const saveState = props.saveState ?? { status: "idle" };
+  const actionState = props.actionState ?? { status: "idle", kind: "" };
   const html = renderToString(
     createElement(BotonesDeLaPieza, {
+      // Como en el editor: `ocupado` sale de los estados (ver `estaOcupado`).
+      ocupado: estaOcupado({ saveState, actionState, eliminando: props.eliminando }),
       esMovil: false,
       form: form(),
       faltas: [],
@@ -182,14 +196,343 @@ describe("la barra de botones", () => {
     assert.ok(boton("Volver a borrador"));
   });
 
-  // FALLO CONOCIDO (19-nov-2026, sin arreglar: cambia lo que se ve). Los atajos de teclado
-  // se apagan con «ocupado» (guardando **o** publicando), pero los botones no: mientras
-  // guarda, «Publicar» de una pieza existente sigue activo y lanza otro PATCH con el
-  // mismo formulario a la vez (`guardarYPublicar`), y mientras publica, «Guardar» sigue
-  // activo.
-  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
-  test("guardando, tampoco se puede publicar (ni al revés)", { todo: "los botones no miran el otro estado" }, () => {
+  // Era un fallo (19-nov-2026): los atajos de teclado se apagaban con «ocupado»
+  // (guardando **o** publicando), pero los botones no: mientras guardaba, «Publicar» de
+  // una pieza existente seguía activo y lanzaba otro PATCH a la vez, y mientras
+  // publicaba, «Guardar» seguía activo.
+  test("guardando, tampoco se puede publicar (ni al revés)", () => {
     assert.equal(barra({ saveState: { status: "loading" } }).boton("Publicar").desactivado, true);
     assert.equal(barra({ actionState: { status: "loading", kind: "publish" } }).boton("Guardar cambios").desactivado, true);
+  });
+
+  test("publicada y guardando: ni despublicar ni eliminar", () => {
+    const { boton } = barra({ form: form({ status: "published" }), saveState: { status: "loading" } });
+    assert.equal(boton("Despublicar").desactivado, true);
+    assert.equal(boton("Eliminar la pieza").desactivado, true);
+  });
+
+  test("despublicando: ni guardar ni eliminar", () => {
+    const { boton } = barra({ form: form({ status: "published" }), actionState: { status: "loading", kind: "unpublish" } });
+    assert.equal(boton("Despublicando…").desactivado, true);
+    assert.equal(boton("Guardar cambios").desactivado, true);
+    assert.equal(boton("Eliminar la pieza").desactivado, true);
+  });
+
+  test("programada y guardando: tampoco «Publicar ya» ni «Volver a borrador»", () => {
+    const { boton } = barra({ programada: true, form: form({ status: "scheduled" }), saveState: { status: "loading" } });
+    assert.equal(boton("Publicar ya").desactivado, true);
+    assert.equal(boton("Volver a borrador").desactivado, true);
+  });
+
+  test("borrando la pieza: todo apagado menos la vista previa", () => {
+    const { botones } = barra({ form: form({ status: "published" }), eliminando: true });
+    assert.deepEqual(
+      botones.filter((b) => b.desactivado).map((b) => b.etiqueta),
+      ["Guardar cambios", "Despublicar", "Eliminar la pieza"]
+    );
+  });
+
+  test("sin nada en marcha, todo encendido (también eliminar)", () => {
+    assert.deepEqual(barra({ form: form({ status: "published" }) }).botones.filter((b) => b.desactivado), []);
+  });
+});
+
+describe("si el editor está ocupado", () => {
+  const nada = { status: "idle" };
+  test("guardando, publicando/despublicando o eliminando; si no, no", () => {
+    assert.equal(estaOcupado({ saveState: nada, actionState: nada }), false);
+    assert.equal(estaOcupado({ saveState: { status: "loading" }, actionState: nada }), true);
+    assert.equal(estaOcupado({ saveState: nada, actionState: { status: "loading", kind: "unpublish" } }), true);
+    assert.equal(estaOcupado({ saveState: nada, actionState: nada, eliminando: true }), true);
+    // Un error o un éxito ya no es «en marcha».
+    assert.equal(estaOcupado({ saveState: { status: "error" }, actionState: { status: "success" } }), false);
+  });
+});
+
+/** Una promesa que la prueba resuelve o rechaza cuando quiere. */
+const diferida = () => {
+  let resolver;
+  let rechazar;
+  const promesa = new Promise((si, no) => {
+    resolver = si;
+    rechazar = no;
+  });
+  return { promesa, resolver, rechazar };
+};
+
+/**
+ * El editor de piezas sin React: el estado que tocan los manejadores de `guardado.js`,
+ * con `set…` que aceptan valor o función como los de `useState`, y una API cuyas
+ * respuestas suelta la prueba (`e.api("patch").resolver(pieza)`). Los botones son
+ * `e.guardar()`, `e.publicar()`, `e.despublicar()` y `e.eliminar()`; el diálogo de
+ * eliminar, `e.dialogo` (`confirmar()` / `cancelar()`).
+ */
+const editor = ({ isCreate = false, inicial = form({ status: "published", slug: "titular" }) } = {}) => {
+  const e = {
+    estado: {
+      form: inicial,
+      base: inicial,
+      saveState: { status: "idle", message: "" },
+      actionState: { status: "idle", message: "", kind: "" },
+      eliminando: false,
+      colaborador: null,
+      assets: { image: null, video: null, document: null, audio: null, bylinePhoto: null },
+      recienPublicada: false,
+    },
+    llamadas: [],
+    borrador: [],
+    avisos: [],
+    navegado: null,
+    dialogo: null,
+    enMarcha: { current: false },
+    saltarGuarda: { current: false },
+  };
+  const set = (clave) => (v) => {
+    e.estado[clave] = typeof v === "function" ? v(e.estado[clave]) : v;
+  };
+  const api = (nombre) => (...args) => {
+    const d = diferida();
+    e.llamadas.push({ nombre, args, ...d });
+    return d.promesa;
+  };
+  /** La última llamada a `nombre`, para soltar su respuesta. */
+  e.api = (nombre) => e.llamadas.filter((l) => l.nombre === nombre).at(-1);
+  e.nombres = () => e.llamadas.map((l) => l.nombre);
+  e.ocupado = () => estaOcupado(e.estado);
+  /** Lo que el editor pasa a los manejadores, leído al pulsar (como en cada pintado). */
+  e.d = () => ({
+    form: e.estado.form,
+    isCreate,
+    numericPostId: 7,
+    label: "Noticia",
+    enMarcha: e.enMarcha,
+    claveDeCreacion: () => "clave-1",
+    createAdminPost: api("crear"),
+    patchAdminPost: api("patch"),
+    deleteAdminPost: api("borrar"),
+    navigate: (...a) => (e.navegado = a),
+    saltarGuarda: e.saltarGuarda,
+    borrador: {
+      limpiar: () => e.borrador.push("limpiar"),
+      borrar: () => e.borrador.push("borrar"),
+      conservar: () => e.borrador.push("conservar"),
+    },
+    confirm: (opciones) =>
+      new Promise((cerrar) => {
+        e.dialogo = {
+          opciones,
+          confirmar: async () => {
+            try {
+              await opciones.onConfirm();
+              e.dialogo = null;
+              cerrar(true);
+            } catch (err) {
+              // Como `useAdminConfirm`: el diálogo sigue abierto con el error.
+              e.dialogo.error = err;
+            }
+          },
+          cancelar: () => {
+            e.dialogo = null;
+            cerrar(false);
+          },
+        };
+      }),
+    setSaveState: set("saveState"),
+    setActionState: set("actionState"),
+    setForm: set("form"),
+    setBase: set("base"),
+    setColaborador: set("colaborador"),
+    setAssets: set("assets"),
+    setRecienPublicada: set("recienPublicada"),
+    setEliminando: set("eliminando"),
+    toastSuccess: (m, t) => e.avisos.push({ tono: "ok", m, t }),
+    toastError: (m, t) => e.avisos.push({ tono: "error", m, t }),
+  });
+  e.guardar = (opciones) => guardarPieza(opciones, e.d());
+  const accion = (kind, nombre) => () =>
+    ejecutarAccion(
+      { kind, fn: api(nombre), successMessage: `ok ${kind}`, failureMessage: `No se pudo ${kind}.`, toastTitle: kind },
+      e.d()
+    );
+  e.publicar = accion("publish", "publicar");
+  e.despublicar = accion("unpublish", "despublicar");
+  e.eliminar = () => eliminarPieza({ ...e.d(), dialogo: { title: "Eliminar pieza", confirmLabel: "Eliminar" } });
+  return e;
+};
+
+/** Lo que devuelve la API: la pieza guardada, con lo que pone el servidor. */
+const pieza = (extra = {}) => ({ id: 7, format: "noticia", title: "Titular", slug: "titular", status: "published", ...extra });
+const sinRed = () => new TypeError("Failed to fetch");
+
+describe("una acción a la vez (el candado)", () => {
+  test("doble clic en «Guardar»: un solo PATCH", async () => {
+    const e = editor();
+    const uno = e.guardar();
+    const dos = e.guardar();
+    assert.deepEqual(e.nombres(), ["patch"]);
+    assert.equal(e.ocupado(), true);
+    e.api("patch").resolver(pieza());
+    await Promise.all([uno, dos]);
+    assert.equal(e.ocupado(), false);
+    assert.equal(e.estado.saveState.status, "success");
+  });
+
+  test("«Guardar cambios» y, mientras, «Despublicar»: no se despublica a la vez", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    await e.despublicar();
+    assert.deepEqual(e.nombres(), ["patch"]);
+    e.api("patch").resolver(pieza());
+    await guardando;
+    // Ya en paz, despublicar sí va.
+    const despublicando = e.despublicar();
+    assert.deepEqual(e.nombres(), ["patch", "despublicar"]);
+    e.api("despublicar").resolver(pieza({ status: "draft" }));
+    await despublicando;
+    assert.equal(e.estado.form.status, "draft");
+    assert.equal(e.estado.actionState.status, "success");
+  });
+
+  test("al revés: despublicando, «Guardar» (o Ctrl+S) no manda el PATCH con `published`", async () => {
+    const e = editor();
+    const despublicando = e.despublicar();
+    await e.guardar();
+    assert.deepEqual(e.nombres(), ["despublicar"]);
+    e.api("despublicar").resolver(pieza({ status: "draft" }));
+    await despublicando;
+    assert.equal(e.estado.form.status, "draft");
+  });
+
+  test("un borrador: «Guardar» y enseguida «Guardar y publicar», uno solo", async () => {
+    const e = editor({ inicial: form({ status: "draft" }) });
+    const guardando = e.guardar();
+    await e.publicar();
+    assert.deepEqual(e.nombres(), ["patch"]);
+    e.api("patch").resolver(pieza({ status: "draft" }));
+    await guardando;
+  });
+
+  test("doble clic en «Publicar»: una sola publicación", async () => {
+    const e = editor({ inicial: form({ status: "draft" }) });
+    const uno = e.publicar();
+    await e.publicar();
+    assert.deepEqual(e.nombres(), ["publicar"]);
+    e.api("publicar").resolver(pieza());
+    await uno;
+    assert.equal(e.estado.recienPublicada, true);
+  });
+
+  test("al crear, doble clic en «Publicar» (o «Guardar borrador» detrás): una sola pieza", async () => {
+    const e = editor({ isCreate: true, inicial: form() });
+    const uno = e.guardar({ publicar: true });
+    await e.guardar({ publicar: true });
+    await e.guardar();
+    assert.deepEqual(e.nombres(), ["crear"]);
+    assert.equal(e.api("crear").args[0].status, "published");
+    e.api("crear").resolver({ id: 42 });
+    await uno;
+    assert.equal(e.navegado[0], "/admin/posts/42");
+  });
+
+  test("tras crear no se queda «Guardando…» (el editor sigue montado en la pieza nueva)", async () => {
+    const e = editor({ isCreate: true, inicial: form() });
+    const creando = e.guardar();
+    assert.equal(e.ocupado(), true);
+    e.api("crear").resolver({ id: 42 });
+    await creando;
+    assert.equal(e.ocupado(), false);
+  });
+
+  test("guardando, «Eliminar» ni pregunta", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    await e.eliminar();
+    assert.equal(e.dialogo, null);
+    e.api("patch").resolver(pieza());
+    await guardando;
+  });
+
+  test("con la pregunta de eliminar abierta, Ctrl+S no guarda; al cancelar, sí", async () => {
+    const e = editor();
+    const eliminando = e.eliminar();
+    assert.ok(e.dialogo);
+    await e.guardar();
+    await e.despublicar();
+    assert.deepEqual(e.nombres(), []);
+    e.dialogo.cancelar();
+    await eliminando;
+    const guardando = e.guardar();
+    assert.deepEqual(e.nombres(), ["patch"]);
+    e.api("patch").resolver(pieza());
+    await guardando;
+  });
+
+  test("borrando: ocupado hasta que acaba, y luego al listado", async () => {
+    const e = editor();
+    const eliminando = e.eliminar();
+    const confirmando = e.dialogo.confirmar();
+    assert.equal(e.estado.eliminando, true);
+    assert.equal(e.ocupado(), true);
+    e.api("borrar").resolver(null);
+    await confirmando;
+    await eliminando;
+    assert.equal(e.navegado[0], "/admin/posts");
+    assert.equal(e.saltarGuarda.current, true);
+  });
+
+  test("sin red al borrar: el diálogo sigue con el error, los botones vuelven y nada se cuela hasta cerrarlo", async () => {
+    const e = editor();
+    const eliminando = e.eliminar();
+    const confirmando = e.dialogo.confirmar();
+    e.api("borrar").rechazar(sinRed());
+    await confirmando;
+    assert.ok(e.dialogo.error instanceof TypeError);
+    assert.equal(e.estado.eliminando, false);
+    assert.equal(e.navegado, null);
+    await e.guardar();
+    assert.deepEqual(e.nombres(), ["borrar"]);
+    e.dialogo.cancelar();
+    await eliminando;
+    assert.equal(e.enMarcha.current, false);
+  });
+
+  test("sin red al guardar: se dice, no se borra la copia local y se puede volver a intentar", async () => {
+    const e = editor();
+    const uno = e.guardar();
+    e.api("patch").rechazar(sinRed());
+    await uno;
+    assert.equal(e.estado.saveState.status, "error");
+    assert.equal(e.estado.saveState.message, "No se pudo contactar el servidor. Revise su conexión e inténtelo de nuevo.");
+    assert.deepEqual(e.borrador, []);
+    assert.equal(e.ocupado(), false);
+    const dos = e.guardar();
+    assert.deepEqual(e.nombres(), ["patch", "patch"]);
+    e.api("patch").resolver(pieza());
+    await dos;
+    assert.equal(e.estado.saveState.status, "success");
+  });
+
+  test("sin red al despublicar: se dice, la pieza sigue publicada y se suelta el candado", async () => {
+    const e = editor();
+    const uno = e.despublicar();
+    e.api("despublicar").rechazar(sinRed());
+    await uno;
+    assert.equal(e.estado.actionState.status, "error");
+    assert.equal(e.estado.form.status, "published");
+    assert.equal(e.ocupado(), false);
+    assert.equal(e.enMarcha.current, false);
+  });
+
+  test("sin red al crear: no se navega y se reintenta con la misma clave", async () => {
+    const e = editor({ isCreate: true, inicial: form() });
+    const uno = e.guardar();
+    e.api("crear").rechazar(sinRed());
+    await uno;
+    assert.equal(e.estado.saveState.status, "error");
+    assert.equal(e.navegado, null);
+    const dos = e.guardar();
+    assert.deepEqual(e.llamadas.map((l) => l.args[1]), ["clave-1", "clave-1"]);
+    e.api("crear").resolver({ id: 42 });
+    await dos;
   });
 });

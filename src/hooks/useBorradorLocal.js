@@ -13,6 +13,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * - Tras enviar con éxito, `borrar()` lo quita y deja de guardar. Si el formulario
  *   sigue abierto (se guardó en el servidor y se sigue editando), `limpiar()` lo quita
  *   pero sigue guardando lo que venga.
+ * - Si al volver la respuesta ya había algo escrito que no se mandó, `conservar(base)`
+ *   deja la copia (es lo que aún no está en el servidor) y avisa de que esa `base`
+ *   nueva no es una apertura: sin esto, la copia de hace un momento se volvía a poner
+ *   encima de lo último que se escribió, con el aviso de «Recuperamos…».
  *
  * `clave` en `null` lo apaga (p. ej. mientras el formulario aún carga del servidor).
  * `base` es con lo que se abrió el formulario: igual a eso, no hay nada que guardar.
@@ -56,6 +60,7 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
   const actuales = useRef(valores);
   const deBase = useRef(base);
   const cerrado = useRef(false);
+  const baseSinAplicar = useRef(null);
   actuales.current = valores;
   deBase.current = base;
 
@@ -63,6 +68,10 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
   useEffect(() => {
     if (!clave) return;
     cerrado.current = false;
+    if (base !== null && base === baseSinAplicar.current) {
+      baseSinAplicar.current = null;
+      return;
+    }
     const guardado = leer(clave);
     if (guardado?.valores && !igual(guardado.valores, deBase.current)) {
       aplicar(guardado.valores);
@@ -71,8 +80,9 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
     }
     // Al cambiar de formulario y cada vez que llega una base nueva: si la pieza se carga
     // dos veces (en desarrollo React lo hace; o se recarga del servidor), la segunda
-    // carga pisaba la copia recién recuperada. Tras guardar no hay copia (`limpiar`), así
-    // que no se vuelve a aplicar nada. `aplicar` es el `setState` del padre.
+    // carga pisaba la copia recién recuperada. Tras guardar no hay copia (`limpiar`), o la
+    // hay pero esa base se salta (`conservar`), así que no se vuelve a aplicar nada.
+    // `aplicar` es el `setState` del padre.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clave, base]);
 
@@ -122,10 +132,15 @@ export const useBorradorLocal = ({ clave, valores, base, aplicar, normalizar = s
     setGuardadoEn(null);
   }, [clave]);
 
+  const conservar = useCallback((nuevaBase) => {
+    baseSinAplicar.current = nuevaBase;
+    setRecuperadoEn(null);
+  }, []);
+
   const borrar = useCallback(() => {
     cerrado.current = true;
     if (clave) escribir(clave, null);
   }, [clave]);
 
-  return { guardadoEn, recuperadoEn, guardarAhora, descartar, limpiar, borrar };
+  return { guardadoEn, recuperadoEn, guardarAhora, descartar, limpiar, conservar, borrar };
 };

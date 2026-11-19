@@ -94,6 +94,10 @@ export const AdminPostEditor = () => {
     const [searchParams] = useSearchParams();
 
     const [form, setForm] = useState(emptyForm);
+    // El formulario del último pintado, para lo que vuelve de una petición: lo escrito
+    // mientras tanto no se pisa (ver `aplicarRespuesta` en `guardado.js`).
+    const formActual = useRef(form);
+    formActual.current = form;
     const [vistaPrevia, setVistaPrevia] = useState(false);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
     // El lector que la propuso, si la pieza salió de una propuesta aceptada. La firma
@@ -254,6 +258,7 @@ export const AdminPostEditor = () => {
     // candado: una acción a la vez (ver `estaOcupado`).
     const dependencias = () => ({
         form,
+        formActual,
         isCreate,
         numericPostId,
         // Same reason: no gendered adjective on a name that comes from data.
@@ -285,8 +290,9 @@ export const AdminPostEditor = () => {
 
     const handleSave = () => guardar();
 
-    const runAction = (kind, fn, successMessage, failureMessage, toastTitle) => () =>
-        ejecutarAccion({ kind, fn, successMessage, failureMessage, toastTitle }, dependencias());
+    // `enviado`: sobre qué formulario responde el servidor (ver `aplicarRespuesta`).
+    const runAction = (kind, fn, successMessage, failureMessage, toastTitle, enviado) => () =>
+        ejecutarAccion({ kind, fn, successMessage, failureMessage, toastTitle, enviado }, dependencias());
 
     // Publicar con cambios sin guardar los guarda antes: «Publicar» es la acción
     // principal de un borrador listo, y publicar la versión de antes sería una trampa.
@@ -312,7 +318,9 @@ export const AdminPostEditor = () => {
             ? "Se canceló la programación: vuelve a ser un borrador."
             : "Se despublicó y ya no es visible en el sitio.",
         "No se pudo despublicar.",
-        "Despublicar"
+        "Despublicar",
+        // Despublicar no manda el formulario: lo que se haya escrito sin guardar se queda.
+        base ?? form
     );
 
     const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);

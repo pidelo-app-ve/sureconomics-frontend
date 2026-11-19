@@ -17,6 +17,7 @@ import {
   ejecutarAccion,
   eliminarPieza,
   estaOcupado,
+  fusionarRespuesta,
   guardarPieza,
   hayCambios,
 } from "./guardado.js";
@@ -265,7 +266,8 @@ const diferida = () => {
  * con `set…` que aceptan valor o función como los de `useState`, y una API cuyas
  * respuestas suelta la prueba (`e.api("patch").resolver(pieza)`). Los botones son
  * `e.guardar()`, `e.publicar()`, `e.despublicar()` y `e.eliminar()`; el diálogo de
- * eliminar, `e.dialogo` (`confirmar()` / `cancelar()`).
+ * eliminar, `e.dialogo` (`confirmar()` / `cancelar()`). Lo que se escribe mientras
+ * tanto, `e.escribir({ campo: valor })`.
  */
 const editor = ({ isCreate = false, inicial = form({ status: "published", slug: "titular" }) } = {}) => {
   const e = {
@@ -299,9 +301,13 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
   e.api = (nombre) => e.llamadas.filter((l) => l.nombre === nombre).at(-1);
   e.nombres = () => e.llamadas.map((l) => l.nombre);
   e.ocupado = () => estaOcupado(e.estado);
+  e.escribir = (cambios) => set("form")((prev) => ({ ...prev, ...cambios }));
+  e.sinGuardar = () => hayCambios(e.estado.form, e.estado.base);
   /** Lo que el editor pasa a los manejadores, leído al pulsar (como en cada pintado). */
   e.d = () => ({
     form: e.estado.form,
+    // El ref del editor: el formulario del último pintado.
+    formActual: { get current() { return e.estado.form; } },
     isCreate,
     numericPostId: 7,
     label: "Noticia",
@@ -349,13 +355,14 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     toastError: (m, t) => e.avisos.push({ tono: "error", m, t }),
   });
   e.guardar = (opciones) => guardarPieza(opciones, e.d());
-  const accion = (kind, nombre) => () =>
+  const accion = (kind, nombre, enviado = () => undefined) => () =>
     ejecutarAccion(
-      { kind, fn: api(nombre), successMessage: `ok ${kind}`, failureMessage: `No se pudo ${kind}.`, toastTitle: kind },
+      { kind, fn: api(nombre), successMessage: `ok ${kind}`, failureMessage: `No se pudo ${kind}.`, toastTitle: kind, enviado: enviado() },
       e.d()
     );
   e.publicar = accion("publish", "publicar");
-  e.despublicar = accion("unpublish", "despublicar");
+  // Como en el editor: despublicar no manda el formulario, responde sobre lo guardado.
+  e.despublicar = accion("unpublish", "despublicar", () => e.estado.base);
   e.eliminar = () => eliminarPieza({ ...e.d(), dialogo: { title: "Eliminar pieza", confirmLabel: "Eliminar" } });
   return e;
 };
@@ -534,5 +541,166 @@ describe("una acción a la vez (el candado)", () => {
     assert.deepEqual(e.llamadas.map((l) => l.args[1]), ["clave-1", "clave-1"]);
     e.api("crear").resolver({ id: 42 });
     await dos;
+  });
+});
+
+describe("la respuesta, campo a campo (fusionarRespuesta)", () => {
+  const enviado = form({ title: "Antes", slug: "Mi Pieza", topic_ids: [1] });
+  const recibido = form({ title: "Antes", slug: "mi-pieza", topic_ids: [1], status: "scheduled" });
+
+  test("lo que no se tocó desde que se mandó, como dice el servidor", () => {
+    const f = fusionarRespuesta({ actual: enviado, enviado, recibido });
+    assert.deepEqual(f, recibido);
+  });
+
+  test("lo que se tocó mientras tanto, como lo dejó quien escribe", () => {
+    const actual = { ...enviado, slug: "Mi Pieza 2", topic_ids: [1, 2] };
+    const f = fusionarRespuesta({ actual, enviado, recibido });
+    assert.equal(f.slug, "Mi Pieza 2");
+    assert.deepEqual(f.topic_ids, [1, 2]);
+    assert.equal(f.status, "scheduled");
+  });
+
+  test("escribir y deshacer hasta lo que se mandó cuenta como no tocado", () => {
+    const actual = { ...enviado, title: "Antes" };
+    assert.equal(fusionarRespuesta({ actual, enviado, recibido }).title, "Antes");
+    assert.equal(fusionarRespuesta({ actual: { ...enviado }, enviado, recibido }).slug, "mi-pieza");
+  });
+});
+
+describe("lo que se escribe mientras guarda no se pierde", () => {
+  test("se escribe el título mientras va el PATCH: se queda, sigue «sin guardar» y la copia local no se borra", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    e.escribir({ title: "Titular con más" });
+    e.api("patch").resolver(pieza());
+    await guardando;
+    assert.equal(e.estado.form.title, "Titular con más");
+    assert.equal(e.estado.base.title, "Titular");
+    assert.equal(e.sinGuardar(), true);
+    assert.deepEqual(e.borrador, ["conservar"]);
+    assert.equal(e.estado.saveState.status, "success");
+  });
+
+  test("sin escribir nada: lo del servidor, nada sin guardar, y la copia local se limpia", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    e.api("patch").resolver(pieza());
+    await guardando;
+    assert.equal(e.sinGuardar(), false);
+    assert.deepEqual(e.borrador, ["limpiar"]);
+  });
+
+  test("el servidor normaliza el slug y nadie lo tocó: se ve el suyo", async () => {
+    const e = editor({ inicial: form({ status: "draft", slug: "Mi Pieza" }) });
+    const guardando = e.guardar();
+    e.api("patch").resolver(pieza({ status: "draft", slug: "mi-pieza" }));
+    await guardando;
+    assert.equal(e.estado.form.slug, "mi-pieza");
+    assert.equal(e.sinGuardar(), false);
+    assert.deepEqual(e.borrador, ["limpiar"]);
+  });
+
+  test("el servidor normaliza el slug pero quien escribe lo cambió mientras: se queda el suyo", async () => {
+    const e = editor({ inicial: form({ status: "draft", slug: "Mi Pieza" }) });
+    const guardando = e.guardar();
+    e.escribir({ slug: "otra-pieza" });
+    e.api("patch").resolver(pieza({ status: "draft", slug: "mi-pieza" }));
+    await guardando;
+    assert.equal(e.estado.form.slug, "otra-pieza");
+    assert.equal(e.sinGuardar(), true);
+    assert.deepEqual(e.borrador, ["conservar"]);
+  });
+
+  test("el cuerpo saneado por el servidor: se ve si no se tocó; si se siguió escribiendo, se queda lo escrito", async () => {
+    const sucio = "<p>Hola</p><script>x()</script>";
+    const limpio = "<p>Hola</p>";
+    const a = editor({ inicial: form({ content: sucio }) });
+    const uno = a.guardar();
+    a.api("patch").resolver(pieza({ content: limpio }));
+    await uno;
+    assert.equal(a.estado.form.content, limpio);
+    assert.equal(a.sinGuardar(), false);
+
+    const b = editor({ inicial: form({ content: sucio }) });
+    const dos = b.guardar();
+    b.escribir({ content: "<p>Hola, y sigo</p>" });
+    b.api("patch").resolver(pieza({ content: limpio }));
+    await dos;
+    assert.equal(b.estado.form.content, "<p>Hola, y sigo</p>");
+    assert.equal(b.estado.base.content, limpio);
+    assert.equal(b.sinGuardar(), true);
+  });
+
+  test("la fecha de publicación la pone el servidor, aunque se escriba otra cosa a la vez", async () => {
+    const e = editor({ inicial: form({ status: "published", published_at: "" }) });
+    const guardando = e.guardar();
+    e.escribir({ excerpt: "Un resumen" });
+    e.api("patch").resolver(pieza({ status: "published", published_at: "2026-11-19T15:45:00Z" }));
+    await guardando;
+    assert.equal(e.estado.form.status, "published");
+    assert.equal(e.estado.form.published_at, "2026-11-19T11:45");
+    assert.equal(e.estado.form.excerpt, "Un resumen");
+    assert.equal(e.estado.base.excerpt, "");
+  });
+
+  test("un adjunto cambiado mientras guarda se queda, con su ficha; el que no, el del servidor", async () => {
+    const e = editor({ inicial: form({ image_asset_id: 1, document_asset_id: 5 }) });
+    e.estado.assets = { ...e.estado.assets, image: { id: 1 }, document: { id: 5 } };
+    const guardando = e.guardar();
+    // Como `setAsset` del editor: el id en el formulario y la ficha en `assets`.
+    e.escribir({ image_asset_id: 2 });
+    e.estado.assets = { ...e.estado.assets, image: { id: 2 } };
+    e.api("patch").resolver(pieza({ image_asset_id: 1, image_asset: { id: 1 }, document_asset_id: 5, document_asset: { id: 5, label: "Informe" } }));
+    await guardando;
+    assert.equal(e.estado.form.image_asset_id, 2);
+    assert.deepEqual(e.estado.assets.image, { id: 2 });
+    assert.deepEqual(e.estado.assets.document, { id: 5, label: "Informe" });
+    assert.equal(e.sinGuardar(), true);
+  });
+
+  test("despublicar mientras se escribe: el estado del servidor y lo escrito, los dos", async () => {
+    const e = editor();
+    const despublicando = e.despublicar();
+    e.escribir({ title: "Titular corregido" });
+    e.api("despublicar").resolver(pieza({ status: "draft" }));
+    await despublicando;
+    assert.equal(e.estado.form.status, "draft");
+    assert.equal(e.estado.form.title, "Titular corregido");
+    assert.equal(e.sinGuardar(), true);
+    assert.deepEqual(e.borrador, ["conservar"]);
+  });
+
+  test("despublicar con cambios sin guardar de antes: no se los lleva (despublicar no los manda)", async () => {
+    const e = editor();
+    e.escribir({ excerpt: "Sin guardar todavía" });
+    const despublicando = e.despublicar();
+    e.api("despublicar").resolver(pieza({ status: "draft" }));
+    await despublicando;
+    assert.equal(e.estado.form.excerpt, "Sin guardar todavía");
+    assert.equal(e.estado.form.status, "draft");
+    assert.equal(e.sinGuardar(), true);
+  });
+
+  test("guardar y publicar un borrador mientras se escribe: publicada, y lo nuevo sin guardar", async () => {
+    const e = editor({ inicial: form({ status: "draft" }) });
+    const publicando = e.publicar();
+    e.escribir({ title: "Titular, segunda vuelta" });
+    e.api("publicar").resolver(pieza({ status: "published" }));
+    await publicando;
+    assert.equal(e.estado.form.status, "published");
+    assert.equal(e.estado.form.title, "Titular, segunda vuelta");
+    assert.equal(e.sinGuardar(), true);
+  });
+
+  test("sin red tras escribir mientras guardaba: no se toca nada de lo escrito ni la copia", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    e.escribir({ title: "Titular con más" });
+    e.api("patch").rechazar(sinRed());
+    await guardando;
+    assert.equal(e.estado.form.title, "Titular con más");
+    assert.deepEqual(e.borrador, []);
+    assert.equal(e.sinGuardar(), true);
   });
 });

@@ -437,10 +437,14 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
 
 // Los topes son los de la página, no una copia.
 {
+  // Desde el 19-nov-2026 los usa `lib/bloquesDePortada.js`, que es donde `Home` decide
+  // qué pieza va en cada sitio; ni uno ni otro los copia.
   const home = readFileSync(new URL("../src/pages/Home.jsx", import.meta.url), "utf8");
-  check("Home toma PREVIEW, AL_PUNTO y ANALISIS_EN_PLANA de lib/apertura",
-    /import \{ AL_PUNTO, ANALISIS_EN_PLANA, PREVIEW \} from "\.\.\/lib\/apertura";/.test(home) &&
-      !/const (PREVIEW|AL_PUNTO|ANALISIS_EN_PLANA)\s*=/.test(home));
+  const bloques = readFileSync(new URL("../src/lib/bloquesDePortada.js", import.meta.url), "utf8");
+  check("Home toma PREVIEW, AL_PUNTO y ANALISIS_EN_PLANA de lib/apertura (por lib/bloquesDePortada)",
+    /import \{ AL_PUNTO, ANALISIS_EN_PLANA, PREVIEW, elegirApertura \} from "\.\/apertura";/.test(bloques) &&
+      /from "\.\.\/lib\/bloquesDePortada";/.test(home) &&
+      !/const (PREVIEW|AL_PUNTO|ANALISIS_EN_PLANA)\s*=/.test(home + bloques));
   check("PREVIEW y AL_PUNTO, los de la portada", PREVIEW.noticia === 11 && AL_PUNTO.cuantas === 4);
   const pieza = readFileSync(new URL("../src/lib/pieza.js", import.meta.url), "utf8");
   const meta = pieza.slice(pieza.indexOf("export const FORMATO_META = {"), pieza.indexOf("\n};", pieza.indexOf("export const FORMATO_META = {")));

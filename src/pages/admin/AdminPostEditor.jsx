@@ -38,16 +38,20 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import {
     FORMAT_FIELDS,
     FORMATOS_SIN_PROGRAMAR,
-    comparable,
     emptyForm,
     fechaDeCaracas,
     formToPayload,
-    hastaDeCaracas,
     horaCorta,
-    isoToDateTimeLocal,
     normalizarPieza,
     postToForm,
 } from "../../components/admin/editorDePieza/formulario";
+import {
+    avisoDelFormulario,
+    avisoTrasGuardar,
+    claveDelBorrador as claveDelBorradorDe,
+    destinoTrasCrear,
+    hayCambios,
+} from "../../components/admin/editorDePieza/guardado";
 import { estadoDeLaPieza, estadoDelIngles } from "../../components/admin/editorDePieza/derivadosDeLaPieza";
 import { useTraduccionDePieza } from "../../components/admin/editorDePieza/useTraduccionDePieza";
 import { useTaxonomiaDelEditor } from "../../components/admin/editorDePieza/useTaxonomiaDelEditor";
@@ -66,7 +70,7 @@ import { BotonesDeLaPieza } from "../../components/admin/editorDePieza/BotonesDe
 /**
  * El editor de piezas del panel. Aquí quedan el estado del formulario, la carga, el
  * guardado y las acciones; los grupos del formulario, los datos y los hooks propios
- * viven en `components/admin/editorDePieza/`.
+ * viven en `components/admin/editorDePieza/` (lo que decide al guardar, en `guardado.js`).
  */
 export const AdminPostEditor = () => {
     const { role } = useAuth();
@@ -251,24 +255,12 @@ export const AdminPostEditor = () => {
             if (publicar) payload.status = "published";
             if (isCreate) {
                 const created = await createAdminPost(payload, claveDeCreacion());
-                const newId = created?.id ?? null;
                 // Same reason: no gendered adjective on a name that comes from data.
                 const label = currentFormat?.name ?? "La pieza";
                 saltarGuarda.current = true;
                 borrador.borrar();
-                if (newId != null) {
-                    navigate(`/admin/posts/${newId}`, {
-                        replace: true,
-                        state: publicar
-                            ? { flash: `${label}: publicada.`, recienPublicada: true }
-                            : { flash: `${label}: creada correctamente.` },
-                    });
-                } else {
-                    navigate("/admin/posts", {
-                        replace: true,
-                        state: { flash: `${label}: creada correctamente.` },
-                    });
-                }
+                const { ruta, opciones } = destinoTrasCrear({ created, publicar, label });
+                navigate(ruta, opciones);
                 return;
             }
             const updated = await patchAdminPost(numericPostId, payload);
@@ -283,16 +275,10 @@ export const AdminPostEditor = () => {
                 document: updated.document_asset ?? null,
                 audio: updated.audio_asset ?? null,
             }));
-            // Programada: que lo diga con la fecha, que es lo que hay que comprobar. Y
-            // fijada en portada, igual: el «hasta» es lo que la redacción quiere ver.
-            const aviso =
-                updated?.status === "scheduled"
-                    ? `Programada: sale sola el ${fechaDeCaracas(isoToDateTimeLocal(updated.published_at))} (hora de Caracas).`
-                    : updated?.en_portada && updated?.destacada_hasta
-                      ? `Cambios guardados. Abre la portada hasta el ${hastaDeCaracas(updated.destacada_hasta)} (hora de Caracas).`
-                      : "Cambios guardados correctamente.";
-            setSaveState({ status: "success", message: aviso });
-            toastSuccess(aviso, updated?.status === "scheduled" ? "Programada" : "Contenido guardado");
+            // Programada, con la fecha; fijada en portada, con el «hasta»: ver `avisoTrasGuardar`.
+            const aviso = avisoTrasGuardar(updated);
+            setSaveState({ status: "success", message: aviso.mensaje });
+            toastSuccess(aviso.mensaje, aviso.titulo);
         } catch (err) {
             const message = adminErrorMessage(
                 err,
@@ -328,7 +314,7 @@ export const AdminPostEditor = () => {
     // Publicar con cambios sin guardar los guarda antes: «Publicar» es la acción
     // principal de un borrador listo, y publicar la versión de antes sería una trampa.
     const guardarYPublicar = async (id) => {
-        if (base && comparable(form) !== comparable(base)) {
+        if (hayCambios(form, base)) {
             await patchAdminPost(id, formToPayload(form));
         }
         return publishAdminPost(id);
@@ -388,7 +374,7 @@ export const AdminPostEditor = () => {
     // Salir con cambios sin guardar: un clic de más en el menú o en «Volver» se llevaba
     // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
-    const sinGuardar = base !== null && comparable(form) !== comparable(base);
+    const sinGuardar = hayCambios(form, base);
     // Ctrl+S guarda y Ctrl+Enter publica (Cmd en Mac): quien escribe no suelta el teclado.
     useAtajosDeTeclado(atajos);
 
@@ -405,12 +391,7 @@ export const AdminPostEditor = () => {
 
     // Copia en este equipo de lo que no se ha guardado, por si se cierra la pestaña o se
     // cae el navegador: vuelve al abrir la pieza otra vez. No sustituye a «Guardar».
-    const claveDelBorrador =
-        loadState.status === "success" && base
-            ? isCreate
-                ? `pieza-nueva-${base.format || "sin-formato"}`
-                : `pieza-${postId}`
-            : null;
+    const claveDelBorrador = claveDelBorradorDe({ loadState, base, isCreate, postId });
     const borrador = useBorradorLocal({
         clave: claveDelBorrador,
         valores: form,
@@ -419,13 +400,7 @@ export const AdminPostEditor = () => {
         normalizar: normalizarPieza,
     });
 
-    const feedback = (() => {
-        for (const state of [actionState, saveState]) {
-            if (state.status === "error") return { tone: "error", message: state.message };
-            if (state.status === "success") return { tone: "success", message: state.message };
-        }
-        return null;
-    })();
+    const feedback = avisoDelFormulario(actionState, saveState);
 
     if (isCreate && !canCreate) {
         return <EmptyState title="Sin acceso" description="Hace falta una cuenta del panel para crear contenido nuevo." />;

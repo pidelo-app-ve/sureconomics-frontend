@@ -19,9 +19,10 @@ import { useIdioma } from "./ProveedorIdioma";
  *
  * - `noEncontrada`: la página es una 404 (o un 410). Lleva `noindex` y **ni canónica ni
  *   `hreflang`**: una dirección que no existe no puede decir cuál es «la buena».
- * - Un filtro o un formulario con parámetros (`/explorar?tema=…`, `/contacto?asunto=…`;
- *   la lista está en `esPaginaDeFiltro`, `lib/canonica`) sale con `noindex` solo, sin que
- *   la página lo pida. La canónica sigue apuntando a la versión limpia, que se indexa.
+ * - Un filtro (`/explorar?tema=…`; la lista está en `esPaginaDeFiltro`, `lib/canonica`)
+ *   sale con `noindex, follow` solo, sin que la página lo pida, y también sin canónica ni
+ *   `hreflang`: `noindex` junto a una canónica hacia otra dirección son dos señales que
+ *   Google desaconseja mezclar. La versión limpia (`/explorar`) se indexa.
  *
  * Las claves `title`/`description` se llaman como en `applyPageMeta` para que el cambio
  * en cada página sea mover la llamada, no reescribirla.
@@ -52,7 +53,7 @@ export const useMetaPagina = ({
       description,
       lang,
       noindex: sinIndice || sinVersionPropia,
-      canonicalUrl: noEncontrada ? null : sinVersionPropia ? enEspanol : propia,
+      canonicalUrl: noEncontrada || filtro ? null : sinVersionPropia ? enEspanol : propia,
       alternates: sinIndice || soloEspanol ? null : { es: enEspanol, en: enIngles, "x-default": enEspanol },
       tipo,
       autor,

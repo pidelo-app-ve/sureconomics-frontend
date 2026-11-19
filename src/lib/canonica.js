@@ -23,34 +23,29 @@ export const consultaCanonica = (search) => {
 };
 
 /**
- * Las páginas que, con ciertos parámetros, son un filtro o un formulario a medio llenar
- * y no otra página: `/en/explorar?tema=Infraestructura`, `/contacto?asunto=…`. La canónica
- * ya apunta a la versión limpia (ver `consultaCanonica`), pero Google las seguía guardando
- * como «duplicadas» (Search Console, 19-nov-2026). Con esto salen con `noindex, follow`:
- * no se guardan, y sus enlaces sí se siguen. La versión sin parámetros sigue indexable.
+ * Las páginas que, con parámetros, son un filtro y no otra página:
+ * `/en/explorar?tema=Infraestructura`, `/explorar?donde=Venezuela`. Google las guardaba
+ * como «duplicadas» (Search Console, 19-nov-2026). Ahora salen con `noindex, follow` y
+ * **sin canónica** (ver `useMetaPagina`): no se guardan, sus enlaces sí se siguen, y no
+ * se mezcla «no me guardes» con «la buena es otra», que Google desaconseja. La versión
+ * sin parámetros sigue indexable.
  *
- * Ruta (sin el `/en`) -> los parámetros que la vuelven filtro; `"*"`, cualquiera.
- * - `/explorar`: `tema`, `donde` y `q` son los filtros del buscador; cualquier otro
- *   parámetro también es la misma página.
- * - `/contacto`: `asunto` solo rellena el formulario.
- * - `/clave`: `?c=` abre el juego en la categoría de un reto compartido; es el mismo juego.
+ * Hoy solo `/explorar` (y `/en/explorar`), con **cualquier** parámetro: `tema`, `donde` y
+ * `q` son sus filtros, y lo demás (`pagina`, `utm_*`) también es la misma página.
  *
- * Y en cualquier ruta, `buscar` y `q`: en este sitio nunca son contenido (`/?buscar=1`
- * abre el buscador sobre la portada).
+ * **Lo que NO entra, a propósito** (se queda con su canónica limpia y se indexa):
+ * - `/articulos?formato=…` y `/audiovisual?ver=…`: secciones de verdad (las primeras, en
+ *   `api/sitemap.js`), igual que la paginación (`?pagina=`) de un listado;
+ * - `/?buscar=1`: la lupa de la cabecera; el servidor entrega la portada con su canónica,
+ *   y un `noindex` por JavaScript le llevaría la contraria sobre la portada;
+ * - `/contacto?asunto=…` y `/clave?c=…`: la misma página con el formulario o la categoría
+ *   puestos; basta la canónica a la versión limpia;
+ * - `?q=`, `?v=` o `utm_*` en una pieza.
  *
- * **Lo que NO entra, a propósito:** `/articulos?formato=…` y `/audiovisual?ver=…` son
- * secciones de verdad (las primeras, en `api/sitemap.js`), igual que la paginación
- * (`?pagina=`) de un listado. La prueba (`canonica.test.mjs`) pasa cada dirección del
- * sitemap por aquí y exige que ninguna salga como filtro.
+ * La prueba (`canonica.test.mjs`) pasa cada dirección del sitemap por aquí y exige que
+ * ninguna salga como filtro.
  */
-const FILTROS = {
-  "/explorar": "*",
-  "/contacto": ["asunto"],
-  "/clave": ["c"],
-};
-
-/** Parámetros de búsqueda: en cualquier ruta, nunca son una página propia. */
-const BUSQUEDA_EN_TODAS = ["buscar", "q"];
+const RUTAS_DE_FILTRO = new Set(["/explorar"]);
 
 /** `/en/explorar/` -> `/explorar`; `/en` -> `/`. */
 const rutaSinIdioma = (pathname) => {
@@ -59,11 +54,5 @@ const rutaSinIdioma = (pathname) => {
   return sinEn.length > 1 ? sinEn.replace(/\/+$/, "") || "/" : sinEn;
 };
 
-export const esPaginaDeFiltro = (pathname, search) => {
-  const claves = [...new URLSearchParams(search || "").keys()];
-  if (!claves.length) return false;
-  if (claves.some((c) => BUSQUEDA_EN_TODAS.includes(c))) return true;
-  const filtros = FILTROS[rutaSinIdioma(pathname)];
-  if (!filtros) return false;
-  return filtros === "*" || claves.some((c) => filtros.includes(c));
-};
+export const esPaginaDeFiltro = (pathname, search) =>
+  RUTAS_DE_FILTRO.has(rutaSinIdioma(pathname)) && [...new URLSearchParams(search || "").keys()].length > 0;

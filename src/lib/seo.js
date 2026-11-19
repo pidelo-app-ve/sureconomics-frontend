@@ -71,7 +71,8 @@ export const applyPageMeta = ({
   }
   if (description) upsertMeta("description", description);
   if (canonicalUrl) upsertLink("canonical", canonicalUrl);
-  // `null` (no `undefined`) quiere decir «esta página no tiene canónica»: una 404. Se
+  // `null` (no `undefined`) quiere decir «esta página no tiene canónica»: una 404 o un
+  // filtro de `/explorar` (ver `useMetaPagina`). Se
   // quita la que dejó la página anterior al navegar, y su `og:url` con ella; una 404 que
   // declara canónica le dice a Google dos cosas opuestas a la vez.
   if (canonicalUrl === null) {

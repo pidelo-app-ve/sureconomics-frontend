@@ -23,7 +23,7 @@ r = consultaCanonica("?v=abc&formato=articulos&utm_source=x");
 check("el formato solo, aunque venga mezclado", r === "?formato=articulos", r);
 check("un formato vacío no entra", consultaCanonica("?formato=") === "");
 
-// —— Qué dirección es un filtro (y sale con `noindex, follow`) ——
+// —— Qué dirección es un filtro (y sale con `noindex, follow` y sin canónica) ——
 console.log("\nfiltros: noindex");
 const filtro = (url) => {
   const u = new URL(url, SITIO);
@@ -38,13 +38,7 @@ for (const url of [
   "/explorar?utm_source=x",
   "/explorar/?pagina=2",
   "/explorar?q=",
-  "/contacto?asunto=Advertising — formato B",
-  "/en/contacto?asunto=Consultoría",
-  "/?buscar=1",
-  "/en?buscar=1",
-  "/articulos?formato=noticias&q=dólar",
-  "/clave?c=economia",
-  "/en/clave?c=economia",
+  "/en/explorar/?q=dólar",
 ]) {
   check(url, filtro(url) === true);
 }
@@ -71,6 +65,18 @@ for (const url of [
   "/resumen/2026-11-09/manana",
   // Una ruta que se llama «explorar» por dentro no es `/explorar`.
   "/noticias/explorar?tema=x",
+  // La lupa de la cabecera: la portada sale del servidor con su canónica; no se le
+  // lleva la contraria por JavaScript (revisión del 19-nov-2026).
+  "/?buscar=1",
+  "/en?buscar=1",
+  // La misma página con el formulario o la categoría puestos: basta la canónica limpia.
+  "/contacto?asunto=Advertising — formato B",
+  "/en/contacto?asunto=Consultoría",
+  "/clave?c=economia",
+  "/en/clave?c=economia",
+  // Una búsqueda pegada a una pieza o a una sección tampoco.
+  "/noticias/una-pieza?q=dólar",
+  "/articulos?formato=noticias&q=dólar",
 ]) {
   check(url, filtro(url) === false);
 }

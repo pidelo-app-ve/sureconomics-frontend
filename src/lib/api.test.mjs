@@ -147,16 +147,114 @@ describe("sesión caducada", () => {
     assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
   });
 
-  // FALLO CONOCIDO (19-nov-2026, sin arreglar: cambia el comportamiento). Si tras un
-  // 401 la red se cae justo al renovar, `adminRequest` lo trata igual que una sesión
-  // caducada: borra la sesión y echa al editor, aunque la sesión fuera buena (lo escrito
-  // se salva en la copia local). Debería decir «sin red» y dejar la sesión.
-  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
-  test("sin red al renovar, la sesión no se cierra", { todo: "un fallo de red al renovar cierra la sesión" }, async () => {
+  test("si la renovación responde 403, también se cierra la sesión", async () => {
+    conSesion();
+    contestar(json(401, { success: false, error: { message: "Token expired" } }), json(403, { success: false, error: { message: "Cuenta desactivada" } }));
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
+    assert.equal(err.status, 401);
+    assert.equal(sessionStorage.tamano, 0);
+    assert.ok(avisosDeSesion >= 1);
+  });
+
+  test("renovada, pero el token nuevo tampoco vale (401 otra vez): se cierra la sesión", async () => {
+    conSesion();
+    contestar(
+      json(401, { success: false, error: { message: "Token expired" } }),
+      json(200, { success: true, data: { access_token: "acceso-nuevo", refresh_token: "renovar-2", expires_in: 900 } }),
+      json(401, { success: false, error: { message: "Token expired" } })
+    );
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
+    assert.equal(err.status, 401);
+    assert.equal(sessionStorage.tamano, 0);
+  });
+
+  // Era un fallo (19-nov-2026): un solo `try` envolvía la renovación **y** el reintento,
+  // y cualquier error -- sin red, el limitador, el servidor reiniciando -- borraba la
+  // sesión y echaba al editor aunque la sesión fuera buena. Solo un 401/403 de
+  // `/auth/refresh` dice que la sesión ya no vale.
+  test("sin red al renovar, la sesión no se cierra", async () => {
     conSesion();
     contestar(json(401, { success: false, error: { message: "Token expired" } }), new TypeError("Failed to fetch"));
-    await errorDe(() => adminRequest("/admin/posts/1"));
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
     assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+    assert.equal(sessionStorage.getItem(ACCESO), "acceso-viejo");
+    assert.equal(avisosDeSesion, 0, "el panel creyó que se cerró la sesión");
+    // Y el editor lee lo que pasó de verdad.
+    assert.equal(adminErrorMessage(err, "No se pudieron guardar los cambios."), "No se pudo contactar el servidor. Revise su conexión e inténtelo de nuevo.");
+  });
+
+  test("un 429 al renovar (el limitador): la sesión se queda y se dice que espere", async () => {
+    conSesion();
+    contestar(json(401, { success: false, error: { message: "Token expired" } }), json(429, { success: false, error: { message: "30 per 1 minute" } }));
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
+    assert.equal(err.status, 429);
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+    assert.equal(avisosDeSesion, 0);
+    assert.equal(adminErrorMessage(err), "Demasiadas solicitudes. Espere unos minutos e inténtelo de nuevo.");
+  });
+
+  test("un 502 al renovar (Render reiniciando): la sesión se queda", async () => {
+    conSesion();
+    contestar(json(401, { success: false, error: { message: "Token expired" } }), new Response("<html>Bad Gateway</html>", { status: 502, statusText: "Bad Gateway" }));
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
+    assert.equal(err.status, 502);
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+    assert.equal(sessionStorage.getItem(ROL), "publicador");
+    assert.equal(avisosDeSesion, 0);
+  });
+
+  test("renovada bien y la red se cae en el reintento: se queda el token recién emitido", async () => {
+    conSesion();
+    contestar(
+      json(401, { success: false, error: { message: "Token expired" } }),
+      json(200, { success: true, data: { access_token: "acceso-nuevo", refresh_token: "renovar-2", expires_in: 900 } }),
+      new TypeError("Failed to fetch")
+    );
+    const err = await errorDe(() => adminRequest("/admin/posts/1", { method: "PATCH", json: { title: "Guardada" } }));
+    assert.ok(err instanceof TypeError);
+    assert.equal(sessionStorage.getItem(ACCESO), "acceso-nuevo");
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-2");
+    // Solo el aviso de «renové»; ninguno de «cerré».
+    assert.equal(avisosDeSesion, 1);
+    // Y al volver la red, guardar otra vez entra con el token nuevo, sin renovar.
+    contestar(json(200, { success: true, data: { id: 1 } }));
+    await adminRequest("/admin/posts/1", { method: "PATCH", json: { title: "Guardada" } });
+    assert.equal(peticiones.at(-1).headers.Authorization, "Bearer acceso-nuevo");
+  });
+
+  test("a punto de caducar y sin poder renovar antes: se pide igual con el token que hay", async () => {
+    conSesion({ caducaEn: Date.now() + 1000 });
+    contestar(json(429, { success: false, error: { message: "30 per 1 minute" } }), json(200, { success: true, data: [] }));
+    await adminRequest("/admin/posts");
+    assert.equal(peticiones[1].headers.Authorization, "Bearer acceso-viejo");
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+  });
+
+  // El backend (`auth_service.refresh_tokens`) emite un par nuevo en cada renovación pero
+  // NO invalida el refresh viejo (los tokens no llevan lista; solo `tv`, que sube al
+  // cerrar sesiones). Así que dos peticiones con 401 a la vez renuevan las dos con el
+  // mismo token, y las dos cuajan: no hay carrera que cierre la sesión. Si algún día el
+  // backend invalida el refresh al rotarlo, esta prueba es la que hay que cambiar (y
+  // `adminRequest` tendría que compartir una sola renovación).
+  test("dos 401 a la vez: las dos renuevan y siguen, sin cerrar la sesión", async () => {
+    conSesion();
+    let renovaciones = 0;
+    globalThis.fetch = async (url, init = {}) => {
+      peticiones.push({ url: String(url), ...init });
+      if (String(url).endsWith("/auth/refresh")) {
+        renovaciones += 1;
+        assert.equal(JSON.parse(init.body).refresh_token, "renovar-1");
+        return json(200, { success: true, data: { access_token: `acceso-${renovaciones}`, refresh_token: `renovar-r${renovaciones}`, expires_in: 900 } });
+      }
+      return init.headers.Authorization === "Bearer acceso-viejo"
+        ? json(401, { success: false, error: { message: "Token expired" } })
+        : json(200, { success: true, data: { ok: true } });
+    };
+    const [a, b] = await Promise.all([adminRequest("/admin/posts/1"), adminRequest("/admin/posts/2")]);
+    assert.deepEqual([a, b], [{ ok: true }, { ok: true }]);
+    assert.equal(renovaciones, 2);
+    assert.ok(sessionStorage.getItem(ACCESO).startsWith("acceso-"));
+    assert.ok(sessionStorage.getItem(RENOVAR).startsWith("renovar-r"));
   });
 });
 

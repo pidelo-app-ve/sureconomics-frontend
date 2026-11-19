@@ -5789,7 +5789,6 @@ a.se-ad--ficha:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .se-ad--ficha,
   .se-ad--ficha .se-ad__cta { transition: none; }
 }
 
@@ -8126,10 +8125,6 @@ html {
   .se-format:not(.se-format--expandido) .se-noticias__nota:nth-child(n + 6) {
     display: none;
   }
-}
-
-.se-noticias__anuncio {
-  margin-top: var(--se-space-lg);
 }
 
 /* Entre 1024 y 1279 cinco columnas no caben sin partir cada enlace en tres líneas: la

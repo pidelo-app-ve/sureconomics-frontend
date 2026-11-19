@@ -194,5 +194,3 @@ UltimaHoraColumna.propTypes = {
     PropTypes.shape({ id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), fechaIso: PropTypes.string })
   ),
 };
-
-export default UltimaHoraColumna;

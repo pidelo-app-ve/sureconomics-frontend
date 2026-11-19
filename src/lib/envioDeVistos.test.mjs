@@ -17,6 +17,7 @@ const esperarPromesas = async () => {
 
 /** Un navegador y un servidor de mentira. `backend`: "nuevo" | "viejo". */
 const montar = ({ backend = "nuevo", beaconSale = true, recordado = null } = {}) => {
+  const servidor = { backend };
   let ahora = 0;
   let siguiente = 1;
   const timers = new Map();
@@ -33,7 +34,7 @@ const montar = ({ backend = "nuevo", beaconSale = true, recordado = null } = {})
     peticion: (url, cuerpo) => {
       const ruta = url.replace("https://api", "");
       fetches.push({ ruta, cuerpo, en: ahora });
-      const existe = ruta === RUTA_UNA || (ruta === RUTA_VARIAS && backend === "nuevo");
+      const existe = ruta === RUTA_UNA || (ruta === RUTA_VARIAS && servidor.backend === "nuevo");
       return Promise.resolve({ ok: existe, status: existe ? 204 : 404 });
     },
     reloj: () => ahora,
@@ -61,7 +62,7 @@ const montar = ({ backend = "nuevo", beaconSale = true, recordado = null } = {})
     [...beacons.map((b) => ({ ...b, via: "beacon" })), ...fetches.map((f) => ({ ...f, via: "fetch" }))]
       .sort((a, b) => a.en - b.en)
       .map((s) => [s.ruta, s.cuerpo.split("\n"), s.via, s.en]);
-  return { envio, avanzar, beacons, fetches, salidas, almacenado, ahora: () => ahora };
+  return { envio, avanzar, beacons, fetches, salidas, almacenado, servidor, ahora: () => ahora };
 };
 
 console.log("la primera de cada página, al momento");
@@ -96,8 +97,9 @@ console.log("\nbackend nuevo y cliente nuevo");
   m.envio.ver("d", { pagina: "/" });
   m.envio.ver("e", { pagina: "/" });
   m.avanzar(ESPERA_MAXIMA_MS);
-  const ultimo = m.beacons.at(-1);
-  check("desde entonces, por beacon a /vistos", ultimo.ruta === RUTA_VARIAS && ultimo.cuerpo === "d\ne", m.salidas());
+  const ultimo = m.fetches.at(-1);
+  check("con la pestaña viva sigue por fetch (para ver si un día da 404)",
+    m.fetches.length === 2 && ultimo.ruta === RUTA_VARIAS && ultimo.cuerpo === "d\ne", m.salidas());
   check("sin repetir nada a /visto", m.beacons.filter((b) => b.ruta === RUTA_UNA).length === 1, m.salidas());
 }
 
@@ -126,6 +128,32 @@ console.log("\nbackend viejo (sin /vistos) y cliente nuevo");
   m.envio.ver("c", { pagina: "/" });
   m.avanzar(ESPERA_MAXIMA_MS);
   check("lo recordado de antes en la sesión vale", m.fetches.length === 0 && m.beacons.every((x) => x.ruta === RUTA_UNA), m.salidas());
+}
+
+console.log("\nel backend se revierte con la pestaña abierta");
+{
+  const m = montar({ backend: "nuevo" });
+  m.envio.ver("a", { pagina: "/" });
+  m.envio.ver("b", { pagina: "/" });
+  m.envio.ver("c", { pagina: "/" });
+  m.avanzar(ESPERA_MAXIMA_MS);
+  await esperarPromesas();
+  check("primero aprende que /vistos existe", m.almacenado.valor === "si", m.almacenado);
+
+  m.servidor.backend = "viejo"; // vuelta atrás del backend: /vistos da 404
+  m.envio.ver("d", { pagina: "/" });
+  m.envio.ver("e", { pagina: "/" });
+  m.avanzar(ESPERA_MAXIMA_MS);
+  await esperarPromesas();
+  check("el lote siguiente va por fetch y ve el 404", m.fetches.at(-1).ruta === RUTA_VARIAS && m.fetches.at(-1).cuerpo === "d\ne", m.salidas());
+  const reenviadas = m.beacons.filter((x) => x.ruta === RUTA_UNA).map((x) => x.cuerpo);
+  check("se reenvía ficha a ficha a /visto: no se pierde nada", reenviadas.join() === "a,d,e", m.salidas());
+  check("y cambia a «no»", m.almacenado.valor === "no", m.almacenado);
+
+  m.envio.ver("f", { pagina: "/" });
+  m.envio.ver("g", { pagina: "/" });
+  m.avanzar(ESPERA_MAXIMA_MS);
+  check("desde entonces, una a una sin preguntar", m.fetches.length === 2 && m.beacons.slice(-2).every((x) => x.ruta === RUTA_UNA), m.salidas());
 }
 
 console.log("\nal ocultar o cerrar la pestaña");
@@ -201,7 +229,7 @@ console.log("\ntopes");
   const m = montar({ recordado: "si" });
   m.envio.ver("cero", { pagina: "/" });
   for (let i = 0; i < 30; i++) m.envio.ver(`f${i}`, { pagina: "/" });
-  const lote = m.beacons.find((b) => b.ruta === RUTA_VARIAS);
+  const lote = m.fetches.find((b) => b.ruta === RUTA_VARIAS);
   check("con treinta esperando salen ya, sin esperar al reloj", lote && lote.cuerpo.split("\n").length === 30, m.salidas());
   m.envio.ver("con espacio", { pagina: "/" });
   m.envio.ver("", { pagina: "/" });

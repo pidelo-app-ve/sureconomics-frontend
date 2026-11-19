@@ -14,7 +14,7 @@ import { Retrato } from "../piece/PieceByline";
 import { listaDePiezas, piezaShape } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { IconoPausa } from "../comun/IconoPausa";
-import { UltimaHoraColumna } from "../titulares/UltimaHoraColumna";
+import { UltimaHoraColumna } from "../../features/titulares";
 import { NuestroCanal } from "../canal/NuestroCanal";
 import { AperturaShort } from "../canal/AperturaShort";
 import { esShort, idDeYoutube } from "../../lib/youtube";

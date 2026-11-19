@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { useAdminToast } from "../../../context/AdminToastContext";
-import { adminErrorMessage } from "../../../lib/adminErrorMessage";
-import { adminRequest } from "../../../lib/api";
-import { ModalDelPanel } from "../ModalDelPanel";
+import { useAdminToast } from "../../../../context/AdminToastContext";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { corregirTitular } from "../api";
 
 /**
  * Corregir un titular a mano: el español y el inglés uno al lado del otro, con los
@@ -69,7 +69,7 @@ export const EditarTitular = ({ grupo, onCerrar, onGuardado }) => {
     setOcupado(true);
     try {
       const json = Object.fromEntries(cambiados.map((k) => [k, texto[k]]));
-      await adminRequest(`/admin/headlines/${grupo.id}`, { method: "PATCH", json });
+      await corregirTitular(grupo.id, json);
       toastSuccess("Guardado. La web lo enseña corregido en menos de dos minutos.", "Titulares");
       onGuardado();
     } catch (err) {

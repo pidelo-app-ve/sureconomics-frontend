@@ -1,20 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { EditarTitular } from "../../components/admin/titulares/EditarTitular";
-import { FuentesDeTitulares } from "../../components/admin/titulares/FuentesDeTitulares";
-import { HistorialTitular } from "../../components/admin/titulares/HistorialTitular";
-import { ErrorState, LoadingState } from "../../components/content";
-import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { useAdminToast } from "../../context/AdminToastContext";
-import { useAuth } from "../../context/AuthContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { adminRequest } from "../../lib/api";
-import { MODOS_DEL_JUEZ, nombreDelProblema } from "../../lib/juezDeTitulares";
-import { recorridoTitulares } from "../../lib/guias/guiaTitulares";
-import { applyPageMeta } from "../../lib/seo";
-import { unwrapEntity } from "../../services/adminResponseUtils";
-import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { EditarTitular } from "../componentes/EditarTitular";
+import { FuentesDeTitulares } from "../componentes/FuentesDeTitulares";
+import { HistorialTitular } from "../componentes/HistorialTitular";
+import { ErrorState, LoadingState } from "../../../../components/content";
+import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista";
+import { useAdminToast } from "../../../../context/AdminToastContext";
+import { useAuth } from "../../../../context/AuthContext";
+import { useAdminConfirm } from "../../../../hooks/useAdminConfirm";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
+import { MODOS_DEL_JUEZ, nombreDelProblema } from "../juez";
+import {
+  borrarTitular,
+  cambiarAjusteDeTitulares,
+  desfijarTitular,
+  fijarTitular,
+  getAjustesDeTitulares,
+  getFuentesDeTitulares,
+  getResumenDeTitulares,
+  getTitularesDelPanel,
+  restaurarTitular,
+} from "../api";
+import { recorridoTitulares } from "../../../../lib/guias/guiaTitulares";
+import { applyPageMeta } from "../../../../lib/seo";
+import { unwrapEntity } from "../../../../services/adminResponseUtils";
+import { CabeceraDePagina } from "../../../../components/admin/CabeceraDePagina";
 
 /**
  * «Titulares» en el panel: lo que hace la redacción con los titulares en caliente.
@@ -282,11 +292,11 @@ export const AdminTitulares = () => {
   const cargar = useCallback(async () => {
     try {
       const [resumen, ajustes, lista, fuentes] = await Promise.all([
-        adminRequest("/admin/headlines/resumen"),
-        adminRequest("/admin/headlines/settings"),
-        adminRequest("/admin/headlines", { query: { vista, horas: 24, limite: 100 } }),
+        getResumenDeTitulares(),
+        getAjustesDeTitulares(),
+        getTitularesDelPanel({ vista, horas: 24, limite: 100 }),
         // Los medios son un extra: si fallan, el resto del panel tiene que seguir sirviendo.
-        adminRequest("/admin/headlines/fuentes").catch(() => null),
+        getFuentesDeTitulares().catch(() => null),
       ]);
       setState({
         status: "success",
@@ -325,7 +335,7 @@ export const AdminTitulares = () => {
 
   const borrar = async (grupo, motivo, nota) => {
     const ok = await hacer(
-      () => adminRequest(`/admin/headlines/${grupo.id}`, { method: "DELETE", json: { motivo, nota } }),
+      () => borrarTitular(grupo.id, { motivo, nota }),
       "Borrado. Deja de verse en la web en menos de dos minutos.",
       "No se pudo borrar.",
     );
@@ -335,23 +345,23 @@ export const AdminTitulares = () => {
   const restaurar = async (grupo) => {
     const ok = await confirm({ title: "Restaurar el titular", description: `«${grupo.titulo}» vuelve a la web.`, confirmLabel: "Restaurar" });
     if (!ok) return;
-    await hacer(() => adminRequest(`/admin/headlines/${grupo.id}/restore`, { method: "POST" }), "Restaurado.", "No se pudo restaurar.");
+    await hacer(() => restaurarTitular(grupo.id), "Restaurado.", "No se pudo restaurar.");
   };
 
   const fijar = (grupo, minutos) =>
     hacer(
-      () => adminRequest(`/admin/headlines/${grupo.id}/pin`, { method: "POST", json: { minutos } }),
+      () => fijarTitular(grupo.id, minutos),
       "Fijado arriba. La web lo enseña el primero en menos de dos minutos.",
       "No se pudo fijar.",
     );
 
   const quitar = (grupo) =>
-    hacer(() => adminRequest(`/admin/headlines/${grupo.id}/pin`, { method: "DELETE" }), "Quitado de arriba.", "No se pudo quitar.");
+    hacer(() => desfijarTitular(grupo.id), "Quitado de arriba.", "No se pudo quitar.");
 
   const cambiar = async (clave, valor, pregunta) => {
     const ok = await confirm({ title: pregunta.titulo, description: pregunta.texto, confirmLabel: pregunta.boton });
     if (!ok) return;
-    await hacer(() => adminRequest("/admin/headlines/settings", { method: "PUT", json: { [clave]: valor } }), "Hecho.", "No se pudo cambiar.");
+    await hacer(() => cambiarAjusteDeTitulares(clave, valor), "Hecho.", "No se pudo cambiar.");
   };
 
   if (state.status === "loading") return <LoadingState title="Cargando titulares…" />;

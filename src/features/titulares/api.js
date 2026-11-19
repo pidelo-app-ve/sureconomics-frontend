@@ -1,4 +1,4 @@
-import { userPublicRequest } from "../lib/userApi";
+import { userPublicRequest } from "../../lib/userApi";
 
 /**
  * Los titulares en caliente: los redacta el backend cada 10 minutos a partir de lo que

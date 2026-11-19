@@ -191,7 +191,7 @@ describe("con datos", () => {
     }
   });
 
-  test("en /en, los enlaces y los nombres de las secciones en inglés", async () => {
+  test("en /en, los enlaces de las secciones van a /en y «Al punto» sale en inglés", async () => {
     conPiezas(filas());
     const html = await abrir("/en");
     assert.match(html, /href="\/en\/articulos\?formato=noticias"/);

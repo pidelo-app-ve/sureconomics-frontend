@@ -29,7 +29,7 @@ const HORA = 3_600_000;
 const form = (extra = {}) => ({ ...emptyForm(), format: "noticia", title: "Titular", content: "<p>Texto</p>", ...extra });
 
 describe("las fechas, en hora de Caracas", () => {
-  test("de la API al campo: UTC-4, se abra el panel desde donde se abra", () => {
+  test("de la API al campo: en UTC-4", () => {
     assert.equal(isoToDateTimeLocal("2026-09-28T13:00:00Z"), "2026-09-28T09:00");
     // Cruza la medianoche hacia atrás.
     assert.equal(isoToDateTimeLocal("2026-01-01T02:30:00Z"), "2025-12-31T22:30");
@@ -53,7 +53,8 @@ describe("las fechas, en hora de Caracas", () => {
   // `new Date(":00-04:00")` como el 1-ene-2000 a las 4:00, así que una pieza programada
   // sin fecha dice «Programado · sábado, 1 de enero, 4:00» en vez de «falta la fecha»
   // (cabecera del editor y resumen del estado). Publicar sigue bloqueado: la falta
-  // «fecha» mira el campo, no esto. Al arreglarlo, quitar el `todo`.
+  // «fecha» mira el campo, no esto.
+  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
   test("un campo de fecha vacío no se dice como una fecha", { todo: "fechaDeCaracas('') da el 1-ene-2000" }, () => {
     assert.equal(fechaDeCaracas(""), "");
   });

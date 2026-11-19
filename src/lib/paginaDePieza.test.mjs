@@ -56,7 +56,7 @@ describe("minutos de lectura", () => {
     assert.equal(minutosDeLectura(palabras(330).replace(/ /g, "<br>")), 2);
   });
 
-  test("un texto enorme no se cuelga y da una cifra con sentido", () => {
+  test("un texto enorme da una cifra con sentido", () => {
     const enorme = `<p>${palabras(500_000)}</p>`;
     assert.equal(minutosDeLectura(enorme), Math.round(500_000 / 220));
   });
@@ -125,7 +125,7 @@ describe("el estado tras pedir la pieza", () => {
     assert.deepEqual(estadoDelFallo({ status: 404 }), { status: "missing", fila: null });
   });
 
-  test("lo demás es pasajero y se puede reintentar (sin red, 429, 500, 502)", () => {
+  test("lo demás es pasajero (error y no «no existe»): sin red, 429, 500, 502", () => {
     const sinRed = new TypeError("Failed to fetch");
     for (const err of [sinRed, { status: 0 }, { status: 429 }, { status: 500 }, { status: 502 }, { status: 410 }, null]) {
       const estado = estadoDelFallo(err);

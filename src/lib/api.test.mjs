@@ -87,7 +87,7 @@ describe("con la sesión en orden", () => {
     assert.deepEqual(p.cuerpo, { title: "Hola" });
   });
 
-  test("reintentar crear tras un fallo manda la misma clave (no duplica la pieza)", async () => {
+  test("el servicio reenvía la clave de idempotencia que recibe", async () => {
     conSesion();
     contestar(new TypeError("Failed to fetch"), json(201, { success: true, data: { id: 9 } }));
     await errorDe(() => createAdminPost({ title: "Hola" }, "clave-1"));
@@ -150,8 +150,8 @@ describe("sesión caducada", () => {
   // FALLO CONOCIDO (19-nov-2026, sin arreglar: cambia el comportamiento). Si tras un
   // 401 la red se cae justo al renovar, `adminRequest` lo trata igual que una sesión
   // caducada: borra la sesión y echa al editor, aunque la sesión fuera buena (lo escrito
-  // se salva en la copia local). Debería decir «sin red» y dejar la sesión. Al arreglarlo,
-  // quitar el `todo`.
+  // se salva en la copia local). Debería decir «sin red» y dejar la sesión.
+  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
   test("sin red al renovar, la sesión no se cierra", { todo: "un fallo de red al renovar cierra la sesión" }, async () => {
     conSesion();
     contestar(json(401, { success: false, error: { message: "Token expired" } }), new TypeError("Failed to fetch"));

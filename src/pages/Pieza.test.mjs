@@ -209,7 +209,7 @@ describe("mientras carga", () => {
     assert.doesNotMatch(html, /El bolívar cae otra vez/);
   });
 
-  test("un formato equivocado en la dirección no enseña la pieza (se redirige a la buena)", async () => {
+  test("un formato equivocado en la dirección no pinta la pieza (la página redirige a la buena)", async () => {
     const html = await abrir("/articulos/el-bolivar-cae", fila());
     assert.equal(titularDe(html), null);
     assert.doesNotMatch(html, /se-piece__body|El bolívar cae otra vez/);
@@ -217,7 +217,7 @@ describe("mientras carga", () => {
 });
 
 describe("texto raro de la redacción", () => {
-  test("etiquetas en el titular se ven como texto, nunca se ejecutan", async () => {
+  test("etiquetas en el titular se escapan: se ven como texto", async () => {
     const titulo = `<script>alert("x")</script> <img src=x onerror=alert(1)>`;
     const html = await abrir("/noticias/el-bolivar-cae", fila({ title: titulo }));
     assert.doesNotMatch(html, /<script>alert/);

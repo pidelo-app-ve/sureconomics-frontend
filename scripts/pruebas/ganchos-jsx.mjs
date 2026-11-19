@@ -18,6 +18,9 @@
  */
 import { readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+// `esbuild` no está en package.json: llega con Vite, que lo usa por dentro. Si un día
+// falta (Vite deja de traerlo o cambia de versión mayor), se declara en devDependencies
+// con la versión que tenga `node_modules/esbuild` (`npm ls esbuild`), sin cambiar nada más.
 import { transformSync } from "esbuild";
 
 /** Lo que el código del sitio lee de `import.meta.env` durante las pruebas. */

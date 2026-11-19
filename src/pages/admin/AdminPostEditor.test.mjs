@@ -31,7 +31,7 @@ describe("crear una pieza", () => {
     assert.doesNotMatch(texto, /Guardar/);
   });
 
-  test("con cuenta: lo primero es elegir el formato, y el título lo dice", async () => {
+  test("con cuenta: abre como «Crear pieza», en borrador", async () => {
     globalThis.sessionStorage = almacen({
       sureconomics_admin_access_token: "a",
       sureconomics_admin_refresh_token: "r",

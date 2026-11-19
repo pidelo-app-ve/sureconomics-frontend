@@ -36,7 +36,7 @@ describe("tras crear", () => {
     assert.deepEqual(opciones.state, { flash: "Noticia: creada correctamente." });
   });
 
-  test("creada y publicada de una vez: lo dice y enseña el enlace", () => {
+  test("creada y publicada de una vez: el aviso lo dice y marca `recienPublicada` (el enlace)", () => {
     const { opciones } = destinoTrasCrear({ created: { id: 42 }, publicar: true, label: "Noticia" });
     assert.deepEqual(opciones.state, { flash: "Noticia: publicada.", recienPublicada: true });
   });
@@ -141,13 +141,13 @@ describe("la barra de botones", () => {
     assert.equal(boton("Eliminar la pieza"), undefined);
   });
 
-  test("doble clic en guardar: mientras guarda, el botón está desactivado y lo dice", () => {
+  test("mientras guarda, «Guardar» está desactivado y dice «Guardando…» (contra el doble clic)", () => {
     const { boton } = barra({ isCreate: true, saveState: { status: "loading" } });
     assert.equal(boton("Guardando…").desactivado, true);
     assert.equal(boton("Publicar").desactivado, true);
   });
 
-  test("doble clic en publicar: mientras publica, publicar está desactivado", () => {
+  test("mientras publica, «Publicar» está desactivado (contra el doble clic)", () => {
     const { boton } = barra({ actionState: { status: "loading", kind: "publish" } });
     assert.equal(boton("Publicando…").desactivado, true);
   });
@@ -186,7 +186,8 @@ describe("la barra de botones", () => {
   // se apagan con «ocupado» (guardando **o** publicando), pero los botones no: mientras
   // guarda, «Publicar» de una pieza existente sigue activo y lanza otro PATCH con el
   // mismo formulario a la vez (`guardarYPublicar`), y mientras publica, «Guardar» sigue
-  // activo. Al arreglarlo, quitar el `todo`.
+  // activo.
+  // Al arreglarlo, quitar el `todo` y dejarla como prueba normal: entonces vigila que el fallo no vuelva.
   test("guardando, tampoco se puede publicar (ni al revés)", { todo: "los botones no miran el otro estado" }, () => {
     assert.equal(barra({ saveState: { status: "loading" } }).boton("Publicar").desactivado, true);
     assert.equal(barra({ actionState: { status: "loading", kind: "publish" } }).boton("Guardar cambios").desactivado, true);

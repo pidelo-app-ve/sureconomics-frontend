@@ -14,9 +14,14 @@ import { AdminConfirmDialog } from "../components/admin/AdminConfirmDialog";
  */
 
 export const useAdminConfirm = () => {
+  // `{ id, resolve }` del diálogo abierto. Cada `confirm()` lleva su `id`: lo que acaba
+  // tarde (un borrado que termina con otro diálogo ya encima, el de salir sin guardar)
+  // solo cierra y responde el suyo, no el que esté abierto ahora.
   const resolverRef = useRef(null);
+  const siguienteId = useRef(0);
   const stateRef = useRef(null);
   const [state, setState] = useState({
+    id: 0,
     open: false,
     title: "",
     description: "",
@@ -33,11 +38,12 @@ export const useAdminConfirm = () => {
     stateRef.current = state;
   }, [state]);
 
-  const close = useCallback((result) => {
-    const resolve = resolverRef.current;
+  const close = useCallback((result, id) => {
+    const pendiente = resolverRef.current;
+    if (!pendiente || pendiente.id !== id) return;
     resolverRef.current = null;
-    setState((s) => ({ ...s, open: false, isBusy: false, errorMessage: "", onConfirm: null }));
-    if (resolve) resolve(Boolean(result));
+    setState((s) => (s.id === id ? { ...s, open: false, isBusy: false, errorMessage: "", onConfirm: null } : s));
+    pendiente.resolve(Boolean(result));
   }, []);
 
   const confirm = useCallback(
@@ -47,9 +53,12 @@ export const useAdminConfirm = () => {
         // encima, la de salir sin guardar), su promesa se resuelve como «no» antes de
         // pisarla. Si no, no se resolvía nunca y quien la esperaba se quedaba colgado
         // (el editor, con su candado tomado y todos los botones sin hacer nada).
-        if (resolverRef.current) resolverRef.current(false);
-        resolverRef.current = resolve;
+        if (resolverRef.current) resolverRef.current.resolve(false);
+        siguienteId.current += 1;
+        const id = siguienteId.current;
+        resolverRef.current = { id, resolve };
         setState({
+          id,
           open: true,
           title: options.title,
           description: options.description,
@@ -67,26 +76,30 @@ export const useAdminConfirm = () => {
 
   const handleClose = useCallback(() => {
     if (state.isBusy) return;
-    close(false);
-  }, [close, state.isBusy]);
+    close(false, state.id);
+  }, [close, state.isBusy, state.id]);
 
   const handleConfirm = useCallback(async () => {
     const current = stateRef.current;
     if (!current || current.isBusy) return;
     if (!current.onConfirm) {
-      close(true);
+      close(true, current.id);
       return;
     }
-    setState((s) => ({ ...s, isBusy: true, errorMessage: "" }));
+    setState((s) => (s.id === current.id ? { ...s, isBusy: true, errorMessage: "" } : s));
     try {
       await current.onConfirm();
-      close(true);
+      close(true, current.id);
     } catch (err) {
-      setState((s) => ({
-        ...s,
-        isBusy: false,
-        errorMessage: err instanceof Error ? err.message : "No se pudo completar la acción.",
-      }));
+      setState((s) =>
+        s.id === current.id
+          ? {
+              ...s,
+              isBusy: false,
+              errorMessage: err instanceof Error ? err.message : "No se pudo completar la acción.",
+            }
+          : s
+      );
     }
   }, [close]);
 

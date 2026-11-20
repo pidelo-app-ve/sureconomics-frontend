@@ -8,6 +8,10 @@
  *     await act(async () => g.valor.hacerAlgo());
  *     await g.desmontar();
  *
+ * Con `{ pintar: (valor) => elemento }` el componente de prueba pinta además ese
+ * elemento (p. ej. el `ConfirmDialog` que devuelve un hook). Tiene que acabar en
+ * componentes que no pinten etiquetas: un doble que devuelva `null` (`dobles.mjs`).
+ *
  * `renderToString` (ver `pintar.mjs`) no corre efectos; esto sí: `createRoot` de
  * React 18 en un contenedor de mentira. El componente de prueba devuelve `null`, así
  * que a React le basta con lo mínimo de `window` y del contenedor. `window` lleva un
@@ -38,11 +42,11 @@ export { act };
 
 const sinNada = { addEventListener() {}, removeEventListener() {} };
 
-export const montarGancho = async (usarGancho, propsIniciales = {}) => {
+export const montarGancho = async (usarGancho, propsIniciales = {}, { pintar } = {}) => {
   const g = { props: propsIniciales, valor: undefined };
   const Prueba = (props) => {
     g.valor = usarGancho(props);
-    return null;
+    return pintar ? pintar(g.valor) : null;
   };
   const raiz = createRoot({ nodeType: 1, nodeName: "DIV", tagName: "DIV", ownerDocument: sinNada, ...sinNada });
   g.pintar = async (props = {}) => {

@@ -43,6 +43,11 @@ export const useAdminConfirm = () => {
   const confirm = useCallback(
     (options) =>
       new Promise((resolve) => {
+        // Un solo diálogo a la vez: si había otro abierto (la pregunta de eliminar y,
+        // encima, la de salir sin guardar), su promesa se resuelve como «no» antes de
+        // pisarla. Si no, no se resolvía nunca y quien la esperaba se quedaba colgado
+        // (el editor, con su candado tomado y todos los botones sin hacer nada).
+        if (resolverRef.current) resolverRef.current(false);
         resolverRef.current = resolve;
         setState({
           open: true,

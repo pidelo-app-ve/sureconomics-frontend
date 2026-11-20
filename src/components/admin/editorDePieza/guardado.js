@@ -129,18 +129,22 @@ export const estaOcupado = ({ saveState, actionState, eliminando = false }) =>
   saveState?.status === "loading" || actionState?.status === "loading" || Boolean(eliminando);
 
 /**
- * Una acción a la vez. `enMarcha` es un ref (`{ current }`) que comparten las tres
+ * Una acción a la vez. `enMarcha` es un ref (`{ current }`) que comparten las
  * acciones: los botones se apagan con `estaOcupado`, pero eso llega en el siguiente
  * pintado, y un doble clic o un atajo podían colarse antes. Con el candado, lo que
- * llega mientras hay algo en marcha no hace nada.
+ * llega mientras hay algo en marcha no se hace, pero se dice (`d.toastError`): si el
+ * candado se quedara tomado por un fallo, los botones no callarían sin más.
  */
-const conCandado = async (enMarcha, fn) => {
-  if (enMarcha.current) return;
-  enMarcha.current = true;
+export const conCandado = async (d, fn) => {
+  if (d.enMarcha.current) {
+    d.toastError("Hay otra acción en marcha. Espere a que termine.", "Un momento");
+    return;
+  }
+  d.enMarcha.current = true;
   try {
     await fn();
   } finally {
-    enMarcha.current = false;
+    d.enMarcha.current = false;
   }
 };
 
@@ -150,7 +154,7 @@ const conCandado = async (enMarcha, fn) => {
  * (`useBorradorLocal`), `navigate`, los avisos y `enMarcha`.
  */
 export const guardarPieza = ({ publicar = false } = {}, d) =>
-  conCandado(d.enMarcha, async () => {
+  conCandado(d, async () => {
     d.setSaveState({ status: "loading", message: "" });
     d.setActionState({ status: "idle", message: "", kind: "" });
     try {
@@ -206,7 +210,7 @@ export const guardarPieza = ({ publicar = false } = {}, d) =>
  */
 export const ejecutarAccion = ({ kind, fn, successMessage, failureMessage, toastTitle, enviado }, d) => {
   if (d.isCreate) return Promise.resolve();
-  return conCandado(d.enMarcha, async () => {
+  return conCandado(d, async () => {
     d.setSaveState({ status: "idle", message: "" });
     d.setActionState({ status: "loading", message: "", kind });
     try {
@@ -231,7 +235,7 @@ export const ejecutarAccion = ({ kind, fn, successMessage, failureMessage, toast
  */
 export const eliminarPieza = (d) => {
   if (d.isCreate) return Promise.resolve();
-  return conCandado(d.enMarcha, async () => {
+  return conCandado(d, async () => {
     d.setActionState({ status: "idle", message: "", kind: "" });
     await d.confirm({
       ...d.dialogo,

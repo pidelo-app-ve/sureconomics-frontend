@@ -384,6 +384,30 @@ describe("una acción a la vez (el candado)", () => {
     assert.equal(e.estado.saveState.status, "success");
   });
 
+  test("lo que no se hace por estar ocupado se dice, no se calla", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    await e.guardar();
+    await e.despublicar();
+    await e.eliminar();
+    const ocupado = e.avisos.filter((a) => a.m === "Hay otra acción en marcha. Espere a que termine.");
+    assert.equal(ocupado.length, 3);
+    assert.equal(ocupado[0].tono, "error");
+    e.api("patch").resolver(pieza());
+    await guardando;
+  });
+
+  test("si el manejador mismo lanza (p. ej. el aviso de error), el candado se suelta", async () => {
+    const e = editor();
+    const d = { ...e.d(), toastError: () => {
+      throw new Error("el aviso falló");
+    } };
+    const guardando = guardarPieza({}, d);
+    e.api("patch").rechazar(sinRed());
+    await assert.rejects(guardando, /el aviso falló/);
+    assert.equal(e.enMarcha.current, false);
+  });
+
   test("«Guardar cambios» y, mientras, «Despublicar»: no se despublica a la vez", async () => {
     const e = editor();
     const guardando = e.guardar();

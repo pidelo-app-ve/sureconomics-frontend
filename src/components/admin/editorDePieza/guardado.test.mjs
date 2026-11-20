@@ -19,6 +19,8 @@ import {
   estaOcupado,
   fusionarRespuesta,
   guardarPieza,
+  quitarVinculo,
+  usarFirmaDeLaCuenta,
   hayCambios,
 } from "./guardado.js";
 import { BotonesDeLaPieza } from "./BotonesDeLaPieza.jsx";
@@ -120,7 +122,7 @@ const barra = (props = {}) => {
   const html = renderToString(
     createElement(BotonesDeLaPieza, {
       // Como en el editor: `ocupado` sale de los estados (ver `estaOcupado`).
-      ocupado: estaOcupado({ saveState, actionState, eliminando: props.eliminando }),
+      ocupado: estaOcupado({ saveState, actionState, eliminando: props.eliminando, colaboradorOcupado: props.colaboradorOcupado }),
       esMovil: false,
       form: form(),
       faltas: [],
@@ -277,6 +279,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
       saveState: { status: "idle", message: "" },
       actionState: { status: "idle", message: "", kind: "" },
       eliminando: false,
+      colaboradorOcupado: false,
       colaborador: null,
       assets: { image: null, video: null, document: null, audio: null, bylinePhoto: null },
       recienPublicada: false,
@@ -306,6 +309,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
   /** Lo que el editor pasa a los manejadores, leído al pulsar (como en cada pintado). */
   e.d = () => ({
     form: e.estado.form,
+    base: e.estado.base,
     // El ref del editor: el formulario del último pintado.
     formActual: { get current() { return e.estado.form; } },
     isCreate,
@@ -316,6 +320,8 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     createAdminPost: api("crear"),
     patchAdminPost: api("patch"),
     deleteAdminPost: api("borrar"),
+    usarFirmaDeSuCuenta: api("usar-su-cuenta"),
+    quitarVinculoConElLector: api("quitar-vinculo"),
     navigate: (...a) => (e.navegado = a),
     saltarGuarda: e.saltarGuarda,
     borrador: {
@@ -354,6 +360,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     setAssets: set("assets"),
     setRecienPublicada: set("recienPublicada"),
     setEliminando: set("eliminando"),
+    setColaboradorOcupado: set("colaboradorOcupado"),
     toastSuccess: (m, t) => e.avisos.push({ tono: "ok", m, t }),
     toastError: (m, t) => e.avisos.push({ tono: "error", m, t }),
   });
@@ -367,6 +374,8 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
   // Como en el editor: despublicar no manda el formulario, responde sobre lo guardado.
   e.despublicar = accion("unpublish", "despublicar", () => e.estado.base);
   e.eliminar = () => eliminarPieza({ ...e.d(), dialogo: { title: "Eliminar pieza", confirmLabel: "Eliminar" } });
+  e.usarSuCuenta = () => usarFirmaDeLaCuenta(e.d());
+  e.quitarVinculo = () => quitarVinculo({ ...e.d(), dialogo: { title: "Quitar el vínculo con el lector" } });
   return e;
 };
 
@@ -732,5 +741,94 @@ describe("lo que se escribe mientras guarda no se pierde", () => {
     assert.equal(e.estado.form.title, "Titular con más");
     assert.deepEqual(e.borrador, []);
     assert.equal(e.sinGuardar(), true);
+  });
+});
+
+describe("la firma del colaborador, con las demás acciones", () => {
+  test("cambiando la firma, el editor está ocupado y la barra se apaga", () => {
+    assert.equal(estaOcupado({ saveState: { status: "idle" }, actionState: { status: "idle" }, colaboradorOcupado: true }), true);
+    const { boton } = barra({ form: form({ status: "published" }), colaboradorOcupado: true });
+    assert.equal(boton("Guardar cambios").desactivado, true);
+    assert.equal(boton("Despublicar").desactivado, true);
+  });
+
+  test("guardando, «Usar su cuenta» no sale (y se dice); usándola, «Guardar» tampoco", async () => {
+    const a = editor();
+    const guardando = a.guardar();
+    await a.usarSuCuenta();
+    assert.deepEqual(a.nombres(), ["patch"]);
+    assert.ok(a.avisos.some((x) => x.m === "Hay otra acción en marcha. Espere a que termine."));
+    a.api("patch").resolver(pieza());
+    await guardando;
+
+    const b = editor();
+    const usando = b.usarSuCuenta();
+    assert.equal(b.ocupado(), true);
+    await b.guardar();
+    assert.deepEqual(b.nombres(), ["usar-su-cuenta"]);
+    b.api("usar-su-cuenta").resolver(pieza({ byline: "Ana" }));
+    await usando;
+    assert.equal(b.ocupado(), false);
+  });
+
+  test("con «Quitar el vínculo» preguntando, Ctrl+S no guarda", async () => {
+    const e = editor();
+    const quitando = e.quitarVinculo();
+    await e.guardar();
+    assert.deepEqual(e.nombres(), []);
+    e.dialogo.cancelar();
+    await quitando;
+    assert.equal(e.enMarcha.current, false);
+  });
+
+  test("«Usar su cuenta» trae la firma nueva y deja lo escrito sin guardar", async () => {
+    const e = editor();
+    e.escribir({ excerpt: "Sin guardar", byline: "Firma a mano" });
+    const usando = e.usarSuCuenta();
+    e.api("usar-su-cuenta").resolver(pieza({ byline: "Ana Pérez", byline_photo_asset_id: 9, byline_photo: { id: 9 } }));
+    await usando;
+    assert.equal(e.estado.form.byline, "Ana Pérez");
+    assert.equal(e.estado.form.byline_photo_asset_id, 9);
+    assert.deepEqual(e.estado.assets.bylinePhoto, { id: 9 });
+    assert.equal(e.estado.form.excerpt, "Sin guardar");
+    assert.equal(e.estado.base.byline, "Ana Pérez");
+    assert.equal(e.sinGuardar(), true);
+    assert.deepEqual(e.borrador, ["conservar"]);
+  });
+
+  test("lo que se escribe en la firma mientras va la petición se queda", async () => {
+    const e = editor();
+    const usando = e.usarSuCuenta();
+    e.escribir({ byline: "Otra firma" });
+    e.api("usar-su-cuenta").resolver(pieza({ byline: "Ana Pérez" }));
+    await usando;
+    assert.equal(e.estado.form.byline, "Otra firma");
+    assert.equal(e.sinGuardar(), true);
+  });
+
+  test("«Quitar el vínculo» no se lleva lo escrito sin guardar (ni la firma tocada a mano)", async () => {
+    const e = editor({ inicial: form({ status: "published", slug: "titular", byline: "Ana" }) });
+    e.escribir({ byline: "Ana, corregida", title: "Titular nuevo" });
+    const quitando = e.quitarVinculo();
+    const confirmando = e.dialogo.confirmar();
+    assert.equal(e.estado.colaboradorOcupado, true);
+    e.api("quitar-vinculo").resolver(pieza({ byline: "Ana", colaborador: null }));
+    await confirmando;
+    await quitando;
+    assert.equal(e.estado.form.byline, "Ana, corregida");
+    assert.equal(e.estado.form.title, "Titular nuevo");
+    assert.equal(e.estado.colaboradorOcupado, false);
+    assert.equal(e.enMarcha.current, false);
+  });
+
+  test("sin red al usar su cuenta: se dice, nada cambia y se suelta el candado", async () => {
+    const e = editor();
+    const usando = e.usarSuCuenta();
+    e.api("usar-su-cuenta").rechazar(sinRed());
+    await usando;
+    assert.equal(e.estado.actionState.status, "error");
+    assert.equal(e.estado.colaboradorOcupado, false);
+    assert.equal(e.enMarcha.current, false);
+    assert.deepEqual(e.borrador, []);
   });
 });

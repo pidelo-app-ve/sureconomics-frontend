@@ -118,15 +118,18 @@ export const claveDelBorrador = ({ loadState, base, isCreate, postId }) =>
     : null;
 
 /**
- * Si el editor está a mitad de algo: guardando, publicando, despublicando o
- * eliminando. Con esto se apagan a la vez **todos** los botones de acción y los atajos
+ * Si el editor está a mitad de algo: guardando, publicando, despublicando, eliminando
+ * o cambiando la firma del colaborador. Con esto se apagan a la vez **todos** los botones de acción y los atajos
  * de teclado. Antes cada botón miraba solo lo suyo, y con una pieza publicada se podía
  * pulsar «Guardar cambios» y, mientras tanto, «Despublicar»: el PATCH manda siempre
  * `status`, así que si llegaba el último la pieza volvía a quedar publicada aunque el
  * aviso dijera «Se despublicó».
  */
-export const estaOcupado = ({ saveState, actionState, eliminando = false }) =>
-  saveState?.status === "loading" || actionState?.status === "loading" || Boolean(eliminando);
+export const estaOcupado = ({ saveState, actionState, eliminando = false, colaboradorOcupado = false }) =>
+  saveState?.status === "loading" ||
+  actionState?.status === "loading" ||
+  Boolean(eliminando) ||
+  Boolean(colaboradorOcupado);
 
 /**
  * Una acción a la vez. `enMarcha` es un ref (`{ current }`) que comparten las
@@ -255,3 +258,54 @@ export const eliminarPieza = (d) => {
     });
   });
 };
+
+/**
+ * La firma del colaborador, ya en el servidor, en el editor. Responde sobre lo guardado
+ * (`d.base`): lo escrito sin guardar se queda. Con `firmaNueva` («Usar su cuenta») los
+ * dos campos de la firma responden sobre lo que había al pulsar: tiene que traer la
+ * firma nueva aunque se hubiera tocado antes; si se toca mientras va la petición, se
+ * queda. «Quitar el vínculo» no cambia la firma: la tocada a mano se queda.
+ */
+const aplicarFirma = (post, d, { firmaNueva }) => {
+  const guardado = d.base ?? d.form;
+  const enviado = firmaNueva
+    ? { ...guardado, byline: d.form.byline, byline_photo_asset_id: d.form.byline_photo_asset_id }
+    : guardado;
+  const fotoTocada = !mismoValor(d.formActual.current?.byline_photo_asset_id, enviado.byline_photo_asset_id);
+  aplicarRespuesta(post, d, enviado);
+  d.setAssets((prev) => ({ ...prev, bylinePhoto: fotoTocada ? prev.bylinePhoto : post.byline_photo ?? null }));
+};
+
+/**
+ * «Usar el nombre y la foto de su cuenta»: guarda al momento, como publicar, y por eso
+ * va con el candado y cuenta como `colaboradorOcupado` (ver `estaOcupado`).
+ */
+export const usarFirmaDeLaCuenta = (d) =>
+  conCandado(d, async () => {
+    d.setColaboradorOcupado(true);
+    d.setActionState({ status: "idle", message: "", kind: "" });
+    try {
+      aplicarFirma(await d.usarFirmaDeSuCuenta(d.numericPostId), d, { firmaNueva: true });
+      d.setActionState({ status: "success", message: "Firma puesta al día con su cuenta.", kind: "colaborador" });
+    } catch (err) {
+      d.setActionState({ status: "error", message: err?.message || "No se pudo cambiar la firma.", kind: "colaborador" });
+    } finally {
+      d.setColaboradorOcupado(false);
+    }
+  });
+
+/** «Quitar el vínculo con el lector»: pregunta (`d.dialogo`) con el candado, como eliminar. */
+export const quitarVinculo = (d) =>
+  conCandado(d, async () => {
+    await d.confirm({
+      ...d.dialogo,
+      onConfirm: async () => {
+        d.setColaboradorOcupado(true);
+        try {
+          aplicarFirma(await d.quitarVinculoConElLector(d.numericPostId), d, { firmaNueva: false });
+        } finally {
+          d.setColaboradorOcupado(false);
+        }
+      },
+    });
+  });

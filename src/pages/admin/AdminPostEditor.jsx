@@ -264,6 +264,7 @@ export const AdminPostEditor = () => {
     const dependencias = () => ({
         form,
         formActual,
+        base,
         isCreate,
         numericPostId,
         // Same reason: no gendered adjective on a name that comes from data.
@@ -331,15 +332,7 @@ export const AdminPostEditor = () => {
     const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);
     const programada = form.status === "scheduled";
 
-    const { colaboradorOcupado, handleUsarSuCuenta, handleQuitarVinculo } = useFirmaDelColaborador({
-        numericPostId,
-        confirm,
-        setForm,
-        setBase,
-        setAssets,
-        setColaborador,
-        setActionState,
-    });
+    const { colaboradorOcupado, handleUsarSuCuenta, handleQuitarVinculo } = useFirmaDelColaborador({ dependencias });
 
     const handleDelete = () =>
         eliminarPieza({
@@ -425,7 +418,7 @@ export const AdminPostEditor = () => {
     } = estadoDeLaPieza({ form, requiredMedia, canPublish, programada, legacyImage, topics, placeGroups });
 
     const publicarEsPrincipal = canPublish && form.status === "draft" && !faltas.length;
-    const ocupado = estaOcupado({ saveState, actionState, eliminando });
+    const ocupado = estaOcupado({ saveState, actionState, eliminando, colaboradorOcupado });
     atajos.current = {
         guardar: form.format && !ocupado ? handleSave : null,
         publicar:

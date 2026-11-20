@@ -162,6 +162,15 @@ export const conCandado = async (d, fn) => {
 };
 
 /**
+ * Si la pieza abierta ya es otra que la de la petición. El editor sigue montado al pasar
+ * de una pieza a otra (las dos rutas pintan el mismo componente), y la respuesta que
+ * llega tarde de la anterior no se pone en el formulario de la nueva. `d.piezaAbierta`
+ * es un ref al id del último pintado; `d.numericPostId`, el de cuando se pulsó.
+ */
+const esOtraPieza = (d) => d.piezaAbierta.current !== d.numericPostId;
+const NADA = { status: "idle", message: "" };
+
+/**
  * «Guardar» (y, al crear, «Publicar»: `publicar` hace que la pieza nazca publicada).
  * Lo que usa llega en `d`: el formulario, los `set…` del editor, la API, `borrador`
  * (`useBorradorLocal`), `navigate`, los avisos y `enMarcha`.
@@ -186,6 +195,10 @@ export const guardarPieza = ({ publicar = false } = {}, d) =>
         return;
       }
       const updated = await d.patchAdminPost(d.numericPostId, payload);
+      if (esOtraPieza(d)) {
+        d.setSaveState(NADA);
+        return;
+      }
       // El adjunto que se cambió mientras tanto se queda, con su ficha, igual que su id
       // en el formulario: si no, la vista previa enseñaría el de antes.
       const cambiados = {
@@ -211,7 +224,9 @@ export const guardarPieza = ({ publicar = false } = {}, d) =>
         err,
         d.isCreate ? "No se pudo crear la pieza." : "No se pudieron guardar los cambios."
       );
-      d.setSaveState({ status: "error", message });
+      // Con otra pieza abierta, el aviso sí (lo de la anterior no se guardó), pero el
+      // mensaje bajo el formulario no: sería de otra pieza.
+      d.setSaveState(!d.isCreate && esOtraPieza(d) ? NADA : { status: "error", message });
       d.toastError(message, d.isCreate ? "No se pudo crear" : "No se pudo guardar");
     }
   });
@@ -228,13 +243,17 @@ export const ejecutarAccion = ({ kind, fn, successMessage, failureMessage, toast
     d.setActionState({ status: "loading", message: "", kind });
     try {
       const updated = await fn(d.numericPostId);
+      if (esOtraPieza(d)) {
+        d.setActionState({ status: "idle", message: "", kind: "" });
+        return;
+      }
       aplicarRespuesta(updated, d, enviado ?? d.form);
       d.setActionState({ status: "success", message: successMessage, kind });
       d.setRecienPublicada(kind === "publish");
       d.toastSuccess(successMessage, toastTitle);
     } catch (err) {
       const message = adminErrorMessage(err, failureMessage);
-      d.setActionState({ status: "error", message, kind });
+      d.setActionState(esOtraPieza(d) ? { status: "idle", message: "", kind: "" } : { status: "error", message, kind });
       d.toastError(message, toastTitle);
     }
   });
@@ -274,9 +293,11 @@ export const eliminarPieza = (d) => {
  * (`d.base`): lo escrito sin guardar se queda. Con `firmaNueva` («Usar su cuenta») los
  * dos campos de la firma responden sobre lo que había al pulsar: tiene que traer la
  * firma nueva aunque se hubiera tocado antes; si se toca mientras va la petición, se
- * queda. «Quitar el vínculo» no cambia la firma: la tocada a mano se queda.
+ * queda. «Quitar el vínculo» no cambia la firma: la tocada a mano se queda. Con otra
+ * pieza abierta no se aplica nada (devuelve `false`).
  */
 const aplicarFirma = (post, d, { firmaNueva }) => {
+  if (esOtraPieza(d)) return false;
   const guardado = d.base ?? d.form;
   const enviado = firmaNueva
     ? { ...guardado, byline: d.form.byline, byline_photo_asset_id: d.form.byline_photo_asset_id }
@@ -284,6 +305,7 @@ const aplicarFirma = (post, d, { firmaNueva }) => {
   const fotoTocada = !mismoValor(d.formActual.current?.byline_photo_asset_id, enviado.byline_photo_asset_id);
   aplicarRespuesta(post, d, enviado);
   d.setAssets((prev) => ({ ...prev, bylinePhoto: fotoTocada ? prev.bylinePhoto : post.byline_photo ?? null }));
+  return true;
 };
 
 /**
@@ -295,7 +317,7 @@ export const usarFirmaDeLaCuenta = (d) =>
     d.setColaboradorOcupado(true);
     d.setActionState({ status: "idle", message: "", kind: "" });
     try {
-      aplicarFirma(await d.usarFirmaDeSuCuenta(d.numericPostId), d, { firmaNueva: true });
+      if (!aplicarFirma(await d.usarFirmaDeSuCuenta(d.numericPostId), d, { firmaNueva: true })) return;
       d.setActionState({ status: "success", message: "Firma puesta al día con su cuenta.", kind: "colaborador" });
     } catch (err) {
       d.setActionState({ status: "error", message: err?.message || "No se pudo cambiar la firma.", kind: "colaborador" });

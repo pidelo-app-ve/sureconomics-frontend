@@ -291,6 +291,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     dialogo: null,
     enMarcha: { current: false },
     saltarGuarda: { current: false },
+    piezaAbierta: { current: isCreate ? null : 7 },
   };
   const set = (clave) => (v) => {
     e.estado[clave] = typeof v === "function" ? v(e.estado[clave]) : v;
@@ -304,6 +305,13 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
   e.api = (nombre) => e.llamadas.filter((l) => l.nombre === nombre).at(-1);
   e.nombres = () => e.llamadas.map((l) => l.nombre);
   e.ocupado = () => estaOcupado(e.estado);
+  /** Se abre otra pieza con el editor montado (como al ir de /admin/posts/7 a /8). */
+  e.abrirOtra = () => {
+    e.piezaAbierta.current = 8;
+    const otra = form({ title: "Otra pieza", status: "draft" });
+    e.estado.form = otra;
+    e.estado.base = otra;
+  };
   e.escribir = (cambios) => set("form")((prev) => ({ ...prev, ...cambios }));
   e.sinGuardar = () => hayCambios(e.estado.form, e.estado.base);
   /** Lo que el editor pasa a los manejadores, leído al pulsar (como en cada pintado). */
@@ -313,7 +321,8 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     // El ref del editor: el formulario del último pintado.
     formActual: { get current() { return e.estado.form; } },
     isCreate,
-    numericPostId: 7,
+    numericPostId: isCreate ? null : 7,
+    piezaAbierta: e.piezaAbierta,
     label: "Noticia",
     enMarcha: e.enMarcha,
     claveDeCreacion: () => "clave-1",
@@ -852,5 +861,53 @@ describe("la firma del colaborador, con las demás acciones", () => {
     assert.equal(e.estado.colaboradorOcupado, false);
     assert.equal(e.enMarcha.current, false);
     assert.deepEqual(e.borrador, []);
+  });
+});
+
+describe("la respuesta que llega con otra pieza abierta", () => {
+  test("se guardaba la 7 y ya está abierta la 8: no se toca nada de la 8", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    e.abrirOtra();
+    e.api("patch").resolver(pieza({ title: "Titular de la 7" }));
+    await guardando;
+    assert.equal(e.estado.form.title, "Otra pieza");
+    assert.equal(e.estado.base.title, "Otra pieza");
+    assert.deepEqual(e.borrador, []);
+    assert.equal(e.estado.saveState.status, "idle");
+    assert.equal(e.avisos.length, 0);
+    assert.equal(e.ocupado(), false);
+  });
+
+  test("si falló, se avisa, pero el mensaje bajo el formulario de la 8 queda limpio", async () => {
+    const e = editor();
+    const guardando = e.guardar();
+    e.abrirOtra();
+    e.api("patch").rechazar(sinRed());
+    await guardando;
+    assert.equal(e.estado.saveState.status, "idle");
+    assert.equal(e.avisos.at(-1).tono, "error");
+  });
+
+  test("despublicar la 7 con la 8 abierta: la 8 sigue como estaba", async () => {
+    const e = editor();
+    const despublicando = e.despublicar();
+    e.abrirOtra();
+    e.api("despublicar").resolver(pieza({ status: "draft", title: "Titular de la 7" }));
+    await despublicando;
+    assert.equal(e.estado.form.title, "Otra pieza");
+    assert.equal(e.estado.actionState.status, "idle");
+    assert.equal(e.estado.recienPublicada, false);
+  });
+
+  test("la firma de la 7 no se pone en la 8", async () => {
+    const e = editor();
+    const usando = e.usarSuCuenta();
+    e.abrirOtra();
+    e.api("usar-su-cuenta").resolver(pieza({ byline: "Ana de la 7" }));
+    await usando;
+    assert.equal(e.estado.form.byline, "");
+    assert.equal(e.estado.actionState.status, "idle");
+    assert.equal(e.estado.colaboradorOcupado, false);
   });
 });

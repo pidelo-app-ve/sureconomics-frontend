@@ -137,6 +137,10 @@ export const AdminPostEditor = () => {
         const n = Number(postId);
         return Number.isFinite(n) ? n : postId;
     }, [postId]);
+    // La pieza abierta en el último pintado: la respuesta que llega tarde de otra no se
+    // aplica aquí (ver `esOtraPieza` en `guardado.js`).
+    const piezaAbierta = useRef(numericPostId);
+    piezaAbierta.current = numericPostId;
 
     const loadPost = useCallback(async () => {
         if (isCreate || !numericPostId) {
@@ -267,6 +271,7 @@ export const AdminPostEditor = () => {
         base,
         isCreate,
         numericPostId,
+        piezaAbierta,
         // Same reason: no gendered adjective on a name that comes from data.
         label: currentFormat?.name ?? "La pieza",
         enMarcha,

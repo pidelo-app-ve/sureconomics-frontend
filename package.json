@@ -11,7 +11,7 @@
         "start": "vite",
         "build": "vite build && node scripts/shell-como-app.mjs",
         "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0 && node scripts/i18n-comprobar.mjs",
-        "test": "node --test",
+        "test": "node --import ./scripts/pruebas/cargador-jsx.mjs --test",
         "preview": "vite preview",
         "test:og": "node api/pieza.test.mjs && node api/no-encontrada.test.mjs && node api/portada.test.mjs",
         "test:rutas": "node api/rutas.test.mjs",

@@ -22,7 +22,6 @@ import { ListaDeComprobacion } from "../../components/admin/ListaDeComprobacion"
 import { PiezaPublicada } from "../../components/admin/PiezaPublicada";
 import { useSugerenciasDeClasificacion } from "../../components/admin/SugerenciasDeClasificacion";
 import { applyPageMeta } from "../../lib/seo";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
@@ -38,16 +37,22 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import {
     FORMAT_FIELDS,
     FORMATOS_SIN_PROGRAMAR,
-    comparable,
     emptyForm,
     fechaDeCaracas,
     formToPayload,
-    hastaDeCaracas,
     horaCorta,
-    isoToDateTimeLocal,
     normalizarPieza,
     postToForm,
 } from "../../components/admin/editorDePieza/formulario";
+import {
+    avisoDelFormulario,
+    claveDelBorrador as claveDelBorradorDe,
+    ejecutarAccion,
+    eliminarPieza,
+    estaOcupado,
+    guardarPieza,
+    hayCambios,
+} from "../../components/admin/editorDePieza/guardado";
 import { estadoDeLaPieza, estadoDelIngles } from "../../components/admin/editorDePieza/derivadosDeLaPieza";
 import { useTraduccionDePieza } from "../../components/admin/editorDePieza/useTraduccionDePieza";
 import { useTaxonomiaDelEditor } from "../../components/admin/editorDePieza/useTaxonomiaDelEditor";
@@ -66,7 +71,7 @@ import { BotonesDeLaPieza } from "../../components/admin/editorDePieza/BotonesDe
 /**
  * El editor de piezas del panel. Aquí quedan el estado del formulario, la carga, el
  * guardado y las acciones; los grupos del formulario, los datos y los hooks propios
- * viven en `components/admin/editorDePieza/`.
+ * viven en `components/admin/editorDePieza/` (lo que decide al guardar, en `guardado.js`).
  */
 export const AdminPostEditor = () => {
     const { role } = useAuth();
@@ -76,6 +81,9 @@ export const AdminPostEditor = () => {
     // Lo último que se cargó o guardó, para saber si hay algo sin guardar. `saltarGuarda`
     // deja pasar las salidas que hace el propio editor (tras crear o eliminar).
     const [base, setBase] = useState(null);
+    // Sube cada vez que el formulario se abre (se carga del servidor o se empieza uno
+    // nuevo): es cuando se ofrece la copia de este equipo (`useBorradorLocal`).
+    const [apertura, setApertura] = useState(0);
     const saltarGuarda = useRef(false);
     const canCreate = Boolean(role);
     const { postId } = useParams();
@@ -89,6 +97,10 @@ export const AdminPostEditor = () => {
     const [searchParams] = useSearchParams();
 
     const [form, setForm] = useState(emptyForm);
+    // El formulario del último pintado, para lo que vuelve de una petición: lo escrito
+    // mientras tanto no se pisa (ver `aplicarRespuesta` en `guardado.js`).
+    const formActual = useRef(form);
+    formActual.current = form;
     const [vistaPrevia, setVistaPrevia] = useState(false);
     const [assets, setAssets] = useState({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
     // El lector que la propuso, si la pieza salió de una propuesta aceptada. La firma
@@ -109,6 +121,12 @@ export const AdminPostEditor = () => {
     // partir de ahi lo que venga es otro video y no un reintento del mismo.
     const { clave: claveDeVideo, renovar: renovarClaveDeVideo } = useClaveIdempotente();
     const [actionState, setActionState] = useState({ status: "idle", message: "", kind: "" });
+    // Borrando la pieza (ya confirmado): cuenta como `ocupado`. `enMarcha`, el candado de
+    // guardar, publicar/despublicar y eliminar: ver `guardado.js`.
+    const [eliminando, setEliminando] = useState(false);
+    const enMarcha = useRef(false);
+    // Con la pregunta de eliminar o la de quitar el vínculo abierta: también `ocupado`.
+    const [preguntando, setPreguntando] = useState(false);
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
@@ -121,6 +139,10 @@ export const AdminPostEditor = () => {
         const n = Number(postId);
         return Number.isFinite(n) ? n : postId;
     }, [postId]);
+    // La pieza abierta en el último pintado: la respuesta que llega tarde de otra no se
+    // aplica aquí (ver `esOtraPieza` en `guardado.js`).
+    const piezaAbierta = useRef(numericPostId);
+    piezaAbierta.current = numericPostId;
 
     const loadPost = useCallback(async () => {
         if (isCreate || !numericPostId) {
@@ -130,6 +152,7 @@ export const AdminPostEditor = () => {
             const inicial = { ...emptyForm(), format: requested };
             setForm(inicial);
             setBase(inicial);
+            setApertura((n) => n + 1);
             saltarGuarda.current = false;
             setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
             setColaborador(null);
@@ -141,6 +164,7 @@ export const AdminPostEditor = () => {
             const post = await getAdminPost(numericPostId);
             setForm(postToForm(post));
             setBase(postToForm(post));
+            setApertura((n) => n + 1);
             saltarGuarda.current = false;
             setAssets({
                 image: post.image_asset ?? null,
@@ -241,94 +265,53 @@ export const AdminPostEditor = () => {
     // there is an image on a piece with nothing attached, and can clear it.
     const legacyImage = Boolean(form.featured_image_url && !form.image_asset_id);
 
+    // Lo que usan guardar, publicar/despublicar y eliminar (`guardado.js`), con el
+    // candado: una acción a la vez (ver `estaOcupado`).
+    const dependencias = () => ({
+        form,
+        formActual,
+        base,
+        isCreate,
+        numericPostId,
+        piezaAbierta,
+        // Same reason: no gendered adjective on a name that comes from data.
+        label: currentFormat?.name ?? "La pieza",
+        enMarcha,
+        claveDeCreacion,
+        createAdminPost,
+        patchAdminPost,
+        deleteAdminPost,
+        navigate,
+        saltarGuarda,
+        borrador,
+        confirm,
+        setSaveState,
+        setActionState,
+        setForm,
+        setBase,
+        setColaborador,
+        setAssets,
+        setRecienPublicada,
+        setEliminando,
+        setPreguntando,
+        toastSuccess,
+        toastError,
+    });
+
     // `publicar`: al crear, la pieza nace publicada. Antes eran dos pasos (crear el
     // borrador y, ya en la pantalla siguiente, publicar) para lo que casi siempre es uno.
-    const guardar = async ({ publicar = false } = {}) => {
-        setSaveState({ status: "loading", message: "" });
-        setActionState({ status: "idle", message: "", kind: "" });
-        try {
-            const payload = formToPayload(form);
-            if (publicar) payload.status = "published";
-            if (isCreate) {
-                const created = await createAdminPost(payload, claveDeCreacion());
-                const newId = created?.id ?? null;
-                // Same reason: no gendered adjective on a name that comes from data.
-                const label = currentFormat?.name ?? "La pieza";
-                saltarGuarda.current = true;
-                borrador.borrar();
-                if (newId != null) {
-                    navigate(`/admin/posts/${newId}`, {
-                        replace: true,
-                        state: publicar
-                            ? { flash: `${label}: publicada.`, recienPublicada: true }
-                            : { flash: `${label}: creada correctamente.` },
-                    });
-                } else {
-                    navigate("/admin/posts", {
-                        replace: true,
-                        state: { flash: `${label}: creada correctamente.` },
-                    });
-                }
-                return;
-            }
-            const updated = await patchAdminPost(numericPostId, payload);
-            setForm(postToForm(updated));
-            setBase(postToForm(updated));
-            setColaborador(updated.colaborador ?? null);
-            borrador.limpiar();
-            setAssets((prev) => ({
-                ...prev,
-                image: updated.image_asset ?? null,
-                video: updated.video_asset ?? null,
-                document: updated.document_asset ?? null,
-                audio: updated.audio_asset ?? null,
-            }));
-            // Programada: que lo diga con la fecha, que es lo que hay que comprobar. Y
-            // fijada en portada, igual: el «hasta» es lo que la redacción quiere ver.
-            const aviso =
-                updated?.status === "scheduled"
-                    ? `Programada: sale sola el ${fechaDeCaracas(isoToDateTimeLocal(updated.published_at))} (hora de Caracas).`
-                    : updated?.en_portada && updated?.destacada_hasta
-                      ? `Cambios guardados. Abre la portada hasta el ${hastaDeCaracas(updated.destacada_hasta)} (hora de Caracas).`
-                      : "Cambios guardados correctamente.";
-            setSaveState({ status: "success", message: aviso });
-            toastSuccess(aviso, updated?.status === "scheduled" ? "Programada" : "Contenido guardado");
-        } catch (err) {
-            const message = adminErrorMessage(
-                err,
-                isCreate ? "No se pudo crear la pieza." : "No se pudieron guardar los cambios."
-            );
-            setSaveState({ status: "error", message });
-            toastError(message, isCreate ? "No se pudo crear" : "No se pudo guardar");
-        }
-    };
+    const guardar = (opciones) => guardarPieza(opciones, dependencias());
 
     const handleSave = () => guardar();
 
-    const runAction = (kind, fn, successMessage, failureMessage, toastTitle) => async () => {
-        if (isCreate) return;
-        setSaveState({ status: "idle", message: "" });
-        setActionState({ status: "loading", message: "", kind });
-        try {
-            const updated = await fn(numericPostId);
-            setForm(postToForm(updated));
-            setBase(postToForm(updated));
-            setColaborador(updated.colaborador ?? null);
-            borrador.limpiar();
-            setActionState({ status: "success", message: successMessage, kind });
-            setRecienPublicada(kind === "publish");
-            toastSuccess(successMessage, toastTitle);
-        } catch (err) {
-            const message = adminErrorMessage(err, failureMessage);
-            setActionState({ status: "error", message, kind });
-            toastError(message, toastTitle);
-        }
-    };
+    // `enviado`: sobre qué formulario responde el servidor (ver `aplicarRespuesta`).
+    const runAction = (kind, fn, successMessage, failureMessage, toastTitle, enviado) => () =>
+        ejecutarAccion({ kind, fn, successMessage, failureMessage, toastTitle, enviado }, dependencias());
 
     // Publicar con cambios sin guardar los guarda antes: «Publicar» es la acción
     // principal de un borrador listo, y publicar la versión de antes sería una trampa.
     const guardarYPublicar = async (id) => {
-        if (base && comparable(form) !== comparable(base)) {
+        if (hayCambios(form, base)) {
             await patchAdminPost(id, formToPayload(form));
         }
         return publishAdminPost(id);
@@ -349,46 +332,32 @@ export const AdminPostEditor = () => {
             ? "Se canceló la programación: vuelve a ser un borrador."
             : "Se despublicó y ya no es visible en el sitio.",
         "No se pudo despublicar.",
-        "Despublicar"
+        "Despublicar",
+        // Despublicar no manda el formulario: lo que se haya escrito sin guardar se queda.
+        base ?? form
     );
 
     const sePuedeProgramar = canPublish && !FORMATOS_SIN_PROGRAMAR.has(form.format);
     const programada = form.status === "scheduled";
 
-    const { colaboradorOcupado, handleUsarSuCuenta, handleQuitarVinculo } = useFirmaDelColaborador({
-        numericPostId,
-        confirm,
-        setForm,
-        setBase,
-        setAssets,
-        setColaborador,
-        setActionState,
-    });
+    const { colaboradorOcupado, handleUsarSuCuenta, handleQuitarVinculo } = useFirmaDelColaborador({ dependencias });
 
-    const handleDelete = async () => {
-        if (isCreate) return;
-        setActionState({ status: "idle", message: "", kind: "" });
-        await confirm({
-            title: "Eliminar pieza",
-            description: form.title.trim()
-                ? `¿Eliminar «${form.title.trim()}» de forma permanente? No se puede deshacer.`
-                : `¿Eliminar esta pieza de forma permanente? No se puede deshacer.`,
-            confirmLabel: "Eliminar",
-            onConfirm: async () => {
-                await deleteAdminPost(numericPostId);
-                saltarGuarda.current = true;
-                navigate("/admin/posts", {
-                    replace: true,
-                    state: { flash: "Pieza eliminada correctamente." },
-                });
+    const handleDelete = () =>
+        eliminarPieza({
+            ...dependencias(),
+            dialogo: {
+                title: "Eliminar pieza",
+                description: form.title.trim()
+                    ? `¿Eliminar «${form.title.trim()}» de forma permanente? No se puede deshacer.`
+                    : `¿Eliminar esta pieza de forma permanente? No se puede deshacer.`,
+                confirmLabel: "Eliminar",
             },
         });
-    };
 
     // Salir con cambios sin guardar: un clic de más en el menú o en «Volver» se llevaba
     // lo escrito (en el computador no se preguntaba). Cerrar una hoja del teléfono no
     // cuenta: lo escrito sigue en el editor.
-    const sinGuardar = base !== null && comparable(form) !== comparable(base);
+    const sinGuardar = hayCambios(form, base);
     // Ctrl+S guarda y Ctrl+Enter publica (Cmd en Mac): quien escribe no suelta el teclado.
     useAtajosDeTeclado(atajos);
 
@@ -405,27 +374,17 @@ export const AdminPostEditor = () => {
 
     // Copia en este equipo de lo que no se ha guardado, por si se cierra la pestaña o se
     // cae el navegador: vuelve al abrir la pieza otra vez. No sustituye a «Guardar».
-    const claveDelBorrador =
-        loadState.status === "success" && base
-            ? isCreate
-                ? `pieza-nueva-${base.format || "sin-formato"}`
-                : `pieza-${postId}`
-            : null;
+    const claveDelBorrador = claveDelBorradorDe({ loadState, base, isCreate, postId });
     const borrador = useBorradorLocal({
         clave: claveDelBorrador,
         valores: form,
         base,
         aplicar: setForm,
         normalizar: normalizarPieza,
+        apertura,
     });
 
-    const feedback = (() => {
-        for (const state of [actionState, saveState]) {
-            if (state.status === "error") return { tone: "error", message: state.message };
-            if (state.status === "success") return { tone: "success", message: state.message };
-        }
-        return null;
-    })();
+    const feedback = avisoDelFormulario(actionState, saveState);
 
     if (isCreate && !canCreate) {
         return <EmptyState title="Sin acceso" description="Hace falta una cuenta del panel para crear contenido nuevo." />;
@@ -467,7 +426,7 @@ export const AdminPostEditor = () => {
     } = estadoDeLaPieza({ form, requiredMedia, canPublish, programada, legacyImage, topics, placeGroups });
 
     const publicarEsPrincipal = canPublish && form.status === "draft" && !faltas.length;
-    const ocupado = saveState.status === "loading" || actionState.status === "loading";
+    const ocupado = estaOcupado({ saveState, actionState, eliminando, colaboradorOcupado, preguntando });
     atajos.current = {
         guardar: form.format && !ocupado ? handleSave : null,
         publicar:
@@ -658,6 +617,7 @@ export const AdminPostEditor = () => {
                         publicarEsPrincipal={publicarEsPrincipal}
                         handleSave={handleSave}
                         saveState={saveState}
+                        ocupado={ocupado}
                         programada={programada}
                         isCreate={isCreate}
                         canPublish={canPublish}

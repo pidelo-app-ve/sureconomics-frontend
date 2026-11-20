@@ -4,7 +4,11 @@ import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 
 const { ancla } = recorridoEditor;
 
-/** Vista previa, guardar, publicar, despublicar y eliminar: la barra de acciones. */
+/**
+ * Vista previa, guardar, publicar, despublicar y eliminar: la barra de acciones.
+ * `ocupado` (`estaOcupado` de `guardado.js`) apaga todos los de acción a la vez: con
+ * uno en marcha no se lanza otro que se cruce con él.
+ */
 export const BotonesDeLaPieza = ({
     esMovil,
     form,
@@ -13,6 +17,7 @@ export const BotonesDeLaPieza = ({
     publicarEsPrincipal,
     handleSave,
     saveState,
+    ocupado,
     programada,
     isCreate,
     canPublish,
@@ -44,7 +49,7 @@ export const BotonesDeLaPieza = ({
             type="button"
             className={publicarEsPrincipal ? "se-btn se-btn--secondary" : "se-btn"}
             onClick={handleSave}
-            disabled={saveState.status === "loading"}
+            disabled={ocupado}
         >
             {saveState.status === "loading"
                 ? "Guardando…"
@@ -63,7 +68,7 @@ export const BotonesDeLaPieza = ({
                 type="button"
                 className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
                 onClick={() => guardar({ publicar: true })}
-                disabled={saveState.status === "loading" || Boolean(faltas.length)}
+                disabled={ocupado || Boolean(faltas.length)}
                 title={faltas.length ? `Falta: ${faltas.join(", ")}` : "Ctrl + Enter"}
             >
                 Publicar
@@ -76,7 +81,7 @@ export const BotonesDeLaPieza = ({
                     type="button"
                     className={publicarEsPrincipal ? "se-btn" : "se-btn se-btn--secondary"}
                     onClick={handlePublish}
-                    disabled={actionState.status === "loading"}
+                    disabled={ocupado}
                 >
                     {actionState.status === "loading" &&
                     actionState.kind === "publish"
@@ -93,7 +98,7 @@ export const BotonesDeLaPieza = ({
                     type="button"
                     className="se-btn se-btn--secondary"
                     onClick={handleUnpublish}
-                    disabled={actionState.status === "loading"}
+                    disabled={ocupado}
                 >
                     {actionState.status === "loading" &&
                     actionState.kind === "unpublish"
@@ -107,6 +112,7 @@ export const BotonesDeLaPieza = ({
                     type="button"
                     className="se-editor-eliminar"
                     onClick={handleDelete}
+                    disabled={ocupado}
                 >
                     Eliminar la pieza
                 </button>
@@ -123,6 +129,7 @@ BotonesDeLaPieza.propTypes = {
     publicarEsPrincipal: PropTypes.bool,
     handleSave: PropTypes.func.isRequired,
     saveState: PropTypes.shape({ status: PropTypes.string }).isRequired,
+    ocupado: PropTypes.bool,
     programada: PropTypes.bool,
     isCreate: PropTypes.bool,
     canPublish: PropTypes.bool,

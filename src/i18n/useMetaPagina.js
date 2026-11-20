@@ -26,6 +26,8 @@ import { useIdioma } from "./ProveedorIdioma";
  *
  * Las claves `title`/`description` se llaman como en `applyPageMeta` para que el cambio
  * en cada página sea mover la llamada, no reescribirla.
+ *
+ * Lo que se pone sale de `senalesDeLaPagina` (abajo), sin React, para poder probarlo.
  */
 export const useMetaPagina = ({
   title,
@@ -43,20 +45,42 @@ export const useMetaPagina = ({
   const filtro = esPaginaDeFiltro(pathname, search);
 
   useEffect(() => {
-    const enEspanol = `${SITIO}${rutaEnIdioma(base, "es")}`;
-    const enIngles = `${SITIO}${rutaEnIdioma(base, "en")}`;
-    const propia = lang === "en" ? enIngles : enEspanol;
-    const sinVersionPropia = soloEspanol && lang === "en";
-    const sinIndice = noindex || noEncontrada || filtro;
-    applyPageMeta({
-      title,
-      description,
-      lang,
-      noindex: sinIndice || sinVersionPropia,
-      canonicalUrl: noEncontrada || filtro ? null : sinVersionPropia ? enEspanol : propia,
-      alternates: sinIndice || soloEspanol ? null : { es: enEspanol, en: enIngles, "x-default": enEspanol },
-      tipo,
-      autor,
-    });
+    applyPageMeta(
+      senalesDeLaPagina({ base, filtro, lang, title, description, noindex, noEncontrada, soloEspanol, tipo, autor })
+    );
   }, [title, description, noindex, noEncontrada, filtro, soloEspanol, tipo, autor, lang, base]);
+};
+
+/**
+ * Lo que `useMetaPagina` le pasa a `applyPageMeta`. `base` es la dirección sin prefijo de
+ * idioma y con solo la consulta que cuenta (`consultaCanonica`); `filtro`, si es una
+ * página de filtro (`esPaginaDeFiltro`). Lo demás, lo que pidió la página.
+ */
+export const senalesDeLaPagina = ({
+  base,
+  filtro,
+  lang,
+  title,
+  description,
+  noindex = false,
+  noEncontrada = false,
+  soloEspanol = false,
+  tipo = "website",
+  autor = null,
+}) => {
+  const enEspanol = `${SITIO}${rutaEnIdioma(base, "es")}`;
+  const enIngles = `${SITIO}${rutaEnIdioma(base, "en")}`;
+  const propia = lang === "en" ? enIngles : enEspanol;
+  const sinVersionPropia = soloEspanol && lang === "en";
+  const sinIndice = noindex || noEncontrada || filtro;
+  return {
+    title,
+    description,
+    lang,
+    noindex: sinIndice || sinVersionPropia,
+    canonicalUrl: noEncontrada || filtro ? null : sinVersionPropia ? enEspanol : propia,
+    alternates: sinIndice || soloEspanol ? null : { es: enEspanol, en: enIngles, "x-default": enEspanol },
+    tipo,
+    autor,
+  };
 };

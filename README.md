@@ -36,6 +36,9 @@ npm install
 npm run start
 ```
 
+Pruebas: `npm test` (todas) o `npm test -- <archivo>` (una sola). `node --test` a secas ya no
+sirve: hace falta el cargador de `scripts/pruebas/`, que `npm test` registra solo.
+
 ## Backend endpoints expected
 
 - `GET /health`

@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { BRAND } from "../data/surEconomicsMock";
 import { Enlace, Redirigir } from "../components/Enlace";
 import { sinPrefijo } from "../i18n/motor";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
-import { ErrorState, LoadingState } from "../components/content";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
 import { FichaDeMoneda, TablaDeMonedas, useMonedas } from "../features/monedas";
@@ -23,8 +21,16 @@ import {
 import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
 import { UltimaHoraColumna } from "../components/titulares/UltimaHoraColumna";
 import { useMasLeidas } from "../hooks/useMasLeidas";
-import { temaPrincipal } from "../lib/contentFilter";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
+import {
+  SE_LEEN,
+  estadoDeLaRespuesta,
+  estadoDelFallo,
+  metaDeLaPieza,
+  minutosDeLectura,
+  tomarPiezaDelHtml,
+} from "../lib/paginaDePieza";
+import { PiezaCargando, PiezaConError, PiezaNoEncontrada } from "../components/piece/EstadosDeLaPieza";
 import { getPieceFila, getRelatedFilas } from "../services/publicContentService";
 import { piezaFromApi, piezasFromApi } from "../lib/pieza";
 import { useTaxonomy } from "../hooks/useTaxonomy";
@@ -44,22 +50,11 @@ import {
  * One shell for all five, with only the body switching — the breadcrumb, kicker,
  * headline, byline, tags and related module do the same job whatever the format,
  * and five near-identical pages would drift apart on the first change.
+ *
+ * Lo que decide sin pintar (el estado tras pedir la pieza, los minutos, el título y
+ * las señales para Google) vive en `lib/paginaDePieza.js`; lo que enseña sin pieza
+ * (cargando, no existe, error), en `components/piece/EstadosDeLaPieza.jsx`.
  */
-
-/** Formatos que se leen: los demás se ven o se escuchan, y sus minutos son otros. */
-const SE_LEEN = new Set(["noticia", "articulo", "editorial", "informe"]);
-
-/**
- * Minutos de lectura, a 220 palabras por minuto (un lector de prensa en pantalla). Del
- * cuerpo tal como llega, sin etiquetas. Menos de un minuto se dice como uno.
- */
-const minutosDeLectura = (html) => {
-  const palabras = String(html || "")
-    .replace(/<[^>]+>/g, " ")
-    .split(/\s+/)
-    .filter(Boolean).length;
-  return palabras ? Math.max(1, Math.round(palabras / 220)) : null;
-};
 
 /**
  * Compartir está en un solo sitio por pantalla: en escritorio ancho, el carril que baja
@@ -72,46 +67,6 @@ const REDES_CABECERA = ["whatsapp", "instagram", "x", "linkedin", "copiar"];
 
 /** Donde la foto de cabecera va bajo el titular: el mismo corte de 900 px que la hoja. */
 const FOTO_DEBAJO = "(max-width: 899px)";
-
-const NoEncontrada = () => {
-  const { t } = useIdioma();
-  return (
-    <main className="se-blog se-articles" role="main">
-      <section className="se-section">
-        <div className="se-container">
-          <div className="se-piece">
-            <h1 className="se-piece__title">{t("piezas.noEncontrada.titulo")}</h1>
-            <p className="se-piece__lead">{t("piezas.noEncontrada.texto")}</p>
-            <Enlace to="/" className="se-piece__back">
-              {t("piezas.noEncontrada.volver")}
-            </Enlace>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-};
-
-/**
- * La pieza que ya vino dentro del HTML, si es esta (tal cual, sin convertir).
- *
- * `api/pieza.js` la mete en `<script type="application/json" id="se-pieza">` al servir la página, para que los
- * buscadores vean el texto. Aprovecharla aquí ahorra pedirla otra vez a la API y, sobre
- * todo, evita que el artículo que ya se veía desaparezca tras un «Cargando…» y vuelva.
- * Se usa una sola vez: al navegar a otra pieza dentro del sitio, se pide como siempre.
- */
-const tomarPiezaDelHtml = (slug) => {
-  // Solo lee. Se borra en el efecto, ya usada: React, en modo estricto, llama dos veces
-  // a la función que prepara el estado inicial, y borrarla aquí dejaba la segunda
-  // llamada sin pieza -- y la página la volvía a pedir a la API.
-  try {
-    const nodo = document.getElementById("se-pieza");
-    const datos = nodo ? JSON.parse(nodo.textContent || "null") : null;
-    return datos && datos.slug === slug ? datos : null;
-  } catch {
-    return null;
-  }
-};
 
 /**
  * Arriba de una pieza en `/en`, qué se está leyendo.
@@ -235,16 +190,14 @@ export const Pieza = () => {
     getPieceFila(slug)
       .then((fila) => {
         if (!alive) return;
-        const valida = fila && typeof fila === "object" && fila.slug ? fila : null;
-        setState({ status: valida ? "success" : "missing", fila: valida });
-        if (valida) cargarRelacionadas(valida);
+        const nuevo = estadoDeLaRespuesta(fila);
+        setState(nuevo);
+        if (nuevo.fila) cargarRelacionadas(nuevo.fila);
       })
       .catch((err) => {
         if (!alive) return;
-        // Solo un 404 es «no existe». Lo demás (sin red, 429, 502 mientras Render
-        // reinicia) es pasajero: se dice así, con reintento, y sin `noindex`. Es el
-        // mismo criterio que api/pieza.js; antes todo caía en «no encontrada».
-        setState(err?.status === 404 ? { status: "missing", fila: null } : { status: "error", fila: null, error: err });
+        // Solo un 404 es «no existe»; lo demás es pasajero (ver `estadoDelFallo`).
+        setState(estadoDelFallo(err));
       });
     return () => {
       alive = false;
@@ -269,27 +222,8 @@ export const Pieza = () => {
   const relacionadas = useMemo(() => piezasFromApi(relacionadasFilas), [relacionadasFilas, lang]);
   const cargando = useDelayedFlag(state.status === "loading");
 
-  // El título, la descripción y las señales para Google, en su idioma. Una pieza sin
-  // versión en inglés (`soloEspanol`) sale en `/en` con `noindex` y el canónico
-  // apuntando al español. Con ella, las dos páginas se declaran la una a la otra
-  // (`hreflang`), también la española. Y una dirección que no lleva a ninguna pieza
-  // no debe quedar en los buscadores, ni declarar canónica (es una 404).
-  useMetaPagina(
-    state.status === "missing"
-      ? { title: t("piezas.noEncontrada.meta.titulo", { marca: BRAND.name }), noEncontrada: true }
-      : pieza
-        ? {
-            // El mismo título y la misma descripción que pone la función de Vercel antes
-            // de que cargue la página (`api/pieza.js`): si no, la pestaña cambiaba al cargar.
-            title: t("piezas.pieza.meta.titulo", { titulo: pieza.metaTitulo || pieza.titulo, marca: BRAND.name }),
-            description:
-              pieza.metaDescripcion || pieza.resumen || pieza.entrada || temaPrincipal(pieza) || BRAND.name,
-            soloEspanol: !pieza.tieneIngles,
-            tipo: "article",
-            autor: pieza.formatoApi === "editorial" ? BRAND.name : pieza.autor || BRAND.name,
-          }
-        : { soloEspanol: true }
-  );
+  // El título, la descripción y las señales para Google, en su idioma: ver `metaDeLaPieza`.
+  useMetaPagina(metaDeLaPieza({ status: state.status, pieza, t }));
 
   // La barra de direcciones también lleva la versión: quien copia el enlace de ahí para
   // pegarlo en X comparte el mismo que el botón. `replaceState` y no `navigate`: sólo
@@ -340,32 +274,15 @@ export const Pieza = () => {
   });
 
   if (state.status === "loading" || (state.fila && !pieza)) {
-    // Nothing at all for the first fraction of a second: a piece that loads fast
-    // should just appear, without a card flashing in front of it. Pero con una
-    // pantalla de alto desde el primer momento: sin ella el pie quedaba a la vista y
-    // la pieza, al llegar, lo empujaba fuera de golpe.
-    return (
-      <main className="se-blog se-articles se-cargando-pantalla" role="main">
-        <section className="se-section">
-          <div className="se-container">{cargando ? <LoadingState title={t("comun.cargando")} /> : null}</div>
-        </section>
-      </main>
-    );
+    // Nada la primera fracción de segundo, pero con una pantalla de alto: ver `PiezaCargando`.
+    return <PiezaCargando cargando={cargando} />;
   }
 
   if (state.status === "error") {
-    return (
-      <main className="se-blog se-articles" role="main">
-        <section className="se-section">
-          <div className="se-container">
-            <ErrorState title={t("piezas.errorCarga")} error={state.error} onRetry={() => setIntento((n) => n + 1)} />
-          </div>
-        </section>
-      </main>
-    );
+    return <PiezaConError error={state.error} onRetry={() => setIntento((n) => n + 1)} />;
   }
 
-  if (!pieza) return <NoEncontrada />;
+  if (!pieza) return <PiezaNoEncontrada />;
 
   // The format lives in the URL, so a hand-edited path can disagree with the
   // piece. Send it to the canonical address rather than serving a lie.

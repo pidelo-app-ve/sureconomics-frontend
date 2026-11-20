@@ -1,10 +1,10 @@
 /**
- * La guía del panel «Titulares» (`features/titulares/admin/paginas/AdminTitulares.jsx`).
+ * La guía del panel «Titulares» (`dominios/titulares/panel/paginas/AdminTitulares.jsx`).
  * Anclajes: `[data-tour-titulares="…"]`. Sus pasos viven con el panel, en
- * `features/titulares/guias/pasosDelPanel.js`; aquí se arma la guía con ellos.
+ * `dominios/titulares/guias/pasosDelPanel.js`; aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_TITULARES } from "../../features/titulares/guias/pasosDelPanel.js";
+import { PASOS_TITULARES } from "../../dominios/titulares/guias/pasosDelPanel.js";
 
 export { PASOS_TITULARES };
 

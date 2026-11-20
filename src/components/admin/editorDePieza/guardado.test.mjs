@@ -597,6 +597,28 @@ describe("la respuesta, campo a campo (fusionarRespuesta)", () => {
     assert.equal(f.status, "scheduled");
   });
 
+  test("estado y fecha van juntos: si se tocó uno, se quedan los dos de quien escribe", () => {
+    const mandado = form({ status: "published", published_at: "" });
+    const delServidor = form({ status: "published", published_at: "2026-11-19T11:45" });
+    // Mientras guardaba, pasó a «programada» con su fecha... pero solo tocó el estado.
+    const soloEstado = { ...mandado, status: "scheduled" };
+    const f = fusionarRespuesta({ actual: soloEstado, enviado: mandado, recibido: delServidor });
+    assert.equal(f.status, "scheduled");
+    assert.equal(f.published_at, "", "la fecha del servidor se mezcló con el estado de quien escribe");
+    // Sin tocar ninguno, los dos del servidor.
+    assert.equal(fusionarRespuesta({ actual: mandado, enviado: mandado, recibido: delServidor }).published_at, "2026-11-19T11:45");
+  });
+
+  test("la portada (casilla, duración y fecha) va junta", () => {
+    const mandado = form({ portada: true, portada_durante: "24", portada_hasta: "" });
+    const delServidor = form({ portada: true, portada_durante: "fecha", portada_hasta: "2026-11-20T11:45" });
+    const tocada = { ...mandado, portada_durante: "48" };
+    const f = fusionarRespuesta({ actual: tocada, enviado: mandado, recibido: delServidor });
+    assert.deepEqual([f.portada, f.portada_durante, f.portada_hasta], [true, "48", ""]);
+    const g = fusionarRespuesta({ actual: mandado, enviado: mandado, recibido: delServidor });
+    assert.deepEqual([g.portada, g.portada_durante, g.portada_hasta], [true, "fecha", "2026-11-20T11:45"]);
+  });
+
   test("escribir y deshacer hasta lo que se mandó cuenta como no tocado", () => {
     const actual = { ...enviado, title: "Antes" };
     assert.equal(fusionarRespuesta({ actual, enviado, recibido }).title, "Antes");

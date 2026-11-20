@@ -25,11 +25,21 @@ const mismoValor = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? n
  * Campo a campo: si sigue como se mandó (`enviado`), manda el servidor (`recibido`) --
  * el estado, la fecha, los adjuntos, y lo que normaliza: el slug, el HTML saneado del
  * cuerpo --; si se tocó mientras tanto, se queda lo de quien escribe.
+ *
+ * Los campos que solo tienen sentido juntos van en grupo (`GRUPOS_DEL_FORMULARIO`): si
+ * se tocó cualquiera, se queda el grupo entero de quien escribe. Si no, mezclar
+ * dejaría, p. ej., «programada» con la fecha que puso el servidor al publicar.
  */
+const GRUPOS_DEL_FORMULARIO = [
+  ["status", "published_at"],
+  ["portada", "portada_durante", "portada_hasta"],
+];
 export const fusionarRespuesta = ({ actual, enviado, recibido }) => {
+  const grupoDe = (campo) => GRUPOS_DEL_FORMULARIO.find((g) => g.includes(campo)) ?? [campo];
   const fusion = { ...actual };
   for (const campo of Object.keys(recibido)) {
-    if (mismoValor(actual?.[campo], enviado?.[campo])) fusion[campo] = recibido[campo];
+    const sinTocar = grupoDe(campo).every((c) => mismoValor(actual?.[c], enviado?.[c]));
+    if (sinTocar) fusion[campo] = recibido[campo];
   }
   return fusion;
 };

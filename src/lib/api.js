@@ -131,7 +131,7 @@ export const refreshAdminTokens = async () => {
     }
     const data = unwrapResponseData(payload);
     if (!data || typeof data !== "object" || !data.access_token) {
-        throw new Error("Invalid refresh response");
+        throw new Error("La renovación de la sesión devolvió una respuesta no válida.");
     }
     persistAuth({
         accessToken: data.access_token,
@@ -179,15 +179,18 @@ export const adminRequest = async (path, options = {}) => {
     let { res, payload } = await fetchWithStoredAccess();
 
     if (res.status === 401 && readStoredAuth().refreshToken) {
-        // Solo se cierra la sesión si el servidor dice que la renovación no vale (401 o
-        // 403). Sin red, un 429 o un 5xx al renovar no dicen nada de la sesión: se lanza
+        // Solo se cierra la sesión si el servidor dice que la renovación no vale: un 4xx
+        // que no sea 429 (401, 403, 400 de un token mal formado…). Sin red, un 429 o un
+        // 5xx al renovar no dicen nada de la sesión: se lanza
         // ese error tal cual y la sesión se queda. Antes un solo `try` envolvía también el
         // reintento, y un corte de red justo después de renovar borraba el token recién
         // emitido y echaba del panel a quien estaba escribiendo.
         try {
             await refreshAdminTokens();
         } catch (refreshErr) {
-            if (refreshErr?.status !== 401 && refreshErr?.status !== 403) throw refreshErr;
+            const status = refreshErr?.status;
+            const sesionNoVale = status >= 400 && status < 500 && status !== 429;
+            if (!sesionNoVale) throw refreshErr;
             clearStoredAuth();
             dispatchAdminAuthSync();
             const err = new Error("Sesión expirada");

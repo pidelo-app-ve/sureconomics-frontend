@@ -156,6 +156,25 @@ describe("sesión caducada", () => {
     assert.ok(avisosDeSesion >= 1);
   });
 
+  test("cualquier otro 4xx de la renovación (400, 422: el token no vale) también la cierra", async () => {
+    for (const status of [400, 422]) {
+      conSesion();
+      contestar(json(401, { success: false, error: { message: "Token expired" } }), json(status, { success: false, error: { message: "Bad token" } }));
+      const err = await errorDe(() => adminRequest("/admin/posts/1"));
+      assert.equal(err.status, 401, String(status));
+      assert.equal(sessionStorage.tamano, 0, String(status));
+    }
+  });
+
+  test("una renovación que responde 200 sin token: error en español y la sesión se queda", async () => {
+    conSesion();
+    contestar(json(401, { success: false, error: { message: "Token expired" } }), json(200, { success: true, data: {} }));
+    const err = await errorDe(() => adminRequest("/admin/posts/1"));
+    assert.equal(err.message, "La renovación de la sesión devolvió una respuesta no válida.");
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+    assert.equal(avisosDeSesion, 0);
+  });
+
   test("renovada, pero el token nuevo tampoco vale (401 otra vez): se cierra la sesión", async () => {
     conSesion();
     contestar(

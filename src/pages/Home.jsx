@@ -22,7 +22,7 @@ import { enTandas } from "../lib/tandas";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { usePieces } from "../hooks/usePieces";
 import { pedirCotizaciones } from "../features/monedas";
-import { precargarTitulares } from "../hooks/useHeadlines";
+import { precargarTitulares } from "../features/titulares";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { trasLaFoto } from "../lib/trasLaFoto";
 import { ESPACIOS } from "../services/publicidadService";

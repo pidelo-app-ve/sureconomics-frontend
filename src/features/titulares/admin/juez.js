@@ -23,7 +23,7 @@ export const MODOS_DEL_JUEZ = {
 };
 
 /** Los tipos de problema (`titulares_ia.TIPOS_DE_PROBLEMA`). */
-export const PROBLEMAS_DEL_JUEZ = {
+const PROBLEMAS_DEL_JUEZ = {
   cifra: "Cifra",
   unidad: "Unidad",
   sujeto: "Sujeto",

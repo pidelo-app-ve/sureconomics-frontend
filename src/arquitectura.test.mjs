@@ -54,6 +54,10 @@ const RAIZ = fileURLToPath(new URL("../", import.meta.url));
 /** Las fachadas de la mudanza: pueden importar las tripas de una feature. Ruta → quién la quita. */
 const FACHADAS = {
   "src/lib/monedas.js": "monedas, cuando el editor de piezas importe de features/monedas",
+  "src/components/titulares/UltimaHoraColumna.jsx":
+    "titulares, cuando Pieza.jsx importe de features/titulares (otra rama la está probando: un import, al integrarla)",
+  "src/hooks/useHeadlines.js":
+    "titulares, cuando haceCuanto se mude a un sitio compartido (LugarYFecha, por la puerta, cambiaría el orden del CSS)",
 };
 
 /**

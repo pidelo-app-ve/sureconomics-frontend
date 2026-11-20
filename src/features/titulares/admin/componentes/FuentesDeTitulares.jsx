@@ -1,12 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { useAdminToast } from "../../../context/AdminToastContext";
-import { useAuth } from "../../../context/AuthContext";
-import { adminErrorMessage } from "../../../lib/adminErrorMessage";
-import { adminRequest } from "../../../lib/api";
-import { recorridoTitulares } from "../../../lib/guias/guiaTitulares";
-import { unwrapEntity } from "../../../services/adminResponseUtils";
-import { ModalDelPanel } from "../ModalDelPanel";
+import { useAdminToast } from "../../../../context/AdminToastContext";
+import { useAuth } from "../../../../context/AuthContext";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
+import { recorridoTitulares } from "../../../../lib/guias/guiaTitulares";
+import { unwrapEntity } from "../../../../services/adminResponseUtils";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { activarFuente, cambiarNivelDeFuente, silenciarFuente } from "../api";
 
 const { ancla } = recorridoTitulares;
 
@@ -142,10 +142,7 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
   const silenciar = async () => {
     setOcupado(true);
     try {
-      const r = await adminRequest(`/admin/headlines/fuentes/${encodeURIComponent(silenciando.id)}/mute`, {
-        method: "POST",
-        json: { retirar },
-      });
+      const r = await silenciarFuente(silenciando.id, retirar);
       const n = unwrapEntity(r)?.retirados?.length ?? 0;
       toastSuccess(
         `${silenciando.nombre} silenciada.${n ? ` Se borraron ${n} titular${n === 1 ? "" : "es"} donde era la única fuente.` : ""}`,
@@ -172,15 +169,14 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
 
   const guardar = async () => {
     const { fuente: f, modo } = ventana;
-    const ruta = `/admin/headlines/fuentes/${encodeURIComponent(f.id)}`;
     const cambia = nivel !== f.nivel;
     let paso = "nivel";
     setOcupado(true);
     setFallo(null);
     try {
-      if (cambia) await adminRequest(`${ruta}/nivel`, { method: "POST", json: { nivel } });
+      if (cambia) await cambiarNivelDeFuente(f.id, nivel);
       paso = "activar";
-      if (modo !== "nivel") await adminRequest(`${ruta}/unmute`, { method: "POST" });
+      if (modo !== "nivel") await activarFuente(f.id);
       toastSuccess(`${f.nombre}: ${MODO[modo].hecho}, con nivel ${nivel}.`, "Titulares");
       setVentana(null);
       onCambio();

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { adminErrorMessage } from "../../../lib/adminErrorMessage";
-import { adminRequest } from "../../../lib/api";
-import { MODOS_DEL_JUEZ, VEREDICTOS, nombreDelProblema } from "../../../lib/juezDeTitulares";
-import { unwrapEntity } from "../../../services/adminResponseUtils";
-import { ModalDelPanel } from "../ModalDelPanel";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
+import { MODOS_DEL_JUEZ, VEREDICTOS, nombreDelProblema } from "../juez";
+import { unwrapEntity } from "../../../../services/adminResponseUtils";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { getHistorialDeTitular } from "../api";
 
 /**
  * El historial de un titular: cada versión del texto (la que escribió el sistema, las
@@ -170,7 +170,7 @@ export const HistorialTitular = ({ grupo, motivos, onCerrar }) => {
     if (!grupo) return undefined;
     let vivo = true;
     setEstado({ cargando: true, datos: null, error: null });
-    adminRequest(`/admin/headlines/${grupo.id}/historial`)
+    getHistorialDeTitular(grupo.id)
       .then((r) => vivo && setEstado({ cargando: false, datos: unwrapEntity(r), error: null }))
       .catch((err) => vivo && setEstado({ cargando: false, datos: null, error: adminErrorMessage(err, "No se pudo cargar.") }));
     return () => {

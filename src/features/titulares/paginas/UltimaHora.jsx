@@ -1,20 +1,20 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
-import { Enlace } from "../components/Enlace";
-import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
-import { TablaDeMonedas, useMonedas } from "../features/monedas";
-import { useMasLeidas } from "../hooks/useMasLeidas";
-import { lineaDelPunto, rutaInterna } from "../lib/resumen";
-import { getResumen } from "../services/resumenService";
-import { BRAND } from "../data/surEconomicsMock";
-import { EmptyState, ErrorState, LoadingState } from "../components/content";
+import { Enlace } from "../../../components/Enlace";
+import { MasLeido, MINIMO_MAS_LEIDAS } from "../../../components/home/MasLeido";
+import { TablaDeMonedas, useMonedas } from "../../monedas";
+import { useMasLeidas } from "../../../hooks/useMasLeidas";
+import { lineaDelPunto, rutaInterna } from "../../../lib/resumen";
+import { getResumen } from "../../../services/resumenService";
+import { BRAND } from "../../../data/surEconomicsMock";
+import { EmptyState, ErrorState, LoadingState } from "../../../components/content";
 import { haceCuanto, useHeadlines } from "../hooks/useHeadlines";
-import { formatearFecha } from "../i18n/motor";
-import { nuevosEn, queHacer } from "../lib/listaUltimaHora";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
-import "../styles/titulares.css";
+import { formatearFecha } from "../../../i18n/motor";
+import { nuevosEn, queHacer } from "../listaUltimaHora";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import "../titulares.css";
 
 /**
  * «Última hora»: los titulares en caliente que redacta el backend cada 10 minutos.
@@ -39,7 +39,7 @@ import "../styles/titulares.css";
  * reciente tiene menos de una hora. Al lado, en escritorio, el resumen del día y las
  * monedas: lo que el lector de esta página suele buscar después.
  *
- * Cuándo entra lo nuevo (`lib/listaUltimaHora.js`): solo si el lector está al principio
+ * Cuándo entra lo nuevo (`../listaUltimaHora.js`): solo si el lector está al principio
  * de la lista. Si bajó leyendo, espera tras «Ver 1 titular nuevo» para no moverle el
  * texto (revisión del 22-oct-2026, 3.2), y entra solo en cuanto vuelve arriba. Los dos
  * casos se anuncian a los lectores de pantalla. Lo que sí cambia en el acto: un texto

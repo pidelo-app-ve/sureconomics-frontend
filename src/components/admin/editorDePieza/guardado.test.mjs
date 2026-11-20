@@ -321,7 +321,10 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     borrador: {
       limpiar: () => e.borrador.push("limpiar"),
       borrar: () => e.borrador.push("borrar"),
-      conservar: () => e.borrador.push("conservar"),
+      conservar: (valores) => {
+        e.borrador.push("conservar");
+        e.copiaConservada = valores;
+      },
     },
     confirm: (opciones) =>
       new Promise((cerrar) => {
@@ -604,6 +607,9 @@ describe("lo que se escribe mientras guarda no se pierde", () => {
     assert.equal(e.sinGuardar(), true);
     assert.deepEqual(e.borrador, ["conservar"]);
     assert.equal(e.estado.saveState.status, "success");
+    // La copia que se conserva es lo que queda en el formulario, ya con lo del
+    // servidor: nunca más vieja que lo guardado.
+    assert.deepEqual(e.copiaConservada, e.estado.form);
   });
 
   test("sin escribir nada: lo del servidor, nada sin guardar, y la copia local se limpia", async () => {

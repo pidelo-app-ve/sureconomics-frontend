@@ -1,123 +1,158 @@
 /**
  * La copia en este equipo de lo que no se ha guardado (`useBorradorLocal`), con sus
- * efectos corriendo de verdad. `npm test`.
- *
- * `renderToString` no corre efectos, y este hook es casi todo efectos: aquí se monta con
- * `createRoot` en un contenedor de mentira. El componente de prueba no pinta nada
- * (devuelve `null`), así que a React le basta con lo mínimo de `window` y del
- * contenedor; `localStorage` es un mapa en memoria.
+ * efectos corriendo de verdad (`scripts/pruebas/montar.mjs`). `npm test`.
  */
 import { test, describe, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { createElement } from "react";
 
-const datos = new Map();
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-globalThis.window = Object.assign(new EventTarget(), {
-  setTimeout,
-  clearTimeout,
-  HTMLIFrameElement: class {},
-  localStorage: {
-    getItem: (k) => (datos.has(k) ? datos.get(k) : null),
-    setItem: (k, v) => datos.set(k, String(v)),
-    removeItem: (k) => datos.delete(k),
-  },
-});
-
-const { createRoot } = await import("react-dom/client");
-const { act } = await import("react-dom/test-utils");
+const { montarGancho, act, almacenLocal } = await import("../../scripts/pruebas/montar.mjs");
 const { useBorradorLocal } = await import("./useBorradorLocal.js");
 
 const CLAVE = "sureconomics_borrador_pieza-7";
-const copia = () => JSON.parse(datos.get(CLAVE) ?? "null")?.valores ?? null;
+const copia = () => JSON.parse(almacenLocal.get(CLAVE) ?? "null")?.valores ?? null;
+const ponerCopia = (valores, guardadoEn = 1) => almacenLocal.set(CLAVE, JSON.stringify({ valores, guardadoEn }));
 
 /**
  * El hook montado como en el editor: `form` y `base` en el «padre», `aplicar` es su
- * `setForm`. `pintar({ form, base })` cambia lo que recibe; `h` es lo que devuelve.
+ * `setForm` (cambia `m.form`). `m.pintar({ form, base, apertura })` vuelve a pintar;
+ * `m.h` es lo que devuelve el hook. `apertura: null` lo monta sin señal de apertura
+ * (como las páginas de propuestas del lector).
  */
-const montar = async ({ form, base }) => {
-  const m = { form, base, h: null };
-  const Prueba = ({ form: valores, base: deBase }) => {
-    m.h = useBorradorLocal({
-      clave: "pieza-7",
-      valores,
-      base: deBase,
-      aplicar: (v) => {
-        m.form = v;
-      },
-    });
-    return null;
+const montar = async ({ form, base, apertura = 1 }) => {
+  const m = { form };
+  const g = await montarGancho(
+    ({ valores, base: deBase, apertura: abrir }) =>
+      useBorradorLocal({
+        clave: "pieza-7",
+        valores,
+        base: deBase,
+        apertura: abrir ?? undefined,
+        aplicar: (v) => {
+          m.form = v;
+        },
+      }),
+    { valores: form, base, apertura }
+  );
+  m.pintar = async ({ form: f = m.form, ...resto } = {}) => {
+    m.form = f;
+    await g.pintar({ valores: m.form, ...resto });
   };
-  const contenedor = { nodeType: 1, nodeName: "DIV", tagName: "DIV", ownerDocument: { addEventListener() {}, removeEventListener() {} }, addEventListener() {}, removeEventListener() {} };
-  const raiz = createRoot(contenedor);
-  m.pintar = async (cambios = {}) => {
-    Object.assign(m, cambios);
-    await act(async () => raiz.render(createElement(Prueba, { form: m.form, base: m.base })));
-  };
-  m.desmontar = () => act(() => raiz.unmount());
+  Object.defineProperty(m, "h", { get: () => g.valor });
+  m.desmontar = g.desmontar;
+  // Lo que `aplicar` cambió en el primer pintado, al padre.
   await m.pintar();
   return m;
 };
 
 const pieza = (extra = {}) => ({ title: "Titular", content: "<p>Texto</p>", ...extra });
 
-beforeEach(() => datos.clear());
+beforeEach(() => almacenLocal.clear());
 
-describe("la copia en este equipo", () => {
-  test("al abrir, si hay una copia distinta de lo guardado, se pone y se avisa", async () => {
-    datos.set(CLAVE, JSON.stringify({ valores: pieza({ title: "Lo que no se guardó" }), guardadoEn: 1 }));
+describe("al abrir", () => {
+  test("si hay una copia distinta de lo guardado, se pone, se avisa y no se borra", async () => {
+    ponerCopia(pieza({ title: "Lo que no se guardó" }));
     const m = await montar({ form: pieza(), base: pieza() });
     assert.equal(m.form.title, "Lo que no se guardó");
     assert.equal(m.h.recuperadoEn, 1);
+    assert.equal(copia().title, "Lo que no se guardó");
     await m.desmontar();
   });
 
-  test("tras guardar sin nada pendiente, `limpiar` la quita", async () => {
-    datos.set(CLAVE, JSON.stringify({ valores: pieza({ title: "Nuevo" }), guardadoEn: 1 }));
-    const m = await montar({ form: pieza({ title: "Nuevo" }), base: pieza({ title: "Nuevo" }) });
-    await act(async () => m.h.limpiar());
-    await m.pintar({ base: pieza({ title: "Nuevo" }) });
-    assert.equal(copia(), null);
-    await m.desmontar();
-  });
-
-  // Era un fallo (19-nov-2026): al volver la respuesta se borraba la copia aunque se
-  // hubiera seguido escribiendo. Y sin borrarla era peor: la base nueva volvía a poner
-  // encima la copia de hace un momento, más vieja que lo último tecleado, con el aviso
-  // de «Recuperamos…».
-  test("tras guardar con algo escrito mientras tanto, `conservar` deja la copia y no la vuelve a poner encima", async () => {
-    // La copia se guardó antes de lo último que se tecleó (va 0,8 s por detrás).
-    datos.set(CLAVE, JSON.stringify({ valores: pieza({ title: "Titular con" }), guardadoEn: 1 }));
-    const m = await montar({ form: pieza({ title: "Titular con" }), base: pieza({ title: "Titular con" }) });
-    m.form = pieza({ title: "Titular con más" });
-    // Vuelve la respuesta: la base es lo guardado, el formulario sigue con lo último.
-    const guardada = pieza({ title: "Titular" });
-    await act(async () => m.h.conservar(guardada));
-    await m.pintar({ base: guardada });
-    assert.equal(m.form.title, "Titular con más");
-    assert.equal(m.h.recuperadoEn, null);
-    assert.ok(copia(), "la copia local se borró");
-    await m.desmontar();
-  });
-
-  test("lo que se salta es solo esa base: al recargar la pieza, la copia vuelve a ofrecerse", async () => {
-    datos.set(CLAVE, JSON.stringify({ valores: pieza({ title: "Pendiente" }), guardadoEn: 2 }));
+  test("una carga nueva de la pieza (otra `apertura`) vuelve a ofrecer la copia", async () => {
+    ponerCopia(pieza({ title: "Pendiente" }), 2);
     const m = await montar({ form: pieza({ title: "Pendiente" }), base: pieza({ title: "Pendiente" }) });
-    const guardada = pieza({ title: "Titular" });
-    await act(async () => m.h.conservar(guardada));
-    await m.pintar({ base: guardada });
-    m.form = pieza({ title: "Titular" });
-    await m.pintar({ base: pieza({ title: "Titular" }) });
+    // Se recarga del servidor (como la segunda carga de React en desarrollo).
+    await m.pintar({ form: pieza(), base: pieza(), apertura: 2 });
     assert.equal(m.form.title, "Pendiente");
     assert.equal(m.h.recuperadoEn, 2);
     await m.desmontar();
   });
 
-  test("lo pendiente se vuelve a copiar con lo último escrito (al salir de la página)", async () => {
+  test("al recargar con algo escrito, la copia no se borra por llegar el formulario igual a lo guardado", async () => {
     const m = await montar({ form: pieza(), base: pieza() });
-    const guardada = pieza();
-    await act(async () => m.h.conservar(guardada));
-    await m.pintar({ form: pieza({ title: "Titular con más" }), base: guardada });
+    await m.pintar({ form: pieza({ title: "Escrito" }) });
+    await act(async () => window.dispatchEvent(new Event("pagehide")));
+    // Llega la pieza otra vez: formulario y base iguales, y la copia se ofrece.
+    await m.pintar({ form: pieza(), base: pieza(), apertura: 2 });
+    assert.equal(copia()?.title, "Escrito");
+    assert.equal(m.form.title, "Escrito");
+    await m.desmontar();
+  });
+});
+
+describe("tras guardar", () => {
+  test("sin nada pendiente, `limpiar` la quita", async () => {
+    ponerCopia(pieza({ title: "Nuevo" }));
+    const m = await montar({ form: pieza({ title: "Nuevo" }), base: pieza({ title: "Nuevo" }) });
+    await act(async () => m.h.limpiar());
+    assert.equal(copia(), null);
+    await m.desmontar();
+  });
+
+  // Era un fallo (revisión del 20-nov-2026): la copia «AB»; se guarda «ABC» y mientras
+  // se escribe «ABCD»; se borra la D antes de 0,8 s y la copia se quedaba en «AB». Al
+  // reabrir se recuperaba «AB» y se perdía la C, que ya estaba en el servidor.
+  test("con algo escrito mientras tanto, `conservar` escribe la copia en ese momento", async () => {
+    ponerCopia(pieza({ title: "AB" }));
+    const m = await montar({ form: pieza({ title: "AB" }), base: pieza({ title: "AB" }) });
+    const guardada = pieza({ title: "ABC" });
+    await m.pintar({ form: pieza({ title: "ABCD" }) });
+    await act(async () => m.h.conservar(pieza({ title: "ABCD" })));
+    assert.equal(copia().title, "ABCD");
+    await m.pintar({ base: guardada });
+    assert.equal(m.form.title, "ABCD");
+    await m.desmontar();
+  });
+
+  test("si lo escrito vuelve a ser lo guardado, la copia se quita y al reabrir no sale una vieja", async () => {
+    ponerCopia(pieza({ title: "AB" }));
+    const m = await montar({ form: pieza({ title: "AB" }), base: pieza({ title: "AB" }) });
+    await m.pintar({ form: pieza({ title: "ABCD" }), base: pieza({ title: "ABC" }) });
+    // Se borra la D: igual a lo guardado.
+    await m.pintar({ form: pieza({ title: "ABC" }) });
+    assert.equal(copia(), null);
+    await m.pintar({ form: pieza({ title: "ABC" }), base: pieza({ title: "ABC" }), apertura: 2 });
+    assert.equal(m.form.title, "ABC");
+    assert.equal(m.h.recuperadoEn, null);
+    await m.desmontar();
+  });
+
+  test("`conservar` quita el aviso de «Recuperamos…»", async () => {
+    ponerCopia(pieza({ title: "Recuperada" }), 3);
+    const m = await montar({ form: pieza(), base: pieza() });
+    assert.equal(m.h.recuperadoEn, 3);
+    await act(async () => m.h.conservar(pieza({ title: "Recuperada y más" })));
+    assert.equal(m.h.recuperadoEn, null);
+    await m.desmontar();
+  });
+
+  // Era un fallo de antes (revisión del 20-nov-2026): cada base nueva -- al guardar, al
+  // poner la firma del colaborador -- volvía a poner encima la copia guardada, más vieja
+  // que lo último escrito.
+  test("una base nueva que no es abrir (guardar, la firma) no vuelve a poner la copia encima", async () => {
+    const m = await montar({ form: pieza(), base: pieza() });
+    await m.pintar({ form: pieza({ title: "Escrito" }) });
+    ponerCopia(pieza({ title: "Copia vieja" }));
+    await m.pintar({ base: pieza({ byline: "Firma nueva" }) });
+    assert.equal(m.form.title, "Escrito");
+    assert.equal(m.h.recuperadoEn, null);
+    await m.desmontar();
+  });
+
+  test("sin señal de apertura (las propuestas del lector), cada base nueva cuenta como abrir, como antes", async () => {
+    const m = await montar({ form: pieza(), base: pieza(), apertura: null });
+    ponerCopia(pieza({ title: "Copia" }), 4);
+    await m.pintar({ base: pieza({ excerpt: "recargada" }) });
+    assert.equal(m.form.title, "Copia");
+    assert.equal(m.h.recuperadoEn, 4);
+    await m.desmontar();
+  });
+});
+
+describe("al salir", () => {
+  test("lo pendiente se copia con lo último escrito", async () => {
+    const m = await montar({ form: pieza(), base: pieza() });
+    await m.pintar({ form: pieza({ title: "Titular con más" }) });
     await act(async () => window.dispatchEvent(new Event("pagehide")));
     assert.equal(copia().title, "Titular con más");
     await m.desmontar();

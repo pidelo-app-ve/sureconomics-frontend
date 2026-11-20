@@ -81,6 +81,9 @@ export const AdminPostEditor = () => {
     // Lo último que se cargó o guardó, para saber si hay algo sin guardar. `saltarGuarda`
     // deja pasar las salidas que hace el propio editor (tras crear o eliminar).
     const [base, setBase] = useState(null);
+    // Sube cada vez que el formulario se abre (se carga del servidor o se empieza uno
+    // nuevo): es cuando se ofrece la copia de este equipo (`useBorradorLocal`).
+    const [apertura, setApertura] = useState(0);
     const saltarGuarda = useRef(false);
     const canCreate = Boolean(role);
     const { postId } = useParams();
@@ -143,6 +146,7 @@ export const AdminPostEditor = () => {
             const inicial = { ...emptyForm(), format: requested };
             setForm(inicial);
             setBase(inicial);
+            setApertura((n) => n + 1);
             saltarGuarda.current = false;
             setAssets({ image: null, video: null, document: null, audio: null, bylinePhoto: null });
             setColaborador(null);
@@ -154,6 +158,7 @@ export const AdminPostEditor = () => {
             const post = await getAdminPost(numericPostId);
             setForm(postToForm(post));
             setBase(postToForm(post));
+            setApertura((n) => n + 1);
             saltarGuarda.current = false;
             setAssets({
                 image: post.image_asset ?? null,
@@ -375,6 +380,7 @@ export const AdminPostEditor = () => {
         base,
         aplicar: setForm,
         normalizar: normalizarPieza,
+        apertura,
     });
 
     const feedback = avisoDelFormulario(actionState, saveState);

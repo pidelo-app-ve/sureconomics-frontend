@@ -49,7 +49,7 @@ const aplicarRespuesta = (updated, d, enviado = d.form) => {
   d.setBase(recibido);
   d.setColaborador(updated.colaborador ?? null);
   const ahora = fusionarRespuesta({ actual: d.formActual.current, enviado, recibido });
-  if (hayCambios(ahora, recibido)) d.borrador.conservar(recibido);
+  if (hayCambios(ahora, recibido)) d.borrador.conservar(ahora);
   else d.borrador.limpiar();
 };
 

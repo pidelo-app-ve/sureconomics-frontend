@@ -74,16 +74,6 @@
   padding: 24px 26px;
 }
 
-.se-pausa-tarjeta__kicker {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #ffc928;
-}
-
 .se-pausa-tarjeta__titulo {
   margin: 0;
   font-family: var(--se-font-heading);
@@ -413,15 +403,6 @@
   justify-items: start;
   gap: 8px;
   padding: 20px 22px;
-}
-
-.se-clave-tarjeta__kicker {
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clave-acento);
 }
 
 .se-clave-tarjeta__titulo {

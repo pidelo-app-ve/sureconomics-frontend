@@ -5,8 +5,8 @@
  * **Esta es la puerta del sitio.** Lo que el resto del sitio usa de los titulares se
  * importa de aquí (`import { UltimaHoraColumna } from "../features/titulares"`), nunca de
  * los archivos de dentro: así lo de dentro puede cambiar de sitio sin tocar a nadie. Lo
- * vigila `src/arquitectura.test.mjs`. Sale solo lo que alguien usa: la tarjeta (portada y
- * «no encontrada») y la precarga de la lista (la portada la adelanta).
+ * vigila `src/arquitectura.test.mjs`. Sale solo lo que alguien usa: la tarjeta (portada,
+ * pieza y «no encontrada») y la precarga de la lista (la portada la adelanta).
  *
  * Lo que hay dentro:
  * - `api.js`: lo que el sitio le pide al servidor (la lista y su versión), sin sesión.

@@ -19,7 +19,7 @@ import {
   SiguienteLectura,
 } from "../components/piece";
 import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
-import { UltimaHoraColumna } from "../components/titulares/UltimaHoraColumna";
+import { UltimaHoraColumna } from "../features/titulares";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import {

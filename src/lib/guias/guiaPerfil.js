@@ -10,6 +10,7 @@ export const PASOS_PERFIL = [
   { clave: "nombre", titulo: "cuenta.guias.perfil.nombre.titulo", texto: "cuenta.guias.perfil.nombre.texto" },
   { clave: "datos", titulo: "cuenta.guias.perfil.datos.titulo", texto: "cuenta.guias.perfil.datos.texto" },
   { clave: "guardar", titulo: "cuenta.guias.perfil.guardar.titulo", texto: "cuenta.guias.perfil.guardar.texto" },
+  { clave: "sesiones", titulo: "cuenta.guias.perfil.sesiones.titulo", texto: "cuenta.guias.perfil.sesiones.texto" },
   { clave: "guia", titulo: "cuenta.guias.perfil.guia.titulo", texto: "cuenta.guias.perfil.guia.texto" },
 ];
 

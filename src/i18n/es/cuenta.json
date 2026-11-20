@@ -208,7 +208,19 @@
       "telefono": "Teléfono",
       "ayudaOcupacion": "Solo la ve la redacción.",
       "ayudaTelefono": "Sólo para que la redacción le localice si acepta su envío.",
-      "guardado": "Guardado ✓"
+      "guardado": "Guardado ✓",
+      "sesiones": {
+        "titulo": "Sesiones abiertas",
+        "texto": "Si dejó su cuenta abierta en otro aparato o cree que alguien la usa, ciérrela en todos a la vez. También se cierra en este: para seguir, vuelva a entrar.",
+        "boton": "Cerrar sesión en todos los aparatos",
+        "pregunta": "¿Cerrar la sesión en todos sus aparatos, también en este?",
+        "confirmar": "Sí, cerrar todas",
+        "cancelar": "Cancelar",
+        "cerrando": "Cerrando…",
+        "falloRed": "No se pudo conectar. Sus sesiones siguen abiertas: compruebe la conexión e inténtelo otra vez.",
+        "demasiadas": "Lo ha intentado muchas veces seguidas. Espere un rato e inténtelo otra vez.",
+        "fallo": "No se pudieron cerrar las sesiones. Inténtelo otra vez en un momento."
+      }
     },
     "retrato": {
       "tipoNoValido": "Tiene que ser una imagen JPG, PNG o WebP.",
@@ -538,6 +550,10 @@
         "guardar": {
           "titulo": "Guardar",
           "texto": "Los cambios se aplican al pulsar «Guardar cambios»."
+        },
+        "sesiones": {
+          "titulo": "Cerrar sesión en todos los aparatos",
+          "texto": "Si dejó su cuenta abierta en un ordenador ajeno o cree que alguien entra con ella, pulse aquí: se cierran todas sus sesiones a la vez, también la de este aparato. Después vuelva a entrar con su correo y su contraseña."
         },
         "guia": {
           "titulo": "Vuelva aquí cuando quiera",

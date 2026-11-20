@@ -137,8 +137,10 @@ export const UserAuthProvider = ({ children }) => {
     [loadProfile, persistFromTokenResponse]
   );
 
-  const logout = useCallback(async () => {
-    await userAuthService.logoutUserRemote();
+  // `{ soloAqui: true }`: el servidor ya cerró todas las sesiones («Cerrar sesión en
+  // todos los aparatos»); avisarle con un token que ya no vale solo daría un 401 más.
+  const logout = useCallback(async ({ soloAqui = false } = {}) => {
+    if (!soloAqui) await userAuthService.logoutUserRemote();
     clearUserAuth();
     dispatchUserAuthSync();
     setTokensSnapshot(readUserAuth());

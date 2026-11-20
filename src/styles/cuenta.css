@@ -1274,6 +1274,8 @@
   color: var(--color-accent);
 }
 .se-cuenta__form { display: grid; gap: 1rem; }
+/* «Cerrar sesión en todos los aparatos», separado de los datos: es otra cosa. */
+.se-cuenta__sesiones { margin-top: 2.5rem; }
 .se-cuenta__fila {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));

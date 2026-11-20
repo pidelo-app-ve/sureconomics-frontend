@@ -136,6 +136,11 @@ export const fetchMe = async () => {
 export const marcarRecorridoVisto = (nombre) =>
   userRequest(`/user-auth/me/recorridos/${encodeURIComponent(nombre)}`, { method: "PUT", json: {} });
 
+/** «Cerrar sesión en todos los aparatos»: el servidor deja sin valor todos los tokens de
+ *  esta cuenta, también los de este aparato. Ver `lib/cerrarTodasLasSesiones.js`. */
+export const cerrarTodasLasSesionesRemoto = () =>
+  userRequest("/user-auth/logout-all", { method: "POST", json: {} });
+
 export const logoutUserRemote = async () => {
   try {
     await userRequest("/user-auth/logout", { method: "POST", json: {} });

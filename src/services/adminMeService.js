@@ -13,6 +13,11 @@ export const updateAdminMe = async (body) =>
 export const changeAdminMyPassword = async (body) =>
   adminRequest("/admin/me/password", { method: "PATCH", json: body });
 
+/** «Cerrar sesión en todos los aparatos»: el servidor deja sin valor todos los tokens de
+ *  esta cuenta, también los de este aparato, y suelta su Telegram. Ver
+ *  `lib/cerrarTodasLasSesiones.js`. */
+export const cerrarTodasMisSesiones = async () => adminRequest("/auth/logout-all", { method: "POST", json: {} });
+
 /** Apunta en el servidor que esta persona ya vio la guía `nombre` (p. ej. «panel»). */
 export const marcarRecorridoVisto = async (nombre) =>
   adminRequest(`/admin/me/recorridos/${encodeURIComponent(nombre)}`, { method: "PUT", json: {} });

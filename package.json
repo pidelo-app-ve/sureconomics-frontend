@@ -22,7 +22,7 @@
         "test:clave": "node src/juegos/clave/motor.test.mjs",
         "test:recorrido": "node src/lib/recorridoVista.test.mjs && node src/lib/todasLasGuias.test.mjs",
         "test:relojes": "node src/lib/relojes.test.mjs",
-        "test:ultimahora": "node src/dominios/titulares/logica/listaUltimaHora.test.mjs",
+        "test:ultimahora": "node src/features/titulares/utils/listaUltimaHora.test.mjs",
         "test:publicidad": "node src/lib/listaDeQuery.test.mjs",
         "test:youtube": "node src/lib/youtube.test.mjs",
         "test:avisos": "node src/lib/avisos.test.mjs",

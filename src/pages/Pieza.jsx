@@ -7,7 +7,7 @@ import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { ShareButtons } from "../components/content/ShareButtons";
 import { AnadirEnGoogle } from "../components/comun/AnadirEnGoogle";
-import { FichaDeMoneda, TablaDeMonedas, useMonedas } from "../dominios/monedas";
+import { FichaDeMoneda, TablaDeMonedas, useMonedas } from "../features/monedas";
 import { BotonDeMarcador } from "../components/content/BotonDeMarcador";
 import {
   Media,
@@ -19,7 +19,7 @@ import {
   SiguienteLectura,
 } from "../components/piece";
 import { MasLeido, MINIMO_MAS_LEIDAS } from "../components/home/MasLeido";
-import { UltimaHoraColumna } from "../dominios/titulares";
+import { UltimaHoraColumna } from "../features/titulares";
 import { useMasLeidas } from "../hooks/useMasLeidas";
 import { enlaceParaCompartir, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import {

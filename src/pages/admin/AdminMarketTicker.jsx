@@ -12,7 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoCinta } from "../../lib/guias/guiaCinta";
-import { MonedasDelPanel } from "../../dominios/monedas/panel";
+import { MonedasDelPanel } from "../../features/monedas/admin";
 
 const DIRECCIONES = [
     { value: "up", label: "Subió" },

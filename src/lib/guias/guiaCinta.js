@@ -7,12 +7,12 @@
  * vaciarla devuelve la automática. La guía lo dice así aunque la página aún hable de
  * «no hay conexión con ningún mercado».
  *
- * Abajo, las monedas de la región (`dominios/monedas/panel/componentes/MonedasDelPanel.jsx`):
+ * Abajo, las monedas de la región (`features/monedas/admin/components/MonedasDelPanel.jsx`):
  * lo que se publica de cada una, las cotizaciones que no cuadraron y esperan a una persona, y
  * las ocultas (con quién y cuándo, y «Deshacer»). Sus pasos se escriben junto a ese panel
- * (`dominios/monedas/guias/pasosDelPanel.js`) y aquí se intercalan.
+ * (`features/monedas/guides/pasosDelPanel.js`) y aquí se intercalan.
  */
-import { PASOS_MONEDAS_DEL_PANEL } from "../../dominios/monedas/guias/pasosDelPanel.js";
+import { PASOS_MONEDAS_DEL_PANEL } from "../../features/monedas/guides/pasosDelPanel.js";
 import { crearRecorrido } from "../recorridoVista.js";
 
 export const PASOS_CINTA = [
@@ -63,7 +63,7 @@ export const PASOS_CINTA = [
       "en un minuto como mucho.",
     puntos: ["Volver a la cinta automática: quitar todas las filas (o dejarlas vacías) y guardar."],
   },
-  // Las monedas de la región: sus pasos viven con su panel (`dominios/monedas`).
+  // Las monedas de la región: sus pasos viven con su panel (`features/monedas`).
   ...PASOS_MONEDAS_DEL_PANEL,
   {
     clave: "guia",

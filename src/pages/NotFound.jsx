@@ -3,7 +3,7 @@ import { Enlace } from "../components/Enlace";
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
-import { UltimaHoraColumna } from "../dominios/titulares";
+import { UltimaHoraColumna } from "../features/titulares";
 
 // La 404 no es una página que se visite a propósito: el juego se descarga solo si
 // alguien llega aquí, y convierte un enlace roto en un minuto agradable.

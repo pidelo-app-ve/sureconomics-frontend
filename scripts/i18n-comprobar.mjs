@@ -33,9 +33,10 @@ const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(RAIZ, "src");
 const CON_RESTOS = process.argv.includes("--restos");
 
-// Fuera del escaneo: el panel (las carpetas `admin/` y el `panel/` de cada dominio) y lo
-// que solo usa el panel (`useAdmin*`), el juego de otro equipo, las pruebas y el propio motor.
-const IGNORADOS = [/[\\/]admin[\\/]/, /[\\/]dominios[\\/][^\\/]+[\\/]panel[\\/]/, /[\\/]backoffice[\\/]/, /useAdmin[A-Za-z]*\.jsx?$/, /el-analista[\\/]el-analista\.jsx$/, /\.test\.m?js$/, /[\\/]i18n[\\/]/];
+// Fuera del escaneo: el panel (toda carpeta `admin/`, también la `features/*/admin/` de
+// cada dominio) y lo que solo usa el panel (`useAdmin*`), el juego de otro equipo, las
+// pruebas y el propio motor.
+const IGNORADOS = [/[\\/]admin[\\/]/, /[\\/]backoffice[\\/]/, /useAdmin[A-Za-z]*\.jsx?$/, /el-analista[\\/]el-analista\.jsx$/, /\.test\.m?js$/, /[\\/]i18n[\\/]/];
 
 let fallos = 0;
 const fallo = (m) => {

@@ -107,9 +107,9 @@ const rutasPublicas = (lang) => [
             // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
             { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp", { zonas: ["lvbp"], lang }) },
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
-            { path: "monedas", lazy: pagina(() => import("./dominios/monedas/paginas/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
+            { path: "monedas", lazy: pagina(() => import("./features/monedas/pages/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
             // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
-            { path: "ultima-hora", lazy: pagina(() => import("./dominios/titulares/paginas/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
+            { path: "ultima-hora", lazy: pagina(() => import("./features/titulares/pages/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
             // El resumen diario, en tres ediciones: la última, las de un día o una (adonde
             // llevan Telegram y WhatsApp).
             { path: "resumen", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
@@ -202,7 +202,7 @@ export const router = createBrowserRouter([
                     { path: "lvbp", lazy: pagina(() => import("./pages/admin/AdminLvbp"), "AdminLvbp") },
                     // Traducir al inglés, en lote, las piezas publicadas que no lo tienen.
                     { path: "traducciones", lazy: pagina(() => import("./pages/admin/AdminTraducciones"), "AdminTraducciones") },
-                    { path: "titulares", lazy: pagina(() => import("./dominios/titulares/panel/paginas/AdminTitulares"), "AdminTitulares") },
+                    { path: "titulares", lazy: pagina(() => import("./features/titulares/admin/pages/AdminTitulares"), "AdminTitulares") },
                     // Lo que la redacción debería mirar hoy: los avisos y lo que se avisaría ahora.
                     { path: "avisos", lazy: pagina(() => import("./pages/admin/AdminAvisos"), "AdminAvisos") },
                     { path: "resumen", lazy: pagina(() => import("./pages/admin/AdminResumen"), "AdminResumen") },

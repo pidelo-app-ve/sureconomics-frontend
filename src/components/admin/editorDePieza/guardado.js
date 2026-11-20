@@ -128,18 +128,27 @@ export const claveDelBorrador = ({ loadState, base, isCreate, postId }) =>
     : null;
 
 /**
- * Si el editor está a mitad de algo: guardando, publicando, despublicando, eliminando
- * o cambiando la firma del colaborador. Con esto se apagan a la vez **todos** los botones de acción y los atajos
- * de teclado. Antes cada botón miraba solo lo suyo, y con una pieza publicada se podía
+ * Si el editor está a mitad de algo: guardando, publicando, despublicando, eliminando,
+ * cambiando la firma del colaborador o con una pregunta abierta (eliminar, quitar el
+ * vínculo: `preguntando`). Con esto se apagan a la vez **todos** los botones de acción
+ * y los atajos de teclado. Antes cada botón miraba solo lo suyo, y con una pieza
+ * publicada se podía
  * pulsar «Guardar cambios» y, mientras tanto, «Despublicar»: el PATCH manda siempre
  * `status`, así que si llegaba el último la pieza volvía a quedar publicada aunque el
  * aviso dijera «Se despublicó».
  */
-export const estaOcupado = ({ saveState, actionState, eliminando = false, colaboradorOcupado = false }) =>
+export const estaOcupado = ({
+  saveState,
+  actionState,
+  eliminando = false,
+  colaboradorOcupado = false,
+  preguntando = false,
+}) =>
   saveState?.status === "loading" ||
   actionState?.status === "loading" ||
   Boolean(eliminando) ||
-  Boolean(colaboradorOcupado);
+  Boolean(colaboradorOcupado) ||
+  Boolean(preguntando);
 
 /**
  * Una acción a la vez. `enMarcha` es un ref (`{ current }`) que comparten las
@@ -262,14 +271,16 @@ export const ejecutarAccion = ({ kind, fn, successMessage, failureMessage, toast
 /**
  * «Eliminar la pieza»: pregunta (`d.confirm` con `d.dialogo`) y borra. El candado se
  * toma desde que se abre la pregunta hasta que se cierra: con el diálogo abierto, un
- * Ctrl+S no lanza un guardado que se cruce con el borrado. `eliminando` (lo que apaga
- * los botones) es solo mientras se borra.
+ * Ctrl+S no lanza un guardado que se cruce con el borrado. Mientras pregunta,
+ * `preguntando` apaga los botones y los atajos (sin eso, Ctrl+S daba con el candado y
+ * salía «Hay otra acción en marcha», que no es lo que pasa); `eliminando`, mientras se
+ * borra.
  */
 export const eliminarPieza = (d) => {
   if (d.isCreate) return Promise.resolve();
   return conCandado(d, async () => {
     d.setActionState({ status: "idle", message: "", kind: "" });
-    await d.confirm({
+    await preguntar(d, {
       ...d.dialogo,
       onConfirm: async () => {
         d.setEliminando(true);
@@ -286,6 +297,20 @@ export const eliminarPieza = (d) => {
       },
     });
   });
+};
+
+/**
+ * Una pregunta del editor (`d.confirm`) con `preguntando` puesto mientras está abierta.
+ * Se quita siempre: al responder sí, al responder no y si otra pregunta la pisa
+ * (`useAdminConfirm` la resuelve entonces como «no»).
+ */
+const preguntar = async (d, opciones) => {
+  d.setPreguntando(true);
+  try {
+    return await d.confirm(opciones);
+  } finally {
+    d.setPreguntando(false);
+  }
 };
 
 /**
@@ -329,7 +354,7 @@ export const usarFirmaDeLaCuenta = (d) =>
 /** «Quitar el vínculo con el lector»: pregunta (`d.dialogo`) con el candado, como eliminar. */
 export const quitarVinculo = (d) =>
   conCandado(d, async () => {
-    await d.confirm({
+    await preguntar(d, {
       ...d.dialogo,
       onConfirm: async () => {
         d.setColaboradorOcupado(true);

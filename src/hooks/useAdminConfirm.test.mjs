@@ -126,6 +126,8 @@ describe("un diálogo a la vez", () => {
       confirm: g.valor.confirm,
       dialogo: { title: "Eliminar pieza" },
       setActionState: () => {},
+      preguntando: false,
+      setPreguntando: (v) => (d.preguntando = v),
       toastError: (m) => avisos.push(m),
     };
     let eliminando;
@@ -133,11 +135,14 @@ describe("un diálogo a la vez", () => {
       eliminando = eliminarPieza(d);
     });
     assert.equal(d.enMarcha.current, true);
+    assert.equal(d.preguntando, true);
     await act(async () => {
       g.valor.confirm({ title: "Salir sin guardar", description: "" });
     });
     await eliminando;
     assert.equal(d.enMarcha.current, false);
+    // Y la pregunta pisada también deja de contar como «preguntando».
+    assert.equal(d.preguntando, false);
     await g.desmontar();
   });
 });

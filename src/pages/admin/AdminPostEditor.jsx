@@ -125,6 +125,8 @@ export const AdminPostEditor = () => {
     // guardar, publicar/despublicar y eliminar: ver `guardado.js`.
     const [eliminando, setEliminando] = useState(false);
     const enMarcha = useRef(false);
+    // Con la pregunta de eliminar o la de quitar el vínculo abierta: también `ocupado`.
+    const [preguntando, setPreguntando] = useState(false);
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
@@ -291,6 +293,7 @@ export const AdminPostEditor = () => {
         setAssets,
         setRecienPublicada,
         setEliminando,
+        setPreguntando,
         toastSuccess,
         toastError,
     });
@@ -423,7 +426,7 @@ export const AdminPostEditor = () => {
     } = estadoDeLaPieza({ form, requiredMedia, canPublish, programada, legacyImage, topics, placeGroups });
 
     const publicarEsPrincipal = canPublish && form.status === "draft" && !faltas.length;
-    const ocupado = estaOcupado({ saveState, actionState, eliminando, colaboradorOcupado });
+    const ocupado = estaOcupado({ saveState, actionState, eliminando, colaboradorOcupado, preguntando });
     atajos.current = {
         guardar: form.format && !ocupado ? handleSave : null,
         publicar:

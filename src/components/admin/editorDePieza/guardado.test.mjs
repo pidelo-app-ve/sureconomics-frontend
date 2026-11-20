@@ -122,7 +122,13 @@ const barra = (props = {}) => {
   const html = renderToString(
     createElement(BotonesDeLaPieza, {
       // Como en el editor: `ocupado` sale de los estados (ver `estaOcupado`).
-      ocupado: estaOcupado({ saveState, actionState, eliminando: props.eliminando, colaboradorOcupado: props.colaboradorOcupado }),
+      ocupado: estaOcupado({
+        saveState,
+        actionState,
+        eliminando: props.eliminando,
+        colaboradorOcupado: props.colaboradorOcupado,
+        preguntando: props.preguntando,
+      }),
       esMovil: false,
       form: form(),
       faltas: [],
@@ -280,6 +286,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
       actionState: { status: "idle", message: "", kind: "" },
       eliminando: false,
       colaboradorOcupado: false,
+      preguntando: false,
       colaborador: null,
       assets: { image: null, video: null, document: null, audio: null, bylinePhoto: null },
       recienPublicada: false,
@@ -370,6 +377,7 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     setRecienPublicada: set("recienPublicada"),
     setEliminando: set("eliminando"),
     setColaboradorOcupado: set("colaboradorOcupado"),
+    setPreguntando: set("preguntando"),
     toastSuccess: (m, t) => e.avisos.push({ tono: "ok", m, t }),
     toastError: (m, t) => e.avisos.push({ tono: "error", m, t }),
   });
@@ -909,5 +917,56 @@ describe("la respuesta que llega con otra pieza abierta", () => {
     assert.equal(e.estado.form.byline, "");
     assert.equal(e.estado.actionState.status, "idle");
     assert.equal(e.estado.colaboradorOcupado, false);
+  });
+});
+
+describe("con una pregunta abierta (preguntando)", () => {
+  // Era un detalle (segunda revisión, 20-nov-2026): con la pregunta de eliminar abierta
+  // el candado estaba tomado pero `ocupado` no, así que Ctrl+S seguía activo y daba con
+  // el candado: «Hay otra acción en marcha», que no es lo que pasa.
+  test("cuenta como ocupado: la barra y los atajos se apagan", () => {
+    assert.equal(estaOcupado({ saveState: { status: "idle" }, actionState: { status: "idle" }, preguntando: true }), true);
+    const { botones } = barra({ form: form({ status: "published" }), preguntando: true });
+    assert.deepEqual(
+      botones.filter((b) => b.desactivado).map((b) => b.etiqueta),
+      ["Guardar cambios", "Despublicar", "Eliminar la pieza"]
+    );
+  });
+
+  test("eliminar: mientras pregunta, ocupado; al decir que no, se quita", async () => {
+    const e = editor();
+    const eliminando = e.eliminar();
+    assert.equal(e.estado.preguntando, true);
+    assert.equal(e.ocupado(), true);
+    e.dialogo.cancelar();
+    await eliminando;
+    assert.equal(e.estado.preguntando, false);
+    assert.equal(e.ocupado(), false);
+  });
+
+  test("eliminar: al decir que sí, también se quita (y se borra)", async () => {
+    const e = editor();
+    const eliminando = e.eliminar();
+    const confirmando = e.dialogo.confirmar();
+    e.api("borrar").resolver(null);
+    await confirmando;
+    await eliminando;
+    assert.equal(e.estado.preguntando, false);
+    assert.equal(e.navegado[0], "/admin/posts");
+  });
+
+  test("quitar el vínculo: igual, y también si falla la petición y luego se cancela", async () => {
+    const e = editor();
+    const quitando = e.quitarVinculo();
+    assert.equal(e.estado.preguntando, true);
+    const confirmando = e.dialogo.confirmar();
+    e.api("quitar-vinculo").rechazar(sinRed());
+    await confirmando;
+    // El diálogo sigue abierto con el error: sigue preguntando.
+    assert.equal(e.estado.preguntando, true);
+    e.dialogo.cancelar();
+    await quitando;
+    assert.equal(e.estado.preguntando, false);
+    assert.equal(e.ocupado(), false);
   });
 });

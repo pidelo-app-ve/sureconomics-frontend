@@ -205,7 +205,9 @@ export const Resumen = () => {
   useMetaPagina({
     title: t("resumen.meta", { titulo, marca: BRAND.name }),
     description: t("resumen.descripcion"),
-    noindex: retirado,
+    // Retirada (410) o una edición que no salió (404 desde `api/pieza.js`): sin índice y
+    // sin canónica. El día sin resumen (`/resumen`, `/resumen/<fecha>`) sigue como estaba.
+    noEncontrada: retirado || (status === "vacio" && Boolean(edicion)),
   });
 
   return (

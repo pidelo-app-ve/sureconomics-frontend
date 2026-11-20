@@ -273,10 +273,10 @@ export const Pieza = () => {
   // versión en inglés (`soloEspanol`) sale en `/en` con `noindex` y el canónico
   // apuntando al español. Con ella, las dos páginas se declaran la una a la otra
   // (`hreflang`), también la española. Y una dirección que no lleva a ninguna pieza
-  // no debe quedar en los buscadores.
+  // no debe quedar en los buscadores, ni declarar canónica (es una 404).
   useMetaPagina(
     state.status === "missing"
-      ? { title: t("piezas.noEncontrada.meta.titulo", { marca: BRAND.name }), noindex: true }
+      ? { title: t("piezas.noEncontrada.meta.titulo", { marca: BRAND.name }), noEncontrada: true }
       : pieza
         ? {
             // El mismo título y la misma descripción que pone la función de Vercel antes

@@ -58,6 +58,9 @@ await conFetch(async () => { pedidas++; return { ok: true, status: 200, text: as
   check("en español", res.body.includes('<html lang="es">'));
   check("X-Robots-Tag noindex", res.headers["X-Robots-Tag"] === "noindex");
   check("guardada en el borde", /s-maxage=\d+/.test(res.headers["Cache-Control"] ?? ""));
+  // Una 404 no declara canónica (Search Console, 19-nov-2026), ni `og:url` ni `hreflang`.
+  check("sin canónica, og:url ni hreflang",
+    !res.body.includes('rel="canonical"') && !res.body.includes('property="og:url"') && !res.body.includes("hreflang"));
 
   const en = respuestaFalsa();
   await handler({ query: { lang: "en" } }, en);
@@ -84,6 +87,19 @@ console.log("piezas sueltas");
 check("sin robots en el shell, lo añade",
   shellNoEncontrada(SHELL.replace(/\s*<meta name="robots"[^>]*>/, "")).includes('content="noindex, follow"'));
 check("la mínima en inglés enlaza a /en", paginaMinima("en").includes('href="/en"'));
+check("la mínima no lleva canónica ni hreflang",
+  ["es", "en"].every((i) => !paginaMinima(i).includes('rel="canonical"') && !paginaMinima(i).includes("hreflang")));
+// Si un día el shell trajera canónica, `og:url` o `hreflang`, la 404 se los quita.
+const SHELL_CON_CANONICA = SHELL.replace(
+  "</head>",
+  `  <link rel="canonical" href="https://www.sureconomics.com/" />
+    <meta property="og:url" content="https://www.sureconomics.com/" />
+    <link rel="alternate" hreflang="en" href="https://www.sureconomics.com/en" />
+  </head>`
+);
+const limpia = shellNoEncontrada(SHELL_CON_CANONICA, "en");
+check("un shell con canónica sale sin ella, sin og:url y sin hreflang",
+  !limpia.includes("canonical") && !limpia.includes("og:url") && !limpia.includes("hreflang") && limpia.includes('id="root"'));
 
 console.log("los textos son los de src/i18n");
 for (const idioma of ["es", "en"]) {

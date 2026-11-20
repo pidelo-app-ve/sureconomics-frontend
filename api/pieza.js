@@ -383,6 +383,8 @@ export default async function handler(req, res) {
             imagen: IMAGEN_DE_MARCA,
             url,
             noindex: true,
+            // Ni canónica ni `og:url`: no existe (o ya no), no hay dirección «buena».
+            sinCanonica: true,
           })
         );
         return;
@@ -445,6 +447,9 @@ export default async function handler(req, res) {
           imagen: IMAGEN_DE_MARCA,
           url: `${SITIO}${prefijo}/${seccion}/${slug}`,
           noindex: true,
+          // Una 404 no declara canónica: con `noindex` al lado eran dos señales opuestas
+          // (Search Console, 19-nov-2026, `/articulos/riesgos-en-el-tipo-de-cambio-en-per--6`).
+          sinCanonica: true,
         })
       );
       return;

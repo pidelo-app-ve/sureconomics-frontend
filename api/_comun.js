@@ -249,7 +249,13 @@ export const leerShell = async () => {
   }
 };
 
-/** Las etiquetas de la tarjeta para las redes y de la canónica. */
+/**
+ * Las etiquetas de la tarjeta para las redes y de la canónica.
+ *
+ * `sinCanonica`: para una 404 o un 410. Sin `<link rel="canonical">`, sin `og:url` y sin
+ * `hreflang`: una dirección que no existe no puede declararse «la buena», y con `noindex`
+ * al lado eran dos señales opuestas (Search Console, 19-nov-2026).
+ */
 export const etiquetas = ({
   titulo,
   descripcion,
@@ -261,6 +267,7 @@ export const etiquetas = ({
   locale = "es_LA",
   alternativas = null,
   autor = null,
+  sinCanonica = false,
 }) => {
   const filas = [
     `<meta property="og:type" content="${escapar(tipo)}" />`,
@@ -270,13 +277,15 @@ export const etiquetas = ({
     `<meta name="twitter:site" content="@Sur_economics" />`,
     `<meta property="og:locale" content="${escapar(locale)}" />`,
     `<meta property="og:title" content="${escapar(titulo)}" />`,
-    `<meta property="og:url" content="${escapar(url)}" />`,
-    `<link rel="canonical" href="${escapar(url)}" />`,
   ];
+  if (!sinCanonica) {
+    filas.push(`<meta property="og:url" content="${escapar(url)}" />`);
+    filas.push(`<link rel="canonical" href="${escapar(url)}" />`);
+  }
   // Una pieza con versión en inglés: las dos páginas se declaran la una a la otra, y
   // `x-default` apunta al español, la casa. Lo mismo que pone `useMetaPagina` al
   // cargar, pero aquí lo lee también quien no ejecuta JavaScript.
-  if (alternativas) {
+  if (alternativas && !sinCanonica) {
     filas.push(`<link rel="alternate" hreflang="es" href="${escapar(alternativas.es)}" />`);
     filas.push(`<link rel="alternate" hreflang="en" href="${escapar(alternativas.en)}" />`);
     filas.push(`<link rel="alternate" hreflang="x-default" href="${escapar(alternativas.es)}" />`);

@@ -29,7 +29,7 @@ import { AuthProvider } from "../../src/context/AuthContext.jsx";
 import { UserAuthProvider } from "../../src/context/UserAuthContext.jsx";
 import { ProveedorDeMarcadores } from "../../src/context/MarcadoresContext.jsx";
 import { ProveedorDeTemasSeguidos } from "../../src/context/TemasSeguidosContext.jsx";
-import { ProveedorDePublicidad } from "../../src/components/publicidad/index.js";
+import { ProveedorDePublicidad } from "../../src/features/publicidad/index.js";
 
 /** Los proveedores de `main.jsx`, de fuera adentro, y el de `Layout.jsx`. */
 const PROVEEDORES = [AuthProvider, UserAuthProvider, ProveedorDeMarcadores, ProveedorDeTemasSeguidos];

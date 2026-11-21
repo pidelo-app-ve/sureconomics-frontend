@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 
 import { FORMATO_DEL_HUECO, NOMBRE_DEL_HUECO } from "./mapa/paginas";
-import { getOcupacion } from "../../services/adminPublicidadService";
+import { getOcupacion } from "../services/api";
 
 /**
  * Las plazas fijas de una pieza, en la ficha de la pieza: una casilla por hueco que
@@ -81,5 +81,3 @@ PlazasFijas.propTypes = {
   onChange: PropTypes.func.isRequired,
   deshabilitado: PropTypes.bool,
 };
-
-export default PlazasFijas;

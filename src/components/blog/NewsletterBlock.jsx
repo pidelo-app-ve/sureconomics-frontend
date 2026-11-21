@@ -3,8 +3,7 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { marcarSuscrito } from "../../lib/invitacionBoletin";
 import { subscribeToNewsletter } from "../../services/newsletterService";
-import { ESPACIOS } from "../../services/publicidadService";
-import { EspacioPublicitario } from "../publicidad";
+import { ESPACIOS, EspacioPublicitario } from "../../features/publicidad";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**

@@ -4,7 +4,7 @@ import { Enlace } from "../components/Enlace";
 import { CardMedia } from "../components/home/CardMedia";
 import { TituloDePieza } from "../components/content/TituloDePieza";
 import { Escudo, TarjetaJuego, useLvbp } from "../components/lvbp/MarcadorLvbp";
-import { PatrocinioCompacto, useEspacios, useHueco } from "../components/publicidad";
+import { ESPACIOS, PatrocinioCompacto, useEspacios, useHueco } from "../features/publicidad";
 import { BRAND } from "../data/surEconomicsMock";
 import { formatearFecha, formatearNumero } from "../i18n/motor";
 import { useIdioma } from "../i18n/ProveedorIdioma";
@@ -14,7 +14,6 @@ import { LOGO_LIGA, equipo, fechaDelDia } from "../lib/lvbp";
 import { piezasFromApi, rutaDeFormato, rutaDePieza } from "../lib/pieza";
 import { SITIO } from "../lib/seo";
 import { getPieces } from "../services/publicContentService";
-import { ESPACIOS } from "../services/publicidadService";
 import "./lvbp.css";
 
 /**

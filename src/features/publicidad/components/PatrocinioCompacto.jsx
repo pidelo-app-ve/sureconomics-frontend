@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
-import { tActual } from "../../i18n/motor";
+import { tActual } from "../../../i18n/motor";
 import { useMemo } from "react";
 
 import { Envoltorio } from "./EspacioPublicitario";
-import { useRotacion } from "./useRotacion";
+import { useRotacion } from "../hooks/useRotacion";
 
 /**
  * «Patrocinado por [marca]», en una línea. Para donde no cabe un anuncio y sí un crédito:

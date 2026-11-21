@@ -1,7 +1,7 @@
 /**
  * Cómo viajan los filtros de tema y país al pedir los anuncios. `npm run test:publicidad`.
  */
-import { listaDeQuery } from "../lib/listaDeQuery.js";
+import { listaDeQuery } from "./listaDeQuery.js";
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {

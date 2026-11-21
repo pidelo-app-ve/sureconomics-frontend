@@ -1,16 +1,16 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { PlazasFijas } from "../PlazasFijas";
-import { AssetField } from "../AssetField";
-import { ModalDelPanel } from "../ModalDelPanel";
-import { VistaDeLaPieza } from "../VistaDeLaPieza";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../services/adminMediaService";
+import { PlazasFijas } from "./PlazasFijas";
+import { AssetField } from "../../../../components/admin/AssetField";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { VistaDeLaPieza } from "./VistaDeLaPieza";
+import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../../services/adminMediaService";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
   resumenDePieza,
-} from "../../../lib/formatosDePublicidad";
-import { conArteAutomatico } from "./arteAutomatico";
+} from "../utils/formatosDePublicidad";
+import { conArteAutomatico } from "../utils/arteAutomatico";
 
 export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
   const [abierta, setAbierta] = useState(false);

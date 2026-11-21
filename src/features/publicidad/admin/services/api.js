@@ -1,5 +1,5 @@
-import { adminRequest } from "../lib/api";
-import { unwrapEntity } from "./adminResponseUtils";
+import { adminRequest } from "../../../../lib/api";
+import { unwrapEntity } from "../../../../services/adminResponseUtils";
 
 /**
  * El panel de publicidad.

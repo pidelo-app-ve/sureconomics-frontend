@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { reportarVisto } from "../../services/publicidadService";
+import { reportarVisto } from "../services/api";
 
 /**
  * Qué pieza del ciclo se enseña ahora, y cuándo pasa a la siguiente.

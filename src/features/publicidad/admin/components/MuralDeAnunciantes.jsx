@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
-} from "../../lib/formatosDePublicidad";
+} from "../utils/formatosDePublicidad";
 
 /**
  * Quién está al aire: un mosaico con el logotipo de cada anunciante que paga.
@@ -319,5 +319,3 @@ MuralDeAnunciantes.propTypes = {
 };
 
 MuralDeAnunciantes.defaultProps = { anunciantes: [], cifrasPorPieza: {} };
-
-export default MuralDeAnunciantes;

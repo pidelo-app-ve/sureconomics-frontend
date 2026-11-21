@@ -1,7 +1,7 @@
 /**
  * Cómo salen hacia el servidor las impresiones de publicidad: lo que se factura. Sin
  * navegador (lo que toca `navigator` o el reloj llega de fuera), y por eso tiene pruebas:
- * `npm run test:lotes`. Lo usa `services/publicidadService.reportarVisto`.
+ * `npm run test:lotes`. Lo usa `services/api.reportarVisto`.
  *
  * ## Las cuatro reglas
  *
@@ -41,14 +41,14 @@
  * seguro es peor que arriesgar que el cupo la descarte.
  */
 
-import { MAX_FICHAS_POR_ENVIO, trocearFichas } from "./lotesDeEnvio.js";
+import { MAX_FICHAS_POR_ENVIO, trocearFichas } from "../../../lib/lotesDeEnvio.js";
 
 /** Lo que espera una rotación a las que vienen detrás. */
 export const ESPERA_MAXIMA_MS = 5 * 1000;
 /** El cupo del servidor: una vista por dirección, pieza y hueco cada 30 s. */
 export const CUPO_MS = 30 * 1000;
 /** Margen sobre el cupo para lo retenido (relojes y red no son exactos). */
-export const MARGEN_MS = 1000;
+const MARGEN_MS = 1000;
 
 export const RUTA_UNA = "/publicidad/visto";
 export const RUTA_VARIAS = "/publicidad/vistos";

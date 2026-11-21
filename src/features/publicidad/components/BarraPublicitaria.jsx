@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { tActual } from "../../i18n/motor";
+import { tActual } from "../../../i18n/motor";
 
-import { EVENTO_CONSENTIMIENTO, avisoPendiente } from "../../lib/analitica";
-import { ESPACIOS, enlaceDeClic } from "../../services/publicidadService";
+import { EVENTO_CONSENTIMIENTO, avisoPendiente } from "../../../lib/analitica";
+import { ESPACIOS, enlaceDeClic } from "../services/api";
 import { useCiclo } from "./ProveedorDePublicidad";
-import { useRotacion } from "./useRotacion";
+import { useRotacion } from "../hooks/useRotacion";
 
 /**
  * H — la barra fija inferior.

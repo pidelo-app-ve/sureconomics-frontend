@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { POR_FORMATO } from "../publicidad/EspacioPublicitario";
+import { POR_FORMATO } from "../../components/EspacioPublicitario";
 
 /**
  * La pieza montada, tal y como saldrá en el sitio.
@@ -139,5 +139,3 @@ VistaDeLaPieza.propTypes = {
 };
 
 VistaDeLaPieza.defaultProps = { variante: "tarjeta", usaTitular: true };
-
-export default VistaDeLaPieza;

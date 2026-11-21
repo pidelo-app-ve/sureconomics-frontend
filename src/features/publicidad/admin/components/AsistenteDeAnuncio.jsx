@@ -1,15 +1,15 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 
-import { AssetField } from "./AssetField";
+import { AssetField } from "../../../../components/admin/AssetField";
 import { DondeSale } from "./DondeSale";
-import { ModalDelPanel } from "./ModalDelPanel";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
-import { GUIA_DE_FORMATO, nombreDeFormato } from "../../lib/formatosDePublicidad";
+import { GUIA_DE_FORMATO, nombreDeFormato } from "../utils/formatosDePublicidad";
 import {
   ACCEPTED_IMAGE_MIME,
   uploadAdminMediaImage,
-} from "../../services/adminMediaService";
+} from "../../../../services/adminMediaService";
 import {
   actualizarCampana,
   actualizarPieza,
@@ -18,7 +18,7 @@ import {
   crearPieza,
   getEscalera,
   getOcupacion,
-} from "../../services/adminPublicidadService";
+} from "../services/api";
 import { MapaDelSitio } from "./mapa/MapaDelSitio";
 
 /**
@@ -690,5 +690,3 @@ AsistenteDeAnuncio.propTypes = {
 };
 
 AsistenteDeAnuncio.defaultProps = { anunciantes: [] };
-
-export default AsistenteDeAnuncio;

@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useId, useMemo } from "react";
 
-import { useTaxonomy } from "../../hooks/useTaxonomy";
+import { useTaxonomy } from "../../../../hooks/useTaxonomy";
 
 /**
  * Dónde sale una campaña, con los valores que existen de verdad.
@@ -282,5 +282,3 @@ DondeSale.propTypes = {
   ).isRequired,
   onChange: PropTypes.func.isRequired,
 };
-
-export default DondeSale;

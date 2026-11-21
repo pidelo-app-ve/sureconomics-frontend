@@ -1,6 +1,5 @@
-import { PatrocinioCompacto, useEspacios, useHueco } from "../../components/publicidad";
+import { ESPACIOS, PatrocinioCompacto, useEspacios, useHueco } from "../../features/publicidad";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { ESPACIOS } from "../../services/publicidadService";
 
 /**
  * La línea «Patrocinado por…» del juego, servida por el sistema de publicidad.

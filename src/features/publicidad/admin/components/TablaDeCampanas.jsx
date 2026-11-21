@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import { ESTADOS_DE_CAMPANA, estadoDeCampana } from "../MuralDeAnunciantes";
-import { recorridoPublicidad } from "../../../lib/guias/guiaPublicidad";
+import { ESTADOS_DE_CAMPANA, estadoDeCampana } from "./MuralDeAnunciantes";
+import { recorridoPublicidad } from "../../../../lib/guias/guiaPublicidad";
 import { InterruptorAlAire } from "./InterruptorAlAire";
 
 const { ancla } = recorridoPublicidad;

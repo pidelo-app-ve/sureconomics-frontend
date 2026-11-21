@@ -24,8 +24,7 @@ import { pedirCotizaciones } from "../features/monedas";
 import { precargarTitulares } from "../features/titulares";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { trasLaFoto } from "../lib/trasLaFoto";
-import { ESPACIOS } from "../services/publicidadService";
-import { AnuncioEntreTandas, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../components/publicidad";
+import { AnuncioEntreTandas, ESPACIOS, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../features/publicidad";
 
 /**
  * Homepage.

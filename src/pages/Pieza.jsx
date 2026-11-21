@@ -35,14 +35,14 @@ import { getPieceFila, getRelatedFilas } from "../services/publicContentService"
 import { piezaFromApi, piezasFromApi } from "../lib/pieza";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
-import { ESPACIOS } from "../services/publicidadService";
 import { InvitacionPausa } from "../components/home/TarjetaPausa";
 import { ClaveDeLaPieza } from "../components/piece/ClaveDeLaPieza";
 import {
+  ESPACIOS,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
   useEspacios,
-} from "../components/publicidad";
+} from "../features/publicidad";
 
 /**
  * Detail page for a piece of any format.

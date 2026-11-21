@@ -17,13 +17,13 @@ import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { useCanal } from "../hooks/useCanal";
 import { VideosDelCanal } from "../components/canal/VideosDelCanal";
 import { EnLaCalle } from "../components/canal/EnLaCalle";
-import { ESPACIOS } from "../services/publicidadService";
 import {
   AnuncioEntreTandas,
+  ESPACIOS,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
   useEspacios,
-} from "../components/publicidad";
+} from "../features/publicidad";
 
 /**
  * «Al punto»: los videos del canal de YouTube (nov-2026) y, si la redacción publica

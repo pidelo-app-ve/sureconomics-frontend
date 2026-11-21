@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MapaDelSitio } from "../../components/admin/mapa/MapaDelSitio";
-import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoPublicidad } from "../../lib/guias/guiaPublicidad";
-import { applyPageMeta } from "../../lib/seo";
-import { useAdminToast } from "../../context/AdminToastContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
-import { useConfirmacionDeGuardado } from "../../hooks/useConfirmacionDeGuardado";
-import { AsistenteDeAnuncio } from "../../components/admin/AsistenteDeAnuncio";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { MapaDelSitio } from "../components/mapa/MapaDelSitio";
+import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista";
+import { recorridoPublicidad } from "../../../../lib/guias/guiaPublicidad";
+import { applyPageMeta } from "../../../../lib/seo";
+import { useAdminToast } from "../../../../context/AdminToastContext";
+import { useAdminConfirm } from "../../../../hooks/useAdminConfirm";
+import { useConfirmacionDeGuardado } from "../../../../hooks/useConfirmacionDeGuardado";
+import { AsistenteDeAnuncio } from "../components/AsistenteDeAnuncio";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import {
   actualizarPieza,
   getEscalera,
@@ -15,11 +15,11 @@ import {
   fijarAjustes,
   getResumen,
   listar,
-} from "../../services/adminPublicidadService";
-import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
-import { piezasConArteAutomatico } from "../../components/admin/publicidad/arteAutomatico";
-import { TablaDeCampanas } from "../../components/admin/publicidad/TablaDeCampanas";
-import { TarjetaDeAnunciante } from "../../components/admin/publicidad/TarjetaDeAnunciante";
+} from "../services/api";
+import { CabeceraDePagina } from "../../../../components/admin/CabeceraDePagina";
+import { piezasConArteAutomatico } from "../utils/arteAutomatico";
+import { TablaDeCampanas } from "../components/TablaDeCampanas";
+import { TarjetaDeAnunciante } from "../components/TarjetaDeAnunciante";
 
 /**
  * El panel de publicidad: anunciantes, campañas, piezas y cifras.

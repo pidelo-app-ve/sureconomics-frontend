@@ -690,5 +690,3 @@ AsistenteDeAnuncio.propTypes = {
 };
 
 AsistenteDeAnuncio.defaultProps = { anunciantes: [] };
-
-export default AsistenteDeAnuncio;

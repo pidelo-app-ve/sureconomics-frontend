@@ -48,7 +48,7 @@ export const ESPERA_MAXIMA_MS = 5 * 1000;
 /** El cupo del servidor: una vista por dirección, pieza y hueco cada 30 s. */
 export const CUPO_MS = 30 * 1000;
 /** Margen sobre el cupo para lo retenido (relojes y red no son exactos). */
-export const MARGEN_MS = 1000;
+const MARGEN_MS = 1000;
 
 export const RUTA_UNA = "/publicidad/visto";
 export const RUTA_VARIAS = "/publicidad/vistos";

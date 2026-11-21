@@ -282,5 +282,3 @@ DondeSale.propTypes = {
   ).isRequired,
   onChange: PropTypes.func.isRequired,
 };
-
-export default DondeSale;

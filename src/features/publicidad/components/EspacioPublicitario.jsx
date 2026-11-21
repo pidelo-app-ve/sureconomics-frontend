@@ -336,7 +336,7 @@ const FORMATOS_DE_CINTA = new Set(["B", "C", "D"]);
 /** El cintillo no lleva arte ni titular: publica el nombre del anunciante y ya. */
 const FORMATOS_SIN_ARTE = new Set(["F"]);
 
-export const pintaAlgo = (hueco, variante) => {
+const pintaAlgo = (hueco, variante) => {
   if (!hueco) return false;
   if (FORMATOS_SIN_ARTE.has(hueco.formato)) return true;
 

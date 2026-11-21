@@ -375,5 +375,3 @@ MapaDelSitio.propTypes = {
   cargando: PropTypes.bool,
   titulo: PropTypes.string,
 };
-
-export default MapaDelSitio;

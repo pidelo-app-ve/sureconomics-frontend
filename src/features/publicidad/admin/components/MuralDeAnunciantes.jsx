@@ -319,5 +319,3 @@ MuralDeAnunciantes.propTypes = {
 };
 
 MuralDeAnunciantes.defaultProps = { anunciantes: [], cifrasPorPieza: {} };
-
-export default MuralDeAnunciantes;

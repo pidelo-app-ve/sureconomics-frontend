@@ -81,5 +81,3 @@ PlazasFijas.propTypes = {
   onChange: PropTypes.func.isRequired,
   deshabilitado: PropTypes.bool,
 };
-
-export default PlazasFijas;

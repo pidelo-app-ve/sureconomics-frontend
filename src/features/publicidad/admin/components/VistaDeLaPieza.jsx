@@ -139,5 +139,3 @@ VistaDeLaPieza.propTypes = {
 };
 
 VistaDeLaPieza.defaultProps = { variante: "tarjeta", usaTitular: true };
-
-export default VistaDeLaPieza;

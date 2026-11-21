@@ -23,13 +23,13 @@ import { enTandas } from "../lib/tandas";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
-import { ESPACIOS } from "../services/publicidadService";
 import {
   AnuncioEntreTandas,
+  ESPACIOS,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
   useEspacios,
-} from "../components/publicidad";
+} from "../features/publicidad";
 
 /**
  * Listing page for one content format.

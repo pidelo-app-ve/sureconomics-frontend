@@ -1,4 +1,4 @@
-import { esArteTelefonoAutomatico } from "../../../lib/arteTelefono";
+import { esArteTelefonoAutomatico } from "../../utils/arteTelefono";
 
 /** Si el arte de teléfono de una pieza lo armó el panel solo (2-nov, retirado). */
 export const conArteAutomatico = (pieza) =>

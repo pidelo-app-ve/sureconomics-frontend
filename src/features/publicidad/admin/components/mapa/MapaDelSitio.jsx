@@ -1,10 +1,10 @@
 import PropTypes from "prop-types";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-import { POR_FORMATO } from "../../publicidad/EspacioPublicitario";
-import { useRotacion } from "../../../hooks/useRotacion";
+import { POR_FORMATO } from "../../../components/EspacioPublicitario";
+import { useRotacion } from "../../../../../hooks/useRotacion";
 import { FORMATO_DEL_HUECO, NOMBRE_DEL_HUECO, PAGINAS, huecosDe } from "./paginas";
-import "../../../styles/mapa.css";
+import "./mapa.css";
 
 /**
  * El mapa del sitio: cada página dibujada con sus huecos de publicidad, y dentro de

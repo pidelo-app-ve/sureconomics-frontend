@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { AssetField } from "../AssetField";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../services/adminMediaService";
+import { AssetField } from "../../../../components/admin/AssetField";
+import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../../services/adminMediaService";
 import {
   actualizarAnunciante,
   borrarAnunciante,
   listar,
-} from "../../../services/adminPublicidadService";
+} from "../services/api";
 import { TarjetaDeCampana } from "./TarjetaDeCampana";
 
 export const TarjetaDeAnunciante = ({

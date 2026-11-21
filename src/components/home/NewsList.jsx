@@ -4,7 +4,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
-import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
+import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
 import { listaDePiezas } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 

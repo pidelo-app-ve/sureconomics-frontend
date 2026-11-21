@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { actualizarCampana, listar } from "../../../services/adminPublicidadService";
+import { actualizarCampana, listar } from "../services/api";
 
 /**
  * «Al aire»: encender o pausar una campaña con un clic, sin abrir su ficha. Antes el

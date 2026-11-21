@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { tActual } from "../../i18n/motor";
+import { tActual } from "../../../i18n/motor";
 
-import { enlaceDeClic } from "../../services/publicidadService";
-import { esArteTelefonoAutomatico } from "../../lib/arteTelefono";
-import { imagenSrcSet } from "../../lib/fotoDePieza";
+import { enlaceDeClic } from "../services/api";
+import { esArteTelefonoAutomatico } from "../utils/arteTelefono";
+import { imagenSrcSet } from "../../../lib/fotoDePieza";
 import { useAnunciosPendientes, useCiclo, useHueco } from "./ProveedorDePublicidad";
-import { useRotacion } from "./useRotacion";
+import { useRotacion } from "../hooks/useRotacion";
 
 /**
  * Un hueco publicitario, pintado según el formato que le tocó.
@@ -26,7 +26,7 @@ import { useRotacion } from "./useRotacion";
  * nueva sin él le da al destino control sobre la que la abrió.
  *
  * El destino nunca es el del anunciante: es nuestra propia API, que cuenta el clic y
- * redirige. Ver `publicidadService`.
+ * redirige. Ver `services/api.js`.
  */
 
 const Etiqueta = ({ anunciante, esCasa }) => (
@@ -154,7 +154,7 @@ const Montaje = ({ hueco, modificador }) => {
   const arte = hueco.cinta || hueco.imagen;
   if (!arte) return null;
   // El arte de teléfono, salvo los que armó el panel solo el 2-nov (salían deshechos;
-  // ver `lib/arteTelefono`): con esos, en el teléfono sale la tira como antes.
+  // ver `utils/arteTelefono`): con esos, en el teléfono sale la tira como antes.
   const movil = esArteTelefonoAutomatico(hueco.cinta_movil) ? null : hueco.cinta_movil;
   // Una pieza que es solo un logo: el servidor pone el logotipo donde iría la tira. En
   // el teléfono se le da su propio recuadro (ver `.se-ad--logo` en la hoja): en el de la

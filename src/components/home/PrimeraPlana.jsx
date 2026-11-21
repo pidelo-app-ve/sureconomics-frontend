@@ -20,8 +20,7 @@ import { AperturaShort } from "../canal/AperturaShort";
 import { esShort, idDeYoutube } from "../../lib/youtube";
 import { alLlegarLaFoto, fotoPrincipalLista, trasLaFoto } from "../../lib/trasLaFoto";
 import { EN_LA_COLUMNA, SIZES_PRINCIPAL, elegirApertura, precargaDeLaApertura } from "../../lib/apertura";
-import { EspacioPublicitario } from "../publicidad";
-import { ESPACIOS } from "../../services/publicidadService";
+import { ESPACIOS, EspacioPublicitario } from "../../features/publicidad";
 import "./primeraPlana.css";
 
 /**

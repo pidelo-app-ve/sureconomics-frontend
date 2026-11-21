@@ -3,7 +3,7 @@ import { Enlace } from "../Enlace";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { CardMedia } from "./CardMedia";
 import { rutaDePieza } from "../../lib/pieza";
-import { EspacioPublicitario, useHayAnuncio } from "../publicidad";
+import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
 import { listaDePiezas } from "./piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 

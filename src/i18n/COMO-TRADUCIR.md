@@ -92,7 +92,7 @@ export const Tarjeta = ({ pieza }) => {
   escribió su nombre en inglés; si no, en español.
 - Fuera de React (un servicio que lanza un error con mensaje, un `lib/`): `tActual(clave)`
   de `i18n/motor.js`. También vale en componentes pequeños que no tienen ningún otro hook
-  (los de `components/publicidad/`): una página está en un solo idioma a la vez y cambiarlo
+  (los de `features/publicidad/components/`): una página está en un solo idioma a la vez y cambiarlo
   es navegar, que lo vuelve a montar todo.
 - `npm run lint` corre también `npm run i18n`: no se puede subir con una clave que falte en
   un idioma, una que no se use o un texto suelto.

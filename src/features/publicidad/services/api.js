@@ -1,7 +1,7 @@
-import { listaDeQuery } from "../lib/listaDeQuery";
-import { userPublicRequest } from "../lib/userApi";
-import { siguienteRecarga } from "../lib/recargaDePublicidad";
-import { CLAVE_SOPORTE, crearEnvioDeVistos } from "../lib/envioDeVistos";
+import { listaDeQuery } from "../utils/listaDeQuery";
+import { userPublicRequest } from "../../../lib/userApi";
+import { siguienteRecarga } from "../utils/recargaDePublicidad";
+import { CLAVE_SOPORTE, crearEnvioDeVistos } from "../utils/envioDeVistos";
 
 /**
  * La publicidad, desde el lado del navegador.
@@ -74,7 +74,7 @@ export const getEspacios = async (espacios, contexto = {}) => {
   if (!pedidos.length) return { activa: true, espacios: {} };
 
   // La recarga de quien mira: con ella la escalera del servidor baja un peldaño (ver
-  // `lib/recargaDePublicidad`).
+  // `utils/recargaDePublicidad`).
   const query = { espacios: pedidos.join(","), recarga: siguienteRecarga() };
   if (contexto.seccion) query.seccion = String(contexto.seccion);
   if (contexto.formato) query.formato = String(contexto.formato);
@@ -110,7 +110,7 @@ const baseDeLaApi = () => String(import.meta.env.VITE_API_URL || "").replace(/\/
 
 let envio = null;
 
-/** El envío de impresiones de esta carga del sitio (ver `lib/envioDeVistos`). */
+/** El envío de impresiones de esta carga del sitio (ver `utils/envioDeVistos`). */
 const envioDeVistos = () => {
   if (envio) return envio;
   envio = crearEnvioDeVistos({
@@ -159,7 +159,7 @@ const envioDeVistos = () => {
  * facturado tres de las que vio una.
  *
  * Cómo sale hacia el servidor -- la primera de cada página al momento, las rotaciones
- * juntas, y por qué juntar no cambia lo que se factura -- está en `lib/envioDeVistos`.
+ * juntas, y por qué juntar no cambia lo que se factura -- está en `utils/envioDeVistos`.
  * `pieza` es la que se vio: con su hueco, su marca y su arte se reconoce la misma pieza
  * en el mismo hueco servida en otra carga, que es lo que mira el cupo de 30 s.
  *

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom/dist";
 
-import { ESPACIOS, getEspacios } from "../../services/publicidadService";
+import { ESPACIOS, getEspacios } from "../services/api";
 
 /**
  * Quién pide los anuncios de la página, y cuándo.

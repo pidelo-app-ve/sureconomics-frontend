@@ -7,7 +7,7 @@ import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 import { AvisoDeCookies } from "../components/AvisoDeCookies"
 import { InvitacionAlBoletin } from "../components/InvitacionAlBoletin"
-import { BarraPublicitaria, ProveedorDePublicidad } from "../components/publicidad"
+import { BarraPublicitaria, ProveedorDePublicidad } from "../features/publicidad"
 import { AvisoDeRuta } from "../components/AvisoDeRuta"
 import { useIdioma } from "../i18n/ProveedorIdioma"
 

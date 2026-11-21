@@ -12,7 +12,7 @@ import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { dispatchAdminAuthSync } from "../../lib/api";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { persistAuth } from "../../lib/authStorage";
-import { cerrarTodasLasSesiones, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
+import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
 import { applyPageMeta } from "../../lib/seo";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
@@ -74,7 +74,8 @@ export const AdminMiPerfil = () => {
           await cerrarTodasLasSesiones({
             pedir: cerrarTodasMisSesiones,
             cerrarLocal: logout,
-            irAEntrar: () => navigate("/cuenta/entrar", { replace: true }),
+            irAEntrar: (resultado) =>
+              navigate("/cuenta/entrar", { replace: true, state: estadoAlEntrar(resultado) }),
           });
         } catch (err) {
           throw new Error(mensajeDeFallo(err, FALLOS_AL_CERRAR));

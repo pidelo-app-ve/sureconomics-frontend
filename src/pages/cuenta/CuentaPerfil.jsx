@@ -6,7 +6,7 @@ import { useNavegar } from "../../components/Enlace";
 import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { cerrarTodasLasSesiones, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
+import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
 import { actualizarMiPerfil, cerrarTodasLasSesionesRemoto } from "../../services/userAuthService";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoPerfil } from "../../lib/guias/guiaPerfil";
@@ -67,11 +67,20 @@ const SesionesAbiertas = () => {
   const [paso, setPaso] = useState("inicio"); // inicio · preguntar · cerrando
   const [error, setError] = useState("");
   const cancelar = useRef(null);
+  const principal = useRef(null);
+  // Tras un fallo, el foco vuelve al botón principal: el de «Sí, cerrar todas» ya no
+  // existe, y sin esto se perdía en el `body`. Un objeto nuevo en cada fallo, para que
+  // dos seguidos vuelvan a llevarlo.
+  const [volverAlBoton, setVolverAlBoton] = useState(null);
 
   // Al preguntar, el foco va a «Cancelar»: lo seguro, y quien usa teclado oye la pregunta.
   useEffect(() => {
     if (paso === "preguntar") cancelar.current?.focus();
   }, [paso]);
+
+  useEffect(() => {
+    if (volverAlBoton) principal.current?.focus();
+  }, [volverAlBoton]);
 
   const cerrar = async () => {
     setPaso("cerrando");
@@ -80,7 +89,7 @@ const SesionesAbiertas = () => {
       await cerrarTodasLasSesiones({
         pedir: cerrarTodasLasSesionesRemoto,
         cerrarLocal: () => logout({ soloAqui: true }),
-        irAEntrar: () => navigate("/cuenta/entrar", { replace: true }),
+        irAEntrar: (resultado) => navigate("/cuenta/entrar", { replace: true, state: estadoAlEntrar(resultado) }),
       });
     } catch (err) {
       setError(
@@ -91,6 +100,7 @@ const SesionesAbiertas = () => {
         }),
       );
       setPaso("inicio");
+      setVolverAlBoton({});
     }
   };
 
@@ -107,7 +117,12 @@ const SesionesAbiertas = () => {
       ) : null}
       {paso === "inicio" ? (
         <div className="se-cuenta__acciones">
-          <button type="button" className="se-btn se-btn--secondary" onClick={() => setPaso("preguntar")}>
+          <button
+            type="button"
+            ref={principal}
+            className="se-btn se-btn--secondary"
+            onClick={() => setPaso("preguntar")}
+          >
             {t("cuenta.perfil.sesiones.boton")}
           </button>
         </div>

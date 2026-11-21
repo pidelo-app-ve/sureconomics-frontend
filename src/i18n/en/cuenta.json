@@ -39,7 +39,8 @@
       "entrar": "Sign in",
       "sinCuenta": "Don't have an account? {enlace}",
       "crearUna": "Create one",
-      "olvido": "Forgot your password?"
+      "olvido": "Forgot your password?",
+      "sesionCaducada": "Your session here had already expired, so your other sessions are still open. Sign in and repeat «Sign out of all devices» to close them."
     },
     "registro": {
       "meta": {
@@ -553,7 +554,7 @@
         },
         "sesiones": {
           "titulo": "Sign out of all devices",
-          "texto": "If you left your account open on someone else's computer or think someone is getting in with it, press here: all your sessions close at once, including this device's. Then sign in again with your email and password."
+          "texto": "If you left your account open on someone else's computer or think someone is getting in with it, press here: all your sessions close at once, including this device's. Then sign in again the way you always do."
         },
         "guia": {
           "titulo": "Come back whenever you like",

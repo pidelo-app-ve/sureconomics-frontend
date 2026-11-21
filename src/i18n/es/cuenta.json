@@ -39,7 +39,8 @@
       "entrar": "Entrar",
       "sinCuenta": "¿No tiene cuenta? {enlace}",
       "crearUna": "Crear una",
-      "olvido": "¿Olvidó su contraseña?"
+      "olvido": "¿Olvidó su contraseña?",
+      "sesionCaducada": "Su sesión aquí ya había caducado, así que las demás siguen abiertas. Entre y repita «Cerrar sesión en todos los aparatos» para cerrarlas."
     },
     "registro": {
       "meta": {
@@ -553,7 +554,7 @@
         },
         "sesiones": {
           "titulo": "Cerrar sesión en todos los aparatos",
-          "texto": "Si dejó su cuenta abierta en un ordenador ajeno o cree que alguien entra con ella, pulse aquí: se cierran todas sus sesiones a la vez, también la de este aparato. Después vuelva a entrar con su correo y su contraseña."
+          "texto": "Si dejó su cuenta abierta en un ordenador ajeno o cree que alguien entra con ella, pulse aquí: se cierran todas sus sesiones a la vez, también la de este aparato. Después vuelva a entrar como lo hace siempre."
         },
         "guia": {
           "titulo": "Vuelva aquí cuando quiera",

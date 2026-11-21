@@ -6,7 +6,12 @@
  */
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { cerrarTodasLasSesiones, esFalloDeRed, mensajeDeFallo } from "./cerrarTodasLasSesiones.js";
+import {
+  cerrarTodasLasSesiones,
+  esFalloDeRed,
+  estadoAlEntrar,
+  mensajeDeFallo,
+} from "./cerrarTodasLasSesiones.js";
 
 const TEXTOS = { red: "sin red", demasiadas: "muchas veces", otro: "otro fallo" };
 
@@ -22,8 +27,8 @@ const pasos = (pedir) => {
     cerrarLocal: async () => {
       hechos.push("cerrarLocal");
     },
-    irAEntrar: () => {
-      hechos.push("irAEntrar");
+    irAEntrar: (resultado) => {
+      hechos.push(`irAEntrar:${resultado}`);
     },
   };
 };
@@ -33,16 +38,18 @@ const conEstado = (status, mensaje = "x") => Object.assign(new Error(mensaje), {
 describe("cerrar todas las sesiones", () => {
   test("si el servidor dice que sí, cierra la sesión de aquí y lleva a entrar, en ese orden", async () => {
     const p = pasos(() => ({ logged_out_all: true }));
-    await cerrarTodasLasSesiones(p);
-    assert.deepEqual(p.hechos, ["pedir", "cerrarLocal", "irAEntrar"]);
+    assert.equal(await cerrarTodasLasSesiones(p), "todas");
+    assert.deepEqual(p.hechos, ["pedir", "cerrarLocal", "irAEntrar:todas"]);
+    assert.equal(estadoAlEntrar("todas"), undefined);
   });
 
-  test("un 401 (la sesión ya no valía) cuenta como hecho", async () => {
+  test("un 401: la de aquí ya había caducado; se cierra y se avisa al entrar de que repita", async () => {
     const p = pasos(() => {
       throw conEstado(401);
     });
-    await cerrarTodasLasSesiones(p);
-    assert.deepEqual(p.hechos, ["pedir", "cerrarLocal", "irAEntrar"]);
+    assert.equal(await cerrarTodasLasSesiones(p), "caducada");
+    assert.deepEqual(p.hechos, ["pedir", "cerrarLocal", "irAEntrar:caducada"]);
+    assert.deepEqual(estadoAlEntrar("caducada"), { sesionCaducada: true });
   });
 
   test("sin red, la sesión de aquí se queda y el error sube", async () => {

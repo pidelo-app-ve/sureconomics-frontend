@@ -211,6 +211,13 @@ export const CuentaEntrar = () => {
         <p className="se-entrada__lead">
           {t("cuenta.entrar.lead")}
         </p>
+        {/* Llega desde «Cerrar sesión en todos los aparatos» con la sesión de aquí ya
+            caducada: las demás siguen abiertas (`lib/cerrarTodasLasSesiones.js`). */}
+        {location.state?.sesionCaducada ? (
+          <p className="se-entrada__lead" role="status">
+            <strong>{t("cuenta.entrar.sesionCaducada")}</strong>
+          </p>
+        ) : null}
 
         <form className="se-entrada__form" onSubmit={handleSubmit} noValidate>
           <CampoDeTexto

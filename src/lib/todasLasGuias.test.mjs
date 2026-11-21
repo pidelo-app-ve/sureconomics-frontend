@@ -46,7 +46,7 @@ const ANCLAS_DINAMICAS = {
   "src/pages/cuenta/CuentaDashboardLayout.jsx|guia": ({ propiedades }) =>
     propiedades("src/pages/cuenta/CuentaDashboardLayout.jsx", "guia"),
   // Cada bloque de Audiencia dice su paso en `parada="…"`.
-  "src/components/admin/audiencia/Piezas.jsx|parada": ({ atributos }) => atributos("parada"),
+  "src/features/analitica/admin/components/Piezas.jsx|parada": ({ atributos }) => atributos("parada"),
 };
 
 const problemas = new Map(); // guía (o archivo) → lo que falla

@@ -1,10 +1,10 @@
 /**
  * Por dónde llegó una visita, visto desde el navegador: funciones puras.
  *
- * Están aparte de `analitica.js` para poder probarlas sin navegador
+ * Están aparte de `services/medicion.js` para poder probarlas sin navegador
  * (`npm run test:llegada`). Lo que tienen en común es que **reducen**: de cada dato que
  * el navegador conoce sale lo mínimo que hace falta saber, y lo demás no viaja. El
- * servidor vuelve a reducirlo (`analitica_origen`, en el backend) y lo que se guarda es
+ * servidor vuelve a reducirlo (`services/rules/origen.py` del dominio `analitica`, en el backend) y lo que se guarda es
  * un canal, un nombre, un país y un aparato.
  */
 

@@ -1,7 +1,7 @@
-import { adminRequest } from "../lib/api";
-import { readStoredAuth } from "../lib/authStorage";
-import { nombreDelInforme } from "../lib/audiencia";
-import { unwrapEntity } from "./adminResponseUtils";
+import { adminRequest } from "../../../../lib/api";
+import { readStoredAuth } from "../../../../lib/authStorage";
+import { nombreDelInforme } from "../utils/audiencia";
+import { unwrapEntity } from "../../../../services/adminResponseUtils";
 
 /**
  * Los números de audiencia, solo para el panel.

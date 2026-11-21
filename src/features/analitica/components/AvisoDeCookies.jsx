@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Enlace } from "./Enlace";
-import { useIdioma } from "../i18n/ProveedorIdioma";
+import { Enlace } from "../../../components/Enlace";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
 import {
   MEDICION_HABILITADA,
   aceptado,
@@ -11,7 +11,7 @@ import {
   contarPagina,
   decidir,
   registrarVista,
-} from "../lib/analitica";
+} from "../services/medicion";
 
 /**
  * El aviso de cookies y el interruptor de la medicion.

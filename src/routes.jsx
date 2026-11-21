@@ -97,7 +97,7 @@ const rutasPublicas = (lang) => [
             { path: "podcast/:slug", element: <Pieza /> },
             { path: "consultoria", lazy: pagina(() => import("./pages/Consultoria"), "Consultoria", { zonas: ["paginas"], lang }) },
             { path: "contacto", lazy: pagina(() => import("./pages/Contacto"), "Contacto", { zonas: ["paginas"], lang }) },
-            { path: "cookies", lazy: pagina(() => import("./pages/Cookies"), "Cookies", { zonas: ["paginas"], lang }) },
+            { path: "cookies", lazy: pagina(() => import("./features/analitica/pages/Cookies"), "Cookies", { zonas: ["paginas"], lang }) },
             // Todos los juegos del sitio, una tarjeta por juego. A ella lleva el botón
             // «Juegos» de la cabecera.
             { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos", { zonas: ["juegos"], lang }) },
@@ -193,7 +193,7 @@ export const router = createBrowserRouter([
                     { path: "redes/tiktok", lazy: pagina(() => import("./pages/admin/AdminRedesTikTok"), "AdminRedesTikTok") },
                     { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion", { zonas: ["cuenta"] }) },
                     { path: "publicidad", lazy: pagina(() => import("./pages/admin/AdminPublicidad"), "AdminPublicidad") },
-                    { path: "analitica", lazy: pagina(() => import("./pages/admin/AdminAnalitica"), "AdminAnalitica") },
+                    { path: "analitica", lazy: pagina(() => import("./features/analitica/admin/pages/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
                     { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
                     // El catálogo de La Clave: las palabras de las que sale la del día.

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { Enlace, useNavegar } from "../components/Enlace";
 import { useUserAuth } from "../context/UserAuthContext";
-import { AvisoDeCookies } from "../components/AvisoDeCookies";
+import { AvisoDeCookies } from "../features/analitica";
 import { BRAND } from "../data/surEconomicsMock";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";

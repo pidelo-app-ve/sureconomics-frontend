@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import {
   DIAS_GUARDADOS,
   NOMBRE_FORMATO,
@@ -10,30 +10,30 @@ import {
   duracion,
   numero,
   porciento,
-} from "../../lib/audiencia";
-import { ancla, recorridoAudiencia } from "../../lib/guias/guiaAudiencia";
+} from "../utils/audiencia";
+import { ancla, recorridoAudiencia } from "../../../../lib/guias/guiaAudiencia";
 import {
   descargarInforme,
   getConsentimiento,
   getEnVivo,
   getResumen,
-} from "../../services/adminAnaliticaService";
-import "../../styles/analitica-consentimiento.css";
-import "../../styles/analitica-bloques.css";
-import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
-import { AudienciaReal } from "../../components/admin/audiencia/AudienciaReal";
-import { ComoVaElMes } from "../../components/admin/audiencia/ComoVaElMes";
-import { CuantosVuelven } from "../../components/admin/audiencia/CuantosVuelven";
-import { DeDondeLlegan } from "../../components/admin/audiencia/DeDondeLlegan";
-import { PaisesYAparatos } from "../../components/admin/audiencia/PaisesYAparatos";
-import { Barras, Bloque, Columnas, Ficha, Tabla, Variacion } from "../../components/admin/audiencia/Piezas";
-import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
+} from "../services/api";
+import "./analitica-consentimiento.css";
+import "./analitica-bloques.css";
+import { CabeceraDePagina } from "../../../../components/admin/CabeceraDePagina";
+import { AudienciaReal } from "../components/AudienciaReal";
+import { ComoVaElMes } from "../components/ComoVaElMes";
+import { CuantosVuelven } from "../components/CuantosVuelven";
+import { DeDondeLlegan } from "../components/DeDondeLlegan";
+import { PaisesYAparatos } from "../components/PaisesYAparatos";
+import { Barras, Bloque, Columnas, Ficha, Tabla, Variacion } from "../components/Piezas";
+import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
  *
- * Los números salen de la medición propia del sitio -- ver `lib/analitica.js` y
- * `analitica_service.py` --, así que cuentan solo a quien aceptó las cookies. Eso lo dice
+ * Los números salen de la medición propia del sitio -- ver `services/medicion.js` y
+ * `app/domains/analitica` en el backend --, así que cuentan solo a quien aceptó las cookies. Eso lo dice
  * la pantalla en voz alta: un panel de audiencia que no lo advierta se lee como si fueran
  * todos los lectores, y no lo son. Cuánto queda fuera lo estima «Audiencia real
  * estimada», con el contador de páginas, que no guarda nada de la persona.
@@ -58,8 +58,9 @@ import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
  * **La página ordena; los bloques viven aparte.** Aquí quedan la carga de los datos, la
  * cabecera y el orden. Las piezas comunes (ficha, bloque, barras, tabla) y los bloques
  * de audiencia real, proyección del mes, origen, país y aparato y retorno están en
- * `components/admin/audiencia/`; las palabras con que se escriben los números, en
- * `lib/audiencia.js`; y la guía de la página, en `lib/guias/guiaAudiencia.js`.
+ * `admin/components/`; las palabras con que se escriben los números, en
+ * `admin/utils/audiencia.js`; y la guía de la página, en `lib/guias/guiaAudiencia.js` (sus
+ * pasos, en `features/analitica/guides/pasosDelPanel.js`).
  *
  * ## Sobre los gráficos
  *
@@ -291,7 +292,7 @@ PilasDeConsentimiento.propTypes = { serie: PropTypes.arrayOf(PropTypes.object).i
 
 /**
  * Cuenta también a quien dijo que no; fuera de este bloque solo lo hace «Audiencia real
- * estimada» (`components/admin/audiencia/AudienciaReal.jsx`).
+ * estimada» (`admin/components/AudienciaReal.jsx`).
  *
  * Por eso va en su propio bloque y con su propia petición: el resto de la pantalla sale
  * de quien aceptó, y esto dice cuántos son los que aceptan.

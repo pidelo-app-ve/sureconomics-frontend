@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { nombreDelMes, numero, rango } from "../../../lib/audiencia";
+import { nombreDelMes, numero, rango } from "../utils/audiencia";
 import { Bloque, Ficha, Tabla } from "./Piezas";
 
 /**

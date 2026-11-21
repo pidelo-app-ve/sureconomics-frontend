@@ -1,15 +1,15 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { leerComparacion, numero } from "../../../lib/audiencia";
-import { enlaceWeb } from "../../../lib/enlaces";
-import { ancla } from "../../../lib/guias/guiaAudiencia";
+import { leerComparacion, numero } from "../utils/audiencia";
+import { enlaceWeb } from "../../../../lib/enlaces";
+import { ancla } from "../../../../lib/guias/guiaAudiencia";
 
 /**
  * Las piezas con que se arma la pantalla de audiencia: la ficha de una cifra, el bloque
  * con su gráfico y su tabla, las columnas y las barras.
  *
- * Vivían dentro de `pages/admin/AdminAnalitica.jsx`. Salieron de ahí cuando la pantalla
- * ganó bloques nuevos (`components/admin/audiencia/`), que usan las mismas: así todos
+ * Vivían dentro de `admin/pages/AdminAnalitica.jsx`. Salieron de ahí cuando la pantalla
+ * ganó bloques nuevos (los de esta carpeta, `admin/components/`), que usan las mismas: así todos
  * los bloques se dibujan igual y la página no carga con todo.
  */
 

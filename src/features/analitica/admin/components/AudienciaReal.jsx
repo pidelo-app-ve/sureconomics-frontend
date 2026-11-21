@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { numero, porciento, rangoCorto, tramo } from "../../../lib/audiencia";
+import { numero, porciento, rangoCorto, tramo } from "../utils/audiencia";
 import { Bloque, Ficha, Tabla } from "./Piezas";
 
 /**

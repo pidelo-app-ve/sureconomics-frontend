@@ -5,7 +5,7 @@ import {
   nombreDeFuente,
   numero,
   porciento,
-} from "../../../lib/audiencia";
+} from "../utils/audiencia";
 import { Barras, Bloque, Tabla } from "./Piezas";
 
 const altasEnPalabras = (n) => (n === 1 ? "1 alta al boletín" : `${numero(n)} altas al boletín`);

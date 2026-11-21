@@ -1,12 +1,12 @@
-import "../styles/institucional.css";
+import "../../../styles/institucional.css";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { Enlace } from "../components/Enlace";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
-import { formatearFecha, tActual } from "../i18n/motor";
-import { BRAND, CONTACT } from "../data/surEconomicsMock";
-import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from "../lib/analitica";
+import { Enlace } from "../../../components/Enlace";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { formatearFecha, tActual } from "../../../i18n/motor";
+import { BRAND, CONTACT } from "../../../data/surEconomicsMock";
+import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from "../services/medicion";
 
 /**
  * El aviso de cookies: el documento, y el interruptor de verdad.
@@ -282,7 +282,7 @@ export const Cookies = () => {
           <p>{t("paginas.cookies.datosBoletin")}</p>
           {/* Lo que ocurre tambien cuando la respuesta es no: dos contadores, el de la
               decision y el de paginas vistas (`contarDecision` y `contarPagina`, en
-              `lib/analitica.js`). Va dicho aqui, en la seccion de los datos, y no escondido:
+              `services/medicion.js`). Va dicho aqui, en la seccion de los datos, y no escondido:
               la promesa de que un no no deja rastro se sostiene porque lo que se manda es
               un uno sin nadie detras. Si alguno de los dos pasa a mandar algo mas, estos
               tres parrafos dejan de ser verdad. */}

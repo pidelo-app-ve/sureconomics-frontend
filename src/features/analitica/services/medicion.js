@@ -33,12 +33,12 @@
  * por donde se llego, y de eso solo el nombre del sitio anterior -- nunca la pagina ni
  * lo que se busco --, la zona horaria del aparato y si es movil, tableta o
  * computadora. El servidor lo reduce a un canal, un pais y un aparato, y lo fija una
- * sola vez por visita. Las cuentas estan en `llegada.js`, que no toca el navegador y
+ * sola vez por visita. Las cuentas estan en `utils/llegada.js`, que no toca el navegador y
  * por eso tiene pruebas.
  */
 
-import { aparatoDe, bloqueDeLlegada, etiquetaDeCampana, sitioDeOrigen } from "./llegada";
-import { tocaLatido, trocearEventos } from "./lotesDeEnvio";
+import { aparatoDe, bloqueDeLlegada, etiquetaDeCampana, sitioDeOrigen } from "../utils/llegada";
+import { tocaLatido, trocearEventos } from "../../../lib/lotesDeEnvio";
 
 /**
  * El interruptor general. Encendido el 22/09/2026, con el texto del aviso aprobado.

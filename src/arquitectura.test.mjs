@@ -40,7 +40,8 @@
  *      `guides/` si un dominio llega a tener varias): son datos sin JSX, y las guías de
  *      `lib/guias/` los leen desde una prueba que corre en node, que no entiende el JSX
  *      que trae `index.js`;
- *    - las fachadas de la mudanza (`FACHADAS`, con quién las quita).
+ *    - las fachadas de la mudanza (`FACHADAS`, con quién las quita). Cada fachada dice
+ *      también quién la importa, y nadie más puede: el código nuevo entra por la puerta.
  * 5. Los pasos de las guías de un dominio son datos: solo importan otros pasos de guía
  *    (`guia.js` o `guides/*.js`) o un `.json`. Nada de componentes ni JSX (los lee node).
  * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
@@ -69,13 +70,24 @@ import * as espree from "espree";
 
 const RAIZ = fileURLToPath(new URL("../", import.meta.url));
 
-/** Las fachadas de la mudanza: pueden importar las tripas de un dominio. Ruta → quién la quita. */
+/**
+ * Las fachadas de la mudanza: pueden importar las tripas de un dominio. Ruta → quién la
+ * quita (`quita`) y los únicos archivos que la pueden importar (`importadores`).
+ */
 const FACHADAS = {
-  "src/hooks/useHeadlines.js":
-    "titulares, cuando haceCuanto se mude a un sitio compartido (LugarYFecha, por la puerta, cambiaría el orden del CSS)",
-  "src/lib/analitica.js":
-    "analitica, cuando la barra de la publicidad (features/publicidad/components/BarraPublicitaria.jsx), " +
-    "useVistaPrevia y newsletterService importen de features/analitica (por la puerta se reordena index-*.js)",
+  "src/hooks/useHeadlines.js": {
+    quita: "titulares, cuando haceCuanto se mude a un sitio compartido (LugarYFecha, por la puerta, cambiaría el orden del CSS)",
+    importadores: ["src/components/home/LugarYFecha.jsx"],
+  },
+  "src/lib/analitica.js": {
+    quita: "analitica, cuando la barra de la publicidad, useVistaPrevia y newsletterService importen de " +
+      "features/analitica (por la puerta se reordena index-*.js)",
+    importadores: [
+      "src/features/publicidad/components/BarraPublicitaria.jsx",
+      "src/hooks/useVistaPrevia.js",
+      "src/services/newsletterService.js",
+    ],
+  },
 };
 
 /**
@@ -202,6 +214,11 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
         salida.push(`${donde}; los pasos de una guía son datos: solo importan otros pasos de guía (guia.js, guides/)`);
         continue;
       }
+      const fachada = fachadas[relativa(destino)];
+      if (fachada && !fachada.importadores.includes(rel)) {
+        salida.push(`${donde}; una fachada solo la importan los de su lista (FACHADAS): lo nuevo entra por la puerta`);
+        continue;
+      }
       const otro = dominioDe(destino);
       if (otro && dentroDe(ruta, UI)) {
         salida.push(`${donde}; ui/ no conoce los dominios, ni por su puerta (son ellos los que usan ui/)`);
@@ -282,6 +299,19 @@ test("cada dominio, ui/ y el resto del sitio entran a un dominio por sus puertas
 
 test("cada fachada de la lista existe (una borrada se quita también de FACHADAS)", () => {
   assert.deepEqual(Object.keys(FACHADAS).filter((f) => !existsSync(path.join(RAIZ, f))), []);
+});
+
+test("cada importador de una fachada la sigue importando (uno que ya no, se quita de su lista)", () => {
+  const sobran = [];
+  for (const [fachada, { importadores }] of Object.entries(FACHADAS)) {
+    for (const importador of importadores) {
+      const ruta = path.join(RAIZ, importador);
+      const la = existsSync(ruta) && importaciones(readFileSync(ruta, "utf8"))
+        .some((i) => i.especificador && resolver(ruta, i.especificador) === path.join(RAIZ, fachada));
+      if (!la) sobran.push(`${importador} → ${fachada}`);
+    }
+  }
+  assert.deepEqual(sobran, []);
 });
 
 test("cada fuga conocida del panel sigue ahí (una arreglada se quita de FUGAS_CONOCIDAS)", () => {
@@ -398,6 +428,7 @@ test("la prueba ve las trampas", () => {
       'import { Y } from "../features/b/components/Y";', // ✗ 4
       'import { X } from "../components/admin/X";', // ✗ 2: la fuga indirecta (X importa el panel)
       "const M = (n) => import(`./mapas/${n}.js`);", // ✗ 6: una ruta calculada
+      'import { Y as F } from "../lib/fachada";', //    bien: Home.jsx está en la lista de la fachada
     ],
     "src/routes.jsx": [
       'const P = () => import("./features/b/pages/Pag");', // bien: el lazy de una página
@@ -419,13 +450,16 @@ test("la prueba ve las trampas", () => {
     "src/lib/fachada.js": [
       'export { Y } from "../features/b/components/Y";', // bien: es una fachada
     ],
+    "src/pages/Otra.jsx": [
+      'import { Y } from "../lib/fachada";', //         ✗ 4: no está en la lista de la fachada
+    ],
   };
   try {
     for (const [ruta, lineas] of Object.entries(sitio)) {
       mkdirSync(path.dirname(path.join(raiz, ruta)), { recursive: true });
       writeFileSync(path.join(raiz, ruta), lineas.join("\n"));
     }
-    const claves = faltas(raiz, { "src/lib/fachada.js": "prueba" }, {}).map((f) => f.split(";")[0].replace(": importa ", " "));
+    const claves = faltas(raiz, { "src/lib/fachada.js": { quita: "prueba", importadores: ["src/pages/Home.jsx"] } }, {}).map((f) => f.split(";")[0].replace(": importa ", " "));
     assert.deepEqual(claves.sort(), [
       "src/features/a/components/X.jsx:2 src/features/b/components/Y.jsx",
       "src/features/a/components/X.jsx:3 src/features/b/admin/index.js",
@@ -439,6 +473,7 @@ test("la prueba ve las trampas", () => {
       "src/pages/Home.jsx:3 src/features/b/components/Y.jsx",
       "src/pages/Home.jsx:4 src/components/admin/X.jsx",
       "src/pages/Home.jsx:5 (ruta calculada)",
+      "src/pages/Otra.jsx:1 src/lib/fachada.js",
       "src/pages/admin/Cinta.jsx:2 src/features/b/admin/components/Z.jsx",
       "src/routes.jsx:10 src/features/b/utils.js",
       "src/routes.jsx:11 src/features/b/admin/Exportado.jsx",

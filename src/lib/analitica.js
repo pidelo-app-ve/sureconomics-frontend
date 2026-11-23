@@ -13,4 +13,4 @@
  * Código nuevo: `import { consentimiento } from "../features/analitica"`. Se borra cuando
  * se acepte ese cambio de orden (es inofensivo: mismo código) o nadie la use.
  */
-export * from "../features/analitica/medicion.js";
+export { EVENTO_CONSENTIMIENTO, avisoPendiente, consentimiento, registrarAlta } from "../features/analitica/medicion.js";

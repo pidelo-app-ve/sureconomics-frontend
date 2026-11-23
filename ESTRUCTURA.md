@@ -1,7 +1,9 @@
 # Mapa del repo
 
 Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas las vigila
-`src/arquitectura.test.mjs` (corre con `npm test`).
+`src/arquitectura.test.mjs` (corre con `npm test`), y el tamaño de los componentes,
+`src/componentes.test.mjs`: uno nuevo no pasa de 200 líneas y los que ya pasaban tienen
+un tope que solo baja.
 
 ## Dos zonas
 

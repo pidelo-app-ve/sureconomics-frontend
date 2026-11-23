@@ -6,10 +6,7 @@ import { DondeSale } from "./DondeSale";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
 import { GUIA_DE_FORMATO, nombreDeFormato } from "../utils";
-import {
-  ACCEPTED_IMAGE_MIME,
-  uploadAdminMediaImage,
-} from "../../../../services/adminMediaService";
+import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
 import {
   actualizarCampana,
   actualizarPieza,
@@ -18,6 +15,7 @@ import {
   crearPieza,
   getEscalera,
   getOcupacion,
+  subirArte,
 } from "../api";
 import { MapaDelSitio } from "./mapa/MapaDelSitio";
 
@@ -577,7 +575,7 @@ export const AsistenteDeAnuncio = ({
                   (esCinta ? setCintaId : setImagenId)(id ?? null);
                   (esCinta ? setCinta : setImagen)(objeto ?? null);
                 }}
-                onUpload={uploadAdminMediaImage}
+                onUpload={subirArte}
                 accept={ACCEPTED_IMAGE_MIME}
               />
             );

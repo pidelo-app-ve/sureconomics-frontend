@@ -129,3 +129,36 @@ export const resumenDePieza = (pieza, guia) => {
   if (guia?.arte?.length) return pieza.cinta || pieza.imagen ? "Con arte" : "Sin arte";
   return pieza.enlace || "Sin destino";
 };
+
+/**
+ * Lo más que puede pesar el arte de un anuncio (bytes, KB de 1024), los dos incluidos:
+ * cada lector lo baja entero en cada portada. Un SVG que era una foto vectorizada pesaba
+ * 243 KB ya comprimido (23-nov-2026). Los mismos que `TOPE_ARTE_*` en el backend
+ * (`app/domains/publicidad/rules.py`), que es quien manda: aquí solo se avisa antes de
+ * subir, para no mandar a la biblioteca un archivo que luego no se podrá usar.
+ */
+export const TOPE_ARTE_SVG = 50 * 1024;
+export const TOPE_ARTE_IMAGEN = 150 * 1024;
+
+/**
+ * Por qué no vale este arte por su peso, en una frase; `null` si vale. Mismas palabras
+ * que el servidor (`rules.arte_demasiado_pesado`).
+ *
+ * @param {{ mime?: string, bytes?: number, nombre?: string }} archivo
+ * @returns {string | null}
+ */
+export const arteDemasiadoPesado = ({ mime, bytes, nombre } = {}) => {
+  if (!bytes) return null;
+  // Sin tipo (algún sistema no lo da), por la extensión.
+  const esSvg = (mime || "").trim().toLowerCase() === "image/svg+xml" || /\.svg$/i.test(nombre || "");
+  const tope = esSvg ? TOPE_ARTE_SVG : TOPE_ARTE_IMAGEN;
+  if (bytes <= tope) return null;
+  // Hacia arriba: con 50 KB y un byte, «pesa 50 KB y el máximo es 50 KB» no se entendería.
+  const kb = Math.ceil(bytes / 1024);
+  const quien = nombre ? `«${nombre}»` : esSvg ? "El SVG" : "La imagen";
+  const que = esSvg ? "un SVG de anuncio" : "una imagen de anuncio";
+  const consejo = esSvg
+    ? `Si es una foto o una ilustración pasada a vectorial, expórtela en WebP (hasta ${TOPE_ARTE_IMAGEN / 1024} KB); si es un logo, simplifíquelo.`
+    : "Expórtela en WebP o en JPG con menos calidad, o más pequeña.";
+  return `${quien} pesa ${kb} KB; ${que} puede pesar hasta ${tope / 1024} KB, porque cada lector se baja el archivo entero en cada portada. ${consejo}`;
+};

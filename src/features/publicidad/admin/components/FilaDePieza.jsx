@@ -4,7 +4,8 @@ import { PlazasFijas } from "./PlazasFijas";
 import { AssetField } from "../../../../components/admin/AssetField";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../../services/adminMediaService";
+import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
+import { subirArte } from "../api";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
@@ -66,7 +67,7 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
           setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
           (esCinta ? setCinta : setImagen)(objeto ?? null);
         }}
-        onUpload={uploadAdminMediaImage}
+        onUpload={subirArte}
         accept={ACCEPTED_IMAGE_MIME}
       />
     );
@@ -220,7 +221,7 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
                 setBorrador((b) => ({ ...b, cinta_movil_id: idNuevo ?? null }));
                 setMovil(objeto ?? null);
               }}
-              onUpload={uploadAdminMediaImage}
+              onUpload={subirArte}
               accept={ACCEPTED_IMAGE_MIME}
             />
           ) : null}

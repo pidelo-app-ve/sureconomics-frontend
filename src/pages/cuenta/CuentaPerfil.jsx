@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { RetratoDelLector } from "../../components/cuenta/RetratoDelLector";
+import { useNavegar } from "../../components/Enlace";
 import { BRAND } from "../../data/surEconomicsMock";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { actualizarMiPerfil } from "../../services/userAuthService";
+import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
+import { actualizarMiPerfil, cerrarTodasLasSesionesRemoto } from "../../services/userAuthService";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoPerfil } from "../../lib/guias/guiaPerfil";
 import "../../styles/cuenta.css";
@@ -51,6 +53,100 @@ const vacio = {
   city: "",
   occupation: "",
   phoneNumber: "",
+};
+
+/**
+ * «Cerrar sesión en todos los aparatos». La cuenta no tiene el diálogo del panel (vive en
+ * su CSS), así que la confirmación va en el sitio: el botón se cambia por la pregunta y
+ * sus dos respuestas. Si falla, la sesión de aquí sigue y se dice por qué.
+ */
+const SesionesAbiertas = () => {
+  const { t } = useIdioma();
+  const { logout } = useUserAuth();
+  const navigate = useNavegar();
+  const [paso, setPaso] = useState("inicio"); // inicio · preguntar · cerrando
+  const [error, setError] = useState("");
+  const cancelar = useRef(null);
+  const principal = useRef(null);
+  // Tras un fallo, el foco vuelve al botón principal: el de «Sí, cerrar todas» ya no
+  // existe, y sin esto se perdía en el `body`. Un objeto nuevo en cada fallo, para que
+  // dos seguidos vuelvan a llevarlo.
+  const [volverAlBoton, setVolverAlBoton] = useState(null);
+
+  // Al preguntar, el foco va a «Cancelar»: lo seguro, y quien usa teclado oye la pregunta.
+  useEffect(() => {
+    if (paso === "preguntar") cancelar.current?.focus();
+  }, [paso]);
+
+  useEffect(() => {
+    if (volverAlBoton) principal.current?.focus();
+  }, [volverAlBoton]);
+
+  const cerrar = async () => {
+    setPaso("cerrando");
+    setError("");
+    try {
+      await cerrarTodasLasSesiones({
+        pedir: cerrarTodasLasSesionesRemoto,
+        cerrarLocal: () => logout({ soloAqui: true }),
+        irAEntrar: (resultado) => navigate("/cuenta/entrar", { replace: true, state: estadoAlEntrar(resultado) }),
+      });
+    } catch (err) {
+      setError(
+        mensajeDeFallo(err, {
+          red: t("cuenta.perfil.sesiones.falloRed"),
+          demasiadas: t("cuenta.perfil.sesiones.demasiadas"),
+          otro: t("cuenta.perfil.sesiones.fallo"),
+        }),
+      );
+      setPaso("inicio");
+      setVolverAlBoton({});
+    }
+  };
+
+  return (
+    <section className="se-cuenta__form se-cuenta__sesiones" aria-labelledby="p-sesiones" {...ancla("sesiones")}>
+      <h2 className="se-cuenta__h2" id="p-sesiones">
+        {t("cuenta.perfil.sesiones.titulo")}
+      </h2>
+      <p className="se-cuenta__lead">{t("cuenta.perfil.sesiones.texto")}</p>
+      {error ? (
+        <p className="se-cuenta__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {paso === "inicio" ? (
+        <div className="se-cuenta__acciones">
+          <button
+            type="button"
+            ref={principal}
+            className="se-btn se-btn--secondary"
+            onClick={() => setPaso("preguntar")}
+          >
+            {t("cuenta.perfil.sesiones.boton")}
+          </button>
+        </div>
+      ) : (
+        <div className="se-cuenta__acciones" role="group" aria-labelledby="p-sesiones-pregunta">
+          <p className="se-cuenta__lead" id="p-sesiones-pregunta">
+            <strong>{t("cuenta.perfil.sesiones.pregunta")}</strong>
+          </p>
+          <button type="button" className="se-btn" onClick={cerrar} disabled={paso === "cerrando"}>
+            {paso === "cerrando" ? t("cuenta.perfil.sesiones.cerrando") : t("cuenta.perfil.sesiones.confirmar")}
+          </button>
+          <button
+            type="button"
+            ref={cancelar}
+            className="se-btn se-btn--secondary"
+            onClick={() => setPaso("inicio")}
+            disabled={paso === "cerrando"}
+          >
+            {t("cuenta.perfil.sesiones.cancelar")}
+          </button>
+        </div>
+      )}
+    </section>
+  );
 };
 
 export const CuentaPerfil = () => {
@@ -289,6 +385,7 @@ export const CuentaPerfil = () => {
           ) : null}
         </div>
       </form>
+      <SesionesAbiertas />
       <RecorridoVista recorrido={recorridoPerfil} />
     </div>
   );

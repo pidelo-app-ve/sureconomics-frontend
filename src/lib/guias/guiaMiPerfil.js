@@ -9,7 +9,7 @@ export const PASOS_MI_PERFIL = [
   {
     titulo: "Qué hay en esta página",
     texto:
-      "Los datos de su cuenta del panel y su contraseña. Arriba está su rol: el Editor lo hace todo menos " +
+      "Los datos de su cuenta del panel, su contraseña y la salida de todos sus aparatos. Arriba está su rol: el Editor lo hace todo menos " +
       "llevar las cuentas del equipo; el Admin, también eso. El rol no se cambia aquí: lo cambia un admin.",
   },
   {
@@ -32,6 +32,14 @@ export const PASOS_MI_PERFIL = [
       "Escriba la actual y dos veces la nueva, de ocho caracteres como mínimo. Al cambiarla se cierran sus " +
       "sesiones en los demás aparatos (en este sigue dentro) y se desconecta Telegram: vuelva a compartir su " +
       "contacto con el bot.",
+  },
+  {
+    clave: "sesiones",
+    titulo: "Cerrar sesión en todos los aparatos",
+    texto:
+      "Si dejó el panel abierto en un ordenador ajeno o cree que alguien entra con su cuenta, pulse aquí. Le " +
+      "pide confirmación y después cierra todas sus sesiones a la vez, también esta, y desconecta Telegram. " +
+      "Para seguir, vuelva a entrar con su correo y su contraseña, y comparta otra vez su contacto con el bot.",
   },
   {
     clave: "guia",

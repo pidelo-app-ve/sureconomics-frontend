@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { changeAdminMyPassword, getAdminMe, updateAdminMe } from "../../services/adminMeService";
+import { useNavigate } from "react-router-dom";
+import {
+  cerrarTodasMisSesiones,
+  changeAdminMyPassword,
+  getAdminMe,
+  updateAdminMe,
+} from "../../services/adminMeService";
 import { ErrorState, LoadingState } from "../../components/content";
+import { useAuth } from "../../context/AuthContext";
+import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { dispatchAdminAuthSync } from "../../lib/api";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { persistAuth } from "../../lib/authStorage";
+import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
 import { applyPageMeta } from "../../lib/seo";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
@@ -33,12 +42,46 @@ const ROLE_LABELS = {
   admin: "Admin",
 };
 
+/** Lo que dice el diálogo si «Cerrar sesión en todos los aparatos» falla. */
+const FALLOS_AL_CERRAR = {
+  red: "No se pudo contactar el servidor. Sus sesiones siguen abiertas: revise la conexión e inténtelo de nuevo.",
+  demasiadas: "Lo ha intentado muchas veces seguidas. Espere un rato e inténtelo de nuevo.",
+  otro: "No se pudieron cerrar las sesiones. Inténtelo de nuevo en unos momentos.",
+};
+
 export const AdminMiPerfil = () => {
   const [state, setState] = useState({ status: "idle", data: null, error: null });
   const [profileForm, setProfileForm] = useState({ name: "", email: "", current_password: "" });
   const [profileState, setProfileState] = useState({ status: "idle", error: null, message: "" });
   const [passwordForm, setPasswordForm] = useState({ current_password: "", new_password: "", confirm_password: "" });
   const [passwordState, setPasswordState] = useState({ status: "idle", error: null, message: "" });
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const { confirm, ConfirmDialog } = useAdminConfirm();
+
+  // «Cerrar sesión en todos los aparatos». Si falla, el diálogo se queda abierto con el
+  // motivo (`useAdminConfirm` pinta el mensaje del error) y la sesión de aquí sigue.
+  const pedirCerrarTodas = () =>
+    confirm({
+      title: "¿Cerrar sesión en todos los aparatos?",
+      description:
+        "Se cierran todas sus sesiones del panel, también esta, y se desconecta Telegram. Para seguir tendrá " +
+        "que volver a entrar con su correo y su contraseña.",
+      confirmLabel: "Cerrar todas",
+      busyLabel: "Cerrando…",
+      onConfirm: async () => {
+        try {
+          await cerrarTodasLasSesiones({
+            pedir: cerrarTodasMisSesiones,
+            cerrarLocal: logout,
+            irAEntrar: (resultado) =>
+              navigate("/cuenta/entrar", { replace: true, state: estadoAlEntrar(resultado) }),
+          });
+        } catch (err) {
+          throw new Error(mensajeDeFallo(err, FALLOS_AL_CERRAR));
+        }
+      },
+    });
 
   useEffect(() => {
     applyPageMeta({ title: "Admin — Mi perfil", description: "Datos de tu cuenta de backoffice.", noindex: true });
@@ -310,6 +353,20 @@ export const AdminMiPerfil = () => {
         </button>
       </form>
 
+      <section className="se-contact-form" style={{ marginTop: "2.5rem", maxWidth: 480 }} {...ancla("sesiones")}>
+        <h2 className="se-heading-section" style={{ fontSize: "1.15rem", margin: "0 0 0.5rem" }}>
+          Sesiones abiertas
+        </h2>
+        <p className="se-admin-meta-hint">
+          Si dejó el panel abierto en otro aparato o cree que alguien entra con su cuenta, ciérrelas todas a la vez.
+          También se cierra esta y se desconecta Telegram.
+        </p>
+        <button type="button" className="se-btn se-btn--secondary" onClick={pedirCerrarTodas}>
+          Cerrar sesión en todos los aparatos
+        </button>
+      </section>
+
+      <ConfirmDialog />
       <RecorridoVista recorrido={recorridoMiPerfil} />
     </main>
   );

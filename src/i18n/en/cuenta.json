@@ -39,7 +39,8 @@
       "entrar": "Sign in",
       "sinCuenta": "Don't have an account? {enlace}",
       "crearUna": "Create one",
-      "olvido": "Forgot your password?"
+      "olvido": "Forgot your password?",
+      "sesionCaducada": "Your session here had already expired, so your other sessions are still open. Sign in and repeat «Sign out of all devices» to close them."
     },
     "registro": {
       "meta": {
@@ -208,7 +209,19 @@
       "telefono": "Phone",
       "ayudaOcupacion": "Only the newsroom sees it.",
       "ayudaTelefono": "Only so the newsroom can reach you if your submission is accepted.",
-      "guardado": "Saved ✓"
+      "guardado": "Saved ✓",
+      "sesiones": {
+        "titulo": "Open sessions",
+        "texto": "If you left your account open on another device or think someone is using it, sign out everywhere at once. This device is signed out too: sign in again to continue.",
+        "boton": "Sign out of all devices",
+        "pregunta": "Sign out of all your devices, including this one?",
+        "confirmar": "Yes, sign out everywhere",
+        "cancelar": "Cancel",
+        "cerrando": "Signing out…",
+        "falloRed": "Couldn't connect. Your sessions are still open: check your connection and try again.",
+        "demasiadas": "You've tried too many times in a row. Wait a while and try again.",
+        "fallo": "Couldn't sign out your sessions. Try again in a moment."
+      }
     },
     "retrato": {
       "tipoNoValido": "It has to be a JPG, PNG or WebP image.",
@@ -538,6 +551,10 @@
         "guardar": {
           "titulo": "Save",
           "texto": "Changes apply when you press «Save changes»."
+        },
+        "sesiones": {
+          "titulo": "Sign out of all devices",
+          "texto": "If you left your account open on someone else's computer or think someone is getting in with it, press here: all your sessions close at once, including this device's. Then sign in again the way you always do."
         },
         "guia": {
           "titulo": "Come back whenever you like",

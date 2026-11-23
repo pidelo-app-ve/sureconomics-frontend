@@ -107,7 +107,7 @@ const rutasPublicas = (lang) => [
             // El béisbol venezolano: juegos, marcadores y tabla. Carga perezosa, como los juegos.
             { path: "lvbp", lazy: pagina(() => import("./pages/Lvbp"), "Lvbp", { zonas: ["lvbp"], lang }) },
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
-            { path: "monedas", lazy: pagina(() => import("./features/monedas/pages/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
+            { path: "monedas", lazy: pagina(() => import("./features/monedas/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
             // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
             { path: "ultima-hora", lazy: pagina(() => import("./features/titulares/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
             // El resumen diario, en tres ediciones: la última, las de un día o una (adonde
@@ -193,7 +193,7 @@ export const router = createBrowserRouter([
                     { path: "redes/tiktok", lazy: pagina(() => import("./pages/admin/AdminRedesTikTok"), "AdminRedesTikTok") },
                     { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion", { zonas: ["cuenta"] }) },
                     { path: "publicidad", lazy: pagina(() => import("./features/publicidad/admin/AdminPublicidad"), "AdminPublicidad") },
-                    { path: "analitica", lazy: pagina(() => import("./features/analitica/admin/pages/AdminAnalitica"), "AdminAnalitica") },
+                    { path: "analitica", lazy: pagina(() => import("./features/analitica/admin/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
                     { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
                     // El catálogo de La Clave: las palabras de las que sale la del día.

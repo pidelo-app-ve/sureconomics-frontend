@@ -1,5 +1,5 @@
 /**
- * La guía de «Audiencia» (`features/analitica/admin/pages/AdminAnalitica.jsx`). Anclajes:
+ * La guía de «Audiencia» (`features/analitica/admin/AdminAnalitica.jsx`). Anclajes:
  * `[data-tour-audiencia="…"]`. Sus pasos viven con el panel, en
  * `features/analitica/guia.js`; aquí se arma la guía con ellos.
  */

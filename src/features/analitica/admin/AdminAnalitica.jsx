@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
+import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import {
   DIAS_GUARDADOS,
   NOMBRE_FORMATO,
@@ -10,24 +10,24 @@ import {
   duracion,
   numero,
   porciento,
-} from "../utils";
-import { ancla, recorridoAudiencia } from "../../../../lib/guias/guiaAudiencia";
+} from "./utils";
+import { ancla, recorridoAudiencia } from "../../../lib/guias/guiaAudiencia";
 import {
   descargarInforme,
   getConsentimiento,
   getEnVivo,
   getResumen,
-} from "../api";
+} from "./api";
 import "./analitica-consentimiento.css";
 import "./analitica-bloques.css";
-import { CabeceraDePagina } from "../../../../components/admin/CabeceraDePagina";
-import { AudienciaReal } from "../components/AudienciaReal";
-import { ComoVaElMes } from "../components/ComoVaElMes";
-import { CuantosVuelven } from "../components/CuantosVuelven";
-import { DeDondeLlegan } from "../components/DeDondeLlegan";
-import { PaisesYAparatos } from "../components/PaisesYAparatos";
-import { Barras, Bloque, Columnas, Ficha, Tabla, Variacion } from "../components/Piezas";
-import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista";
+import { CabeceraDePagina } from "../../../components/admin/CabeceraDePagina";
+import { AudienciaReal } from "./components/AudienciaReal";
+import { ComoVaElMes } from "./components/ComoVaElMes";
+import { CuantosVuelven } from "./components/CuantosVuelven";
+import { DeDondeLlegan } from "./components/DeDondeLlegan";
+import { PaisesYAparatos } from "./components/PaisesYAparatos";
+import { Barras, Bloque, Columnas, Ficha, Tabla, Variacion } from "./components/Piezas";
+import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.

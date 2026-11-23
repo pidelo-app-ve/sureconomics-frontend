@@ -1,5 +1,5 @@
 /**
- * Los pasos de la guía del panel «Audiencia» (`admin/pages/AdminAnalitica.jsx`). Anclajes:
+ * Los pasos de la guía del panel «Audiencia» (`admin/AdminAnalitica.jsx`). Anclajes:
  * `[data-tour-audiencia="…"]`. Los textos son para la redacción y para quien lleva el
  * negocio: qué dice cada número y hasta dónde se le puede creer, sin jerga.
  *

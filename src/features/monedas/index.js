@@ -14,7 +14,7 @@
  * - `useMonedas.js`: las cotizaciones, pedidas una vez por visita y compartidas.
  * - `components/`: la ficha junto al titular, la tabla de la portada y del lateral, la
  *   apertura con su gráfica, y la gráfica. Cada uno con su hoja de estilos al lado.
- * - `pages/Monedas.jsx` (y `monedas.css`): la página `/monedas`.
+ * - `Monedas.jsx` (y `monedas.css`): la página `/monedas`.
  * - `admin/`: las monedas dentro de «Cinta de mercado» en el panel
  *   (`admin/MonedasDelPanel.jsx`), con sus llamadas al servidor (`admin/api.js`) y su
  *   propia puerta (`admin/index.js`).

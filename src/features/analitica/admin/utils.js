@@ -1,6 +1,6 @@
 /**
  * Con qué palabras escribe sus números la pantalla de audiencia
- * (`pages/AdminAnalitica.jsx` y `components/`).
+ * (`AdminAnalitica.jsx` y `components/`).
  *
  * Funciones puras -- sin React, sin red y sin reloj: lo que haga falta entra por los
  * argumentos --, así se prueban con números escritos a mano (`utils.test.mjs`).

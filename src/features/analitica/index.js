@@ -17,7 +17,7 @@
  * - `utils.js`: de dónde se llegó y con qué aparato, en cuentas puras (con prueba).
  * - `AvisoDeCookies.jsx`: la barra del aviso, que además enciende la medición.
  * - `Cookies.jsx`: la página `/cookies`, con el interruptor de verdad.
- * - `admin/`: el panel «Audiencia» (`admin/pages/AdminAnalitica.jsx`, con sus bloques en
+ * - `admin/`: el panel «Audiencia» (`admin/AdminAnalitica.jsx`, con sus bloques en
  *   `admin/components/`, sus llamadas en `admin/api.js` y sus cuentas en
  *   `admin/utils.js`). Entra por el `lazy` de `routes.jsx`: no necesita puerta.
  * - `guia.js`: los pasos de la guía de ese panel (la guía se arma en

@@ -5,7 +5,8 @@
  * Un dominio (`src/features/<tema>/`) guarda todo lo de su tema, en pocos archivos: en la
  * raíz, `api.js` (lo que se le pide al servidor), `utils.js` (lógica pura), un `useX.js`
  * si tiene un gancho, `guia.js` (los pasos de su guía) y las páginas o componentes
- * sueltos; en carpetas, solo cuando hay varios, `components/`, `pages/` y `admin/`. Las
+ * sueltos; en carpetas, solo cuando hay varios de código, `components/`, `pages/` y
+ * `admin/`. Las
  * carpetas van con los nombres de siempre de React; los archivos y el código, en español.
  * La forma entera está en `ESTRUCTURA.md`, en la raíz del repo.
  * Su `index.js` es **la puerta**: lo único que el resto del sitio puede importar de él. Así
@@ -49,8 +50,10 @@
  *
  * Y dos sobre la forma, no sobre las importaciones («la forma de los dominios»):
  *
- * 7. Ninguna carpeta dentro de un dominio guarda un solo archivo (contando lo que cuelga
- *    de ella): una carpeta así es un nombre de más. El archivo va un nivel arriba.
+ * 7. Ninguna carpeta dentro de un dominio guarda un solo archivo de código (`.js` o
+ *    `.jsx`, contando lo que cuelga de ella; las hojas `.css` y las pruebas no cuentan:
+ *    una página con su hoja sigue siendo una página). Una carpeta así es un nombre de
+ *    más: el archivo va un nivel arriba, con su hoja.
  * 8. Ningún archivo de un dominio pasa de 1.000 líneas: más largo ya no se lee de una
  *    sentada, y se parte por lo que hace (lógica de negocio), no por tipo de archivo.
  *
@@ -258,7 +261,8 @@ const MAX_LINEAS = 1000;
 
 /**
  * La forma de los dominios (reglas 7 y 8): las carpetas de un dominio con un solo archivo
- * (contando lo que cuelga de ellas) y los archivos de más de `maxLineas` líneas.
+ * de código (`.js`/`.jsx` sin pruebas, contando lo que cuelga de ellas) y los archivos de
+ * más de `maxLineas` líneas.
  */
 export const formaDeLosDominios = (raiz = RAIZ, maxLineas = MAX_LINEAS) => {
   const dominios = path.join(raiz, "src", "features");
@@ -267,12 +271,13 @@ export const formaDeLosDominios = (raiz = RAIZ, maxLineas = MAX_LINEAS) => {
   const todo = readdirSync(dominios, { recursive: true }).map((r) => path.join(dominios, r));
   const carpetas = todo.filter((r) => statSync(r).isDirectory());
   const archivos = todo.filter((r) => statSync(r).isFile());
+  const esCodigo = (r) => /\.jsx?$/.test(r) && !/\.test\./.test(r);
   const salida = [];
   for (const carpeta of carpetas) {
     if (path.dirname(carpeta) === dominios) continue; // `features/<tema>/` es el dominio, no una carpeta suya
-    const suyos = archivos.filter((a) => dentroDe(a, carpeta));
+    const suyos = archivos.filter((a) => dentroDe(a, carpeta) && esCodigo(a));
     if (suyos.length === 1) {
-      salida.push(`${relativa(carpeta)}/: un solo archivo (${relativa(suyos[0])}); va un nivel arriba, sin carpeta`);
+      salida.push(`${relativa(carpeta)}/: un solo archivo de código (${relativa(suyos[0])}); va un nivel arriba, sin carpeta`);
     }
   }
   for (const archivo of archivos) {
@@ -487,7 +492,7 @@ test("la prueba ve las trampas", () => {
   }
 });
 
-test("la forma de los dominios: ninguna carpeta con un solo archivo, ningún archivo de más de 1.000 líneas", () => {
+test("la forma de los dominios: ninguna carpeta con un solo archivo de código, ningún archivo de más de 1.000 líneas", () => {
   const lista = formaDeLosDominios();
   assert.deepEqual(lista, [], `\n${lista.join("\n")}`);
 });
@@ -503,8 +508,14 @@ test("la prueba de la forma ve las trampas", () => {
     "src/features/a/components/X.jsx": "", //               bien: dos componentes
     "src/features/a/components/Y.jsx": "",
     "src/features/a/components/mapa/M.jsx": "", //         ✗ 7: aunque cuelgue de una carpeta buena
-    "src/features/a/admin/pages/AdminA.jsx": "", //         bien: la página y su hoja son dos
+    "src/features/a/admin/pages/AdminA.jsx": "", //         ✗ 7: una página con su hoja sigue siendo una
     "src/features/a/admin/pages/admin.css": "",
+    "src/features/a/admin/vistas/Uno.jsx": "", //           bien: dos páginas, aunque una lleve hoja
+    "src/features/a/admin/vistas/Dos.jsx": "",
+    "src/features/a/admin/vistas/dos.css": "",
+    "src/features/a/utils/x.js": "", //                     ✗ 7: su prueba no cuenta
+    "src/features/a/utils/x.test.mjs": "",
+    "src/features/a/estilos/a.css": "", //                  bien: sin código no es la carpeta de un archivo de código
     "src/features/a/admin/services/api.js": "", //          ✗ 7
     "src/features/b/index.js": "",
     "src/features/b/admin/solo/dentro/z.js": "", //         ✗ 7, tres veces: admin/, solo/ y dentro/
@@ -516,10 +527,12 @@ test("la prueba de la forma ve las trampas", () => {
       writeFileSync(path.join(raiz, ruta), texto);
     }
     assert.deepEqual(formaDeLosDominios(raiz).map((f) => f.split(":")[0]), [
+      "src/features/a/admin/pages/",
       "src/features/a/admin/services/",
       "src/features/a/components/mapa/",
       "src/features/a/hooks/",
       "src/features/a/largo.js",
+      "src/features/a/utils/",
       "src/features/b/admin/",
       "src/features/b/admin/solo/",
       "src/features/b/admin/solo/dentro/",

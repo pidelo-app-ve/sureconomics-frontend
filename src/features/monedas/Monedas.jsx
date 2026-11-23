@@ -1,14 +1,14 @@
 import { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { BRAND } from "../../../data/surEconomicsMock";
-import { formatearFecha } from "../../../i18n/motor";
-import { porDolar } from "../utils";
-import { useIdioma } from "../../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../../i18n/useMetaPagina";
-import { getMonedas } from "../api";
-import { useHistoriaMoneda } from "../useMonedas";
-import { GraficaDeMoneda } from "../components/GraficaDeMoneda";
-import { Flecha, variacionTexto } from "../components/FichaDeMoneda";
+import { BRAND } from "../../data/surEconomicsMock";
+import { formatearFecha } from "../../i18n/motor";
+import { porDolar } from "./utils";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
+import { getMonedas } from "./api";
+import { useHistoriaMoneda } from "./useMonedas";
+import { GraficaDeMoneda } from "./components/GraficaDeMoneda";
+import { Flecha, variacionTexto } from "./components/FichaDeMoneda";
 import "./monedas.css";
 
 /**

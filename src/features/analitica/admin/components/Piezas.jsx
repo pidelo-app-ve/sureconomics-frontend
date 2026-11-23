@@ -8,7 +8,7 @@ import { ancla } from "../../../../lib/guias/guiaAudiencia";
  * Las piezas con que se arma la pantalla de audiencia: la ficha de una cifra, el bloque
  * con su gráfico y su tabla, las columnas y las barras.
  *
- * Vivían dentro de `admin/pages/AdminAnalitica.jsx`. Salieron de ahí cuando la pantalla
+ * Vivían dentro de `admin/AdminAnalitica.jsx`. Salieron de ahí cuando la pantalla
  * ganó bloques nuevos (los de esta carpeta, `admin/components/`), que usan las mismas: así todos
  * los bloques se dibujan igual y la página no carga con todo.
  */

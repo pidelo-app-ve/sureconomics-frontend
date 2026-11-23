@@ -56,9 +56,9 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
    - en la raíz: `api.js` (lo que se le pide al servidor), `utils.js` (lógica pura, con
      `utils.test.mjs` al lado), `useX.js` si hay un gancho, `guia.js` (los pasos de su
      guía: solo datos), y las páginas o componentes sueltos;
-   - `components/`, `pages/` y `admin/` solo cuando tienen varios archivos. Ninguna
-     carpeta con un solo archivo y ningún archivo de más de 1.000 líneas (la prueba lo
-     vigila).
+   - `components/`, `pages/` y `admin/` solo cuando tienen varios archivos de código.
+     Ninguna carpeta con un solo `.js`/`.jsx` (una página con su `.css` cuenta como uno)
+     y ningún archivo de más de 1.000 líneas (la prueba lo vigila).
 3. Cada archivo de lógica empieza con un comentario corto: qué hace.
 4. Si tiene panel, va en `admin/`. Si otra página del panel necesita algo de él, se le
    abre una segunda puerta, `admin/index.js` (ver `features/monedas/admin/index.js`):

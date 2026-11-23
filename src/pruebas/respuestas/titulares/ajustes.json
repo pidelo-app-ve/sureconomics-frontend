@@ -1,0 +1,18 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, 3f0d94d) con su cliente de pruebas: GET /admin/headlines/settings -> 200. Cómo: grabar/test_grabar_respuestas.py (scratchpad de la tanda 2).",
+  "respuesta": {
+    "data": {
+      "autopublish_enabled": false,
+      "juez_modo": "bloquear",
+      "motivos": {
+        "dato_erroneo": "Dato erróneo",
+        "duplicado": "Duplicado",
+        "fuente_poco_confiable": "Fuente poco confiable",
+        "no_es_noticia": "No es noticia",
+        "otro": "Otro"
+      },
+      "section_visible": true
+    },
+    "success": true
+  }
+}

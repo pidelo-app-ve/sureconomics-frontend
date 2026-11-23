@@ -1,0 +1,15 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, 3f0d94d) con su cliente de pruebas: POST /auth/login -> 200. Cómo: grabar/test_grabar_respuestas.py (scratchpad de la tanda 2).",
+  "respuesta": {
+    "data": {
+      "access_token": "token-de-prueba",
+      "actor": "admin",
+      "expires_in": 300,
+      "refresh_expires_in": 600,
+      "refresh_token": "token-de-prueba",
+      "role": "publicador",
+      "token_type": "Bearer"
+    },
+    "success": true
+  }
+}

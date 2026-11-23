@@ -48,17 +48,29 @@
  * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
  *    comprobar: solo se admite en `routes.jsx`.
  *
+ * 7. `src/api/` (el cliente HTTP: núcleo, sesión y quiosco) es lo de abajo: solo importa
+ *    de `src/api/` y de `src/i18n/` (los textos de los errores). Nada del sitio, del panel
+ *    ni de un dominio: son ellos los que lo usan. Igual `src/config/` (los datos fijos del
+ *    sitio: marca, menú, equipo…), que solo importa de `src/config/`.
+ *
  * Y dos sobre la forma, no sobre las importaciones («la forma de los dominios»):
  *
- * 7. Ninguna carpeta dentro de un dominio guarda un solo archivo de código (`.js` o
+ * 8. Ninguna carpeta dentro de un dominio guarda un solo archivo de código (`.js` o
  *    `.jsx`, contando lo que cuelga de ella; las hojas `.css` y las pruebas no cuentan:
  *    una página con su hoja sigue siendo una página). Una carpeta así es un nombre de
  *    más: el archivo va un nivel arriba, con su hoja.
- * 8. Ningún archivo de un dominio pasa de 1.000 líneas: más largo ya no se lee de una
+ * 9. Ningún archivo de un dominio pasa de 1.000 líneas: más largo ya no se lee de una
  *    sentada, y se parte por lo que hace (lógica de negocio), no por tipo de archivo.
  *
- * Cada regla tiene su trampa en «la prueba ve las trampas»: un sitio de mentira en una
- * carpeta temporal donde cada falta está puesta a propósito.
+ * Y una sobre la red:
+ *
+ * 10. Nadie fuera de `src/api/` llama a la red por su cuenta (`fetch`, `sendBeacon`,
+ *     `XMLHttpRequest`): todo va por el cliente, que es donde se arreglan una vez los
+ *     errores, la sesión y el quiosco. Los que tienen un motivo están en
+ *     `RED_FUERA_DEL_CLIENTE`, con cuántas llamadas cada uno; el número solo puede bajar.
+ *
+ * Cada regla tiene su trampa en «la prueba ve las trampas» (y la de la red, en la suya):
+ * un sitio de mentira en una carpeta temporal donde cada falta está puesta a propósito.
  *
  * Las importaciones se leen del árbol del código (espree, el analizador de ESLint), no del
  * texto: los comentarios no cuentan, y `import()` sí.
@@ -105,6 +117,32 @@ const FUGAS_CONOCIDAS = {
     "el diálogo de confirmar lo usan el panel y la cuenta; la quita quien cree src/ui/ (diálogos)",
   "src/components/cuenta/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
     "el recorte del retrato lo usan el panel y la cuenta del lector; la quita quien lo mude a src/ui/",
+};
+
+/**
+ * Quién llama a la red por su cuenta fuera de `src/api/`, cuántas veces (`fetch`,
+ * `navigator.sendBeacon` y `new XMLHttpRequest`, contadas en el código) y por qué. Es un
+ * trinquete: el número solo puede bajar. Si una llamada pasa al cliente, se baja aquí (y
+ * se quita la línea al llegar a cero); una nueva fuera del cliente no pasa la prueba.
+ */
+const RED_FUERA_DEL_CLIENTE = {
+  "src/features/analitica/medicion.js": {
+    llamadas: 3,
+    porque: "la medición sale por sendBeacon (o fetch con keepalive) como text/plain, sin pregunta previa de CORS " +
+      "y sin credenciales, y no espera respuesta: el cliente manda JSON y lee la respuesta",
+  },
+  "src/features/publicidad/api.js": {
+    llamadas: 2,
+    porque: "las impresiones, igual que la medición: sendBeacon o fetch con keepalive, text/plain y sin credenciales",
+  },
+  "src/lib/deteccionDeCaras.js": {
+    llamadas: 1,
+    porque: "pide un archivo del propio sitio (el clasificador de caras), no la API",
+  },
+  "src/services/adminMediaService.js": {
+    llamadas: 1,
+    porque: "la subida de video a Cloudflare Stream: XMLHttpRequest por la barra de progreso, y sin nuestro token (es un tercero)",
+  },
 };
 
 /**
@@ -160,6 +198,9 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   const SRC = path.join(raiz, "src");
   const DOMINIOS = path.join(SRC, "features");
   const UI = path.join(SRC, "ui");
+  const API = path.join(SRC, "api");
+  const I18N = path.join(SRC, "i18n");
+  const CONFIG = path.join(SRC, "config");
   const relativa = (ruta) => path.relative(raiz, ruta).split(path.sep).join("/");
   /** De qué dominio es una ruta (`monedas`), o null si no es de ninguno. */
   const dominioDe = (ruta) => (dentroDe(ruta, DOMINIOS) ? path.relative(DOMINIOS, ruta).split(path.sep)[0] : null);
@@ -212,6 +253,14 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
       const destino = resolver(ruta, especificador);
       if (!destino) continue;
       const donde = `${rel}:${linea}: importa ${relativa(destino)}`;
+      if (dentroDe(ruta, API) && !dentroDe(destino, API) && !dentroDe(destino, I18N)) {
+        salida.push(`${donde}; src/api/ es lo de abajo: solo importa de src/api/ y src/i18n/`);
+        continue;
+      }
+      if (dentroDe(ruta, CONFIG) && !dentroDe(destino, CONFIG)) {
+        salida.push(`${donde}; src/config/ son datos: solo importa de src/config/`);
+        continue;
+      }
       if (esGuia(ruta) && !((esGuia(destino) && destino.endsWith(".js")) ||
         (destino.endsWith(".json") && path.basename(path.dirname(destino)) === "guides"))) {
         salida.push(`${donde}; los pasos de una guía son datos: solo importan otros pasos de guía (guia.js, guides/)`);
@@ -244,6 +293,67 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   return salida;
 };
 
+/** Si un nodo es una llamada a la red: `fetch(…)`, `window.fetch(…)`, `x.sendBeacon(…)` o `new XMLHttpRequest()`. */
+const esLlamadaDeRed = (n) => {
+  if (n.type === "NewExpression") return n.callee.type === "Identifier" && n.callee.name === "XMLHttpRequest";
+  if (n.type !== "CallExpression") return false;
+  const c = n.callee;
+  if (c.type === "Identifier") return c.name === "fetch";
+  if (c.type !== "MemberExpression" || c.computed || c.property.type !== "Identifier") return false;
+  if (c.property.name === "sendBeacon") return true;
+  return c.property.name === "fetch" && c.object.type === "Identifier" && ["window", "globalThis", "self"].includes(c.object.name);
+};
+
+/**
+ * Las llamadas a la red fuera de `src/api/` (sin pruebas ni El Analista), por archivo:
+ * `{ "src/x.js": [línea, …] }`. Se leen del árbol del código: un comentario o un texto
+ * que diga `fetch(` no cuentan.
+ */
+export const llamadasDeRed = (raiz = RAIZ) => {
+  const SRC = path.join(raiz, "src");
+  const relativa = (ruta) => path.relative(raiz, ruta).split(path.sep).join("/");
+  if (!existsSync(SRC)) return {};
+  const salida = {};
+  for (const n of readdirSync(SRC, { recursive: true })) {
+    const ruta = path.join(SRC, n);
+    const rel = relativa(ruta);
+    if (!/\.(jsx?|mjs)$/.test(rel) || /\.test\./.test(rel) || rel.startsWith("src/api/") || rel.startsWith("src/juegos/el-analista/")) continue;
+    const lineas = [];
+    const visitar = (nodo) => {
+      if (!nodo || typeof nodo.type !== "string") return;
+      if (esLlamadaDeRed(nodo)) lineas.push(nodo.loc.start.line);
+      for (const clave of espree.VisitorKeys[nodo.type] ?? []) {
+        const hijo = nodo[clave];
+        for (const h of Array.isArray(hijo) ? hijo : [hijo]) visitar(h);
+      }
+    };
+    visitar(espree.parse(readFileSync(ruta, "utf8"), OPCIONES));
+    if (lineas.length) salida[rel] = lineas;
+  }
+  return salida;
+};
+
+/** Lo que no cuadra con `excepciones`: llamadas de más, o una lista que ya puede bajar. */
+export const faltasDeRed = (raiz = RAIZ, excepciones = RED_FUERA_DEL_CLIENTE) => {
+  const vistas = llamadasDeRed(raiz);
+  const salida = [];
+  for (const [rel, lineas] of Object.entries(vistas)) {
+    const permitidas = excepciones[rel]?.llamadas ?? 0;
+    if (lineas.length > permitidas) {
+      salida.push(`${rel}: ${lineas.length} llamadas a la red por su cuenta (líneas ${lineas.join(", ")}), ` +
+        `la lista deja ${permitidas}; van por el cliente de src/api/`);
+    }
+  }
+  for (const [rel, { llamadas }] of Object.entries(excepciones)) {
+    const hay = vistas[rel]?.length ?? 0;
+    if (hay < llamadas) {
+      salida.push(`${rel}: ahora ${hay} llamadas a la red y la lista dice ${llamadas}; baja el número en ` +
+        "RED_FUERA_DEL_CLIENTE (o quita la línea si es cero)");
+    }
+  }
+  return salida.sort();
+};
+
 /** Las carpetas con nombre en español que han vuelto: `src/dominios` o una de las de antes dentro de un dominio. */
 export const carpetasEnEspanol = (raiz = RAIZ) => {
   const dominios = path.join(raiz, "src", "features");
@@ -256,11 +366,11 @@ export const carpetasEnEspanol = (raiz = RAIZ) => {
   return [...viejas, ...dentro.sort()];
 };
 
-/** Más líneas que esto, y un archivo de un dominio se parte (regla 8). */
+/** Más líneas que esto, y un archivo de un dominio se parte (regla 9). */
 const MAX_LINEAS = 1000;
 
 /**
- * La forma de los dominios (reglas 7 y 8): las carpetas de un dominio con un solo archivo
+ * La forma de los dominios (reglas 8 y 9): las carpetas de un dominio con un solo archivo
  * de código (`.js`/`.jsx` sin pruebas, contando lo que cuelga de ellas) y los archivos de
  * más de `maxLineas` líneas.
  */
@@ -434,7 +544,23 @@ test("la prueba ve las trampas", () => {
       'import { X } from "../components/admin/X";', // ✗ 2: la fuga indirecta (X importa el panel)
       "const M = (n) => import(`./mapas/${n}.js`);", // ✗ 6: una ruta calculada
       'import { Y as F } from "../lib/fachada";', //    bien: Home.jsx está en la lista de la fachada
+      'import { pedir } from "../api/nucleo";', //       bien: todos usan el cliente
     ],
+    "src/api/nucleo.js": [
+      'import { t } from "../i18n/motor";', //          bien: los textos de los errores
+      'import { s } from "./sesion";', //               bien
+      'import { x } from "../lib/x";', //               ✗ 7: nada del sitio
+      'import { B } from "../features/b";', //          ✗ 7: ni un dominio, por la puerta
+      'import { X } from "../components/admin/X";', //  ✗ 7: ni el panel
+    ],
+    "src/api/sesion.js": [],
+    "src/config/sitio.js": [
+      'import { TEAM } from "./equipo";', //            bien
+      'import { t } from "../i18n/motor";', //          ✗ 7: datos, sin nada más
+    ],
+    "src/config/equipo.js": [],
+    "src/i18n/motor.js": [],
+    "src/lib/x.js": [],
     "src/routes.jsx": [
       'const P = () => import("./features/b/pages/Pag");', // bien: el lazy de una página
       'import { Y } from "./features/b/components/Y";', //     ✗ 4: lo demás, por la puerta
@@ -466,6 +592,10 @@ test("la prueba ve las trampas", () => {
     }
     const claves = faltas(raiz, { "src/lib/fachada.js": { quita: "prueba", importadores: ["src/pages/Home.jsx"] } }, {}).map((f) => f.split(";")[0].replace(": importa ", " "));
     assert.deepEqual(claves.sort(), [
+      "src/api/nucleo.js:3 src/lib/x.js",
+      "src/api/nucleo.js:4 src/features/b/index.js",
+      "src/api/nucleo.js:5 src/components/admin/X.jsx",
+      "src/config/sitio.js:2 src/i18n/motor.js",
       "src/features/a/components/X.jsx:2 src/features/b/components/Y.jsx",
       "src/features/a/components/X.jsx:3 src/features/b/admin/index.js",
       "src/features/a/components/X.jsx:4 src/features/a/admin/Panel.jsx",
@@ -492,6 +622,58 @@ test("la prueba ve las trampas", () => {
   }
 });
 
+test("nadie fuera de src/api/ llama a la red por su cuenta, salvo la lista (y la lista solo baja)", () => {
+  const lista = faltasDeRed();
+  assert.deepEqual(lista, [], `\n${lista.join("\n")}`);
+});
+
+test("la prueba de la red ve las trampas", () => {
+  const raiz = mkdtempSync(path.join(os.tmpdir(), "arquitectura-red-"));
+  const sitio = {
+    "src/api/nucleo.js": "export const p = () => fetch('/x');", //         bien: es el cliente
+    "src/lib/suelta.js": [
+      "// fetch('/comentario') no cuenta",
+      "const t = 'fetch(\"/un texto\")';", //                                   no cuenta
+      "export const a = () => fetch('/a');", //                               ✗ 10
+      "export const b = () => window.fetch('/b');", //                        ✗ 10
+      "export const c = () => globalThis.fetch('/c');", //                    ✗ 10
+      "export const d = () => navigator.sendBeacon('/d', '');", //            ✗ 10
+      "export const e = () => new XMLHttpRequest();", //                      ✗ 10
+      "export const f = (cliente) => cliente.fetch('/f');", //                no cuenta: no es el del navegador
+    ].join("\n"),
+    "src/lib/suelta.test.mjs": "fetch('/en una prueba no cuenta');",
+    "src/juegos/el-analista/el-analista.jsx": "fetch('/se trae tal cual');",
+    "src/lib/con-permiso.js": "fetch('/1'); fetch('/2');", //                bien: la lista deja 2
+    "src/lib/ya-baja.js": "fetch('/1');", //                                 ✗ 10: la lista dice 2; ya puede bajar
+    "src/lib/se-fue.js": "export const x = 1;", //                           ✗ 10: en la lista y sin llamadas
+  };
+  const excepciones = {
+    "src/lib/con-permiso.js": { llamadas: 2, porque: "prueba" },
+    "src/lib/ya-baja.js": { llamadas: 2, porque: "prueba" },
+    "src/lib/se-fue.js": { llamadas: 1, porque: "prueba" },
+  };
+  try {
+    for (const [ruta, texto] of Object.entries(sitio)) {
+      mkdirSync(path.dirname(path.join(raiz, ruta)), { recursive: true });
+      writeFileSync(path.join(raiz, ruta), texto);
+    }
+    assert.deepEqual(llamadasDeRed(raiz), {
+      "src/lib/con-permiso.js": [1, 1],
+      "src/lib/suelta.js": [3, 4, 5, 6, 7],
+      "src/lib/ya-baja.js": [1],
+    });
+    assert.deepEqual(faltasDeRed(raiz, excepciones).map((f) => f.split(":")[0]), [
+      "src/lib/se-fue.js",
+      "src/lib/suelta.js",
+      "src/lib/ya-baja.js",
+    ]);
+    // Sin la lista, también salta la que tenía permiso.
+    assert.ok(faltasDeRed(raiz, {}).some((f) => f.startsWith("src/lib/con-permiso.js:")));
+  } finally {
+    rmSync(raiz, { recursive: true, force: true });
+  }
+});
+
 test("la forma de los dominios: ninguna carpeta con un solo archivo de código, ningún archivo de más de 1.000 líneas", () => {
   const lista = formaDeLosDominios();
   assert.deepEqual(lista, [], `\n${lista.join("\n")}`);
@@ -503,22 +685,22 @@ test("la prueba de la forma ve las trampas", () => {
   const sitio = {
     "src/features/a/index.js": "", //                       bien: la carpeta del dominio no cuenta
     "src/features/a/utils.js": lineas(1000), //             bien: justo en el tope
-    "src/features/a/largo.js": lineas(1001), //             ✗ 8: una línea de más
-    "src/features/a/hooks/useX.js": "", //                  ✗ 7: un solo gancho en su carpeta
+    "src/features/a/largo.js": lineas(1001), //             ✗ 9: una línea de más
+    "src/features/a/hooks/useX.js": "", //                  ✗ 8: un solo gancho en su carpeta
     "src/features/a/components/X.jsx": "", //               bien: dos componentes
     "src/features/a/components/Y.jsx": "",
-    "src/features/a/components/mapa/M.jsx": "", //         ✗ 7: aunque cuelgue de una carpeta buena
-    "src/features/a/admin/pages/AdminA.jsx": "", //         ✗ 7: una página con su hoja sigue siendo una
+    "src/features/a/components/mapa/M.jsx": "", //         ✗ 8: aunque cuelgue de una carpeta buena
+    "src/features/a/admin/pages/AdminA.jsx": "", //         ✗ 8: una página con su hoja sigue siendo una
     "src/features/a/admin/pages/admin.css": "",
     "src/features/a/admin/vistas/Uno.jsx": "", //           bien: dos páginas, aunque una lleve hoja
     "src/features/a/admin/vistas/Dos.jsx": "",
     "src/features/a/admin/vistas/dos.css": "",
-    "src/features/a/utils/x.js": "", //                     ✗ 7: su prueba no cuenta
+    "src/features/a/utils/x.js": "", //                     ✗ 8: su prueba no cuenta
     "src/features/a/utils/x.test.mjs": "",
     "src/features/a/estilos/a.css": "", //                  bien: sin código no es la carpeta de un archivo de código
-    "src/features/a/admin/services/api.js": "", //          ✗ 7
+    "src/features/a/admin/services/api.js": "", //          ✗ 8
     "src/features/b/index.js": "",
-    "src/features/b/admin/solo/dentro/z.js": "", //         ✗ 7, tres veces: admin/, solo/ y dentro/
+    "src/features/b/admin/solo/dentro/z.js": "", //         ✗ 8, tres veces: admin/, solo/ y dentro/
     "src/pages/x/Unica.jsx": "", //                         bien: fuera de los dominios no se mira
   };
   try {

@@ -77,7 +77,7 @@ export const PASOS_TITULARES = [
     clave: "vistas",
     titulo: "Publicados y borrados",
     puntos: [
-      "Publicados: lo que está ahora en la web. Por omisión, lo de las últimas 24 horas; en los filtros se pueden pedir 48 o 72.",
+      "Publicados: lo que está ahora en la web. Un titular deja la web solo a las pocas horas si no llegan notas nuevas, así que aquí casi todo es de hoy.",
       "Borrados: lo que alguien quitó. Desde ahí se puede restaurar.",
     ],
   },
@@ -90,7 +90,7 @@ export const PASOS_TITULARES = [
     puntos: [
       "Buscar: una palabra o un trozo del título o del resumen, en español o en inglés. Busca cuando deja de escribir.",
       "País y Tema: de dónde es la noticia y de qué trata. En País solo salen los que tienen algún titular en esas horas.",
-      "De las últimas: 24, 48 o 72 horas hacia atrás. Más atrás de 72 horas no se guarda nada para revisar aquí.",
+      "De las últimas: 24, 48 o 72 horas hacia atrás. Sirve sobre todo en Borrados, para buscar algo que se quitó hace un par de días; esta lista no mira más atrás de 72 horas.",
       "Solo: los que salieron como última hora, los que alguien corrigió a mano o los que están fijados arriba ahora mismo.",
       "Mejor fuente: el nivel del medio más fiable que cuenta la noticia. Elegir el 4 deja ver los que se apoyan solo en Google News o en medios pequeños, que conviene revisar.",
       "Limpiar filtros: si con lo elegido no sale nada, este botón los quita todos de una vez.",

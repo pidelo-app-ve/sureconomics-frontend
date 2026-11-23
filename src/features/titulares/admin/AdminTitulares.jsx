@@ -354,6 +354,9 @@ export const AdminTitulares = () => {
         opciones: datos?.opciones ?? null,
         error: null,
       });
+      // Y la página que se pide pasa a ser esa: si no, la recarga de cada minuto seguiría
+      // pidiendo la vieja y saltaría a ella en cuanto volviera a existir.
+      if (datos?.pagina && datos.pagina !== pagina) setPagina(datos.pagina);
     } catch (err) {
       if (turno !== turnoDeLista.current) return;
       // Una recarga callada que falla no borra lo que se está viendo.
@@ -365,6 +368,12 @@ export const AdminTitulares = () => {
     () => Promise.all([cargarPanel(), cargarLista({ callado: true })]),
     [cargarPanel, cargarLista],
   );
+  // La recarga tras una acción sale de aquí y no del `cargar` del clic: si mientras tanto
+  // se cambió de pestaña, de página o de filtro, aquel pediría la lista vieja y, al ser
+  // la petición más reciente, pisaría a la buena.
+  const cargarAhora = useRef(cargar);
+  cargarAhora.current = cargar;
+  const recargar = useCallback(() => cargarAhora.current(), []);
 
   useEffect(() => {
     cargarPanel();
@@ -415,7 +424,7 @@ export const AdminTitulares = () => {
     try {
       await peticion();
       toastSuccess(exito, "Titulares");
-      await cargar();
+      await recargar();
       return true;
     } catch (err) {
       toastError(adminErrorMessage(err, fallo), "Titulares");
@@ -698,10 +707,10 @@ export const AdminTitulares = () => {
         </>
       ) : null}
 
-      <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} verNuevas={verNuevas} />
+      <FuentesDeTitulares fuentes={fuentes} onCambio={recargar} anclaje={ancla("fuentes")} verNuevas={verNuevas} />
 
       <EditarTitular grupo={editando} onCerrar={() => setEditando(null)}
-        onGuardado={() => { setEditando(null); cargar(); }} />
+        onGuardado={() => { setEditando(null); recargar(); }} />
       <HistorialTitular grupo={historial} motivos={motivos} onCerrar={() => setHistorial(null)} />
       <ConfirmDialog />
     </main>

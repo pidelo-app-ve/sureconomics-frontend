@@ -63,12 +63,11 @@ const RAIZ = fileURLToPath(new URL("../", import.meta.url));
 
 /** Las fachadas de la mudanza: pueden importar las tripas de un dominio. Ruta → quién la quita. */
 const FACHADAS = {
-  "src/lib/monedas.js": "monedas, cuando el editor de piezas importe de features/monedas",
   "src/hooks/useHeadlines.js":
     "titulares, cuando haceCuanto se mude a un sitio compartido (LugarYFecha, por la puerta, cambiaría el orden del CSS)",
   "src/lib/analitica.js":
-    "analitica, cuando la barra de la publicidad (components/publicidad/BarraPublicitaria.jsx), la invitación al " +
-    "boletín, useVistaPrevia y newsletterService importen de features/analitica (por la puerta se reordena index-*.js)",
+    "analitica, cuando la barra de la publicidad (features/publicidad/components/BarraPublicitaria.jsx), " +
+    "useVistaPrevia y newsletterService importen de features/analitica (por la puerta se reordena index-*.js)",
 };
 
 /**

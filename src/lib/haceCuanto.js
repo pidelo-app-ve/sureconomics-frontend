@@ -1,6 +1,10 @@
 /**
  * «hace 12 minutos», «hace 3 horas»: cuándo llegó lo último de una sincronización. Para
  * el panel (en español, de ahí que no pase por el i18n): «En redes» y «Canal de YouTube».
+ *
+ * No es la `haceCuanto` de los titulares (`features/titulares/useHeadlines.js`), que va
+ * por el i18n y escribe corto («Hace 4 min», sin días). Juntarlas cambiaría lo que se lee
+ * en una de las dos: por eso son dos.
  */
 export const haceCuanto = (iso) => {
   if (!iso) return "nunca";

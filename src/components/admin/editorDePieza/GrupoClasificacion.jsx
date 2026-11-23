@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { tActual } from "../../../i18n/motor";
-import { CODIGOS_MONEDA } from "../../../lib/monedas";
+import { CODIGOS_MONEDA } from "../../../features/monedas";
 import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 import { CampoMovil } from "../CampoMovil";
 import { AxisPicker } from "../AxisPicker";

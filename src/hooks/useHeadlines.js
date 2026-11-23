@@ -11,5 +11,8 @@
  * Se borra cuando `haceCuanto` (que no es solo de los titulares: la portada lo usa para
  * la fecha de cada pieza) se mude a un sitio compartido, o cuando la portada pueda
  * importar la puerta sin que cambie el orden de sus hojas.
+ *
+ * No confundir con `lib/haceCuanto.js`, la del panel: escribe largo y en español fijo
+ * («hace 12 minutos», con días). Son dos a propósito.
  */
 export { haceCuanto } from "../features/titulares/useHeadlines.js";

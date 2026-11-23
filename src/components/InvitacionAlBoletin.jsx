@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { EVENTO_CONSENTIMIENTO, consentimiento } from "../lib/analitica";
+import { EVENTO_CONSENTIMIENTO, consentimiento } from "../features/analitica";
 import {
   ESPERA_MS,
   debeInvitar,

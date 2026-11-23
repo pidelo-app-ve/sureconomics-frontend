@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";

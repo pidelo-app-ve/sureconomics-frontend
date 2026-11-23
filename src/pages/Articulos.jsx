@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useSearchParams } from "react-router-dom";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { Redirigir } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";

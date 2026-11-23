@@ -4,7 +4,7 @@ import { BotonDeSeguirTema } from "../../components/content/BotonDeSeguirTema";
 import { TituloDePieza } from "../../components/content/TituloDePieza";
 import { useTemasSeguidos } from "../../context/TemasSeguidosContext";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useTaxonomy } from "../../hooks/useTaxonomy";
 import { formatearFecha } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Enlace } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";

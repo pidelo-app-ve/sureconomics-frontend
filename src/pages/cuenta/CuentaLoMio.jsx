@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Enlace } from "../../components/Enlace";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { formatearFecha, formatearNumero, idiomaActual } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";

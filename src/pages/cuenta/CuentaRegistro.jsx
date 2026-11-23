@@ -5,7 +5,7 @@ import { useUserAuth } from "../../context/UserAuthContext";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
 import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";

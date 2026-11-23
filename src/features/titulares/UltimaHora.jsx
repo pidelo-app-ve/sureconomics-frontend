@@ -7,7 +7,7 @@ import { TablaDeMonedas, useMonedas } from "../monedas";
 import { useMasLeidas } from "../../hooks/useMasLeidas";
 import { lineaDelPunto, rutaInterna } from "../../lib/resumen";
 import { getResumen } from "../../services/resumenService";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { EmptyState, ErrorState, LoadingState } from "../../components/content";
 import { haceCuanto, useHeadlines } from "./useHeadlines";
 import { formatearFecha } from "../../i18n/motor";

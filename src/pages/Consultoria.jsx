@@ -1,5 +1,5 @@
 import "../styles/institucional.css";
-import { BRAND, CONTACT, SERVICES } from "../data/surEconomicsMock";
+import { BRAND, CONTACT, SERVICES } from "../config/sitio";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";

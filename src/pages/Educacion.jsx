@@ -4,7 +4,7 @@ import { getCatalogo } from "../services/educacionService";
 import { TarjetaDeModulo } from "../components/educacion/TarjetaDeModulo";
 import { Recorte, Recortes } from "../components/comun/Recorte";
 import { IconEscudo, IconLlave, IconVisto } from "../components/icons/educacion";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 

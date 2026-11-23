@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import { SOCIAL } from "../data/surEconomicsMock";
+import { SOCIAL } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { formatearFecha } from "../i18n/motor";
 import { getRedes } from "../services/publicContentService";

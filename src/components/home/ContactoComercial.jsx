@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CONTACT } from "../../data/surEconomicsMock";
+import { CONTACT } from "../../config/sitio";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 import { useIdioma } from "../../i18n/ProveedorIdioma";

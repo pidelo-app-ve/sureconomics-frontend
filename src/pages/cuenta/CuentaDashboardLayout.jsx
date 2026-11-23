@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Enlace, EnlaceNav } from "../../components/Enlace";
 import { RequireUserAuth } from "../../components/cuenta/RequireUserAuth";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";

@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { Enlace } from "../components/Enlace";
 import { PanelDeCompra } from "../components/educacion/PanelDeCompra";
 import { IconCandado, IconLlave, IconoDeTipo, IconReloj } from "../components/icons/educacion";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { Recorte, Recortes } from "../components/comun/Recorte";

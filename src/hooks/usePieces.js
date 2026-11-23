@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { elegirApertura, precargarApertura } from "../components/home/PrimeraPlana";
+import { textoDeBusqueda } from "../lib/contentFilter";
 import { FORMATO_META, piezasFromApi } from "../lib/pieza";
 import { trasLaFoto } from "../lib/trasLaFoto";
 import { getPieces } from "../services/publicContentService";
@@ -26,10 +27,23 @@ import { getPieces } from "../services/publicContentService";
  * quinientas piezas por cada cambio de idioma, no.
  *
  * Con `portada` (sin formato) trae solo lo que pinta la portada: ver `pedirPortada`.
+ *
+ * Con `q` (lo escrito en el buscador) pide al servidor las que lo llevan en el título,
+ * el resumen o el nombre del entrevistado, en español o en inglés (`/posts?q=`), en vez
+ * de buscar solo entre las quinientas más recientes: el techo ya se pasó (en «Noticias»
+ * desde mediados de octubre de 2026) y lo anterior no aparecía al buscarlo. Ver
+ * `ESPERA_BUSQUEDA` y `buscando`.
  */
 
 const PER_PAGE = 100;
 const MAX_PAGES = 5;
+
+/**
+ * Lo que se espera desde la última tecla antes de preguntar al servidor: escribir
+ * «petróleo» no son ocho búsquedas. Mientras tanto, y mientras llega la respuesta, se
+ * sigue viendo la lista anterior filtrada aquí (`buscando` dice que viene otra).
+ */
+const ESPERA_BUSQUEDA = 300;
 
 /**
  * Lo ya descargado, por formato, durante un minuto.
@@ -46,12 +60,12 @@ const fresco = (clave) => {
 };
 /** A la portada le sirve también la lista entera, si está guardada. */
 const guardadoPara = (portada, entera) => (portada && fresco(entera)) || fresco(portada ? "portada" : entera);
-const deGuardado = ({ filas, total, truncated, faltan, de }) => ({ status: "success", filas, total, truncated, faltan, error: null, de });
+const deGuardado = ({ filas, total, truncated, faltan, de }) => ({ status: "success", filas, total, truncated, faltan, error: null, de, buscando: false });
 
-const pedirPagina = (format, educational, page, limit = PER_PAGE) =>
-  // `undefined` y no `false` cuando no se pide: el cliente omite los nulos, y un
+const pedirPagina = ({ format, educational, q }, page, limit = PER_PAGE) =>
+  // `undefined` y no `false` (ni "") cuando no se pide: el cliente omite los nulos, y un
   // `?educational=false` en la direccion se leeria como un filtro puesto.
-  getPieces({ format, educational: educational ? true : undefined, page, limit });
+  getPieces({ format, educational: educational ? true : undefined, q: q || undefined, page, limit });
 
 /**
  * La portada, sin pedir las quinientas.
@@ -119,7 +133,7 @@ const pedirPortada = async (primera, vigente = () => true, { aplazar = false, al
   if ((p1.pages || 1) <= 1) return { filas: p1.filas, total: p1.total, truncated: false, faltan: 0 };
   // La pieza quinientos sin contar la fijada, que la API saca del orden y pone delante
   // en la primera página. Sin quinientas no hay corte: la lista entera es todo.
-  const corte = pedirPagina(undefined, false, MAX_PAGES * PER_PAGE, 1).then((r) => r.filas[0] ?? null);
+  const corte = pedirPagina({}, MAX_PAGES * PER_PAGE, 1).then((r) => r.filas[0] ?? null);
   const formatos = Object.keys(FORMATO_META).filter((format) => format !== "noticia");
   const piezas = piezasFromApi(p1.filas);
   // Las de arriba cuyo tema no tiene dos piezas más en la primera página (el contexto se
@@ -160,11 +174,11 @@ const pedirPortada = async (primera, vigente = () => true, { aplazar = false, al
 };
 
 /** La lista entera: la primera página y las siguientes, a la vez y por detrás. */
-const pedirLasCinco = async (primera, format, educational) => {
+const pedirLasCinco = async (primera, filtro) => {
   const pages = primera.pages || 1;
   const resto = [];
   for (let page = 2; page <= Math.min(pages, MAX_PAGES); page += 1) resto.push(page);
-  const trozos = await Promise.all(resto.map((page) => pedirPagina(format, educational, page)));
+  const trozos = await Promise.all(resto.map((page) => pedirPagina(filtro, page)));
   // Sin repetir: la primera puede ser la que la portada ya tenía en pantalla, y si se
   // publicó algo desde entonces las páginas corrieron.
   const vistas = new Set(primera.filas.map((f) => f.id));
@@ -175,10 +189,16 @@ const pedirLasCinco = async (primera, format, educational) => {
 /**
  * `faltan`: cuántas piezas de la lista entera no se pidieron. `0` si está entera; con
  * `portada`, `null` mientras no se sabe.
+ *
+ * `buscando`: lo que se ve es la lista anterior y ya viene la de otra búsqueda (`q`).
+ * Quien pinta no debe decir «sin resultados» mientras tanto.
  */
-export const usePieces = ({ format, educational, portada = false, aplazar = false } = {}) => {
+export const usePieces = ({ format, educational, q, portada = false, aplazar = false } = {}) => {
   const { lang } = useIdioma();
-  const entera = `${format ?? ""}|${educational ? 1 : 0}`;
+  // La portada no busca en el servidor: su buscador filtra lo que ya tiene (ver `Home`).
+  const busca = portada ? "" : textoDeBusqueda(q);
+  const base = `${format ?? ""}|${educational ? 1 : 0}`;
+  const entera = `${base}|${busca}`;
   const clave = portada ? "portada" : entera;
   // La primera página que la portada tiene en pantalla. Al completar la lista se sigue
   // con esa y no con una más nueva: abrir el buscador no cambia lo que se está leyendo.
@@ -186,11 +206,12 @@ export const usePieces = ({ format, educational, portada = false, aplazar = fals
   const [state, setState] = useState(() => {
     const previo = guardadoPara(portada, entera);
     if (previo) return deGuardado(previo);
-    return { status: "loading", filas: [], total: 0, truncated: false, faltan: 0, error: null, de: null };
+    return { status: "loading", filas: [], total: 0, truncated: false, faltan: 0, error: null, de: null, buscando: false };
   });
 
   useEffect(() => {
     let alive = true;
+    const filtro = { format, educational, q: busca };
     const previo = guardadoPara(portada, entera);
     if (previo) {
       if (previo.primera) primeraEnPantalla.current = previo.primera;
@@ -202,14 +223,21 @@ export const usePieces = ({ format, educational, portada = false, aplazar = fals
     // Lo que ya se ve se queda mientras llega el resto si es esta misma lista o la
     // portada que se completa. Otra lista, en cambio, enseña que carga.
     const sigue = (s) => s.de === clave || s.de === "portada";
-    setState((s) => (sigue(s) ? s : { ...s, status: "loading", error: null }));
+    // Otra búsqueda en la misma lista (o quitar la que había): tampoco se vacía la
+    // pantalla. Se ve la anterior, filtrada por quien pinta, hasta que llega la nueva; si
+    // no, el campo de búsqueda desaparecería a cada tecla mientras «carga».
+    const otraBusqueda = (s) => !portada && s.status === "success" && String(s.de).startsWith(`${base}|`);
+    setState((s) => {
+      if (sigue(s)) return s;
+      return otraBusqueda(s) ? { ...s, buscando: true } : { ...s, status: "loading", error: null };
+    });
 
-    (async () => {
+    const pedir = async () => {
       // La primera, sola: es la que dice cuántas páginas hay. Y en cuanto llega, se
       // pinta. Antes la portada esperaba las cinco, una detrás de otra, para enseñar
       // las veintitantas piezas de arriba que ya venían en la primera.
-      const reusada = !portada && primeraEnPantalla.current;
-      const primera = (reusada ? Promise.resolve(reusada) : pedirPagina(format, educational, 1)).then((p1) => {
+      const reusada = !portada && !busca && primeraEnPantalla.current;
+      const primera = (reusada ? Promise.resolve(reusada) : pedirPagina(filtro, 1)).then((p1) => {
         if (alive && portada) {
           primeraEnPantalla.current = { ...p1, en: Date.now() };
           // La foto de la apertura, pedida ya: antes de que React pinte la portada entera.
@@ -217,7 +245,9 @@ export const usePieces = ({ format, educational, portada = false, aplazar = fals
         }
         if (alive) {
           const pinta = { filas: p1.filas, total: p1.total ?? p1.filas.length, truncated: (p1.pages || 1) > MAX_PAGES };
-          setState((s) => (sigue(s) ? s : { ...pinta, status: "success", faltan: portada ? null : 0, error: null, de: clave }));
+          setState((s) =>
+            sigue(s) ? s : { ...pinta, status: "success", faltan: portada ? null : 0, error: null, de: clave, buscando: false },
+          );
         }
         return p1;
       });
@@ -229,34 +259,51 @@ export const usePieces = ({ format, educational, portada = false, aplazar = fals
       const alAvanzar = (filas) => setState((s) => (s.de === clave && s.status === "success" ? { ...s, filas } : s));
       const lista = await (portada
         ? pedirPortada(primera, () => alive, { aplazar, alAvanzar })
-        : primera.then((p1) => pedirLasCinco(p1, format, educational)));
+        : primera.then((p1) => pedirLasCinco(p1, filtro)));
       if (!alive) return;
       // Hecha sobre la primera página que la portada tenía en pantalla, la lista es tan
       // vieja como ella: con la hora de ahora, Explorar la tomaría por recién pedida.
-      if (!lista.incompleta) {
+      // Las búsquedas no se guardan: cada una es una entrada nueva y el guardado no se
+      // vaciaría nunca (el servidor ya las guarda un minuto).
+      if (!lista.incompleta && !busca) {
         guardado.set(clave, { ...lista, de: clave, primera: portada ? primeraEnPantalla.current : null, en: reusada ? reusada.en : Date.now() });
       }
-      setState({ ...lista, status: "success", error: null, de: clave });
-    })().catch((error) => {
-      if (alive) {
-        // Si la primera llegó y falla una de las siguientes, se queda lo que hay: mejor
-        // la portada con cien piezas que una pantalla de error.
-        setState((s) =>
-          s.filas.length
-            ? { ...s, status: "success" }
-            : { status: "error", filas: [], total: 0, truncated: false, faltan: 0, error, de: null },
-        );
-      }
-    });
+      setState({ ...lista, status: "success", error: null, de: clave, buscando: false });
+    };
+
+    const correr = () =>
+      pedir().catch((error) => {
+        if (alive) {
+          // Si la primera llegó y falla una de las siguientes, se queda lo que hay: mejor
+          // la portada con cien piezas que una pantalla de error.
+          setState((s) =>
+            s.filas.length
+              ? { ...s, status: "success", buscando: false }
+              : { status: "error", filas: [], total: 0, truncated: false, faltan: 0, error, de: null, buscando: false },
+          );
+        }
+      });
+    // Una búsqueda espera a que se deje de escribir (`ESPERA_BUSQUEDA`); lo demás, no.
+    const espera = busca ? setTimeout(correr, ESPERA_BUSQUEDA) : null;
+    if (!busca) correr();
 
     return () => {
       alive = false;
+      clearTimeout(espera);
     };
-  }, [clave, entera, portada, format, educational, aplazar]);
+  }, [clave, entera, base, busca, portada, format, educational, aplazar]);
 
   // `lang` en las dependencias aunque no se use dentro: es lo que hace que las piezas
   // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const items = useMemo(() => piezasFromApi(state.filas), [state.filas, lang]);
-  return { status: state.status, items, total: state.total, truncated: state.truncated, error: state.error, faltan: state.faltan };
+  return {
+    status: state.status,
+    items,
+    total: state.total,
+    truncated: state.truncated,
+    error: state.error,
+    faltan: state.faltan,
+    buscando: Boolean(state.buscando),
+  };
 };

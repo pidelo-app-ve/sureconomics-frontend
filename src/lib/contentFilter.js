@@ -112,6 +112,15 @@ export const geoPrincipal = (piece, geoTop = geoTopPorDefecto()) =>
   piece?.geos?.[0] ?? geoTop;
 
 /**
+ * Lo escrito en un buscador, como se busca: sin espacios de más. «  tasa   Selic » busca
+ * «tasa Selic», aquí y en el servidor (`/posts?q=`, ver `usePieces`).
+ *
+ * @param {unknown} q
+ * @returns {string}
+ */
+export const textoDeBusqueda = (q) => String(q ?? "").split(/\s+/).filter(Boolean).join(" ");
+
+/**
  * @param {object} piece
  * @param {{ temas?: Set<string>, geos?: Set<string>, query?: string, tree?: object }} selection
  * @returns {boolean}
@@ -126,7 +135,7 @@ export const matches = (piece, { temas, geos, query, tree } = {}) => {
     if (![...geos].some((g) => belongs.has(g))) return false;
   }
 
-  const q = (query ?? "").trim().toLowerCase();
+  const q = textoDeBusqueda(query).toLowerCase();
   if (q) {
     const haystack = [piece.titulo, piece.resumen, piece.entrada, piece.entrevistado]
       .filter(Boolean)

@@ -5,7 +5,8 @@
       "errorSeccion": "No se pudo cargar esta sección",
       "sinResultadosSeccion": "Ningún contenido de esta sección coincide con los filtros. Quite alguno para ampliar la búsqueda.",
       "seccionVacia": "Cuando la redacción publique en esta sección, aparecerá aquí.",
-      "soloRecientes": "Se están mostrando las piezas más recientes de esta sección."
+      "soloRecientes": "Se están mostrando las piezas más recientes de esta sección. Para encontrar una anterior, escriba en el buscador una palabra de su título.",
+      "soloRecientesBusqueda": "Hay muchas piezas con esa búsqueda y se están mostrando las más recientes. Añada otra palabra para afinarla."
     },
     "formato": {
       "meta": {
@@ -41,7 +42,8 @@
       "sinResultadosTexto": "Ninguna pieza coincide con los filtros. Quite alguno para ampliar la búsqueda.",
       "vacioTexto": "Cuando la redacción publique la primera pieza, aparecerá aquí.",
       "verLasN": "Ver las {n}",
-      "verSeccion": "Ver toda la sección"
+      "verSeccion": "Ver toda la sección",
+      "soloRecientes": "Se están mostrando las piezas más recientes del sitio. Para encontrar una anterior, escriba en el buscador una palabra de su título."
     },
     "alPunto": {
       "meta": {

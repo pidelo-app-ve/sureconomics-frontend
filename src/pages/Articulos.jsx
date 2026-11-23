@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useSearchParams } from "react-router-dom";
 import { BRAND } from "../data/surEconomicsMock";
@@ -39,6 +39,10 @@ import {
  *
  * The two explorer axes narrow *within* the format — a format page never leaves its
  * format. Cross-format results come from `/explorar` instead.
+ *
+ * Lo escrito en el buscador lo busca el servidor en todo el archivo del formato
+ * (`usePieces({ q })`), como en Explorar: «Noticias» pasó de quinientas a mediados de
+ * octubre de 2026 y su buscador no encontraba nada anterior.
  */
 
 const LAYOUTS = {
@@ -65,7 +69,10 @@ export const FormatListing = ({ formatoApi }) => {
   const { t, lang } = useIdioma();
   const meta = FORMATO_META[formatoApi];
   const taxonomy = useTaxonomy();
-  const { items: pieces, status, error, truncated } = usePieces({ format: formatoApi });
+  // Lo escrito, para el servidor. Copia de `query` (`useContentFilter`), que filtra
+  // además aquí lo que se ve mientras llega la respuesta.
+  const [buscado, setBuscado] = useState("");
+  const { items: pieces, status, error, truncated, buscando } = usePieces({ format: formatoApi, q: buscado });
 
   const tree = {
     geoTop: taxonomy.geoTop,
@@ -102,6 +109,7 @@ export const FormatListing = ({ formatoApi }) => {
   const handleQuery = useCallback(
     (next) => {
       setQuery(next);
+      setBuscado(next);
       resetPage();
     },
     [setQuery, resetPage]
@@ -113,7 +121,7 @@ export const FormatListing = ({ formatoApi }) => {
     (lang === "es" && taxonomy.formats.find((f) => f.slug === formatoApi)?.name_plural) ||
     nombreDeFormato(formatoApi);
   // Only announced when the wait is long enough to be worth announcing.
-  const cargando = useDelayedFlag(status === "loading");
+  const cargando = useDelayedFlag(status === "loading" || buscando);
 
   // El patrocinio de tema/pais (formato C) solo tiene sentido con el filtro puesto:
   // lo que se vende es aparecer delante de quien ya dijo que le interesa ese tema.
@@ -145,7 +153,7 @@ export const FormatListing = ({ formatoApi }) => {
           <>
             {/* The filters only mean something once the geography tree has loaded,
                 and they are only worth showing when there is something to narrow. */}
-            {taxonomy.ready && pieces.length ? (
+            {taxonomy.ready && (pieces.length || query.trim()) ? (
               <ContentExplorer
                 pieces={pieces}
                 // `nombreTraducido` y no `name`: las piezas ya traen sus temas en el
@@ -176,7 +184,7 @@ export const FormatListing = ({ formatoApi }) => {
               <h2 className="se-sr-only">
                 {t("listados.formato.todasLasPiezas", { titulo: titulo.toLowerCase() })}
               </h2>
-              {visible.length ? (
+              {visible.length || buscando ? (
                 // Cada tanda de «Cargar más» con su anuncio delante.
                 enTandas(visible, meta.porPagina, meta.porPagina).map((tanda, i) => (
                   <div key={tanda[0].id} className={i ? "se-tanda" : undefined}>
@@ -207,8 +215,12 @@ export const FormatListing = ({ formatoApi }) => {
                 las seis para que ninguna se descuadrara. */}
             <EspacioPublicitario espacio={ESPACIOS.LISTADO_NATIVO} variante="lista" />
 
-            {truncated ? (
-              <p className="se-text-body se-listing__note">{t("listados.listado.soloRecientes")}</p>
+            {truncated && !buscando ? (
+              <p className="se-text-body se-listing__note">
+                {query.trim()
+                  ? t("listados.listado.soloRecientesBusqueda")
+                  : t("listados.listado.soloRecientes")}
+              </p>
             ) : null}
 
             <CargarMas

@@ -4,4 +4,4 @@
  * de piezas). Código nuevo: `import { porDolar } from "../features/monedas"`. Se borra
  * cuando nadie la use.
  */
-export { CODIGOS_MONEDA, porDolar } from "../features/monedas/utils/formato.js";
+export { CODIGOS_MONEDA, porDolar } from "../features/monedas/utils.js";

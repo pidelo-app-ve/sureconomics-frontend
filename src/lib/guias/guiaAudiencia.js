@@ -1,10 +1,10 @@
 /**
  * La guía de «Audiencia» (`features/analitica/admin/pages/AdminAnalitica.jsx`). Anclajes:
  * `[data-tour-audiencia="…"]`. Sus pasos viven con el panel, en
- * `features/analitica/guides/pasosDelPanel.js`; aquí se arma la guía con ellos.
+ * `features/analitica/guia.js`; aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_AUDIENCIA } from "../../features/analitica/guides/pasosDelPanel.js";
+import { PASOS_AUDIENCIA } from "../../features/analitica/guia.js";
 
 export { PASOS_AUDIENCIA };
 

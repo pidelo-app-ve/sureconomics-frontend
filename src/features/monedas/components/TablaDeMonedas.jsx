@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useIdioma } from "../../../i18n/ProveedorIdioma";
-import { porDolar } from "../utils/formato";
+import { porDolar } from "../utils";
 import { Flecha, variacionTexto } from "./FichaDeMoneda";
 import "./tablaDeMonedas.css";
 

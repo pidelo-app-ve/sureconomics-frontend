@@ -97,7 +97,7 @@ const rutasPublicas = (lang) => [
             { path: "podcast/:slug", element: <Pieza /> },
             { path: "consultoria", lazy: pagina(() => import("./pages/Consultoria"), "Consultoria", { zonas: ["paginas"], lang }) },
             { path: "contacto", lazy: pagina(() => import("./pages/Contacto"), "Contacto", { zonas: ["paginas"], lang }) },
-            { path: "cookies", lazy: pagina(() => import("./features/analitica/pages/Cookies"), "Cookies", { zonas: ["paginas"], lang }) },
+            { path: "cookies", lazy: pagina(() => import("./features/analitica/Cookies"), "Cookies", { zonas: ["paginas"], lang }) },
             // Todos los juegos del sitio, una tarjeta por juego. A ella lleva el botón
             // «Juegos» de la cabecera.
             { path: "juegos", lazy: pagina(() => import("./pages/Juegos"), "Juegos", { zonas: ["juegos"], lang }) },
@@ -109,7 +109,7 @@ const rutasPublicas = (lang) => [
             // Las monedas de la región: cuánto vale un dólar en cada una, según su banco central.
             { path: "monedas", lazy: pagina(() => import("./features/monedas/pages/Monedas"), "Monedas", { zonas: ["monedas"], lang }) },
             // Los titulares en caliente: título, resumen y su fuente, cada 10 minutos.
-            { path: "ultima-hora", lazy: pagina(() => import("./features/titulares/pages/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
+            { path: "ultima-hora", lazy: pagina(() => import("./features/titulares/UltimaHora"), "UltimaHora", { zonas: ["titulares"], lang }) },
             // El resumen diario, en tres ediciones: la última, las de un día o una (adonde
             // llevan Telegram y WhatsApp).
             { path: "resumen", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
@@ -192,7 +192,7 @@ export const router = createBrowserRouter([
                     // así que la dirección no puede cambiar sin cambiarla también allí.
                     { path: "redes/tiktok", lazy: pagina(() => import("./pages/admin/AdminRedesTikTok"), "AdminRedesTikTok") },
                     { path: "educacion", lazy: pagina(() => import("./pages/admin/AdminEducacion"), "AdminEducacion", { zonas: ["cuenta"] }) },
-                    { path: "publicidad", lazy: pagina(() => import("./features/publicidad/admin/pages/AdminPublicidad"), "AdminPublicidad") },
+                    { path: "publicidad", lazy: pagina(() => import("./features/publicidad/admin/AdminPublicidad"), "AdminPublicidad") },
                     { path: "analitica", lazy: pagina(() => import("./features/analitica/admin/pages/AdminAnalitica"), "AdminAnalitica") },
                     { path: "comments", lazy: pagina(() => import("./pages/admin/AdminCommentsList"), "AdminCommentsList") },
                     { path: "analista", lazy: pagina(() => import("./pages/admin/AdminAnalista"), "AdminAnalista") },
@@ -202,7 +202,7 @@ export const router = createBrowserRouter([
                     { path: "lvbp", lazy: pagina(() => import("./pages/admin/AdminLvbp"), "AdminLvbp") },
                     // Traducir al inglés, en lote, las piezas publicadas que no lo tienen.
                     { path: "traducciones", lazy: pagina(() => import("./pages/admin/AdminTraducciones"), "AdminTraducciones") },
-                    { path: "titulares", lazy: pagina(() => import("./features/titulares/admin/pages/AdminTitulares"), "AdminTitulares") },
+                    { path: "titulares", lazy: pagina(() => import("./features/titulares/admin/AdminTitulares"), "AdminTitulares") },
                     // Lo que la redacción debería mirar hoy: los avisos y lo que se avisaría ahora.
                     { path: "avisos", lazy: pagina(() => import("./pages/admin/AdminAvisos"), "AdminAvisos") },
                     { path: "resumen", lazy: pagina(() => import("./pages/admin/AdminResumen"), "AdminResumen") },

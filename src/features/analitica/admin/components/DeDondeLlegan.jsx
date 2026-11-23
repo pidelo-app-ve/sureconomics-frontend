@@ -5,7 +5,7 @@ import {
   nombreDeFuente,
   numero,
   porciento,
-} from "../utils/audiencia";
+} from "../utils";
 import { Barras, Bloque, Tabla } from "./Piezas";
 
 const altasEnPalabras = (n) => (n === 1 ? "1 alta al boletín" : `${numero(n)} altas al boletín`);
@@ -17,7 +17,7 @@ const visitasEnPalabras = (n) => (n === 1 ? "1 visita" : `${numero(n)} visitas`)
  * Dos listas: los **canales** -- siete palabras fijas, las mismas del informe -- y,
  * debajo, los **sitios concretos** de donde más se llega. Del sitio de origen el
  * servidor solo guarda un nombre («google», «whatsapp») o su dominio; nunca lo que la
- * persona buscó ni la dirección completa (`analitica_origen.py`).
+ * persona buscó ni la dirección completa (`app/domains/analitica` en el backend).
  *
  * Los porcentajes son sobre las visitas que traen el dato. Las anteriores a nov-2026
  * no lo traen y se dicen aparte: contarlas como «directo» sería inventarse por dónde

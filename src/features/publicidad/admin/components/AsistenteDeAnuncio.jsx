@@ -5,7 +5,7 @@ import { AssetField } from "../../../../components/admin/AssetField";
 import { DondeSale } from "./DondeSale";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
-import { GUIA_DE_FORMATO, nombreDeFormato } from "../utils/formatosDePublicidad";
+import { GUIA_DE_FORMATO, nombreDeFormato } from "../utils";
 import {
   ACCEPTED_IMAGE_MIME,
   uploadAdminMediaImage,
@@ -18,7 +18,7 @@ import {
   crearPieza,
   getEscalera,
   getOcupacion,
-} from "../services/api";
+} from "../api";
 import { MapaDelSitio } from "./mapa/MapaDelSitio";
 
 /**

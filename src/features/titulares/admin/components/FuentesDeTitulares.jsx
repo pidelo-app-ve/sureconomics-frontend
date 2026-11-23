@@ -6,7 +6,7 @@ import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { recorridoTitulares } from "../../../../lib/guias/guiaTitulares";
 import { unwrapEntity } from "../../../../services/adminResponseUtils";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
-import { activarFuente, cambiarNivelDeFuente, silenciarFuente } from "../services/api";
+import { activarFuente, cambiarNivelDeFuente, silenciarFuente } from "../api";
 
 const { ancla } = recorridoTitulares;
 

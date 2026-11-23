@@ -13,4 +13,4 @@
  * Código nuevo: `import { consentimiento } from "../features/analitica"`. Se borra cuando
  * nadie la use.
  */
-export * from "../features/analitica/services/medicion.js";
+export * from "../features/analitica/medicion.js";

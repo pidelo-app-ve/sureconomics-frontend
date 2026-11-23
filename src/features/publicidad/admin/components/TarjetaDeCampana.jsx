@@ -2,14 +2,14 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { DondeSale } from "./DondeSale";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
-import { nombreDeFormato } from "../utils/formatosDePublicidad";
+import { nombreDeFormato } from "../utils";
 import {
   actualizarCampana,
   actualizarPieza,
   borrarCampana,
   borrarPieza,
   crearPieza,
-} from "../services/api";
+} from "../api";
 import { FilaDePieza } from "./FilaDePieza";
 import { InterruptorAlAire } from "./InterruptorAlAire";
 

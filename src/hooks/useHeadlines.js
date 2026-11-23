@@ -12,4 +12,4 @@
  * la fecha de cada pieza) se mude a un sitio compartido, o cuando la portada pueda
  * importar la puerta sin que cambie el orden de sus hojas.
  */
-export { haceCuanto } from "../features/titulares/hooks/useHeadlines.js";
+export { haceCuanto } from "../features/titulares/useHeadlines.js";

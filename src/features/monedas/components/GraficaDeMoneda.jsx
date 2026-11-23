@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useId, useMemo, useState } from "react";
 import { useIdioma } from "../../../i18n/ProveedorIdioma";
 import { formatearFecha, formatearNumero } from "../../../i18n/motor";
-import { porDolar } from "../utils/formato";
+import { porDolar } from "../utils";
 import { Flecha } from "./FichaDeMoneda";
 import "./graficaDeMoneda.css";
 

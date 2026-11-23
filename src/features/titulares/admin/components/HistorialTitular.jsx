@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
-import { MODOS_DEL_JUEZ, VEREDICTOS, nombreDelProblema } from "../utils/juez";
+import { MODOS_DEL_JUEZ, VEREDICTOS, nombreDelProblema } from "../utils";
 import { unwrapEntity } from "../../../../services/adminResponseUtils";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
-import { getHistorialDeTitular } from "../services/api";
+import { getHistorialDeTitular } from "../api";
 
 /**
  * El historial de un titular: cada versión del texto (la que escribió el sistema, las

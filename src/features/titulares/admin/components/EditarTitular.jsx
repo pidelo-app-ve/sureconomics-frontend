@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useAdminToast } from "../../../../context/AdminToastContext";
 import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
-import { corregirTitular } from "../services/api";
+import { corregirTitular } from "../api";
 
 /**
  * Corregir un titular a mano: el español y el inglés uno al lado del otro, con los

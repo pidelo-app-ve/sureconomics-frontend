@@ -2,17 +2,17 @@
  * La guía de «Cinta de mercado» (`pages/admin/AdminMarketTicker.jsx`). Anclajes:
  * `[data-tour-cinta="…"]`. Textos para la redacción: qué es cada cosa y para qué sirve.
  *
- * La cinta del sitio se llena sola (`GET /cinta`, ver `cinta_service.py` en el backend):
+ * La cinta del sitio se llena sola (`GET /cinta`, ver `app/domains/cinta` en el backend):
  * lo que se guarde en esta página la sustituye entera mientras tenga alguna cifra, y
  * vaciarla devuelve la automática. La guía lo dice así aunque la página aún hable de
  * «no hay conexión con ningún mercado».
  *
- * Abajo, las monedas de la región (`features/monedas/admin/components/MonedasDelPanel.jsx`):
+ * Abajo, las monedas de la región (`features/monedas/admin/MonedasDelPanel.jsx`):
  * lo que se publica de cada una, las cotizaciones que no cuadraron y esperan a una persona, y
  * las ocultas (con quién y cuándo, y «Deshacer»). Sus pasos se escriben junto a ese panel
- * (`features/monedas/guides/pasosDelPanel.js`) y aquí se intercalan.
+ * (`features/monedas/guia.js`) y aquí se intercalan.
  */
-import { PASOS_MONEDAS_DEL_PANEL } from "../../features/monedas/guides/pasosDelPanel.js";
+import { PASOS_MONEDAS_DEL_PANEL } from "../../features/monedas/guia.js";
 import { crearRecorrido } from "../recorridoVista.js";
 
 export const PASOS_CINTA = [

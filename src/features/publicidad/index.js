@@ -10,7 +10,7 @@
  * vigila `src/arquitectura.test.mjs`.
  *
  * Lo que hay dentro:
- * - `services/api.js`: lo que el sitio le pide al servidor (los anuncios de una página,
+ * - `api.js`: lo que el sitio le pide al servidor (los anuncios de una página,
  *   el enlace del clic y el aviso de «visto») y las claves de los huecos (`ESPACIOS`).
  * - `components/ProveedorDePublicidad.jsx`: pide los huecos de la página una vez y los
  *   reparte (`useEspacios`, `useHueco`).
@@ -18,20 +18,19 @@
  *   tira, rail…), la fila entre tandas y si una página tiene anuncio (`useHayAnuncio`).
  * - `components/BarraPublicitaria.jsx` y `components/PatrocinioCompacto.jsx`: la barra
  *   fija de abajo y el «Patrocinado por» de una línea.
- * - `hooks/useRotacion.js`: el carrusel de cada hueco y el aviso de cada pieza vista.
- * - `utils/`: lógica sin React ni red, con sus pruebas al lado: cómo salen las vistas en
- *   lotes (`envioDeVistos.js`, `npm run test:lotes`), el contador de recargas
- *   (`recargaDePublicidad.js`), los filtros en la dirección (`listaDeQuery.js`, `npm run
- *   test:publicidad`) y cómo reconocer los artes de teléfono que armaba el panel, ya
- *   retirados (`arteTelefono.js`).
- * - `admin/`: el panel «Publicidad» (`/admin/publicidad`): su página (`admin/pages/`), las
+ * - `useRotacion.js`: el carrusel de cada hueco y el aviso de cada pieza vista.
+ * - Lógica sin React ni red, con sus pruebas al lado: cómo salen las vistas en lotes
+ *   (`envioDeVistos.js`, `npm run test:lotes`); el contador de recargas y los filtros en
+ *   la dirección (`utils.js`, `npm run test:publicidad`); y cómo reconocer los artes de
+ *   teléfono que armaba el panel, ya retirados (`arteTelefono.js`).
+ * - `admin/`: el panel «Publicidad» (`/admin/publicidad`): su página (`admin/AdminPublicidad.jsx`), las
  *   tarjetas de anunciantes y campañas, el asistente, el mural, las plazas fijas y el mapa
- *   del sitio (`admin/components/`), sus llamadas (`admin/services/api.js`) y los
- *   formatos (`admin/utils/`). No tiene puerta (`admin/index.js`): `routes.jsx` carga su
+ *   del sitio (`admin/components/`), sus llamadas (`admin/api.js`), los
+ *   formatos (`admin/utils.js`) y los artes hechos solos (`admin/arteAutomatico.js`). No tiene puerta (`admin/index.js`): `routes.jsx` carga su
  *   página con `import()` y ninguna otra página del panel usa nada de él. Si alguna llega
  *   a necesitarlo, se abre como en `features/monedas/admin/index.js`, nunca por esta (el
  *   panel viajaría en el paquete de cada lector).
- * - `guides/pasosDelPanel.js`: los pasos de la guía del panel (la guía se arma en
+ * - `guia.js`: los pasos de la guía del panel (la guía se arma en
  *   `lib/guias/guiaPublicidad.js`).
  *
  * Lo que **no** está aquí, a propósito: `lib/lotesDeEnvio.js` (lo usan también las
@@ -54,4 +53,4 @@ export {
   useEspacios,
   useHueco,
 } from "./components/ProveedorDePublicidad";
-export { ESPACIOS } from "./services/api";
+export { ESPACIOS } from "./api";

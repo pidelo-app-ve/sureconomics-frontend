@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { leerComparacion, numero } from "../utils/audiencia";
+import { leerComparacion, numero } from "../utils";
 import { enlaceWeb } from "../../../../lib/enlaces";
 import { ancla } from "../../../../lib/guias/guiaAudiencia";
 

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
-} from "../utils/formatosDePublicidad";
+} from "../utils";
 
 /**
  * Quién está al aire: un mosaico con el logotipo de cada anunciante que paga.

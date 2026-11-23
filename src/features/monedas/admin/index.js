@@ -10,4 +10,4 @@
  * El panel va solo en español: la comprobación de textos (`npm run i18n`) se salta esta
  * carpeta `admin/`, como todas las `admin/` del sitio.
  */
-export { MonedasDelPanel } from "./components/MonedasDelPanel";
+export { MonedasDelPanel } from "./MonedasDelPanel";

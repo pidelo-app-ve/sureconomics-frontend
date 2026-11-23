@@ -9,8 +9,8 @@ import {
   GUIA_DE_FORMATO,
   nombreDeFormato,
   resumenDePieza,
-} from "../utils/formatosDePublicidad";
-import { conArteAutomatico } from "../utils/arteAutomatico";
+} from "../utils";
+import { conArteAutomatico } from "../arteAutomatico";
 
 export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
   const [abierta, setAbierta] = useState(false);

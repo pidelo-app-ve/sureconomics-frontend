@@ -6,7 +6,7 @@ import {
   actualizarAnunciante,
   borrarAnunciante,
   listar,
-} from "../services/api";
+} from "../api";
 import { TarjetaDeCampana } from "./TarjetaDeCampana";
 
 export const TarjetaDeAnunciante = ({

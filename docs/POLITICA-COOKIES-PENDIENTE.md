@@ -14,11 +14,11 @@ Salió bien en casi todo:
 
 | Lo que promete el aviso | Dónde se cumple |
 |---|---|
-| Cuatro cookies de medición, propias | `features/analitica/services/medicion.js` — `SameSite=Lax`, en el dominio del sitio |
-| «Rechazar» pesa lo mismo que «Aceptar», sin aspa | `features/analitica/components/AvisoDeCookies.jsx` — sólo dos botones |
+| Cuatro cookies de medición, propias | `features/analitica/medicion.js` — `SameSite=Lax`, en el dominio del sitio |
+| «Rechazar» pesa lo mismo que «Aceptar», sin aspa | `features/analitica/AvisoDeCookies.jsx` — sólo dos botones |
 | Se vuelve a preguntar a los seis meses | `SEIS_MESES = 183 días` |
 | Catorce meses de retención, borrado automático | `RETENCION = 425 días` + cron diario 03:15 en `render.yaml` |
-| Al retirar, se borra del servidor | `analitica_service.olvidar()` borra filas, no las marca |
+| Al retirar, se borra del servidor | `olvidar()`, en `app/domains/analitica`, borra filas, no las marca |
 | El identificador no se cruza con la cuenta | `analitica_sesiones.user_id` es `String(64)` sin clave ajena |
 
 La página declara **cinco** cookies —la de consentimiento incluida—, aunque la entradilla
@@ -134,10 +134,10 @@ agencia de SEO. El texto de `/cookies` se puso al día el mismo día, en los dos
 
 | Lo nuevo | Qué se guarda de verdad | Dónde se cumple |
 |---|---|---|
-| Por dónde llega la visita | Un canal (buscador, redes, mensajería, IA, correo, otros, directo) y un nombre («google») o el dominio. Del navegador solo sale el nombre del sitio: nunca la dirección entera ni lo buscado | `features/analitica/utils/llegada.js` (`sitioDeOrigen`) y `clasificar` (backend, `app/domains/analitica/services/rules/origen.py`) |
+| Por dónde llega la visita | Un canal (buscador, redes, mensajería, IA, correo, otros, directo) y un nombre («google») o el dominio. Del navegador solo sale el nombre del sitio: nunca la dirección entera ni lo buscado | `features/analitica/utils.js` (`sitioDeOrigen`) y `clasificar` (backend, `app/domains/analitica`) |
 | País | Dos letras. Sale de la zona horaria del aparato; la zona no se guarda y la IP no se mira | `analitica_origen.pais_de` |
-| Aparato | Una palabra de tres: móvil, tableta o computadora. El agente de usuario no se guarda | `features/analitica/utils/llegada.js` (`aparatoDe`) |
-| Altas al boletín por canal | Un contador por día y canal, sin correo y sin marca en la visita | `registrarAlta`, en `features/analitica/services/medicion.js` |
+| Aparato | Una palabra de tres: móvil, tableta o computadora. El agente de usuario no se guarda | `features/analitica/utils.js` (`aparatoDe`) |
+| Altas al boletín por canal | Un contador por día y canal, sin correo y sin marca en la visita | `registrarAlta`, en `features/analitica/medicion.js` |
 | Páginas vistas sin medir | Un contador por día. Viajan dos datos: si la persona rechazó o no ha contestado, y si es la primera página de la carga. Sin cookie, sin identificador, sin la página | `contarPagina` → `POST /analitica/pagina` |
 
 Las cuatro primeras filas solo ocurren con el «Aceptar». La última es la que hay que mirar.

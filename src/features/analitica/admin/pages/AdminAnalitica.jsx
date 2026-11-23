@@ -10,14 +10,14 @@ import {
   duracion,
   numero,
   porciento,
-} from "../utils/audiencia";
+} from "../utils";
 import { ancla, recorridoAudiencia } from "../../../../lib/guias/guiaAudiencia";
 import {
   descargarInforme,
   getConsentimiento,
   getEnVivo,
   getResumen,
-} from "../services/api";
+} from "../api";
 import "./analitica-consentimiento.css";
 import "./analitica-bloques.css";
 import { CabeceraDePagina } from "../../../../components/admin/CabeceraDePagina";
@@ -32,7 +32,7 @@ import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista"
 /**
  * Audiencia: quién lee ahora y qué pasó en el periodo.
  *
- * Los números salen de la medición propia del sitio -- ver `services/medicion.js` y
+ * Los números salen de la medición propia del sitio -- ver `medicion.js` y
  * `app/domains/analitica` en el backend --, así que cuentan solo a quien aceptó las cookies. Eso lo dice
  * la pantalla en voz alta: un panel de audiencia que no lo advierta se lee como si fueran
  * todos los lectores, y no lo son. Cuánto queda fuera lo estima «Audiencia real
@@ -59,8 +59,8 @@ import { RecorridoVista } from "../../../../components/recorrido/RecorridoVista"
  * cabecera y el orden. Las piezas comunes (ficha, bloque, barras, tabla) y los bloques
  * de audiencia real, proyección del mes, origen, país y aparato y retorno están en
  * `admin/components/`; las palabras con que se escriben los números, en
- * `admin/utils/audiencia.js`; y la guía de la página, en `lib/guias/guiaAudiencia.js` (sus
- * pasos, en `features/analitica/guides/pasosDelPanel.js`).
+ * `admin/utils.js`; y la guía de la página, en `lib/guias/guiaAudiencia.js` (sus
+ * pasos, en `features/analitica/guia.js`).
  *
  * ## Sobre los gráficos
  *

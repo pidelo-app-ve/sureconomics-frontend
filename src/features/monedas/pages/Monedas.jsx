@@ -2,11 +2,11 @@ import { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { BRAND } from "../../../data/surEconomicsMock";
 import { formatearFecha } from "../../../i18n/motor";
-import { porDolar } from "../utils/formato";
+import { porDolar } from "../utils";
 import { useIdioma } from "../../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../../i18n/useMetaPagina";
-import { getMonedas } from "../services/api";
-import { useHistoriaMoneda } from "../hooks/useMonedas";
+import { getMonedas } from "../api";
+import { useHistoriaMoneda } from "../useMonedas";
 import { GraficaDeMoneda } from "../components/GraficaDeMoneda";
 import { Flecha, variacionTexto } from "../components/FichaDeMoneda";
 import "./monedas.css";
@@ -16,7 +16,7 @@ import "./monedas.css";
  *
  * Una tabla y nada más: el valor, la variación contra el día anterior, la fuente y la
  * fecha del dato. Las cifras son las que guarda el recolector cada hora
- * (`app/dominios/monedas` en el backend); la misma regla del cintillo manda aquí: un
+ * (`app/domains/monedas` en el backend); la misma regla del cintillo manda aquí: un
  * dato viejo se enseña como «sin dato reciente», nunca como una cifra con fecha de hoy.
  *
  * Cada fila se abre con la gráfica de sus últimos 30 días (`GraficaDeMoneda`): el

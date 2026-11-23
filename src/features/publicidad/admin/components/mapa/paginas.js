@@ -10,7 +10,7 @@
  * limita un bloque a un aparato («pc» o «telefono»).
  *
  * El formato de cada hueco se copia del servidor (`ESPACIOS` en
- * `app/models/publicidad.py`), que es quien manda: aquí solo sirve para dibujar un
+ * `app/domains/publicidad`), que es quien manda: aquí solo sirve para dibujar un
  * hueco vacío con su forma y para saber qué huecos admite un arte.
  */
 

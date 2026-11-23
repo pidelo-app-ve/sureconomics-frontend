@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Suspense, lazy, useEffect } from "react";
-import { useHistoriaMoneda } from "../hooks/useMonedas";
+import { useHistoriaMoneda } from "../useMonedas";
 import { FichaDeMoneda } from "./FichaDeMoneda";
 // La hoja de la gráfica sigue viajando con el sitio, en el mismo sitio de la cascada:
 // lo que baja aparte es solo el código.

@@ -22,7 +22,7 @@ import { HistorialDeLaEdicion } from "../../components/admin/resumen/HistorialDe
  * «Resumen diario» en el panel: ver cómo va a llegar al canal cada edición y ajustarla.
  *
  * Una hora antes de cada salida (6:00, 12:00 y 18:00) el backend arma solo un borrador
- * con lo nuevo desde la edición anterior (ver `services/resumen_service.py`), y **a su
+ * con lo nuevo desde la edición anterior (ver `app/domains/resumen` en el backend), y **a su
  * hora sale solo** (7:00, 13:00 o 19:00) en la web, en Telegram y en el canal de
  * WhatsApp: nadie tiene que aprobarlo (lo pidió Ramón el 9-nov-2026). Hasta esa hora el
  * editor puede cambiar la **foto** que acompaña al mensaje -- la de otra noticia del

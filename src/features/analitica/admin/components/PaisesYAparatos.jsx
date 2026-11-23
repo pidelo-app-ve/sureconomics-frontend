@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { NOMBRE_APARATO, numero, porciento } from "../utils/audiencia";
+import { NOMBRE_APARATO, numero, porciento } from "../utils";
 import { ancla } from "../../../../lib/guias/guiaAudiencia";
 import { Barras, Bloque, Tabla } from "./Piezas";
 
@@ -12,7 +12,7 @@ const DESDE_NOVIEMBRE = "Este dato se guarda desde noviembre de 2026. Las visita
  * guarda. El **país** se deduce de la zona horaria que marca su aparato
  * (`analitica_origen.pais_de`) -- un venezolano en Madrid cuenta como España, y eso se
  * dice en el apunte para que nadie lea el dato como otra cosa --, y el **aparato** es
- * una de tres palabras que manda el propio navegador (`features/analitica/utils/llegada.js`).
+ * una de tres palabras que manda el propio navegador (`features/analitica/utils.js`).
  *
  * Los porcentajes son sobre las visitas que traen el dato.
  */

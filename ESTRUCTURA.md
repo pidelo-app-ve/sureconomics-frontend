@@ -44,6 +44,14 @@ un tope que solo baja.
   orden en que entran las hojas en el CSS construido depende del orden de las
   importaciones; al mover un archivo, se comprueba que el `dist/` no cambia.
 
+## Pruebas
+
+Junto a lo que prueban (`X.test.mjs`), y todas corren con `npm test`. El banco está en
+`scripts/pruebas/`: `pintar.mjs` (lo que se ve al cargar, sin navegador), `montar.mjs`
+(un gancho con sus efectos) y `dom.mjs` (**pruebas de pantalla**: clics, escribir y ver qué
+cambia, con happy-dom y Testing Library). Sin red: las respuestas del servidor son copias
+grabadas del backend, en `src/pruebas/respuestas/<zona>/`, cada una con su `_origen`.
+
 ## Fachadas que quedan
 
 Dos archivos de la zona vieja reexportan algo de un feature para quien aún lo importa

@@ -1,0 +1,13 @@
+{
+  "_origen": "POST /admin/boletin/numeros/1/enviar (backend app/routes/admin/boletin.py:enviar -> newsletter_broadcast_service.enviar_lote): un lote que acaba con todos. Escrita a mano con la forma de enviar_lote (no se graba: mandaría correos), 23-nov-2026.",
+  "respuesta": {
+    "success": true,
+    "data": {
+      "enviados_en_este_lote": 3,
+      "fallidos_en_este_lote": 0,
+      "omitidos_en_este_lote": 0,
+      "pendientes": 0,
+      "terminado": true
+    }
+  }
+}

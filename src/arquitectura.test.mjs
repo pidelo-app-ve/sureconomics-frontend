@@ -7,6 +7,7 @@
  * si tiene un gancho, `guia.js` (los pasos de su guía) y las páginas o componentes
  * sueltos; en carpetas, solo cuando hay varios, `components/`, `pages/` y `admin/`. Las
  * carpetas van con los nombres de siempre de React; los archivos y el código, en español.
+ * La forma entera está en `ESTRUCTURA.md`, en la raíz del repo.
  * Su `index.js` es **la puerta**: lo único que el resto del sitio puede importar de él. Así
  * lo de dentro cambia de sitio sin tocar a nadie. Si el dominio tiene panel, va en su
  * carpeta `admin/`, con una segunda puerta, `admin/index.js`, para que el sitio público no
@@ -44,6 +45,13 @@
  *    (`guia.js` o `guides/*.js`) o un `.json`. Nada de componentes ni JSX (los lee node).
  * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
  *    comprobar: solo se admite en `routes.jsx`.
+ *
+ * Y dos sobre la forma, no sobre las importaciones («la forma de los dominios»):
+ *
+ * 7. Ninguna carpeta dentro de un dominio guarda un solo archivo (contando lo que cuelga
+ *    de ella): una carpeta así es un nombre de más. El archivo va un nivel arriba.
+ * 8. Ningún archivo de un dominio pasa de 1.000 líneas: más largo ya no se lee de una
+ *    sentada, y se parte por lo que hace (lógica de negocio), no por tipo de archivo.
  *
  * Cada regla tiene su trampa en «la prueba ve las trampas»: un sitio de mentira en una
  * carpeta temporal donde cada falta está puesta a propósito.
@@ -228,6 +236,38 @@ export const carpetasEnEspanol = (raiz = RAIZ) => {
   return [...viejas, ...dentro.sort()];
 };
 
+/** Más líneas que esto, y un archivo de un dominio se parte (regla 8). */
+const MAX_LINEAS = 1000;
+
+/**
+ * La forma de los dominios (reglas 7 y 8): las carpetas de un dominio con un solo archivo
+ * (contando lo que cuelga de ellas) y los archivos de más de `maxLineas` líneas.
+ */
+export const formaDeLosDominios = (raiz = RAIZ, maxLineas = MAX_LINEAS) => {
+  const dominios = path.join(raiz, "src", "features");
+  if (!existsSync(dominios)) return [];
+  const relativa = (ruta) => path.relative(raiz, ruta).split(path.sep).join("/");
+  const todo = readdirSync(dominios, { recursive: true }).map((r) => path.join(dominios, r));
+  const carpetas = todo.filter((r) => statSync(r).isDirectory());
+  const archivos = todo.filter((r) => statSync(r).isFile());
+  const salida = [];
+  for (const carpeta of carpetas) {
+    if (path.dirname(carpeta) === dominios) continue; // `features/<tema>/` es el dominio, no una carpeta suya
+    const suyos = archivos.filter((a) => dentroDe(a, carpeta));
+    if (suyos.length === 1) {
+      salida.push(`${relativa(carpeta)}/: un solo archivo (${relativa(suyos[0])}); va un nivel arriba, sin carpeta`);
+    }
+  }
+  for (const archivo of archivos) {
+    const texto = readFileSync(archivo, "utf8");
+    const lineas = texto.split("\n").length - (texto.endsWith("\n") ? 1 : 0);
+    if (lineas > maxLineas) {
+      salida.push(`${relativa(archivo)}: ${lineas} líneas, más de ${maxLineas}; se parte por lo que hace`);
+    }
+  }
+  return salida.sort();
+};
+
 const DOMINIOS = path.join(RAIZ, "src", "features");
 
 test("hay dominios que vigilar (que lo de abajo no pase en vacío)", () => {
@@ -407,6 +447,50 @@ test("la prueba ve las trampas", () => {
       "src/routes.jsx:8 src/features/b/Tarjeta.jsx",
       "src/ui/Boton.jsx:1 src/features/b/index.js",
     ]);
+  } finally {
+    rmSync(raiz, { recursive: true, force: true });
+  }
+});
+
+test("la forma de los dominios: ninguna carpeta con un solo archivo, ningún archivo de más de 1.000 líneas", () => {
+  const lista = formaDeLosDominios();
+  assert.deepEqual(lista, [], `\n${lista.join("\n")}`);
+});
+
+test("la prueba de la forma ve las trampas", () => {
+  const raiz = mkdtempSync(path.join(os.tmpdir(), "arquitectura-forma-"));
+  const lineas = (n) => Array.from({ length: n }, (_, i) => `// ${i + 1}`).join("\n") + "\n";
+  const sitio = {
+    "src/features/a/index.js": "", //                       bien: la carpeta del dominio no cuenta
+    "src/features/a/utils.js": lineas(1000), //             bien: justo en el tope
+    "src/features/a/largo.js": lineas(1001), //             ✗ 8: una línea de más
+    "src/features/a/hooks/useX.js": "", //                  ✗ 7: un solo gancho en su carpeta
+    "src/features/a/components/X.jsx": "", //               bien: dos componentes
+    "src/features/a/components/Y.jsx": "",
+    "src/features/a/components/mapa/M.jsx": "", //         ✗ 7: aunque cuelgue de una carpeta buena
+    "src/features/a/admin/pages/AdminA.jsx": "", //         bien: la página y su hoja son dos
+    "src/features/a/admin/pages/admin.css": "",
+    "src/features/a/admin/services/api.js": "", //          ✗ 7
+    "src/features/b/index.js": "",
+    "src/features/b/admin/solo/dentro/z.js": "", //         ✗ 7, tres veces: admin/, solo/ y dentro/
+    "src/pages/x/Unica.jsx": "", //                         bien: fuera de los dominios no se mira
+  };
+  try {
+    for (const [ruta, texto] of Object.entries(sitio)) {
+      mkdirSync(path.dirname(path.join(raiz, ruta)), { recursive: true });
+      writeFileSync(path.join(raiz, ruta), texto);
+    }
+    assert.deepEqual(formaDeLosDominios(raiz).map((f) => f.split(":")[0]), [
+      "src/features/a/admin/services/",
+      "src/features/a/components/mapa/",
+      "src/features/a/hooks/",
+      "src/features/a/largo.js",
+      "src/features/b/admin/",
+      "src/features/b/admin/solo/",
+      "src/features/b/admin/solo/dentro/",
+    ]);
+    // El tope se puede bajar para la prueba: con 999, utils.js también salta.
+    assert.ok(formaDeLosDominios(raiz, 999).some((f) => f.startsWith("src/features/a/utils.js:")));
   } finally {
     rmSync(raiz, { recursive: true, force: true });
   }

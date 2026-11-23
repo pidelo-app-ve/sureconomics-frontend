@@ -36,6 +36,12 @@ export const lunesLargo = (iso) => {
   });
 };
 
+/** Hoy como `2026-11-23`, en la hora de este equipo, para compararlo con `send_on`. */
+export const hoyIso = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
 export const fecha = (iso) =>
   iso
     ? new Date(iso).toLocaleDateString("es", { day: "numeric", month: "long", year: "numeric" })

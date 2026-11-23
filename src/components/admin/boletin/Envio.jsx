@@ -8,10 +8,18 @@ import {
   reenviarNumero,
   verNumero,
 } from "../../../services/adminBoletinService";
-import { leerDestino, guardarDestino, lunesLargo, fecha } from "./datosDelBoletin";
+import { leerDestino, guardarDestino, lunesLargo, fecha, hoyIso } from "./datosDelBoletin";
 
 // ------------------------------------------------------------------ el envío
-export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }) => {
+export const Envio = ({
+  numero,
+  cambiosSinGuardar,
+  asunto,
+  guardarCambios,
+  correr,
+  onCambio,
+  preguntar,
+}) => {
   const [destino, setDestino] = useState(leerDestino);
   const [progreso, setProgreso] = useState(null);
   const [asuntoReenvio, setAsuntoReenvio] = useState(numero.subject ?? "");
@@ -19,6 +27,9 @@ export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }
   const entregas = numero.entregas ?? {};
   const enviados = entregas.sent ?? 0;
   const vacio = !(numero.pages?.length || (numero.body_html ?? "").trim());
+  const listo = numero.status === "ready";
+  const enCurso = numero.status === "sending";
+  const guardaAlEnviar = cambiosSinGuardar && !enCurso;
 
   const probar = async () => {
     const correo = destino.trim();
@@ -32,16 +43,26 @@ export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }
     else if (r) toastError("El servidor de correo no aceptó el envío. Pruebe otra vez en un momento.");
   };
 
+  /**
+   * Con cambios sin guardar se guardan primero y después sale: antes el botón se
+   * apagaba sin decir por qué, y el de guardar quedaba muy arriba. Con el envío ya en
+   * curso no se guarda nada: el servidor no deja tocar un número que está saliendo.
+   */
   const mandar = async () => {
     const n = numero.suscriptores ?? 0;
+    const guardarAntes = cambiosSinGuardar && !enCurso;
+    const titulo = (guardarAntes ? asunto : numero.subject).trim();
+    // El lunes ya llegó (o pasó): decir «en vez del lunes a las 9:00» confundía.
+    const futuro = numero.send_on && numero.send_on > hoyIso();
     const vale = await preguntar({
-      title: `¿Enviar «${numero.subject}» a ${n} ${n === 1 ? "suscriptor" : "suscriptores"}?`,
-      description: numero.send_on
-        ? `Sale ya, en vez de el ${lunesLargo(numero.send_on)} a las 9:00. Va a la lista real y no se puede deshacer.`
-        : "Sale a la lista real y no se puede deshacer. Si aún no lo ha visto en su bandeja, mande antes una prueba.",
-      confirmLabel: "Enviar ahora",
+      title: `¿Enviar «${titulo}» a ${n} ${n === 1 ? "suscriptor" : "suscriptores"}?`,
+      description: `${
+        futuro ? `Sale ya, en vez de el ${lunesLargo(numero.send_on)} a las 9:00.` : "Sale ya."
+      }${guardarAntes ? " Antes se guardan el asunto y la introducción." : ""} Va a la lista real y no se puede deshacer.`,
+      confirmLabel: guardarAntes ? "Guardar y enviar" : "Enviar ahora",
     });
     if (!vale) return;
+    if (guardarAntes && !(await guardarCambios())) return;
     await porLotes(enviados, n - enviados, "Número enviado a toda la lista");
   };
 
@@ -84,8 +105,6 @@ export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }
     await porLotes(0, n, "Número reenviado a toda la lista");
   };
 
-  const listo = numero.status === "ready";
-  const enCurso = numero.status === "sending";
 
   return (
     <section className="se-bol__bloque se-bol__envio">
@@ -188,16 +207,26 @@ export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }
             <button
               type="button"
               className={enCurso || progreso ? "se-btn se-btn--primary" : "se-btn se-btn--secondary"}
-              disabled={!(listo || enCurso) || Boolean(progreso) || cambiosSinGuardar}
+              disabled={
+                !(listo || enCurso) || Boolean(progreso) || (guardaAlEnviar && !asunto?.trim())
+              }
               onClick={mandar}
             >
               {progreso
                 ? `Enviando… ${progreso.enviados} enviados, quedan ${progreso.pendientes}`
                 : enCurso
                   ? `Seguir enviando (quedan ${entregas.pending ?? 0})`
-                  : "Enviar ahora, sin esperar al lunes"}
+                  : guardaAlEnviar
+                    ? "Guardar y enviar ahora"
+                    : "Enviar ahora"}
             </button>
           </div>
+          {listo && guardaAlEnviar ? (
+            <p className="se-admin-meta-hint">
+              Hay cambios sin guardar en el asunto o la introducción. Si sale solo, sale con
+              lo guardado: guárdelos arriba o use «Guardar y enviar ahora».
+            </p>
+          ) : null}
           {vacio ? (
             <p className="se-admin-meta-hint">Suba al menos una página para poder probarlo.</p>
           ) : !listo && !enCurso ? (
@@ -215,6 +244,8 @@ export const Envio = ({ numero, cambiosSinGuardar, correr, onCambio, preguntar }
 Envio.propTypes = {
   numero: PropTypes.object.isRequired,
   cambiosSinGuardar: PropTypes.bool,
+  asunto: PropTypes.string,
+  guardarCambios: PropTypes.func.isRequired,
   correr: PropTypes.func.isRequired,
   onCambio: PropTypes.func.isRequired,
   preguntar: PropTypes.func.isRequired,

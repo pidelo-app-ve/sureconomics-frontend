@@ -1,104 +1,60 @@
+/**
+ * Hablar con la API desde la parte del lector: lo público (`userPublicRequest`), lo que
+ * pide su sesión (`userRequest`), lo que la usa si la hay (`userOptionalAuthRequest`) y
+ * las descargas protegidas. El trabajo lo hace el núcleo, `src/api/` (`nucleo.js` y
+ * `sesion.js`); aquí queda lo propio del lector: su sesión (`userAuthStorage.js`), su
+ * forma de leer el error y de desenvolver la respuesta, el quiosco para las lecturas
+ * públicas, y su política si renovar la sesión falla (`CERRAR_SIEMPRE`: ver allí por qué
+ * es distinta de la del panel).
+ */
 import { tActual } from "../i18n/motor";
-import { ApiError } from "../services/apiClient";
+import {
+  API_BASE,
+  ApiError,
+  desenvolverDelLector,
+  entregarDescarga,
+  errorDelLector,
+  pedir,
+  pedirArchivo,
+} from "../api/nucleo.js";
+import { CERRAR_SIEMPRE, SEGUIR, crearSesion } from "../api/sesion.js";
 import { clearUserAuth, persistUserAuth, readUserAuth } from "./userAuthStorage";
-import { baseDelQuiosco, vaPorElQuiosco } from "./quiosco.js";
 
 export const USER_AUTH_SYNC_EVENT = "sureconomics-user-auth-sync";
 
-export const dispatchUserAuthSync = () => {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(USER_AUTH_SYNC_EVENT));
+/** Las peticiones del lector: las lecturas públicas y sin sesión pueden ir por el quiosco. */
+const pedirDelLector = (path, options) => pedir(path, options, { conQuiosco: true });
+
+/** La respuesta ya leída: el error del lector si no fue bien; si no, desenvuelta. */
+const responder = ({ res, payload }) => {
+  if (!res.ok || payload?.success === false) {
+    throw errorDelLector(res, payload ?? {});
+  }
+  return desenvolverDelLector(payload);
+};
+
+const sesion = crearSesion({
+  almacen: { leer: readUserAuth, guardar: persistUserAuth, borrar: clearUserAuth },
+  evento: USER_AUTH_SYNC_EVENT,
+  rutaDeRenovar: "/user-auth/refresh",
+  pedir: pedirDelLector,
+  abrir: responder,
+  sinRenovacion: () => new ApiError("No hay token de renovación", { status: 401 }),
+  renovacionInvalida: () => new ApiError("Respuesta de renovación inválida", { status: 401 }),
+});
+
+export const dispatchUserAuthSync = sesion.avisar;
+
+/** Sin `VITE_API_URL` no se pide nada (iría al dominio de la página). */
+const exigirBase = () => {
+  if (!API_BASE) {
+    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
   }
 };
 
-const API_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
-
-const buildUrl = (path, query, base = API_BASE) => {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  const url = new URL(`${base}${normalizedPath}`);
-  if (query && typeof query === "object") {
-    Object.entries(query).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === "") return;
-      url.searchParams.set(key, String(value));
-    });
-  }
-  return url.toString();
-};
-
-const formatPayloadDetailMessage = (payload) => {
-  const detail = payload?.detail;
-  if (Array.isArray(detail)) {
-    const parts = detail
-      .map((d) => {
-        if (typeof d === "string") return d;
-        if (d && typeof d.msg === "string") return d.msg;
-        return null;
-      })
-      .filter(Boolean);
-    if (parts.length) return parts.join(" ");
-  }
-  if (typeof detail === "string") return detail;
-  return null;
-};
-
-const throwFromPayload = (res, payload) => {
-  const err = payload?.error ?? {};
-  const fromDetail = formatPayloadDetailMessage(payload);
-  const fromError = typeof err.message === "string" ? err.message : "";
-  const fromTop = typeof payload?.message === "string" ? payload.message : "";
-  const message =
-    (fromError && fromError !== "Request failed" ? fromError : null) ||
-    fromDetail ||
-    fromTop ||
-    (typeof err.message === "string" ? err.message : null) ||
-    res.statusText ||
-    "Request failed";
-  throw new ApiError(message, {
-    status: res.status,
-    code: err.code,
-    details: err.details ?? payload ?? null,
-  });
-};
-
-const unwrapUserResponseData = (payload) => {
-  if (payload == null) return null;
-  if (Object.prototype.hasOwnProperty.call(payload, "meta") && payload.meta != null) {
-    return { data: payload.data, meta: payload.meta };
-  }
-  return payload.data !== undefined ? payload.data : payload;
-};
-
-/**
- * @param {string} path
- * @param {RequestInit & { token?: string, json?: unknown, query?: Record<string, unknown> }} [options]
- */
-const rawUserFetch = async (path, options = {}) => {
-  const { token, json, headers: initHeaders, body, query, idempotencyKey, ...rest } = options;
-  const headers = { ...initHeaders };
-  if (json !== undefined) {
-    headers["Content-Type"] = "application/json";
-  }
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-  // Las lecturas públicas (monedas, titulares, béisbol, resumen…), por el quiosco de este
-  // dominio, como en `services/apiClient.js` (ver `lib/quiosco.js`).
-  const quiosco = baseDelQuiosco();
-  const porElQuiosco = Boolean(quiosco) && vaPorElQuiosco(path, { method: rest.method ?? "GET", headers });
-  const url = buildUrl(path, query, porElQuiosco ? quiosco : API_BASE);
-  // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
-  // crear otra cosa. Ver `lib/idempotencia.js`.
-  if (idempotencyKey) {
-    headers["Idempotency-Key"] = idempotencyKey;
-  }
-  const res = await fetch(url, {
-    ...rest,
-    headers,
-    body: json !== undefined ? JSON.stringify(json) : body,
-  });
-  const payload = await res.json().catch(() => ({}));
-  return { res, payload };
-};
+/** Estos dos mensajes sí llegan a la pantalla (los pintan los estados de error de la cuenta): en el idioma del documento. */
+const debeIniciarSesion = () => new ApiError(tActual("cuenta.api.debeIniciarSesion"), { status: 401 });
+const sesionExpirada = () => new ApiError(tActual("cuenta.api.sesionExpirada"), { status: 401 });
 
 /**
  * Public JSON request (no consumer bearer).
@@ -106,14 +62,8 @@ const rawUserFetch = async (path, options = {}) => {
  * @param {Omit<RequestInit, 'body'> & { json?: unknown, query?: Record<string, unknown> }} [options]
  */
 export const userPublicRequest = async (path, options = {}) => {
-  if (!API_BASE) {
-    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
-  }
-  const { res, payload } = await rawUserFetch(path, options);
-  if (!res.ok || payload?.success === false) {
-    throwFromPayload(res, payload ?? {});
-  }
-  return unwrapUserResponseData(payload);
+  exigirBase();
+  return responder(await pedirDelLector(path, options));
 };
 
 /**
@@ -133,57 +83,16 @@ export const userPublicRequest = async (path, options = {}) => {
  * @returns {Promise<Record<string, unknown>>}
  */
 export const userOptionalAuthRequest = async (path, options = {}) => {
-  if (!API_BASE) {
-    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
-  }
-
-  const { refreshToken, accessExpiresAt, accessToken } = readUserAuth();
+  exigirBase();
   // Sólo se refresca si de verdad hay sesión que refrescar.
-  if (accessToken && refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
-    try {
-      await refreshUserTokens();
-    } catch {
-      /* continue */
-    }
-  }
-
-  const { res, payload } = await rawUserFetch(path, {
-    ...options,
-    token: readUserAuth().accessToken || undefined,
-  });
-  if (!res.ok || payload?.success === false) {
-    throwFromPayload(res, payload ?? {});
-  }
-  return unwrapUserResponseData(payload);
+  await sesion.renovarSiVaACaducar({ soloConAcceso: true });
+  return responder(await pedirDelLector(path, { ...options, token: readUserAuth().accessToken || undefined }));
 };
 
 /**
  * @returns {Promise<Record<string, unknown>>}
  */
-export const refreshUserTokens = async () => {
-  const { refreshToken } = readUserAuth();
-  if (!refreshToken) {
-    throw new ApiError("No hay token de renovación", { status: 401 });
-  }
-  const { res, payload } = await rawUserFetch("/user-auth/refresh", {
-    method: "POST",
-    json: { refresh_token: refreshToken },
-  });
-  if (!res.ok || payload?.success === false) {
-    throwFromPayload(res, payload ?? {});
-  }
-  const data = unwrapUserResponseData(payload);
-  if (!data || typeof data !== "object" || !data.access_token) {
-    throw new ApiError("Respuesta de renovación inválida", { status: 401 });
-  }
-  persistUserAuth({
-    accessToken: data.access_token,
-    refreshToken: data.refresh_token ?? refreshToken,
-    expiresIn: data.expires_in,
-  });
-  dispatchUserAuthSync();
-  return data;
-};
+export const refreshUserTokens = sesion.renovar;
 
 /**
  * Authenticated consumer request (Bearer user access). On 401 refreshes once.
@@ -191,54 +100,23 @@ export const refreshUserTokens = async () => {
  * @param {Omit<RequestInit, 'body'> & { json?: unknown, query?: Record<string, unknown> }} [options]
  */
 export const userRequest = async (path, options = {}) => {
-  if (!API_BASE) {
-    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
-  }
+  exigirBase();
+  await sesion.renovarSiVaACaducar();
 
-  const { refreshToken, accessExpiresAt } = readUserAuth();
-  if (refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
-    try {
-      await refreshUserTokens();
-    } catch {
-      /* continue */
-    }
-  }
-
-  const fetchWithStoredAccess = () =>
-    rawUserFetch(path, {
-      ...options,
-      token: readUserAuth().accessToken,
-    });
-
-  // Estos dos mensajes sí llegan a la pantalla (los pintan los estados de error de la
-  // cuenta), así que van en el idioma del documento.
   if (!readUserAuth().accessToken) {
-    throw new ApiError(tActual("cuenta.api.debeIniciarSesion"), { status: 401 });
+    throw debeIniciarSesion();
   }
 
-  let { res, payload } = await fetchWithStoredAccess();
+  const respuesta = await sesion.conRenovacion(
+    () => pedirDelLector(path, { ...options, token: readUserAuth().accessToken }),
+    { siFalla: CERRAR_SIEMPRE, errorCaducada: sesionExpirada },
+  );
 
-  if (res.status === 401 && readUserAuth().refreshToken) {
-    try {
-      await refreshUserTokens();
-      ({ res, payload } = await fetchWithStoredAccess());
-    } catch {
-      clearUserAuth();
-      dispatchUserAuthSync();
-      throw new ApiError(tActual("cuenta.api.sesionExpirada"), { status: 401 });
-    }
+  if (respuesta.res.status === 401) {
+    sesion.cerrar();
   }
 
-  if (res.status === 401) {
-    clearUserAuth();
-    dispatchUserAuthSync();
-  }
-
-  if (!res.ok || payload?.success === false) {
-    throwFromPayload(res, payload ?? {});
-  }
-
-  return unwrapUserResponseData(payload);
+  return responder(respuesta);
 };
 
 /**
@@ -252,55 +130,36 @@ export const userRequest = async (path, options = {}) => {
  * misma razón: los permisos los decide la aplicación en cada petición, no una firma en
  * la dirección que cualquiera podría reenviar.
  *
- * Refresca el token una vez si venció, igual que `userRequest`.
+ * Refresca el token una vez si venció, igual que `userRequest`; pero si no puede, no
+ * cierra la sesión: sube el 401 como error.
  */
 export const descargarArchivoDeUsuario = async (
   path,
   { nombreSugerido, exigirSesion = true, comoBlob = false } = {},
 ) => {
-  if (!API_BASE) {
-    throw new ApiError("Falta VITE_API_URL en el entorno.", { status: 0 });
-  }
+  exigirBase();
+  await sesion.renovarSiVaACaducar();
 
-  const { refreshToken, accessExpiresAt } = readUserAuth();
-  if (refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
-    try {
-      await refreshUserTokens();
-    } catch {
-      /* continue */
-    }
-  }
-
-  const pedir = () => {
-    // La cabecera se arma sólo si hay token. Mandar `Bearer undefined` no es lo mismo
-    // que no mandar nada: el servidor intentaria leerlo.
+  // La cabecera se arma sólo si hay token. Mandar `Bearer undefined` no es lo mismo
+  // que no mandar nada: el servidor intentaria leerlo.
+  const hacer = async () => {
     const token = readUserAuth().accessToken;
-    return fetch(`${API_BASE}${path.startsWith("/") ? path : `/${path}`}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    return { res: await pedirArchivo(path, { headers: token ? { Authorization: `Bearer ${token}` } : {} }) };
   };
 
   // `exigirSesion: false` es para los informes de descarga abierta, donde el servidor
   // contesta 200 sin sesión. Por omisión se exige, que es lo que quiere todo lo demás:
   // cortar aquí ahorra un viaje que iba a volver 401.
   if (exigirSesion && !readUserAuth().accessToken) {
-    throw new ApiError(tActual("cuenta.api.debeIniciarSesion"), { status: 401 });
+    throw debeIniciarSesion();
   }
 
-  let res = await pedir();
-  if (res.status === 401 && readUserAuth().refreshToken) {
-    try {
-      await refreshUserTokens();
-      res = await pedir();
-    } catch {
-      /* se maneja abajo */
-    }
-  }
+  const { res } = await sesion.conRenovacion(hacer, { siFalla: SEGUIR });
 
   if (!res.ok) {
     // El cuerpo de un error sí es JSON; el de un acierto son bytes.
     const payload = await res.json().catch(() => ({}));
-    throwFromPayload(res, payload ?? {});
+    throw errorDelLector(res, payload ?? {});
   }
 
   const blob = await res.blob();
@@ -316,18 +175,7 @@ export const descargarArchivoDeUsuario = async (
   const enCabecera = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(cabecera);
   const nombre = (enCabecera && decodeURIComponent(enCabecera[1])) || nombreSugerido || "descarga";
 
-  const objeto = URL.createObjectURL(blob);
-  try {
-    const enlace = document.createElement("a");
-    enlace.href = objeto;
-    enlace.download = nombre;
-    document.body.appendChild(enlace);
-    enlace.click();
-    enlace.remove();
-  } finally {
-    // Sin esto el blob se queda en memoria hasta que se recargue la página, y un
-    // informe de veinte megas se nota.
-    setTimeout(() => URL.revokeObjectURL(objeto), 1000);
-  }
+  // Se suelta al segundo: un informe de veinte megas en memoria se nota.
+  entregarDescarga(blob, nombre, { soltarTrasMs: 1000 });
   return { nombre, bytes: blob.size };
 };

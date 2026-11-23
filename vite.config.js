@@ -19,7 +19,7 @@ import react from '@vitejs/plugin-react'
  * API, para que no haya una segunda dirección que mantener al día.
  *
  * `/datos` es el otro gemelo: las lecturas públicas que en producción contesta el borde
- * de Vercel (`src/lib/quiosco.js`). Aquí se quita el prefijo y van a la API local.
+ * de Vercel (`src/api/quiosco.js`). Aquí se quita el prefijo y van a la API local.
  */
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')

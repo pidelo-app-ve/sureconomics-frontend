@@ -1,5 +1,6 @@
 import { createApiClient } from "./apiClient";
 import { adminRequest } from "../lib/api";
+import { entregarDescarga, pedirArchivo } from "../api/nucleo.js";
 import { readStoredAuth } from "../lib/authStorage";
 import { registrarAlta } from "../lib/analitica";
 import { unwrapListResponse } from "./adminResponseUtils";
@@ -90,8 +91,7 @@ export const downloadNewsletterCsv = async ({ status } = {}) => {
   const query = status ? `?status=${encodeURIComponent(status)}` : "";
   await adminRequest("/admin/newsletter", { query: { page: 1, limit: 1 } });
 
-  const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
-  const res = await fetch(`${base}/admin/newsletter/csv${query}`, {
+  const res = await pedirArchivo(`/admin/newsletter/csv${query}`, {
     headers: { Authorization: `Bearer ${readStoredAuth().accessToken || ""}` },
   });
   if (!res.ok) {
@@ -99,17 +99,5 @@ export const downloadNewsletterCsv = async ({ status } = {}) => {
     throw new Error(detalle?.error?.message || "No se pudo descargar la lista.");
   }
 
-  const blob = await res.blob();
-  const objeto = URL.createObjectURL(blob);
-  try {
-    const enlace = document.createElement("a");
-    enlace.href = objeto;
-    enlace.download = "boletin.csv";
-    document.body.appendChild(enlace);
-    enlace.click();
-    enlace.remove();
-  } finally {
-    // Sin esto el blob se queda en memoria hasta que se recargue la página.
-    URL.revokeObjectURL(objeto);
-  }
+  entregarDescarga(await res.blob(), "boletin.csv");
 };

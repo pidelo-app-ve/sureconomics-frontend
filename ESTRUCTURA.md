@@ -28,7 +28,7 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
 | Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
-| Llamadas al servidor (lo común) | `lib/api.js`, `lib/userApi.js`, `services/` |
+| Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`) y el quiosco. Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Vista previa para redes y sitemap (Vercel) | `api/` |
 
 ## Textos y estilos

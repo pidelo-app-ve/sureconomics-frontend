@@ -1,6 +1,6 @@
 /**
  * Qué sale por el quiosco (`/datos`, guardado en el borde) y qué va directo a la API.
- * `node src/lib/quiosco.test.mjs`. Lo que se vigila: que nada con sesión, nada que
+ * `node src/api/quiosco.test.mjs`. Lo que se vigila: que nada con sesión, nada que
  * escriba y nada personal (publicidad, estadísticas, comentarios) acabe en el borde.
  */
 import { vaPorElQuiosco } from "./quiosco.js";

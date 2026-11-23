@@ -228,22 +228,20 @@ export const AdminUserDetail = () => {
               )}
             </div>
           </div>
-          {(createdLabel || adminPick(row, ["role", "roles"], "") !== "—") ? (
-            <dl className="se-admin-user-detail__stats">
-              {createdLabel ? (
-                <div className="se-admin-user-detail__stat">
-                  <dt>Alta</dt>
-                  <dd>{createdLabel}</dd>
-                </div>
-              ) : null}
-              {adminPick(row, ["role", "roles"], "") !== "—" ? (
-                <div className="se-admin-user-detail__stat">
-                  <dt>Rol</dt>
-                  <dd>{adminPick(row, ["role", "roles"], "—")}</dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : null}
+          {/* La ficha de un lector no trae rol (`PublicUserAdminSchema` del backend): la
+              fila «Rol» sale siempre con «—», como salía cuando se leía `role` o `roles`. */}
+          <dl className="se-admin-user-detail__stats">
+            {createdLabel ? (
+              <div className="se-admin-user-detail__stat">
+                <dt>Alta</dt>
+                <dd>{createdLabel}</dd>
+              </div>
+            ) : null}
+            <div className="se-admin-user-detail__stat">
+              <dt>Rol</dt>
+              <dd>—</dd>
+            </div>
+          </dl>
         </div>
       </header>
 

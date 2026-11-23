@@ -64,11 +64,8 @@ const readCollab = (obj) => {
 const resolveUserId = (submissionRow, profile) => {
   const flat = pickChain(submissionRow, profile, ["user_id", "userId", "submitter_id", "author_id", "consumer_id"]);
   if (flat) return flat;
-  const nested =
-    adminPick(submissionRow?.user, ["user_id", "userId", "id"], "") ||
-    adminPick(submissionRow?.author, ["user_id", "userId", "id"], "") ||
-    adminPick(submissionRow?.submitter, ["user_id", "userId", "id"], "");
-  if (nested && nested !== "—") return String(nested).trim();
+  // El envío del panel no trae `user`, `author` ni `submitter` (trae `autor`, en
+  // español: `SubmissionAdminResponseSchema`), así que de ahí no salía nunca nada.
   if (profile && typeof profile === "object") {
     const id = adminPick(profile, ["id"], "");
     if (id && id !== "—") return String(id).trim();
@@ -183,10 +180,7 @@ export const buildSubmissionAuthorBoard = (submissionRow, profile) => {
     rows.push({ label: "Último acceso", value: formatSubmissionDate(lastLogin) });
   }
 
-  if (profileNorm && typeof profileNorm === "object") {
-    const role = adminPick(profileNorm, ["role", "roles"], "");
-    if (role && role !== "—") rows.push({ label: "Rol", value: role });
-  }
+  // Sin fila «Rol»: la ficha de un lector no trae rol (`PublicUserAdminSchema`) y nunca salía.
 
   const dedup = [];
   const seen = new Set();

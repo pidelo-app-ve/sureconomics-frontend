@@ -49,9 +49,9 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
   propio sitio; la subida de video a Cloudflare, con su barra de progreso) están en
   `RED_FUERA_DEL_CLIENTE`, en la prueba de arquitectura, con cuántas llamadas cada uno:
   el número solo puede bajar.
-- Si renovar la sesión falla, el panel solo la cierra cuando el servidor dice que ya no
-  vale; el lector la cierra con cualquier fallo, también sin red. Está escrito como
-  opción en `src/api/sesion.js` (`CERRAR_SI_LA_SESION_NO_VALE` y `CERRAR_SIEMPRE`).
+- Si renovar la sesión falla, el panel y el lector solo la cierran cuando el servidor dice
+  que ya no vale: sin red, la sesión se queda (`CERRAR_SI_LA_SESION_NO_VALE`, en
+  `src/api/sesion.js`).
 
 ## Textos y estilos
 

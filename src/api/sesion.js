@@ -5,18 +5,16 @@
  * `lib/userAuthStorage.js` + `lib/userApi.js`, que siguen siendo por donde entra todo
  * el sitio.
  *
- * ## Qué pasa si renovar falla (la diferencia entre el panel y el lector)
+ * ## Qué pasa si renovar falla
  *
  * Con un 401, se renueva el token una vez y se repite la petición. Si eso falla:
  *
- * - **Panel** (`CERRAR_SI_LA_SESION_NO_VALE`): solo se cierra la sesión si el servidor
- *   dice que la renovación no vale (un 4xx que no sea 429). Sin red, con el limitador o
- *   con el servidor reiniciando, el error sube tal cual y la sesión se queda. Es el
- *   arreglo del 19-nov-2026: antes se echaba del panel a quien estaba escribiendo.
- * - **Lector** (`CERRAR_SIEMPRE`): se cierra con **cualquier** fallo, también sin red o si
- *   la red se cae en el reintento. Es lo de siempre y es un fallo (el mismo que se
- *   arregló en el panel): un lector en el metro pierde la sesión. Se deja así a propósito
- *   para que juntar los clientes no cambie nada; igualarlo es un cambio visible, aparte.
+ * - **Panel y lector** (`CERRAR_SI_LA_SESION_NO_VALE`): solo se cierra la sesión si el
+ *   servidor dice que la renovación no vale (un 4xx que no sea 429). Sin red, con el
+ *   limitador o con el servidor reiniciando, el error sube tal cual y la sesión se queda.
+ *   Es el arreglo del 19-nov-2026 en el panel (antes se echaba a quien estaba
+ *   escribiendo), llevado al lector el 23-nov-2026: hasta entonces el lector perdía la
+ *   sesión con cualquier fallo, también sin red (un lector en el metro).
  * - **Descargas del lector** (`SEGUIR`): nunca se cierra; sigue con el 401 de antes y lo
  *   lanza como error.
  */
@@ -81,13 +79,11 @@ export const crearAlmacen = (prefijo, { conRol = false } = {}) => {
 
 /* ─── Qué hacer si renovar (o el reintento) falla ────────────────────────── */
 
-/** Panel: cerrar solo si el servidor dice que la sesión no vale (4xx menos 429); si no, lanzar. */
+/** Panel y lector: cerrar solo si el servidor dice que la sesión no vale (4xx menos 429); si no, lanzar. */
 export const CERRAR_SI_LA_SESION_NO_VALE = (err) => {
   const status = err?.status;
   return status >= 400 && status < 500 && status !== 429 ? "cerrar" : "lanzar";
 };
-/** Lector: cerrar con cualquier fallo (ver arriba: es un fallo conocido). */
-export const CERRAR_SIEMPRE = () => "cerrar";
 /** Descargas del lector: seguir con la respuesta 401 que había. */
 export const SEGUIR = () => "seguir";
 

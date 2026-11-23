@@ -4,8 +4,8 @@
  * las descargas protegidas. El trabajo lo hace el núcleo, `src/api/` (`nucleo.js` y
  * `sesion.js`); aquí queda lo propio del lector: su sesión (`userAuthStorage.js`), su
  * forma de leer el error y de desenvolver la respuesta, el quiosco para las lecturas
- * públicas, y su política si renovar la sesión falla (`CERRAR_SIEMPRE`: ver allí por qué
- * es distinta de la del panel).
+ * públicas. Si renovar la sesión falla, la misma política que el panel
+ * (`CERRAR_SI_LA_SESION_NO_VALE`, ver `src/api/sesion.js`).
  */
 import { tActual } from "../i18n/motor";
 import {
@@ -17,7 +17,7 @@ import {
   pedir,
   pedirArchivo,
 } from "../api/nucleo.js";
-import { CERRAR_SIEMPRE, SEGUIR, crearSesion } from "../api/sesion.js";
+import { CERRAR_SI_LA_SESION_NO_VALE, SEGUIR, crearSesion } from "../api/sesion.js";
 import { clearUserAuth, persistUserAuth, readUserAuth } from "./userAuthStorage";
 
 export const USER_AUTH_SYNC_EVENT = "sureconomics-user-auth-sync";
@@ -109,7 +109,7 @@ export const userRequest = async (path, options = {}) => {
 
   const respuesta = await sesion.conRenovacion(
     () => pedirDelLector(path, { ...options, token: readUserAuth().accessToken }),
-    { siFalla: CERRAR_SIEMPRE, errorCaducada: sesionExpirada },
+    { siFalla: CERRAR_SI_LA_SESION_NO_VALE, errorCaducada: sesionExpirada },
   );
 
   if (respuesta.res.status === 401) {

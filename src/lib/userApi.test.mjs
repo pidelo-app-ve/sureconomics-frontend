@@ -232,33 +232,44 @@ describe("con la sesión del lector (userRequest)", () => {
     assert.equal(avisosDeSesion, 1);
   });
 
-  // Así es hoy, y es distinto del panel (`lib/api.test.mjs`, «sin red al renovar, la
-  // sesión no se cierra»): el lector pierde la sesión ante CUALQUIER fallo al renovar,
-  // también sin red, con el limitador (429), con el servidor reiniciando (502) o si la red
-  // se cae en el reintento. Ver `src/api/sesion.js`.
-  for (const [nombre, fallo] of [
-    ["sin red al renovar", () => new TypeError("Failed to fetch")],
-    ["un 429 al renovar", () => json(429, { success: false, error: { message: "30 per 1 minute" } })],
-    ["un 502 al renovar", () => new Response("<html>", { status: 502, statusText: "Bad Gateway" })],
+  // Era un fallo (hasta el 23-nov-2026), el mismo que se arregló en el panel el 19-nov
+  // (`lib/api.test.mjs`, «sin red al renovar, la sesión no se cierra»): el lector perdía
+  // la sesión ante CUALQUIER fallo al renovar, también sin red, con el limitador (429),
+  // con el servidor reiniciando (502) o si la red se caía en el reintento. Solo un 4xx
+  // (menos 429) de `/user-auth/refresh` dice que la sesión ya no vale.
+  for (const [nombre, fallo, estado] of [
+    ["sin red al renovar", () => new TypeError("Failed to fetch"), undefined],
+    ["un 429 al renovar", () => json(429, { success: false, error: { message: "30 per 1 minute" } }), 429],
+    ["un 502 al renovar", () => new Response("<html>", { status: 502, statusText: "Bad Gateway" }), 502],
   ]) {
-    test(`${nombre}: hoy también se cierra la sesión`, async () => {
+    test(`${nombre}: la sesión se queda y sube el error de verdad`, async () => {
       conSesion();
       contestar(caducado(), fallo());
       const err = await errorDe(() => userRequest("/user/me"));
-      assert.equal(err.status, 401);
-      assert.equal(err.message, tActual("cuenta.api.sesionExpirada"));
-      assert.equal(sessionStorage.tamano, 0);
-      assert.equal(avisosDeSesion, 1);
+      assert.equal(err.status, estado);
+      assert.equal(sessionStorage.getItem(ACCESO), "acceso-viejo");
+      assert.equal(sessionStorage.getItem(RENOVAR), "renovar-1");
+      assert.equal(avisosDeSesion, 0);
     });
   }
 
-  test("renovada bien y la red se cae en el reintento: hoy también se cierra la sesión", async () => {
+  test("renovada bien y la red se cae en el reintento: se queda el token recién emitido", async () => {
     conSesion();
     contestar(caducado(), renovado(), new TypeError("Failed to fetch"));
     const err = await errorDe(() => userRequest("/user/me"));
+    assert.ok(err instanceof TypeError);
+    assert.equal(sessionStorage.getItem(ACCESO), "acceso-nuevo");
+    assert.equal(sessionStorage.getItem(RENOVAR), "renovar-2");
+    assert.equal(avisosDeSesion, 1); // solo el de «renové»
+  });
+
+  test("si la renovación responde 403, también se cierra la sesión", async () => {
+    conSesion();
+    contestar(caducado(), json(403, { success: false, error: { message: "Cuenta desactivada" } }));
+    const err = await errorDe(() => userRequest("/user/me"));
     assert.equal(err.status, 401);
+    assert.equal(err.message, tActual("cuenta.api.sesionExpirada"));
     assert.equal(sessionStorage.tamano, 0);
-    assert.equal(avisosDeSesion, 2); // el de «renové» y el de «cerré»
   });
 
   test("una renovación que responde 200 sin token también cierra la sesión", async () => {

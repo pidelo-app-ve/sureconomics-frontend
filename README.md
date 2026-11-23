@@ -4,6 +4,7 @@ This is the Sur Economics single-page app. The editorial/blog experience is back
 
 ## Documentos
 
+- [`ESTRUCTURA.md`](ESTRUCTURA.md): el mapa del repo (qué tema vive en qué carpeta, la zona nueva `src/features/` y cómo se añade un feature).
 - `DESIGN.md` y `PRODUCT.md`: el sistema de diseño y el producto (en la raíz porque las herramientas de diseño los leen ahí).
 - `docs/POLITICA-COOKIES-PENDIENTE.md` y `docs/LEGAL-PENDIENTE.md`: lo que falta en `/cookies` y en las páginas legales.
 - `docs/EL-ANALISTA.md`: cómo se trae el juego de El Analista desde su repositorio.

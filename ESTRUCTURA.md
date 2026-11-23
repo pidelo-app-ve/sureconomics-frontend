@@ -27,7 +27,7 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
 | Resumen diario | `pages/Resumen.jsx`, `services/resumenService.js`, `components/admin/resumen` |
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
-| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido` |
+| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
 | Llamadas al servidor (lo común) | `lib/api.js`, `lib/userApi.js`, `services/` |
 | Vista previa para redes y sitemap (Vercel) | `api/` |
 
@@ -41,6 +41,18 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
   junto a `FichaDeMoneda.jsx`), y lo común en `src/styles/` y `src/index.css`. Ojo: el
   orden en que entran las hojas en el CSS construido depende del orden de las
   importaciones; al mover un archivo, se comprueba que el `dist/` no cambia.
+
+## Fachadas que quedan
+
+Dos archivos de la zona vieja reexportan algo de un feature para quien aún lo importa
+de allí. La prueba solo deja importarlas a los de su lista (`FACHADAS`); lo nuevo entra
+por la puerta del feature.
+
+- `src/lib/analitica.js` (la medición): la usan la vista previa, el servicio del boletín y
+  la barra de la publicidad. Se cargan antes que el aviso de cookies; por la puerta, Vite
+  reordenaría el paquete principal (mismo código, otro orden).
+- `src/hooks/useHeadlines.js` (`haceCuanto`): la usa la fecha de cada pieza en la
+  portada. Por la puerta de titulares, su hoja de estilos entraría antes en el CSS.
 
 ## Qué no se toca
 
@@ -63,4 +75,5 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
 4. Si tiene panel, va en `admin/`. Si otra página del panel necesita algo de él, se le
    abre una segunda puerta, `admin/index.js` (ver `features/monedas/admin/index.js`):
    nunca por la puerta del sitio, que viaja en el paquete de cada lector.
-5. Entre features, solo por las puertas. `src/ui/` (lo compartido) no importa features.
+5. Entre features, solo por las puertas. `src/ui/` (lo compartido: botones, tablas,
+   diálogos), cuando exista, no importará features: son ellos los que lo usan.

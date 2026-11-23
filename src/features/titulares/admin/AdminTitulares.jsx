@@ -1,15 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { EditarTitular } from "./components/EditarTitular";
+import { FiltrosDeTitulares } from "./components/FiltrosDeTitulares";
 import { FuentesDeTitulares } from "./components/FuentesDeTitulares";
 import { HistorialTitular } from "./components/HistorialTitular";
-import { ErrorState, LoadingState } from "../../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../../components/content";
 import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../../context/AdminToastContext";
 import { useAuth } from "../../../context/AuthContext";
 import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
-import { MODOS_DEL_JUEZ, nombreDelProblema } from "./utils";
+import { nombreDePais } from "../../../lib/avisos";
+import {
+  FILTROS_INICIALES,
+  MODOS_DEL_JUEZ,
+  consultaDeTitulares,
+  hayFiltros,
+  lineaDePaginas,
+  nombreDeCategoria,
+  nombreDelProblema,
+} from "./utils";
 import {
   borrarTitular,
   cambiarAjusteDeTitulares,
@@ -39,6 +49,12 @@ import { CabeceraDePagina } from "../../../components/admin/CabeceraDePagina";
  * publicarlo y frena el que afirma algo que las notas no dicen. Lo que frenó en el último
  * ciclo se ve en «Titulares que el juez frenó». El botón «Guía» lo explica sobre la
  * propia página.
+ *
+ * La lista va por páginas de 20 y con filtros (`FiltrosDeTitulares`), pedidos al servidor:
+ * cambiar de página, de pestaña o de filtro pide solo la lista, y cambiar de pestaña o de
+ * filtro vuelve a la página 1. El buscador espera a que se deje de escribir, como en
+ * Archivos. Lo de arriba (interruptores, último ciclo, medios) se carga aparte; cada
+ * minuto se refresca todo sin parpadeo.
  */
 
 const VISTAS = [
@@ -278,7 +294,18 @@ export const AdminTitulares = () => {
   const { toastSuccess, toastError } = useAdminToast();
   const { confirm, ConfirmDialog } = useAdminConfirm();
   const [vista, setVista] = useState("publicados");
-  const [state, setState] = useState({ status: "loading", resumen: null, ajustes: null, grupos: [], fuentes: [], error: null });
+  const [state, setState] = useState({ status: "loading", resumen: null, ajustes: null, fuentes: [], error: null });
+  // La lista, aparte: cambiar de página o de filtro no vuelve a pedir lo de arriba.
+  const [lista, setLista] = useState({ status: "loading", grupos: [], total: 0, pagina: 1, paginas: 0, opciones: null, error: null });
+  const [pagina, setPagina] = useState(1);
+  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+  // Dos estados y no uno, como en Archivos: `texto` es lo que se está escribiendo y
+  // `filtros.buscar` lo que de verdad se pide. Sin eso, cada tecla sería una petición.
+  const [texto, setTexto] = useState("");
+  // Cada petición de la lista lleva su turno: si llega tarde una vieja (se cambió de
+  // filtro mientras tanto), no pisa a la nueva.
+  const turnoDeLista = useRef(0);
+  const arribaDeLaLista = useRef(null);
   const [borrando, setBorrando] = useState(null);
   const [editando, setEditando] = useState(null);
   const [historial, setHistorial] = useState(null);
@@ -289,12 +316,11 @@ export const AdminTitulares = () => {
     applyPageMeta({ title: "Admin — Titulares", description: "Los titulares en caliente: corregir, fijar, borrar y silenciar medios." });
   }, []);
 
-  const cargar = useCallback(async () => {
+  const cargarPanel = useCallback(async () => {
     try {
-      const [resumen, ajustes, lista, fuentes] = await Promise.all([
+      const [resumen, ajustes, fuentes] = await Promise.all([
         getResumenDeTitulares(),
         getAjustesDeTitulares(),
-        getTitularesDelPanel({ vista, horas: 24, limite: 100 }),
         // Los medios son un extra: si fallan, el resto del panel tiene que seguir sirviendo.
         getFuentesDeTitulares().catch(() => null),
       ]);
@@ -302,20 +328,86 @@ export const AdminTitulares = () => {
         status: "success",
         resumen: unwrapEntity(resumen),
         ajustes: unwrapEntity(ajustes),
-        grupos: unwrapEntity(lista)?.grupos ?? [],
         fuentes: unwrapEntity(fuentes)?.fuentes ?? [],
         error: null,
       });
     } catch (err) {
       setState((s) => (s.resumen ? s : { ...s, status: "error", error: err }));
     }
-  }, [vista]);
+  }, []);
+
+  /** La página de titulares que toca. `callado`: sin «Cargando…» (la recarga de cada minuto, o tras una acción). */
+  const cargarLista = useCallback(async ({ callado = false } = {}) => {
+    const turno = ++turnoDeLista.current;
+    if (!callado) setLista((l) => ({ ...l, status: "loading", error: null }));
+    try {
+      const datos = unwrapEntity(await getTitularesDelPanel(consultaDeTitulares({ vista, pagina, filtros })));
+      if (turno !== turnoDeLista.current) return;
+      const grupos = datos?.grupos ?? [];
+      setLista({
+        status: "success",
+        grupos,
+        total: datos?.total ?? grupos.length,
+        // El servidor ajusta una página que ya no existe (se borró lo último de la última).
+        pagina: datos?.pagina ?? pagina,
+        paginas: datos?.paginas ?? 1,
+        opciones: datos?.opciones ?? null,
+        error: null,
+      });
+    } catch (err) {
+      if (turno !== turnoDeLista.current) return;
+      // Una recarga callada que falla no borra lo que se está viendo.
+      setLista((l) => (callado && l.status === "success" ? l : { ...l, status: "error", error: err }));
+    }
+  }, [vista, pagina, filtros]);
+
+  const cargar = useCallback(
+    () => Promise.all([cargarPanel(), cargarLista({ callado: true })]),
+    [cargarPanel, cargarLista],
+  );
 
   useEffect(() => {
-    cargar();
+    cargarPanel();
+  }, [cargarPanel]);
+
+  useEffect(() => {
+    cargarLista();
+  }, [cargarLista]);
+
+  useEffect(() => {
     const id = setInterval(cargar, 60_000);
     return () => clearInterval(id);
   }, [cargar]);
+
+  // El buscador pide cuando se deja de escribir; los espacios de más no cuentan.
+  useEffect(() => {
+    const limpio = texto.trim().replace(/\s+/g, " ");
+    if (limpio === filtros.buscar) return undefined;
+    const reloj = setTimeout(() => {
+      setPagina(1);
+      setFiltros((f) => ({ ...f, buscar: limpio }));
+    }, 250);
+    return () => clearTimeout(reloj);
+  }, [texto, filtros.buscar]);
+
+  const cambiarFiltro = (clave, valor) => {
+    setPagina(1);
+    setBorrando(null);
+    setFiltros((f) => ({ ...f, [clave]: valor }));
+  };
+
+  const limpiarFiltros = () => {
+    setTexto("");
+    setPagina(1);
+    setFiltros(FILTROS_INICIALES);
+  };
+
+  /** Otra página, y arriba de la lista: la paginación de abajo se pulsa tras veinte titulares. */
+  const irAPagina = (p) => {
+    setPagina(p);
+    setBorrando(null);
+    arribaDeLaLista.current?.scrollIntoView?.({ block: "start" });
+  };
 
   /** Una acción del panel: la petición, el aviso y volver a cargar. */
   const hacer = async (peticion, exito, fallo) => {
@@ -367,7 +459,8 @@ export const AdminTitulares = () => {
   if (state.status === "loading") return <LoadingState title="Cargando titulares…" />;
   if (state.status === "error") return <ErrorState title="No se pudo cargar." error={state.error} onRetry={cargar} />;
 
-  const { resumen, ajustes, grupos, fuentes } = state;
+  const { resumen, ajustes, fuentes } = state;
+  const { grupos } = lista;
   const publica = ajustes?.autopublish_enabled;
   const visible = ajustes?.section_visible;
   const motivos = ajustes?.motivos ?? {};
@@ -499,26 +592,53 @@ export const AdminTitulares = () => {
         <FrenadosPorElJuez rechazos={rechazos} modo={ciclo?.juez?.modo} anclaje={ancla("frenados")} />
       ) : null}
 
-      <div className="se-admin-filters" role="tablist" aria-label="Qué titulares ver" style={{ marginBottom: "0.75rem" }} {...ancla("vistas")}>
+      <div ref={arribaDeLaLista} className="se-admin-filters" role="tablist" aria-label="Qué titulares ver" style={{ marginBottom: "0.75rem" }} {...ancla("vistas")}>
         {VISTAS.map((v) => (
           <button key={v.clave} type="button" role="tab" aria-selected={vista === v.clave}
             className={`se-btn ${vista === v.clave ? "se-btn--primary" : "se-btn--secondary"}`}
-            onClick={() => { setVista(v.clave); setBorrando(null); }}>
+            onClick={() => { setVista(v.clave); setPagina(1); setBorrando(null); }}>
             {v.texto}
           </button>
         ))}
       </div>
 
-      {!grupos.length ? (
-        <p className="se-admin-meta-hint">
-          {vista === "publicados" ? "No hay titulares publicados en las últimas 24 horas." : "No hay titulares borrados en las últimas 24 horas."}
-        </p>
-      ) : (
+      <FiltrosDeTitulares filtros={filtros} texto={texto} onTexto={setTexto} onCambio={cambiarFiltro}
+        opciones={lista.opciones} anclaje={ancla("filtros")} />
+
+      {lista.status === "loading" ? <LoadingState title="Cargando titulares…" /> : null}
+      {lista.status === "error" ? (
+        <ErrorState title="No se pudo cargar la lista de titulares." error={lista.error} onRetry={() => cargarLista()} />
+      ) : null}
+
+      {lista.status === "success" && !grupos.length ? (
+        hayFiltros(filtros) ? (
+          <EmptyState
+            title="Ningún titular con estos filtros"
+            description={`No hay titulares ${vista === "publicados" ? "publicados" : "borrados"} que cumplan todo lo elegido. Pruebe con menos filtros o con más horas.`}
+            action={
+              <button type="button" className="se-btn se-btn--secondary" onClick={limpiarFiltros}>
+                Limpiar filtros
+              </button>
+            }
+          />
+        ) : (
+          <p className="se-admin-meta-hint">
+            {vista === "publicados" ? "No hay titulares publicados" : "No hay titulares borrados"} en las últimas {filtros.horas} horas.
+          </p>
+        )
+      ) : null}
+
+      {lista.status === "success" && grupos.length ? (
+        <>
+        <div className="se-admin-paginas" {...ancla("paginas")}>
+          <p className="se-text-body" style={{ margin: 0 }}>{lineaDePaginas(lista)}</p>
+          <Pagination page={lista.pagina} totalPages={lista.paginas} onPageChange={irAPagina} compacta etiqueta="Paginación (arriba)" />
+        </div>
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "0.75rem" }}>
           {grupos.map((g, k) => (
             <li key={g.id} className="se-admin-table-wrap" style={{ padding: "1rem" }} {...(k === 0 ? ancla("titular") : {})}>
               <p className="se-admin-meta-hint" style={{ margin: 0 }}>
-                {g.pais || "—"} · {g.categoria || "—"} · puntaje {g.calor} · {g.fuentes} fuente{g.fuentes === 1 ? "" : "s"}
+                {g.pais ? nombreDePais(g.pais) : "—"} · {nombreDeCategoria(g.categoria)} · puntaje {g.calor} · {g.fuentes} fuente{g.fuentes === 1 ? "" : "s"}
                 {vista === "publicados" ? ` · publicado ${cuando(g.publicado)}` : ` · borrado ${cuando(g.borrado)} (${motivos[g.motivo_borrado] || g.motivo_borrado || "—"})`}
               </p>
               {g.fijado_hasta || g.editado ? (
@@ -574,7 +694,9 @@ export const AdminTitulares = () => {
             </li>
           ))}
         </ul>
-      )}
+        <Pagination page={lista.pagina} totalPages={lista.paginas} onPageChange={irAPagina} />
+        </>
+      ) : null}
 
       <FuentesDeTitulares fuentes={fuentes} onCambio={cargar} anclaje={ancla("fuentes")} verNuevas={verNuevas} />
 

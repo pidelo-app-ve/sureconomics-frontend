@@ -77,9 +77,32 @@ export const PASOS_TITULARES = [
     clave: "vistas",
     titulo: "Publicados y borrados",
     puntos: [
-      "Publicados: lo que está ahora en la web, de las últimas 24 horas.",
+      "Publicados: lo que está ahora en la web. Por omisión, lo de las últimas 24 horas; en los filtros se pueden pedir 48 o 72.",
       "Borrados: lo que alguien quitó. Desde ahí se puede restaurar.",
     ],
+  },
+  {
+    clave: "filtros",
+    titulo: "Buscar y filtrar",
+    texto:
+      "Para encontrar un titular sin bajar por toda la lista. Los filtros se suman: si elige un país y un tema, " +
+      "salen solo los que cumplen las dos cosas. Al cambiar cualquiera, la lista vuelve a la primera página.",
+    puntos: [
+      "Buscar: una palabra o un trozo del título o del resumen, en español o en inglés. Busca cuando deja de escribir.",
+      "País y Tema: de dónde es la noticia y de qué trata. En País solo salen los que tienen algún titular en esas horas.",
+      "De las últimas: 24, 48 o 72 horas hacia atrás. Más atrás de 72 horas no se guarda nada para revisar aquí.",
+      "Solo: los que salieron como última hora, los que alguien corrigió a mano o los que están fijados arriba ahora mismo.",
+      "Mejor fuente: el nivel del medio más fiable que cuenta la noticia. Elegir el 4 deja ver los que se apoyan solo en Google News o en medios pequeños, que conviene revisar.",
+      "Limpiar filtros: si con lo elegido no sale nada, este botón los quita todos de una vez.",
+    ],
+  },
+  {
+    clave: "paginas",
+    titulo: "Las páginas",
+    texto:
+      "Los titulares van de 20 en 20, los de más puntaje primero. Esta línea dice en qué página está y cuántos hay " +
+      "en total con los filtros puestos. «Anterior» y «Siguiente» están aquí arriba y también al final de la lista, " +
+      "con el número de cada página para saltar directo.",
   },
   {
     clave: "titular",
@@ -124,7 +147,7 @@ export const PASOS_TITULARES = [
       "cuela un medio dudoso sin que nadie lo vea.",
     puntos: [
       "Nuevo, sin activar: la marca de esos medios. Salen los primeros de la lista y el título plegado dice cuántos esperan.",
-      "Enseñar: deja ver solo los nuevos, los silenciados o los que cuentan.",
+      "Enseñar, Nivel y Buscar medio: dejan ver solo los nuevos, los silenciados o los que cuentan, los de un nivel, o un medio por su nombre. Si son muchos, van por páginas de 25.",
       "Activar: compruebe antes que es un medio serio. Si no lo es, déjelo como está.",
     ],
   },

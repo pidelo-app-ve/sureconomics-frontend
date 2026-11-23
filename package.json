@@ -23,6 +23,7 @@
         "test:recorrido": "node src/lib/recorridoVista.test.mjs && node src/lib/todasLasGuias.test.mjs",
         "test:relojes": "node src/lib/relojes.test.mjs",
         "test:ultimahora": "node src/features/titulares/utils.test.mjs",
+        "test:titulares-panel": "node src/features/titulares/admin/utils.test.mjs",
         "test:publicidad": "node src/features/publicidad/utils.test.mjs",
         "test:youtube": "node src/lib/youtube.test.mjs",
         "test:avisos": "node src/lib/avisos.test.mjs",

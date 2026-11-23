@@ -19,9 +19,12 @@ export const getAjustesDeTitulares = () => adminRequest("/admin/headlines/settin
 export const cambiarAjusteDeTitulares = (clave, valor) =>
   adminRequest("/admin/headlines/settings", { method: "PUT", json: { [clave]: valor } });
 
-/** Los titulares de las últimas `horas`: `vista` es «publicados» o «borrados». */
-export const getTitularesDelPanel = ({ vista, horas, limite }) =>
-  adminRequest("/admin/headlines", { query: { vista, horas, limite } });
+/**
+ * Una página de titulares: `vista` es «publicados» o «borrados», con `pagina`,
+ * `por_pagina`, `horas` y los filtros puestos (la arma `consultaDeTitulares` de `utils.js`).
+ * Contesta `{ grupos, total, pagina, paginas, opciones: { paises, categorias } }`.
+ */
+export const getTitularesDelPanel = (consulta) => adminRequest("/admin/headlines", { query: consulta });
 
 /** Los medios que lee el sistema, con su nivel y si están silenciados. */
 export const getFuentesDeTitulares = () => adminRequest("/admin/headlines/fuentes");

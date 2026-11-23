@@ -6,7 +6,15 @@ import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { recorridoTitulares } from "../../../../lib/guias/guiaTitulares";
 import { unwrapEntity } from "../../../../services/adminResponseUtils";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { Pagination } from "../../../../components/content";
 import { activarFuente, cambiarNivelDeFuente, silenciarFuente } from "../api";
+import {
+  ESTADOS_DE_FUENTE,
+  FUENTES_POR_PAGINA,
+  NOMBRE_DE_NIVEL as NIVEL,
+  filtrarFuentes,
+  trozoDeLista,
+} from "../utils";
 
 const { ancla } = recorridoTitulares;
 
@@ -29,9 +37,12 @@ const { ancla } = recorridoTitulares;
  * nivel ya quedó guardado y el medio sigue silenciado, y la ventana lo dice así y deja
  * reintentar. Los niveles 1 y 2 solo los pone un admin (el backend contesta 403 al
  * publicador): al resto se le enseñan deshabilitados, con el porqué.
+ *
+ * **Buscar, filtrar y las páginas, en el navegador** (`filtrarFuentes`, `trozoDeLista`):
+ * el servidor ya manda todos los medios de una vez (son unas decenas y hacen falta todos
+ * para los recuentos del resumen plegado), así que pedirlos por páginas no ahorraría
+ * nada. De 25 en 25; la paginación solo aparece si hay más de una página.
  */
-
-const NIVEL = { 1: "1 · oficial", 2: "2 · agencia", 3: "3 · medio", 4: "4 · Google News o pequeño" };
 
 /**
  * Qué significa cada nivel, para quien lo elige. Sale de las reglas del backend
@@ -47,20 +58,6 @@ const NIVELES = [
   { nivel: 4, nombre: "Google News o medio pequeño", ejemplo: "Búsquedas por tema, medios locales o poco conocidos.",
     pesa: "Nunca basta solo: hacen falta 3 medios distintos (2 si la noticia es de Venezuela)." },
 ];
-
-const FILTROS = [
-  { clave: "todas", texto: "Todos" },
-  { clave: "nuevas", texto: "Nuevos, sin activar" },
-  { clave: "silenciadas", texto: "Silenciados" },
-  { clave: "cuentan", texto: "Que cuentan" },
-];
-
-const pasa = {
-  todas: () => true,
-  nuevas: (f) => f.nueva,
-  silenciadas: (f) => f.silenciada && !f.nueva,
-  cuentan: (f) => !f.silenciada,
-};
 
 /** Los niveles que solo pone un admin (`titulares_moderacion.NIVELES_SOLO_ADMIN`). */
 const SOLO_ADMIN = [1, 2];
@@ -108,6 +105,9 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
   const [nivel, setNivel] = useState(3);
   const [fallo, setFallo] = useState(null);
   const [filtro, setFiltro] = useState("todas");
+  const [buscar, setBuscar] = useState("");
+  const [nivelVisto, setNivelVisto] = useState("");
+  const [pagina, setPagina] = useState(1);
   const [ocupado, setOcupado] = useState(false);
   const [abierta, setAbierta] = useState(false);
   const grupoNivel = useId();
@@ -118,6 +118,9 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
   useEffect(() => {
     if (!verNuevas) return;
     setFiltro("nuevas");
+    setBuscar("");
+    setNivelVisto("");
+    setPagina(1);
     setAbierta(true);
     caja.current?.scrollIntoView({ block: "start" });
   }, [verNuevas]);
@@ -136,8 +139,14 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
   const silenciadas = fuentes.filter((f) => f.silenciada && !f.nueva).length;
   const nuevas = fuentes.filter((f) => f.nueva).length;
   // Las nuevas, arriba: son las que piden que alguien haga algo. El resto, en el orden
-  // del servidor (`sort` es estable).
-  const visibles = fuentes.filter(pasa[filtro] ?? pasa.todas).sort((a, b) => Number(Boolean(b.nueva)) - Number(Boolean(a.nueva)));
+  // del servidor. Cambiar un filtro vuelve a la página 1; una página que ya no existe
+  // (se silenció el último de la última) da la última.
+  const visibles = filtrarFuentes(fuentes, { buscar, estado: filtro, nivel: nivelVisto });
+  const trozo = trozoDeLista(visibles, pagina, FUENTES_POR_PAGINA);
+  const filtrar = (poner) => (e) => {
+    poner(e.target.value);
+    setPagina(1);
+  };
 
   const silenciar = async () => {
     setOcupado(true);
@@ -222,20 +231,42 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
           <div className="se-admin-filters se-tit-fuentes__filtros" {...ancla("fuentes-nuevas")}>
             <label className="se-admin-filters__field">
               <span className="se-form-label">Enseñar</span>
-              <select className="se-form-control" value={filtro} onChange={(e) => setFiltro(e.target.value)}>
-                {FILTROS.map((o) => (
-                  <option key={o.clave} value={o.clave}>
+              <select className="se-form-control" value={filtro} onChange={filtrar(setFiltro)}>
+                {Object.entries(ESTADOS_DE_FUENTE).map(([clave, o]) => (
+                  <option key={clave} value={clave}>
                     {o.texto}
-                    {o.clave === "nuevas" ? ` (${nuevas})` : ""}
+                    {clave === "nuevas" ? ` (${nuevas})` : ""}
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="se-admin-filters__field">
+              <span className="se-form-label">Nivel</span>
+              <select className="se-form-control" value={nivelVisto} onChange={filtrar(setNivelVisto)}>
+                <option value="">Todos</option>
+                {Object.entries(NIVEL).map(([n, nombre]) => (
+                  <option key={n} value={n}>
+                    {nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="se-admin-filters__field se-admin-filters__field--grow">
+              <span className="se-form-label">Buscar medio</span>
+              <input className="se-form-control" type="search" value={buscar} onChange={filtrar(setBuscar)}
+                placeholder="Nombre del medio" maxLength={80} />
             </label>
             <span className="se-admin-meta-hint">
               Un medio nuevo llega silenciado: sus notas no cuentan hasta que alguien lo revisa y lo activa. Van los primeros.
             </span>
           </div>
           {visibles.length ? (
+            <>
+            {trozo.paginas > 1 ? (
+              <p className="se-admin-meta-hint" style={{ margin: "0.75rem 0 0" }}>
+                Página {trozo.pagina} de {trozo.paginas} — {visibles.length} medios
+              </p>
+            ) : null}
             <div className="se-tit-fuentes__tabla">
               <table className="se-admin-table">
                 <thead>
@@ -249,7 +280,7 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
                   </tr>
                 </thead>
                 <tbody>
-                  {visibles.map((f) => (
+                  {trozo.filas.map((f) => (
                     <tr key={f.id} className={f.silenciada && !f.nueva ? "se-tit-fuentes__fila--muda" : undefined}>
                       <td>{f.nombre}</td>
                       <td>{NIVEL[f.nivel] || f.nivel}</td>
@@ -280,8 +311,12 @@ export const FuentesDeTitulares = ({ fuentes, onCambio, anclaje, verNuevas = 0 }
                 </tbody>
               </table>
             </div>
+            <Pagination page={trozo.pagina} totalPages={trozo.paginas} onPageChange={setPagina} etiqueta="Páginas de medios" />
+            </>
           ) : (
-            <p className="se-admin-meta-hint">Ningún medio en esta lista.</p>
+            <p className="se-admin-meta-hint">
+              {buscar.trim() || nivelVisto ? "Ningún medio con estos filtros." : "Ningún medio en esta lista."}
+            </p>
           )}
         </>
       ) : (

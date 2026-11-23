@@ -6260,7 +6260,7 @@
   }
 
   /* La columna del editor encoge con la pantalla: sin esto la rejilla se ensanchaba
-     hasta el botón más largo («Enviar ahora, sin esperar al lunes») y todo el editor
+     hasta el botón más largo («Guardar y enviar ahora») y todo el editor
      se salía por la derecha. */
   .se-bol__editor {
     grid-template-columns: minmax(0, 1fr);

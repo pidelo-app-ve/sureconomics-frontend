@@ -20,24 +20,23 @@ const palabras = (html) => {
   return t ? t.split(/\s+/).length : 0;
 };
 
+/** Lo que se edita a mano de un número, tal como está guardado. */
+const textoDe = (numero) => ({
+  subject: numero.subject ?? "",
+  preheader: numero.preheader ?? "",
+  body_html: numero.body_html ?? "",
+});
+
 // ------------------------------------------------------------------ el editor
 export const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, preguntar }) => {
   // En el teléfono cada bloque es una fila que abre su hoja, como en el editor de
   // piezas. «Probar y enviar» se queda a la vista: es la acción, no un campo.
   const esMovil = useEsMovil();
-  const [texto, setTexto] = useState({
-    subject: numero.subject ?? "",
-    preheader: numero.preheader ?? "",
-    body_html: numero.body_html ?? "",
-  });
+  const [texto, setTexto] = useState(() => textoDe(numero));
 
-  // Al cambiar de número se reinicia el borrador; al guardar el mismo, no hace falta.
+  // Al cambiar de número se reinicia el borrador. Al guardar el mismo, lo hace `guardar`.
   useEffect(() => {
-    setTexto({
-      subject: numero.subject ?? "",
-      preheader: numero.preheader ?? "",
-      body_html: numero.body_html ?? "",
-    });
+    setTexto(textoDe(numero));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numero.id]);
 
@@ -47,10 +46,21 @@ export const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, pregunta
     texto.preheader !== (numero.preheader ?? "") ||
     texto.body_html !== (numero.body_html ?? "");
 
-  const guardar = () =>
-    correr(() => actualizarNumero(numero.id, texto), "Cambios guardados").then((r) =>
-      r ? onCambio(r) : null,
-    );
+  /**
+   * Guarda y se queda con lo que guardó el servidor, no con lo escrito: el servidor
+   * limpia la introducción y deja los atributos de un enlace en otro orden. Comparando
+   * con lo escrito, la pantalla veía «cambios sin guardar» para siempre y «Enviar
+   * ahora» no se encendía hasta recargar. Si mientras tanto se siguió escribiendo, se
+   * respeta lo nuevo. Devuelve el número guardado, o nada si falló.
+   */
+  const guardar = async () => {
+    const enviado = texto;
+    const r = await correr(() => actualizarNumero(numero.id, enviado), "Cambios guardados");
+    if (!r) return null;
+    onCambio(r);
+    setTexto((t) => (t === enviado ? textoDe(r) : t));
+    return r;
+  };
 
   // Volver a la lista con el asunto o la introducción a medias: en el teléfono se
   // pregunta, que un toque de más no se lleve lo escrito.
@@ -262,6 +272,8 @@ export const Editor = ({ numero, correr, onCambio, onVolver, onBorrado, pregunta
       <Envio
         numero={numero}
         cambiosSinGuardar={cambios}
+        asunto={texto.subject}
+        guardarCambios={guardar}
         correr={correr}
         onCambio={onCambio}
         preguntar={preguntar}

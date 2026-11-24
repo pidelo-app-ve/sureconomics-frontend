@@ -55,3 +55,28 @@ export const prepararArte = async (archivo, { medidas, nombre, onAviso, senal, l
   }
   return { archivo: nuevo, nota: notaDeConversion(archivo.size, nuevo, POR_QUE) };
 };
+
+/**
+ * Para después de `correr` (el del panel, que resuelve a lo guardado, o a nada si falló):
+ * si salió, pasa lo guardado a `despues` (releer la lista) y lo devuelve.
+ */
+export const siSalio = (despues) => async (hecho) => {
+  if (hecho) await despues(hecho);
+  return hecho;
+};
+
+/**
+ * El `onReemplazar` de «Aligerar»: apunta en `marca` qué campo se guarda solo, para que al
+ * volver la ficha del servidor se tome solo ese y no se pierda lo que se esté escribiendo
+ * en los demás; lo guarda con `guardar(fila)` y resuelve a `true` si salió.
+ *
+ * @param {{ current: string | null }} marca
+ * @param {string} campo
+ * @param {(fila: { id: number }) => Promise<unknown>} guardar resuelve a algo si salió
+ */
+export const guardarSoloEseArte = (marca, campo, guardar) => async (fila) => {
+  marca.current = campo;
+  const hecho = await guardar(fila);
+  if (!hecho) marca.current = null;
+  return Boolean(hecho);
+};

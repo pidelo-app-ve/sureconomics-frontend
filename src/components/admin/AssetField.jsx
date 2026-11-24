@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 
 import { SelectorDeBiblioteca } from "./SelectorDeBiblioteca";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createAdminExternalMedia,
   estadoDelVideo,
@@ -10,6 +10,7 @@ import {
   patchAdminMedia,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { useAvisoDeSubida } from "./useAvisoDeSubida";
 
 /**
  * Attach one file to a piece: upload it, or point at one that lives elsewhere.
@@ -47,16 +48,8 @@ export const AssetField = ({
   // una barra que no se mueve es indistinguible de algo colgado: la redaccion cancela
   // subidas que iban bien.
   const [progreso, setProgreso] = useState(null);
-  const [aviso, setAviso] = useState("");
-  // Lo que queda dicho cuando la subida acaba bien («Se aligeró de 243 KB a 88 KB», de
-  // los anuncios). El aviso de arriba se borra al terminar; esto se queda hasta la
-  // siguiente subida o hasta quitar el archivo.
-  const [nota, setNota] = useState("");
-  // Para cancelar lo que esté preparando `onUpload` (aligerar una imagen) si el campo
-  // desaparece a mitad, por ejemplo al cerrar la ventana de la pieza: así no se sube
-  // nada que ya nadie va a usar. Quien no lo mira sigue funcionando igual.
-  const cancelar = useRef(null);
-  useEffect(() => () => cancelar.current?.abort(), []);
+  // El aviso mientras sube, la nota al acabar («Se aligeró de…») y cortar si se cierra.
+  const subida = useAvisoDeSubida();
 
   // Si Cloudflare ya acabo de transcodificar el video adjunto.
   //
@@ -152,32 +145,19 @@ export const AssetField = ({
     if (!file || !onUpload) return;
     setBusy(true);
     setError("");
-    setAviso("");
-    setNota("");
     setProgreso(null);
-    cancelar.current?.abort();
-    const control = new AbortController();
-    cancelar.current = control;
+    const { opciones, acabar } = subida.empezar();
     try {
       // El segundo argumento es opcional: quien sube una imagen no lo usa y sigue
-      // funcionando igual. El video usa el progreso y el aviso; los anuncios, el aviso,
-      // la nota y la señal.
-      attach(
-        await onUpload(file, {
-          onProgress: setProgreso,
-          onAviso: setAviso,
-          onNota: setNota,
-          signal: control.signal,
-        })
-      );
+      // funcionando igual. El video usa el progreso y el aviso; las imágenes, todo.
+      attach(await onUpload(file, { onProgress: setProgreso, ...opciones }));
     } catch (err) {
-      setNota("");
+      subida.olvidar();
       if (err?.name !== "AbortError") setError(adminErrorMessage(err, "No se pudo subir el archivo."));
     } finally {
-      if (cancelar.current === control) cancelar.current = null;
+      acabar();
       setBusy(false);
       setProgreso(null);
-      setAviso("");
     }
   };
 
@@ -189,7 +169,7 @@ export const AssetField = ({
     }
     setBusy(true);
     setError("");
-    setNota("");
+    subida.olvidar();
     try {
       const body = { kind, url: trimmed };
       const numeric = Number(extra);
@@ -329,10 +309,7 @@ export const AssetField = ({
           <button
             type="button"
             className="se-btn se-btn--secondary se-btn--small"
-            onClick={() => {
-              setNota("");
-              onChange(null, null);
-            }}
+            onClick={() => { subida.olvidar(); onChange(null, null); }}
           >
             Quitar
           </button>
@@ -363,7 +340,7 @@ export const AssetField = ({
           kind={kind}
           puesto={value}
           onElegir={(fila) => {
-            setNota("");
+            subida.olvidar();
             attach(fila);
             setBiblioteca(false);
           }}
@@ -386,7 +363,7 @@ export const AssetField = ({
                 <span className="se-asset__progreso-cifra">{progreso}%</span>
               </>
             ) : null}
-            {aviso ? <span className="se-asset__aviso">{aviso}</span> : null}
+            {subida.aviso ? <span className="se-asset__aviso">{subida.aviso}</span> : null}
           </label>
         ) : null}
 
@@ -424,7 +401,7 @@ export const AssetField = ({
         </div>
       </div>
 
-      {nota ? <p className="se-asset__nota">{nota}</p> : null}
+      {subida.nota ? <p className="se-asset__nota">{subida.nota}</p> : null}
       {error ? <p className="se-asset__error">{error}</p> : null}
     </fieldset>
   );

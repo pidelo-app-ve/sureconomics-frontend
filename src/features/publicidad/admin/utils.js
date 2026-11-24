@@ -149,6 +149,20 @@ export const GUIA_DE_FORMATO = {
   },
 };
 
+/**
+ * El arte para teléfono de los formatos de tira: va aparte de `arte` porque no cambia de
+ * un formato a otro. La tira es 8:1: en un teléfono mide unos 48 px de alto y el texto
+ * deja de leerse, y escalar no reacomoda (da igual SVG o JPEG).
+ */
+export const ARTE_DE_TELEFONO = {
+  campo: "cinta_movil",
+  etiqueta: "Arte para teléfono — 1200 × 600 px (recomendado)",
+  pista:
+    "Lo hace el anunciante: 1200 × 600 px (PNG, JPG, WebP o SVG), con el logo, la frase y el botón apilados y centrados, nada importante a menos de 60 px del borde y letra grande. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto. Sin él, en el teléfono sale la tira entera, de unos 45 px de alto.",
+  forma: { ancho: 2, alto: 1 },
+  medidas: MEDIDAS_DE_ARTE.cinta_movil,
+};
+
 /** El nombre legible, con el del servidor de respaldo por si aparece un formato nuevo. */
 export const nombreDeFormato = (letra, formatos) =>
   GUIA_DE_FORMATO[letra]?.nombre ?? formatos?.[letra] ?? letra;

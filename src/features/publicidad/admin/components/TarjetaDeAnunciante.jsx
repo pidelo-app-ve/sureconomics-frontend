@@ -1,16 +1,55 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import { AssetField } from "../../../../components/admin/AssetField";
-import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
 import {
   actualizarAnunciante,
   borrarAnunciante,
   listar,
-  subidaDeArte,
 } from "../api";
+import { guardarSoloEseArte, siSalio } from "../aligerarArte";
 import { MEDIDAS_DE_ARTE } from "../utils";
-import { AligerarArte } from "./AligerarArte";
+import { CampoDeArte } from "./CampoDeArte";
 import { TarjetaDeCampana } from "./TarjetaDeCampana";
+
+/** Lo que se está escribiendo en la ficha, como viene del anunciante. */
+const fichaDe = (anunciante) => ({
+  nombre: anunciante.nombre,
+  sitio_web: anunciante.sitio_web ?? "",
+  contacto_email: anunciante.contacto_email ?? "",
+  notas: anunciante.notas ?? "",
+  activo: anunciante.activo,
+  logo_id: anunciante.logo_id ?? null,
+});
+
+/**
+ * La ficha que se está escribiendo y el archivo del logotipo (lo que pinta el selector).
+ * Cuando el anunciante vuelve del servidor se toma entera; salvo si «Aligerar» acaba de
+ * guardar solo el logotipo (`soloLogo`): entonces solo él, y lo que se esté escribiendo en
+ * los otros campos no se pierde.
+ */
+const useFichaDelAnunciante = (anunciante) => {
+  const [ficha, setFicha] = useState(() => fichaDe(anunciante));
+  const [logo, setLogo] = useState(anunciante.logo ?? null);
+  const soloLogo = useRef(null);
+
+  useEffect(() => {
+    const soloElLogo = Boolean(soloLogo.current);
+    soloLogo.current = null;
+    setFicha((f) => (soloElLogo ? { ...f, logo_id: anunciante.logo_id ?? null } : fichaDe(anunciante)));
+    setLogo(anunciante.logo ?? null);
+    // Los campos uno a uno, como antes: `anunciante` entero cambia en cada relectura.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    anunciante.nombre,
+    anunciante.sitio_web,
+    anunciante.contacto_email,
+    anunciante.notas,
+    anunciante.activo,
+    anunciante.logo_id,
+    anunciante.logo,
+  ]);
+
+  return { ficha, setFicha, logo, setLogo, soloLogo };
+};
 
 export const TarjetaDeAnunciante = ({
   anunciante,
@@ -24,44 +63,7 @@ export const TarjetaDeAnunciante = ({
   onNuevaCampana,
 }) => {
   const [abierta, setAbierta] = useState(false);
-  const [ficha, setFicha] = useState({
-    nombre: anunciante.nombre,
-    sitio_web: anunciante.sitio_web ?? "",
-    contacto_email: anunciante.contacto_email ?? "",
-    notas: anunciante.notas ?? "",
-    activo: anunciante.activo,
-    logo_id: anunciante.logo_id ?? null,
-  });
-  const [logo, setLogo] = useState(anunciante.logo ?? null);
-  // «Aligerar» guarda solo el logotipo: al volver la ficha del servidor se toma solo él,
-  // y lo que se esté escribiendo en los otros campos no se pierde.
-  const soloLogo = useRef(false);
-
-  useEffect(() => {
-    if (soloLogo.current) {
-      soloLogo.current = false;
-      setFicha((f) => ({ ...f, logo_id: anunciante.logo_id ?? null }));
-      setLogo(anunciante.logo ?? null);
-      return;
-    }
-    setFicha({
-      nombre: anunciante.nombre,
-      sitio_web: anunciante.sitio_web ?? "",
-      contacto_email: anunciante.contacto_email ?? "",
-      notas: anunciante.notas ?? "",
-      activo: anunciante.activo,
-      logo_id: anunciante.logo_id ?? null,
-    });
-    setLogo(anunciante.logo ?? null);
-  }, [
-    anunciante.nombre,
-    anunciante.sitio_web,
-    anunciante.contacto_email,
-    anunciante.notas,
-    anunciante.activo,
-    anunciante.logo_id,
-    anunciante.logo,
-  ]);
+  const { ficha, setFicha, logo, setLogo, soloLogo } = useFichaDelAnunciante(anunciante);
 
   // El mural de arriba pide abrir una ficha concreta. Se obedece abriendo, nunca
   // cerrando: quien tenia otras dos desplegadas comparando campanas no quiere que
@@ -107,41 +109,26 @@ export const TarjetaDeAnunciante = ({
           {/* La ficha de la marca. Antes un anunciante era solo un nombre: no había
               dónde poner su logotipo ni su página, y el panel tenía que deducir quién
               era a partir del arte de alguna de sus campañas -- que cambia cada mes. */}
-          <AssetField
+          <CampoDeArte
             id={`a-${anunciante.id}-logo`}
-            label="Logotipo de la marca"
-            hint="Sale en el mosaico de arriba y sirve para reconocer al anunciante aunque su campaña de este mes lleve otro arte."
-            kind="image"
-            value={ficha.logo_id}
+            etiqueta="Logotipo de la marca"
+            pista="Sale en el mosaico de arriba y sirve para reconocer al anunciante aunque su campaña de este mes lleve otro arte."
+            medidas={MEDIDAS_DE_ARTE.logo}
+            valor={ficha.logo_id}
             asset={logo}
             onChange={(id, objeto) => {
               setFicha((f) => ({ ...f, logo_id: id ?? null }));
               setLogo(objeto ?? null);
             }}
-            onUpload={subidaDeArte(MEDIDAS_DE_ARTE.logo)}
-            accept={ACCEPTED_IMAGE_MIME}
+            preguntar={preguntar}
+            ocupado={ocupado}
+            onReemplazar={guardarSoloEseArte(soloLogo, "logo", (fila) =>
+              correr(
+                () => actualizarAnunciante(anunciante.id, { logo_id: fila.id }).then(() => listar()),
+                `Logotipo de «${anunciante.nombre}» aligerado`,
+              ).then(siSalio(onCambio)),
+            )}
           />
-          {ficha.logo_id ? (
-            <AligerarArte
-              asset={logo}
-              medidas={MEDIDAS_DE_ARTE.logo}
-              preguntar={preguntar}
-              deshabilitado={ocupado}
-              onReemplazar={async (fila) => {
-                soloLogo.current = true;
-                const hecho = await correr(async () => {
-                  await actualizarAnunciante(anunciante.id, { logo_id: fila.id });
-                  return listar();
-                }, `Logotipo de «${anunciante.nombre}» aligerado`);
-                if (!hecho) {
-                  soloLogo.current = false;
-                  return false;
-                }
-                onCambio(hecho);
-                return true;
-              }}
-            />
-          ) : null}
 
           <div className="se-admin-pub__doble">
             <div>

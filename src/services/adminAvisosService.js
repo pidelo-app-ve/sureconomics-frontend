@@ -8,8 +8,9 @@ import { unwrapEntity } from "./adminResponseUtils";
    se descartan. Lo que devuelve cada función ya viene leído (`lib/avisos.js`): la página
    no adivina nombres. */
 
-/** Los avisos de hoy, con si están encendidos y cuántos quedan. */
-export const traerAvisos = async () => leerAvisos(unwrapEntity(await adminRequest("/admin/avisos")));
+/** Los avisos de hoy (o los de `fecha`, AAAA-MM-DD), con si están encendidos y cuántos van hoy. */
+export const traerAvisos = async (fecha = null) =>
+  leerAvisos(unwrapEntity(await adminRequest("/admin/avisos", fecha ? { query: { fecha } } : undefined)));
 
 /** Lo que se avisaría ahora mismo. No crea nada: sirve para mirar antes de encender. */
 export const traerCandidatos = async () =>

@@ -63,8 +63,18 @@ export const PASOS_AVISOS = [
     clave: "vistas",
     titulo: "Las dos vistas",
     puntos: [
-      "De hoy: los avisos que ya salieron, con lo que pasó con cada uno.",
+      "De hoy: los avisos que ya salieron, con lo que pasó con cada uno. Si elige otro día, la pestaña lo dice («Del 22 nov.»).",
       "Lo que se avisaría ahora: las noticias que el sistema tiene en la mira en este momento. Es solo para mirar: no crea nada.",
+    ],
+  },
+  {
+    clave: "filtros",
+    titulo: "Otro día y qué avisos ver",
+    texto: "Solo en «De hoy». Sirven para repasar lo que salió otro día o encontrar un aviso sin bajar por toda la lista.",
+    puntos: [
+      "Día: los avisos de ese día. No pasa de hoy; «Volver a hoy» deja la lista como estaba. La cuenta de arriba sigue siendo la de hoy.",
+      "Estado: todos, solo los pendientes, los que tomó usted, los que ya tienen borrador, los publicados o los descartados.",
+      "Páginas: si un día tiene más de 30 avisos, van de 20 en 20, con «Anterior» y «Siguiente» arriba y abajo.",
     ],
   },
   {

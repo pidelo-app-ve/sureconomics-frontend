@@ -3,7 +3,7 @@
  */
 import {
   accionesDe, comprobacion, detalleDeLoComprobado, estadoDeAviso, leerAvisos, leerCandidatos, leerRevision, lineaDelDia, nombreDePais,
-  estadoDePersona, leerBot, lineaDelBot, lineaDeQuienRecibe, pendientes, vistaInicial,
+  estadoDePersona, leerBot, lineaDelBot, lineaDeQuienRecibe, pendientes, vistaInicial, avisosALaVista, diaCorto,
 } from "./avisos.js";
 
 let fallos = 0;
@@ -135,6 +135,27 @@ check("sin ninguno", lineaDelDia({ ...dia, hoy: 0 }) === "Ninguno todavía hoy")
 console.log("en qué vista se abre");
 check("con avisos de hoy: hoy", vistaInicial(dia) === "hoy");
 check("sin avisos: lo que se avisaría", vistaInicial(vacio) === "ahora");
+
+console.log("la lista del día: estado y páginas");
+check("lee la fecha del día que trae", leerAvisos({ fecha: "2026-11-22" }).fecha === "2026-11-22" && vacio.fecha === null);
+const muchos = Array.from({ length: 45 }, (_, i) => ({
+  id: i + 1,
+  estado: ["pendiente", "tomado", "redactado", "publicado", "descartado"][i % 5],
+  tomadoPorId: i % 10 === 1 ? 7 : 8,
+}));
+let v = avisosALaVista(muchos);
+check("más de 30: de 20 en 20", v.filas.length === 20 && v.paginas === 3 && v.total === 45, v);
+v = avisosALaVista(muchos, { pagina: 3 });
+check("la última página trae lo que queda", v.filas.length === 5 && v.filas[0].id === 41, v);
+v = avisosALaVista(muchos, { pagina: 99 });
+check("una página que ya no existe da la última", v.pagina === 3, v);
+v = avisosALaVista(muchos, { estado: "pendientes", pagina: 2 });
+check("30 o menos: todos a la vista, en una página", v.filas.length === 9 && v.paginas === 1 && v.pagina === 1, v);
+v = avisosALaVista(muchos, { estado: "mios", miId: 7 });
+check("tomados por mí: solo los míos", v.total === 5 && v.filas.every((x) => x.tomadoPorId === 7), v);
+check("tomados por mí sin saber quién soy: ninguno", avisosALaVista(muchos, { estado: "mios" }).total === 0);
+check("un estado raro enseña todos", avisosALaVista(muchos, { estado: "raro" }).total === 45);
+check("el día corto", /22/.test(diaCorto("2026-11-22")) && diaCorto("") === "", diaCorto("2026-11-22"));
 
 console.log(fallos ? `\n${fallos} fallo(s)` : "\ntodo bien");
 process.exit(fallos ? 1 : 0);

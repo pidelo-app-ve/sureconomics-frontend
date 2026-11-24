@@ -7,6 +7,7 @@
  * en el backend). Pasa por estos estados: `pendiente` → `tomado` → `redactado` →
  * `publicado`; o se queda en `descartado` (con su motivo) o en `vencido`.
  */
+import { trozoDeLista } from "./listasDelPanel.js";
 
 /** Por qué se descarta un aviso, como se dice en pantalla. */
 export const NOMBRE_DE_MOTIVO = {
@@ -46,9 +47,10 @@ const leerDia = (data) => ({
 const leerFuentes = (fuentes) =>
   lista(fuentes).map((f) => ({ medio: f?.medio || "Sin nombre", titulo: f?.titulo || "", url: f?.url || null }));
 
-/** `GET /admin/avisos`: los avisos de hoy y el estado del día. */
+/** `GET /admin/avisos`: los avisos de hoy (o del día pedido, `fecha`) y el estado de hoy. */
 export const leerAvisos = (data) => ({
   ...leerDia(data),
+  fecha: typeof data?.fecha === "string" ? data.fecha : null,
   avisos: lista(data?.avisos).map((a) => ({
     id: a.id,
     titulo: a.titulo || "",
@@ -268,3 +270,37 @@ export const lineaDelBot = (bot) => {
 
 /** En qué vista se abre la página: si no hay avisos de hoy, lo que se avisaría ahora. */
 export const vistaInicial = ({ avisos }) => (avisos.length ? "hoy" : "ahora");
+
+/* —— la lista del día: el filtro por estado y las páginas, en el navegador —— */
+
+/** Qué avisos enseña cada opción de «Estado» (`miId`: quien mira, para «Tomados por mí»). */
+export const ESTADOS_DE_AVISO = {
+  todos: { texto: "Todos", pasa: () => true },
+  pendientes: { texto: "Pendientes", pasa: (a) => a.estado === "pendiente" },
+  mios: { texto: "Tomados por mí", pasa: (a, miId) => a.estado === "tomado" && miId != null && a.tomadoPorId === miId },
+  redactados: { texto: "Redactados (con borrador)", pasa: (a) => a.estado === "redactado" },
+  publicados: { texto: "Publicados", pasa: (a) => a.estado === "publicado" },
+  descartados: { texto: "Descartados", pasa: (a) => a.estado === "descartado" },
+};
+
+/** Hasta cuántos avisos se ven de una vez; con más, van de `AVISOS_POR_PAGINA` en `AVISOS_POR_PAGINA`. */
+export const AVISOS_SIN_PAGINAR = 30;
+export const AVISOS_POR_PAGINA = 20;
+
+/**
+ * Los avisos que se ven: los que pasan el estado elegido y, si son más de 30, la página
+ * `pagina` de 20 (que se ajusta si ya no existe). Devuelve `{ filas, pagina, paginas, total }`.
+ */
+export const avisosALaVista = (avisos, { estado = "todos", miId = null, pagina = 1 } = {}) => {
+  const pasa = (ESTADOS_DE_AVISO[estado] ?? ESTADOS_DE_AVISO.todos).pasa;
+  const filtrados = lista(avisos).filter((a) => pasa(a, miId));
+  if (filtrados.length <= AVISOS_SIN_PAGINAR) return { filas: filtrados, pagina: 1, paginas: 1, total: filtrados.length };
+  return { ...trozoDeLista(filtrados, pagina, AVISOS_POR_PAGINA), total: filtrados.length };
+};
+
+/** «24 nov.»: el día elegido, corto, para la pestaña («Del 24 nov.»). */
+export const diaCorto = (fecha) => {
+  const [anio, mes, dia] = String(fecha ?? "").split("-").map(Number);
+  if (!anio || !mes || !dia) return fecha ?? "";
+  return new Date(Date.UTC(anio, mes - 1, dia, 12)).toLocaleDateString("es-VE", { day: "numeric", month: "short", timeZone: "UTC" });
+};

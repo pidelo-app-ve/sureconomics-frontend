@@ -17,7 +17,7 @@ import { mock, test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 
-const { pintar, pantalla, fireEvent, waitFor, within, act, pasar, servidor, grabada } = await import(
+const { pintar, pantalla, fireEvent, waitFor, within, act, asentar, pasar, servidor, grabada } = await import(
   "../../../../scripts/pruebas/dom.mjs"
 );
 const { AdminTitulares } = await import("./AdminTitulares.jsx");
@@ -41,6 +41,7 @@ const abrir = async (lista = listaPara) => {
     .contestar("GET", LISTA, (p) => lista(p.consulta));
   pintar(createElement(AdminTitulares), { ruta: "/admin/titulares", rol: ROL });
   await pantalla.findByText("Página 1 de 3 — 45 en total");
+  await asentar();
 };
 
 const pedidas = () => servidor.a(LISTA, "GET").map((p) => p.consulta);

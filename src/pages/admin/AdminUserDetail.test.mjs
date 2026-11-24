@@ -11,7 +11,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 
-const { pintar, pantalla, fireEvent, waitFor, servidor, grabada } = await import("../../../scripts/pruebas/dom.mjs");
+const { pintar, pantalla, fireEvent, waitFor, asentar, servidor, grabada } = await import("../../../scripts/pruebas/dom.mjs");
 const { AdminUserDetail } = await import("./AdminUserDetail.jsx");
 
 const lectora = grabada("lectores/lectora.json");
@@ -21,6 +21,7 @@ const abrir = async () => {
   servidor.contestar("GET", RUTA, lectora).contestar("PATCH", RUTA, grabada("lectores/lectora-nombre.json"));
   pintar(createElement(AdminUserDetail), { ruta: RUTA, patron: "/admin/users/:id", rol: grabada("panel/entrar-editor.json").data.role });
   await pantalla.findByDisplayValue("Ana");
+  await asentar();
 };
 
 test("lee el permiso de proponer tal como lo manda el servidor", async () => {

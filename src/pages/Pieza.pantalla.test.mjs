@@ -13,7 +13,7 @@ import assert from "node:assert/strict";
 import { createElement } from "react";
 import { traducir } from "../i18n/motor.js";
 
-const { pintar, pantalla, fireEvent, servidor, grabada } = await import("../../scripts/pruebas/dom.mjs");
+const { pintar, pantalla, fireEvent, asentar, servidor, grabada } = await import("../../scripts/pruebas/dom.mjs");
 const { Pieza } = await import("./Pieza.jsx");
 
 const pieza = grabada("piezas/pieza.json");
@@ -65,6 +65,7 @@ test("con la API caída lo dice y «Reintentar» la vuelve a pedir (no es «no e
   });
   abrir(SLUG);
   await pantalla.findByText(es("piezas.errorCarga"));
+  await asentar();
   assert.equal(pantalla.queryByRole("heading", { level: 1, name: es("piezas.noEncontrada.titulo") }), null);
 
   fireEvent.click(pantalla.getByRole("button", { name: es("comun.reintentar") }));

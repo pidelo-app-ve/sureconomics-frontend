@@ -24,7 +24,9 @@ EditorDeTexto.propTypes = { value: PropTypes.string, onChange: PropTypes.func.is
 
 sustituir({ "src/components/editor/RichTextEditor.jsx": { RichTextEditor: EditorDeTexto } });
 
-const { pintar, pantalla, fireEvent, waitFor, within, servidor, grabada } = await import("../../../scripts/pruebas/dom.mjs");
+const { pintar, pantalla, fireEvent, waitFor, within, asentar, servidor, grabada } = await import(
+  "../../../scripts/pruebas/dom.mjs"
+);
 const { AdminBoletin } = await import("./AdminBoletin.jsx");
 
 const BASE = "/admin/boletin/numeros";
@@ -41,7 +43,11 @@ const abrirNumero = async () => {
     .contestar("PATCH", `${BASE}/1`, grabada("boletin/numero-guardado.json"));
   pintar(createElement(AdminBoletin), { ruta: "/admin/boletin/numeros", rol: "publicador" });
   fireEvent.click(await pantalla.findByRole("button", { name: /30 de noviembre/ }));
-  return pantalla.findByLabelText("Asunto");
+  const asunto = await pantalla.findByLabelText("Asunto");
+  // Que corra el efecto que copia el número en el borrador antes de escribir: si no,
+  // con la máquina cargada pisaba lo escrito (revisión de la tanda 2).
+  await asentar();
+  return asunto;
 };
 
 const escribir = (campo, valor) => fireEvent.change(campo, { target: { value: valor } });

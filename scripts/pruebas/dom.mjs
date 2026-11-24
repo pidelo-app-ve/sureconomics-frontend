@@ -19,7 +19,8 @@
  *   papel y el nombre que se leen («el botón Guardar»), no por clases. `pantalla` es su
  *   `screen`; `fireEvent` dispara clics y cambios. Tras cada prueba se desmonta todo.
  * - **Sin red:** `fetch` es el de `servidor.mjs`, que contesta con respuestas grabadas
- *   (`src/pruebas/respuestas/`); una petición sin respuesta hace fallar la prueba.
+ *   (`src/pruebas/respuestas/`); una petición sin respuesta hace fallar la prueba
+ *   siempre (lo comprueba el `afterEach` de aquí abajo).
  *   `navigator.sendBeacon` (la analítica) solo apunta.
  *
  * `pintar(elemento, { ruta, rol })` lo monta dentro de lo que pone `main.jsx` para el panel
@@ -95,11 +96,24 @@ export const pintar = (elemento, { ruta = "/", patron = "*", rol = null, sitio =
 /** Un rato de reloj de verdad (la espera de un buscador): `await pasar(300)`. */
 export const pasar = (ms) => act(() => new Promise((listo) => setTimeout(listo, ms)));
 
+/**
+ * Dejar que corran los efectos que quedan tras pintar o tras una respuesta. Va justo
+ * después de encontrar un campo y **antes** de escribir en él: si no, un efecto que aún
+ * no corrió (el del editor del boletín que copia el número en el borrador, p. ej.) puede
+ * pisar lo escrito. Con la máquina cargada pasaba de vez en cuando.
+ */
+export const asentar = () => act(async () => {});
+
 afterEach(() => {
+  // Toda petición sin respuesta grabada hace fallar la prueba, la mire o no ella misma.
+  const sinRespuesta = [...servidor.sinRespuesta];
   rtl.cleanup();
   servidor.reiniciar();
   globalThis.localStorage.clear();
   globalThis.sessionStorage.clear();
+  if (sinRespuesta.length) {
+    throw new Error(`peticiones sin respuesta grabada: ${sinRespuesta.join(", ")}`);
+  }
 });
 
 // Cerrar happy-dom: si no, sus relojes dejan el proceso de la prueba abierto.

@@ -7,7 +7,7 @@ import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getResumen } from "../services/resumenService";
-import { lineaDelPunto, rutaInterna } from "../lib/resumen";
+import { fotoDelResumen, lineaDelPunto, rutaInterna } from "../lib/resumen";
 import "../styles/resumen.css";
 
 /**
@@ -99,7 +99,8 @@ const Edicion = ({ datos, dentroDelDia }) => {
     <>
       {datos.imagen?.url ? (
         <figure className="se-res__imagen">
-          <img src={datos.imagen.url} alt={datos.imagen.alt || ""} />
+          {/* Las tallas WebP del servidor y no siempre la original (ver `fotoDelResumen`). */}
+          <img {...fotoDelResumen(datos.imagen)} alt={datos.imagen.alt || ""} />
           {datos.imagen.credito ? <figcaption>{datos.imagen.credito}</figcaption> : null}
         </figure>
       ) : null}
@@ -167,7 +168,10 @@ Edicion.propTypes = {
     monedas: PropTypes.array,
     lvbp: PropTypes.array,
     frase: PropTypes.string,
-    imagen: PropTypes.shape({ url: PropTypes.string, alt: PropTypes.string, credito: PropTypes.string }),
+    imagen: PropTypes.shape({
+      url: PropTypes.string, alt: PropTypes.string, credito: PropTypes.string,
+      ancho: PropTypes.number, alto: PropTypes.number,
+    }),
   }).isRequired,
   dentroDelDia: PropTypes.bool,
 };

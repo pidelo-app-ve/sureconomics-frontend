@@ -20,7 +20,8 @@ import handler, {
   inyectar,
   tituloParaBuscadores,
 } from "./pieza.js";
-import { fotoDePortada } from "../src/lib/fotoDePieza.js";
+import { SIZES_DE_CABECERA, fotoDePortada } from "../src/lib/fotoDePieza.js";
+import { anchoDeSizes, tallaElegida } from "../scripts/pruebas/anchoDeSizes.mjs";
 import { olvidarShell } from "./_comun.js";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -632,6 +633,27 @@ const CON_FOTO = { ...CON_CUERPO, image_asset: { url: EN_R2, width: 1733, height
       && raiz.indexOf("se-piece__img") < raiz.indexOf("se-piece__meta"));
   check("foto previa: la de compartir no cambia",
     h.includes('property="og:image" content="https://www.sureconomics.com/media/image/2026/11/recurso-33285c7f7d61-og-60-10.jpg"'));
+}
+{
+  // El sizes de la cabecera (24-nov-2026), contra lo que mide su caja en `blog.css`: una
+  // columna (ventana menos 24/32 px de margen a cada lado) hasta 899 y, desde 900, la
+  // columna de la foto, 0,8 de 2 con 48 px entre las dos; en un teléfono acostado, 0,95 de 2.
+  // Decía `(max-width: 960px) 100vw, 1100px`: a 1440 pedía 1100 px para una caja de 525.
+  const CAJA = [
+    [390, 900, 342], [412, 900, 364], [800, 1000, 736], [900, 1000, 315], [1024, 800, 358],
+    [1280, 800, 461], [1440, 900, 525], [1600, 900, 525], [1920, 1080, 589], [844, 390, 355], [667, 375, 279],
+  ];
+  const fuera = CAJA.filter(([ancho, alto, caja]) => {
+    const dice = anchoDeSizes(SIZES_DE_CABECERA, ancho, alto);
+    return dice < caja || dice > caja * 1.15 + 2;
+  });
+  check("foto previa: el sizes cubre la caja sin pasarse más de un 15 %", fuera.length === 0,
+    fuera.map(([a, h, c]) => `${a}x${h}: caja ${c}, sizes ${anchoDeSizes(SIZES_DE_CABECERA, a, h)}`));
+  const { srcSet, sizes } = fotoDePortada(EN_R2, 1733, 907);
+  check("foto previa: un teléfono de 390 a 3x baja la de 1100 y no la de 1400 (pide 1026)",
+    tallaElegida(srcSet, sizes, 390, 3).w === 1100);
+  check("foto previa: un escritorio de 1440 a 1x baja la de 640 y no la de 1100 (caja de 525)",
+    tallaElegida(srcSet, sizes, 1440, 1).w === 640);
 }
 {
   const img = imgDe(await pedir({ ...CON_FOTO, image_asset: { url: "/media/image/2026/10/vieja-abc.jpg" }, imagen_foco: null }));

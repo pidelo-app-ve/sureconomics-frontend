@@ -165,9 +165,43 @@ export const posicionDeFoco = (texto) => {
   return foco && !(foco[0] === 50 && foco[1] === 50) ? `${foco[0]}% ${foco[1]}%` : undefined;
 };
 
+/**
+ * Las tallas de una foto que hasta ahora se pintaba entera, sin `srcset` (la del resumen
+ * diario, la de «Siguiente lectura»), con la original al final cuando no pasa de 1.400 px.
+ *
+ * La original va para que nadie la vea peor que antes: quien necesita más que la mayor
+ * talla (un teléfono 3x con una foto de 900) sigue recibiendo la original, como siempre; los
+ * demás, una talla WebP. Por encima de 1.400 no hace falta: la talla de 1.400 cubre cualquier
+ * caja de estas, y la original suele ser el PNG de 1.536 px y 2 MB que sube la redacción.
+ *
+ * Nulo, y se pinta la original como antes, sin ancho conocido (piezas viejas: sin él se
+ * pedirían tallas que quizá no existen, y una `<img>` sin plan B se quedaría rota), de fuera,
+ * SVG o GIF, o de menos de 640 (sin más tallas que las pequeñas, que aquí se verían borrosas).
+ */
+export const tallasHastaLaOriginal = (url, anchoOriginal) => {
+  if (!Number.isInteger(anchoOriginal) || anchoOriginal <= 0) return null;
+  return imagenSrcSet(url, ANCHOS_DE_TARJETA, anchoOriginal, { original: anchoOriginal <= 1400 });
+};
+
 /** Las tallas que se ofrecen para la foto de cabecera, las mismas que en las tarjetas.
  *  En nuestro bucket mandan las que el backend generó (ver `imagenSrcSet`). */
 const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
+
+/**
+ * El `sizes` de la foto de cabecera: lo que mide su caja (`.se-piece__head--media` en
+ * `blog.css`), medido el 24-nov-2026:
+ *  - teléfono en horizontal (hasta 500 de alto): la mitad de dos columnas 1,05/0,95;
+ *  - hasta 899: una columna, el ancho menos los márgenes (24 px a cada lado; 32 desde 768);
+ *  - desde 900: la columna de la foto, 0,8 de 2 (rejilla 1,2fr/0,8fr con 48 px entre las
+ *    dos): 315 a 900, 525 a 1440, fija desde ahí (contenedor de 1440) y 589 desde 1920 (1600).
+ * Decía `(max-width: 960px) 100vw, 1100px`: a 1440 pedía 1100 px para una caja de 525 y en
+ * un teléfono 3x de 390 bajaba la de 1400 donde basta la de 1100. Cada tramo redondea hacia
+ * arriba, como el de la apertura (`SIZES_PRINCIPAL`).
+ */
+export const SIZES_DE_CABECERA =
+  "(orientation: landscape) and (max-height: 500px) and (max-width: 899px) 48vw, " +
+  "(max-width: 899px) calc(100vw - 48px), (max-width: 1439px) calc(40vw - 45px), " +
+  "(max-width: 1919px) 525px, 589px";
 
 /**
  * La foto de cabecera de una pieza: los atributos de su `<img>`.
@@ -188,7 +222,7 @@ export const fotoDePortada = (url, ancho = null, alto = null) => {
   return {
     src: imagenAncho(url, 1400),
     srcSet: imagenSrcSet(url, ANCHOS_DE_PORTADA, ancho) ?? undefined,
-    sizes: "(max-width: 960px) 100vw, 1100px",
+    sizes: SIZES_DE_CABECERA,
     width: medida ? ancho : undefined,
     height: medida ? alto : undefined,
   };

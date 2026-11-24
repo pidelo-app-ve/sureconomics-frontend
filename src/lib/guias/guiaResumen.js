@@ -126,7 +126,24 @@ export const PASOS_RESUMEN = [
   {
     clave: "historial",
     titulo: "Las ediciones anteriores",
-    texto: "Las ediciones de los últimos días, con su estado y si llegaron a cada canal. Pulsa una para verla.",
+    texto:
+      "Todas las ediciones que se han armado, de la más reciente a la más antigua, con su estado y si llegaron a " +
+      "cada canal. Pulsa «Ver» en una para abrirla arriba.",
+    puntos: [
+      "Páginas: van de 21 en 21, una semana de tres ediciones. Arriba dice en qué página estás y cuántas hay en total; «Anterior» y «Siguiente» están arriba y abajo.",
+    ],
+  },
+  {
+    clave: "historial-filtros",
+    titulo: "Buscar una edición",
+    texto: "Para encontrar una edición concreta sin pasar páginas. Al cambiar un filtro, la lista vuelve a la primera página.",
+    puntos: [
+      "Estado: solo las publicadas, las retenidas, las que no tuvieron contenido nuevo, las retiradas o los borradores.",
+      "Edición: solo las de la mañana, la tarde o la noche.",
+      "Desde y Hasta: los días entre los que buscar. Si las pones al revés, se buscan igual.",
+      "Solo con fallos de envío: las que no llegaron a Telegram o a WhatsApp, para revisar qué pasó.",
+      "Limpiar filtros: si ninguna edición cumple lo elegido, aparece este botón para volver a verlas todas.",
+    ],
   },
   {
     clave: "guia",

@@ -159,3 +159,33 @@ export const editable = (r) => ({
 export const comoAdjunto = (f) => ({
   id: f.id, url: f.url, original_filename: f.titulo || f.alt || "Foto", width: f.ancho, height: f.alto, credit: f.credito,
 });
+
+/* —— el historial: sus filtros y lo que se pide (`GET /admin/resumen/ediciones`) —— */
+
+/** Sin filtros: todas las ediciones, de 21 en 21 (una semana de tres). */
+export const FILTROS_DEL_HISTORIAL = { estado: "", edicion: "", desde: "", hasta: "", fallo: "" };
+
+/** Los estados que se pueden elegir (los de la base; «caducada» no es uno: es un borrador que no salió). */
+export const ESTADOS_DEL_HISTORIAL = {
+  publicado: "Publicadas",
+  borrador: "Borradores",
+  retenido: "Retenidas",
+  vacio: "Sin contenido nuevo",
+  retirado: "Retiradas",
+};
+
+/** «Solo con fallos de envío»: en qué canal. */
+export const FALLOS_DE_ENVIO = { telegram: "En Telegram", whatsapp: "En WhatsApp" };
+
+/** Si hay algún filtro puesto. */
+export const hayFiltrosEnElHistorial = (f) => Object.values(f ?? {}).some(Boolean);
+
+/**
+ * Lo que se le pide al servidor: la página y solo los filtros puestos. Unas fechas al revés
+ * («del 20 al 10») se dan la vuelta: es lo que quiso decir quien las puso.
+ */
+export const consultaDelHistorial = (f = FILTROS_DEL_HISTORIAL, pagina = 1) => {
+  let { desde, hasta } = f;
+  if (desde && hasta && desde > hasta) [desde, hasta] = [hasta, desde];
+  return Object.fromEntries(Object.entries({ ...f, desde, hasta, pagina }).filter(([, v]) => v));
+};

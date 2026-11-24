@@ -17,6 +17,7 @@ import { VistaPreviaWhatsApp } from "../../components/admin/resumen/VistaPreviaW
 import { Punto } from "../../components/admin/resumen/Punto";
 import { LoQueSeCayo } from "../../components/admin/resumen/LoQueSeCayo";
 import { HistorialDeLaEdicion } from "../../components/admin/resumen/HistorialDeLaEdicion";
+import { HistorialDeEdiciones } from "../../components/admin/resumen/HistorialDeEdiciones";
 
 /**
  * «Resumen diario» en el panel: ver cómo va a llegar al canal cada edición y ajustarla.
@@ -45,6 +46,10 @@ import { HistorialDeLaEdicion } from "../../components/admin/resumen/HistorialDe
  *   falla, el mismo botón lo reintenta.
  * - La ficha dice **quién hizo qué** con cada edición (`historial`) y qué se borró después
  *   de armarla (`caidos`, `quitados`).
+ *
+ * Abajo, todas las ediciones anteriores por páginas y con filtros (`HistorialDeEdiciones`).
+ * La cabecera (las tres de hoy, «en pausa») sale de `GET /admin/resumen`, que trae solo las
+ * de hoy.
  */
 
 const { ancla } = recorridoResumen;
@@ -67,6 +72,8 @@ export const AdminResumen = () => {
   const [imagenElegida, setImagenElegida] = useState(null);
   const [ocupado, setOcupado] = useState(false);
   const [anadir, setAnadir] = useState({ id: "", seccion: "importante" });
+  // Cuántas acciones van: al cambiar, el historial de abajo se vuelve a pedir (callado).
+  const [vueltas, setVueltas] = useState(0);
 
   useEffect(() => {
     applyPageMeta({ title: "Admin — Resumen diario", description: "Ver cómo sale cada edición del resumen y ajustarla antes de la hora." });
@@ -113,6 +120,7 @@ export const AdminResumen = () => {
         toastSuccess(exito, "Resumen");
       }
       await cargar(d?.id ?? actual?.id);
+      setVueltas((v) => v + 1);
       return true;
     } catch (err) {
       toastError(adminErrorMessage(err, fallo), "Resumen");
@@ -151,7 +159,7 @@ export const AdminResumen = () => {
   };
 
   /** Volver a cargar sin tapar el aviso que ya se dio: tras un 409, lo más probable es que alguien llegó antes. */
-  const ponerAlDia = (id) => cargar(id).catch(() => {});
+  const ponerAlDia = (id) => cargar(id).catch(() => {}).finally(() => setVueltas((v) => v + 1));
 
   /**
    * «Retirar edición»: no se deshace, así que se confirma dentro del panel con su motivo.
@@ -665,46 +673,7 @@ export const AdminResumen = () => {
         </>
       ) : null}
 
-      <section className="se-admin-table-wrap se-res-adm-bloque" {...ancla("historial")}>
-        <h2 className="se-form-label">Ediciones anteriores</h2>
-        {datos.resumenes.length ? (
-          <div className="se-tit-fuentes__tabla">
-            <table className="se-admin-table">
-              <thead>
-                <tr>
-                  <th scope="col">Día</th>
-                  <th scope="col">Edición</th>
-                  <th scope="col">Estado</th>
-                  <th scope="col" className="se-tit-num">Puntos</th>
-                  <th scope="col">Telegram</th>
-                  <th scope="col">WhatsApp</th>
-                  <th scope="col"><span className="se-sr-only">Abrir</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {datos.resumenes.map((r) => (
-                  <tr key={r.id}>
-                    <td>{r.fecha_larga}</td>
-                    <td>{MOMENTO[r.edicion]}</td>
-                    <td>{chipDe(r).texto}</td>
-                    <td className="se-tit-num">{r.puntos}</td>
-                    <td>{["publicado", "retirado"].includes(r.estado) ? canal(r, "telegram", r.telegram) : "—"}</td>
-                    <td>{["publicado", "retirado"].includes(r.estado) ? canal(r, "whatsapp", r.whatsapp) : "—"}</td>
-                    <td className="se-admin-table__actions">
-                      <button type="button" className="se-btn se-btn--secondary" disabled={r.id === actual?.id || ocupado}
-                        onClick={() => abrirOtra(r.id)}>
-                        {r.id === actual?.id ? "Abierto" : "Ver"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="se-admin-meta-hint">Todavía no hay ninguno.</p>
-        )}
-      </section>
+      <HistorialDeEdiciones abiertaId={actual?.id} ocupado={ocupado} vueltas={vueltas} onAbrir={abrirOtra} />
       <ConfirmDialog />
     </main>
   );

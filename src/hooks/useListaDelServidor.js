@@ -8,15 +8,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * cuando cambia, se pide otra vez, con «Cargando…». Cada petición lleva su **turno**: si
  * llega tarde una vieja (se cambió de filtro mientras tanto), no pisa a la nueva.
  *
+ * `alLlegar(datos)`, si se da, corre con cada respuesta que vale (la del último turno): ahí
+ * se pone, por ejemplo, la página que el servidor dice que existe.
+ *
  * Devuelve `{ status, datos, error, cargar, recargar }`:
  * - `cargar()`: otra vez, con «Cargando…» (el «Reintentar» de un error);
  * - `recargar()`: la de después de una acción, callada (sin «Cargando…» y, si falla, se
  *   queda lo que se ve). Pide siempre la lista **vigente**: si entre el clic y la vuelta
  *   se cambió de página o de filtro, no trae la de antes.
  */
-export const useListaDelServidor = (pedir) => {
+export const useListaDelServidor = (pedir, alLlegar) => {
   const [lista, setLista] = useState({ status: "loading", datos: null, error: null });
   const turno = useRef(0);
+  const llegada = useRef(alLlegar);
+  llegada.current = alLlegar;
 
   const cargar = useCallback(
     async ({ callado = false } = {}) => {
@@ -24,7 +29,9 @@ export const useListaDelServidor = (pedir) => {
       if (!callado) setLista((l) => ({ ...l, status: "loading", error: null }));
       try {
         const datos = await pedir();
-        if (mio === turno.current) setLista({ status: "success", datos, error: null });
+        if (mio !== turno.current) return;
+        setLista({ status: "success", datos, error: null });
+        llegada.current?.(datos);
       } catch (error) {
         if (mio !== turno.current) return;
         setLista((l) => (callado && l.status === "success" ? l : { status: "error", datos: l.datos, error }));

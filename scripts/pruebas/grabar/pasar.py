@@ -15,6 +15,9 @@ AQUI = Path(__file__).resolve().parent
 GRABADAS = Path(os.environ.get("GRABADAS") or Path(tempfile.gettempdir()) / "sureconomics-grabadas")
 DESTINO = AQUI.parents[2] / "src" / "pruebas" / "respuestas"
 COMMIT_BACKEND = sys.argv[1]
+# La fecha y la rama de la grabación: las de la primera tanda si no se dicen.
+FECHA = os.environ.get("FECHA_GRABADA", "23-nov-2026")
+RAMA = os.environ.get("RAMA_BACKEND", "integracion-2026-11d")
 
 MAPA = {
     "boletin-lista": "boletin/lista.json",
@@ -45,6 +48,17 @@ MAPA = {
     "portada-piezas": "portada/piezas.json",
     "canal": "portada/canal.json",
     "publicidad-portada": "portada/publicidad.json",
+    "resumen-ediciones-1": "resumen/ediciones-1.json",
+    "resumen-ediciones-2": "resumen/ediciones-2.json",
+    "resumen-ediciones-fallo": "resumen/ediciones-fallo.json",
+    "resumen-ediciones-vacio": "resumen/ediciones-vacio.json",
+    "usuarios-pagina-1": "lectores/lista-1.json",
+    "usuarios-pagina-2": "lectores/lista-2.json",
+    "usuarios-buscar": "lectores/lista-buscar.json",
+    "usuarios-desactivados": "lectores/lista-desactivados.json",
+    "usuarios-vacio": "lectores/lista-vacia.json",
+    "suscriptores-pagina-1": "boletin/suscriptores-1.json",
+    "suscriptores-buscar": "boletin/suscriptores-buscar.json",
 }
 SOLO = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
 
@@ -52,7 +66,7 @@ for nombre, rel in MAPA.items():
     if SOLO and nombre not in SOLO:
         continue
     g = json.loads((GRABADAS / f"{nombre}.json").read_text(encoding="utf-8"))
-    origen = (f"Grabada el 23-nov-2026 del backend (integracion-2026-11d, {COMMIT_BACKEND}) con su cliente de "
+    origen = (f"Grabada el {FECHA} del backend ({RAMA}, {COMMIT_BACKEND}) con su cliente de "
               f"pruebas: {g['metodo']} {g['ruta']} -> {g['estado']}. Cómo: scripts/pruebas/grabar/.")
     if g["nota"]:
         origen += f" {g['nota']}"

@@ -51,7 +51,7 @@ const TOPE_NUEVO = 200;
  * (un cambio en esta tabla que no sea bajar o quitar, se rechaza).
  */
 const TOPES = {
-  "src/pages/admin/AdminResumen.jsx#AdminResumen": 660,
+  "src/pages/admin/AdminResumen.jsx#AdminResumen": 624,
   "src/pages/admin/AdminSubmissionDetail.jsx#AdminSubmissionDetail": 646,
   "src/pages/admin/AdminPostsList.jsx#AdminPostsList": 600,
   "src/features/publicidad/admin/components/AsistenteDeAnuncio.jsx#AsistenteDeAnuncio": 598,

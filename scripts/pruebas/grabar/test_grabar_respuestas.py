@@ -174,3 +174,58 @@ def test_panel(app, client):
     _guardar("lectora-nombre", "PATCH", f"/admin/users/{lectora.id}",
              client.patch(f"/admin/users/{lectora.id}", headers=h, json={"first_name": "Ana María", "last_name": "Pérez"}),
              nota='enviado: {"first_name": "Ana María", "last_name": "Pérez"}')
+
+
+def _consulta(ruta: str, consulta: dict) -> str:
+    return ruta + "?" + "&".join(f"{k}={v}" for k, v in consulta.items())
+
+
+def test_listas(app, client):
+    """Las listas del panel con filtros y páginas (frente E, 24-nov-2026): el historial del
+    resumen, los lectores y los suscriptores del boletín."""
+    from app.domains.resumen import queries
+    from app.domains.resumen.models import ResumenDiario
+    from app.models import NewsletterSubscriber, User
+
+    h = _entrar(client, "editor-listas@example.test", "publicador")
+    # El resumen: diez días de tres ediciones (30) y una de ellas falló en WhatsApp.
+    hoy = queries.ahora_en_caracas().date()
+    ahora = datetime.now(timezone.utc).replace(microsecond=0)
+    for atras in range(1, 11):
+        for edicion in ("manana", "tarde", "noche"):
+            fallo = atras == 3 and edicion == "tarde"
+            db.session.add(ResumenDiario(
+                fecha=hoy - timedelta(days=atras), edicion=edicion, estado="publicado",
+                contenido={"secciones": [{"clave": "importante", "puntos": [{"id": "p1", "linea": "Algo"}]}]},
+                desde=ahora - timedelta(days=atras, hours=6), hasta=ahora - timedelta(days=atras),
+                publicado_en=ahora - timedelta(days=atras), telegram_estado="enviado",
+                whatsapp_estado="fallo" if fallo else "enviado", whatsapp_error="sesión caída" if fallo else None,
+            ))
+    # Los lectores: 25, tres de ellos «Ana».
+    for n in range(25):
+        nombre = "Ana" if n % 10 == 0 else f"Lector{n}"
+        db.session.add(User(email=f"lector{n}@example.test", first_name=nombre, last_name=f"Apellido{n}",
+                            is_active=n != 7, is_email_verified=n % 2 == 0))
+    # Los suscriptores: 25, tres de ellos «ana…».
+    for n in range(25):
+        correo = f"ana{n}@example.test" if n % 10 == 0 else f"persona{n}@example.test"
+        db.session.add(NewsletterSubscriber(email=correo, status="subscribed", unsubscribe_token=f"baja-lista-{n}",
+                                            source=("home", "footer", "instagram")[n % 3]))
+    db.session.commit()
+
+    for nombre, ruta, consulta in (
+        ("resumen-ediciones-1", "/admin/resumen/ediciones", {"pagina": 1}),
+        ("resumen-ediciones-2", "/admin/resumen/ediciones", {"pagina": 2}),
+        ("resumen-ediciones-fallo", "/admin/resumen/ediciones", {"fallo": "whatsapp", "pagina": 1}),
+        ("resumen-ediciones-vacio", "/admin/resumen/ediciones", {"estado": "retenido", "pagina": 1}),
+        ("usuarios-pagina-1", "/admin/users", {"page": 1, "limit": 20}),
+        ("usuarios-pagina-2", "/admin/users", {"page": 2, "limit": 20}),
+        ("usuarios-buscar", "/admin/users", {"page": 1, "limit": 20, "q": "ana"}),
+        ("usuarios-desactivados", "/admin/users", {"page": 1, "limit": 20, "activo": "no"}),
+        ("usuarios-vacio", "/admin/users", {"page": 1, "limit": 20, "q": "nadie"}),
+        ("suscriptores-pagina-1", "/admin/newsletter", {"page": 1, "limit": 20, "status": "subscribed"}),
+        ("suscriptores-buscar", "/admin/newsletter", {"page": 1, "limit": 20, "status": "subscribed", "q": "ana"}),
+    ):
+        r = client.get(ruta, headers=h, query_string=consulta)
+        assert r.status_code == 200, (ruta, r.json)
+        _guardar(nombre, "GET", _consulta(ruta, consulta), r)

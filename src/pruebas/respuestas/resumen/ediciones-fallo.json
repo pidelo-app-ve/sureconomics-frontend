@@ -1,0 +1,39 @@
+{
+  "_origen": "Grabada el 24-nov-2026 del backend (frente-e-listas, b2326f8) con su cliente de pruebas: GET /admin/resumen/ediciones?fallo=whatsapp&pagina=1 -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "filtros": {
+        "desde": null,
+        "edicion": null,
+        "estado": null,
+        "fallo": "whatsapp",
+        "hasta": null
+      },
+      "pagina": 1,
+      "paginas": 1,
+      "por_pagina": 21,
+      "resumenes": [
+        {
+          "armado_con": "reglas",
+          "caducada": false,
+          "edicion": "tarde",
+          "en_pausa": false,
+          "estado": "publicado",
+          "fecha": "2026-11-21",
+          "fecha_larga": "Sábado 21 de noviembre",
+          "id": 8,
+          "pasa_a": null,
+          "publicado_en": "2026-11-21T18:29:17",
+          "puntos": 1,
+          "retirado_en": null,
+          "sale_a_las": "2026-11-21T13:00:00-04:00",
+          "sale_sola_a_las": null,
+          "telegram": "enviado",
+          "whatsapp": "fallo"
+        }
+      ],
+      "total": 1
+    },
+    "success": true
+  }
+}

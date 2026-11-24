@@ -9,14 +9,17 @@ import {
     ACCEPTED_VIDEO_MIME,
     uploadAdminMediaAudio,
     uploadAdminMediaDocument,
-    uploadAdminMediaImage,
 } from "../../../services/adminMediaService";
 import { enlaceWeb } from "../../../lib/enlaces";
+import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 import { IMAGE_HINT, nombreDeArchivo } from "./formulario";
+import { subirFotoDePieza } from "./fotoDePieza";
+
+const { ancla } = recorridoEditor;
 
 /** «Foto y archivos»: el video, el documento o el audio que pide el formato, y la imagen. */
 export const GrupoArchivos = ({ esMovil, form, setForm, assets, setAsset, requiredMedia, legacyImage, subirVideo }) => (
-    <div className="se-editor-group">
+    <div className="se-editor-group" {...ancla("archivos")}>
         <p className="se-editor-group__title">Foto y archivos</p>
 
         {requiredMedia === "video" ? (
@@ -144,7 +147,7 @@ export const GrupoArchivos = ({ esMovil, form, setForm, assets, setAsset, requir
                     value={form.image_asset_id}
                     asset={assets.image}
                     onChange={setAsset("image_asset_id", "image")}
-                    onUpload={uploadAdminMediaImage}
+                    onUpload={subirFotoDePieza}
                     accept={ACCEPTED_IMAGE_MIME}
                 />
                 {/* Qué punto de la foto queda a la vista en cada tarjeta. */}

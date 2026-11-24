@@ -36,6 +36,19 @@ export const PASOS_EDITOR = [
       "Debajo, plegada, la versión en inglés: con «Traducir con Claude» se rellena sola para revisarla.",
   },
   {
+    clave: "archivos",
+    titulo: "Foto y archivos",
+    texto:
+      "La foto de la pieza (la de la portada y las tarjetas) y, según el formato, el video, el documento o el " +
+      "audio. De cada foto el sitio prepara solo versiones más pequeñas para el teléfono.",
+    puntos: [
+      "SVG (un dibujo vectorial): se convierte solo en una imagen WebP antes de subirlo, aquí y en las fotos " +
+        "entre párrafos, porque si no cada lector se lo bajaría entero. Verá «Optimizando la imagen…» y después cuánto pesa.",
+      "GIF animado: se sube tal cual para no perder el movimiento; el panel avisa de que cada lector lo bajará entero.",
+      "JPG, PNG y WebP: no se tocan, el sitio ya hace sus versiones pequeñas.",
+    ],
+  },
+  {
     clave: "clasificacion",
     titulo: "Temas, lugares y sello",
     texto:

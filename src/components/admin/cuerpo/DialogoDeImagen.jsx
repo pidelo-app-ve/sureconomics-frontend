@@ -15,7 +15,7 @@ const megas = (bytes) => `${Math.round(bytes / (1024 * 1024))} MB`;
 /** Lo que se le dice a quien elige un archivo que no sirve, antes de subirlo. */
 const problemaDe = (archivo) => {
   if (!archivo) return "No llegó ningún archivo.";
-  if (!TIPOS_DE_IMAGEN.includes(archivo.type)) return "Ese archivo no es una foto. Sirven JPG, PNG, WebP, GIF o AVIF.";
+  if (!TIPOS_DE_IMAGEN.includes(archivo.type)) return "Ese archivo no es una foto. Sirven JPG, PNG, WebP, GIF, AVIF o SVG.";
   if (archivo.size > MAX_IMAGE_BYTES) {
     return `La foto pesa ${megas(archivo.size)} y el máximo es ${megas(MAX_IMAGE_BYTES)}. Expórtela más liviana y vuelva a probar.`;
   }
@@ -63,6 +63,12 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
   const [imagen, setImagen] = useState(null); // atributos finales (src, srcset, medidas)
   const [local, setLocal] = useState(""); // vista previa mientras sube
   const [subiendo, setSubiendo] = useState(false);
+  // Lo que cuenta quien sube: mientras («Optimizando la imagen…», al convertir un SVG) y
+  // al acabar («Se aligeró de…», o que un GIF animado bajará entero).
+  const [avisoSubida, setAvisoSubida] = useState("");
+  const [notaSubida, setNotaSubida] = useState("");
+  // Para dejar de preparar la foto (convertirla) si se elige otra o se cierra la ventana.
+  const cancelar = useRef(null);
   const [error, setError] = useState("");
   const [pie, setPie] = useState("");
   const [alt, setAlt] = useState("");
@@ -81,9 +87,17 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
     setAlt(inicial?.alt ?? "");
     setLocal("");
     setSubiendo(false);
+    setAvisoSubida("");
+    setNotaSubida("");
     setError("");
     setBuscando(false);
   }, [abierto, inicial]);
+
+  // Cerrada (o desmontada) a mitad de preparar una foto: no se sube nada.
+  useEffect(() => {
+    if (!abierto) cancelar.current?.abort();
+  }, [abierto]);
+  useEffect(() => () => cancelar.current?.abort(), []);
 
   // Las recientes, una vez por apertura y solo si hacen falta.
   useEffect(() => {
@@ -112,19 +126,31 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
       return;
     }
     const miTurno = (turno.current += 1);
+    cancelar.current?.abort();
+    const control = new AbortController();
+    cancelar.current = control;
     setError("");
+    setAvisoSubida("");
+    setNotaSubida("");
     setBuscando(false);
     setLocal(URL.createObjectURL(archivo));
     setSubiendo(true);
     try {
-      const attrs = await subir(archivo);
+      const attrs = await subir(archivo, {
+        onAviso: (texto) => turno.current === miTurno && setAvisoSubida(texto),
+        onNota: (texto) => turno.current === miTurno && setNotaSubida(texto),
+        signal: control.signal,
+      });
       if (turno.current !== miTurno) return; // eligió otra mientras tanto
       setImagen(attrs);
     } catch (err) {
-      if (turno.current !== miTurno) return;
+      if (turno.current !== miTurno || err?.name === "AbortError") return;
       setLocal("");
+      setNotaSubida("");
       setError(adminErrorMessage(err, "No se pudo subir la foto. Pruebe otra vez."));
     } finally {
+      if (cancelar.current === control) cancelar.current = null;
+      if (turno.current === miTurno) setAvisoSubida("");
       if (turno.current === miTurno) setSubiendo(false);
     }
   };
@@ -140,6 +166,8 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
 
   const otraFoto = () => {
     turno.current += 1;
+    cancelar.current?.abort();
+    setNotaSubida("");
     setLocal("");
     setImagen(null);
     setSubiendo(false);
@@ -206,7 +234,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
                 {subiendo ? (
                   <span className="se-figura-ed__velo" role="status">
                     <span className="se-figura-ed__giro" aria-hidden="true" />
-                    Subiendo la foto…
+                    {avisoSubida || "Subiendo la foto…"}
                   </span>
                 ) : null}
               </div>
@@ -215,6 +243,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
               </figcaption>
             </figure>
             <p className="se-imgdlg__nota">Así se verá en la pieza, al ancho de la columna de lectura.</p>
+            {notaSubida ? <p className="se-asset__nota">{notaSubida}</p> : null}
             <button type="button" className="se-imgdlg__enlace" onClick={otraFoto} disabled={subiendo}>
               Elegir otra foto
             </button>

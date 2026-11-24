@@ -9,7 +9,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * llega tarde una vieja (se cambió de filtro mientras tanto), no pisa a la nueva.
  *
  * `alLlegar(datos)`, si se da, corre con cada respuesta que vale (la del último turno): ahí
- * se pone, por ejemplo, la página que el servidor dice que existe.
+ * se pone, por ejemplo, la página que el servidor dice que existe. Si `pedir` devuelve los
+ * datos ya a mano (no una promesa: la respuesta que acaba de llegar, para esa página), se
+ * ponen tal cual, sin «Cargando…» ni otra petición.
  *
  * Devuelve `{ status, datos, error, cargar, recargar }`:
  * - `cargar()`: otra vez, con «Cargando…» (el «Reintentar» de un error);
@@ -26,9 +28,14 @@ export const useListaDelServidor = (pedir, alLlegar) => {
   const cargar = useCallback(
     async ({ callado = false } = {}) => {
       const mio = ++turno.current;
-      if (!callado) setLista((l) => ({ ...l, status: "loading", error: null }));
       try {
-        const datos = await pedir();
+        const pedido = pedir();
+        if (typeof pedido?.then !== "function") {
+          setLista({ status: "success", datos: pedido, error: null });
+          return;
+        }
+        if (!callado) setLista((l) => ({ ...l, status: "loading", error: null }));
+        const datos = await pedido;
         if (mio !== turno.current) return;
         setLista({ status: "success", datos, error: null });
         llegada.current?.(datos);

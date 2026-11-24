@@ -26,13 +26,23 @@ export const HistorialDeEdiciones = ({ abiertaId, ocupado, vueltas, onAbrir }) =
   const [filtros, setFiltros] = useState(FILTROS_DEL_HISTORIAL);
   const [pagina, setPagina] = useState(1);
   const arriba = useRef(null);
+  // La respuesta que ya llegó para la página que el servidor ajustó: se usa, no se vuelve a pedir.
+  const yaLlego = useRef(null);
 
-  const pedir = useCallback(
-    async () => unwrapEntity(await adminRequest("/admin/resumen/ediciones", { query: consultaDelHistorial(filtros, pagina) })),
-    [filtros, pagina],
-  );
-  // El servidor da la última página si la pedida ya no existe: esa pasa a ser la pedida.
-  const alLlegar = (d) => (d?.pagina && d.pagina !== pagina ? setPagina(d.pagina) : null);
+  const pedir = useCallback(() => {
+    const consulta = consultaDelHistorial(filtros, pagina);
+    const llegada = yaLlego.current;
+    yaLlego.current = null;
+    if (llegada?.clave === JSON.stringify(consulta)) return llegada.datos;
+    return adminRequest("/admin/resumen/ediciones", { query: consulta }).then(unwrapEntity);
+  }, [filtros, pagina]);
+  // El servidor da la última página si la pedida ya no existe: esa pasa a ser la pedida,
+  // con lo que ya trajo.
+  const alLlegar = (d) => {
+    if (!d?.pagina || d.pagina === pagina) return;
+    yaLlego.current = { clave: JSON.stringify(consultaDelHistorial(filtros, d.pagina)), datos: d };
+    setPagina(d.pagina);
+  };
   const { status, datos, error, cargar, recargar } = useListaDelServidor(pedir, alLlegar);
 
   useEffect(() => {

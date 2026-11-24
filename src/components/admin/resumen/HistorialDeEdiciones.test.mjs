@@ -95,6 +95,20 @@ test("tras una acción se pide la lista vigente, sin «Cargando»", async () => 
   assert.ok(pantalla.getByText("Página 2 de 2 — 30 en total"));
 });
 
+test("si el servidor ajusta la página (ya no existe), se usa lo que trajo: sin otra petición", async () => {
+  // La lista se quedó corta: al pedir la 2, el servidor da la 1, que es la última.
+  await abrir((consulta) => (consulta.pagina === "2" ? grabada("resumen/ediciones-fallo.json") : listaPara(consulta)));
+  const antes = pedidas().length;
+  siguiente();
+  await pantalla.findByText("Página 1 de 1 — 1 en total");
+  await pasar(50);
+  assert.deepEqual(pedidas().slice(antes).map((c) => c.pagina), ["2"]);
+  // Y la página pedida pasa a ser la 1: una recarga tras una acción pide la 1.
+  fireEvent.click(pantalla.getByRole("button", { name: "Otra acción" }));
+  await waitFor(() => assert.equal(pedidas().length, antes + 2));
+  assert.equal(pedidas().at(-1).pagina, "1");
+});
+
 test("una respuesta que llega tarde no pisa a la de un filtro más nuevo", async () => {
   let soltarPagina2;
   await abrir((consulta) =>

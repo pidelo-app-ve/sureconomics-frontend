@@ -3,7 +3,18 @@
  * ajustes y la ocupación de los huecos.
  */
 import { adminRequest } from "../../../lib/api";
+import { uploadAdminMediaImage } from "../../../services/adminMediaService";
 import { unwrapEntity } from "../../../services/adminResponseUtils";
+import { arteDemasiadoPesado } from "./utils";
+
+/**
+ * Sube el arte de un anuncio (o el logotipo de un anunciante) a la biblioteca, si no pesa
+ * de más (`arteDemasiadoPesado`). Si pesa, no sube nada y el selector enseña por qué.
+ */
+export const subirArte = (archivo) => {
+  const motivo = arteDemasiadoPesado({ mime: archivo?.type, bytes: archivo?.size, nombre: archivo?.name });
+  return motivo ? Promise.reject(new Error(motivo)) : uploadAdminMediaImage(archivo);
+};
 
 /**
  * El panel de publicidad.

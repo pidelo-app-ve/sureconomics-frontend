@@ -7,6 +7,15 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # Sin saltos de versión mayor (Vite 8, React 19…): proponía cuatro versiones de golpe,
+    # fallaba la vista previa de Vercel y se quedaba abierta. Las mayores se suben a mano,
+    # un paso por commit (docs/planes/PLAN-DE-ACCION-2026-11-23.md, tanda 3). Esto no
+    # frena los parches de seguridad: `update-types` solo afecta a las actualizaciones de
+    # versión, nunca a las de seguridad (documentación de GitHub, «Controlling which
+    # dependencies are updated by Dependabot»).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       tiptap:
         patterns: ["@tiptap/*", "prosemirror-*"]

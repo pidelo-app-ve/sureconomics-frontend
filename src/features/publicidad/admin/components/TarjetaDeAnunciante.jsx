@@ -1,11 +1,12 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { AssetField } from "../../../../components/admin/AssetField";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../../services/adminMediaService";
+import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
 import {
   actualizarAnunciante,
   borrarAnunciante,
   listar,
+  subirArte,
 } from "../api";
 import { TarjetaDeCampana } from "./TarjetaDeCampana";
 
@@ -106,7 +107,7 @@ export const TarjetaDeAnunciante = ({
               setFicha((f) => ({ ...f, logo_id: id ?? null }));
               setLogo(objeto ?? null);
             }}
-            onUpload={uploadAdminMediaImage}
+            onUpload={subirArte}
             accept={ACCEPTED_IMAGE_MIME}
           />
 

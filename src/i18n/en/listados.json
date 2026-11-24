@@ -5,7 +5,8 @@
       "errorSeccion": "We couldn't load this section",
       "sinResultadosSeccion": "Nothing in this section matches the filters. Remove one to widen the search.",
       "seccionVacia": "When the newsroom publishes in this section, it will appear here.",
-      "soloRecientes": "Showing the most recent pieces in this section."
+      "soloRecientes": "Showing the most recent pieces in this section. To find an older one, type a word from its title in the search box.",
+      "soloRecientesBusqueda": "Many pieces match that search and the most recent are shown. Add another word to narrow it down."
     },
     "formato": {
       "meta": {
@@ -41,7 +42,8 @@
       "sinResultadosTexto": "No piece matches the filters. Remove one to widen the search.",
       "vacioTexto": "When the newsroom publishes its first piece, it will appear here.",
       "verLasN": "See all {n}",
-      "verSeccion": "See the whole section"
+      "verSeccion": "See the whole section",
+      "soloRecientes": "Showing the most recent pieces on the site. To find an older one, type a word from its title in the search box."
     },
     "alPunto": {
       "meta": {

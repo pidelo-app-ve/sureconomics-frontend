@@ -29,6 +29,11 @@ import { useDelayedFlag } from "../hooks/useDelayedFlag";
  * the result they are looking at.
  *
  * Groups appear in a fixed order and empty ones are dropped.
+ *
+ * Con algo escrito en el buscador, las piezas las busca el servidor en todo el archivo
+ * (`usePieces({ q })`); sin nada, son las quinientas más recientes, y si hay más lo dice
+ * (`truncated`). Antes buscaba solo entre esas quinientas y sin avisar: con el techo ya
+ * pasado (12-oct-2026), lo anterior no aparecía.
  */
 
 const LAYOUTS = {
@@ -44,11 +49,10 @@ export const Explorar = () => {
   const { t, lang } = useIdioma();
   const [searchParams, setSearchParams] = useSearchParams();
   const taxonomy = useTaxonomy();
-  const { items: pieces, status, error } = usePieces();
-
   const temas = useMemo(() => new Set(searchParams.getAll("tema")), [searchParams]);
   const geos = useMemo(() => new Set(searchParams.getAll("donde")), [searchParams]);
   const query = searchParams.get("q") ?? "";
+  const { items: pieces, status, error, truncated, buscando } = usePieces({ q: query });
 
   const tree = useMemo(
     () => ({
@@ -97,7 +101,10 @@ export const Explorar = () => {
   });
 
   const isFiltered = temas.size > 0 || geos.size > 0 || query.trim().length > 0;
-  const cargando = useDelayedFlag(status === "loading");
+  const cargando = useDelayedFlag(status === "loading" || buscando);
+  // El buscador se queda aunque una búsqueda no encuentre nada o falle: es donde se
+  // corrige lo escrito.
+  const conBuscador = taxonomy.ready && (pieces.length > 0 || query.trim() !== "");
 
   // En español manda el nombre que la redacción puso en el panel; en inglés, el del
   // diccionario, que es el único que existe en ese idioma.
@@ -121,15 +128,22 @@ export const Explorar = () => {
         <div className="se-container">
           <div className="se-articles__head">
             <h1 className="se-articles__title">{titulo}</h1>
-            {status === "success" ? (
+            {status === "success" && !buscando ? (
               <p className="se-text-body se-articles__lead">
                 {t("listados.explorar.conteo", { n: results.length })}
+              </p>
+            ) : null}
+            {status === "success" && !buscando && truncated ? (
+              <p className="se-text-body se-listing__note">
+                {query.trim()
+                  ? t("listados.listado.soloRecientesBusqueda")
+                  : t("listados.explorar.soloRecientes")}
               </p>
             ) : null}
           </div>
         </div>
 
-        {status === "success" && taxonomy.ready && pieces.length ? (
+        {conBuscador ? (
           <div className="se-container">
             <ContentExplorer
               pieces={pieces}
@@ -168,7 +182,7 @@ export const Explorar = () => {
         </section>
       ) : null}
 
-      {status === "success" && grupos.length === 0 ? (
+      {status === "success" && !buscando && grupos.length === 0 ? (
         <section className="se-section">
           <div className="se-container">
             <EmptyState

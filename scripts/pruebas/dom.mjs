@@ -66,23 +66,29 @@ export const { act, fireEvent, waitFor, within, screen: pantalla } = rtl;
 // Una prueba que pasa no espera más; solo tarda más en fallar.
 rtl.configure({ asyncUtilTimeout: 5000 });
 
+const { UserAuthProvider } = await import("../../src/context/UserAuthContext.jsx");
+const { ProveedorDeMarcadores } = await import("../../src/context/MarcadoresContext.jsx");
+const { ProveedorDeTemasSeguidos } = await import("../../src/context/TemasSeguidosContext.jsx");
+const { ProveedorDePublicidad } = await import("../../src/features/publicidad/index.js");
+
+/** Lo que pone `main.jsx` alrededor de todo (de fuera adentro), y los avisos del panel. */
+const PROVEEDORES = [AuthProvider, UserAuthProvider, ProveedorDeMarcadores, ProveedorDeTemasSeguidos, AdminToastProvider];
+
 /**
  * Pintar `elemento` como lo monta el sitio (ver arriba). `patron` es el de la ruta en
  * `routes.jsx` (`noticias/:slug`) para que `useParams` lo lea; por omisión, cualquiera.
- * Un router de datos, como el del sitio: `useBlocker` no funciona con otro. Devuelve lo
- * de `render` más `router` (para ver adónde se fue: `router.state.location.pathname`).
+ * Un router de datos, como el del sitio: `useBlocker` no funciona con otro. Con `sitio`,
+ * la página va además dentro de la publicidad, como en `Layout.jsx`. Devuelve lo de
+ * `render` más `router` (para ver adónde se fue: `router.state.location.pathname`).
  */
-export const pintar = (elemento, { ruta = "/", patron = "*", rol = null } = {}) => {
+export const pintar = (elemento, { ruta = "/", patron = "*", rol = null, sitio = false } = {}) => {
   clearStoredAuth();
   if (rol) persistAuth({ accessToken: "token-de-prueba", refreshToken: "renovar-de-prueba", expiresIn: 3600, role: rol });
-  const router = createMemoryRouter([{ path: patron, element: elemento }, { path: "*", element: null }], {
+  const pagina = sitio ? createElement(ProveedorDePublicidad, null, elemento) : elemento;
+  const router = createMemoryRouter([{ path: patron, element: pagina }, { path: "*", element: null }], {
     initialEntries: [ruta],
   });
-  const arbol = createElement(
-    AuthProvider,
-    null,
-    createElement(AdminToastProvider, null, createElement(RouterProvider, { router })),
-  );
+  const arbol = PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), createElement(RouterProvider, { router }));
   return { ...rtl.render(arbol), router };
 };
 

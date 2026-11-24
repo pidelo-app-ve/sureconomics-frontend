@@ -1,0 +1,19 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /publicidad/espacios?espacios=barra-inferior,portada-banner,portada-apertura,portada-nativo,portada-tarjeta,portada-nativo-articulos,portada-nativo-editorial,boletin&recarga=0&seccion=portada -> 200. Cómo: grabar/test_grabar_respuestas.py (scratchpad de la tanda 2).",
+  "respuesta": {
+    "data": {
+      "activa": true,
+      "espacios": {
+        "barra-inferior": [],
+        "boletin": [],
+        "portada-apertura": [],
+        "portada-banner": [],
+        "portada-nativo": [],
+        "portada-nativo-articulos": [],
+        "portada-nativo-editorial": [],
+        "portada-tarjeta": []
+      }
+    },
+    "success": true
+  }
+}

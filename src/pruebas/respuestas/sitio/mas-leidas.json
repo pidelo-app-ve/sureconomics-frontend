@@ -1,0 +1,7 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /analitica/mas-leidas?dias=7 -> 200. Cómo: grabar/test_grabar_respuestas.py (scratchpad de la tanda 2).",
+  "respuesta": {
+    "data": [],
+    "success": true
+  }
+}

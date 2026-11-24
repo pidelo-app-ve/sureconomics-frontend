@@ -18,8 +18,24 @@ import { esShort } from "./youtube.js";
 /** Cuántas noticias acompañan a la principal bajo ella. */
 export const EN_LA_COLUMNA = 3;
 
-/** El `sizes` de la foto de la apertura: todo el ancho en el teléfono, media página en escritorio. */
-export const SIZES_PRINCIPAL = "(max-width: 959px) 100vw, 50vw";
+/**
+ * El `sizes` de la foto de la apertura: lo que mide de verdad su caja (`primeraPlana.css`,
+ * `.se-container` con 1440 de tope y márgenes de 24/32/40 px), medido el 24-nov-2026:
+ *  - hasta 759: todo el ancho (la foto se sale de los márgenes, `.se-plana__foto`);
+ *  - hasta 959: el ancho menos los márgenes;
+ *  - 960-1199: dos tercios (rejilla 2fr/1fr) menos márgenes y el filete: 577 a 960, 722 a 1199;
+ *  - 1200 en adelante: media página (3/6/3) menos los rellenos: 517 a 1200, 628 a 1440, y fija
+ *    en 628 hasta 1919 y en 704 desde 1920 (el contenedor pasa a 1600).
+ * Decía `50vw` en escritorio: a 1440 pedía 720 px para una caja de 628 y bajaba la talla de
+ * 1100 donde basta la de 640. Cada tramo redondea hacia arriba: si se queda corto, la foto se
+ * ve blanda; si se pasa un poco, solo pesa un poco más.
+ *
+ * Lo usan la `<img>` (`CardMedia`), la precarga de `api/portada.js` y la del navegador
+ * (`precargarApertura`): los tres tienen que decir lo mismo o la foto se baja dos veces.
+ */
+export const SIZES_PRINCIPAL =
+  "(max-width: 759px) 100vw, (max-width: 959px) calc(100vw - 48px), (max-width: 1199px) calc(65vw - 46px), " +
+  "(max-width: 1439px) calc(47vw - 40px), (max-width: 1919px) 628px, 704px";
 
 /* —— Lo que pinta la portada al cargar ——
    Desde `pages/Home.jsx` (18-nov-2026): la portada servida (`api/portada.js`) mete en su
@@ -131,6 +147,12 @@ export const paraLaApertura = (row) => ({
  * Sin `href` cuando hay `srcset`, a propósito: un navegador que no entiende
  * `imagesrcset` se salta la precarga entera, en vez de bajar la talla grande y luego otra
  * para la `<img>`.
+ *
+ * Con `href` (la original) cuando no hay tallas que ofrecer: una foto de fuera, un SVG o
+ * GIF, o una de menos de 640 px (el 15 % de las de noviembre de 2026, casi todas de 560 a
+ * 625). Esa última no tiene más talla que las de 160 y 320, que en la apertura se verían
+ * borrosas (en un teléfono la caja pide más de 390 px), así que la original es la que toca.
+ * Achicarla solo se puede desde el servidor: una copia WebP a su mismo ancho.
  */
 export const precargaDeLaApertura = (principal) => {
   if (!principal?.imagenUrl || esShort(principal.videoUrl)) return null;

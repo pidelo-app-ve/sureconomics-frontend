@@ -1,19 +1,31 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { PlazasFijas } from "./PlazasFijas";
 import { AssetField } from "../../../../components/admin/AssetField";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
+import { AligerarArte } from "./AligerarArte";
 import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
-import { subirArte } from "../api";
+import { subidaDeArte } from "../api";
 import {
   GUIA_DE_FORMATO,
+  MEDIDAS_DE_ARTE,
   nombreDeFormato,
   resumenDePieza,
 } from "../utils";
 import { conArteAutomatico } from "../arteAutomatico";
 
-export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
+export const FilaDePieza = ({
+  pieza,
+  campana,
+  formatos,
+  anunciante,
+  ocupado,
+  preguntar,
+  onGuardar,
+  onCambiarArte,
+  onBorrar,
+}) => {
   const [abierta, setAbierta] = useState(false);
   const [borrador, setBorrador] = useState(pieza);
   // El archivo, aparte del borrador: no se guarda -- se manda el id --, es lo que el
@@ -22,13 +34,41 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
   const [cinta, setCinta] = useState(pieza.cinta_asset ?? null);
   const [movil, setMovil] = useState(pieza.cinta_movil_asset ?? null);
   const [variante, setVariante] = useState("tarjeta");
+  // La columna que acaba de cambiar «Aligerar», que guarda solo ese arte. Al volver la
+  // pieza del servidor se toma solo esa columna: lo demás que se esté escribiendo en el
+  // formulario, y aún no se haya guardado, no se pierde.
+  const soloArte = useRef(null);
 
   useEffect(() => {
+    const campo = soloArte.current;
+    soloArte.current = null;
+    if (campo) {
+      const id = `${campo}_id`;
+      setBorrador((b) => ({ ...b, [id]: pieza[id] ?? null }));
+      ({ imagen: setImagen, cinta: setCinta, cinta_movil: setMovil })[campo](pieza[`${campo}_asset`] ?? null);
+      return;
+    }
     setBorrador(pieza);
     setImagen(pieza.imagen_asset ?? null);
     setCinta(pieza.cinta_asset ?? null);
     setMovil(pieza.cinta_movil_asset ?? null);
   }, [pieza]);
+
+  /** «Aligerar» debajo del arte de una columna: lo cambia por el aligerado y lo guarda. */
+  const aligerar = (campo, asset, medidas) => (
+    <AligerarArte
+      asset={asset}
+      medidas={medidas}
+      preguntar={preguntar}
+      deshabilitado={ocupado}
+      onReemplazar={async (fila) => {
+        soloArte.current = campo;
+        const ok = await onCambiarArte({ [`${campo}_id`]: fila.id });
+        if (!ok) soloArte.current = null;
+        return ok;
+      }}
+    />
+  );
 
   const cambiar = (campo) => (e) => {
     const valor = e.target.type === "checkbox" ? e.target.checked : e.target.value;
@@ -51,25 +91,27 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
   const cintaPerdida = !usaCinta && (borrador.cinta_id ?? null) !== null;
 
   /** El selector de archivo de una de las dos columnas, con el nombre que le toca. */
-  const campoDeArte = ({ campo, etiqueta, pista, forma }) => {
+  const campoDeArte = ({ campo, etiqueta, pista, forma, medidas }) => {
     const esCinta = campo === "cinta";
     return (
-      <AssetField
-        key={campo}
-        id={`p-${pieza.id}-${campo}`}
-        label={etiqueta}
-        hint={pista}
-        forma={forma}
-        kind="image"
-        value={borrador[`${campo}_id`] ?? null}
-        asset={esCinta ? cinta : imagen}
-        onChange={(idNuevo, objeto) => {
-          setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
-          (esCinta ? setCinta : setImagen)(objeto ?? null);
-        }}
-        onUpload={subirArte}
-        accept={ACCEPTED_IMAGE_MIME}
-      />
+      <Fragment key={campo}>
+        <AssetField
+          id={`p-${pieza.id}-${campo}`}
+          label={etiqueta}
+          hint={pista}
+          forma={forma}
+          kind="image"
+          value={borrador[`${campo}_id`] ?? null}
+          asset={esCinta ? cinta : imagen}
+          onChange={(idNuevo, objeto) => {
+            setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
+            (esCinta ? setCinta : setImagen)(objeto ?? null);
+          }}
+          onUpload={subidaDeArte(medidas)}
+          accept={ACCEPTED_IMAGE_MIME}
+        />
+        {borrador[`${campo}_id`] ? aligerar(campo, esCinta ? cinta : imagen, medidas) : null}
+      </Fragment>
     );
   };
 
@@ -221,10 +263,13 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
                 setBorrador((b) => ({ ...b, cinta_movil_id: idNuevo ?? null }));
                 setMovil(objeto ?? null);
               }}
-              onUpload={subirArte}
+              onUpload={subidaDeArte(MEDIDAS_DE_ARTE.cinta_movil)}
               accept={ACCEPTED_IMAGE_MIME}
             />
           ) : null}
+          {usaCinta && borrador.cinta_movil_id
+            ? aligerar("cinta_movil", movil, MEDIDAS_DE_ARTE.cinta_movil)
+            : null}
 
           <PlazasFijas
             formato={borrador.formato}
@@ -384,6 +429,10 @@ FilaDePieza.propTypes = {
   anunciante: PropTypes.object,
   formatos: PropTypes.object,
   ocupado: PropTypes.bool,
+  /** El diálogo de confirmar del panel (lo usa «Aligerar»). */
+  preguntar: PropTypes.func.isRequired,
   onGuardar: PropTypes.func.isRequired,
+  /** Guarda solo el arte de una columna (`{ cinta_id: 7 }`); resuelve a `true` si salió. */
+  onCambiarArte: PropTypes.func.isRequired,
   onBorrar: PropTypes.func.isRequired,
 };

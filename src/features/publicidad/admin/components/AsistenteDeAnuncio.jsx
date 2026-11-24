@@ -15,7 +15,7 @@ import {
   crearPieza,
   getEscalera,
   getOcupacion,
-  subirArte,
+  subidaDeArte,
 } from "../api";
 import { MapaDelSitio } from "./mapa/MapaDelSitio";
 
@@ -559,7 +559,7 @@ export const AsistenteDeAnuncio = ({
             <p className="se-admin-meta-hint">{guia.soloTexto}</p>
           ) : null}
 
-          {artes.map(({ campo, etiqueta, pista, forma }) => {
+          {artes.map(({ campo, etiqueta, pista, forma, medidas }) => {
             const esCinta = campo === "cinta";
             return (
               <AssetField
@@ -575,7 +575,7 @@ export const AsistenteDeAnuncio = ({
                   (esCinta ? setCintaId : setImagenId)(id ?? null);
                   (esCinta ? setCinta : setImagen)(objeto ?? null);
                 }}
-                onUpload={subirArte}
+                onUpload={subidaDeArte(medidas)}
                 accept={ACCEPTED_IMAGE_MIME}
               />
             );

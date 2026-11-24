@@ -1,13 +1,15 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AssetField } from "../../../../components/admin/AssetField";
 import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
 import {
   actualizarAnunciante,
   borrarAnunciante,
   listar,
-  subirArte,
+  subidaDeArte,
 } from "../api";
+import { MEDIDAS_DE_ARTE } from "../utils";
+import { AligerarArte } from "./AligerarArte";
 import { TarjetaDeCampana } from "./TarjetaDeCampana";
 
 export const TarjetaDeAnunciante = ({
@@ -31,8 +33,17 @@ export const TarjetaDeAnunciante = ({
     logo_id: anunciante.logo_id ?? null,
   });
   const [logo, setLogo] = useState(anunciante.logo ?? null);
+  // «Aligerar» guarda solo el logotipo: al volver la ficha del servidor se toma solo él,
+  // y lo que se esté escribiendo en los otros campos no se pierde.
+  const soloLogo = useRef(false);
 
   useEffect(() => {
+    if (soloLogo.current) {
+      soloLogo.current = false;
+      setFicha((f) => ({ ...f, logo_id: anunciante.logo_id ?? null }));
+      setLogo(anunciante.logo ?? null);
+      return;
+    }
     setFicha({
       nombre: anunciante.nombre,
       sitio_web: anunciante.sitio_web ?? "",
@@ -107,9 +118,30 @@ export const TarjetaDeAnunciante = ({
               setFicha((f) => ({ ...f, logo_id: id ?? null }));
               setLogo(objeto ?? null);
             }}
-            onUpload={subirArte}
+            onUpload={subidaDeArte(MEDIDAS_DE_ARTE.logo)}
             accept={ACCEPTED_IMAGE_MIME}
           />
+          {ficha.logo_id ? (
+            <AligerarArte
+              asset={logo}
+              medidas={MEDIDAS_DE_ARTE.logo}
+              preguntar={preguntar}
+              deshabilitado={ocupado}
+              onReemplazar={async (fila) => {
+                soloLogo.current = true;
+                const hecho = await correr(async () => {
+                  await actualizarAnunciante(anunciante.id, { logo_id: fila.id });
+                  return listar();
+                }, `Logotipo de «${anunciante.nombre}» aligerado`);
+                if (!hecho) {
+                  soloLogo.current = false;
+                  return false;
+                }
+                onCambio(hecho);
+                return true;
+              }}
+            />
+          ) : null}
 
           <div className="se-admin-pub__doble">
             <div>

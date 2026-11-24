@@ -266,6 +266,20 @@ export const TarjetaDeCampana = ({
                   anunciante={anunciante}
                   campana={campana}
                   ocupado={ocupado}
+                  preguntar={preguntar}
+                  onCambiarArte={(datos) =>
+                    correr(
+                      async () => {
+                        await actualizarPieza(pieza.id, datos);
+                        return actualizarCampana(campana.id, {});
+                      },
+                      "Arte aligerado y puesto en la pieza",
+                    ).then(async (hecho) => {
+                      if (!hecho) return false;
+                      await onCambio(hecho);
+                      return true;
+                    })
+                  }
                   onGuardar={(datos) =>
                     correr(
                       async () => {

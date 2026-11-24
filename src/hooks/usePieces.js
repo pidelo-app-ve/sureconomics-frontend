@@ -41,7 +41,9 @@ const MAX_PAGES = 5;
 /**
  * Lo que se espera desde la última tecla antes de preguntar al servidor: escribir
  * «petróleo» no son ocho búsquedas. Mientras tanto, y mientras llega la respuesta, se
- * sigue viendo la lista anterior filtrada aquí (`buscando` dice que viene otra).
+ * sigue viendo la lista anterior filtrada aquí (`buscando` dice que viene otra). Solo
+ * cuando hay una lista en pantalla, es decir, cuando se está escribiendo: la búsqueda que
+ * llega en la dirección (un enlace a `/explorar?q=…`) se pide enseguida.
  */
 const ESPERA_BUSQUEDA = 300;
 
@@ -203,6 +205,8 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
   // La primera página que la portada tiene en pantalla. Al completar la lista se sigue
   // con esa y no con una más nueva: abrir el buscador no cambia lo que se está leyendo.
   const primeraEnPantalla = useRef(null);
+  // Lo último pintado, para saber en el efecto si se está escribiendo sobre una lista.
+  const pintado = useRef(null);
   const [state, setState] = useState(() => {
     const previo = guardadoPara(portada, entera);
     if (previo) return deGuardado(previo);
@@ -226,7 +230,8 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
     // Otra búsqueda en la misma lista (o quitar la que había): tampoco se vacía la
     // pantalla. Se ve la anterior, filtrada por quien pinta, hasta que llega la nueva; si
     // no, el campo de búsqueda desaparecería a cada tecla mientras «carga».
-    const otraBusqueda = (s) => !portada && s.status === "success" && String(s.de).startsWith(`${base}|`);
+    const otraBusqueda = (s) => !portada && s.status === "success" && String(s?.de).startsWith(`${base}|`);
+    const escribiendo = Boolean(busca) && otraBusqueda(pintado.current);
     setState((s) => {
       if (sigue(s)) return s;
       return otraBusqueda(s) ? { ...s, buscando: true } : { ...s, status: "loading", error: null };
@@ -283,9 +288,10 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
           );
         }
       });
-    // Una búsqueda espera a que se deje de escribir (`ESPERA_BUSQUEDA`); lo demás, no.
-    const espera = busca ? setTimeout(correr, ESPERA_BUSQUEDA) : null;
-    if (!busca) correr();
+    // Una búsqueda escrita sobre una lista espera a que se deje de escribir
+    // (`ESPERA_BUSQUEDA`); lo demás, no.
+    const espera = escribiendo ? setTimeout(correr, ESPERA_BUSQUEDA) : null;
+    if (!escribiendo) correr();
 
     return () => {
       alive = false;
@@ -297,6 +303,7 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
   // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const items = useMemo(() => piezasFromApi(state.filas), [state.filas, lang]);
+  pintado.current = state;
   return {
     status: state.status,
     items,

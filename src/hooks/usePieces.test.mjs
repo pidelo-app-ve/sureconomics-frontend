@@ -88,6 +88,15 @@ describe("buscar en el servidor", () => {
     await g.desmontar();
   });
 
+  test("la búsqueda que llega en la dirección se pide enseguida, sin esperar", async () => {
+    responder = paginas(1, "Enlace");
+    const g = await montarGancho((p) => usePieces(p), { format: "podcast", q: "oro" });
+    await esperar(0);
+    assert.deepEqual(pedidas.map((p) => p.q), ["oro"]);
+    assert.equal(g.valor.items[0].titulo, "Enlace 1");
+    await g.desmontar();
+  });
+
   test("más de quinientas que coinciden: trae cinco páginas y avisa (`truncated`)", async () => {
     responder = paginas(1, "Base");
     const g = await montarGancho((p) => usePieces(p), { format: "informe" });

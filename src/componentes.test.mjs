@@ -46,7 +46,9 @@ const TOPE_NUEVO = 200;
 /**
  * Los componentes que pasaban de `TOPE_NUEVO` el 23-nov-2026 (rama `integracion-2026-11d`,
  * a371919): `"ruta#Nombre": líneas`. Solo se baja un número o se quita una línea; nunca
- * se sube ni se añade.
+ * se sube ni se añade. La prueba no puede impedir que alguien suba un número en el mismo
+ * commit en que el componente crece: eso **no está permitido** y se vigila en la revisión
+ * (un cambio en esta tabla que no sea bajar o quitar, se rechaza).
  */
 const TOPES = {
   "src/pages/admin/AdminResumen.jsx#AdminResumen": 660,

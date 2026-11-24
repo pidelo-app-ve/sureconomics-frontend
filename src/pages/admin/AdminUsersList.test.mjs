@@ -84,11 +84,22 @@ test("sin nadie con esos filtros lo dice, y «Limpiar filtros» vuelve a todos",
   assert.deepEqual(pedidas().at(-1), { page: "1", limit: "20" });
 });
 
-test("una página que ya no existe lleva a la última que hay", async () => {
-  await abrir(({ page, ...resto }) =>
-    page === "2" ? { ...grabada("lectores/lista-vacia.json"), meta: { page: 2, limit: 20, total: 18, pages: 1 } } : listaPara({ page, ...resto }),
-  );
+test("una página que ya no existe lleva a la última que hay, sin decir antes que no hay nadie", async () => {
+  let soltarPagina1;
+  let primera = true;
+  await abrir(({ page, ...resto }) => {
+    if (page === "2") return { ...grabada("lectores/lista-vacia.json"), meta: { page: 2, limit: 20, total: 18, pages: 1 } };
+    if (primera) {
+      primera = false;
+      return listaPara({ page, ...resto });
+    }
+    // La vuelta a la página 1 tarda: mientras, no puede asomar «Todavía no hay lectores».
+    return new Promise((listo) => (soltarPagina1 = () => listo(listaPara({ page, ...resto }))));
+  });
   siguiente();
-  await waitFor(() => assert.equal(pedidas().at(-1).page, "1"));
+  await waitFor(() => assert.ok(soltarPagina1, "se pidió la página 1"));
+  assert.equal(pantalla.queryByText("Todavía no hay lectores"), null);
+  assert.ok(pantalla.getByText("Cargando usuarios…"));
+  await act(async () => soltarPagina1());
   await pantalla.findByText("Página 1 de 2 — 25 en total");
 });

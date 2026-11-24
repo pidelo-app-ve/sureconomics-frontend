@@ -81,6 +81,10 @@ export const AdminUsersList = () => {
   const items = datos?.items ?? [];
   const meta = datos?.meta;
   const conFiltros = Object.values(filtros).some(Boolean);
+  // Vacía porque la página pedida ya no existe: se está yendo a la última, no hay que
+  // decir «no hay lectores» mientras tanto.
+  const vacia = status === "success" && items.length === 0;
+  const saltando = vacia && Boolean(paginaQueExiste(meta?.page ?? page, meta?.pages ?? 0));
 
   return (
     <main role="main">
@@ -90,10 +94,10 @@ export const AdminUsersList = () => {
         <FiltrosDeUsuarios filtros={filtros} texto={texto} onTexto={setTexto} onCambio={cambiarFiltro} anclaje={ancla("filtros")} />
       </div>
 
-      {status === "loading" ? <LoadingState title="Cargando usuarios…" /> : null}
+      {status === "loading" || saltando ? <LoadingState title="Cargando usuarios…" /> : null}
       {status === "error" ? <ErrorState title="No se pudieron cargar los usuarios" error={error} onRetry={() => cargar()} /> : null}
 
-      {status === "success" && items.length === 0 ? (
+      {vacia && !saltando ? (
         conFiltros ? (
           <EmptyState
             title="Ningún lector con estos filtros"

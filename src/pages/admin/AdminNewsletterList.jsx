@@ -78,6 +78,9 @@ export const AdminNewsletterList = () => {
   const state = { status: lista.status, items: lista.datos?.items ?? [], meta: lista.datos?.meta, error: lista.error };
   const load = () => lista.cargar();
   const conFiltros = Boolean(filtros.q || filtros.origen);
+  // Vacía porque la página pedida ya no existe: se está yendo a la última, sin decir «nadie».
+  const vacia = state.status === "success" && state.items.length === 0;
+  const saltando = vacia && Boolean(paginaQueExiste(state.meta?.page ?? page, state.meta?.pages ?? 0));
 
   useEffect(() => {
     applyPageMeta({
@@ -143,6 +146,12 @@ export const AdminNewsletterList = () => {
                   {csv.status === "loading" ? "Preparando…" : "Descargar CSV"}
                 </button>
               ) : null}
+              {esEditor(role) ? (
+                <span className="se-admin-meta-hint">
+                  El CSV lleva a todos los suscritos ({estado === "all" ? "y, con «Todos», también las bajas" : "sin las bajas"}),
+                  sin la búsqueda ni el origen.
+                </span>
+              ) : null}
             </div>
           </>
         }
@@ -159,7 +168,7 @@ export const AdminNewsletterList = () => {
         <p className="se-admin-form-feedback" role="alert">{csv.error}</p>
       ) : null}
 
-      {state.status === "loading" ? <LoadingState title="Cargando la lista…" /> : null}
+      {state.status === "loading" || saltando ? <LoadingState title="Cargando la lista…" /> : null}
       {state.status === "error" ? (
         <ErrorState
           title="No se pudo cargar la lista del boletin"
@@ -168,7 +177,7 @@ export const AdminNewsletterList = () => {
         />
       ) : null}
 
-      {state.status === "success" && state.items.length === 0 && conFiltros ? (
+      {vacia && !saltando && conFiltros ? (
         <EmptyState
           title="Nadie con estos filtros"
           description="No hay correos que cumplan todo lo elegido. Pruebe con otro trozo del correo, otro origen u otro estado."
@@ -180,7 +189,7 @@ export const AdminNewsletterList = () => {
         />
       ) : null}
 
-      {state.status === "success" && state.items.length === 0 && !conFiltros ? (
+      {vacia && !saltando && !conFiltros ? (
         <EmptyState
           title={estado === "unsubscribed" ? "Nadie se ha dado de baja" : "Todavía nadie"}
           description={

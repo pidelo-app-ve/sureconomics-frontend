@@ -18,7 +18,7 @@
  * Arriba, las cuentas, sin navegador (se prueban en node: `npm run test:aligerar`); abajo,
  * el lienzo, que se puede cambiar por uno de mentira en las pruebas.
  */
-import { pedirArchivoDelSitio } from "../../api/nucleo.js";
+import { pedirArchivoDelSitio } from "../../api/archivoDelSitio.js";
 
 /* ─── Las cuentas ──────────────────────────────────────────────────────────────────── */
 

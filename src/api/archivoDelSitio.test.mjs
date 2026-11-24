@@ -1,11 +1,11 @@
 /**
- * `pedirArchivoDelSitio` (`src/api/nucleo.js`): un archivo de este mismo sitio, no de la
- * API. Lo usa el panel para bajar una imagen ya subida y convertirla
+ * `pedirArchivoDelSitio` (`src/api/archivoDelSitio.js`): un archivo de este mismo sitio,
+ * no de la API. Lo usa el panel para bajar una imagen ya subida y convertirla
  * (`components/admin/aligerarImagen.js`). `npm test`.
  */
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { pedirArchivoDelSitio } from "./nucleo.js";
+import { pedirArchivoDelSitio } from "./archivoDelSitio.js";
 
 const SITIO = "https://www.sureconomics.com";
 

@@ -20,7 +20,7 @@ import { createElement } from "react";
 const { pintar, pantalla, fireEvent, waitFor, within, act, asentar, pasar, servidor, grabada } = await import(
   "../../../../scripts/pruebas/dom.mjs"
 );
-const { AdminTitulares } = await import("./AdminTitulares.jsx");
+const { AdminTitulares, ESPERA_DEL_BUSCADOR_MS: ESPERA } = await import("./AdminTitulares.jsx");
 
 const LISTA = "/admin/headlines";
 const ROL = grabada("panel/entrar-editor.json").data.role;
@@ -76,13 +76,16 @@ test("el buscador espera a que se deje de escribir, y pide una sola vez", async 
   // espera el buscador entre dos teclas daría una petición de más sin que nada estuviera mal.
   mock.timers.enable({ apis: ["setTimeout"] });
   try {
+    // Entre tecla y tecla, menos de la espera; tras la última, justo un milisegundo
+    // menos, y entonces aún no se ha pedido nada.
+    const entreTeclas = Math.floor(ESPERA / 2);
     for (const texto of ["T", "Tit", "Titular", "  Titular   1  "]) {
       fireEvent.change(buscar, { target: { value: texto } });
-      act(() => mock.timers.tick(100));
+      act(() => mock.timers.tick(entreTeclas));
     }
-    act(() => mock.timers.tick(140));
+    act(() => mock.timers.tick(ESPERA - entreTeclas - 1));
     assert.equal(pedidas().length, antes, "mientras se escribe no se pide nada");
-    act(() => mock.timers.tick(10));
+    act(() => mock.timers.tick(1));
   } finally {
     mock.timers.reset();
   }

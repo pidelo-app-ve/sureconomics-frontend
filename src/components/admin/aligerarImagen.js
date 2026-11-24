@@ -18,6 +18,7 @@
  * Arriba, las cuentas, sin navegador (se prueban en node: `npm run test:aligerar`); abajo,
  * el lienzo, que se puede cambiar por uno de mentira en las pruebas.
  */
+import { pedirArchivoDelSitio } from "../../api/nucleo.js";
 
 /* ─── Las cuentas ──────────────────────────────────────────────────────────────────── */
 
@@ -443,8 +444,12 @@ export const descargarImagen = async (asset, { senal, origen = globalThis.locati
         "Descárguela y súbala otra vez con «Subir un archivo»: al subirla, el panel la convierte sola.",
     );
   }
-  const respuesta = await fetch(url, { credentials: "same-origin", signal: senal });
-  if (!respuesta.ok) throw fallo(`No se pudo descargar «${nombre}» (respuesta ${respuesta.status}).`);
-  const blob = await respuesta.blob();
+  let blob;
+  try {
+    blob = await pedirArchivoDelSitio(url, { senal, origen });
+  } catch (error) {
+    if (error?.status) throw fallo(`No se pudo descargar «${nombre}» (respuesta ${error.status}).`);
+    throw error;
+  }
   return new File([blob], nombre, { type: tipoLimpio(blob.type) });
 };

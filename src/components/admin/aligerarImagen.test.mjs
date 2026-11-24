@@ -11,6 +11,7 @@ import {
   avisoDeAligerado,
   buscarVersionLigera,
   convertirImagen,
+  descargarImagen,
   esGif,
   esGifAnimado,
   esSvg,
@@ -279,4 +280,36 @@ test("la nota dice la verdad: «se aligeró» solo si pesa menos, y el formato q
     "Se convirtió a WebP (de 69 KB a 136 KB): vale la pena.",
   );
   assert.equal(notaDeConversion(3 * KB, { size: 20 * KB, type: "image/jpeg" }), "Se convirtió a JPEG (de 3 KB a 20 KB).");
+});
+
+test("descargarImagen: lo de este sitio se baja por el cliente (src/api/) y sale un File con su nombre", async () => {
+  const sitio = "https://www.sureconomics.com";
+  const pedidas = [];
+  const fetchDeAntes = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url, init = {}) => {
+      pedidas.push({ url: String(url), init });
+      if (String(url).endsWith("/no-esta.png")) return new Response("", { status: 404 });
+      return new Response(new Blob(["<svg/>"], { type: "image/svg+xml; charset=utf-8" }), { status: 200 });
+    };
+    const senal = new AbortController().signal;
+    const archivo = await descargarImagen(
+      { url: "/media/image/2026/10/merch.svg", original_filename: "Merch final.svg" },
+      { senal, origen: sitio },
+    );
+    assert.equal(archivo.name, "Merch final.svg");
+    assert.equal(archivo.type, "image/svg+xml");
+    assert.deepEqual(pedidas.map((p) => p.url), [`${sitio}/media/image/2026/10/merch.svg`]);
+    assert.equal(pedidas[0].init.signal, senal);
+
+    // Sin nombre guardado, el de la dirección; si el servidor dice que no, el texto para la redacción.
+    await assert.rejects(descargarImagen({ url: "/media/no-esta.png" }, { origen: sitio }), {
+      message: "No se pudo descargar «no-esta.png» (respuesta 404).",
+    });
+    // De otro sitio ni se pide: se dice qué hacer.
+    await assert.rejects(descargarImagen({ url: "https://res.cloudinary.com/x/a.png" }, { origen: sitio }), /otro sitio/);
+    assert.equal(pedidas.length, 2);
+  } finally {
+    globalThis.fetch = fetchDeAntes;
+  }
 });

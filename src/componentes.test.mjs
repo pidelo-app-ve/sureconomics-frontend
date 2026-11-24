@@ -80,7 +80,7 @@ const TOPES = {
   "src/pages/Audiovisual.jsx#Audiovisual": 293,
   "src/features/monedas/admin/MonedasDelPanel.jsx#MonedasDelPanel": 284,
   "src/pages/admin/AdminPlacesList.jsx#AdminPlacesList": 284,
-  "src/pages/admin/AdminMediaLibrary.jsx#AdminMediaLibrary": 278,
+  "src/pages/admin/AdminMediaLibrary.jsx#AdminMediaLibrary": 275,
   "src/pages/cuenta/CuentaEnvioDetail.jsx#CuentaEnvioDetail": 276,
   "src/pages/admin/AdminMarketTicker.jsx#AdminMarketTicker": 264,
   "src/components/InvitacionAlBoletinAbierta.jsx#InvitacionAlBoletinAbierta": 260,

@@ -637,11 +637,13 @@ const CON_FOTO = { ...CON_CUERPO, image_asset: { url: EN_R2, width: 1733, height
 {
   // El sizes de la cabecera (24-nov-2026), contra lo que mide su caja en `blog.css`: una
   // columna (ventana menos 24/32 px de margen a cada lado) hasta 899 y, desde 900, la
-  // columna de la foto, 0,8 de 2 con 48 px entre las dos; en un teléfono acostado, 0,95 de 2.
+  // columna de la foto, 0,8 de 2 con 48 px entre las dos; en un teléfono acostado, 0,95 de 2,
+  // y desde 900 acostado (o una ventana de menos de 500 de alto), 0,8 de 2 con 32 px.
   // Decía `(max-width: 960px) 100vw, 1100px`: a 1440 pedía 1100 px para una caja de 525.
   const CAJA = [
     [390, 900, 342], [412, 900, 364], [800, 1000, 736], [900, 1000, 315], [1024, 800, 358],
     [1280, 800, 461], [1440, 900, 525], [1600, 900, 525], [1920, 1080, 589], [844, 390, 355], [667, 375, 279],
+    [915, 412, 327], [932, 430, 334], [1000, 480, 361], [1366, 480, 501], [1440, 480, 531], [1920, 480, 595],
   ];
   const fuera = CAJA.filter(([ancho, alto, caja]) => {
     const dice = anchoDeSizes(SIZES_DE_CABECERA, ancho, alto);

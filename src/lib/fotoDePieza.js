@@ -190,18 +190,24 @@ const ANCHOS_DE_PORTADA = [640, 800, 1100, 1400];
 /**
  * El `sizes` de la foto de cabecera: lo que mide su caja (`.se-piece__head--media` en
  * `blog.css`), medido el 24-nov-2026:
- *  - teléfono en horizontal (hasta 500 de alto): la mitad de dos columnas 1,05/0,95;
+ *  - teléfono en horizontal (hasta 500 de alto) y menos de 900: la mitad de dos columnas
+ *    1,05/0,95;
+ *  - en horizontal desde 900: la rejilla de escritorio (1,2fr/0,8fr), pero con los 32 px de
+ *    separación del teléfono acostado y no los 48: 328 a 915, 362 a 1000;
  *  - hasta 899: una columna, el ancho menos los márgenes (24 px a cada lado; 32 desde 768);
  *  - desde 900: la columna de la foto, 0,8 de 2 (rejilla 1,2fr/0,8fr con 48 px entre las
  *    dos): 315 a 900, 525 a 1440, fija desde ahí (contenedor de 1440) y 589 desde 1920 (1600).
+ *    Los fijos dicen 532 y 596, lo que mide con una ventana de menos de 500 de alto (32 px de
+ *    separación): siete píxeles de más no cambian la talla en ninguna pantalla corriente.
  * Decía `(max-width: 960px) 100vw, 1100px`: a 1440 pedía 1100 px para una caja de 525 y en
  * un teléfono 3x de 390 bajaba la de 1400 donde basta la de 1100. Cada tramo redondea hacia
  * arriba, como el de la apertura (`SIZES_PRINCIPAL`).
  */
 export const SIZES_DE_CABECERA =
   "(orientation: landscape) and (max-height: 500px) and (max-width: 899px) 48vw, " +
+  "(orientation: landscape) and (max-height: 500px) and (max-width: 1439px) calc(40vw - 38px), " +
   "(max-width: 899px) calc(100vw - 48px), (max-width: 1439px) calc(40vw - 45px), " +
-  "(max-width: 1919px) 525px, 589px";
+  "(max-width: 1919px) 532px, 596px";
 
 /**
  * La foto de cabecera de una pieza: los atributos de su `<img>`.

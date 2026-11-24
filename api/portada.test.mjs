@@ -31,6 +31,7 @@ import {
   precargaDeLaApertura,
 } from "../src/lib/apertura.js";
 import { ANCHOS_DE_TARJETA, imagenSrcSet } from "../src/lib/fotoDePieza.js";
+import { anchoDeSizes, tallaElegida } from "../scripts/pruebas/anchoDeSizes.mjs";
 
 // El shell viaja con la función (`dist/app.html`). Aquí, sin archivo: cada prueba decide
 // qué shell llega, por el respaldo de la red (el `fetch` simulado). Al final, con archivo.
@@ -308,6 +309,59 @@ console.log("la apertura y su foto");
   const precarga = precargaDeLaApertura(principal);
   check("precargaDeLaApertura: srcset de tarjeta y sizes de la apertura",
     precarga?.imagesizes === SIZES_PRINCIPAL && precarga?.imagesrcset === imagenSrcSet("/media/image/2026/11/foto-2.jpg", ANCHOS_DE_TARJETA, 1536) && !precarga.href);
+}
+
+// —— 4b. La talla de la foto de la apertura (24-nov-2026) ——
+//
+// `SIZES_PRINCIPAL` tiene que decir lo que mide la caja de la foto (`primeraPlana.css`): si
+// se queda corto la foto se ve blanda, y si se pasa se baja una talla de más. Decía `50vw` en
+// escritorio: a 1440 pedía la de 1100 para una caja de 628. La caja, medida a mano en el CSS
+// (contenedor de 1440 con 24/32/40 px de margen; rejilla 2fr/1fr de 960 y 3/6/3 de 1200):
+console.log("la talla de la foto de la apertura");
+{
+  const CAJA = [
+    [390, 390], [412, 412], [800, 736], [960, 577], [1024, 609], [1199, 722],
+    [1200, 517], [1366, 594], [1440, 628], [1600, 624], [1920, 704], [2560, 704],
+  ];
+  const fuera = CAJA.filter(([ventana, caja]) => {
+    const dice = anchoDeSizes(SIZES_PRINCIPAL, ventana);
+    return dice < caja || dice > caja * 1.06 + 2;
+  });
+  check("el sizes cubre la caja sin pasarse más de un 6 %", fuera.length === 0,
+    fuera.map(([v, c]) => `${v}: caja ${c}, sizes ${anchoDeSizes(SIZES_PRINCIPAL, v)}`));
+
+  // Con las tallas de una foto grande (el PNG de 1.733 px de la redacción):
+  const grande = imagenSrcSet("/media/image/2026/11/grande.png", ANCHOS_DE_TARJETA, 1733);
+  check("teléfono de 390 a 3x: la de 1400, como antes (pide 1170)",
+    tallaElegida(grande, SIZES_PRINCIPAL, 390, 3).w === 1400);
+  check("escritorio de 1440 a 1x: la de 640 y no la de 1100 (caja de 628)",
+    tallaElegida(grande, SIZES_PRINCIPAL, 1440, 1).w === 640);
+  check("escritorio de 1440 a 2x: la de 1400 (pide 1256)",
+    tallaElegida(grande, SIZES_PRINCIPAL, 1440, 2).w === 1400);
+
+  // Una foto de menos de 640 px (el 15 % de las de noviembre, casi todas de 560 a 625) no
+  // tiene más tallas que las de 160 y 320, que en la apertura se verían borrosas: va la
+  // original, en la `<img>` y en la precarga, la misma.
+  const chica = armarPortada(SHELL, {
+    filas: [fila(1, { image_asset: { url: "/media/image/2026/11/chica-2c0996951c9a.jpg", width: 599, height: 399 } })],
+    ahora: HORA,
+  });
+  check("apertura de 599 px: precarga de la original, sin srcset",
+    chica.includes('<link rel="preload" as="image" href="/media/image/2026/11/chica-2c0996951c9a.jpg" fetchpriority="high" />'));
+  // De 640 a 1099 px (la mitad de las de noviembre): solo la de 640, nunca la original.
+  const media = armarPortada(SHELL, {
+    filas: [fila(1, { image_asset: { url: "/media/image/2026/11/media-80a1e74ace4e.jpg", width: 661, height: 464 } })],
+    ahora: HORA,
+  });
+  check("apertura de 661 px: precarga de la talla de 640",
+    media.includes('imagesrcset="/media/image/2026/11/media-80a1e74ace4e-640.jpg 640w"'));
+  // Una pieza vieja sin ancho guardado: las tres tallas, como las pide `CardMedia`
+  // (si una no existe, la tarjeta cae al relleno de color; la precarga solo se pierde).
+  const vieja = precargaDeLaApertura(paraLaApertura(fila(1, { image_asset: { url: "/media/image/2026/09/vieja.jpg" } })));
+  check("apertura sin ancho guardado: el mismo srcset que la <img>",
+    vieja?.imagesrcset === imagenSrcSet("/media/image/2026/09/vieja.jpg", ANCHOS_DE_TARJETA, null));
+  const svg = precargaDeLaApertura(paraLaApertura(fila(1, { image_asset: { url: "/media/image/2026/11/g.svg", width: 1200 } })));
+  check("apertura en SVG: la original, sin srcset", svg?.href === "/media/image/2026/11/g.svg" && !svg.imagesrcset);
 }
 
 // —— 5. Caracteres raros (XSS) ——

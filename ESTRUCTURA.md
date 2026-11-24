@@ -33,7 +33,7 @@ un tope que solo baja.
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
 | Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
-| Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`) y el quiosco. Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
+| Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
 | Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |
 
@@ -41,7 +41,8 @@ un tope que solo baja.
 
 - Todo pasa por `src/api/`: `nucleo.js` arma la dirección (la API o el quiosco), pone
   las cabeceras, lee el JSON y el error; `sesion.js` guarda y renueva la sesión;
-  `quiosco.js` dice qué lecturas salen por el borde. Se entra por los envoltorios de
+  `quiosco.js` dice qué lecturas salen por el borde; `archivoDelSitio.js` baja un archivo
+  de este mismo sitio (`/media/…`, para el convertidor de imágenes del panel). Se entra por los envoltorios de
   siempre: `lib/api.js` (`adminRequest`, el panel), `lib/userApi.js` (`userRequest`,
   `userPublicRequest`…, el lector) y `services/apiClient.js` (`createApiClient`, lo
   público).

@@ -19,13 +19,12 @@ import { uploadAdminMediaImage } from "../../../services/adminMediaService";
 import {
   AVISO_OPTIMIZANDO,
   archivoEsGifAnimado,
-  avisoDeAligerado,
   comprobarSenal,
   convertirImagen,
   esGif,
   esSvg,
-  kilobytes,
   lienzoDelNavegador,
+  notaDeConversion,
 } from "../aligerarImagen.js";
 
 /**
@@ -38,14 +37,10 @@ export const AVISO_GIF_ANIMADO =
   "Es un GIF animado: se sube tal cual para no perder el movimiento, y cada lector lo bajará entero.";
 
 /**
- * Lo que se dice al acabar. Un SVG pequeño (un icono de 3 KB) puede salir más pesado en
- * WebP: decir «se aligeró» sería mentir, pero convertirlo sigue valiendo la pena porque
- * de él salen las versiones pequeñas de cada pantalla.
+ * Por qué vale la pena aunque pese más: un SVG pequeño (un icono de 3 KB) puede salir más
+ * pesado convertido, pero de la imagen salen las versiones pequeñas de cada pantalla.
  */
-export const notaDeConversion = (antes, despues) =>
-  despues < antes
-    ? avisoDeAligerado(antes, despues)
-    : `Se convirtió a WebP (de ${kilobytes(antes)} KB a ${kilobytes(despues)} KB): ahora el sitio prepara versiones más pequeñas para cada pantalla.`;
+const POR_QUE = "ahora el sitio prepara versiones más pequeñas para cada pantalla.";
 
 /**
  * Qué se hace con una foto antes de subirla: `convertir` (un SVG), `avisar` (un GIF
@@ -79,7 +74,7 @@ export const prepararFotoDePieza = async (archivo, { onAviso, senal, lienzo = li
   // Sin tope: una sola pasada, con 0,82, la calidad con la que el servidor hace sus
   // versiones.
   const nuevo = await convertirImagen(archivo, { medidas: MEDIDAS_DE_FOTO, senal, lienzo });
-  return { archivo: nuevo, nota: notaDeConversion(archivo.size, nuevo.size) };
+  return { archivo: nuevo, nota: notaDeConversion(archivo.size, nuevo, POR_QUE) };
 };
 
 /**

@@ -4,9 +4,12 @@ import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { subirArte } from "../api";
 import {
   AVISO_OPTIMIZANDO,
+  archivoEsGifAnimado,
   descargarImagen,
+  esGif,
   esSvg,
   kilobytes,
+  nombreDelFormato,
   origenDeLaImagen,
 } from "../../../../components/admin/aligerarImagen";
 import { prepararArte } from "../aligerarArte";
@@ -37,9 +40,12 @@ export const AligerarArte = ({ asset, medidas, preguntar, onReemplazar, deshabil
     if (origenDeLaImagen(url, window.location.origin) !== "propio") return undefined;
     const control = new AbortController();
     descargarImagen(asset, { senal: control.signal })
-      .then((archivo) => {
+      .then(async (archivo) => {
         const datos = { mime: archivo.type, bytes: archivo.size, nombre: archivo.name };
-        if (arteDemasiadoPesado(datos)) setPesado({ archivo, ...datos });
+        if (!arteDemasiadoPesado(datos)) return;
+        // Un GIF animado no se aligera (perdería el movimiento): sin botón.
+        if (esGif(datos) && (await archivoEsGifAnimado(archivo))) return;
+        if (!control.signal.aborted) setPesado({ archivo, ...datos });
       })
       // Si no se pudo medir, no se afirma nada: el servidor sigue de red.
       .catch(() => {});
@@ -63,7 +69,8 @@ export const AligerarArte = ({ asset, medidas, preguntar, onReemplazar, deshabil
       const vale = await preguntar({
         title: "¿Poner el arte aligerado?",
         description:
-          `Queda de ${kilobytes(pesado.bytes)} KB a ${kilobytes(archivo.size)} KB, en WebP y con la misma imagen, ` +
+          `${archivo.size < pesado.bytes ? "Queda" : "Pasa"} de ${kilobytes(pesado.bytes)} KB a ` +
+          `${kilobytes(archivo.size)} KB, en ${nombreDelFormato(archivo.type)} y con la misma imagen, ` +
           "y pasa a ser el que sale publicado. El archivo de ahora se queda en Archivos por si hiciera falta.",
         confirmLabel: "Reemplazar",
         busyLabel: "Reemplazando…",
@@ -92,7 +99,7 @@ export const AligerarArte = ({ asset, medidas, preguntar, onReemplazar, deshabil
             Este arte pesa <b>{kilobytes(pesado.bytes)} KB</b> y{" "}
             {esSvg(pesado) ? "un SVG de anuncio" : "una imagen de anuncio"} puede pesar hasta{" "}
             {kilobytes(topeDelArte(pesado))} KB: cada lector lo baja entero en cada portada. «Aligerar» hace una
-            copia en WebP, del tamaño de su hueco, que pesa menos, y la pone en su lugar.
+            copia en WebP, del tamaño de su hueco y dentro del tope, y la pone en su lugar.
           </p>
           <div className="se-admin-pub__acciones">
             <button

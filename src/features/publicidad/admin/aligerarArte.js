@@ -11,12 +11,15 @@
 import {
   AVISO_OPTIMIZANDO,
   archivoEsGifAnimado,
-  avisoDeAligerado,
   convertirImagen,
   esGif,
   lienzoDelNavegador,
+  notaDeConversion,
 } from "../../../components/admin/aligerarImagen.js";
-import { TOPE_ARTE_IMAGEN, decidirAligerado } from "./utils.js";
+import { TOPE_ARTE_IMAGEN, TOPE_ARTE_SVG, decidirAligerado } from "./utils.js";
+
+/** Por qué vale la pena aunque pese más que antes (un SVG de 69 KB que sale en 136 KB). */
+const POR_QUE = `un SVG de anuncio puede pesar hasta ${TOPE_ARTE_SVG / 1024} KB y una imagen hasta ${TOPE_ARTE_IMAGEN / 1024} KB.`;
 
 /**
  * Deja un archivo listo para subirlo como arte: tal cual si no pasa del tope, o
@@ -38,12 +41,17 @@ export const prepararArte = async (archivo, { medidas, nombre, onAviso, senal, l
   if (decision.accion === "rechazar") throw new Error(decision.motivo);
 
   onAviso?.(AVISO_OPTIMIZANDO);
-  const nuevo = await convertirImagen(archivo, { medidas, tope: TOPE_ARTE_IMAGEN, nombre: suNombre, senal, lienzo });
+  const convertir = (tope) => convertirImagen(archivo, { medidas, tope, nombre: suNombre, senal, lienzo });
+  // Primero, que pese menos que el original (y que el tope). Un SVG de entre 50 y 150 KB
+  // pasa del suyo pero puede no bajar de su propio peso en WebP: entonces basta con que
+  // entre en el de las imágenes, y la nota lo dice tal cual.
+  let nuevo = await convertir(Math.min(TOPE_ARTE_IMAGEN, archivo.size));
+  if (!nuevo && archivo.size < TOPE_ARTE_IMAGEN) nuevo = await convertir(TOPE_ARTE_IMAGEN);
   if (!nuevo) {
     throw new Error(
       `No se pudo dejar ${suNombre ? `«${suNombre}»` : "el arte"} por debajo de ${TOPE_ARTE_IMAGEN / 1024} KB ni ` +
         "bajando la calidad y el tamaño. No se ha subido nada. Pida al anunciante una versión más sencilla.",
     );
   }
-  return { archivo: nuevo, nota: avisoDeAligerado(archivo.size, nuevo.size) };
+  return { archivo: nuevo, nota: notaDeConversion(archivo.size, nuevo, POR_QUE) };
 };

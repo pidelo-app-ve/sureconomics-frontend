@@ -27,7 +27,7 @@ import { VistaDeFigura } from "./VistaDeFigura";
 
 /**
  * Lo que se admite como foto del cuerpo. El SVG entra porque no llega al servidor como
- * SVG: quien sube (`editorDePieza/fotoDePieza.js`) lo convierte antes en WebP.
+ * SVG: quien sube (`editorDePieza/subirFotoDePieza.js`) lo convierte antes en WebP.
  */
 export const TIPOS_DE_IMAGEN = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/svg+xml"];
 

@@ -5,7 +5,7 @@ import { RichTextEditor } from "../../editor/RichTextEditor";
 import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 import { CampoEnIngles } from "./CampoEnIngles";
 import { FORMATOS_CON_FOTOS_EN_EL_CUERPO } from "./formulario";
-import { subirFotoDePieza } from "./fotoDePieza";
+import { subirFotoDePieza } from "./subirFotoDePieza";
 
 const { ancla } = recorridoEditor;
 

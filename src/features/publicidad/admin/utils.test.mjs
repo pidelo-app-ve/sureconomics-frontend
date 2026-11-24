@@ -141,3 +141,33 @@ test("prepararArte: si ni achicando entra, lo dice y no devuelve nada", async ()
   };
   await assert.rejects(prepararArte(archivo, { medidas: MEDIDAS_DE_ARTE.logo, lienzo }), /por debajo de 150 KB/);
 });
+
+test("prepararArte: un SVG de 69 KB busca primero pesar menos que él", async () => {
+  const llamadas = [];
+  const lienzo = {
+    ...lienzoFalso(),
+    exportar: async (_d, pedido) => {
+      llamadas.push(pedido);
+      return new Blob([new Uint8Array(Math.round(pedido.ancho * pedido.alto * 0.2 * pedido.calidad))], { type: pedido.tipo });
+    },
+  };
+  const archivo = new File([new Uint8Array(69 * KB)], "chico.svg", { type: "image/svg+xml" });
+  const r = await prepararArte(archivo, { medidas: MEDIDAS_DE_ARTE.cinta, lienzo });
+  assert.ok(r.archivo.size < 69 * KB);
+  assert.match(r.nota, /^Se aligeró de 69 KB a \d+ KB\.$/);
+  assert.ok(llamadas.length > 1);
+});
+
+test("prepararArte: si no baja de su peso, entra en 150 KB y no dice «se aligeró»", async () => {
+  const lienzo = {
+    ...lienzoFalso(),
+    exportar: async (_d, { tipo }) => new Blob([new Uint8Array(136 * KB)], { type: tipo }),
+  };
+  const archivo = new File([new Uint8Array(69 * KB)], "terco.svg", { type: "image/svg+xml" });
+  const r = await prepararArte(archivo, { medidas: MEDIDAS_DE_ARTE.cinta, lienzo });
+  assert.equal(r.archivo.size, 136 * KB);
+  assert.equal(
+    r.nota,
+    "Se convirtió a WebP (de 69 KB a 136 KB): un SVG de anuncio puede pesar hasta 50 KB y una imagen hasta 150 KB.",
+  );
+});

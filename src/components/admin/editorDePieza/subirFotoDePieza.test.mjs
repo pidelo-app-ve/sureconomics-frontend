@@ -1,5 +1,5 @@
 /**
- * La foto de una pieza antes de subirla (`fotoDePieza.js`): qué se convierte y qué no,
+ * La foto de una pieza antes de subirla (`subirFotoDePieza.js`): qué se convierte y qué no,
  * con un lienzo de mentira (en node no hay `<canvas>`). `npm test` o
  * `npm run test:aligerar`.
  */
@@ -9,19 +9,22 @@ import {
   AVISO_GIF_ANIMADO,
   MEDIDAS_DE_FOTO,
   decidirFotoDePieza,
-  notaDeConversion,
   prepararFotoDePieza,
-} from "./fotoDePieza.js";
+} from "./subirFotoDePieza.js";
 import { AVISO_OPTIMIZANDO } from "../aligerarImagen.js";
 
 const KB = 1024;
 
-/** Un lienzo de mentira: apunta lo que se le pide y pesa `bytes`. */
-const lienzoFalso = ({ medidas = { ancho: 300, alto: 150 }, bytes = 40 * KB, pedidos = [] } = {}) => ({
+/**
+ * Un lienzo de mentira: apunta lo que se le pide y pesa `bytes`. Con `sinWebp`, como un
+ * Safari antiguo: pedido un WebP, da un PNG.
+ */
+const lienzoFalso = ({ medidas = { ancho: 300, alto: 150 }, bytes = 40 * KB, pedidos = [], sinWebp = false } = {}) => ({
   cargar: async () => ({ medidas, vectorial: true, dibujable: async () => ({}), cerrar() {} }),
   exportar: async (_d, pedido) => {
     pedidos.push(pedido);
-    return new Blob([new Uint8Array(bytes)], { type: pedido.tipo });
+    const tipo = sinWebp && pedido.tipo === "image/webp" ? "image/png" : pedido.tipo;
+    return new Blob([new Uint8Array(bytes)], { type: tipo });
   },
 });
 
@@ -57,8 +60,14 @@ test("un SVG sale en WebP de 1.400 px, con calidad 0,82, en una sola pasada y co
   assert.equal(r.nota, "Se aligeró de 243 KB a 40 KB.");
 });
 
-test("un SVG pequeño que sale más pesado no dice «se aligeró»", () => {
-  assert.match(notaDeConversion(3 * KB, 20 * KB), /^Se convirtió a WebP \(de 3 KB a 20 KB\)/);
+test("un SVG pequeño que sale más pesado no dice «se aligeró», y dice el formato de verdad", async () => {
+  const icono = new File([new Uint8Array(3 * KB)], "icono.svg", { type: "image/svg+xml" });
+  const webp = await prepararFotoDePieza(icono, { lienzo: lienzoFalso({ bytes: 20 * KB }) });
+  assert.match(webp.nota, /^Se convirtió a WebP \(de 3 KB a 20 KB\): ahora el sitio prepara/);
+  // En un Safari sin WebP sale JPEG, y el aviso no puede decir «WebP».
+  const jpeg = await prepararFotoDePieza(icono, { lienzo: lienzoFalso({ bytes: 20 * KB, sinWebp: true }) });
+  assert.equal(jpeg.archivo.name, "icono.jpg");
+  assert.match(jpeg.nota, /^Se convirtió a JPEG \(de 3 KB a 20 KB\)/);
 });
 
 test("una foto JPEG pesada se sube tal cual: sus versiones las hace el servidor", async () => {

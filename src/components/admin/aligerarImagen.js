@@ -9,7 +9,7 @@
  * Uno solo para todo el panel. Lo usan:
  * - la publicidad (`features/publicidad/admin/aligerarArte.js`): el arte que pasa del
  *   tope se aligera al tamaño de su hueco;
- * - el editor de piezas (`editorDePieza/fotoDePieza.js`): un SVG se pasa a WebP de
+ * - el editor de piezas (`editorDePieza/subirFotoDePieza.js`): un SVG se pasa a WebP de
  *   1.400 px como mucho, porque de un SVG el servidor no saca versiones pequeñas.
  *
  * Vive en una carpeta del panel (`components/admin/`): así no puede viajar en el paquete
@@ -121,6 +121,25 @@ export const kilobytes = (bytes) => Math.max(1, Math.round((Number(bytes) || 0) 
 export const avisoDeAligerado = (antes, despues) =>
   `Se aligeró de ${kilobytes(antes)} KB a ${kilobytes(despues)} KB.`;
 
+/** «WebP» o «JPEG», para decirlo en un aviso. */
+export const nombreDelFormato = (tipo) => (tipoLimpio(tipo) === "image/jpeg" ? "JPEG" : "WebP");
+
+/**
+ * Lo que se dice al acabar una conversión. Si pesa menos, «Se aligeró de X KB a Y KB».
+ * Si pesa más (un SVG pequeño pasado a imagen), decir «se aligeró» sería mentir: se dice
+ * que se convirtió, a qué formato (WebP, o JPEG en un Safari antiguo) y `porQue` valió
+ * la pena.
+ *
+ * @param {number} antes bytes del original
+ * @param {{ size: number, type?: string }} nuevo el archivo convertido
+ * @param {string} [porQue]
+ */
+export const notaDeConversion = (antes, nuevo, porQue) =>
+  nuevo.size < antes
+    ? avisoDeAligerado(antes, nuevo.size)
+    : `Se convirtió a ${nombreDelFormato(nuevo.type)} (de ${kilobytes(antes)} KB a ${kilobytes(nuevo.size)} KB)` +
+      (porQue ? `: ${porQue}` : ".");
+
 /** Lo que dice mientras trabaja. */
 export const AVISO_OPTIMIZANDO = "Optimizando la imagen…";
 
@@ -164,11 +183,19 @@ export const esGifAnimado = (b) => {
   return cuadros > 1;
 };
 
-/** Un número de un atributo de SVG en píxeles («1456», «1456px»); null con %, em… */
-const pixeles = (valor) => {
-  const m = /^\s*([\d.]+)\s*(px)?\s*$/i.exec(valor ?? "");
-  const n = m ? Number(m[1]) : NaN;
-  return n > 0 ? n : null;
+/**
+ * Cuántos píxeles CSS vale cada unidad de un `width`/`height` de SVG. `em` y `ex` van a
+ * la letra por defecto del navegador (16 px). El `%` no se puede saber: depende de dónde
+ * se pinte.
+ */
+const PX_POR_UNIDAD = { "": 1, px: 1, pt: 4 / 3, pc: 16, in: 96, cm: 96 / 2.54, mm: 96 / 25.4, q: 96 / 101.6, em: 16, rem: 16, ex: 8 };
+
+/** Una longitud de SVG en píxeles («1456», «1456px», «546pt», «10cm»); null con % o sin número. */
+export const longitudEnPx = (valor) => {
+  const m = /^\s*([\d.]+(?:e[+-]?\d+)?)\s*([a-z]*)\s*$/i.exec(valor ?? "");
+  const factor = m ? PX_POR_UNIDAD[m[2].toLowerCase()] : undefined;
+  const n = factor ? Number(m[1]) * factor : NaN;
+  return n > 0 ? Math.round(n * 1000) / 1000 : null;
 };
 
 /** La etiqueta `<svg …>` de arriba (la primera; el prólogo XML no cuenta). */
@@ -179,8 +206,9 @@ const atributo = (etiqueta, nombre) =>
   new RegExp(`\\s${nombre}\\s*=\\s*("([^"]*)"|'([^']*)')`, "i").exec(etiqueta);
 
 /**
- * Las medidas propias de un SVG: `width` y `height` si están en píxeles, si no las del
- * `viewBox`. `null` si no dice ninguna (entonces se dibuja al tamaño de la caja).
+ * Las medidas propias de un SVG, en píxeles: `width` y `height` (en px, pt, mm… pasados a
+ * px), si no las del `viewBox`. `null` si no dice ninguna (entonces se miden en el
+ * navegador, y si tampoco, se dibuja al tamaño de la caja).
  *
  * @param {string} texto
  * @returns {{ ancho: number, alto: number, viewBox: boolean } | null}
@@ -194,8 +222,8 @@ export const medidasDeSvg = (texto) => {
   };
   const caja = (valor("viewBox") ?? "").trim().split(/[\s,]+/).map(Number);
   const conCaja = caja.length === 4 && caja[2] > 0 && caja[3] > 0;
-  const ancho = pixeles(valor("width"));
-  const alto = pixeles(valor("height"));
+  const ancho = longitudEnPx(valor("width"));
+  const alto = longitudEnPx(valor("height"));
   if (ancho && alto) return { ancho, alto, viewBox: conCaja };
   if (conCaja) return { ancho: caja[2], alto: caja[3], viewBox: true };
   return null;
@@ -203,19 +231,22 @@ export const medidasDeSvg = (texto) => {
 
 /**
  * El mismo SVG con un ancho y un alto fijos, para que el navegador lo dibuje a ese tamaño
- * (sin ellos, Firefox no sabe cuánto mide uno que solo trae `viewBox` y no lo pinta). Si
- * no traía `viewBox`, se le pone uno con sus medidas de antes: sin él, cambiar el ancho
- * recortaría el dibujo en vez de escalarlo.
+ * (sin ellos, Firefox no sabe cuánto mide uno que solo trae `viewBox` y no lo pinta).
+ *
+ * Si no traía `viewBox`, se le pone uno con lo que medía antes en píxeles (`original`: de
+ * sus atributos, ya pasados a px, o medido en el navegador). Sin él, cambiar el ancho
+ * agrandaría el lienzo y no el dibujo, que se quedaría en una esquina.
+ *
+ * @param {{ ancho: number, alto: number } | null} [original]
  */
-export const svgConMedidas = (texto, ancho, alto) => {
+export const svgConMedidas = (texto, ancho, alto, original = medidasDeSvg(texto)) => {
   const etiqueta = ETIQUETA_SVG.exec(texto ?? "")?.[0];
   if (!etiqueta) return texto;
-  const propias = medidasDeSvg(texto);
   let nueva = etiqueta
     .replace(/\s(width|height)\s*=\s*("[^"]*"|'[^']*')/gi, "")
     .replace(/^<svg\b/i, `<svg width="${ancho}" height="${alto}"`);
-  if (propias && !propias.viewBox) {
-    nueva = nueva.replace(/^<svg\b/i, `<svg viewBox="0 0 ${propias.ancho} ${propias.alto}"`);
+  if (original?.ancho > 0 && original?.alto > 0 && !atributo(etiqueta, "viewBox")) {
+    nueva = nueva.replace(/^<svg\b/i, `<svg viewBox="0 0 ${original.ancho} ${original.alto}"`);
   }
   return texto.replace(etiqueta, () => nueva);
 };
@@ -247,8 +278,9 @@ const SVG_ILEGIBLE = (nombre) =>
   "No se ha subido nada. Ábralo en el programa con el que se hizo y expórtelo otra vez (mejor en WebP o PNG).";
 
 const NO_SE_DEJA = (nombre) =>
-  `El navegador no deja convertir ${quien(nombre, "esta imagen")}: la trata como si fuera de otro sitio. ` +
-  "Descárguela y súbala otra vez desde su equipo con «Subir un archivo»: al subirla, el panel la convierte sola.";
+  `El navegador no deja convertir ${quien(nombre, "esta imagen")}: la trata como si fuera de otro sitio ` +
+  "(pasa con algunos SVG que llevan dentro un trozo de página web). No se ha subido nada. Ábrala en el " +
+  "programa con el que se hizo, expórtela en PNG o WebP y súbala así.";
 
 /** Una `<img>` cargada desde un `Blob` (y la dirección temporal, ya soltada). */
 const imagenDeBlob = (blob) =>
@@ -276,12 +308,7 @@ export const lienzoDelNavegador = {
   async cargar(archivo, { nombre } = {}) {
     if (esSvg({ mime: archivo.type, nombre })) {
       const texto = await archivo.text();
-      const propias = medidasDeSvg(texto);
-      // Cada tamaño se dibuja desde el SVG con ese ancho y alto: así sale nítido, y
-      // Firefox no se queda sin saber cuánto mide uno que solo trae `viewBox`.
-      const dibujable = (ancho, alto) =>
-        imagenDeBlob(new Blob([svgConMedidas(texto, ancho, alto)], { type: "image/svg+xml" }));
-      let medidas = propias;
+      let medidas = medidasDeSvg(texto);
       try {
         const prueba = await imagenDeBlob(new Blob([texto], { type: "image/svg+xml" }));
         if (!medidas && prueba.naturalWidth > 0 && prueba.naturalHeight > 0) {
@@ -290,6 +317,10 @@ export const lienzoDelNavegador = {
       } catch {
         throw fallo(SVG_ILEGIBLE(nombre));
       }
+      // Cada tamaño se dibuja desde el SVG con ese ancho y alto: así sale nítido, y
+      // Firefox no se queda sin saber cuánto mide uno que solo trae `viewBox`.
+      const dibujable = (ancho, alto) =>
+        imagenDeBlob(new Blob([svgConMedidas(texto, ancho, alto, medidas)], { type: "image/svg+xml" }));
       return { medidas, vectorial: true, dibujable, cerrar() {} };
     }
     // Una foto: `createImageBitmap` la decodifica fuera del hilo de la página, donde lo

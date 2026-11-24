@@ -13,7 +13,7 @@ import {
 import { enlaceWeb } from "../../../lib/enlaces";
 import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 import { IMAGE_HINT, nombreDeArchivo } from "./formulario";
-import { subirFotoDePieza } from "./fotoDePieza";
+import { subirFotoDePieza } from "./subirFotoDePieza";
 
 const { ancla } = recorridoEditor;
 

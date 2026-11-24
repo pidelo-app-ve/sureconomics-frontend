@@ -14,9 +14,11 @@ import {
   esGif,
   esGifAnimado,
   esSvg,
+  longitudEnPx,
   medidasDeSalida,
   medidasDeSvg,
   nombreAligerado,
+  notaDeConversion,
   origenDeLaImagen,
   svgConMedidas,
 } from "./aligerarImagen.js";
@@ -223,7 +225,7 @@ test("convertirImagen: un lienzo «contaminado» se explica, con la alternativa"
       throw e;
     },
   });
-  await assert.rejects(convertirImagen(archivo, { medidas: TIRA, lienzo }), /Subir un archivo/);
+  await assert.rejects(convertirImagen(archivo, { medidas: TIRA, lienzo }), /expórtela en PNG o WebP/);
 });
 
 test("convertirImagen: cancelado antes de empezar, no lee nada", async () => {
@@ -238,4 +240,43 @@ test("convertirImagen: cancelado antes de empezar, no lee nada", async () => {
   const archivo = new File([new Uint8Array(300 * KB)], "foto.png", { type: "image/png" });
   await assert.rejects(convertirImagen(archivo, { medidas: TIRA, senal: control.signal, lienzo }), { name: "AbortError" });
   assert.equal(leido, false);
+});
+
+test("las longitudes de un SVG pasan a píxeles: pt, mm, in…; el % no se puede saber", () => {
+  assert.equal(longitudEnPx("1456"), 1456);
+  assert.equal(longitudEnPx("1456px"), 1456);
+  assert.equal(longitudEnPx("546pt"), 728);
+  assert.equal(longitudEnPx("67.5pt"), 90);
+  assert.equal(longitudEnPx("1in"), 96);
+  assert.equal(longitudEnPx("25.4mm"), 96);
+  assert.equal(longitudEnPx("100%"), null);
+  assert.equal(longitudEnPx(""), null);
+  assert.deepEqual(medidasDeSvg('<svg width="546pt" height="67.5pt">'), { ancho: 728, alto: 90, viewBox: false });
+});
+
+test("un SVG sin viewBox escala entero, no se queda en una esquina", () => {
+  // Medidas en pt: el viewBox va en px, lo que medía de verdad.
+  assert.equal(
+    svgConMedidas('<svg width="546pt" height="67.5pt"><g/></svg>', 2912, 360),
+    '<svg viewBox="0 0 728 90" width="2912" height="360"><g/></svg>',
+  );
+  // Sin medidas en el archivo: las que midió el navegador (`naturalWidth`).
+  assert.equal(
+    svgConMedidas('<svg xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150"/></svg>', 720, 360, {
+      ancho: 300,
+      alto: 150,
+    }),
+    '<svg viewBox="0 0 300 150" width="720" height="360" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="150"/></svg>',
+  );
+  // Si ya trae viewBox, no se toca, aunque se le pasen otras medidas.
+  assert.equal(svgConMedidas('<svg viewBox="0 0 10 5"/>', 20, 10, { ancho: 99, alto: 99 }), '<svg width="20" height="10" viewBox="0 0 10 5"/>');
+});
+
+test("la nota dice la verdad: «se aligeró» solo si pesa menos, y el formato que salió", () => {
+  assert.equal(notaDeConversion(243 * KB, { size: 88 * KB, type: "image/webp" }), "Se aligeró de 243 KB a 88 KB.");
+  assert.equal(
+    notaDeConversion(69 * KB, { size: 136 * KB, type: "image/webp" }, "vale la pena."),
+    "Se convirtió a WebP (de 69 KB a 136 KB): vale la pena.",
+  );
+  assert.equal(notaDeConversion(3 * KB, { size: 20 * KB, type: "image/jpeg" }), "Se convirtió a JPEG (de 3 KB a 20 KB).");
 });

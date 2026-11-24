@@ -228,20 +228,14 @@ export const AdminUserDetail = () => {
               )}
             </div>
           </div>
-          {(createdLabel || adminPick(row, ["role", "roles"], "") !== "—") ? (
+          {/* Sin fila «Rol»: un lector no tiene rol (`PublicUserAdminSchema` del backend) y
+              salía siempre «—». */}
+          {createdLabel ? (
             <dl className="se-admin-user-detail__stats">
-              {createdLabel ? (
-                <div className="se-admin-user-detail__stat">
-                  <dt>Alta</dt>
-                  <dd>{createdLabel}</dd>
-                </div>
-              ) : null}
-              {adminPick(row, ["role", "roles"], "") !== "—" ? (
-                <div className="se-admin-user-detail__stat">
-                  <dt>Rol</dt>
-                  <dd>{adminPick(row, ["role", "roles"], "—")}</dd>
-                </div>
-              ) : null}
+              <div className="se-admin-user-detail__stat">
+                <dt>Alta</dt>
+                <dd>{createdLabel}</dd>
+              </div>
             </dl>
           ) : null}
         </div>

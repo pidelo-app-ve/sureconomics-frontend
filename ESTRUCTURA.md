@@ -13,6 +13,9 @@ un tope que solo baja.
   `src/services` y `src/styles`, ordenadas por tipo de archivo. Cuando se toca un tema a
   fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica y
   publicidad), y lo que queda en la zona vieja entra por su puerta.
+- **Compartida, por debajo de todo:** `src/api/` (el cliente HTTP) y `src/config/` (los
+  datos fijos del sitio). No importan nada del sitio ni del panel: son los demás los que
+  las usan.
 
 ## Tema → carpetas
 
@@ -30,8 +33,27 @@ un tope que solo baja.
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
 | Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
-| Llamadas al servidor (lo común) | `lib/api.js`, `lib/userApi.js`, `services/` |
-| Vista previa para redes y sitemap (Vercel) | `api/` |
+| Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`) y el quiosco. Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
+| Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
+| Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |
+
+## Llamadas al servidor
+
+- Todo pasa por `src/api/`: `nucleo.js` arma la dirección (la API o el quiosco), pone
+  las cabeceras, lee el JSON y el error; `sesion.js` guarda y renueva la sesión;
+  `quiosco.js` dice qué lecturas salen por el borde. Se entra por los envoltorios de
+  siempre: `lib/api.js` (`adminRequest`, el panel), `lib/userApi.js` (`userRequest`,
+  `userPublicRequest`…, el lector) y `services/apiClient.js` (`createApiClient`, lo
+  público).
+- Nadie llama a `fetch`, `sendBeacon` o `XMLHttpRequest` por su cuenta fuera de
+  `src/api/`. Los cuatro que tienen motivo (la medición y las impresiones, que van sin
+  credenciales y sin esperar respuesta; el clasificador de caras, que es un archivo del
+  propio sitio; la subida de video a Cloudflare, con su barra de progreso) están en
+  `RED_FUERA_DEL_CLIENTE`, en la prueba de arquitectura, con cuántas llamadas cada uno:
+  el número solo puede bajar.
+- Si renovar la sesión falla, el panel y el lector solo la cierran cuando el servidor dice
+  que ya no vale: sin red, la sesión se queda (`CERRAR_SI_LA_SESION_NO_VALE`, en
+  `src/api/sesion.js`).
 
 ## Textos y estilos
 

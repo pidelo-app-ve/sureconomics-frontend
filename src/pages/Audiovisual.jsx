@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { EmptyState, ErrorState, LoadingState } from "../components/content";

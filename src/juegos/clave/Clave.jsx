@@ -4,7 +4,7 @@ import { Enlace } from "../../components/Enlace";
 import { ShareButtons } from "../../components/content/ShareButtons";
 import { formatearFecha, formatearNumero } from "../../i18n/motor";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { rutaDeFormato, rutaDePieza } from "../../lib/pieza";
 import { SITIO } from "../../lib/seo";
 import { getCategoriasClave, getPalabraDelDia, buscarPiezaConPalabra } from "../../services/claveService";

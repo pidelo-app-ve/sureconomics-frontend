@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { TEAM, claveDeFoto } from "../../data/surEconomicsMock";
+import { TEAM, claveDeFoto } from "../../config/equipo";
 import { BarraDeGuardar } from "../../components/admin/BarraDeGuardar";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
 import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";

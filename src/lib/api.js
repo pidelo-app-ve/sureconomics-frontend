@@ -1,102 +1,53 @@
-import {
-    clearStoredAuth,
-    persistAuth,
-    readStoredAuth,
-} from "./authStorage";
-
-const rawBase = import.meta.env.VITE_API_URL ?? "";
-const API_BASE = rawBase.replace(/\/$/, "");
+/**
+ * Hablar con la API desde el panel (`adminRequest` y compañía). El trabajo lo hace el
+ * núcleo, `src/api/` (`nucleo.js` y `sesion.js`); aquí queda lo propio del panel: su
+ * sesión (`authStorage.js`), su forma de leer el error y de desenvolver la respuesta, y
+ * su política si renovar la sesión falla (`CERRAR_SI_LA_SESION_NO_VALE`). Nunca por el
+ * quiosco: todo lo del panel lleva sesión.
+ */
+import { clearStoredAuth, persistAuth, readStoredAuth } from "./authStorage";
+import { desenvolverDelPanel, errorDelPanel, pedir } from "../api/nucleo.js";
+import { CERRAR_SI_LA_SESION_NO_VALE, crearSesion } from "../api/sesion.js";
 
 /** Fired after tokens are refreshed or cleared so AuthContext can sync from sessionStorage. */
 export const ADMIN_AUTH_SYNC_EVENT = "sureconomics-admin-auth-sync";
 
-export const dispatchAdminAuthSync = () => {
-    if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent(ADMIN_AUTH_SYNC_EVENT));
+/** Un `Error` con su estado HTTP. */
+const conEstado = (mensaje, status) => Object.assign(new Error(mensaje), { status });
+
+/** La respuesta ya leída: el error del panel si no fue bien; si no, `data` (o `{ data, meta }`). */
+const abrir = ({ res, payload }) => {
+    if (!res.ok || payload.success === false) {
+        throw errorDelPanel(res, payload);
     }
+    return desenvolverDelPanel(payload);
 };
 
-const buildUrl = (path, query) => {
-    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-    const url = new URL(`${API_BASE}${normalizedPath}`);
-    if (query && typeof query === "object") {
-        Object.entries(query).forEach(([key, value]) => {
-            if (value === undefined || value === null || value === "") return;
-            url.searchParams.set(key, String(value));
-        });
-    }
-    return url.toString();
-};
+const sesion = crearSesion({
+    almacen: { leer: readStoredAuth, guardar: persistAuth, borrar: clearStoredAuth },
+    evento: ADMIN_AUTH_SYNC_EVENT,
+    rutaDeRenovar: "/auth/refresh",
+    pedir,
+    abrir,
+    sinRenovacion: () => conEstado("No refresh token", 401),
+    renovacionInvalida: () => new Error("La renovación de la sesión devolvió una respuesta no válida."),
+});
 
-/**
- * @param {Response} res
- * @param {Record<string, unknown>} payload
- */
-const throwFromPayload = (res, payload) => {
-    const err = payload?.error ?? { message: res.statusText || "Request failed" };
-    const error = new Error(typeof err.message === "string" ? err.message : "Request failed");
-    error.status = res.status;
-    error.code = err.code;
-    error.details = err.details ?? payload ?? null;
-    throw error;
-};
-
-/**
- * @param {string} path
- * @param {RequestInit & { token?: string, json?: unknown, query?: Record<string, unknown> }} [options]
- */
-const rawFetch = async (path, options = {}) => {
-    const { token, json, headers: initHeaders, body, query, idempotencyKey, ...rest } = options;
-    const url = buildUrl(path, query);
-
-    const headers = { ...initHeaders };
-    if (json !== undefined) {
-        headers["Content-Type"] = "application/json";
-    }
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-    // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
-    // crear otra cosa. Ver `lib/idempotencia.js`.
-    if (idempotencyKey) {
-        headers["Idempotency-Key"] = idempotencyKey;
-    }
-
-    const res = await fetch(url, {
-        ...rest,
-        headers,
-        body: json !== undefined ? JSON.stringify(json) : body,
-    });
-
-    const payload = await res.json().catch(() => ({}));
-    return { res, payload };
-};
+export const dispatchAdminAuthSync = sesion.avisar;
 
 /**
  * Successful API envelope: returns `data` only, or `{ data, meta }` when `meta` is present.
  * @param {Record<string, unknown>} payload
  * @returns {unknown}
  */
-export const unwrapResponseData = (payload) => {
-    if (payload == null) return null;
-    if (Object.prototype.hasOwnProperty.call(payload, "meta") && payload.meta != null) {
-        return { data: payload.data, meta: payload.meta };
-    }
-    return payload.data;
-};
+export const unwrapResponseData = desenvolverDelPanel;
 
 /**
  * @param {string} path
  * @param {RequestInit & { token?: string, json?: unknown, query?: Record<string, unknown> }} [options]
  * @returns {Promise<unknown>}
  */
-export const apiRequest = async (path, options = {}) => {
-    const { res, payload } = await rawFetch(path, options);
-    if (!res.ok || payload.success === false) {
-        throwFromPayload(res, payload);
-    }
-    return unwrapResponseData(payload);
-};
+export const apiRequest = async (path, options = {}) => abrir(await pedir(path, options));
 
 /**
  * @param {Record<string, unknown>} meta
@@ -115,32 +66,7 @@ export const normalizeListMeta = (meta) => {
 /**
  * @returns {Promise<{ access_token: string, refresh_token: string, expires_in?: number, refresh_expires_in?: number }>}
  */
-export const refreshAdminTokens = async () => {
-    const { refreshToken } = readStoredAuth();
-    if (!refreshToken) {
-        const err = new Error("No refresh token");
-        err.status = 401;
-        throw err;
-    }
-    const { res, payload } = await rawFetch("/auth/refresh", {
-        method: "POST",
-        json: { refresh_token: refreshToken },
-    });
-    if (!res.ok || payload.success === false) {
-        throwFromPayload(res, payload);
-    }
-    const data = unwrapResponseData(payload);
-    if (!data || typeof data !== "object" || !data.access_token) {
-        throw new Error("La renovación de la sesión devolvió una respuesta no válida.");
-    }
-    persistAuth({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token ?? refreshToken,
-        expiresIn: data.expires_in,
-    });
-    dispatchAdminAuthSync();
-    return data;
-};
+export const refreshAdminTokens = sesion.renovar;
 
 /**
  * Authenticated admin request. Uses access token from sessionStorage; on 401 refreshes once and retries.
@@ -150,66 +76,30 @@ export const refreshAdminTokens = async () => {
  * body is left untouched and no `Content-Type` is set, so the browser can add the
  * multipart boundary itself (see `adminUploadsService`).
  *
+ * Solo se cierra la sesión si el servidor dice que la renovación no vale (ver
+ * `src/api/sesion.js`): sin red, un 429 o un 5xx al renovar no dicen nada de la sesión.
+ *
  * @param {string} path
  * @param {RequestInit & { json?: unknown, query?: Record<string, unknown> }} [options]
  * @returns {Promise<unknown>}
  */
 export const adminRequest = async (path, options = {}) => {
-    const { refreshToken, accessExpiresAt } = readStoredAuth();
-    if (refreshToken && accessExpiresAt && Date.now() >= accessExpiresAt - 5000) {
-        try {
-            await refreshAdminTokens();
-        } catch {
-            // continue; access token may still work
-        }
-    }
-
-    const fetchWithStoredAccess = () =>
-        rawFetch(path, {
-            ...options,
-            token: readStoredAuth().accessToken,
-        });
+    await sesion.renovarSiVaACaducar();
 
     if (!readStoredAuth().accessToken) {
-        const err = new Error("Debe iniciar sesión");
-        err.status = 401;
-        throw err;
+        throw conEstado("Debe iniciar sesión", 401);
     }
 
-    let { res, payload } = await fetchWithStoredAccess();
+    const respuesta = await sesion.conRenovacion(
+        () => pedir(path, { ...options, token: readStoredAuth().accessToken }),
+        { siFalla: CERRAR_SI_LA_SESION_NO_VALE, errorCaducada: () => conEstado("Sesión expirada", 401) },
+    );
 
-    if (res.status === 401 && readStoredAuth().refreshToken) {
-        // Solo se cierra la sesión si el servidor dice que la renovación no vale: un 4xx
-        // que no sea 429 (401, 403, 400 de un token mal formado…). Sin red, un 429 o un
-        // 5xx al renovar no dicen nada de la sesión: se lanza
-        // ese error tal cual y la sesión se queda. Antes un solo `try` envolvía también el
-        // reintento, y un corte de red justo después de renovar borraba el token recién
-        // emitido y echaba del panel a quien estaba escribiendo.
-        try {
-            await refreshAdminTokens();
-        } catch (refreshErr) {
-            const status = refreshErr?.status;
-            const sesionNoVale = status >= 400 && status < 500 && status !== 429;
-            if (!sesionNoVale) throw refreshErr;
-            clearStoredAuth();
-            dispatchAdminAuthSync();
-            const err = new Error("Sesión expirada");
-            err.status = 401;
-            throw err;
-        }
-        ({ res, payload } = await fetchWithStoredAccess());
+    if (respuesta.res.status === 401) {
+        sesion.cerrar();
     }
 
-    if (res.status === 401) {
-        clearStoredAuth();
-        dispatchAdminAuthSync();
-    }
-
-    if (!res.ok || payload.success === false) {
-        throwFromPayload(res, payload);
-    }
-
-    return unwrapResponseData(payload);
+    return abrir(respuesta);
 };
 
 /**

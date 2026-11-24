@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { formatearFecha } from "../../i18n/motor";
 import { porDolar } from "./utils";
 import { useIdioma } from "../../i18n/ProveedorIdioma";

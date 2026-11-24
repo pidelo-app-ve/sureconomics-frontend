@@ -4,7 +4,7 @@ import { Enlace, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { ErrorState, LoadingState } from "../../components/content";
 import { SubmissionForm, normalizarPropuesta } from "../../components/submissions/SubmissionForm";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import * as userMeService from "../../services/userMeService";

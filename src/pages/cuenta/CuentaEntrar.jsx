@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Enlace, Redirigir, useNavegar } from "../../components/Enlace";
 import { useUserAuth } from "../../context/UserAuthContext";
 import { useAuth } from "../../context/AuthContext";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { conVolver, leerVolver } from "../../lib/volver";

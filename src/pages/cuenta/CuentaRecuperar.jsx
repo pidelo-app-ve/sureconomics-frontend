@@ -4,7 +4,7 @@ import { Enlace, useNavegar } from "../../components/Enlace";
 import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
 import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
 import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../data/surEconomicsMock";
+import { BRAND } from "../../config/sitio";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 import { useIdioma } from "../../i18n/ProveedorIdioma";

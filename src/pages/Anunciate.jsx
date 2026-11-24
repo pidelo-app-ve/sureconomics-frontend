@@ -3,7 +3,7 @@ import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 
 /**
  * «Anúnciate aquí»: la página de venta del inventario.

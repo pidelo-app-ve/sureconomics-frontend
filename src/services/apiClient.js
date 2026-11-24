@@ -1,54 +1,17 @@
-import { tActual } from "../i18n/motor";
-import { baseDelQuiosco, vaPorElQuiosco } from "../lib/quiosco.js";
+/**
+ * El cliente de lo público (`createApiClient`): sin sesión, y las lecturas por el
+ * quiosco. El trabajo lo hace el núcleo (`src/api/nucleo.js`); aquí queda lo propio de
+ * este cliente: su base, sus cabeceras fijas, su forma de leer el error (con la dirección
+ * pedida) y de desenvolver la respuesta, y que a `fetch` solo le llegan el método, las
+ * cabeceras, el JSON y `signal`.
+ */
+import { ApiError, desenvolverPublico, errorPublico, pedir } from "../api/nucleo.js";
+
+export { ApiError };
 
 const normalizeBaseUrl = (raw) => {
   const base = typeof raw === "string" ? raw.trim() : "";
   return base.replace(/\/$/, "");
-};
-
-export class ApiError extends Error {
-  /**
-   * @param {string} message
-   * @param {{ status?: number, code?: string, details?: unknown, url?: string }} [opts]
-   */
-  constructor(message, opts = {}) {
-    super(message);
-    this.name = "ApiError";
-    this.status = opts.status;
-    this.code = opts.code;
-    this.details = opts.details ?? null;
-    this.url = opts.url;
-  }
-}
-
-const buildUrl = (baseUrl, path, query) => {
-  const normalizedPath = path?.startsWith("/") ? path : `/${path ?? ""}`;
-  const url = new URL(`${normalizeBaseUrl(baseUrl)}${normalizedPath}`);
-  if (query && typeof query === "object") {
-    Object.entries(query).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === "") return;
-      url.searchParams.set(key, String(value));
-    });
-  }
-  return url.toString();
-};
-
-const safeJson = async (res) => {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
-};
-
-const unwrapPayload = (payload) => {
-  if (!payload) return null;
-  if (payload.success === false) return payload;
-  if (Object.prototype.hasOwnProperty.call(payload, "meta") && payload.meta != null && "data" in payload) {
-    return { data: payload.data, meta: payload.meta };
-  }
-  if ("data" in payload) return payload.data;
-  return payload;
 };
 
 export const createApiClient = ({
@@ -74,66 +37,23 @@ export const createApiClient = ({
    * }} [options]
    */
   const request = async (path, options = {}) => {
-    const method = options.method ?? "GET";
-
-    const headers = {
-      ...defaultHeaders,
-      ...(options.headers ?? {}),
-    };
-
-    // Las lecturas públicas, por el quiosco de este dominio (`lib/quiosco.js`).
-    const quiosco = baseDelQuiosco();
-    const porElQuiosco = Boolean(quiosco) && vaPorElQuiosco(path, { method, headers });
-    const url = buildUrl(porElQuiosco ? quiosco : resolvedBaseUrl, path, options.query);
-
-    // Reintentar con la misma clave devuelve la respuesta de la primera vez en vez de
-    // crear otra cosa. Ver `lib/idempotencia.js`.
-    if (options.idempotencyKey) {
-      headers["Idempotency-Key"] = options.idempotencyKey;
+    const { res, payload, url } = await pedir(
+      path,
+      {
+        method: options.method ?? "GET",
+        headers: { ...defaultHeaders, ...(options.headers ?? {}) },
+        json: options.json,
+        query: options.query,
+        idempotencyKey: options.idempotencyKey,
+        signal: options.signal,
+      },
+      { base: resolvedBaseUrl, conQuiosco: true, siNoEsJson: null },
+    );
+    if (!res.ok || (payload && payload.success === false)) {
+      throw errorPublico(res, payload, url);
     }
-
-    let body;
-    if (options.json !== undefined) {
-      headers["Content-Type"] = "application/json";
-      body = JSON.stringify(options.json);
-    }
-
-    const res = await fetch(url, {
-      method,
-      headers,
-      body,
-      signal: options.signal,
-    });
-
-    const payload = await safeJson(res);
-    // El mensaje de respaldo puede acabar en pantalla (los estados de error lo pintan),
-    // así que sale en el idioma del documento.
-    if (!res.ok) {
-      const message =
-        (payload && (payload.message || payload.error?.message)) ||
-        res.statusText ||
-        tActual("cuenta.api.errorSolicitud");
-      throw new ApiError(String(message), {
-        status: res.status,
-        code: payload?.error?.code,
-        details: payload?.error?.details ?? payload,
-        url,
-      });
-    }
-
-    if (payload && payload.success === false) {
-      const err = payload.error ?? { message: tActual("cuenta.api.errorSolicitud") };
-      throw new ApiError(typeof err.message === "string" ? err.message : tActual("cuenta.api.errorSolicitud"), {
-        status: res.status,
-        code: err.code,
-        details: err.details ?? payload,
-        url,
-      });
-    }
-
-    return unwrapPayload(payload);
+    return desenvolverPublico(payload);
   };
 
   return { request };
 };
-

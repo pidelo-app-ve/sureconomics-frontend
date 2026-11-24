@@ -5,7 +5,7 @@ import { Enlace } from "../../components/Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../i18n/useMetaPagina";
 import { formatearFecha, tActual } from "../../i18n/motor";
-import { BRAND, CONTACT } from "../../data/surEconomicsMock";
+import { BRAND, CONTACT } from "../../config/sitio";
 import { MEDICION_HABILITADA, consentimiento, decidir, estado, revocar } from "./medicion";
 
 /**

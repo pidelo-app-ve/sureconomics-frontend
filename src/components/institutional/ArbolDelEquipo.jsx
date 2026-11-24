@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { TEAM, claveDeFoto } from "../../data/surEconomicsMock";
+import { TEAM, claveDeFoto } from "../../config/equipo";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 import { TeamMemberCard } from "./TeamMemberCard";

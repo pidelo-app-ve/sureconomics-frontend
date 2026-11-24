@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BRAND, CONTACT } from "../data/surEconomicsMock";
+import { BRAND, CONTACT } from "../config/sitio";
 import { useSearchParams } from "react-router-dom";
 import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";

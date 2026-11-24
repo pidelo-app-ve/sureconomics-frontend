@@ -3,7 +3,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react"
 import { Enlace, useNavegar } from "../components/Enlace";
 import { useUserAuth } from "../context/UserAuthContext";
 import { AvisoDeCookies } from "../features/analitica";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { nuevaClave } from "../lib/idempotencia";

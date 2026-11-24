@@ -1,7 +1,7 @@
 // Su hoja, antes que los componentes: la de `ArbolDelEquipo` tiene que entrar después,
 // como cuando estas reglas vivían en `blog.css`.
 import "../styles/quienes-somos.css";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getFotosDelEquipo } from "../services/publicContentService";

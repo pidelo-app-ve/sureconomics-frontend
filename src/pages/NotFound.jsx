@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 import { Enlace } from "../components/Enlace";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { UltimaHoraColumna } from "../features/titulares";

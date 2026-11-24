@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Enlace } from "./Enlace";
 import { sinPrefijo } from "../i18n/motor";
 import PropTypes from "prop-types";
-import { PRIMARY_NAV } from "../data/surEconomicsMock";
+import { PRIMARY_NAV } from "../config/sitio";
 import { BRAND, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { Relojes, RelojesEnLista } from "./Relojes";
 import { useIdioma } from "../i18n/ProveedorIdioma";

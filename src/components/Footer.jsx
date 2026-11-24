@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { Enlace } from "./Enlace";
 import { sinPrefijo } from "../i18n/motor";
-import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../data/surEconomicsMock";
+import { BRAND, PRIMARY_NAV, CONTACT, SOCIAL } from "../config/sitio";
 import { IconInstagram, IconTikTok, IconX } from "./icons/social";
 import { BRAND as MARCA, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { useIdioma } from "../i18n/ProveedorIdioma";

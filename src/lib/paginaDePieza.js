@@ -4,7 +4,7 @@
  * qué título y qué señales para Google lleva. Sin React, para poder probarlo
  * (`paginaDePieza.test.mjs`).
  */
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { temaPrincipal } from "./contentFilter";
 
 /** Formatos que se leen: los demás se ven o se escuchan, y sus minutos son otros. */

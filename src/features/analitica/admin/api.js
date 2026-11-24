@@ -3,6 +3,7 @@
  * y la descarga del informe en Excel.
  */
 import { adminRequest } from "../../../lib/api";
+import { entregarDescarga, pedirArchivo } from "../../../api/nucleo.js";
 import { readStoredAuth } from "../../../lib/authStorage";
 import { nombreDelInforme } from "./utils";
 import { unwrapEntity } from "../../../services/adminResponseUtils";
@@ -185,11 +186,10 @@ export const getConsentimiento = async (dias = 30) => {
 export const descargarInforme = async (dias = 30) => {
   await adminRequest("/admin/analitica/en-vivo");
 
-  const base = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
   const consulta = new URLSearchParams({ dias: String(dias) });
   const zona = zonaDeAqui();
   if (zona) consulta.set("zona", zona);
-  const res = await fetch(`${base}/admin/analitica/informe?${consulta}`, {
+  const res = await pedirArchivo(`/admin/analitica/informe?${consulta}`, {
     headers: { Authorization: `Bearer ${readStoredAuth().accessToken || ""}` },
   });
   if (!res.ok) {
@@ -197,17 +197,5 @@ export const descargarInforme = async (dias = 30) => {
     throw new Error(detalle?.error?.message || "No se pudo descargar el informe.");
   }
 
-  const blob = await res.blob();
-  const objeto = URL.createObjectURL(blob);
-  try {
-    const enlace = document.createElement("a");
-    enlace.href = objeto;
-    enlace.download = nombreDelInforme(dias);
-    document.body.appendChild(enlace);
-    enlace.click();
-    enlace.remove();
-  } finally {
-    // Sin esto el blob se queda en memoria hasta que se recargue la página.
-    URL.revokeObjectURL(objeto);
-  }
+  entregarDescarga(await res.blob(), nombreDelInforme(dias));
 };

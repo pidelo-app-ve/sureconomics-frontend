@@ -5,7 +5,7 @@ import { CardMedia } from "../components/home/CardMedia";
 import { TituloDePieza } from "../components/content/TituloDePieza";
 import { Escudo, TarjetaJuego, useLvbp } from "../components/lvbp/MarcadorLvbp";
 import { ESPACIOS, PatrocinioCompacto, useEspacios, useHueco } from "../features/publicidad";
-import { BRAND } from "../data/surEconomicsMock";
+import { BRAND } from "../config/sitio";
 import { formatearFecha, formatearNumero } from "../i18n/motor";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";

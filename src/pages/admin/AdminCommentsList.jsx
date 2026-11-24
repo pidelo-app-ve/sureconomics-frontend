@@ -53,9 +53,10 @@ const getAuthorDetails = (row) => {
     return { name: name || "—", email: email || "" };
   }
 
-  const name = adminPick(row, ["author_name", "user_name", "author"], "—");
-  const email = adminPick(row, ["author_email", "user_email", "email"], "");
-  return { name, email };
+  // El comentario del panel (`AdminCommentSchema` del backend) solo trae `user_id`: ni
+  // nombre ni correo del autor. Salen del usuario, que se pide aparte (`lookups`); si
+  // ese no llega, la tabla dice «—».
+  return { name: "—", email: "" };
 };
 
 export const AdminCommentsList = () => {
@@ -306,11 +307,10 @@ export const AdminCommentsList = () => {
                       }
                     : getAuthorDetails(row);
                   const st = adminPick(row, ["status", "state"], "—");
-                  const postSlug =
-                    pickFromObj(postEntity, ["slug"]) || adminPick(row, ["post_slug", "slug", "article_slug"], "");
-                  const postTitle =
-                    pickFromObj(postEntity, ["title", "metaTitle", "name"]) ||
-                    adminPick(row, ["post_title", "article_title", "title"], "");
+                  // El comentario solo trae `post_id`: el título y el slug salen de la pieza,
+                  // que se pide aparte (`lookups`).
+                  const postSlug = pickFromObj(postEntity, ["slug"]) || "";
+                  const postTitle = pickFromObj(postEntity, ["title", "metaTitle", "name"]) || "";
                   const body = adminPick(row, ["content", "body", "text"], "");
                   const excerpt = body.length > 120 ? `${body.slice(0, 120)}…` : body;
                   const busy = actionId === cid;

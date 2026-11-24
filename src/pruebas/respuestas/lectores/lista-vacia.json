@@ -1,5 +1,5 @@
 {
-  "_origen": "Grabada el 24-nov-2026 del backend (frente-e-listas, b2326f8) con su cliente de pruebas: GET /admin/users?page=1&limit=20&q=nadie -> 200. Cómo: scripts/pruebas/grabar/.",
+  "_origen": "Grabada el 24-nov-2026 del backend (frente-e-listas, b03a957) con su cliente de pruebas: GET /admin/users?page=1&limit=20&q=nadie -> 200. Cómo: scripts/pruebas/grabar/.",
   "respuesta": {
     "data": [],
     "meta": {

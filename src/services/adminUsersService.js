@@ -1,9 +1,16 @@
 import { adminRequest } from "../lib/api";
 import { unwrapEntity, unwrapListResponse } from "./adminResponseUtils";
 
+/**
+ * Una página de lectores. Filtros opcionales, solo si están puestos: `q` (nombre, apellido
+ * o correo), `activo` y `verificado` (`si`/`no`) y `colaborador` (`si`/`no`/`sin_cambiar`).
+ */
 export const listAdminUsers = async (params = {}) => {
+  const filtros = Object.fromEntries(
+    ["q", "activo", "verificado", "colaborador"].filter((k) => params[k]).map((k) => [k, params[k]]),
+  );
   const raw = await adminRequest("/admin/users", {
-    query: { page: params.page ?? 1, limit: params.limit ?? 20 },
+    query: { page: params.page ?? 1, limit: params.limit ?? 20, ...filtros },
   });
   return unwrapListResponse(raw);
 };

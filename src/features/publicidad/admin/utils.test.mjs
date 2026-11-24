@@ -171,3 +171,27 @@ test("prepararArte: si no baja de su peso, entra en 150 KB y no dice «se aliger
     "Se convirtió a WebP (de 69 KB a 136 KB): un SVG de anuncio puede pesar hasta 50 KB y una imagen hasta 150 KB.",
   );
 });
+
+test("la tabla de campañas: en qué momento está cada una y qué enseña cada vista", async () => {
+  const { campanaEnLaVista, momentoDeCampana } = await import("./utils.js");
+  const hoy = "2026-11-24";
+  const al = { estado: "activa", desde: "2026-11-01", hasta: "2026-12-31" };
+  const frenada = { ...al, freno: "tope" };
+  const futura = { estado: "activa", desde: "2026-12-01", freno: "fecha" };
+  const vencida = { estado: "activa", desde: "2026-10-01", hasta: "2026-11-23", freno: "fecha" };
+  const cerrada = { estado: "terminada" };
+  const pausada = { estado: "pausada" };
+  assert.deepEqual(
+    [al, frenada, futura, vencida, cerrada, pausada].map((c) => momentoDeCampana(c, hoy)),
+    ["al_aire", "otra", "programada", "terminada", "terminada", "otra"],
+  );
+  assert.equal(momentoDeCampana({ estado: "activa", hasta: hoy }, hoy), "al_aire", "el último día todavía sale");
+  const todas = [al, frenada, futura, vencida, cerrada, pausada];
+  const ver = (vista) => todas.filter((c) => campanaEnLaVista(c, vista, hoy));
+  assert.deepEqual(ver("sin_terminadas"), [al, frenada, futura, pausada]);
+  assert.deepEqual(ver("al_aire"), [al]);
+  assert.deepEqual(ver("programadas"), [futura]);
+  assert.deepEqual(ver("terminadas"), [vencida, cerrada]);
+  assert.equal(ver("todas").length, 6);
+  assert.deepEqual(ver("rara"), ver("sin_terminadas"));
+});

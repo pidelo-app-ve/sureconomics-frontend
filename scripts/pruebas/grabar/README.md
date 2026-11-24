@@ -24,18 +24,20 @@ PYTHONDONTWRITEBYTECODE=1 MSYS_NO_PATHCONV=1 PYTHONPATH=. python -m pytest -p te
 
 cd <frontend>
 python scripts/pruebas/grabar/pasar.py <commit del backend>        # o: … <commit> titulares-pagina-1,pieza
+# FECHA_GRABADA=24-nov-2026 RAMA_BACKEND=<rama> python … : la fecha y la rama que dice el _origen
 npm test
 ```
 
 ## Qué regenera
 
-| Grabación (`-k`) | Archivos |
+| Grabación (`-k`; ojo: `-k` mira también la ruta del archivo, y una carpeta que se llame «…listas…» lo casa todo) | Archivos |
 |---|---|
 | `boletin` | `boletin/lista`, `numero`, `numero-guardado` |
 | `titulares` | `titulares/resumen`, `ajustes`, `fuentes`, `pagina-1`, `pagina-2`, `colombia`, `buscar`; `panel/entrar-editor`, `entrar-admin` |
 | `panel` | `panel/yo-editor`, `yo-admin`; `lectores/lectora`, `lectora-nombre` |
 | `piezas` | `piezas/pieza`, `no-existe`; `sitio/formatos`, `temas`, `lugares`, `monedas`, `mas-leidas`, `titulares`, `publicidad-pieza` |
 | `portada` | `portada/piezas`, `canal`, `publicidad` |
+| `test_listas` | `resumen/ediciones-1`, `ediciones-2`, `ediciones-fallo`, `ediciones-vacio`; `lectores/lista-1`, `lista-2`, `lista-buscar`, `lista-desactivados`, `lista-vacia`; `boletin/suscriptores-1`, `suscriptores-buscar` |
 
 `boletin/lote-terminado.json` va **escrita a mano**: grabarla mandaría correos.
 

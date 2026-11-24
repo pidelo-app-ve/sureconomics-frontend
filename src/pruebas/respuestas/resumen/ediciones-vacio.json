@@ -1,0 +1,20 @@
+{
+  "_origen": "Grabada el 24-nov-2026 del backend (frente-e-listas, b03a957) con su cliente de pruebas: GET /admin/resumen/ediciones?estado=retenido&pagina=1 -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "filtros": {
+        "desde": null,
+        "edicion": null,
+        "estado": "retenido",
+        "fallo": null,
+        "hasta": null
+      },
+      "pagina": 1,
+      "paginas": 1,
+      "por_pagina": 21,
+      "resumenes": [],
+      "total": 0
+    },
+    "success": true
+  }
+}

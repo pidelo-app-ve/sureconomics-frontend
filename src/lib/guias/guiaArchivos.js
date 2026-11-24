@@ -21,8 +21,15 @@ export const PASOS_ARCHIVOS = [
     titulo: "Buscar",
     puntos: [
       "Tipo: solo imágenes, solo documentos o solo audios.",
-      "Buscar: por nombre, archivo o crédito.",
+      "Buscar: por nombre, archivo o crédito. Busca cuando deja de escribir, y la lista vuelve a la primera página.",
     ],
+  },
+  {
+    clave: "paginas",
+    titulo: "Las páginas",
+    texto:
+      "Los archivos van de 24 en 24. Aquí dice en qué página está y cuántos hay en total con lo elegido; " +
+      "«Anterior» y «Siguiente» están aquí arriba y, con los números, también abajo.",
   },
   {
     clave: "tabla",

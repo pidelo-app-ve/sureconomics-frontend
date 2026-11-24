@@ -17,12 +17,15 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useBuscadorConEspera } from "../../hooks/useBuscadorConEspera";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
+import { paginaQueExiste } from "../../lib/listasDelPanel";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoArchivos } from "../../lib/guias/guiaArchivos";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { PaginasDeLaLista } from "../../components/admin/PaginasDeLaLista";
 
 const { ancla } = recorridoArchivos;
 
@@ -33,6 +36,15 @@ const KINDS = [
     { value: "document", label: "Documentos" },
     { value: "audio", label: "Podcast" },
 ];
+
+/** Lo que dice la lista vacía según el tipo elegido (sin búsqueda). */
+const VACIO_POR_TIPO = {
+    "": { title: "Sin archivos", description: "Los videos de entrevistas se registran pegando su enlace desde el editor." },
+    image: { title: "Sin imágenes", description: "Suba una con «Subir archivo» o desde el editor de una pieza." },
+    video: { title: "Sin videos", description: "Los videos de entrevistas se registran pegando su enlace desde el editor." },
+    document: { title: "Sin documentos", description: "Los PDF de los informes se suben con «Subir archivo»." },
+    audio: { title: "Sin podcast", description: "Los audios (MP3 o M4A) se suben con «Subir archivo»." },
+};
 
 const WHERE = {
     r2: "R2",
@@ -114,8 +126,13 @@ export const AdminMediaLibrary = () => {
     const [kind, setKind] = useState("");
     // Dos estados y no uno: `q` es lo que se está escribiendo, `aguja` lo que de
     // verdad se consulta. Sin esa separación cada tecla sería una petición.
-    const [q, setQ] = useState("");
     const [aguja, setAguja] = useState("");
+    const [q, setQ] = useBuscadorConEspera(aguja, (texto) => {
+        // La página vuelve a la primera: el resultado de otra búsqueda no tiene
+        // por qué tener una página siete.
+        setPage(1);
+        setAguja(texto);
+    });
     const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
     const [busy, setBusy] = useState(false);
     const { confirm, ConfirmDialog } = useAdminConfirm();
@@ -126,6 +143,9 @@ export const AdminMediaLibrary = () => {
         try {
             const { items, meta } = await listAdminMedia({ page, limit: 24, kind, q: aguja });
             setState({ status: "success", items, meta, error: null });
+            // Se borró lo último de la última página: a la que ahora es la última.
+            const existe = paginaQueExiste(page, meta?.pages ?? 0);
+            if (existe) setPage(existe);
         } catch (err) {
             setState({ status: "error", items: [], meta: null, error: err });
         }
@@ -134,16 +154,6 @@ export const AdminMediaLibrary = () => {
     useEffect(() => {
         applyPageMeta({ title: "Admin — Archivos", description: "Biblioteca de medios." });
     }, []);
-
-    useEffect(() => {
-        const reloj = setTimeout(() => {
-            // La página vuelve a la primera: el resultado de otra búsqueda no tiene
-            // por qué tener una página siete.
-            setPage(1);
-            setAguja(q);
-        }, 250);
-        return () => clearTimeout(reloj);
-    }, [q]);
 
     useEffect(() => {
         load();
@@ -274,17 +284,16 @@ export const AdminMediaLibrary = () => {
             ) : null}
             {state.status === "success" && state.items.length === 0 ? (
                 <EmptyState
-                    title={aguja ? "Nada responde a esa búsqueda" : "Sin archivos"}
-                    description={
-                        aguja
-                            ? "Se busca en la etiqueta, el nombre del archivo y el crédito."
-                            : "Los videos de entrevistas se registran pegando su enlace desde el editor."
-                    }
+                    {...(aguja
+                        ? { title: "Nada responde a esa búsqueda", description: "Se busca en la etiqueta, el nombre del archivo y el crédito." }
+                        : VACIO_POR_TIPO[kind] ?? VACIO_POR_TIPO[""])}
                 />
             ) : null}
 
             {state.status === "success" && state.items.length > 0 ? (
                 <>
+                    <PaginasDeLaLista pagina={meta?.page ?? page} paginas={totalPages} total={meta?.total ?? state.items.length}
+                        onPagina={setPage} anclaje={ancla("paginas")} />
                     <div className="se-admin-table-wrap" {...ancla("tabla")}>
                         <table className="se-admin-table">
                             <thead>

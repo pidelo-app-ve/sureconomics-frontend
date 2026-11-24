@@ -235,3 +235,37 @@ export const decidirAligerado = (archivo = {}) => {
   }
   return { accion: "aligerar" };
 };
+
+/* ─── La tabla de campañas: qué se ve, en el navegador ──────────────────────────── */
+
+/** Lo que se puede elegir en «Ver» de la tabla de campañas. Se entra «Sin terminadas». */
+export const VISTAS_DE_CAMPANAS = {
+  sin_terminadas: "Sin terminadas",
+  al_aire: "Al aire",
+  programadas: "Programadas",
+  terminadas: "Terminadas",
+  todas: "Todas",
+};
+
+/**
+ * En qué momento está una campaña, con `hoy` (AAAA-MM-DD, Caracas): `terminada` (se dio
+ * por terminada o ya pasó su último día), `programada` (todavía no llegó su primer día),
+ * `al_aire` (activa y sin nada que la frene: el servidor manda `freno` si no sale) u `otra`
+ * (en pausa, borrador, tope alcanzado, sin pieza…).
+ */
+export const momentoDeCampana = (c, hoy) => {
+  if (c?.estado === "terminada" || (c?.hasta && c.hasta < hoy)) return "terminada";
+  if (c?.desde && c.desde > hoy) return "programada";
+  return c?.estado === "activa" && !c?.freno ? "al_aire" : "otra";
+};
+
+const PASA_LA_VISTA = {
+  sin_terminadas: (m) => m !== "terminada",
+  al_aire: (m) => m === "al_aire",
+  programadas: (m) => m === "programada",
+  terminadas: (m) => m === "terminada",
+  todas: () => true,
+};
+
+/** Si la campaña sale con la vista elegida (una vista que no existe es «Sin terminadas»). */
+export const campanaEnLaVista = (c, vista, hoy) => (PASA_LA_VISTA[vista] ?? PASA_LA_VISTA.sin_terminadas)(momentoDeCampana(c, hoy));

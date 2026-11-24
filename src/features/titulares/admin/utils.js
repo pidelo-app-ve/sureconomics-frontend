@@ -102,9 +102,8 @@ export const consultaDeTitulares = ({ vista, pagina = 1, porPagina = POR_PAGINA,
   return consulta;
 };
 
-/** «Página 2 de 5 — 87 en total», como en Contenido. */
-export const lineaDePaginas = ({ pagina, paginas, total }) =>
-  `Página ${pagina || 1} de ${Math.max(1, paginas || 0)} — ${total || 0} en total`;
+/** «Página 2 de 5 — 87 en total» y el trozo de una lista: los de todas las listas del panel. */
+export { lineaDePaginas, trozoDeLista } from "../../../lib/listasDelPanel.js";
 
 /* ─── Los medios: buscar, filtrar y repartir en páginas, en el navegador ─────────── */
 
@@ -137,11 +136,4 @@ export const filtrarFuentes = (fuentes, { buscar = "", estado = "todas", nivel =
   return (fuentes ?? [])
     .filter((f) => pasa(f) && (!nivel || Number(f.nivel) === Number(nivel)) && (!aguja || sinTildes(f.nombre).includes(aguja)))
     .sort((a, b) => Number(Boolean(b.nueva)) - Number(Boolean(a.nueva)));
-};
-
-/** Un trozo de la lista: la página `pagina` (que se ajusta si ya no existe) y cuántas hay. */
-export const trozoDeLista = (lista, pagina, porPagina) => {
-  const paginas = Math.max(1, Math.ceil((lista?.length ?? 0) / porPagina));
-  const actual = Math.min(Math.max(1, Number(pagina) || 1), paginas);
-  return { pagina: actual, paginas, filas: (lista ?? []).slice((actual - 1) * porPagina, actual * porPagina) };
 };

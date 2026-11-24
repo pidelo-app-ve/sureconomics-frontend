@@ -46,6 +46,7 @@ export const PASOS_PUBLICIDAD = [
     clave: "campanas",
     titulo: "Las campañas",
     puntos: [
+      "Ver: al entrar se ven todas menos las terminadas. Elija «Al aire», «Programadas» (todavía no llegó su primer día), «Terminadas» o «Todas»; al lado de cada una dice cuántas hay.",
       "Cómo va: al aire, en pausa, borrador, o por qué no sale aunque esté activa (tope alcanzado, fuera de fecha, sin pieza lista).",
       "Al aire: enciende o pausa la campaña con un clic. Una campaña sin pieza no se puede encender.",
       "Ficha: baja a la ficha del anunciante, con sus piezas y artes.",

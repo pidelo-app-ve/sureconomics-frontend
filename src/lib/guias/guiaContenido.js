@@ -18,7 +18,7 @@ export const PASOS_CONTENIDO = [
     clave: "filtros",
     titulo: "Buscar y filtrar",
     puntos: [
-      "Buscar: por palabras del título o del resumen.",
+      "Buscar: por palabras del título o del resumen. Busca cuando deja de escribir, no con cada letra.",
       "Formato y estado: para ver, por ejemplo, solo los borradores de noticias.",
       "Sin clasificar: las piezas que todavía no tienen tema.",
     ],

@@ -5,6 +5,7 @@ import { listAdminFormats } from "../../services/adminTaxonomyService";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
 import { applyPageMeta } from "../../lib/seo";
 import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useBuscadorConEspera } from "../../hooks/useBuscadorConEspera";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";
 import { CampoMovil } from "../../components/admin/CampoMovil";
@@ -70,6 +71,11 @@ export const AdminPostsList = () => {
     const [actionFeedback, setActionFeedback] = useState({ status: "idle", message: "", error: null });
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
+    // Lo escrito (`texto`) y lo pedido (`filters.q`), aparte: una petición cuando se deja de escribir.
+    const [texto, setTexto] = useBuscadorConEspera(filters.q, (q) => {
+        setPage(1);
+        setFilters((prev) => ({ ...prev, q }));
+    });
 
     const load = useCallback(async () => {
         setState((s) => ({ ...s, status: "loading", error: null }));
@@ -199,6 +205,13 @@ export const AdminPostsList = () => {
     const meta = state.meta;
     const totalPages = meta?.pages ?? 1;
 
+    const buscador = (
+        <label className="se-admin-filters__field se-admin-filters__field--grow">
+            <span className="se-form-label">Buscar</span>
+            <input className="se-form-control" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Título o resumen" />
+        </label>
+    );
+
     return (
         <main role="main">
             <CabeceraDePagina
@@ -218,15 +231,7 @@ export const AdminPostsList = () => {
             <div className="se-admin-filters" {...ancla("filtros")}>
                 {esMovil ? (
                     <>
-                        <label className="se-admin-filters__field se-admin-filters__field--grow">
-                            <span className="se-form-label">Buscar</span>
-                            <input
-                                className="se-form-control"
-                                value={filters.q}
-                                onChange={setFilter("q")}
-                                placeholder="Título o resumen"
-                            />
-                        </label>
+                        {buscador}
                         <CampoMovil movil titulo="Filtros" resumen={resumenDeFiltros}>
                             <label className="se-admin-filters__field">
                                 <span className="se-form-label">Formato</span>
@@ -285,15 +290,7 @@ export const AdminPostsList = () => {
                                 <option value="published">Publicado</option>
                             </select>
                         </label>
-                        <label className="se-admin-filters__field se-admin-filters__field--grow">
-                            <span className="se-form-label">Buscar</span>
-                            <input
-                                className="se-form-control"
-                                value={filters.q}
-                                onChange={setFilter("q")}
-                                placeholder="Título o resumen"
-                            />
-                        </label>
+                        {buscador}
                         <label className="se-admin-filters__check">
                             <input
                                 type="checkbox"

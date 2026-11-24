@@ -53,7 +53,7 @@ const TOPE_NUEVO = 200;
 const TOPES = {
   "src/pages/admin/AdminResumen.jsx#AdminResumen": 624,
   "src/pages/admin/AdminSubmissionDetail.jsx#AdminSubmissionDetail": 646,
-  "src/pages/admin/AdminPostsList.jsx#AdminPostsList": 600,
+  "src/pages/admin/AdminPostsList.jsx#AdminPostsList": 596,
   "src/features/publicidad/admin/components/AsistenteDeAnuncio.jsx#AsistenteDeAnuncio": 598,
   "src/pages/admin/AdminPostEditor.jsx#AdminPostEditor": 564,
   "src/features/analitica/admin/AdminAnalitica.jsx#AdminAnalitica": 464,

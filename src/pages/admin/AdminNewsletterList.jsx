@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   downloadNewsletterCsv,
   listNewsletterSubscribers,
@@ -7,6 +7,11 @@ import { EmptyState, ErrorState, LoadingState, Pagination } from "../../componen
 import { applyPageMeta } from "../../lib/seo";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
+import { PaginasDeLaLista } from "../../components/admin/PaginasDeLaLista";
+import { FiltrosDeSuscriptores } from "../../components/admin/boletin/FiltrosDeSuscriptores";
+import { useBuscadorConEspera } from "../../hooks/useBuscadorConEspera";
+import { useListaDelServidor } from "../../hooks/useListaDelServidor";
+import { paginaQueExiste } from "../../lib/listasDelPanel";
 import { esEditor } from "../../lib/menuDelPanel";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoSuscriptores } from "../../lib/guias/guiaSuscriptores";
@@ -41,28 +46,38 @@ const ORIGEN = {
  *
  * El filtro por estado empieza en "suscritos" y no en "todos" a propósito: lo que la
  * redacción necesita ver casi siempre es a quién le puede escribir. Las bajas están a un
- * clic, para poder comprobar que alguien salió cuando lo pide.
+ * clic, para poder comprobar que alguien salió cuando lo pide. Al lado, de dónde se apuntó
+ * y un buscador por correo (pide cuando se deja de escribir), todo pedido al servidor;
+ * cambiar algo vuelve a la página 1. El CSV va con el estado elegido, como siempre.
  */
+
+const SIN_FILTROS = { estado: "subscribed", origen: "", q: "" };
 export const AdminNewsletterList = () => {
   const { role } = useAuth();
   const [page, setPage] = useState(1);
-  const [estado, setEstado] = useState("subscribed");
-  const [state, setState] = useState({ status: "idle", items: [], meta: null, error: null });
+  const [filtros, setFiltros] = useState(SIN_FILTROS);
+  const { estado } = filtros;
   const [csv, setCsv] = useState({ status: "idle", error: "" });
+  const arriba = useRef(null);
+  const [texto, setTexto] = useBuscadorConEspera(filtros.q, (q) => {
+    setPage(1);
+    setFiltros((f) => ({ ...f, q }));
+  });
 
-  const load = useCallback(async () => {
-    setState((s) => ({ ...s, status: "loading", error: null }));
-    try {
-      const { items, meta } = await listNewsletterSubscribers({
-        page,
-        limit: 20,
-        status: estado === "all" ? undefined : estado,
-      });
-      setState({ status: "success", items, meta, error: null });
-    } catch (err) {
-      setState({ status: "error", items: [], meta: null, error: err });
-    }
-  }, [page, estado]);
+  const pedir = useCallback(
+    () => listNewsletterSubscribers({ page, limit: 20, status: estado === "all" ? undefined : estado, q: filtros.q, origen: filtros.origen }),
+    [page, estado, filtros.q, filtros.origen],
+  );
+  // Una página que ya no existe (un filtro dejó menos) lleva a la última.
+  const alLlegar = ({ meta }) => {
+    const existe = paginaQueExiste(page, meta?.pages ?? 0);
+    if (existe) setPage(existe);
+  };
+  const lista = useListaDelServidor(pedir, alLlegar);
+  // Con los nombres de antes: lo de abajo se lee igual que cuando la página pedía por su cuenta.
+  const state = { status: lista.status, items: lista.datos?.items ?? [], meta: lista.datos?.meta, error: lista.error };
+  const load = () => lista.cargar();
+  const conFiltros = Boolean(filtros.q || filtros.origen);
 
   useEffect(() => {
     applyPageMeta({
@@ -71,10 +86,6 @@ export const AdminNewsletterList = () => {
       noindex: true,
     });
   }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
 
   const descargar = async () => {
     setCsv({ status: "loading", error: "" });
@@ -86,11 +97,20 @@ export const AdminNewsletterList = () => {
     }
   };
 
-  const cambiarFiltro = (valor) => {
-    setEstado(valor);
+  const cambiarFiltro = (clave, valor) => {
     // Volver a la primera página: en la página 3 de los suscritos puede no haber página
     // 3 de bajas, y el listado saldría vacío sin explicar por qué.
     setPage(1);
+    setFiltros((f) => ({ ...f, [clave]: valor }));
+  };
+  const limpiarFiltros = () => {
+    setTexto("");
+    setPage(1);
+    setFiltros(SIN_FILTROS);
+  };
+  const irAPagina = (p) => {
+    setPage(p);
+    arriba.current?.scrollIntoView?.({ block: "start" });
   };
 
   return (
@@ -100,7 +120,7 @@ export const AdminNewsletterList = () => {
         dato={
           <>
             {state.meta?.total != null
-              ? `${state.meta.total} ${estado === "unsubscribed" ? "bajas" : "en la lista"}`
+              ? `${state.meta.total} ${conFiltros ? "con estos filtros" : estado === "unsubscribed" ? "bajas" : "en la lista"}`
               : "Quién pidió recibirlo"}
           </>
         }
@@ -109,20 +129,6 @@ export const AdminNewsletterList = () => {
             {/* La cabecera ya reparte con `justify-content: space-between`, así que este
                 grupo se queda a la derecha sin CSS nuevo. */}
             <div className="se-boletin__acciones">
-              <label className="se-form-field" htmlFor="boletin-estado" {...ancla("filtro")}>
-                <span className="se-sr-only">Estado</span>
-                <select
-                  id="boletin-estado"
-                  className="se-form-control"
-                  value={estado}
-                  onChange={(e) => cambiarFiltro(e.target.value)}
-                >
-                  <option value="subscribed">Suscritos</option>
-                  <option value="unsubscribed">Dados de baja</option>
-                  <option value="all">Todos</option>
-                </select>
-              </label>
-
               {/* Sólo `admin`: un publicador puede ver el listado en pantalla, y llevarse
                   todos los correos en un archivo es otra cosa. El servidor lo exige igual,
                   esto sólo evita ofrecer un botón que iba a dar 403. */}
@@ -144,6 +150,11 @@ export const AdminNewsletterList = () => {
       />
       <RecorridoVista recorrido={recorridoSuscriptores} />
 
+      <div ref={arriba}>
+        <FiltrosDeSuscriptores filtros={filtros} texto={texto} onTexto={setTexto} onCambio={cambiarFiltro}
+          origenes={ORIGEN} anclaje={ancla("filtro")} />
+      </div>
+
       {csv.status === "error" ? (
         <p className="se-admin-form-feedback" role="alert">{csv.error}</p>
       ) : null}
@@ -157,7 +168,19 @@ export const AdminNewsletterList = () => {
         />
       ) : null}
 
-      {state.status === "success" && state.items.length === 0 ? (
+      {state.status === "success" && state.items.length === 0 && conFiltros ? (
+        <EmptyState
+          title="Nadie con estos filtros"
+          description="No hay correos que cumplan todo lo elegido. Pruebe con otro trozo del correo, otro origen u otro estado."
+          action={
+            <button type="button" className="se-btn se-btn--secondary" onClick={limpiarFiltros}>
+              Limpiar filtros
+            </button>
+          }
+        />
+      ) : null}
+
+      {state.status === "success" && state.items.length === 0 && !conFiltros ? (
         <EmptyState
           title={estado === "unsubscribed" ? "Nadie se ha dado de baja" : "Todavía nadie"}
           description={
@@ -170,6 +193,8 @@ export const AdminNewsletterList = () => {
 
       {state.status === "success" && state.items.length > 0 ? (
         <>
+          <PaginasDeLaLista pagina={state.meta?.page ?? page} paginas={state.meta?.pages ?? 1}
+            total={state.meta?.total ?? state.items.length} onPagina={irAPagina} anclaje={ancla("paginas")} />
           <div className="se-admin-table-wrap" {...ancla("tabla")}>
             <table className="se-admin-table">
               <thead>
@@ -198,7 +223,7 @@ export const AdminNewsletterList = () => {
           <Pagination
             page={state.meta?.page ?? page}
             totalPages={state.meta?.pages ?? 1}
-            onPageChange={setPage}
+            onPageChange={irAPagina}
           />
         </>
       ) : null}

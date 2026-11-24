@@ -1,0 +1,194 @@
+{
+  "_origen": "Grabada el 24-nov-2026 del backend (frente-e-listas, b2326f8) con su cliente de pruebas: GET /admin/newsletter?page=1&limit=20&status=subscribed -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": [
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona24@example.test",
+        "id": 25,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona23@example.test",
+        "id": 24,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona22@example.test",
+        "id": 23,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona21@example.test",
+        "id": 22,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "ana20@example.test",
+        "id": 21,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona19@example.test",
+        "id": 20,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona18@example.test",
+        "id": 19,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona17@example.test",
+        "id": 18,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona16@example.test",
+        "id": 17,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona15@example.test",
+        "id": 16,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona14@example.test",
+        "id": 15,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona13@example.test",
+        "id": 14,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona12@example.test",
+        "id": 13,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona11@example.test",
+        "id": 12,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "ana10@example.test",
+        "id": 11,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona9@example.test",
+        "id": 10,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona8@example.test",
+        "id": 9,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona7@example.test",
+        "id": 8,
+        "source": "footer",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona6@example.test",
+        "id": 7,
+        "source": "home",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      },
+      {
+        "created_at": "2026-11-24T18:29:17",
+        "email": "persona5@example.test",
+        "id": 6,
+        "source": "instagram",
+        "status": "subscribed",
+        "subscribed_at": null,
+        "unsubscribed_at": null
+      }
+    ],
+    "meta": {
+      "limit": 20,
+      "page": 1,
+      "pages": 2,
+      "total": 25
+    },
+    "success": true
+  }
+}

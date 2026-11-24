@@ -61,13 +61,15 @@ export const volverAlBoletin = async (token, { client } = {}) => {
   return c.request("/newsletter/volver", { method: "POST", json: { token } });
 };
 
-/** La lista, para el panel. */
+/** La lista, para el panel. Filtros opcionales, solo si están puestos: `status`, `q` (un trozo del correo) y `origen`. */
 export const listNewsletterSubscribers = async (params = {}) => {
   const raw = await adminRequest("/admin/newsletter", {
     query: {
       page: params.page ?? 1,
       limit: params.limit ?? 20,
       ...(params.status ? { status: params.status } : {}),
+      ...(params.q ? { q: params.q } : {}),
+      ...(params.origen ? { origen: params.origen } : {}),
     },
   });
   return unwrapListResponse(raw);

@@ -51,7 +51,8 @@ def _entrar(client, correo: str, rol: str, nombre: str | None = None):
 
 def test_boletin(app, client):
     from app.models import MediaAsset, NewsletterIssuePage, NewsletterSubscriber
-    from app.services import boletin_programado as reloj
+    # Los lunes del boletín viven en su dominio (antes, app.services.boletin_programado).
+    from app.domains.boletin import rules as reloj
 
     h = _entrar(client, "editor-boletin@example.test", "publicador")
     lunes = reloj.proximo_lunes(reloj.hoy_en_caracas())

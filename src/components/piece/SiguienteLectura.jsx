@@ -2,6 +2,7 @@ import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { estiloDeFoto, rutaDePieza } from "../../lib/pieza";
 import { tallasHastaLaOriginal } from "../../lib/fotoDePieza";
+import { useFotoConRespaldo } from "../../hooks/useFotoConRespaldo";
 import { piezaShape } from "../home/piezaShape";
 import { TituloDePieza } from "../content/TituloDePieza";
 import { Recorte, Recortes } from "../comun/Recorte";
@@ -14,15 +15,19 @@ import { Recorte, Recortes } from "../comun/Recorte";
  */
 const SIZES_DE_LA_FOTO = "(min-width: 700px) 300px, calc(133vw - 64px)";
 
-/** La foto, con las tallas del servidor en vez de la original entera (`tallasHastaLaOriginal`). */
+/** La foto, con las tallas del servidor en vez de la original entera (`tallasHastaLaOriginal`),
+ *  y la original de plan B si la talla no carga (`useFotoConRespaldo`). */
 const FotoSiguiente = ({ pieza }) => {
   const tallas = tallasHastaLaOriginal(pieza.imagenUrl, pieza.imagenAnchoOriginal);
+  const foto = useFotoConRespaldo({
+    src: pieza.imagenUrl,
+    srcSet: tallas ?? undefined,
+    sizes: tallas ? SIZES_DE_LA_FOTO : undefined,
+  });
   return (
     <img
       className="se-siguiente__foto"
-      src={pieza.imagenUrl}
-      srcSet={tallas ?? undefined}
-      sizes={tallas ? SIZES_DE_LA_FOTO : undefined}
+      {...foto}
       style={estiloDeFoto(pieza)}
       alt=""
       loading="lazy"

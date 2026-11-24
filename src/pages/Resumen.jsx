@@ -7,6 +7,7 @@ import { Enlace } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { getResumen } from "../services/resumenService";
+import { useFotoConRespaldo } from "../hooks/useFotoConRespaldo";
 import { fotoDelResumen, lineaDelPunto, rutaInterna } from "../lib/resumen";
 import "../styles/resumen.css";
 
@@ -86,6 +87,19 @@ Punto.propTypes = {
 };
 
 /**
+ * La foto del día: las tallas WebP del servidor y no siempre la original (`fotoDelResumen`),
+ * con la original de plan B si la talla no carga (`useFotoConRespaldo`).
+ */
+const FotoDelDia = ({ imagen }) => {
+  const foto = useFotoConRespaldo(fotoDelResumen(imagen));
+  return <img {...foto} alt={imagen.alt || ""} />;
+};
+
+FotoDelDia.propTypes = {
+  imagen: PropTypes.shape({ url: PropTypes.string, alt: PropTypes.string, ancho: PropTypes.number }).isRequired,
+};
+
+/**
  * Una edición entera. En la página de un día van varias, cada una con su título: ahí sus
  * secciones bajan un nivel (`dentroDelDia`) y sus anclas llevan la edición delante.
  */
@@ -99,8 +113,7 @@ const Edicion = ({ datos, dentroDelDia }) => {
     <>
       {datos.imagen?.url ? (
         <figure className="se-res__imagen">
-          {/* Las tallas WebP del servidor y no siempre la original (ver `fotoDelResumen`). */}
-          <img {...fotoDelResumen(datos.imagen)} alt={datos.imagen.alt || ""} />
+          <FotoDelDia imagen={datos.imagen} />
           {datos.imagen.credito ? <figcaption>{datos.imagen.credito}</figcaption> : null}
         </figure>
       ) : null}

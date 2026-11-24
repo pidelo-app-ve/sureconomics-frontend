@@ -25,6 +25,7 @@
         "test:ultimahora": "node src/features/titulares/utils.test.mjs",
         "test:titulares-panel": "node src/features/titulares/admin/utils.test.mjs",
         "test:publicidad": "node src/features/publicidad/utils.test.mjs && node src/features/publicidad/admin/utils.test.mjs",
+        "test:aligerar": "node --import ./scripts/pruebas/cargador-jsx.mjs --test src/components/admin/aligerarImagen.test.mjs",
         "test:youtube": "node src/lib/youtube.test.mjs",
         "test:avisos": "node src/lib/avisos.test.mjs",
         "test:llegada": "node src/features/analitica/utils.test.mjs",

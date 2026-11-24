@@ -2,8 +2,15 @@ import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
 import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { subirArte } from "../api";
-import { descargarArte, prepararArte } from "../aligerarArte";
-import { AVISO_OPTIMIZANDO, arteDemasiadoPesado, esArteSvg, kilobytes, origenDelArte, topeDelArte } from "../utils";
+import {
+  AVISO_OPTIMIZANDO,
+  descargarImagen,
+  esSvg,
+  kilobytes,
+  origenDeLaImagen,
+} from "../../../../components/admin/aligerarImagen";
+import { prepararArte } from "../aligerarArte";
+import { arteDemasiadoPesado, topeDelArte } from "../utils";
 
 /**
  * «Aligerar», bajo un arte que ya está puesto (en una pieza o como logotipo) y pesa de
@@ -27,9 +34,9 @@ export const AligerarArte = ({ asset, medidas, preguntar, onReemplazar, deshabil
   useEffect(() => {
     setPesado(null);
     setError("");
-    if (origenDelArte(url, window.location.origin) !== "propio") return undefined;
+    if (origenDeLaImagen(url, window.location.origin) !== "propio") return undefined;
     const control = new AbortController();
-    descargarArte(asset, { senal: control.signal })
+    descargarImagen(asset, { senal: control.signal })
       .then((archivo) => {
         const datos = { mime: archivo.type, bytes: archivo.size, nombre: archivo.name };
         if (arteDemasiadoPesado(datos)) setPesado({ archivo, ...datos });
@@ -83,7 +90,7 @@ export const AligerarArte = ({ asset, medidas, preguntar, onReemplazar, deshabil
         <div className="se-admin-pub__rescate">
           <p>
             Este arte pesa <b>{kilobytes(pesado.bytes)} KB</b> y{" "}
-            {esArteSvg(pesado) ? "un SVG de anuncio" : "una imagen de anuncio"} puede pesar hasta{" "}
+            {esSvg(pesado) ? "un SVG de anuncio" : "una imagen de anuncio"} puede pesar hasta{" "}
             {kilobytes(topeDelArte(pesado))} KB: cada lector lo baja entero en cada portada. «Aligerar» hace una
             copia en WebP, del tamaño de su hueco, que pesa menos, y la pone en su lugar.
           </p>

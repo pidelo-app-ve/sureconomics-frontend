@@ -5,7 +5,8 @@
 import { adminRequest } from "../../../lib/api";
 import { uploadAdminMediaImage } from "../../../services/adminMediaService";
 import { unwrapEntity } from "../../../services/adminResponseUtils";
-import { arteDemasiadoPesado, comprobarSenal } from "./utils";
+import { comprobarSenal } from "../../../components/admin/aligerarImagen";
+import { arteDemasiadoPesado } from "./utils";
 import { prepararArte } from "./aligerarArte";
 
 /**

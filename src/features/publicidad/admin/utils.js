@@ -1,9 +1,10 @@
 /**
  * Los formatos publicitarios vistos desde el panel, sin React: qué publica cada uno,
  * cómo se llama en cristiano y cómo se resume una pieza. Lo usan el formulario de la
- * pieza, el asistente y el mural de anunciantes. Y, al final, las cuentas sin navegador
- * de cómo se aligera un arte que pesa de más (las usa `aligerarArte.js`).
+ * pieza, el asistente y el mural de anunciantes. Y, al final, el tope de peso del arte y
+ * qué se hace con el que pasa (lo usa `aligerarArte.js`).
  */
+import { esGif, esSvg } from "../../../components/admin/aligerarImagen.js";
 
 /**
  * A qué tamaño (px) deja el panel un arte cuando lo aligera: el de su hueco, al doble
@@ -179,131 +180,27 @@ export const TOPE_ARTE_IMAGEN = 150 * 1024;
 export const arteDemasiadoPesado = ({ mime, bytes, nombre } = {}) => {
   if (!bytes) return null;
   // Sin tipo (algún sistema no lo da), por la extensión.
-  const esSvg = esArteSvg({ mime, nombre });
-  const tope = esSvg ? TOPE_ARTE_SVG : TOPE_ARTE_IMAGEN;
+  const svg = esSvg({ mime, nombre });
+  const tope = svg ? TOPE_ARTE_SVG : TOPE_ARTE_IMAGEN;
   if (bytes <= tope) return null;
   // Hacia arriba: con 50 KB y un byte, «pesa 50 KB y el máximo es 50 KB» no se entendería.
   const kb = Math.ceil(bytes / 1024);
-  const quien = nombre ? `«${nombre}»` : esSvg ? "El SVG" : "La imagen";
-  const que = esSvg ? "un SVG de anuncio" : "una imagen de anuncio";
-  const consejo = esSvg
+  const quien = nombre ? `«${nombre}»` : svg ? "El SVG" : "La imagen";
+  const que = svg ? "un SVG de anuncio" : "una imagen de anuncio";
+  const consejo = svg
     ? `Si es una foto o una ilustración pasada a vectorial, expórtela en WebP (hasta ${TOPE_ARTE_IMAGEN / 1024} KB); si es un logo, simplifíquelo.`
     : "Expórtela en WebP o en JPG con menos calidad, o más pequeña.";
   return `${quien} pesa ${kb} KB; ${que} puede pesar hasta ${tope / 1024} KB, porque cada lector se baja el archivo entero en cada portada. ${consejo}`;
 };
 
-/* ─── Aligerar un arte que pesa de más ─────────────────────────────────────────────────
+/* ─── Aligerar el arte que pesa de más ─────────────────────────────────────────────────
  *
- * Cuando un arte pasa del tope, el panel no lo rechaza: lo redibuja en el navegador como
- * WebP, en el tamaño de su hueco, y lo baja de calidad (y si hace falta de tamaño) hasta
- * que entra. Aquí están las cuentas, sin navegador, para poder probarlas en node; el
- * dibujo de verdad (el `<canvas>`) está en `aligerarArte.js`. */
-
-/** El tipo sin parámetros ni mayúsculas: «image/svg+xml; charset=utf-8» → «image/svg+xml». */
-export const tipoLimpio = (mime) => String(mime || "").split(";")[0].trim().toLowerCase();
-
-/** Si es un SVG: por el tipo o, si el sistema no lo da, por la extensión. */
-export const esArteSvg = ({ mime, nombre } = {}) =>
-  tipoLimpio(mime) === "image/svg+xml" || /\.svg$/i.test(nombre || "");
+ * Cuando un arte pasa del tope, el panel no lo rechaza: lo convierte en el navegador
+ * (`aligerarArte.js`, con el convertidor de todo el panel,
+ * `components/admin/aligerarImagen.js`). Aquí, qué se hace con cada archivo. */
 
 /** El tope que le toca a un archivo (bytes). */
-export const topeDelArte = (archivo) => (esArteSvg(archivo) ? TOPE_ARTE_SVG : TOPE_ARTE_IMAGEN);
-
-/** Si es un GIF, por el tipo o por la extensión. */
-export const esArteGif = ({ mime, nombre } = {}) =>
-  tipoLimpio(mime) === "image/gif" || /\.gif$/i.test(nombre || "");
-
-/**
- * Las calidades que se prueban, de mejor a peor, y la más baja que se acepta: por debajo
- * de 0,6 un WebP ya enseña manchas en las letras. Si ni con la más baja entra, se achica
- * la imagen un 15 % y se vuelve a empezar, como mucho `ACHIQUES_MAXIMOS` veces (0,85⁶ es
- * algo más de un tercio del ancho: más pequeño ya no sirve como anuncio).
- *
- * El JPEG es el plan B para un navegador que no sabe hacer WebP (Safari antiguo): empieza
- * más alto porque a igual número pierde más que el WebP.
- */
-export const CALIDADES_WEBP = [0.82, 0.75, 0.68, 0.6];
-export const CALIDADES_JPEG = [0.9, 0.82, 0.75, 0.68, 0.6];
-export const ACHIQUE = 0.85;
-export const ACHIQUES_MAXIMOS = 6;
-const MENOR_LADO = 16;
-
-/**
- * A qué tamaño se dibuja: lo más grande que cabe en `caja` sin deformar. Una foto más
- * pequeña que la caja se queda como está (agrandarla solo la emborrona); un SVG es
- * vectorial y se dibuja al tamaño de la caja. Sin medidas propias, la caja.
- *
- * @param {{ ancho?: number, alto?: number } | null} propias
- * @param {{ ancho: number, alto: number }} caja
- * @param {{ vectorial?: boolean }} [opciones]
- */
-export const medidasDeSalida = (propias, caja, { vectorial = false } = {}) => {
-  const ancho = Number(propias?.ancho);
-  const alto = Number(propias?.alto);
-  if (!(ancho > 0 && alto > 0)) return { ancho: caja.ancho, alto: caja.alto };
-  let escala = Math.min(caja.ancho / ancho, caja.alto / alto);
-  if (!vectorial) escala = Math.min(escala, 1);
-  return { ancho: Math.max(1, Math.round(ancho * escala)), alto: Math.max(1, Math.round(alto * escala)) };
-};
-
-/** Corta si alguien canceló (cerró la ventana, eligió otro archivo). */
-export const comprobarSenal = (senal) => {
-  if (senal?.aborted) {
-    const error = new Error("Se canceló antes de terminar.");
-    error.name = "AbortError";
-    throw error;
-  }
-};
-
-/**
- * Busca la versión más fiel que pese como mucho `tope`: cada tamaño con sus calidades de
- * mejor a peor, y si no, un 15 % más pequeño. `exportar` es quien dibuja (en el navegador,
- * un `<canvas>`; en las pruebas, una función de mentira) y devuelve un `Blob`.
- *
- * Si el navegador devuelve otro tipo cuando se le pide WebP (Safari antiguo da un PNG),
- * se pasa a JPEG en el mismo tamaño y se sigue con él.
- *
- * @returns {Promise<{ blob: Blob, tipo: string, calidad: number, ancho: number, alto: number } | null>}
- *   `null` si ni achicando entra.
- */
-export const buscarVersionLigera = async ({ medidas, tope, exportar, senal }) => {
-  let tipo = "image/webp";
-  let { ancho, alto } = medidas;
-  for (let achique = 0; achique <= ACHIQUES_MAXIMOS; achique += 1) {
-    const calidades = () => (tipo === "image/webp" ? CALIDADES_WEBP : CALIDADES_JPEG);
-    for (let i = 0; i < calidades().length; i += 1) {
-      comprobarSenal(senal);
-      const calidad = calidades()[i];
-      const blob = await exportar({ ancho, alto, tipo, calidad });
-      if (tipo === "image/webp" && blob?.type !== "image/webp") {
-        // No sabe hacer WebP: a JPEG, desde su primera calidad y en este mismo tamaño.
-        tipo = "image/jpeg";
-        i = -1;
-        continue;
-      }
-      if (blob && blob.size <= tope) return { blob, tipo, calidad, ancho, alto };
-    }
-    const siguiente = { ancho: Math.round(ancho * ACHIQUE), alto: Math.round(alto * ACHIQUE) };
-    if (Math.min(siguiente.ancho, siguiente.alto) < MENOR_LADO) break;
-    ({ ancho, alto } = siguiente);
-  }
-  return null;
-};
-
-/** El nombre del archivo aligerado: el de antes, con la extensión nueva. */
-export const nombreAligerado = (nombre, tipo) => {
-  const base = String(nombre || "").replace(/\.[^./\\]*$/, "").trim() || "arte";
-  return `${base}.${tipo === "image/jpeg" ? "jpg" : "webp"}`;
-};
-
-/** KB redondeados, nunca 0 (un archivo de 300 bytes no «pesa 0 KB»). */
-export const kilobytes = (bytes) => Math.max(1, Math.round((Number(bytes) || 0) / 1024));
-
-/** Lo que dice el panel al terminar. */
-export const avisoDeAligerado = (antes, despues) =>
-  `Se aligeró de ${kilobytes(antes)} KB a ${kilobytes(despues)} KB.`;
-
-export const AVISO_OPTIMIZANDO = "Optimizando la imagen…";
+export const topeDelArte = (archivo) => (esSvg(archivo) ? TOPE_ARTE_SVG : TOPE_ARTE_IMAGEN);
 
 /**
  * Qué hacer con un archivo antes de subirlo: `subir` tal cual (no pasa del tope),
@@ -316,122 +213,11 @@ export const AVISO_OPTIMIZANDO = "Optimizando la imagen…";
 export const decidirAligerado = (archivo = {}) => {
   const motivo = arteDemasiadoPesado(archivo);
   if (!motivo) return { accion: "subir" };
-  if (esArteGif(archivo) && archivo.gifAnimado !== false) {
+  if (esGif(archivo) && archivo.gifAnimado !== false) {
     return {
       accion: "rechazar",
       motivo: `${motivo} Es un GIF animado: el panel no lo aligera solo porque perdería el movimiento.`,
     };
   }
   return { accion: "aligerar" };
-};
-
-/**
- * Si un GIF tiene más de un cuadro. Recorre sus bloques (cabecera, paleta, extensiones e
- * imágenes) sin descomprimir nada. Si el archivo no se entiende, se da por animado: es lo
- * prudente, porque convertirlo se comería la animación.
- *
- * @param {Uint8Array} b
- */
-export const esGifAnimado = (b) => {
-  const fin = b?.length ?? 0;
-  if (fin < 13 || String.fromCharCode(b[0], b[1], b[2]) !== "GIF") return true;
-  let p = 13;
-  if (b[10] & 0x80) p += 3 * 2 ** ((b[10] & 0x07) + 1); // paleta global
-  /** Salta los subbloques (tamaño + datos) hasta el que mide 0. */
-  const saltarSubbloques = () => {
-    while (p < fin && b[p] !== 0) p += b[p] + 1;
-    p += 1;
-  };
-  let cuadros = 0;
-  while (p < fin) {
-    const bloque = b[p];
-    if (bloque === 0x3b) break; // fin del archivo
-    if (bloque === 0x21) {
-      p += 2; // extensión: marca y etiqueta
-      saltarSubbloques();
-    } else if (bloque === 0x2c) {
-      cuadros += 1;
-      if (cuadros > 1) return true;
-      if (p + 10 > fin) return true;
-      const empaquetado = b[p + 9];
-      p += 10;
-      if (empaquetado & 0x80) p += 3 * 2 ** ((empaquetado & 0x07) + 1); // paleta local
-      p += 1; // tamaño mínimo del código LZW
-      saltarSubbloques();
-    } else {
-      return true;
-    }
-  }
-  return cuadros > 1;
-};
-
-/** Un número de un atributo de SVG en píxeles («1456», «1456px»); null con %, em… */
-const pixeles = (valor) => {
-  const m = /^\s*([\d.]+)\s*(px)?\s*$/i.exec(valor ?? "");
-  const n = m ? Number(m[1]) : NaN;
-  return n > 0 ? n : null;
-};
-
-/** La etiqueta `<svg …>` de arriba (la primera; el prólogo XML y los comentarios no cuentan). */
-const ETIQUETA_SVG = /<svg\b[^>]*>/i;
-
-/** Un atributo de la etiqueta (`\s` delante: `stroke-width` no es `width`). */
-const atributo = (etiqueta, nombre) =>
-  new RegExp(`\\s${nombre}\\s*=\\s*("([^"]*)"|'([^']*)')`, "i").exec(etiqueta);
-
-/**
- * Las medidas propias de un SVG: `width` y `height` si están en píxeles, si no las del
- * `viewBox`. `null` si no dice ninguna (entonces se dibuja al tamaño de la caja).
- *
- * @param {string} texto
- * @returns {{ ancho: number, alto: number, viewBox: boolean } | null}
- */
-export const medidasDeSvg = (texto) => {
-  const etiqueta = ETIQUETA_SVG.exec(texto ?? "")?.[0];
-  if (!etiqueta) return null;
-  const valor = (nombre) => {
-    const m = atributo(etiqueta, nombre);
-    return m ? (m[2] ?? m[3]) : null;
-  };
-  const caja = (valor("viewBox") ?? "").trim().split(/[\s,]+/).map(Number);
-  const conCaja = caja.length === 4 && caja[2] > 0 && caja[3] > 0;
-  const ancho = pixeles(valor("width"));
-  const alto = pixeles(valor("height"));
-  if (ancho && alto) return { ancho, alto, viewBox: conCaja };
-  if (conCaja) return { ancho: caja[2], alto: caja[3], viewBox: true };
-  return null;
-};
-
-/**
- * El mismo SVG con un ancho y un alto fijos, para que el navegador lo dibuje a ese tamaño
- * (sin ellos, Firefox no sabe cuánto mide uno que solo trae `viewBox` y no lo pinta). Si
- * no traía `viewBox`, se le pone uno con sus medidas de antes: sin él, cambiar el ancho
- * recortaría el dibujo en vez de escalarlo.
- */
-export const svgConMedidas = (texto, ancho, alto) => {
-  const etiqueta = ETIQUETA_SVG.exec(texto ?? "")?.[0];
-  if (!etiqueta) return texto;
-  const propias = medidasDeSvg(texto);
-  let nueva = etiqueta
-    .replace(/\s(width|height)\s*=\s*("[^"]*"|'[^']*')/gi, "")
-    .replace(/^<svg\b/i, `<svg width="${ancho}" height="${alto}"`);
-  if (propias && !propias.viewBox) {
-    nueva = nueva.replace(/^<svg\b/i, `<svg viewBox="0 0 ${propias.ancho} ${propias.alto}"`);
-  }
-  return texto.replace(etiqueta, () => nueva);
-};
-
-/**
- * De dónde es la dirección de un arte: `propio` si es de este sitio (`/media/…`, o el
- * mismo origen), `ajeno` si es de otro, `null` si no hay. Solo lo propio se descarga
- * para aligerarlo: lo de otro sitio el navegador no deja leerlo (CORS).
- */
-export const origenDelArte = (url, origen) => {
-  if (!url || typeof url !== "string") return null;
-  if (url.startsWith("/") && !url.startsWith("//")) return "propio";
-  try {
-    return new URL(url).origin === origen ? "propio" : "ajeno";
-  } catch {
-    return "ajeno";
-  }
 };

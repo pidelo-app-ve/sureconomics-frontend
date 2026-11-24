@@ -35,11 +35,11 @@
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },
     "dependencies": {
-        "@tiptap/extension-link": "^3.32.2",
-        "@tiptap/extension-placeholder": "^3.32.2",
-        "@tiptap/pm": "^3.32.2",
-        "@tiptap/react": "^3.32.2",
-        "@tiptap/starter-kit": "^3.32.2",
+        "@tiptap/extension-link": "^3.35.0",
+        "@tiptap/extension-placeholder": "^3.35.0",
+        "@tiptap/pm": "^3.35.0",
+        "@tiptap/react": "^3.35.0",
+        "@tiptap/starter-kit": "^3.35.0",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

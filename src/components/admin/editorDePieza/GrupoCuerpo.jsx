@@ -2,10 +2,10 @@ import PropTypes from "prop-types";
 import { CampoMovil } from "../CampoMovil";
 import { EditorConImagenes } from "../cuerpo/EditorConImagenes";
 import { RichTextEditor } from "../../editor/RichTextEditor";
-import { uploadAdminMediaImage } from "../../../services/adminMediaService";
 import { recorridoEditor } from "../../../lib/guias/guiaEditor";
 import { CampoEnIngles } from "./CampoEnIngles";
 import { FORMATOS_CON_FOTOS_EN_EL_CUERPO } from "./formulario";
+import { subirFotoDePieza } from "./subirFotoDePieza";
 
 const { ancla } = recorridoEditor;
 
@@ -32,7 +32,7 @@ export const GrupoCuerpo = ({ esMovil, form, setForm, nPalabras, ...ingles }) =>
                 <EditorConImagenes
                     value={form.content}
                     onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                    subir={uploadAdminMediaImage}
+                    subir={subirFotoDePieza}
                 />
             ) : (
                 <RichTextEditor

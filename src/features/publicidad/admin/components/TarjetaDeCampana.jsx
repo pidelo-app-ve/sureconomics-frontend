@@ -10,8 +10,13 @@ import {
   borrarPieza,
   crearPieza,
 } from "../api";
+import { siSalio } from "../aligerarArte";
 import { FilaDePieza } from "./FilaDePieza";
 import { InterruptorAlAire } from "./InterruptorAlAire";
+
+/** Guarda una pieza (entera o solo un arte) y relee su campaña, que es lo que se devuelve. */
+const guardarPieza = (piezaId, campanaId, datos) =>
+  actualizarPieza(piezaId, datos).then(() => actualizarCampana(campanaId, {}));
 
 export const TarjetaDeCampana = ({
   campana,
@@ -266,12 +271,15 @@ export const TarjetaDeCampana = ({
                   anunciante={anunciante}
                   campana={campana}
                   ocupado={ocupado}
+                  preguntar={preguntar}
+                  onCambiarArte={(datos) =>
+                    correr(() => guardarPieza(pieza.id, campana.id, datos), "Arte aligerado y puesto en la pieza").then(
+                      siSalio(onCambio),
+                    )
+                  }
                   onGuardar={(datos) =>
                     correr(
-                      async () => {
-                        await actualizarPieza(pieza.id, datos);
-                        return actualizarCampana(campana.id, {});
-                      },
+                      () => guardarPieza(pieza.id, campana.id, datos),
                       `${nombreDeFormato(datos.formato, ajustes?.formatos)} guardado`,
                     ).then(onCambio)
                   }
@@ -285,10 +293,7 @@ export const TarjetaDeCampana = ({
                     });
                     if (!vale) return;
                     correr(
-                      async () => {
-                        await borrarPieza(pieza.id);
-                        return actualizarCampana(campana.id, {});
-                      },
+                      () => borrarPieza(pieza.id).then(() => actualizarCampana(campana.id, {})),
                       `${nombreDeFormato(pieza.formato, ajustes?.formatos)} quitado`,
                     ).then(onCambio);
                   }}

@@ -3247,6 +3247,14 @@
   color: var(--se-gray-500);
 }
 
+/* Lo que queda dicho al acabar bien («Se aligeró de 243 KB a 88 KB»): en verde, como el
+   «Crédito guardado», porque es una buena noticia y no un aviso. */
+.se-asset__nota {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  color: var(--color-green);
+}
+
 
 /* El video adjunto en el formulario: caratula y si ya se puede ver.
    La caratula la saca Cloudflare del propio archivo, asi que verla es la prueba de que

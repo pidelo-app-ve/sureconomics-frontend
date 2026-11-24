@@ -69,6 +69,17 @@ export const PASOS_PUBLICIDAD = [
       "de cada una, con el arte para computador y para teléfono. «Nueva campaña» abre el asistente con ese anunciante.",
   },
   {
+    titulo: "Las imágenes pesadas se aligeran solas",
+    texto:
+      "Cada lector se baja el arte entero en cada portada, así que hay un tope: 150 KB una imagen y 50 KB un SVG. " +
+      "No hace falta bajarlo a mano:",
+    puntos: [
+      "Al subir: si el arte pesa más, el panel lo convierte solo en una imagen WebP más ligera, del tamaño de su hueco. Verá «Optimizando la imagen…» y después «Se aligeró de… a…».",
+      "Aligerar: si un anuncio ya puesto pesa de más, al abrir su pieza (o la ficha, para el logotipo) sale un aviso con este botón. Lo convierte, le pregunta y lo cambia por el ligero; el de antes se queda en Archivos.",
+      "GIF animado: no se toca, porque perdería el movimiento. Pida al anunciante uno más corto o más pequeño.",
+    ],
+  },
+  {
     clave: "guia",
     titulo: "Vuelve aquí cuando quieras",
     texto: "Este botón abre esta guía otra vez.",

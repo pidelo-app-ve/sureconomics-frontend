@@ -5,16 +5,38 @@
 import { adminRequest } from "../../../lib/api";
 import { uploadAdminMediaImage } from "../../../services/adminMediaService";
 import { unwrapEntity } from "../../../services/adminResponseUtils";
+import { comprobarSenal } from "../../../components/admin/aligerarImagen";
 import { arteDemasiadoPesado } from "./utils";
+import { prepararArte } from "./aligerarArte";
 
 /**
- * Sube el arte de un anuncio (o el logotipo de un anunciante) a la biblioteca, si no pesa
- * de más (`arteDemasiadoPesado`). Si pesa, no sube nada y el selector enseña por qué.
+ * Sube el arte de un anuncio (o el logotipo de un anunciante) a la biblioteca.
+ *
+ * Si pesa de más (`arteDemasiadoPesado`), antes lo aligera en el navegador al tamaño de
+ * su hueco (`medidas`, de `MEDIDAS_DE_ARTE`) y sube el WebP por el mismo camino de
+ * siempre. Lo va contando al selector: `onAviso` mientras trabaja («Optimizando la
+ * imagen…») y `onNota` al acabar («Se aligeró de 243 KB a 88 KB»). Un GIF animado o un
+ * SVG que no se puede dibujar no se suben, y el selector enseña por qué. `signal`
+ * cancela (el selector se cerró): si llega antes de subir, no se sube nada.
+ *
+ * Sin `medidas` no sabe a qué tamaño dejarlo, y hace lo de antes: avisar y no subir.
  */
-export const subirArte = (archivo) => {
-  const motivo = arteDemasiadoPesado({ mime: archivo?.type, bytes: archivo?.size, nombre: archivo?.name });
-  return motivo ? Promise.reject(new Error(motivo)) : uploadAdminMediaImage(archivo);
+export const subirArte = async (archivo, { medidas, onAviso, onNota, signal } = {}) => {
+  if (!medidas) {
+    const motivo = arteDemasiadoPesado({ mime: archivo?.type, bytes: archivo?.size, nombre: archivo?.name });
+    if (motivo) throw new Error(motivo);
+    return uploadAdminMediaImage(archivo);
+  }
+  const { archivo: listo, nota } = await prepararArte(archivo, { medidas, onAviso, senal: signal });
+  comprobarSenal(signal);
+  if (nota) onAviso?.("Subiendo la imagen aligerada…");
+  const fila = await uploadAdminMediaImage(listo);
+  if (nota) onNota?.(nota);
+  return fila;
 };
+
+/** `subirArte` para un hueco: lo que el selector (`AssetField`) recibe en `onUpload`. */
+export const subidaDeArte = (medidas) => (archivo, opciones = {}) => subirArte(archivo, { ...opciones, medidas });
 
 /**
  * El panel de publicidad.

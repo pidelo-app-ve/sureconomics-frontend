@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { CampoMovil } from "../CampoMovil";
 import { EditorConImagenes } from "../cuerpo/EditorConImagenes";
 import { RichTextEditor } from "../../editor/RichTextEditor";
-import { uploadAdminMediaImage } from "../../../services/adminMediaService";
+import { subirFotoDePieza } from "./subirFotoDePieza";
 import { FORMATOS_CON_FOTOS_EN_EL_CUERPO } from "./formulario";
 
 /**
@@ -87,7 +87,7 @@ export const CampoEnIngles = ({
             <EditorConImagenes
                 value={form.content_en}
                 onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
-                subir={uploadAdminMediaImage}
+                subir={subirFotoDePieza}
             />
         ) : (
             <RichTextEditor

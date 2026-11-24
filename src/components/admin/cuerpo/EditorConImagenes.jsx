@@ -39,15 +39,20 @@ const insertarEn = (editor, pos, attrs) => {
  * vacía, soltar o pegar fotos y la ventana para subir o elegir. Solo lo usa el panel,
  * en artículos, noticias y editoriales.
  *
- * `subir` es la subida de la biblioteca (`uploadAdminMediaImage`): devuelve el archivo
- * registrado, del que salen la dirección, las tallas y las medidas.
+ * `subir` es la subida de la foto (en las piezas, `subirFotoDePieza`, que convierte un SVG
+ * en WebP antes de subirlo): devuelve el archivo registrado, del que salen la dirección,
+ * las tallas y las medidas. Recibe también, si quien la llama los da, `onAviso`, `onNota`
+ * y `signal` (la ventana de la foto los usa para contar qué pasa y para cancelar).
  */
 export const EditorConImagenes = ({ value, onChange, placeholder, disabled, subir }) => {
   // { modo: "insertar", pos } | { modo: "editar", pos, attrs } | null
   const [dialogo, setDialogo] = useState(null);
   const [aviso, setAviso] = useState("");
 
-  const subirAtributos = useCallback(async (archivo) => atributosDeAsset(await subir(archivo)), [subir]);
+  const subirAtributos = useCallback(
+    async (archivo, opciones) => atributosDeAsset(await subir(archivo, opciones)),
+    [subir]
+  );
 
   // Las extensiones se montan una sola vez; lo que cambia lo leen de referencias.
   const subirRef = useRef(subirAtributos);

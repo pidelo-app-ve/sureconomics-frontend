@@ -6,6 +6,7 @@ import { imagenAncho } from "../../../lib/pieza";
 import { MAX_IMAGE_BYTES, listAdminMedia } from "../../../services/adminMediaService";
 import { ModalDelPanel } from "../ModalDelPanel";
 import { SelectorDeBiblioteca, comoSeLlama } from "../SelectorDeBiblioteca";
+import { useAvisoDeSubida } from "../useAvisoDeSubida";
 import { atributosDeAsset } from "./atributos";
 import { TIPOS_DE_IMAGEN } from "./figura";
 import { IconoSubir } from "./iconos";
@@ -15,7 +16,7 @@ const megas = (bytes) => `${Math.round(bytes / (1024 * 1024))} MB`;
 /** Lo que se le dice a quien elige un archivo que no sirve, antes de subirlo. */
 const problemaDe = (archivo) => {
   if (!archivo) return "No llegó ningún archivo.";
-  if (!TIPOS_DE_IMAGEN.includes(archivo.type)) return "Ese archivo no es una foto. Sirven JPG, PNG, WebP, GIF o AVIF.";
+  if (!TIPOS_DE_IMAGEN.includes(archivo.type)) return "Ese archivo no es una foto. Sirven JPG, PNG, WebP, GIF, AVIF o SVG.";
   if (archivo.size > MAX_IMAGE_BYTES) {
     return `La foto pesa ${megas(archivo.size)} y el máximo es ${megas(MAX_IMAGE_BYTES)}. Expórtela más liviana y vuelva a probar.`;
   }
@@ -43,6 +44,45 @@ const esFoto = (fila) => {
 };
 
 /**
+ * La foto con su pie, sobre papel y al ancho de la columna de lectura: cómo va a quedar.
+ * Mientras sube, un velo con lo que está pasando (`aviso`: «Optimizando la imagen…» al
+ * convertir un SVG); al acabar, `nota` («Se aligeró de…», o que un GIF animado bajará
+ * entero).
+ */
+const PreviaDeLaFoto = ({ vista, pie, subiendo, aviso, nota, onOtra }) => (
+  <div className="se-imgdlg__previa">
+    <figure className="se-imgdlg__papel">
+      <div className="se-imgdlg__marco">
+        <img src={vista} alt="" className="se-imgdlg__img" />
+        {subiendo ? (
+          <span className="se-figura-ed__velo" role="status">
+            <span className="se-figura-ed__giro" aria-hidden="true" />
+            {aviso || "Subiendo la foto…"}
+          </span>
+        ) : null}
+      </div>
+      <figcaption className={`se-imgdlg__pie-previo${pie.trim() ? "" : " se-imgdlg__pie-previo--vacio"}`}>
+        {pie.trim() || "Aquí irá el pie, si escribe uno."}
+      </figcaption>
+    </figure>
+    <p className="se-imgdlg__nota">Así se verá en la pieza, al ancho de la columna de lectura.</p>
+    {nota ? <p className="se-asset__nota">{nota}</p> : null}
+    <button type="button" className="se-imgdlg__enlace" onClick={onOtra} disabled={subiendo}>
+      Elegir otra foto
+    </button>
+  </div>
+);
+
+PreviaDeLaFoto.propTypes = {
+  vista: PropTypes.string.isRequired,
+  pie: PropTypes.string.isRequired,
+  subiendo: PropTypes.bool,
+  aviso: PropTypes.string,
+  nota: PropTypes.string,
+  onOtra: PropTypes.func.isRequired,
+};
+
+/**
  * La ventana para poner una foto en el cuerpo, o cambiar la que ya está.
  *
  * Sobre `ModalDelPanel`, como el resto de modales del panel: tapa la pantalla entera
@@ -63,6 +103,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
   const [imagen, setImagen] = useState(null); // atributos finales (src, srcset, medidas)
   const [local, setLocal] = useState(""); // vista previa mientras sube
   const [subiendo, setSubiendo] = useState(false);
+  const { aviso: avisoSubida, nota: notaSubida, empezar, olvidar } = useAvisoDeSubida();
   const [error, setError] = useState("");
   const [pie, setPie] = useState("");
   const [alt, setAlt] = useState("");
@@ -74,6 +115,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
 
   // Cada vez que se abre, parte de lo que hay (al editar) o de cero (al insertar).
   useEffect(() => {
+    olvidar(); // al abrir y al cerrar: lo que se estaba preparando ya no se sube
     if (!abierto) return;
     turno.current += 1;
     setImagen(inicial?.src ? { ...inicial } : null);
@@ -83,7 +125,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
     setSubiendo(false);
     setError("");
     setBuscando(false);
-  }, [abierto, inicial]);
+  }, [abierto, inicial, olvidar]);
 
   // Las recientes, una vez por apertura y solo si hacen falta.
   useEffect(() => {
@@ -112,19 +154,22 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
       return;
     }
     const miTurno = (turno.current += 1);
+    const { opciones, acabar } = empezar();
     setError("");
     setBuscando(false);
     setLocal(URL.createObjectURL(archivo));
     setSubiendo(true);
     try {
-      const attrs = await subir(archivo);
+      const attrs = await subir(archivo, opciones);
       if (turno.current !== miTurno) return; // eligió otra mientras tanto
       setImagen(attrs);
     } catch (err) {
-      if (turno.current !== miTurno) return;
+      if (turno.current !== miTurno || err?.name === "AbortError") return;
       setLocal("");
+      olvidar();
       setError(adminErrorMessage(err, "No se pudo subir la foto. Pruebe otra vez."));
     } finally {
+      acabar();
       if (turno.current === miTurno) setSubiendo(false);
     }
   };
@@ -140,6 +185,7 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
 
   const otraFoto = () => {
     turno.current += 1;
+    olvidar();
     setLocal("");
     setImagen(null);
     setSubiendo(false);
@@ -199,26 +245,14 @@ export const DialogoDeImagen = ({ abierto, inicial, subir, onAceptar, onCerrar }
       {vista ? (
         // —— Con foto: cómo queda y sus textos ——
         <div className="se-imgdlg__con-foto">
-          <div className="se-imgdlg__previa">
-            <figure className="se-imgdlg__papel">
-              <div className="se-imgdlg__marco">
-                <img src={vista} alt="" className="se-imgdlg__img" />
-                {subiendo ? (
-                  <span className="se-figura-ed__velo" role="status">
-                    <span className="se-figura-ed__giro" aria-hidden="true" />
-                    Subiendo la foto…
-                  </span>
-                ) : null}
-              </div>
-              <figcaption className={`se-imgdlg__pie-previo${pie.trim() ? "" : " se-imgdlg__pie-previo--vacio"}`}>
-                {pie.trim() || "Aquí irá el pie, si escribe uno."}
-              </figcaption>
-            </figure>
-            <p className="se-imgdlg__nota">Así se verá en la pieza, al ancho de la columna de lectura.</p>
-            <button type="button" className="se-imgdlg__enlace" onClick={otraFoto} disabled={subiendo}>
-              Elegir otra foto
-            </button>
-          </div>
+          <PreviaDeLaFoto
+            vista={vista}
+            pie={pie}
+            subiendo={subiendo}
+            aviso={avisoSubida}
+            nota={notaSubida}
+            onOtra={otraFoto}
+          />
 
           <div className="se-imgdlg__campos">
             <label className="se-form-field" htmlFor={`${idBase}-pie`}>

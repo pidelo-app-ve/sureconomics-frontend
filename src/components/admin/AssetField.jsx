@@ -10,6 +10,7 @@ import {
   patchAdminMedia,
 } from "../../services/adminMediaService";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { useAvisoDeSubida } from "./useAvisoDeSubida";
 
 /**
  * Attach one file to a piece: upload it, or point at one that lives elsewhere.
@@ -47,7 +48,8 @@ export const AssetField = ({
   // una barra que no se mueve es indistinguible de algo colgado: la redaccion cancela
   // subidas que iban bien.
   const [progreso, setProgreso] = useState(null);
-  const [aviso, setAviso] = useState("");
+  // El aviso mientras sube, la nota al acabar («Se aligeró de…») y cortar si se cierra.
+  const subida = useAvisoDeSubida();
 
   // Si Cloudflare ya acabo de transcodificar el video adjunto.
   //
@@ -143,23 +145,19 @@ export const AssetField = ({
     if (!file || !onUpload) return;
     setBusy(true);
     setError("");
-    setAviso("");
     setProgreso(null);
+    const { opciones, acabar } = subida.empezar();
     try {
       // El segundo argumento es opcional: quien sube una imagen no lo usa y sigue
-      // funcionando igual. Solo el video lo necesita.
-      attach(
-        await onUpload(file, {
-          onProgress: setProgreso,
-          onAviso: setAviso,
-        })
-      );
+      // funcionando igual. El video usa el progreso y el aviso; las imágenes, todo.
+      attach(await onUpload(file, { onProgress: setProgreso, ...opciones }));
     } catch (err) {
-      setError(adminErrorMessage(err, "No se pudo subir el archivo."));
+      subida.olvidar();
+      if (err?.name !== "AbortError") setError(adminErrorMessage(err, "No se pudo subir el archivo."));
     } finally {
+      acabar();
       setBusy(false);
       setProgreso(null);
-      setAviso("");
     }
   };
 
@@ -171,6 +169,7 @@ export const AssetField = ({
     }
     setBusy(true);
     setError("");
+    subida.olvidar();
     try {
       const body = { kind, url: trimmed };
       const numeric = Number(extra);
@@ -310,7 +309,7 @@ export const AssetField = ({
           <button
             type="button"
             className="se-btn se-btn--secondary se-btn--small"
-            onClick={() => onChange(null, null)}
+            onClick={() => { subida.olvidar(); onChange(null, null); }}
           >
             Quitar
           </button>
@@ -341,6 +340,7 @@ export const AssetField = ({
           kind={kind}
           puesto={value}
           onElegir={(fila) => {
+            subida.olvidar();
             attach(fila);
             setBiblioteca(false);
           }}
@@ -363,7 +363,7 @@ export const AssetField = ({
                 <span className="se-asset__progreso-cifra">{progreso}%</span>
               </>
             ) : null}
-            {aviso ? <span className="se-asset__aviso">{aviso}</span> : null}
+            {subida.aviso ? <span className="se-asset__aviso">{subida.aviso}</span> : null}
           </label>
         ) : null}
 
@@ -401,6 +401,7 @@ export const AssetField = ({
         </div>
       </div>
 
+      {subida.nota ? <p className="se-asset__nota">{subida.nota}</p> : null}
       {error ? <p className="se-asset__error">{error}</p> : null}
     </fieldset>
   );

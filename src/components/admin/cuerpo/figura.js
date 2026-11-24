@@ -25,7 +25,11 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 import { VistaDeFigura } from "./VistaDeFigura";
 
-export const TIPOS_DE_IMAGEN = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
+/**
+ * Lo que se admite como foto del cuerpo. El SVG entra porque no llega al servidor como
+ * SVG: quien sube (`editorDePieza/subirFotoDePieza.js`) lo convierte antes en WebP.
+ */
+export const TIPOS_DE_IMAGEN = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/svg+xml"];
 
 /** La columna de lectura mide unos 612 px; en el teléfono, todo el ancho. */
 export const SIZES_DEL_CUERPO = "(max-width: 700px) 100vw, 640px";

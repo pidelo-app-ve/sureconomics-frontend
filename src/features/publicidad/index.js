@@ -26,7 +26,7 @@
  * - `admin/`: el panel «Publicidad» (`/admin/publicidad`): su página (`admin/AdminPublicidad.jsx`), las
  *   tarjetas de anunciantes y campañas, el asistente, el mural, las plazas fijas y el mapa
  *   del sitio (`admin/components/`), sus llamadas (`admin/api.js`), los
- *   formatos (`admin/utils.js`) y los artes hechos solos (`admin/arteAutomatico.js`). No tiene puerta (`admin/index.js`): `routes.jsx` carga su
+ *   formatos y el tope de peso del arte (`admin/utils.js`), el arte que pesa de más aligerado antes de subirlo (`admin/aligerarArte.js`, con el convertidor de todo el panel, `components/admin/aligerarImagen.js`) y los artes hechos solos (`admin/arteAutomatico.js`). No tiene puerta (`admin/index.js`): `routes.jsx` carga su
  *   página con `import()` y ninguna otra página del panel usa nada de él. Si alguna llega
  *   a necesitarlo, se abre como en `features/monedas/admin/index.js`, nunca por esta (el
  *   panel viajaría en el paquete de cada lector).

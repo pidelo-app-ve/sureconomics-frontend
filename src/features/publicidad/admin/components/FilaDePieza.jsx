@@ -1,34 +1,56 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlazasFijas } from "./PlazasFijas";
-import { AssetField } from "../../../../components/admin/AssetField";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
 import { VistaDeLaPieza } from "./VistaDeLaPieza";
-import { ACCEPTED_IMAGE_MIME } from "../../../../services/adminMediaService";
-import { subirArte } from "../api";
+import { CampoDeArte } from "./CampoDeArte";
+import { guardarSoloEseArte } from "../aligerarArte";
 import {
+  ARTE_DE_TELEFONO,
   GUIA_DE_FORMATO,
   nombreDeFormato,
   resumenDePieza,
 } from "../utils";
 import { conArteAutomatico } from "../arteAutomatico";
 
-export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onGuardar, onBorrar }) => {
-  const [abierta, setAbierta] = useState(false);
+/**
+ * Lo que se está escribiendo en la pieza (`borrador`) y los archivos de sus tres artes,
+ * aparte: no se guardan -- se manda el id --, son lo que el selector pinta mientras tanto.
+ * Cuando la pieza vuelve del servidor, se toma entera; salvo si «Aligerar» acaba de guardar
+ * solo un arte (`soloArte` dice cuál): entonces solo ese, y lo demás que se esté
+ * escribiendo y aún no se haya guardado no se pierde.
+ */
+const useBorradorDePieza = (pieza) => {
   const [borrador, setBorrador] = useState(pieza);
-  // El archivo, aparte del borrador: no se guarda -- se manda el id --, es lo que el
-  // selector pinta mientras tanto.
   const [imagen, setImagen] = useState(pieza.imagen_asset ?? null);
   const [cinta, setCinta] = useState(pieza.cinta_asset ?? null);
   const [movil, setMovil] = useState(pieza.cinta_movil_asset ?? null);
-  const [variante, setVariante] = useState("tarjeta");
+  const soloArte = useRef(null);
+  const ponerAsset = { imagen: setImagen, cinta: setCinta, cinta_movil: setMovil };
 
   useEffect(() => {
+    const campo = soloArte.current;
+    soloArte.current = null;
+    if (campo) {
+      const id = `${campo}_id`;
+      setBorrador((b) => ({ ...b, [id]: pieza[id] ?? null }));
+      ({ imagen: setImagen, cinta: setCinta, cinta_movil: setMovil })[campo](pieza[`${campo}_asset`] ?? null);
+      return;
+    }
     setBorrador(pieza);
     setImagen(pieza.imagen_asset ?? null);
     setCinta(pieza.cinta_asset ?? null);
     setMovil(pieza.cinta_movil_asset ?? null);
   }, [pieza]);
+
+  return { borrador, setBorrador, imagen, setImagen, cinta, setCinta, movil, ponerAsset, soloArte };
+};
+
+export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, preguntar, onGuardar, onCambiarArte, onBorrar }) => {
+  const [abierta, setAbierta] = useState(false);
+  const { borrador, setBorrador, imagen, setImagen, cinta, setCinta, movil, ponerAsset, soloArte } =
+    useBorradorDePieza(pieza);
+  const [variante, setVariante] = useState("tarjeta");
 
   const cambiar = (campo) => (e) => {
     const valor = e.target.type === "checkbox" ? e.target.checked : e.target.value;
@@ -50,28 +72,26 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
   const imagenPerdida = !usaImagen && (borrador.imagen_id ?? null) !== null;
   const cintaPerdida = !usaCinta && (borrador.cinta_id ?? null) !== null;
 
-  /** El selector de archivo de una de las dos columnas, con el nombre que le toca. */
-  const campoDeArte = ({ campo, etiqueta, pista, forma }) => {
-    const esCinta = campo === "cinta";
-    return (
-      <AssetField
-        key={campo}
-        id={`p-${pieza.id}-${campo}`}
-        label={etiqueta}
-        hint={pista}
-        forma={forma}
-        kind="image"
-        value={borrador[`${campo}_id`] ?? null}
-        asset={esCinta ? cinta : imagen}
-        onChange={(idNuevo, objeto) => {
-          setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
-          (esCinta ? setCinta : setImagen)(objeto ?? null);
-        }}
-        onUpload={subirArte}
-        accept={ACCEPTED_IMAGE_MIME}
-      />
-    );
-  };
+  /** El selector del arte de una columna, con el nombre que le toca y «Aligerar» si pesa. */
+  const campoDeArte = ({ campo, etiqueta, pista, forma, medidas }) => (
+    <CampoDeArte
+      key={campo}
+      id={`p-${pieza.id}-${campo.replace("_", "-")}`}
+      etiqueta={etiqueta}
+      pista={pista}
+      forma={forma}
+      medidas={medidas}
+      valor={borrador[`${campo}_id`]}
+      asset={{ imagen, cinta, cinta_movil: movil }[campo]}
+      onChange={(idNuevo, objeto) => {
+        setBorrador((b) => ({ ...b, [`${campo}_id`]: idNuevo ?? null }));
+        ponerAsset[campo](objeto ?? null);
+      }}
+      preguntar={preguntar}
+      ocupado={ocupado}
+      onReemplazar={guardarSoloEseArte(soloArte, campo, (fila) => onCambiarArte({ [`${campo}_id`]: fila.id }))}
+    />
+  );
 
   /** Mueve el archivo de una columna a la otra sin volver a subirlo. */
   const mover = (desde, hacia) => {
@@ -205,26 +225,9 @@ export const FilaDePieza = ({ pieza, campana, formatos, anunciante, ocupado, onG
               hacen aquí. El selector sube el archivo en el sitio y lo enseña al momento:
               no hay que abrir Archivos en otra pestaña ni copiar ningún identificador. */}
           {artes.map(campoDeArte)}
-          {/* La tira es 8:1: en un teléfono mide unos 48 px de alto y el texto deja de
-              leerse. Escalar no reacomoda -- da igual SVG o JPEG --, así que el
-              teléfono necesita su propia composición. Sin ella, sale la tira entera. */}
-          {usaCinta ? (
-            <AssetField
-              id={`p-${pieza.id}-cinta-movil`}
-              label="Arte para teléfono — 1200 × 600 px (recomendado)"
-              hint="Lo hace el anunciante: 1200 × 600 px (PNG, JPG, WebP o SVG), con el logo, la frase y el botón apilados y centrados, nada importante a menos de 60 px del borde y letra grande. Se usa en pantallas de menos de 640 px, donde sale unas cuatro veces más alto. Sin él, en el teléfono sale la tira entera, de unos 45 px de alto."
-              forma={{ ancho: 2, alto: 1 }}
-              kind="image"
-              value={borrador.cinta_movil_id ?? null}
-              asset={movil}
-              onChange={(idNuevo, objeto) => {
-                setBorrador((b) => ({ ...b, cinta_movil_id: idNuevo ?? null }));
-                setMovil(objeto ?? null);
-              }}
-              onUpload={subirArte}
-              accept={ACCEPTED_IMAGE_MIME}
-            />
-          ) : null}
+          {/* La tira es 8:1: en un teléfono no se lee, y el teléfono necesita su propia
+              composición (`ARTE_DE_TELEFONO`). Sin ella, sale la tira entera. */}
+          {usaCinta ? campoDeArte(ARTE_DE_TELEFONO) : null}
 
           <PlazasFijas
             formato={borrador.formato}
@@ -384,6 +387,10 @@ FilaDePieza.propTypes = {
   anunciante: PropTypes.object,
   formatos: PropTypes.object,
   ocupado: PropTypes.bool,
+  /** El diálogo de confirmar del panel (lo usa «Aligerar»). */
+  preguntar: PropTypes.func.isRequired,
   onGuardar: PropTypes.func.isRequired,
+  /** Guarda solo el arte de una columna (`{ cinta_id: 7 }`); resuelve a `true` si salió. */
+  onCambiarArte: PropTypes.func.isRequired,
   onBorrar: PropTypes.func.isRequired,
 };

@@ -1,0 +1,155 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /monedas -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "actualizado": null,
+      "base": "USD",
+      "monedas": [
+        {
+          "capturado_en": null,
+          "codigo": "VES",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Bolívar",
+          "pais": "Venezuela",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "MXN",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Peso mexicano",
+          "pais": "México",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "BRL",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Real",
+          "pais": "Brasil",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "COP",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Peso colombiano",
+          "pais": "Colombia",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "ARS",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Peso argentino",
+          "pais": "Argentina",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "PEN",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Sol",
+          "pais": "Perú",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "CLP",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Peso chileno",
+          "pais": "Chile",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "PYG",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Guaraní",
+          "pais": "Paraguay",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "DOP",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Peso dominicano",
+          "pais": "República Dominicana",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "KYD",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": true,
+          "fuente": null,
+          "nombre": "Dólar de Islas Caimán",
+          "pais": "Islas Caimán",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        },
+        {
+          "capturado_en": null,
+          "codigo": "EUR",
+          "direccion": "flat",
+          "fecha_valor": null,
+          "fija": false,
+          "fuente": null,
+          "nombre": "Euro",
+          "pais": "Eurozona",
+          "valor": null,
+          "variacion": null,
+          "vieja": true
+        }
+      ]
+    },
+    "success": true
+  }
+}

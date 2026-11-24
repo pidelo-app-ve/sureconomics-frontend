@@ -1,0 +1,30 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, 3f0d94d) con su cliente de pruebas: GET /admin/headlines/resumen -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "actualizado": null,
+      "autopublicar": false,
+      "en_sombra": 0,
+      "encendido": {
+        "ciclo": false,
+        "entrada": false,
+        "ia": false
+      },
+      "gasto_usd": {
+        "hoy": 0.0,
+        "mes": 0.0,
+        "presupuesto_mes": 15.0
+      },
+      "grupos": {
+        "published": 45
+      },
+      "notas": {},
+      "proximo": null,
+      "redaccion_en_pausa_hasta": null,
+      "seccion_visible": true,
+      "ultimo_ciclo": null,
+      "version": 0
+    },
+    "success": true
+  }
+}

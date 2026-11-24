@@ -1,0 +1,24 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, 3f0d94d) con su cliente de pruebas: GET /admin/boletin/numeros -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "numeros": [
+        {
+          "body_html": "<p>Esta semana, <a target=\"_blank\" href=\"https://sureconomics.com/noticias/inflacion\" rel=\"noopener noreferrer nofollow\">la inflación en cifras</a>.</p>",
+          "cover_media_id": null,
+          "cover_url": null,
+          "created_at": "2026-11-23T21:01:40",
+          "id": 1,
+          "paginas": 1,
+          "preheader": null,
+          "send_on": "2026-11-23",
+          "sent_at": null,
+          "status": "ready",
+          "subject": "Entorno en Viñetas · 30 de noviembre",
+          "total_recipients": null
+        }
+      ]
+    },
+    "success": true
+  }
+}

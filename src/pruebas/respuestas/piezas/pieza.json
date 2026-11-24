@@ -1,0 +1,61 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /posts/bcv-sube-tasa-encaje -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "audio_asset": null,
+      "author": {
+        "id": 1,
+        "name": "redaccion-piezas@example.test"
+      },
+      "byline": null,
+      "byline_photo": null,
+      "canonical_url": null,
+      "content": "<p>El Banco Central de Venezuela subió la tasa de encaje legal.</p>",
+      "content_en": null,
+      "content_format": {
+        "allows_comments": false,
+        "name": "Noticia",
+        "name_plural": "Noticias",
+        "shows_author": true,
+        "slug": "noticia"
+      },
+      "created_at": "2026-11-23T21:23:19",
+      "destacada_hasta": null,
+      "document_asset": null,
+      "document_open_access": false,
+      "en_ingles": false,
+      "en_portada": false,
+      "excerpt": "<p>La medida rige desde el lunes.</p>",
+      "excerpt_en": null,
+      "featured_image_url": null,
+      "firma_de_colaborador": false,
+      "format": "noticia",
+      "id": 1,
+      "image_asset": null,
+      "imagen_foco": null,
+      "interviewee": null,
+      "interviewee_role": null,
+      "is_educational": false,
+      "juego_palabra": null,
+      "juego_pista": null,
+      "meta_description": null,
+      "meta_title": null,
+      "moneda": null,
+      "places": [],
+      "published_at": "2026-11-23T21:23:19.978525",
+      "sin_publicidad": false,
+      "slug": "bcv-sube-tasa-encaje",
+      "source_name": null,
+      "source_url": null,
+      "sources": [],
+      "title": "El BCV sube la tasa de encaje",
+      "title_en": null,
+      "topics": [],
+      "traduccion_automatica": false,
+      "unit": null,
+      "updated_at": "2026-11-23T21:23:19",
+      "video_asset": null
+    },
+    "success": true
+  }
+}

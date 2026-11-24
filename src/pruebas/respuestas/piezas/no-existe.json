@@ -1,0 +1,13 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /posts/no-existe -> 404. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "estado": 404,
+    "cuerpo": {
+      "error": {
+        "code": "not_found",
+        "message": "Post not found."
+      },
+      "success": false
+    }
+  }
+}

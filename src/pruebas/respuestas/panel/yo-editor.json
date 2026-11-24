@@ -1,0 +1,18 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /admin/me -> 200. Cómo: scripts/pruebas/grabar/. tras PUT /admin/me/recorridos/panel (la bienvenida ya vista)",
+  "respuesta": {
+    "data": {
+      "created_at": "2026-11-23T21:18:09",
+      "email": "editora-panel@example.test",
+      "id": 1,
+      "is_active": true,
+      "name": "editora-panel@example.test",
+      "recorridos_vistos": [
+        "panel"
+      ],
+      "role": "publicador",
+      "telefono": null
+    },
+    "success": true
+  }
+}

@@ -62,6 +62,9 @@ const VISTAS = [
   { clave: "borrados", texto: "Borrados" },
 ];
 
+/** Cuánto espera el buscador a que se deje de escribir antes de pedir (la prueba lo lee de aquí). */
+export const ESPERA_DEL_BUSCADOR_MS = 250;
+
 const FIJAR = [
   { minutos: 30, texto: "media hora" },
   { minutos: 60, texto: "una hora" },
@@ -395,7 +398,7 @@ export const AdminTitulares = () => {
     const reloj = setTimeout(() => {
       setPagina(1);
       setFiltros((f) => ({ ...f, buscar: limpio }));
-    }, 250);
+    }, ESPERA_DEL_BUSCADOR_MS);
     return () => clearTimeout(reloj);
   }, [texto, filtros.buscar]);
 

@@ -1,0 +1,68 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /formats -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": [
+      {
+        "allows_comments": false,
+        "lede": "La información que marca la actualidad, en tiempo real.",
+        "name": "Noticia",
+        "name_plural": "Noticias",
+        "required_media": "none",
+        "shows_author": true,
+        "slug": "noticia",
+        "sort_order": 1
+      },
+      {
+        "allows_comments": true,
+        "lede": "Información, contexto y análisis para entender lo que sucede en la región y el mundo.",
+        "name": "Artículo",
+        "name_plural": "Artículos",
+        "required_media": "none",
+        "shows_author": true,
+        "slug": "articulo",
+        "sort_order": 2
+      },
+      {
+        "allows_comments": true,
+        "lede": "Nuestra mirada sobre los temas que marcan el presente y definen el futuro.",
+        "name": "Editorial",
+        "name_plural": "Editorial",
+        "required_media": "none",
+        "shows_author": false,
+        "slug": "editorial",
+        "sort_order": 3
+      },
+      {
+        "allows_comments": true,
+        "lede": "Ideas, protagonistas y perspectivas en primera persona.",
+        "name": "Entrevista",
+        "name_plural": "Entrevistas",
+        "required_media": "video",
+        "shows_author": true,
+        "slug": "entrevista",
+        "sort_order": 4
+      },
+      {
+        "allows_comments": false,
+        "lede": "Información especializada para entender más allá de la coyuntura.",
+        "name": "Informe",
+        "name_plural": "Informes y reportes",
+        "required_media": "document",
+        "shows_author": true,
+        "slug": "informe",
+        "sort_order": 5
+      },
+      {
+        "allows_comments": true,
+        "lede": "Charlas cortas para escuchar, con la voz de quien las cuenta.",
+        "name": "Podcast",
+        "name_plural": "Podcast",
+        "required_media": "audio",
+        "shows_author": true,
+        "slug": "podcast",
+        "sort_order": 6
+      }
+    ],
+    "success": true
+  }
+}

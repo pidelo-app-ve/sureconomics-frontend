@@ -1,7 +1,9 @@
 # Mapa del repo
 
 Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas las vigila
-`src/arquitectura.test.mjs` (corre con `npm test`).
+`src/arquitectura.test.mjs` (corre con `npm test`), y el tamaño de los componentes,
+`src/componentes.test.mjs`: uno nuevo no pasa de 200 líneas y los que ya pasaban tienen
+un tope que solo baja.
 
 ## Dos zonas
 
@@ -41,6 +43,14 @@ Dónde vive cada cosa del frontend y cómo se añade un tema nuevo. Las reglas l
   junto a `FichaDeMoneda.jsx`), y lo común en `src/styles/` y `src/index.css`. Ojo: el
   orden en que entran las hojas en el CSS construido depende del orden de las
   importaciones; al mover un archivo, se comprueba que el `dist/` no cambia.
+
+## Pruebas
+
+Junto a lo que prueban (`X.test.mjs`), y todas corren con `npm test`. El banco está en
+`scripts/pruebas/`: `pintar.mjs` (lo que se ve al cargar, sin navegador), `montar.mjs`
+(un gancho con sus efectos) y `dom.mjs` (**pruebas de pantalla**: clics, escribir y ver qué
+cambia, con happy-dom y Testing Library). Sin red: las respuestas del servidor son copias
+grabadas del backend, en `src/pruebas/respuestas/<zona>/`, cada una con su `_origen`.
 
 ## Fachadas que quedan
 

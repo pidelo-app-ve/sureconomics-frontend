@@ -1,0 +1,14 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /headlines?lang=es&limit=40 -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": {
+      "items": [],
+      "next_update_at": null,
+      "removed_ids": [],
+      "reset": true,
+      "updated_at": null,
+      "version": 0
+    },
+    "success": true
+  }
+}

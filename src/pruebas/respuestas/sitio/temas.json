@@ -1,0 +1,136 @@
+{
+  "_origen": "Grabada el 23-nov-2026 del backend (integracion-2026-11d, a28c595) con su cliente de pruebas: GET /topics -> 200. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "data": [
+      {
+        "id": 1,
+        "name": "Macroeconomía",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "macroeconomia",
+        "sort_order": 1
+      },
+      {
+        "id": 2,
+        "name": "Política Fiscal y Deuda",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "politica-fiscal-y-deuda",
+        "sort_order": 2
+      },
+      {
+        "id": 3,
+        "name": "Banca y Política Monetaria",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "banca-y-politica-monetaria",
+        "sort_order": 3
+      },
+      {
+        "id": 4,
+        "name": "Mercados e Inversión",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "mercados-e-inversion",
+        "sort_order": 4
+      },
+      {
+        "id": 5,
+        "name": "Comercio Exterior",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "comercio-exterior",
+        "sort_order": 5
+      },
+      {
+        "id": 6,
+        "name": "Geoeconomía",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "geoeconomia",
+        "sort_order": 6
+      },
+      {
+        "id": 7,
+        "name": "Energía y Minería",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "energia-y-mineria",
+        "sort_order": 7
+      },
+      {
+        "id": 8,
+        "name": "Agro y Alimentos",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "agro-y-alimentos",
+        "sort_order": 8
+      },
+      {
+        "id": 9,
+        "name": "Infraestructura",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "infraestructura",
+        "sort_order": 9
+      },
+      {
+        "id": 10,
+        "name": "Transporte",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "transporte",
+        "sort_order": 10
+      },
+      {
+        "id": 11,
+        "name": "Empresas y Negocios",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "empresas-y-negocios",
+        "sort_order": 11
+      },
+      {
+        "id": 12,
+        "name": "Trabajo y Migración",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "trabajo-y-migracion",
+        "sort_order": 12
+      },
+      {
+        "id": 13,
+        "name": "Sociedad y Bienestar",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "sociedad-y-bienestar",
+        "sort_order": 13
+      },
+      {
+        "id": 14,
+        "name": "Tecnología y Pagos",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "tecnologia-y-pagos",
+        "sort_order": 14
+      },
+      {
+        "id": 15,
+        "name": "Clima y Sostenibilidad",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "clima-y-sostenibilidad",
+        "sort_order": 15
+      },
+      {
+        "id": 16,
+        "name": "Política",
+        "name_en": null,
+        "post_count": 0,
+        "slug": "politica",
+        "sort_order": 16
+      }
+    ],
+    "success": true
+  }
+}

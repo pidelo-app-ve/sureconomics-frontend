@@ -58,7 +58,7 @@ const TOPES = {
   "src/pages/admin/AdminPostEditor.jsx#AdminPostEditor": 564,
   "src/features/analitica/admin/AdminAnalitica.jsx#AdminAnalitica": 464,
   "src/pages/admin/AdminJuegoPalabras.jsx#AdminJuegoPalabras": 458,
-  "src/features/titulares/admin/AdminTitulares.jsx#AdminTitulares": 430,
+  "src/features/titulares/admin/AdminTitulares.jsx#AdminTitulares": 418,
   "src/components/Navbar.jsx#Navbar": 426,
   "src/pages/Home.jsx#Home": 385,
   "src/components/admin/AssetField.jsx#AssetField": 382,

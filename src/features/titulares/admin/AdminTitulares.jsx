@@ -5,10 +5,12 @@ import { FiltrosDeTitulares } from "./components/FiltrosDeTitulares";
 import { FuentesDeTitulares } from "./components/FuentesDeTitulares";
 import { HistorialTitular } from "./components/HistorialTitular";
 import { EmptyState, ErrorState, LoadingState, Pagination } from "../../../components/content";
+import { PaginasDeLaLista } from "../../../components/admin/PaginasDeLaLista";
 import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../../context/AdminToastContext";
 import { useAuth } from "../../../context/AuthContext";
 import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { useBuscadorConEspera } from "../../../hooks/useBuscadorConEspera";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import { nombreDePais } from "../../../lib/avisos";
 import {
@@ -16,7 +18,6 @@ import {
   MODOS_DEL_JUEZ,
   consultaDeTitulares,
   hayFiltros,
-  lineaDePaginas,
   nombreDeCategoria,
   nombreDelProblema,
 } from "./utils";
@@ -63,7 +64,7 @@ const VISTAS = [
 ];
 
 /** Cuánto espera el buscador a que se deje de escribir antes de pedir (la prueba lo lee de aquí). */
-export const ESPERA_DEL_BUSCADOR_MS = 250;
+export { ESPERA_DEL_BUSCADOR_MS } from "../../../lib/listasDelPanel";
 
 const FIJAR = [
   { minutos: 30, texto: "media hora" },
@@ -302,9 +303,11 @@ export const AdminTitulares = () => {
   const [lista, setLista] = useState({ status: "loading", grupos: [], total: 0, pagina: 1, paginas: 0, opciones: null, error: null });
   const [pagina, setPagina] = useState(1);
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
-  // Dos estados y no uno, como en Archivos: `texto` es lo que se está escribiendo y
-  // `filtros.buscar` lo que de verdad se pide. Sin eso, cada tecla sería una petición.
-  const [texto, setTexto] = useState("");
+  // `texto` es lo que se está escribiendo y `filtros.buscar` lo que de verdad se pide.
+  const [texto, setTexto] = useBuscadorConEspera(filtros.buscar, (buscar) => {
+    setPagina(1);
+    setFiltros((f) => ({ ...f, buscar }));
+  });
   // Cada petición de la lista lleva su turno: si llega tarde una vieja (se cambió de
   // filtro mientras tanto), no pisa a la nueva.
   const turnoDeLista = useRef(0);
@@ -390,17 +393,6 @@ export const AdminTitulares = () => {
     const id = setInterval(cargar, 60_000);
     return () => clearInterval(id);
   }, [cargar]);
-
-  // El buscador pide cuando se deja de escribir; los espacios de más no cuentan.
-  useEffect(() => {
-    const limpio = texto.trim().replace(/\s+/g, " ");
-    if (limpio === filtros.buscar) return undefined;
-    const reloj = setTimeout(() => {
-      setPagina(1);
-      setFiltros((f) => ({ ...f, buscar: limpio }));
-    }, ESPERA_DEL_BUSCADOR_MS);
-    return () => clearTimeout(reloj);
-  }, [texto, filtros.buscar]);
 
   const cambiarFiltro = (clave, valor) => {
     setPagina(1);
@@ -642,10 +634,7 @@ export const AdminTitulares = () => {
 
       {lista.status === "success" && grupos.length ? (
         <>
-        <div className="se-admin-paginas" {...ancla("paginas")}>
-          <p className="se-text-body" style={{ margin: 0 }}>{lineaDePaginas(lista)}</p>
-          <Pagination page={lista.pagina} totalPages={lista.paginas} onPageChange={irAPagina} compacta etiqueta="Paginación (arriba)" />
-        </div>
+        <PaginasDeLaLista pagina={lista.pagina} paginas={lista.paginas} total={lista.total} onPagina={irAPagina} anclaje={ancla("paginas")} />
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "0.75rem" }}>
           {grupos.map((g, k) => (
             <li key={g.id} className="se-admin-table-wrap" style={{ padding: "1rem" }} {...(k === 0 ? ancla("titular") : {})}>

@@ -22,13 +22,32 @@ export const PASOS_USUARIOS = [
       "para entrar a este panel.",
   },
   {
+    clave: "filtros",
+    titulo: "Buscar a un lector",
+    texto: "Para encontrar a alguien sin pasar páginas. Al cambiar un filtro, la lista vuelve a la primera página.",
+    puntos: [
+      "Buscar: escriba el nombre, el apellido, los dos juntos o un trozo del correo. Busca cuando deja de escribir.",
+      "Cuenta: solo las activas o solo las desactivadas (las que no pueden entrar).",
+      "Correo: solo quien confirmó que su correo es suyo, o quien todavía no.",
+      "Propuestas: quien puede mandar propuestas de artículos, quien no, o aquellos a los que nadie se lo ha cambiado (siguen lo que valga para todos).",
+      "Limpiar filtros: si nadie cumple lo elegido, aparece este botón para volver a ver a todos.",
+    ],
+  },
+  {
+    clave: "paginas",
+    titulo: "Las páginas",
+    texto:
+      "La lista va de veinte en veinte. Aquí dice en qué página está y cuántos lectores hay en total con lo elegido; " +
+      "«Anterior» y «Siguiente» están aquí arriba y, con los números, también abajo.",
+  },
+  {
     clave: "lista",
     titulo: "La lista",
     puntos: [
       "Nombre y correo: los que puso el lector al registrarse.",
+      "Cuenta: activa o desactivada, y «sin verificar» si todavía no confirmó su correo.",
       "Colaborador: si puede mandar propuestas de artículos desde su cuenta. Un guion quiere decir que nadie lo ha cambiado: puede, como cualquier lector.",
       "Editar: abre la ficha del lector, donde se corrige su nombre, se le deja o no mandar propuestas y se desactiva su cuenta.",
-      "Páginas: la lista va de veinte en veinte; si hay más, abajo están los números para pasar de página.",
     ],
   },
   VUELVE,

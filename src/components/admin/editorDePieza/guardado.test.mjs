@@ -339,6 +339,8 @@ const editor = ({ isCreate = false, inicial = form({ status: "published", slug: 
     usarFirmaDeSuCuenta: api("usar-su-cuenta"),
     quitarVinculoConElLector: api("quitar-vinculo"),
     navigate: (...a) => (e.navegado = a),
+    // Lo que avisa a la traducción en marcha (y si ya se había ido a la pieza).
+    alCrear: (id) => (e.creada = { id, yaNavegado: Boolean(e.navegado) }),
     saltarGuarda: e.saltarGuarda,
     borrador: {
       limpiar: () => e.borrador.push("limpiar"),
@@ -491,6 +493,15 @@ describe("una acción a la vez (el candado)", () => {
     assert.equal(e.api("crear").args[0].status, "published");
     e.api("crear").resolver({ id: 42 });
     await uno;
+    assert.equal(e.navegado[0], "/admin/posts/42");
+  });
+
+  test("al crear, se avisa del número de la pieza nueva antes de ir a ella (la traducción sigue)", async () => {
+    const e = editor({ isCreate: true, inicial: form() });
+    const creando = e.guardar();
+    e.api("crear").resolver({ id: 42 });
+    await creando;
+    assert.deepEqual(e.creada, { id: 42, yaNavegado: false });
     assert.equal(e.navegado[0], "/admin/posts/42");
   });
 

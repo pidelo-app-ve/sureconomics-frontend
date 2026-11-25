@@ -200,6 +200,8 @@ export const guardarPieza = ({ publicar = false } = {}, d) =>
         // `estaOcupado`, todos los botones apagados.
         d.setSaveState({ status: "idle", message: "" });
         const { ruta, opciones } = destinoTrasCrear({ created, publicar, label: d.label });
+        // La traducción en marcha sigue en la pieza nueva (ver `useTraduccionDePieza`).
+        d.alCrear?.(created?.id ?? null);
         d.navigate(ruta, opciones);
         return;
       }

@@ -181,14 +181,78 @@ test("abrir otra pieza a medias: se deja la traducción y no cae en la nueva", a
   await m.desmontar();
 });
 
-test("de «nueva» a su número (se acaba de crear): es la misma pieza y sigue", async () => {
+/** Lo que hace el editor al cargar la pieza del servidor: pisa el formulario y sube `apertura`. */
+const cargarDelServidor = async (m, apertura) => {
+  m.form = { ...FORMULARIO, title: "El BCV sube la tasa de encaje (guardada)" };
+  await m.pintar({ apertura });
+};
+
+test("de «nueva» a la pieza que se acaba de crear: sigue, y el inglés espera a que cargue", async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");
+  // El guardado avisa antes de ir a la pieza nueva (`guardarPieza` → `alCrear`).
+  m.h.seCreo(7);
   await m.pintar({ piezaId: 7 });
   assert.equal(m.h.traduciendo, true);
+  const antes = preguntas();
+  servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
+  await hasta(() => preguntas() > antes, "la pregunta que trae la traducción");
+  await esperar(30);
+  // Llegó antes de que el editor cargara la pieza: no se pone aún (la carga lo pisaría).
+  assert.equal(m.form.title_en, "");
+  assert.equal(m.h.traduciendo, true, "sigue diciendo que traduce");
+  assert.deepEqual(m.avisos, []);
+  await cargarDelServidor(m, 1);
+  assert.equal(m.form.title, "El BCV sube la tasa de encaje (guardada)", "lo cargado se queda");
+  assert.equal(m.form.title_en, INGLES.title, "y encima, el inglés");
+  assert.equal(m.form.traduccion_automatica, true);
+  assert.equal(m.h.traduciendo, false);
+  assert.deepEqual(m.avisos, [["bien", "Traducción lista. Revísala y guarda la pieza."]]);
+  await m.desmontar();
+});
+
+test("de «nueva» a la pieza creada, si llega después de cargar: se pone enseguida", async () => {
+  const m = await montar({ piezaId: null });
+  await empezar(m);
+  await hasta(() => preguntas() >= 1, "la primera pregunta");
+  m.h.seCreo(7);
+  await m.pintar({ piezaId: 7 });
+  await cargarDelServidor(m, 1);
   servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
   await hasta(() => !m.h.traduciendo, "el final");
+  assert.equal(m.form.title, "El BCV sube la tasa de encaje (guardada)");
   assert.equal(m.form.title_en, INGLES.title);
+  await m.desmontar();
+});
+
+test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ella", async () => {
+  const m = await montar({ piezaId: null });
+  await empezar(m);
+  await hasta(() => preguntas() >= 1, "la primera pregunta");
+  // Sin `seCreo`: la 8 no es la que se estaba creando.
+  await m.pintar({ piezaId: 8 });
+  assert.equal(m.h.traduciendo, false);
+  const hechas = preguntas();
+  servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
+  await esperar(50);
+  await cargarDelServidor(m, 1);
+  assert.equal(preguntas(), hechas, "ya no pregunta");
+  assert.equal(m.form.title_en, "");
+  assert.deepEqual(m.avisos, []);
+  await m.desmontar();
+});
+
+test("creada la 7 pero se salta a la 8: tampoco cae en ella", async () => {
+  const m = await montar({ piezaId: null });
+  await empezar(m);
+  await hasta(() => preguntas() >= 1, "la primera pregunta");
+  m.h.seCreo(7);
+  await m.pintar({ piezaId: 8 });
+  assert.equal(m.h.traduciendo, false);
+  servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
+  await esperar(50);
+  assert.equal(m.form.title_en, "");
+  assert.deepEqual(m.avisos, []);
   await m.desmontar();
 });

@@ -4,6 +4,7 @@ import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { marcarSuscrito, registrarCierre } from "./utils";
 import { subscribeToNewsletter } from "./api";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
+import "./invitacionAlBoletin.css";
 
 /**
  * La invitación al boletín, abierta: la ventana, el formulario y el foco. Baja aparte;

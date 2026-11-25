@@ -31,8 +31,9 @@
  * - `guia.js`: los pasos de las dos guías del panel (números y suscriptores; se arman en
  *   `lib/guias/guiaBoletin.js` y `lib/guias/guiaSuscriptores.js`).
  *
- * Lo que **no** está aquí, a propósito: los estilos (`.se-newsletter…`, `.se-invitacion…`
- * y `.se-entorno…`, en `styles/blog.css`; `/suscribirse` y `/entorno` importan además
+ * Lo que **no** está aquí, a propósito: los estilos (`.se-newsletter…` y `.se-entorno…`,
+ * en `styles/blog.css`; los de `.se-invitacion…` sí, en `invitacionAlBoletin.css`, que
+ * baja con la ventana abierta; `/suscribirse` y `/entorno` importan además
  * `styles/institucional.css`, que comparten con otras páginas: moverlos cambiaría el
  * orden del CSS construido) y los textos (`i18n/<idioma>/boletin.json`: los diccionarios
  * van por zonas). La medición del alta va por la fachada `lib/analitica.js` (ver

@@ -10,6 +10,7 @@ import { RequireAdmin } from "./components/admin/RequireAdmin";
 import { ProveedorIdioma } from "./i18n/ProveedorIdioma";
 import { Redirigir } from "./components/Enlace";
 import { IDIOMA_BASE, cargarIdioma, cargarZonas } from "./i18n/motor";
+import { esperarHojas } from "./lib/esperarHojas";
 
 /**
  * Una página que se descarga al entrar en ella, no con el resto del sitio.
@@ -23,9 +24,14 @@ import { IDIOMA_BASE, cargarIdioma, cargarZonas } from "./i18n/motor";
  * Con el código vienen sus textos: las zonas del diccionario que usa (`zonas`, en el
  * idioma de su rama), pedidas a la vez y antes de pintar, así que nunca se ve una clave
  * en lugar del texto. `npm run i18n` comprueba que cada página pida las que usa.
+ *
+ * Y sus estilos: si una hoja que la página necesita ya estaba pedida desde otra (la del
+ * buscador, que la portada precarga) y sigue bajando, se espera a que llegue
+ * (`esperarHojas`). Si no, la página se pintaría sin ella hasta entonces.
  */
 const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => async () => {
     const [modulo] = await Promise.all([cargar(), cargarZonas(lang, zonas)]);
+    await esperarHojas();
     return { Component: modulo[nombre] };
 };
 

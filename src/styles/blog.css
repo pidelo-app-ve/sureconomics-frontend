@@ -2563,12 +2563,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   border-radius: 2px;
 }
 
-@keyframes se-image-field-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .se-admin-main__outlet,
   .se-admin-nav-link,

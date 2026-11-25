@@ -259,15 +259,19 @@ console.log("Última hora, dentro del HTML");
         !res.body.includes("Un titular </script>"));
     });
   }
-  // Si llega después que la portada, no se la espera: la página sale ya, sin ella.
-  await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares }), { tardaUh: 300, tardaPortada: 0 }), async () => {
-    const res = respuestaFalsa();
-    const inicio = Date.now();
-    await handler({ query: {} }, res);
-    const tardo = Date.now() - inicio;
-    check("si llega después que la portada, no se espera: sale sin ella", res.code === 200 && tardo < 250 &&
-      bloque(res.body)?.respuesta && !res.body.includes('id="se-ultima-hora"'), `${tardo} ms`);
-  });
+  // Después de la portada se espera a Última hora un margen corto (250 ms): si llega en él,
+  // va dentro (la columna no cambia al montar); si no, la página sale sin ella y sin esperar más.
+  for (const [nombre, tardaUh, conElla] of [["100 ms después", 100, true], ["800 ms después", 800, false]]) {
+    await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares }), { tardaUh, tardaPortada: 0 }), async () => {
+      const res = respuestaFalsa();
+      const inicio = Date.now();
+      await handler({ query: {} }, res);
+      const tardo = Date.now() - inicio;
+      check(`si llega ${nombre} que la portada: ${conElla ? "se espera y va dentro" : "sale sin ella, sin esperar más del margen"}`,
+        res.code === 200 && bloque(res.body)?.respuesta && res.body.includes('id="se-ultima-hora"') === conElla &&
+          (conElla ? tardo >= 90 : tardo < 400), `${tardo} ms`);
+    });
+  }
   for (const [nombre, respuesta] of [
     ["no contestan", () => { throw new Error("timeout"); }],
     ["contestan 502", () => ({ ok: false, status: 502, json: async () => ({}) })],

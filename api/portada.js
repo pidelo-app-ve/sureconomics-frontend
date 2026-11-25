@@ -129,10 +129,30 @@ export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}${RUTA_DEL_QU
 export const ultimaHoraUrl = (idioma) => `${SITIO}${RUTA_DEL_QUIOSCO}${ultimaHoraDeLaPortada(idioma)}`;
 
 /**
- * Lo más que puede durar la petición de Última hora (la página no la espera: ver el
- * `handler`); pasado esto se corta, para no dejarla colgada.
+ * Lo más que puede durar la petición de Última hora; pasado esto se corta, para no dejarla
+ * colgada (la página no la espera tanto: ver `MARGEN_ULTIMA_HORA_MS`).
  */
 const LIMITE_ULTIMA_HORA_MS = 1500;
+
+/**
+ * Lo que se espera a Última hora cuando la portada ya llegó. Sin titulares, el HTML pinta
+ * la columna con las noticias; al llegar los titulares a la página, la columna cambia de
+ * alto y, en el teléfono, la foto salta al montar (la revisión midió 62 px a 360 y un CLS
+ * de 0,012 en `/en` con Última hora 800 ms más lenta). Y esa portada la guarda el borde 30 s
+ * (y 60 más mientras la renueva). Las dos lecturas salen a la vez del mismo quiosco y suelen
+ * llegar juntas (en producción, sin caché: 462 ms la portada y 503 ms Última hora inglesa):
+ * un cuarto de segundo cubre esa diferencia sin retrasar de verdad el primer byte.
+ */
+const MARGEN_ULTIMA_HORA_MS = 250;
+
+/** Lo que dé `promesa` si llega en `ms`; si no, nulo (y sin dejar el reloj vivo). */
+const comoMucho = (promesa, ms) => {
+  let reloj;
+  const tope = new Promise((ok) => {
+    reloj = setTimeout(() => ok(null), ms);
+  });
+  return Promise.race([promesa, tope]).finally(() => clearTimeout(reloj));
+};
 
 /**
  * El orden de las secciones bajo la primera plana: el de `FORMATO_META` en
@@ -615,6 +635,16 @@ export const bloqueDeDatos = (id, lectura, respuesta, ahora = Date.now()) =>
   `${jsonEnScript({ lectura, generada: new Date(ahora).toISOString(), respuesta })}</script>`;
 
 /**
+ * Las filas que no están arriba (ni la que manda ni las de debajo), en el orden de la API:
+ * las `recientes` que `Home` le pasa a `PrimeraPlana`, de donde Última hora saca sus
+ * noticias cuando no hay titulares del día. `plana`, la de `loQuePintaLaPortada`.
+ */
+export const recientesDeLaPortada = (filas, plana) => {
+  const arriba = new Set([plana?.principal, ...(plana?.secundarias ?? [])].filter(Boolean).map((p) => p.id));
+  return filas.filter((f) => !arriba.has(String(f.id ?? "")));
+};
+
+/**
  * La página entera a partir del shell y las filas (o sin filas). Separada del `handler`
  * para las pruebas. `respuesta`: lo que contestó el quiosco, entero, de donde salen las
  * filas; sin ella (o sin filas) la página no lleva bloques de datos y pide como siempre.
@@ -650,11 +680,10 @@ export const armarPortada = (
     .filter((s) => s.titulares.length);
 
   // Última hora, como la pinta React al montar: los titulares si vinieron y, si no son del
-  // día, las piezas que no están arriba (las `recientes` de `Home`, en el orden de la API).
-  const arriba = new Set([plana?.principal, ...(plana?.secundarias ?? [])].filter(Boolean).map((p) => p.id));
+  // día, las piezas que no están arriba.
   const columna = {
     items: Array.isArray(ultimaHora?.data?.items) ? ultimaHora.data.items : [],
-    recientes: validas.filter((f) => !arriba.has(String(f.id ?? ""))),
+    recientes: recientesDeLaPortada(validas, plana),
   };
 
   const todos = [
@@ -706,13 +735,9 @@ export default async function handler(req, res) {
   const idioma = req.query?.lang === "en" ? "en" : "es";
   const rutaPropia = idioma === "en" ? "/en" : "/";
 
-  // Última hora no retrasa la página: se usa si ya llegó cuando están el shell y la portada
-  // (los dos del quiosco, y suele ser la más ligera); si no, la página sale sin ella y la
-  // pide al llegar, como antes.
-  let ultimaHora = null;
-  leerUltimaHora(idioma).then((r) => {
-    ultimaHora = r;
-  });
+  // Última hora se pide a la vez que la portada, pero no la retrasa más que
+  // `MARGEN_ULTIMA_HORA_MS` (ver abajo); si no llega, la página sale sin ella y la pide al llegar.
+  const pidiendoUltimaHora = leerUltimaHora(idioma);
   const [{ shell, fuente }, datos] = await Promise.all([leerShell(), leerTitulares()]);
   res.setHeader("X-Shell", fuente);
 
@@ -746,6 +771,7 @@ export default async function handler(req, res) {
     return;
   }
 
+  const ultimaHora = await comoMucho(pidiendoUltimaHora, MARGEN_ULTIMA_HORA_MS);
   res.setHeader("Cache-Control", CACHE_PORTADA);
   res.setHeader("X-Pieza-Meta", "portada");
   res.status(200).send(armarPortada(shell, { filas: datos.filas, respuesta: datos.respuesta, ultimaHora, idioma }));

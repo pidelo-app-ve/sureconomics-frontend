@@ -14,7 +14,9 @@ import { sustituir } from "../../scripts/pruebas/dobles.mjs";
 import { pintarEn, textoDe } from "../../scripts/pruebas/pintar.mjs";
 import { cargarIdioma, traducir } from "../i18n/motor.js";
 import { piezasFromApi } from "../lib/pieza.js";
-import { aperturaEnHtml } from "../../api/portada.js";
+import { aperturaEnHtml, loQuePintaLaPortada, recientesDeLaPortada } from "../../api/portada.js";
+import { paraLaApertura } from "../lib/apertura.js";
+import { primeraPlanaDe } from "../lib/bloquesDePortada.js";
 
 const PIEZAS = "src/hooks/usePieces.js";
 const TEMAS = "src/hooks/useTaxonomy.js";
@@ -300,6 +302,33 @@ describe("la apertura del HTML es la que pinta React", () => {
       assert.equal(texto(previa, "se-plana__resumen"), texto(react, "se-plana__resumen"));
     });
   }
+
+  // De ellas saca Última hora sus noticias cuando no hay titulares del día: si el HTML
+  // eligiera otras, la columna (y la foto, debajo en el teléfono) cambiaría al montar.
+  test("las «recientes» de Última hora: las mismas que elige Home", () => {
+    const ahora = Date.now();
+    const hace = (h) => new Date(ahora - h * 3600_000).toISOString();
+    const conFoto = { image_asset: { url: "/media/image/2026/11/f.jpg", width: 1536 } };
+    for (const [caso, filas] of [
+      ["la más reciente con foto", [1, 2, 3, 4, 5, 6].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id) }))],
+      ["la más reciente sin foto cede a otra", [
+        { ...apertura(), id: 1, image_asset: null, published_at: hace(1) },
+        ...[2, 3, 4, 5].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id), ...conFoto })),
+      ]],
+      ["una fijada de otro formato", [
+        ...[1, 2, 3, 4, 5].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id) })),
+        { ...apertura({ format: "informe", unit: "Estudios", ...fijada }), id: 9, slug: "informe", published_at: hace(30) },
+      ]],
+      ["mezcla de formatos", [1, 2, 3, 4, 5, 6, 7].map((id) => ({ ...apertura(), id, slug: `p-${id}`, published_at: hace(id), format: id % 2 ? "noticia" : "articulo" }))],
+    ]) {
+      const piezas = piezasFromApi(filas);
+      const { enApertura } = primeraPlanaDe(piezas, false);
+      const deHome = piezas.filter((p) => !enApertura.has(p.id)).map((p) => p.id);
+      const { plana } = loQuePintaLaPortada(filas.map(paraLaApertura), ahora);
+      const delHtml = recientesDeLaPortada(filas, plana).map((f) => String(f.id));
+      assert.deepEqual(delHtml, deHome, caso);
+    }
+  });
 
   test("la marca «ES» de /en, la misma etiqueta", async () => {
     const fila = apertura();

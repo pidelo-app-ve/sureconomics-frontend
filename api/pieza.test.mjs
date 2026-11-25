@@ -763,7 +763,8 @@ check("fotoDePortada: medidas raras no se ponen",
     check("sección equivocada: 301 a la de su formato", res.code === 301 && res.location === "/noticias/bolsas-caen",
       `${res.code} ${res.location}`);
     check("sección equivocada: dice por qué", res.headers["X-Pieza-Meta"] === "otra-direccion");
-    check("sección equivocada: el navegador no la guarda para siempre", /max-age=3600/.test(res.headers["Cache-Control"]));
+    check("sección equivocada: ni el navegador ni el borde la guardan largo",
+      res.headers["Cache-Control"] === "public, max-age=0, s-maxage=300");
   }
   {
     // El enlace que circula por WhatsApp: con su consulta, que llega entera a la buena.

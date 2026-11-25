@@ -524,9 +524,11 @@ export default async function handler(req, res) {
   const conBarra = query._barra === "1";
   if (seccionPedida !== seccionBuena || slug !== slugHallado || conBarra) {
     res.setHeader("X-Pieza-Meta", "otra-direccion");
-    // Poco tiempo en el navegador (`max-age`): una 301 sin él se guarda para siempre, y una
-    // pieza que vuelve a cambiar de formato dejaría a ese lector dando vueltas.
-    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=600, stale-while-revalidate=86400");
+    // Sin `max-age`, una 301 se guarda en el navegador para siempre. Si la pieza cambia de
+    // formato, la 301 vieja y la nueva se apuntarían la una a la otra y el lector daría
+    // vueltas («demasiadas redirecciones»): nada en el navegador, 5 minutos en el borde y
+    // sin `stale-while-revalidate`, que serviría la vieja un día. A Google le da igual.
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300");
     res.redirect(
       301,
       `${prefijo}/${seccionBuena}/${encodeURIComponent(slugHallado)}${consultaDelLector(query, PARAMETROS_INTERNOS)}`

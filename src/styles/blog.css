@@ -2332,35 +2332,10 @@
   color: rgba(var(--se-tinte), 0.72);
 }
 
-.se-articles__hero {
-  padding-top: clamp(2.25rem, 5vw, 3.25rem);
-}
-
 /* Flush with the container, so the kicker, the title and the filter bar below
    all start on the same vertical line as the header logo. Centring this block
    inside the container is what used to indent the heading away from everything
    else on the page. */
-.se-articles__head {
-  margin: 0 0 var(--se-space-xl);
-  animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
-}
-
-.se-articles__title {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.9rem, 4.2vw, 3.2rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.06;
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-articles__lead {
-  margin-top: 0.9rem;
-  /* The 980px half keeps the lead wrapping exactly where it did before the
-     block stopped being centred — only the indent went away, not the measure. */
-  max-width: min(980px, 80ch);
-}
 
 .se-heading-section--small {
   font-size: var(--se-text-h3);
@@ -2945,9 +2920,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    The hero already ends in 100px of padding and shares the section background, so
    the explorer section adds no top gap of its own. */
 .se-explorer-section { padding-top: 0; }
-
-/* Results below the explorer on a listing page. */
-.se-listing { margin-top: var(--se-space-2xl); }
 
 /* —— Encabezado compartido de los bloques de formato —— */
 .se-format__head {
@@ -5950,13 +5922,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 /* —— El título, como el botón de la cabecera pero en grande ——
    El nombre con el punto rojo de grabación delante, con el mismo latido de dos
    segundos (`se-alpunto-latido`, definido con el botón), dentro de la columna. */
-.se-alpunto__titulo {
-  --se-rec: #e5322d;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  line-height: 1;
-}
 
 .se-alpunto__rec {
   /* El halo de 4 px nace en el borde: radio 0,18em entre 0,18em + 4 px. */
@@ -5982,12 +5947,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
    Botones y no enlaces, porque cambian una vista dentro de la misma página; el
    estado se anuncia con `aria-pressed`. Pestañas de texto, como las secciones de un
    diario: la elegida, subrayada en tinta. 44 px de alto, el mínimo táctil. */
-.se-alpunto__seg {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0 1.5rem;
-  margin: calc(-1 * var(--se-space-md)) 0 var(--se-space-xl);
-}
 
 .se-alpunto__seg-btn {
   min-height: 44px;
@@ -6002,40 +5961,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
   cursor: pointer;
   transition: color 0.18s ease, border-color 0.18s ease;
-}
-
-.se-alpunto__seg-btn:hover {
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-alpunto__seg-btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.se-alpunto__seg-btn--on,
-.se-alpunto__seg-btn--on:hover {
-  border-bottom-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
-/* —— Encabezados de las dos secciones —— */
-.se-alpunto__h2 {
-  margin: 0 0 var(--se-space-md);
-  padding-top: 10px;
-  border-top: 2px solid var(--color-ink);
-  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
-  line-height: 1.1;
-  color: var(--se-black);
-}
-
-.se-alpunto__ultimo {
-  margin-top: var(--se-space-2xl);
-}
-
-/* La rejilla ya trae su margen superior por `.se-listing`. */
-.se-alpunto__lista {
-  scroll-margin-top: var(--se-space-lg);
 }
 
 /* —— El hero «Lo último» ——
@@ -6358,10 +6283,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 @media (max-width: 640px) {
   .se-alpunto__grid {
     grid-template-columns: 1fr;
-  }
-
-  .se-alpunto__seg {
-    display: flex;
   }
 
   .se-alpunto__seg-btn {
@@ -8437,12 +8358,6 @@ html {
 
 .se-publico .se-articles {
   background: var(--papel);
-}
-
-.se-publico .se-articles__title {
-  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
-  line-height: 1.05;
-  color: var(--tinta);
 }
 
 /* —— Botones y campos de la parte pública: sin mayúsculas, sin elevarse, rectos —— */

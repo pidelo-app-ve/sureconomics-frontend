@@ -30,6 +30,7 @@ import {
   EspacioPublicitario,
   useEspacios,
 } from "../features/publicidad";
+import "../styles/listados.css";
 
 /**
  * Listing page for one content format.

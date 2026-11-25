@@ -110,9 +110,11 @@ export const useTraduccionDePieza = ({
         if (r) aplicarAhora.current(r);
     }, [apertura]);
 
-    /** Lo llama el guardado al crear la pieza, antes de ir a ella. */
+    /** Lo llama el guardado al crear la pieza, antes de ir a ella. Desde ya, lo que llegue
+        espera a la carga: entre esto y el cambio de pieza también puede llegar. */
     const seCreo = (id) => {
         piezaCreada.current = id ?? null;
+        if (enCurso.current) esperandoCarga.current = true;
     };
 
     // Traduce lo que hay en el formulario, guardado o no, y lo vuelca en los campos en

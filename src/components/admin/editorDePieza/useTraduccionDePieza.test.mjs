@@ -228,6 +228,26 @@ test("de «nueva» a la pieza creada, si llega después de cargar: se pone enseg
   await m.desmontar();
 });
 
+test("llega entre crear y cambiar de pieza: también espera a la carga", LIMITE, async () => {
+  const m = await montar({ piezaId: null });
+  await empezar(m);
+  await hasta(() => preguntas() >= 1, "la primera pregunta");
+  // Creada (el guardado avisa), pero el editor aún no pasó a la 7.
+  await act(() => m.h.seCreo(7));
+  const antes = preguntas();
+  servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
+  await hasta(() => preguntas() > antes, "la pregunta que trae la traducción");
+  await esperar(30);
+  assert.equal(m.form.title_en, "", "no se pone: la carga de la 7 lo pisaría");
+  assert.equal(m.h.traduciendo, true);
+  await m.pintar({ piezaId: 7 });
+  await cargarDelServidor(m, 1);
+  assert.equal(m.form.title, "El BCV sube la tasa de encaje (guardada)");
+  assert.equal(m.form.title_en, INGLES.title);
+  assert.equal(m.h.traduciendo, false);
+  await m.desmontar();
+});
+
 test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ella", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);

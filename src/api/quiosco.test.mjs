@@ -3,7 +3,15 @@
  * `node src/api/quiosco.test.mjs`. Lo que se vigila: que nada con sesión, nada que
  * escriba y nada personal (publicidad, estadísticas, comentarios) acabe en el borde.
  */
-import { ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, leerDelHtml, soltarDelHtml, vaPorElQuiosco } from "./quiosco.js";
+import {
+  ID_DE_LA_PORTADA,
+  LISTADO_DE_LA_PORTADA,
+  VIGENCIA_EN_EL_HTML_MS,
+  leerDelHtml,
+  soltarDelHtml,
+  ultimaHoraDeLaPortada,
+  vaPorElQuiosco,
+} from "./quiosco.js";
 
 let fallos = 0;
 const check = (nombre, ok) => {
@@ -34,8 +42,8 @@ for (const ruta of [
   check(ruta, !vaPorElQuiosco(ruta));
 }
 
-// Lo que trae el HTML (`api/portada.js`): se usa solo si es la lectura pedida y se puede
-// leer; si no, nulo y la página pide como siempre.
+// Lo que trae el HTML (`api/portada.js`): se usa solo si es la lectura pedida, no es vieja
+// y se puede leer; si no, nulo y la página pide como siempre.
 console.log("lo que ya viene en el HTML");
 {
   const respuesta = { data: [{ id: 1, title: "</script> & \"x\"" }], meta: { pages: 1 } };
@@ -46,7 +54,9 @@ console.log("lo que ya viene en el HTML");
   };
   globalThis.document = { getElementById: (id) => nodos.get(id) ?? null };
   try {
-    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, respuesta }));
+    const ahora = Date.now();
+    const generada = (msAtras) => new Date(ahora - msAtras).toISOString();
+    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, generada: generada(90_000), respuesta }));
     const leida = leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA);
     check("la de la portada, tal cual", leida?.data?.[0]?.title === "</script> & \"x\"");
     check("leer no la quita (React prepara el estado dos veces en modo estricto)", nodos.has(ID_DE_LA_PORTADA));
@@ -61,6 +71,17 @@ console.log("lo que ya viene en el HTML");
     check("vacío: nada", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA) === null);
     conBloque(JSON.stringify(respuesta));
     check("sin decir qué lectura es: nada", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA) === null);
+    // La portada de ayer (el borde la sirve si la función falla): se pide la de hoy.
+    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, generada: generada(VIGENCIA_EN_EL_HTML_MS + 1000), respuesta }));
+    check("vieja: nada", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, ahora) === null);
+    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, generada: generada(-(VIGENCIA_EN_EL_HTML_MS + 1000)), respuesta }));
+    check("del futuro (un reloj muy desajustado): nada", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, ahora) === null);
+    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, generada: generada(-120_000), respuesta }));
+    check("un reloj dos minutos atrasado: vale", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, ahora) !== null);
+    conBloque(JSON.stringify({ lectura: LISTADO_DE_LA_PORTADA, respuesta }));
+    check("sin decir cuándo se armó: nada", leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, ahora) === null);
+    check("Última hora, por idioma y como la pide getTitulares",
+      ultimaHoraDeLaPortada("es") === "/headlines?lang=es&limit=40" && ultimaHoraDeLaPortada("en") === "/headlines?lang=en&limit=40");
   } finally {
     delete globalThis.document;
   }

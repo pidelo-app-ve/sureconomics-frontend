@@ -93,7 +93,13 @@ import {
 } from "../src/lib/apertura.js";
 import { ANCHOS_DE_TARJETA, imagenAncho, imagenSrcSet, posicionDeFoco } from "../src/lib/fotoDePieza.js";
 import { textoLlano as resumenDeTarjeta } from "../src/lib/textoLlano.js";
-import { ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, RUTA_DEL_QUIOSCO } from "../src/api/quiosco.js";
+import {
+  ID_DE_LA_PORTADA,
+  ID_DE_ULTIMA_HORA,
+  LISTADO_DE_LA_PORTADA,
+  RUTA_DEL_QUIOSCO,
+  ultimaHoraDeLaPortada,
+} from "../src/api/quiosco.js";
 import {
   FORMAT_NAME,
   IMAGEN_DE_MARCA,
@@ -119,6 +125,15 @@ import {
  */
 export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}${RUTA_DEL_QUIOSCO}${LISTADO_DE_LA_PORTADA}`;
 
+/** Y los de Última hora, en el idioma de la página, también del quiosco (ver `leerUltimaHora`). */
+export const ultimaHoraUrl = (idioma) => `${SITIO}${RUTA_DEL_QUIOSCO}${ultimaHoraDeLaPortada(idioma)}`;
+
+/**
+ * Lo que se esperan los de Última hora. Menos que los de la portada: son un extra, y sin
+ * ellos la página sale igual (los pide al llegar, como antes).
+ */
+const LIMITE_ULTIMA_HORA_MS = 1500;
+
 /**
  * El orden de las secciones bajo la primera plana: el de `FORMATO_META` en
  * `src/lib/pieza.js` (que aquí no se puede cargar: arrastra el motor de idiomas). La prueba
@@ -130,7 +145,7 @@ export const ORDEN_DE_SECCIONES = ["noticia", "articulo", "editorial", "entrevis
 const REVELAR_TRAS = "9s";
 
 /** Lo que mide Última hora encima de la apertura, en px (ver `ESTILO_PREVIO`). */
-const ALTO_DE_ULTIMA_HORA = { telefono: 287, tableta: 226 };
+const ALTO_DE_ULTIMA_HORA = { telefono: 328, tableta: 250 };
 
 /**
  * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor de la
@@ -387,9 +402,11 @@ export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {})
  * va aquí y no en las hojas del sitio.
  * - A los `REVELAR_TRAS`, si React no llegó, se pliega y deja el sitio a la lista.
  * - El alto de Última hora donde va encima de la apertura (hasta 959 px): lo que mide con
- *   tres titulares y su nota, medido el 25-nov-2026 a 360-412 px (dos líneas cada uno) y a
- *   768 (una). Es lo único que no se puede saber aquí (los titulares llegan después, de
- *   otra lectura): si React pinta otro alto, la apertura se mueve esa diferencia al montar.
+ *   tres titulares y la nota de que los redacta una IA, medido el 25-nov-2026 a 360-412 px
+ *   (dos líneas cada uno) y a 600-959 (una). Es lo único que no se pinta aquí: si React
+ *   pinta otro alto (titulares de una o tres líneas, o ninguno del día y entonces las
+ *   noticias, sin la nota), la apertura se mueve esa diferencia al montar. No cuenta para
+ *   el CLS (React pone cajas nuevas, no mueve estas), pero se ve.
  */
 export const ESTILO_PREVIO =
   `<style>.se-portada-previa{position:absolute;top:0;left:0;width:1px;height:1px;margin:-1px;` +
@@ -400,8 +417,8 @@ export const ESTILO_PREVIO =
   `overflow:visible;clip-path:none;white-space:normal}}` +
   `.se-portada-anticipo{animation:se-portada-anticipo 0s linear ${REVELAR_TRAS} forwards}` +
   `@keyframes se-portada-anticipo{to{height:0;overflow:hidden}}` +
-  `@media (max-width:759px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.telefono}px}}` +
-  `@media (min-width:760px) and (max-width:959px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.tableta}px}}` +
+  `@media (max-width:599px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.telefono}px}}` +
+  `@media (min-width:600px) and (max-width:959px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.tableta}px}}` +
   `</style>`;
 
 /** El `<link rel="preload">` de la foto de la apertura (o nada, si no hay que pedirla). */
@@ -466,22 +483,44 @@ const leerTitulares = async () => {
 };
 
 /**
- * La respuesta del quiosco tal cual, para que la página no la vuelva a pedir al cargar
- * (`getPortadaDelHtml`, en el navegador). Detrás de `#root`: la apertura se pinta sin
- * esperar a estos datos, que son la mayor parte del HTML (unos 33 KB con brotli).
- * `jsonEnScript` escapa el `<` (un titular con `</script>` no corta el bloque) y el
- * bloque dice qué lectura contesta (ver `leerDelHtml` en `src/api/quiosco.js`).
+ * Los titulares de Última hora (la respuesta entera del quiosco), o nulo si no llegaron a
+ * tiempo o no traen la lista. Van al HTML para que la columna de Última hora salga con
+ * ellos desde el primer pintado: si llegaran después, la columna cambiaría de alto y, en el
+ * teléfono, empujaría la apertura (medido: CLS de 0,021 con los datos dentro del HTML y los
+ * titulares por detrás). Sin ellos, la página los pide al llegar, como antes.
  */
-export const bloqueDeDatos = (respuesta) =>
-  `<script type="application/json" id="${ID_DE_LA_PORTADA}">` +
-  `${jsonEnScript({ lectura: LISTADO_DE_LA_PORTADA, respuesta })}</script>`;
+const leerUltimaHora = async (idioma) => {
+  try {
+    const respuesta = await conDeadline(ultimaHoraUrl(idioma), LIMITE_ULTIMA_HORA_MS);
+    if (!respuesta.ok) return null;
+    const cuerpo = await respuesta.json();
+    return Array.isArray(cuerpo?.data?.items) ? cuerpo : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Una respuesta del quiosco tal cual, para que la página no la vuelva a pedir al cargar
+ * (`leerDelHtml`, en `src/api/quiosco.js`). Detrás de `#root`: la apertura se pinta sin
+ * esperar a estos datos, que son la mayor parte del HTML (unos 33 KB con brotli).
+ * `jsonEnScript` escapa el `<` (un titular con `</script>` no corta el bloque), y el bloque
+ * dice qué lectura contesta y cuándo se armó: la página no usa uno viejo.
+ */
+export const bloqueDeDatos = (id, lectura, respuesta, ahora = Date.now()) =>
+  `<script type="application/json" id="${id}">` +
+  `${jsonEnScript({ lectura, generada: new Date(ahora).toISOString(), respuesta })}</script>`;
 
 /**
  * La página entera a partir del shell y las filas (o sin filas). Separada del `handler`
  * para las pruebas. `respuesta`: lo que contestó el quiosco, entero, de donde salen las
- * filas; sin ella (o sin filas) la página no lleva bloque de datos y pide como siempre.
+ * filas; sin ella (o sin filas) la página no lleva bloques de datos y pide como siempre.
+ * `ultimaHora`: la respuesta de los titulares de Última hora (`leerUltimaHora`), o nula.
  */
-export const armarPortada = (shell, { filas = [], respuesta = null, idioma = "es", ahora = Date.now() } = {}) => {
+export const armarPortada = (
+  shell,
+  { filas = [], respuesta = null, ultimaHora = null, idioma = "es", ahora = Date.now() } = {}
+) => {
   const t = TEXTOS[idioma];
   const url = idioma === "en" ? URL_EN : URL_ES;
 
@@ -536,7 +575,11 @@ export const armarPortada = (shell, { filas = [], respuesta = null, idioma = "es
       ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) +
         (principal ? aperturaEnHtml(porId.get(plana.principal.id), { idioma, ahora }) : "")
       : null,
-    cola: respuesta && validas.length ? bloqueDeDatos(respuesta) : "",
+    cola:
+      respuesta && validas.length
+        ? bloqueDeDatos(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, respuesta, ahora) +
+          (ultimaHora ? bloqueDeDatos(ID_DE_ULTIMA_HORA, ultimaHoraDeLaPortada(idioma), ultimaHora, ahora) : "")
+        : "",
   });
 };
 
@@ -552,7 +595,11 @@ export default async function handler(req, res) {
   const idioma = req.query?.lang === "en" ? "en" : "es";
   const rutaPropia = idioma === "en" ? "/en" : "/";
 
-  const [{ shell, fuente }, datos] = await Promise.all([leerShell(), leerTitulares()]);
+  const [{ shell, fuente }, datos, ultimaHora] = await Promise.all([
+    leerShell(),
+    leerTitulares(),
+    leerUltimaHora(idioma),
+  ]);
   res.setHeader("X-Shell", fuente);
 
   if (!esNuestroShell(shell)) {
@@ -587,5 +634,5 @@ export default async function handler(req, res) {
 
   res.setHeader("Cache-Control", CACHE_PORTADA);
   res.setHeader("X-Pieza-Meta", "portada");
-  res.status(200).send(armarPortada(shell, { filas: datos.filas, respuesta: datos.respuesta, idioma }));
+  res.status(200).send(armarPortada(shell, { filas: datos.filas, respuesta: datos.respuesta, ultimaHora, idioma }));
 }

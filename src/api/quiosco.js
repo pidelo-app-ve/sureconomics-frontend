@@ -81,9 +81,9 @@ export const vaPorElQuiosco = (ruta, { method = "GET", headers = {}, enNavegador
    no se ejecuta, así que la política de seguridad (CSP) no tiene que permitir scripts en
    línea.
 
-   El bloque dice qué lectura contesta (`{ lectura, respuesta }`), y quien lo toma
-   comprueba que es la que iba a pedir. Si no está, es de otra lectura o no se puede leer,
-   se pide como siempre. */
+   El bloque dice qué lectura contesta y cuándo se armó (`{ lectura, generada, respuesta }`),
+   y quien lo toma comprueba que es la que iba a pedir y que no es vieja. Si no está, es de
+   otra lectura, es vieja o no se puede leer, se pide como siempre. */
 
 /**
  * La lectura de la portada: la primera página del listado, sin filtros, escrita como la
@@ -96,15 +96,37 @@ export const LISTADO_DE_LA_PORTADA = "/posts?page=1&limit=100";
 export const ID_DE_LA_PORTADA = "se-portada";
 
 /**
- * La respuesta que trajo el HTML para `lectura`, o nula. Solo lee: React, en modo
+ * Los titulares de Última hora que pinta la portada encima de la apertura, como los pide
+ * `getTitulares` la primera vez (`features/titulares`): también vienen en el HTML, para que
+ * la columna no cambie de alto al llegar (y empuje la apertura) después de montar.
+ */
+export const ultimaHoraDeLaPortada = (lang) => `/headlines?lang=${lang}&limit=40`;
+
+/** Dónde viajan dentro del HTML de la portada. */
+export const ID_DE_ULTIMA_HORA = "se-ultima-hora";
+
+/**
+ * Hasta cuándo vale lo que trae el HTML. El borde guarda la portada medio minuto, y uno más
+ * mientras la renueva; pero si la función fallara, sirve la de antes hasta un día
+ * (`stale-if-error`). Con los datos de entonces la página enseñaría la portada de ayer y no
+ * se enteraría: más viejo que esto, se pide. Diez minutos y no dos, por los relojes de los
+ * teléfonos, que no siempre van en hora.
+ */
+export const VIGENCIA_EN_EL_HTML_MS = 10 * 60_000;
+
+/**
+ * La respuesta que trajo el HTML para `lectura`, o nula (no está, es de otra lectura, es
+ * más vieja que `VIGENCIA_EN_EL_HTML_MS` o no se puede leer). Solo lee: React, en modo
  * estricto, prepara dos veces el estado inicial, y si se quitara aquí la segunda vez ya no
  * estaría. Quien la usa la quita después con `soltarDelHtml`.
  */
-export const leerDelHtml = (id, lectura) => {
+export const leerDelHtml = (id, lectura, ahora = Date.now()) => {
   try {
     const nodo = typeof document === "undefined" ? null : document.getElementById(id);
     const bloque = nodo ? JSON.parse(nodo.textContent || "null") : null;
-    return bloque?.lectura === lectura ? bloque.respuesta ?? null : null;
+    if (bloque?.lectura !== lectura) return null;
+    const edad = ahora - Date.parse(bloque.generada);
+    return Math.abs(edad) < VIGENCIA_EN_EL_HTML_MS ? bloque.respuesta ?? null : null;
   } catch {
     return null;
   }

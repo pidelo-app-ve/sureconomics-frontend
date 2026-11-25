@@ -4,6 +4,8 @@
  */
 import { useEffect, useState } from "react";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { desenvolverDelLector } from "../../api/nucleo.js";
+import { ID_DE_ULTIMA_HORA, leerDelHtml, soltarDelHtml, ultimaHoraDeLaPortada } from "../../api/quiosco.js";
 import { getTitulares, getVersionTitulares } from "./api";
 
 /**
@@ -34,11 +36,26 @@ const cuando = (i) => Date.parse(i.published_at || "") || 0;
 const ordenar = (items) => [...items].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned))
   || cuando(b) - cuando(a));
 
+/**
+ * La lista que trajo el HTML de la portada (`api/portada.js`), si vino y es de este
+ * idioma: así la columna de Última hora sale con sus titulares desde el primer pintado y
+ * no cambia de alto al llegar (en el teléfono empujaba la apertura). Se usa una vez, al
+ * crear el almacén; con `ultima` a cero, al arrancar se pregunta enseguida la versión, así
+ * que si la redacción cambió u ocultó algo desde que se armó la página, se entera como
+ * siempre (ver la cabecera).
+ */
+const delHtml = (lang) => {
+  const datos = desenvolverDelLector(leerDelHtml(ID_DE_ULTIMA_HORA, ultimaHoraDeLaPortada(lang)));
+  if (!Array.isArray(datos?.items)) return null;
+  soltarDelHtml(ID_DE_ULTIMA_HORA);
+  return { status: "success", items: ordenar(datos.items), version: datos.version ?? 0, error: null };
+};
+
 const almacen = (lang) => {
   let a = almacenes.get(lang);
   if (!a) {
     a = {
-      estado: { status: "loading", items: [], version: null, error: null },
+      estado: delHtml(lang) ?? { status: "loading", items: [], version: null, error: null },
       oyentes: new Set(),
       temporizador: null,
       enVuelo: null,

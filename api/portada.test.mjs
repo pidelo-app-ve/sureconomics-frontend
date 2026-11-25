@@ -94,10 +94,12 @@ const raiz = (html) => {
   return desde === -1 ? "" : html.slice(desde + '<div id="root">'.length, hasta);
 };
 
-/** El bloque de datos (`#se-portada`), leído como lo lee la página; o nulo si no está. */
-const bloque = (html) => {
-  const m = html.match(/<script type="application\/json" id="se-portada">([\s\S]*?)<\/script>/);
-  return m ? JSON.parse(m[1]) : null;
+/** Un bloque de datos (`#se-portada`, `#se-ultima-hora`), leído como lo lee la página; o nulo. */
+const bloque = (html, id = "se-portada") => {
+  const desde = html.indexOf(`<script type="application/json" id="${id}">`);
+  if (desde === -1) return null;
+  const inicio = html.indexOf(">", desde) + 1;
+  return JSON.parse(html.slice(inicio, html.indexOf("</script>", inicio)));
 };
 
 const fichas = (html) =>
@@ -196,6 +198,7 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
     contar(h, /id="se-portada"/g) === 1 && h.indexOf('id="se-portada"') > h.indexOf('<div id="root">') &&
       h.includes('</div><script type="application/json" id="se-portada">') && h.indexOf('id="se-portada"') < h.indexOf('src="/assets/index-abc123.js"'));
   check("dice qué lectura contesta: la de la portada", datos?.lectura === "/posts?page=1&limit=100", datos?.lectura);
+  check("y cuándo se armó (la página no usa uno viejo)", Math.abs(Date.parse(datos?.generada) - Date.now()) < 60_000, datos?.generada);
   check("con la respuesta tal cual llegó (filas y meta)",
     datos?.respuesta?.data?.length === MUCHAS.length && datos.respuesta.data[0].slug === MUCHAS[0].slug && datos.respuesta.meta?.pages === 1);
 
@@ -223,6 +226,48 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
       lista.itemListElement[0].position === 1);
 });
 
+// —— 1b. Los titulares de Última hora, también dentro ——
+console.log("Última hora, dentro del HTML");
+{
+  const titulares = { data: { items: [{ id: 7, title: "Un titular </script>", published_at: fecha(0) }], version: 12 }, success: true };
+  const pedidas = [];
+  const conUltimaHora = (respuesta) => fetchCon({
+    api: async (url) => {
+      pedidas.push(String(url));
+      if (String(url).includes("/datos/headlines")) return respuesta();
+      return { ok: true, status: 200, json: async () => ({ data: MUCHAS, meta: { total: MUCHAS.length, pages: 1 } }) };
+    },
+  });
+  for (const idioma of ["es", "en"]) {
+    pedidas.length = 0;
+    await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares })), async () => {
+      const res = respuestaFalsa();
+      await handler({ query: idioma === "en" ? { lang: "en" } : {} }, res);
+      const uh = bloque(res.body, "se-ultima-hora");
+      check(`${idioma}: los pide al quiosco, en su idioma`,
+        pedidas.includes(`https://www.sureconomics.com/datos/headlines?lang=${idioma}&limit=40`), pedidas.join(" "));
+      check(`${idioma}: van en su bloque, detrás de los de la portada`,
+        uh?.lectura === `/headlines?lang=${idioma}&limit=40` && uh.respuesta?.data?.version === 12 &&
+          res.body.indexOf('id="se-ultima-hora"') > res.body.indexOf('id="se-portada"'));
+      check(`${idioma}: escapados como los otros`, uh?.respuesta?.data?.items?.[0]?.title === "Un titular </script>" &&
+        !res.body.includes("Un titular </script>"));
+    });
+  }
+  for (const [nombre, respuesta] of [
+    ["no contestan", () => { throw new Error("timeout"); }],
+    ["contestan 502", () => ({ ok: false, status: 502, json: async () => ({}) })],
+    ["contestan otra cosa", () => ({ ok: true, status: 200, json: async () => ({ data: [] }) })],
+  ]) {
+    await conFetch(conUltimaHora(respuesta), async () => {
+      const res = respuestaFalsa();
+      await handler({ query: {} }, res);
+      check(`si ${nombre}: la portada sale igual, con sus datos y sin los de Última hora`,
+        res.code === 200 && res.headers["X-Pieza-Meta"] === "portada" && bloque(res.body)?.respuesta &&
+          !res.body.includes('id="se-ultima-hora"'));
+    });
+  }
+}
+
 // —— 2. La API caída ——
 console.log("la API caída");
 for (const [nombre, api, motivo] of [
@@ -239,7 +284,8 @@ for (const [nombre, api, motivo] of [
       res.body.includes(`<title>${TEXTOS.es.titulo}</title>`) && res.body.includes('rel="canonical" href="https://www.sureconomics.com/"'));
     check(`${nombre}: #root vacío, sin precarga ni estilo`,
       res.body.includes('<div id="root"></div>') && !res.body.includes("preload\" as=\"image") && !res.body.includes("se-portada-previa"));
-    check(`${nombre}: sin bloque de datos (la página pide como siempre)`, !res.body.includes('id="se-portada"'));
+    check(`${nombre}: sin bloques de datos (la página pide como siempre)`,
+      !res.body.includes('id="se-portada"') && !res.body.includes('id="se-ultima-hora"'));
     check(`${nombre}: guardada poco`, res.headers["Cache-Control"] === "public, s-maxage=30");
     check(`${nombre}: dice por qué`, res.headers["X-Pieza-Meta"] === `portada-sin-datos-${motivo}`, res.headers["X-Pieza-Meta"]);
   });
@@ -291,8 +337,8 @@ console.log("la apertura, a la vista antes de React");
     /\.se-portada-anticipo\{animation:se-portada-anticipo 0s linear 9s forwards\}/.test(h) &&
       /@keyframes se-portada-anticipo\{to\{height:0;overflow:hidden\}\}/.test(h));
   check("Última hora guarda su alto donde va encima (teléfono y tableta)",
-    /@media \(max-width:759px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h) &&
-      /@media \(min-width:760px\) and \(max-width:959px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h));
+    /@media \(max-width:599px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h) &&
+      /@media \(min-width:600px\) and \(max-width:959px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h));
 
   const encuadrada = armarPortada(SHELL, { filas: [fila(1, { imagen_foco: "30,70" })], ahora: HORA });
   check("con el encuadre de la redacción", encuadrada.includes('<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" style="object-position:30% 70%" srcset='));

@@ -4,7 +4,6 @@ import js from '@eslint/js'
 import globals from 'globals'
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 
 // Estos no corren en el navegador y por eso usan `process`: la funcion de Vercel que
 // inyecta las etiquetas meta, la configuracion de Vite (y la de este linter). Sin esto el
@@ -43,9 +42,7 @@ export default [
     files: ['**/*.{js,jsx}'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     settings: { react: { version: '18.2' } },
-    plugins: { 'react-refresh': reactRefresh },
     rules: {
-      'react-refresh/only-export-components': 'off',
       // ESLint 9 sacó estas tres de las recomendadas; ESLint 8 las tenía y se mantienen.
       // Las dos de formato están en desuso y desaparecen en ESLint 10: se irán cuando
       // el formato lo lleve Prettier (A-10 del plan 2026-11-23).

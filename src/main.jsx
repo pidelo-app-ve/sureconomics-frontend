@@ -39,4 +39,20 @@ const Main = () => {
 }
 
 // Render the Main component into the root DOM element.
-ReactDOM.createRoot(document.getElementById('root')).render(<Main />)
+const montar = () => ReactDOM.createRoot(document.getElementById('root')).render(<Main />)
+
+// La portada y las piezas llegan con lo de arriba ya pintado dentro de `#root`
+// (`api/portada.js`, `api/pieza.js`), y React lo reemplaza al montar. En `/en` la primera
+// navegación espera antes al diccionario inglés (el `loader` de `routes.jsx`), y mientras
+// tanto el router no pinta nada: montar enseguida dejaba la página en blanco medio segundo
+// entre lo del HTML y la página (medido en la portada con el teléfono del laboratorio). Se
+// monta cuando el router ya sabe qué pintar; en español eso es enseguida.
+if (router.state.initialized) {
+    montar()
+} else {
+    const dejar = router.subscribe((estado) => {
+        if (!estado.initialized) return
+        dejar()
+        montar()
+    })
+}

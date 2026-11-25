@@ -241,5 +241,9 @@ export const router = createBrowserRouter([
         // useNavigation().formMethod en mayúsculas ("POST"). Solo se lee su .state
         // (el aviso «Abriendo…» del panel), que no cambia.
         v7_normalizeFormMethod: true,
+        // Cómo arranca el router cuando la primera página aún espera algo (el
+        // diccionario de /en, el código de una página perezosa). main.jsx monta React
+        // solo con router.state.initialized, que sigue llegando igual.
+        v7_partialHydration: true,
     },
 });

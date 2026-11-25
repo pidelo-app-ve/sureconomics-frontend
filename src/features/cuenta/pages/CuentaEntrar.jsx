@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { Enlace, Redirigir, useNavegar } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { useAuth } from "../../context/AuthContext";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { conVolver, leerVolver } from "../../lib/volver";
-import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
-import { BotonDeGoogle } from "../../components/cuenta/BotonDeGoogle";
-import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
-import { loginUnified } from "../../lib/unifiedAuth";
-import { persistAuth } from "../../lib/authStorage";
-import { dispatchAdminAuthSync } from "../../lib/api";
-import { persistUserAuth } from "../../lib/userAuthStorage";
-import { dispatchUserAuthSync } from "../../lib/userApi";
-import "../../styles/cuenta.css";
+import { Enlace, Redirigir, useNavegar } from "../../../components/Enlace";
+import { useUserAuth } from "../UserAuthContext";
+import { useAuth } from "../../../context/AuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { conVolver, leerVolver } from "../../../lib/volver";
+import { CampoDeTexto } from "../components/CampoDeTexto";
+import { BotonDeGoogle } from "../components/BotonDeGoogle";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../../hooks/useVerificacionHumana";
+import { loginUnified } from "../unifiedAuth";
+import { persistAuth } from "../../../lib/authStorage";
+import { dispatchAdminAuthSync } from "../../../lib/api";
+import { persistUserAuth } from "../../../lib/userAuthStorage";
+import { dispatchUserAuthSync } from "../../../lib/userApi";
+import "../../../styles/cuenta.css";
 
 /** Un correo con forma de correo, con el mismo criterio que el registro. */
 const pareceCorreo = (valor) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(valor.trim());

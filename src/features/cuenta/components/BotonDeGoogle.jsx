@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { googleDisponible } from "../../services/userAuthService";
+import { useUserAuth } from "../UserAuthContext";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { googleDisponible } from "../api";
 
 /**
  * El botón de «Entrar con Google».

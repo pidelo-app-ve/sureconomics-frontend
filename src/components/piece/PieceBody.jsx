@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { PlaceholderImage } from "../blog";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../../features/cuenta";
 import { fetchPieceDocument } from "../../services/documentService";
 import { descargarArchivoDeUsuario } from "../../lib/userApi";
 import { piezaShape } from "../home/piezaShape";

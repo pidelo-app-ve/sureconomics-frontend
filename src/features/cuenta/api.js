@@ -1,4 +1,8 @@
-import { userPublicRequest, userRequest } from "../lib/userApi";
+/**
+ * Lo que la cuenta del lector le pide al servidor: registro, entrar, el código del correo,
+ * el perfil, salir (de aquí o de todas partes), las guías ya vistas y Google.
+ */
+import { userPublicRequest, userRequest } from "../../lib/userApi";
 
 const pickTokens = (data) => {
   if (!data || typeof data !== "object") return null;

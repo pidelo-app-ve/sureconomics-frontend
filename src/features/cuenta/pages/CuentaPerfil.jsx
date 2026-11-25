@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
-import { RetratoDelLector } from "../../components/cuenta/RetratoDelLector";
-import { useNavegar } from "../../components/Enlace";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../lib/cerrarTodasLasSesiones";
-import { actualizarMiPerfil, cerrarTodasLasSesionesRemoto } from "../../services/userAuthService";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoPerfil } from "../../lib/guias/guiaPerfil";
-import "../../styles/cuenta.css";
+import { useUserAuth } from "../UserAuthContext";
+import { CampoDeTexto } from "../components/CampoDeTexto";
+import { RetratoDelLector } from "../components/RetratoDelLector";
+import { useNavegar } from "../../../components/Enlace";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { cerrarTodasLasSesiones, estadoAlEntrar, mensajeDeFallo } from "../../../lib/cerrarTodasLasSesiones";
+import { actualizarMiPerfil, cerrarTodasLasSesionesRemoto } from "../api";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoPerfil } from "../../../lib/guias/guiaPerfil";
+import "../../../styles/cuenta.css";
 
 const { ancla } = recorridoPerfil;
 

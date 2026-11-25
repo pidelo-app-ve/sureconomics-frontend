@@ -115,7 +115,7 @@ const FUGAS_CONOCIDAS = {
     "la guarda de /admin, que va en la ruta y no en una página; la quita quien mude el panel (o la pase a src/app/)",
   "src/hooks/useAdminConfirm.jsx → src/components/admin/AdminConfirmDialog.jsx":
     "el diálogo de confirmar lo usan el panel y la cuenta; la quita quien cree src/ui/ (diálogos)",
-  "src/components/cuenta/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
+  "src/features/cuenta/components/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
     "el recorte del retrato lo usan el panel y la cuenta del lector; la quita quien lo mude a src/ui/",
 };
 

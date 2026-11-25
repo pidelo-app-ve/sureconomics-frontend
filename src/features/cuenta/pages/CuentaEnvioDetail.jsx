@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Enlace } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { formatSubmissionDate, submissionStatusLabel } from "../../lib/submissionDisplay";
-import * as userMeService from "../../services/userMeService";
-import { ErrorState, LoadingState, Pagination } from "../../components/content";
-import { useFlashMessage } from "../../hooks/useFlashMessage";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoMiPropuesta } from "../../lib/guias/guiaMisPropuestas";
-import "../../styles/cuenta.css";
-import { enlaceWeb } from "../../lib/enlaces";
+import { Enlace } from "../../../components/Enlace";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { formatSubmissionDate, submissionStatusLabel } from "../../../lib/submissionDisplay";
+import * as userMeService from "../../../services/userMeService";
+import { ErrorState, LoadingState, Pagination } from "../../../components/content";
+import { useFlashMessage } from "../../../hooks/useFlashMessage";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoMiPropuesta } from "../../../lib/guias/guiaMisPropuestas";
+import "../../../styles/cuenta.css";
+import { enlaceWeb } from "../../../lib/enlaces";
 
 const { ancla } = recorridoMiPropuesta;
 

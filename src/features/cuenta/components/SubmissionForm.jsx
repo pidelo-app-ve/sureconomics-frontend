@@ -1,12 +1,12 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Enlace } from "../Enlace";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { RichTextEditor } from "../editor/RichTextEditor";
-import { ImageField } from "../editor/ImageField";
-import { CampoDeTexto } from "../cuenta/CampoDeTexto";
-import { BotonGuia, RecorridoVista } from "../recorrido/RecorridoVista";
-import { recorridoPropuesta } from "../../lib/guias/guiaPropuesta";
+import { Enlace } from "../../../components/Enlace";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { RichTextEditor } from "../../../components/editor/RichTextEditor";
+import { ImageField } from "../../../components/editor/ImageField";
+import { CampoDeTexto } from "./CampoDeTexto";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoPropuesta } from "../../../lib/guias/guiaPropuesta";
 
 /**
  * What an outside contributor may send.

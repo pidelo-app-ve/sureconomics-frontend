@@ -1,3 +1,8 @@
+/**
+ * La sesión del lector en React: quién es (su perfil), si entró, entrar, salir y estar al
+ * día cuando la sesión cambia en otra pestaña. Los tokens los guarda `lib/userAuthStorage.js`
+ * y los renueva el cliente del lector (`lib/userApi.js`).
+ */
 import {
   createContext,
   useCallback,
@@ -7,9 +12,9 @@ import {
   useState,
 } from "react";
 import PropTypes from "prop-types";
-import { USER_AUTH_SYNC_EVENT, dispatchUserAuthSync, refreshUserTokens } from "../lib/userApi";
-import { clearUserAuth, persistUserAuth, readUserAuth } from "../lib/userAuthStorage";
-import * as userAuthService from "../services/userAuthService";
+import { USER_AUTH_SYNC_EVENT, dispatchUserAuthSync, refreshUserTokens } from "../../lib/userApi";
+import { clearUserAuth, persistUserAuth, readUserAuth } from "../../lib/userAuthStorage";
+import * as userAuthService from "./api";
 
 const UserAuthContext = createContext(null);
 

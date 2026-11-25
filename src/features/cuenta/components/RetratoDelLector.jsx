@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { subirMiFoto } from "../../services/userMeService";
-import { RecorteDeAvatar } from "../admin/RecorteDeAvatar";
+import { useUserAuth } from "../UserAuthContext";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { subirMiFoto } from "../../../services/userMeService";
+import { RecorteDeAvatar } from "../../../components/admin/RecorteDeAvatar";
 import { AvatarDelLector } from "./AvatarDelLector";
 
 /**

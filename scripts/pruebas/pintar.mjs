@@ -26,7 +26,7 @@ import "../../src/i18n/diccionarios.js";
 import { cargarIdioma, fijarIdioma, idiomaDeRuta } from "../../src/i18n/motor.js";
 import { ProveedorIdioma } from "../../src/i18n/ProveedorIdioma.jsx";
 import { AuthProvider } from "../../src/context/AuthContext.jsx";
-import { UserAuthProvider } from "../../src/context/UserAuthContext.jsx";
+import { UserAuthProvider } from "../../src/features/cuenta/index.js";
 import { ProveedorDeMarcadores } from "../../src/context/MarcadoresContext.jsx";
 import { ProveedorDeTemasSeguidos } from "../../src/context/TemasSeguidosContext.jsx";
 import { ProveedorDePublicidad } from "../../src/features/publicidad/index.js";

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { Enlace, EnlaceNav } from "../../components/Enlace";
-import { RequireUserAuth } from "../../components/cuenta/RequireUserAuth";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { BRAND_PUBLIC_LOGO } from "../../brand/publicBrandLogos";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoCuenta } from "../../lib/guias/guiaCuenta";
-import { marcarRecorridoVisto } from "../../services/userAuthService";
-import "../../styles/cuenta.css";
+import { Enlace, EnlaceNav } from "../../../components/Enlace";
+import { RequireUserAuth } from "../components/RequireUserAuth";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { BRAND_PUBLIC_LOGO } from "../../../brand/publicBrandLogos";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoCuenta } from "../../../lib/guias/guiaCuenta";
+import { marcarRecorridoVisto } from "../api";
+import "../../../styles/cuenta.css";
 
 const IconGrid = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">

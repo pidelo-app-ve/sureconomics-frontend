@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { CommentList } from "../comments/CommentList";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../../features/cuenta";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
 import { contentService } from "../../services/contentService";

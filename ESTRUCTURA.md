@@ -12,7 +12,7 @@ un tope que solo baja.
 - **Vieja, que se va vaciando:** `src/components`, `src/pages`, `src/lib`, `src/hooks`,
   `src/services` y `src/styles`, ordenadas por tipo de archivo. Cuando se toca un tema a
   fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica,
-  publicidad y el boletín), y lo que queda en la zona vieja entra por su puerta.
+  publicidad, el boletín y la cuenta del lector), y lo que queda en la zona vieja entra por su puerta.
 - **Compartida, por debajo de todo:** `src/api/` (el cliente HTTP) y `src/config/` (los
   datos fijos del sitio). No importan nada del sitio ni del panel: son los demás los que
   las usan.
@@ -29,12 +29,12 @@ un tope que solo baja.
 | Portada | `pages/Home.jsx`, `components/home` |
 | Pieza (artículo, video, informe) | `pages/Pieza.jsx`, `components/piece`, `lib/pieza.js` |
 | Listados y búsqueda | `pages/Articulos.jsx`, `Audiovisual.jsx`, `Explorar.jsx` |
-| Cuenta del lector | `pages/cuenta`, `components/cuenta` |
+| Cuenta del lector (entrar, registro, recuperar, `/cuenta/…`, la sesión del lector en React) | `src/features/cuenta` (su hoja sigue en `styles/cuenta.css`; el cliente y el almacén de la sesión, en `lib/userApi.js` y `lib/userAuthStorage.js`) |
 | Resumen diario | `pages/Resumen.jsx`, `services/resumenService.js`, `components/admin/resumen` |
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
 | Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `components/admin/PaginasDeLaLista.jsx` |
-| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad y el boletín viven en `features/*/guia.js` |
+| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad y el boletín viven en `features/*/guia.js`, y los de las ocho de la cuenta, en `features/cuenta/guides/` |
 | Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
 | Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |

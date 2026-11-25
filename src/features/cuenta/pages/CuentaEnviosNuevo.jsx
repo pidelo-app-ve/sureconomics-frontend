@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Enlace, useNavegar } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import * as userMeService from "../../services/userMeService";
-import { SubmissionForm, normalizarPropuesta } from "../../components/submissions/SubmissionForm";
-import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
-import { useBorradorLocal } from "../../hooks/useBorradorLocal";
-import "../../styles/cuenta.css";
+import { Enlace, useNavegar } from "../../../components/Enlace";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import * as userMeService from "../../../services/userMeService";
+import { SubmissionForm, normalizarPropuesta } from "../components/SubmissionForm";
+import { useClaveIdempotente } from "../../../hooks/useClaveIdempotente";
+import { useBorradorLocal } from "../../../hooks/useBorradorLocal";
+import "../../../styles/cuenta.css";
 
 /** Con lo que abre el formulario. Fuera del componente: el borrador compara contra esto. */
 const VACIO = { format: "articulo", title: "", excerpt: "", content: "", featuredImageUrl: "" };

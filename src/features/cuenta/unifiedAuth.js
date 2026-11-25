@@ -1,4 +1,8 @@
-import { createApiClient } from "../services/apiClient";
+/**
+ * La entrada única (una pantalla para la redacción y los lectores) y la recuperación de la
+ * contraseña: lo que se le pide al servidor antes de tener sesión.
+ */
+import { createApiClient } from "../../services/apiClient";
 
 const defaultClient = (() => {
   try {

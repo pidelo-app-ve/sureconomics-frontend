@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { Enlace } from "../../components/Enlace";
-import { BotonDeSeguirTema } from "../../components/content/BotonDeSeguirTema";
-import { TituloDePieza } from "../../components/content/TituloDePieza";
-import { useTemasSeguidos } from "../../context/TemasSeguidosContext";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { useTaxonomy } from "../../hooks/useTaxonomy";
-import { formatearFecha } from "../../i18n/motor";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { nombreTraducido, rutaDePieza } from "../../lib/pieza";
-import { getPiezasDeMisTemas } from "../../services/userMeService";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoMisTemas } from "../../lib/guias/guiaMisTemas";
-import "../../styles/cuenta.css";
+import { Enlace } from "../../../components/Enlace";
+import { BotonDeSeguirTema } from "../../../components/content/BotonDeSeguirTema";
+import { TituloDePieza } from "../../../components/content/TituloDePieza";
+import { useTemasSeguidos } from "../../../context/TemasSeguidosContext";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useTaxonomy } from "../../../hooks/useTaxonomy";
+import { formatearFecha } from "../../../i18n/motor";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { nombreTraducido, rutaDePieza } from "../../../lib/pieza";
+import { getPiezasDeMisTemas } from "../../../services/userMeService";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoMisTemas } from "../../../lib/guias/guiaMisTemas";
+import "../../../styles/cuenta.css";
 
 /**
  * «Mis temas»: los temas que sigue el lector, los que puede seguir, y lo último

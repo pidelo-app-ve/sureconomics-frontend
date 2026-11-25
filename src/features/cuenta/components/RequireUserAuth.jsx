@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { useLocation } from "react-router-dom";
-import { Redirigir } from "../Enlace";
-import { sinPrefijo } from "../../i18n/motor";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { Redirigir } from "../../../components/Enlace";
+import { sinPrefijo } from "../../../i18n/motor";
+import { useUserAuth } from "../UserAuthContext";
 
 export const RequireUserAuth = ({ children }) => {
   const { isAuthenticated } = useUserAuth();

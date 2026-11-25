@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { useUserAuth } from "./UserAuthContext";
+import { useUserAuth } from "../features/cuenta";
 import { addBookmark, getMyBookmarks, removeBookmark } from "../services/userMeService";
 
 /**

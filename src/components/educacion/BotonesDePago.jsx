@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { Enlace } from "../Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../../features/cuenta";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { abrirPago, precioLegible } from "../../services/educacionService";
 

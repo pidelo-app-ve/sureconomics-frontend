@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { BotonesDePago } from "./BotonesDePago";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../../features/cuenta";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import {
   IconDocumento,

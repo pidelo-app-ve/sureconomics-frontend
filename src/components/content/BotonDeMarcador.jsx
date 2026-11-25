@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import { useNavegar } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../../features/cuenta";
 import { useMarcadores } from "../../context/MarcadoresContext";
 
 /**

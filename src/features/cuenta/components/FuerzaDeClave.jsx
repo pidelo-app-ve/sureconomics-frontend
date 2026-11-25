@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
 
 /**
  * Qué tan buena es la contraseña que se está escribiendo.

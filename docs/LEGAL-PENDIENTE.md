@@ -20,7 +20,7 @@ Hermano de `POLITICA-COOKIES-PENDIENTE.md`, que cubre lo que falta en `/cookies`
 3. Rutas en `src/routes.jsx`, enlaces en el pie junto a «Política de cookies», título
    propio con `applyPageMeta`.
 4. **Casilla en el registro** («He leído la Política de privacidad y acepto los
-   Términos»): hoy no existe. Cambio en `src/pages/cuenta/CuentaRegistro.jsx` y campo
+   Términos»): hoy no existe. Cambio en `src/features/cuenta/pages/CuentaRegistro.jsx` y campo
    `accepted_terms_at` en el backend.
 
 ## Datos que no están en el código y hay que pedir

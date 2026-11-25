@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace, useNavegar } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../cuenta";
 import { useTemasSeguidos } from "../../context/TemasSeguidosContext";
 import { getPiezasDeMisTemas } from "../../services/userMeService";
 import { useHeadlines } from "./useHeadlines";

@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Enlace, useNavegar } from "../../components/Enlace";
-import { CampoDeTexto } from "../../components/cuenta/CampoDeTexto";
-import { FuerzaDeClave } from "../../components/cuenta/FuerzaDeClave";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
-import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { dispatchAdminAuthSync } from "../../lib/api";
-import { persistAuth } from "../../lib/authStorage";
-import { pedirCodigoDeRecuperacion, recuperarContrasena } from "../../lib/unifiedAuth";
-import { persistUserAuth } from "../../lib/userAuthStorage";
-import { dispatchUserAuthSync } from "../../lib/userApi";
-import { leerVolver } from "../../lib/volver";
-import "../../styles/cuenta.css";
+import { Enlace, useNavegar } from "../../../components/Enlace";
+import { CampoDeTexto } from "../components/CampoDeTexto";
+import { FuerzaDeClave } from "../components/FuerzaDeClave";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useClaveIdempotente } from "../../../hooks/useClaveIdempotente";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../../hooks/useVerificacionHumana";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { dispatchAdminAuthSync } from "../../../lib/api";
+import { persistAuth } from "../../../lib/authStorage";
+import { pedirCodigoDeRecuperacion, recuperarContrasena } from "../unifiedAuth";
+import { persistUserAuth } from "../../../lib/userAuthStorage";
+import { dispatchUserAuthSync } from "../../../lib/userApi";
+import { leerVolver } from "../../../lib/volver";
+import "../../../styles/cuenta.css";
 
 /**
  * «¿Olvidó su contraseña?», en dos pasos y en la misma pantalla.

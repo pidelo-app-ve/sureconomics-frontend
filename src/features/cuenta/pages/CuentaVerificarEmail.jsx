@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Enlace, useNavegar } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { conVolver, leerVolver } from "../../lib/volver";
-import "../../styles/cuenta.css";
+import { Enlace, useNavegar } from "../../../components/Enlace";
+import { useUserAuth } from "../UserAuthContext";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { conVolver, leerVolver } from "../../../lib/volver";
+import "../../../styles/cuenta.css";
 
 export const CuentaVerificarEmail = () => {
   const { t } = useIdioma();

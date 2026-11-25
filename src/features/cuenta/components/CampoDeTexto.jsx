@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useId, useState } from "react";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
 
 /**
  * Un campo de formulario de la cuenta: etiqueta, ayuda, error y, si es clave, el ojo.

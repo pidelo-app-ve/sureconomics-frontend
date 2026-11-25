@@ -1,15 +1,15 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Enlace } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
-import { AvatarDelLector } from "../../components/cuenta/AvatarDelLector";
-import { BRAND } from "../../config/sitio";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import * as userMeService from "../../services/userMeService";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoMiEspacio } from "../../lib/guias/guiaMiEspacio";
-import "../../styles/cuenta.css";
+import { Enlace } from "../../../components/Enlace";
+import { useUserAuth } from "../UserAuthContext";
+import { AvatarDelLector } from "../components/AvatarDelLector";
+import { BRAND } from "../../../config/sitio";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import * as userMeService from "../../../services/userMeService";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoMiEspacio } from "../../../lib/guias/guiaMiEspacio";
+import "../../../styles/cuenta.css";
 
 /**
  * El inicio de la cuenta: qué tiene hecho, qué le falta y qué puede hacer aquí.

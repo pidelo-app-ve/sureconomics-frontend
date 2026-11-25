@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Enlace } from "../../components/Enlace";
-import { BRAND } from "../../config/sitio";
-import { formatearFecha, formatearNumero, idiomaActual } from "../../i18n/motor";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../../i18n/useMetaPagina";
-import { getMisCompras } from "../../services/userMeService";
-import { duracionLegible, nivelLegible } from "../../services/educacionService";
-import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoLoMio } from "../../lib/guias/guiaLoMio";
-import "../../styles/cuenta.css";
+import { Enlace } from "../../../components/Enlace";
+import { BRAND } from "../../../config/sitio";
+import { formatearFecha, formatearNumero, idiomaActual } from "../../../i18n/motor";
+import { useIdioma } from "../../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../../i18n/useMetaPagina";
+import { getMisCompras } from "../../../services/userMeService";
+import { duracionLegible, nivelLegible } from "../../../services/educacionService";
+import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoLoMio } from "../../../lib/guias/guiaLoMio";
+import "../../../styles/cuenta.css";
 
 /**
  * Lo mío: los módulos de Educación comprados, y el recibo de cada pago.

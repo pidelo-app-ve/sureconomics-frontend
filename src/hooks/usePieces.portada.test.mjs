@@ -96,6 +96,19 @@ describe("la portada con su primera página en el HTML", () => {
     await g.desmontar();
   });
 
+  test("vieja (la del borde si la función falló, o un reloj adelantado): se pinta y se cambia por la de ahora", async () => {
+    enElHtml = { filas: [fila(1, "Del HTML, de ayer")], total: 1, pages: 1, meta: { total: 1, pages: 1 }, vieja: true };
+    const { g, estados } = await montarPortada();
+    await esperar(0);
+    // Sin «Cargando…» en medio: lo que ya se veía se queda hasta que llega la de ahora.
+    assert.equal(estados[0], "success");
+    assert.ok(!estados.includes("loading"));
+    assert.deepEqual(pedidas.map((p) => ({ page: p.page, limit: p.limit })), [{ page: 1, limit: 100 }]);
+    assert.equal(g.valor.items[0].titulo, "Pedida");
+    assert.equal(soltadas, 1);
+    await g.desmontar();
+  });
+
   test("con más páginas, sigue con el resto como siempre, pero no repite la primera", async () => {
     enElHtml = { filas: [fila(1, "Del HTML")], total: 600, pages: 6, meta: { total: 600, pages: 6 } };
     const { g } = await montarPortada();

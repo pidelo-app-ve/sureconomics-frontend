@@ -45,7 +45,8 @@ const ordenar = (items) => [...items].sort((a, b) => Number(Boolean(b.pinned)) -
  * siempre (ver la cabecera).
  */
 const delHtml = (lang) => {
-  const datos = desenvolverDelLector(leerDelHtml(ID_DE_ULTIMA_HORA, ultimaHoraDeLaPortada(lang)));
+  // Aunque sea viejo: la versión que se pregunta al arrancar dice si hay que pedirla otra vez.
+  const datos = desenvolverDelLector(leerDelHtml(ID_DE_ULTIMA_HORA, ultimaHoraDeLaPortada(lang))?.respuesta);
   if (!Array.isArray(datos?.items)) return null;
   soltarDelHtml(ID_DE_ULTIMA_HORA);
   return { status: "success", items: ordenar(datos.items), version: datos.version ?? 0, error: null };

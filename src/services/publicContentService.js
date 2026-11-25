@@ -191,13 +191,14 @@ const listado = (payload) => {
 /**
  * La primera página de la portada, si vino dentro del HTML (`api/portada.js`, ver
  * `leerDelHtml`): lo mismo que devolvería `getPieces({ page: 1, limit: 100 })`, sin
- * pedirlo. Nula si no vino, no se puede leer o no trae piezas: entonces se pide.
+ * pedirlo, y además `generada` y `vieja` (si hay que pedir la de ahora por detrás). Nula si
+ * no vino, no se puede leer o no trae piezas: entonces se pide.
  */
 export const getPortadaDelHtml = () => {
-  const respuesta = leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA);
-  if (!respuesta) return null;
-  const lista = listado(desenvolverPublico(respuesta));
-  return lista.filas.length ? lista : null;
+  const delHtml = leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA);
+  if (!delHtml) return null;
+  const lista = listado(desenvolverPublico(delHtml.respuesta));
+  return lista.filas.length ? { ...lista, generada: delHtml.generada, vieja: delHtml.vieja } : null;
 };
 
 /** Ya usada: fuera del documento (ver `soltarDelHtml`). */

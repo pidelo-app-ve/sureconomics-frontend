@@ -82,8 +82,9 @@ export const vaPorElQuiosco = (ruta, { method = "GET", headers = {}, enNavegador
    línea.
 
    El bloque dice qué lectura contesta y cuándo se armó (`{ lectura, generada, respuesta }`),
-   y quien lo toma comprueba que es la que iba a pedir y que no es vieja. Si no está, es de
-   otra lectura, es vieja o no se puede leer, se pide como siempre. */
+   y quien lo toma comprueba que es la que iba a pedir. Si no está, es de otra lectura o no
+   se puede leer, se pide como siempre. Si es viejo (`vieja`), se pinta igual y se pide el
+   de ahora por detrás: así no se borra lo que ya se ve para enseñar «Cargando…». */
 
 /**
  * La lectura de la portada: la primera página del listado, sin filtros, escrita como la
@@ -106,17 +107,19 @@ export const ultimaHoraDeLaPortada = (lang) => `/headlines?lang=${lang}&limit=40
 export const ID_DE_ULTIMA_HORA = "se-ultima-hora";
 
 /**
- * Hasta cuándo vale lo que trae el HTML. El borde guarda la portada medio minuto, y uno más
- * mientras la renueva; pero si la función fallara, sirve la de antes hasta un día
- * (`stale-if-error`). Con los datos de entonces la página enseñaría la portada de ayer y no
- * se enteraría: más viejo que esto, se pide. Diez minutos y no dos, por los relojes de los
- * teléfonos, que no siempre van en hora.
+ * Hasta cuándo es nuevo lo que trae el HTML. El borde guarda la portada medio minuto, y uno
+ * más mientras la renueva; pero si la función fallara, sirve la de antes hasta un día
+ * (`stale-if-error`). Con solo los datos de entonces la página se quedaría en la portada de
+ * ayer: más viejo que esto, quien lo usa pide además el de ahora. Diez minutos y no dos,
+ * por los relojes de los teléfonos, que no siempre van en hora (con uno adelantado, el
+ * bloque parece viejo: se pinta igual y se vuelve a pedir, que es lo seguro).
  */
 export const VIGENCIA_EN_EL_HTML_MS = 10 * 60_000;
 
 /**
- * La respuesta que trajo el HTML para `lectura`, o nula (no está, es de otra lectura, es
- * más vieja que `VIGENCIA_EN_EL_HTML_MS` o no se puede leer). Solo lee: React, en modo
+ * Lo que trajo el HTML para `lectura`: `{ respuesta, generada, vieja }`, o nulo (no está, es
+ * de otra lectura o no se puede leer). `generada` es cuándo se armó (en ms, o `NaN` si no lo
+ * dice) y `vieja`, si no es de los últimos `VIGENCIA_EN_EL_HTML_MS`. Solo lee: React, en modo
  * estricto, prepara dos veces el estado inicial, y si se quitara aquí la segunda vez ya no
  * estaría. Quien la usa la quita después con `soltarDelHtml`.
  */
@@ -124,9 +127,9 @@ export const leerDelHtml = (id, lectura, ahora = Date.now()) => {
   try {
     const nodo = typeof document === "undefined" ? null : document.getElementById(id);
     const bloque = nodo ? JSON.parse(nodo.textContent || "null") : null;
-    if (bloque?.lectura !== lectura) return null;
-    const edad = ahora - Date.parse(bloque.generada);
-    return Math.abs(edad) < VIGENCIA_EN_EL_HTML_MS ? bloque.respuesta ?? null : null;
+    if (bloque?.lectura !== lectura || bloque.respuesta == null) return null;
+    const generada = Date.parse(bloque.generada);
+    return { respuesta: bloque.respuesta, generada, vieja: !(Math.abs(ahora - generada) < VIGENCIA_EN_EL_HTML_MS) };
   } catch {
     return null;
   }

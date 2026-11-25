@@ -212,7 +212,9 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
   const pintado = useRef(null);
   // La primera página de la portada, si vino con el HTML (`api/portada.js`): se pinta en el
   // primer render, sin pedirla y sin pasar por «Cargando…»; lo demás se pide detrás, como
-  // siempre. Se lee al montar y vale una vez (ver `soltarPortadaDelHtml`).
+  // siempre. Si es vieja (la portada de antes que sirve el borde si la función falla, o un
+  // reloj adelantado), se pinta igual y se pide la de ahora, que la reemplaza al llegar: lo
+  // que ya se ve no desaparece. Se lee al montar y vale una vez (ver `soltarPortadaDelHtml`).
   const [delHtml] = useState(() => (portada ? getPortadaDelHtml() : null));
   const [state, setState] = useState(() => {
     const previo = guardadoPara(portada, entera);
@@ -251,7 +253,8 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       // las veintitantas piezas de arriba que ya venían en la primera.
       const reusada = !portada && !busca && primeraEnPantalla.current;
       const yaVino = portada ? delHtml : null;
-      const primera = (reusada || yaVino ? Promise.resolve(reusada || yaVino) : pedirPagina(filtro, 1)).then((p1) => {
+      const sirve = yaVino && !yaVino.vieja ? yaVino : null;
+      const primera = (reusada || sirve ? Promise.resolve(reusada || sirve) : pedirPagina(filtro, 1)).then((p1) => {
         if (alive && yaVino) soltarPortadaDelHtml();
         if (alive && portada) {
           primeraEnPantalla.current = { ...p1, en: Date.now() };
@@ -259,8 +262,11 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
           precargarApertura(piezasFromApi(p1.filas));
         }
         if (alive) {
+          // La vieja del HTML se reemplaza por la de ahora en cuanto llega.
           setState((s) =>
-            sigue(s) ? s : { ...pintable(p1), status: "success", faltan: portada ? null : 0, error: null, de: clave, buscando: false },
+            sigue(s) && !yaVino?.vieja
+              ? s
+              : { ...pintable(p1), status: "success", faltan: portada ? null : 0, error: null, de: clave, buscando: false },
           );
         }
         return p1;

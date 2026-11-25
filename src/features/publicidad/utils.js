@@ -24,6 +24,71 @@ export const listaDeQuery = (valor) => {
 };
 
 /**
+ * Lo que el lector eligió en el filtro de un listado, dicho como lo entiende el servidor:
+ * por **slug**, igual que una pieza (`pieza.temaSlugs`, `pieza.geoSlugs`).
+ *
+ * El filtro guarda **nombres** (los que se ven en los botones: «Macroeconomía», y en
+ * `/en` el nombre en inglés si la redacción lo puso), y las campañas guardan sus temas y
+ * países por slug (el panel, `DondeSale`). El servidor compara texto con texto (solo pasa
+ * todo a minúsculas), así que el nombre solo casaba por suerte, cuando en minúsculas es
+ * igual al slug («Venezuela»). «Mercados e Inversión», «Perú» o «EE. UU.» no casaban
+ * nunca, y en `/en` menos: una campaña de un tema no salía en los listados.
+ *
+ * - Un tema se busca por su nombre en español y en inglés (`name`, `name_en`): vale el
+ *   que esté puesto, aunque el lector cambie de idioma con el filtro elegido.
+ * - Un lugar, por `slugPorNombre` (el árbol, en el idioma de la página).
+ * - «Todo» (la raíz del árbol, «Mundo») no es un país: en el filtro quiere decir «sin
+ *   filtro», así que no se manda. Una campaña sin países ya sale en todas partes, y una
+ *   con países solo debe salir a quien eligió uno de ellos.
+ * - Un nombre sin slug conocido (el árbol aún no llegó, un tema que ya no existe) no se
+ *   manda: un nombre no casa con ninguna campaña, y mandarlo solo ensuciaría la dirección.
+ *
+ * @param {{temas?: Iterable<string>, geos?: Iterable<string>}} seleccion
+ * @param {{topics?: Array<{slug: string, name?: string, name_en?: string}>,
+ *   slugPorNombre?: Record<string, string>, geoTop?: string}} taxonomia lo de `useTaxonomy`
+ * @returns {{tema: string[], pais: string[]}}
+ */
+export const contextoDeLaSeleccion = ({ temas, geos } = {}, taxonomia = {}) => {
+  const { topics = [], slugPorNombre = {}, geoTop } = taxonomia;
+
+  const slugDeTema = new Map();
+  topics.forEach((t) => {
+    if (!t?.slug) return;
+    [t.name, t.name_en].forEach((nombre) => {
+      if (nombre && !slugDeTema.has(nombre)) slugDeTema.set(nombre, t.slug);
+    });
+  });
+
+  // La raíz se reconoce por su nombre (lo que guarda el filtro) y, por si acaso, por su
+  // slug: así «Mundo» no se cuela aunque llegara con otro nombre que también la nombre.
+  // `Object.hasOwn`: el mapa es un objeto, y sin esto un nombre como «constructor»
+  // devolvería una función en vez de nada.
+  const lugar = (nombre) => (Object.hasOwn(slugPorNombre, nombre) ? slugPorNombre[nombre] : undefined);
+  const slugDeLaRaiz = geoTop ? lugar(geoTop) : undefined;
+
+  const aSlugs = (valores, slugDe, descartar = () => false) => {
+    const fuera = [];
+    for (const nombre of valores ?? []) {
+      if (typeof nombre !== "string") continue;
+      const slug = slugDe(nombre);
+      if (typeof slug === "string" && slug && !descartar(nombre, slug) && !fuera.includes(slug)) {
+        fuera.push(slug);
+      }
+    }
+    return fuera;
+  };
+
+  return {
+    tema: aSlugs(temas, (n) => slugDeTema.get(n)),
+    pais: aSlugs(
+      geos,
+      lugar,
+      (n, slug) => n === geoTop || (slugDeLaRaiz !== undefined && slug === slugDeLaRaiz)
+    ),
+  };
+};
+
+/**
  * La declaración de huecos de una vista (`useEspacios`), como texto: la clave con la que
  * el gancho sabe si cambió algo, y lo que se recupera de ella para pedir los anuncios.
  *

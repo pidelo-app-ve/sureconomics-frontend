@@ -77,7 +77,7 @@ const TOPES = {
   "src/pages/admin/AdminEducacion.jsx#FilaDeLeccion": 307,
   "src/pages/admin/AdminUserDetail.jsx#AdminUserDetail": 301,
   "src/pages/admin/AdminRedes.jsx#AdminRedes": 297,
-  "src/pages/Audiovisual.jsx#Audiovisual": 293,
+  "src/pages/Audiovisual.jsx#Audiovisual": 292,
   "src/features/monedas/admin/MonedasDelPanel.jsx#MonedasDelPanel": 284,
   "src/pages/admin/AdminPlacesList.jsx#AdminPlacesList": 284,
   "src/pages/admin/AdminMediaLibrary.jsx#AdminMediaLibrary": 275,

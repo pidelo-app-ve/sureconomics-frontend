@@ -197,14 +197,14 @@ export const Audiovisual = () => {
 
   // Los mismos huecos que un listado por formato, con el mismo criterio: el contexto
   // sale de la vista y de la selección, así que se espera al contenido. Los temas y
-  // países van como listas y no como `Set`, que es lo que el servicio sabe leer.
+  // países van como `Set`, igual que en los listados: `useEspacios` los hace listas.
   useEspacios({
     espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.LISTADO_PATROCINIO, ESPACIOS.LISTADO_NATIVO],
     contexto: {
       seccion: "audiovisual",
       formato: vista.formatoApi ?? undefined,
-      tema: [...temas],
-      pais: [...geos],
+      tema: temas,
+      pais: geos,
     },
     listo: status === "success",
   });

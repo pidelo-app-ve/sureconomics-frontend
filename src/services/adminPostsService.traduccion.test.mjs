@@ -25,6 +25,8 @@ const ID = grabada("traducciones/en-marcha.json").cuerpo.data.id;
 const POR_SU_ID = /^\/admin\/traducciones\/[^/]+$/;
 const RAPIDO = { cadaMs: 5, topeMs: 2000 };
 const INGLES = grabada("traducciones/lista.json").data;
+/** Si algo deja de cortar la espera, la prueba falla en vez de colgar la suite. */
+const LIMITE = { timeout: 10000 };
 const pausa = (ms) => new Promise((s) => setTimeout(s, ms));
 const preguntas = () => servidor.peticiones.filter((p) => p.metodo === "GET" && POR_SU_ID.test(p.ruta));
 
@@ -41,11 +43,11 @@ beforeEach(() => {
   sessionStorage.setItem("sureconomics_admin_refresh_token", "renovar-1");
 });
 
-test("cada 2 s y hasta 4 minutos, si no se dice otra cosa", () => {
+test("cada 2 s y hasta 4 minutos, si no se dice otra cosa", LIMITE, () => {
   assert.deepEqual(ESPERA_DE_LA_TRADUCCION, { cadaMs: 2000, topeMs: 240000 });
 });
 
-test("200 directo: la traducción, con una sola petición a la ruta nueva", async () => {
+test("200 directo: la traducción, con una sola petición a la ruta nueva", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/hecha.json"));
   const r = await traducirTextos(CAMPOS, RAPIDO);
   assert.deepEqual(r, grabada("traducciones/hecha.json").data);
@@ -53,7 +55,7 @@ test("200 directo: la traducción, con una sola petición a la ruta nueva", asyn
   assert.equal(servidor.a("/admin/posts/traducir").length, 0, "la ruta vieja es del bot de Saúl");
 });
 
-test("202 y luego 200: pregunta por su id hasta que llega la traducción", async () => {
+test("202 y luego 200: pregunta por su id hasta que llega la traducción", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/sigue.json"), grabada("traducciones/sigue.json"), grabada("traducciones/lista.json"));
   const r = await traducirTextos(CAMPOS, RAPIDO);
@@ -61,7 +63,7 @@ test("202 y luego 200: pregunta por su id hasta que llega la traducción", async
   assert.deepEqual(preguntas().map((p) => p.ruta), Array(3).fill(`/admin/traducciones/${ID}`));
 });
 
-test("202 y luego un error: el de la traducción, tal cual", async () => {
+test("202 y luego un error: el de la traducción, tal cual", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/sigue.json"), grabada("traducciones/fallo.json"));
   const err = await traducirTextos(CAMPOS, RAPIDO).then(() => null, (e) => e);
@@ -71,7 +73,7 @@ test("202 y luego un error: el de la traducción, tal cual", async () => {
   assert.equal(preguntas().length, 2);
 });
 
-test("404 al preguntar: ya no está (reinicio u otra pestaña), que la vuelva a pedir", async () => {
+test("404 al preguntar: ya no está (reinicio u otra pestaña), que la vuelva a pedir", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/se-interrumpio.json"));
   const err = await traducirTextos(CAMPOS, RAPIDO).then(() => null, (e) => e);
@@ -80,7 +82,7 @@ test("404 al preguntar: ya no está (reinicio u otra pestaña), que la vuelva a 
   assert.equal(preguntas().length, 1, "no sigue preguntando");
 });
 
-test("409: el texto del servidor, tal cual, y no se pregunta por nada", async () => {
+test("409: el texto del servidor, tal cual, y no se pregunta por nada", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/ya-hay-una.json"));
   const err = await traducirTextos(CAMPOS, RAPIDO).then(() => null, (e) => e);
   assert.equal(err.code, "translation_in_progress");
@@ -88,7 +90,7 @@ test("409: el texto del servidor, tal cual, y no se pregunta por nada", async ()
   assert.equal(servidor.peticiones.length, 1);
 });
 
-test("tiempo agotado: deja de preguntar y lo dice", async () => {
+test("tiempo agotado: deja de preguntar y lo dice", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/sigue.json"));
   const err = await traducirTextos(CAMPOS, { cadaMs: 5, topeMs: 60 }).then(() => null, (e) => e);
@@ -103,7 +105,7 @@ test("tiempo agotado: deja de preguntar y lo dice", async () => {
   assert.equal(preguntas().length, hechas, "después ya no pregunta");
 });
 
-test("con el tope de siempre, el aviso dice sus 4 minutos", async () => {
+test("con el tope de siempre, el aviso dice sus 4 minutos", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   const ahora = Date.now;
   let vez = 0;
@@ -118,7 +120,7 @@ test("con el tope de siempre, el aviso dice sus 4 minutos", async () => {
   }
 });
 
-test("si se deja a medias (se cerró la pieza), deja de preguntar", async () => {
+test("si se deja a medias (se cerró la pieza), deja de preguntar", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/sigue.json"));
   const control = new AbortController();
@@ -132,7 +134,7 @@ test("si se deja a medias (se cerró la pieza), deja de preguntar", async () => 
   assert.equal(preguntas().length, hechas, "después ya no pregunta");
 });
 
-test("ya dejada antes de la primera pregunta: no pregunta", async () => {
+test("ya dejada antes de la primera pregunta: no pregunta", LIMITE, async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/lista.json"));
   const control = new AbortController();

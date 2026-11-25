@@ -31,6 +31,8 @@ const FORMULARIO = {
   traduccion_automatica: false,
 };
 
+/** Si algo deja de cortar la espera, la prueba falla en vez de colgar la suite. */
+const LIMITE = { timeout: 10000 };
 const esperar = (ms) => act(() => new Promise((s) => setTimeout(s, ms)));
 const preguntas = () => servidor.peticiones.filter((p) => p.metodo === "GET" && POR_SU_ID.test(p.ruta)).length;
 /** Espera (con su `act`) hasta que `listo()`; falla a los 2 s. */
@@ -84,7 +86,7 @@ beforeEach(() => {
   servidor.contestar("GET", POR_SU_ID, grabada("traducciones/sigue.json"));
 });
 
-test("202 y luego 200: «traduciendo» mientras espera, y el inglés al final", async () => {
+test("202 y luego 200: «traduciendo» mientras espera, y el inglés al final", LIMITE, async () => {
   const m = await montar();
   let n = 0;
   servidor.contestar("GET", POR_SU_ID, () =>
@@ -103,7 +105,7 @@ test("202 y luego 200: «traduciendo» mientras espera, y el inglés al final", 
   await m.desmontar();
 });
 
-test("200 directo: el inglés sin preguntar por nada", async () => {
+test("200 directo: el inglés sin preguntar por nada", LIMITE, async () => {
   const m = await montar();
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/hecha.json"));
   await act(() => m.h.traducir());
@@ -118,7 +120,7 @@ for (const [caso, archivo, ruta, texto] of [
   ["404", "se-interrumpio", "GET", "La traducción ya no está en el servidor: se reinició o se pidió otra (quizá en otra pestaña). Vuelva a pedirla."],
   ["202 y luego error", "fallo", "GET", "No se pudo traducir: Claude contestó con un error (529)."],
 ]) {
-  test(`${caso}: el aviso dice qué pasó, y el formulario queda como estaba`, async () => {
+  test(`${caso}: el aviso dice qué pasó, y el formulario queda como estaba`, LIMITE, async () => {
     const m = await montar();
     servidor.contestar(ruta, ruta === "POST" ? "/admin/traducciones" : POR_SU_ID, grabada(`traducciones/${archivo}.json`));
     await act(() => m.h.traducir());
@@ -129,7 +131,7 @@ for (const [caso, archivo, ruta, texto] of [
   });
 }
 
-test("tiempo agotado: lo dice y el botón vuelve a estar listo", async () => {
+test("tiempo agotado: lo dice y el botón vuelve a estar listo", LIMITE, async () => {
   const m = await montar();
   await m.pintar({ espera: { cadaMs: 5, topeMs: 40 } });
   await act(() => m.h.traducir());
@@ -139,7 +141,7 @@ test("tiempo agotado: lo dice y el botón vuelve a estar listo", async () => {
   await m.desmontar();
 });
 
-test("desmontar a medias (se cerró la pieza): deja de preguntar, sin avisos ni cambios", async () => {
+test("desmontar a medias (se cerró la pieza): deja de preguntar, sin avisos ni cambios", LIMITE, async () => {
   const m = await montar();
   await empezar(m);
   await hasta(() => preguntas() >= 2, "dos preguntas");
@@ -151,7 +153,7 @@ test("desmontar a medias (se cerró la pieza): deja de preguntar, sin avisos ni 
   assert.deepEqual(m.form, FORMULARIO);
 });
 
-test("desmontar con una pregunta en camino: lo que llega después no se pone", async () => {
+test("desmontar con una pregunta en camino: lo que llega después no se pone", LIMITE, async () => {
   const m = await montar();
   let soltar;
   servidor.contestar("GET", POR_SU_ID, () => new Promise((s) => {
@@ -166,7 +168,7 @@ test("desmontar con una pregunta en camino: lo que llega después no se pone", a
   assert.deepEqual(m.form, FORMULARIO);
 });
 
-test("abrir otra pieza a medias: se deja la traducción y no cae en la nueva", async () => {
+test("abrir otra pieza a medias: se deja la traducción y no cae en la nueva", LIMITE, async () => {
   const m = await montar({ piezaId: 7 });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");
@@ -187,7 +189,7 @@ const cargarDelServidor = async (m, apertura) => {
   await m.pintar({ apertura });
 };
 
-test("de «nueva» a la pieza que se acaba de crear: sigue, y el inglés espera a que cargue", async () => {
+test("de «nueva» a la pieza que se acaba de crear: sigue, y el inglés espera a que cargue", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");
@@ -212,7 +214,7 @@ test("de «nueva» a la pieza que se acaba de crear: sigue, y el inglés espera 
   await m.desmontar();
 });
 
-test("de «nueva» a la pieza creada, si llega después de cargar: se pone enseguida", async () => {
+test("de «nueva» a la pieza creada, si llega después de cargar: se pone enseguida", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");
@@ -226,7 +228,7 @@ test("de «nueva» a la pieza creada, si llega después de cargar: se pone enseg
   await m.desmontar();
 });
 
-test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ella", async () => {
+test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ella", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");
@@ -243,7 +245,7 @@ test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ell
   await m.desmontar();
 });
 
-test("creada la 7 pero se salta a la 8: tampoco cae en ella", async () => {
+test("creada la 7 pero se salta a la 8: tampoco cae en ella", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);
   await hasta(() => preguntas() >= 1, "la primera pregunta");

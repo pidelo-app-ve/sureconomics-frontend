@@ -25,6 +25,7 @@ import { precargarTitulares } from "../features/titulares";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { trasLaFoto } from "../lib/trasLaFoto";
 import { AnuncioEntreTandas, ESPACIOS, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspacios } from "../features/publicidad";
+import { cargarUnaVez } from "../lib/cargarUnaVez";
 
 /**
  * Homepage.
@@ -66,7 +67,11 @@ import { AnuncioEntreTandas, ESPACIOS, ESPACIOS_DE_SITIO, FilaDeAnuncio, useEspa
  * venía con todo. Para que baje aparte no puede venir además del índice de
  * `components/home`, que lo trae con todo lo demás.
  */
-const cargarBuscador = () => import("../components/home/ContentExplorer").then((m) => m.ContentExplorer);
+// Una sola carga compartida: el buscador trae su hoja, y una segunda llamada al
+// `import()` mientras la hoja sigue bajando lo pintaría sin estilos (ver `cargarUnaVez`).
+const cargarBuscador = cargarUnaVez(() =>
+  import("../components/home/ContentExplorer").then((m) => m.ContentExplorer)
+);
 
 /** Si no llega (sin red, o una versión nueva del sitio), el cajón lo dice en vez de no abrirse. */
 const SinBuscador = () => {

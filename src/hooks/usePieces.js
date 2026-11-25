@@ -257,7 +257,8 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       const primera = (reusada || sirve ? Promise.resolve(reusada || sirve) : pedirPagina(filtro, 1)).then((p1) => {
         if (alive && yaVino) soltarPortadaDelHtml();
         if (alive && portada) {
-          primeraEnPantalla.current = { ...p1, en: Date.now() };
+          // La del HTML es tan vieja como el HTML: cuenta desde que se armó, no desde ahora.
+          primeraEnPantalla.current = { ...p1, en: p1 === sirve ? sirve.generada : Date.now() };
           // La foto de la apertura, pedida ya: antes de que React pinte la portada entera.
           precargarApertura(piezasFromApi(p1.filas));
         }
@@ -286,7 +287,7 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       // Las búsquedas no se guardan: cada una es una entrada nueva y el guardado no se
       // vaciaría nunca (el servidor ya las guarda un minuto).
       if (!lista.incompleta && !busca) {
-        guardado.set(clave, { ...lista, de: clave, primera: portada ? primeraEnPantalla.current : null, en: reusada ? reusada.en : Date.now() });
+        guardado.set(clave, { ...lista, de: clave, primera: portada ? primeraEnPantalla.current : null, en: reusada ? reusada.en : sirve ? sirve.generada : Date.now() });
       }
       setState({ ...lista, status: "success", error: null, de: clave, buscando: false });
     };

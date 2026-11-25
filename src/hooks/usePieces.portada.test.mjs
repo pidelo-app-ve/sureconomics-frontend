@@ -143,6 +143,20 @@ describe("la portada con su primera página en el HTML", () => {
     await otra.g.desmontar();
   });
 
+  test("lo guardado cuenta desde que se armó el HTML, no desde que llegó", async () => {
+    // Armado hace 50 s: al volver 15 s después ya pasa del minuto que se guarda, y se pide.
+    enElHtml = { filas: [fila(1, "Del HTML")], total: 1, pages: 1, meta: { total: 1, pages: 1 }, generada: Date.now() - 50_000 };
+    const primera = await montarPortada();
+    await esperar(0);
+    await primera.g.desmontar();
+    assert.deepEqual(pedidas, []);
+    adelanto += 15_000;
+    const otra = await montarPortada();
+    await esperar(0);
+    assert.deepEqual(pedidas.map((p) => p.page), [1]);
+    await otra.g.desmontar();
+  });
+
   test("otra lista (Artículos) no lo mira", async () => {
     enElHtml = { filas: [fila(1, "Del HTML")], total: 1, pages: 1, meta: { total: 1, pages: 1 } };
     const g = await montarGancho((p) => usePieces(p), { format: "articulo" });

@@ -322,8 +322,10 @@ console.log("la apertura, a la vista antes de React");
     desde > 0 && dentro.startsWith('<div class="se-portada-previa">') && dentro.indexOf("</footer></div>") < desde);
   check("una sola vez", contar(h, /se-portada-anticipo"/g) === 1);
   check("guarda el sitio de la cinta, la cabecera y Última hora, con sus clases",
-    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><header class="se-header"><div class="se-container se-header__inner"></div></header>') &&
+    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><div class="se-header"><div class="se-container se-header__inner"></div></div>') &&
       anticipo.includes('<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div><div class="se-plana__centro">'));
+  check("un solo <main> (el de la lista) y ningún <header>: lo de la vista va en elementos neutros",
+    contar(dentro, /<main\b/g) === 1 && contar(dentro, /<header\b/g) === 0 && contar(dentro, /<(section|article)\b/g) === contar(dentro.slice(0, desde), /<(section|article)\b/g));
   check("con la fecha de la edición (hora de Caracas)",
     anticipo.includes('<p class="se-plana__fecha"><time>miércoles, 18 de noviembre de 2026</time></p>'));
   const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);

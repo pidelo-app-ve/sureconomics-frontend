@@ -343,8 +343,11 @@ export const fechaDeEdicion = (ahora, idioma = "es") =>
  * `<img>` es la de `CardMedia`: la misma dirección, el mismo `srcset` y el mismo `sizes`
  * que la precarga, así que React encuentra la foto ya bajada y del mismo tamaño.
  *
- * Fuera de los lectores de pantalla (`aria-hidden`, y sus enlaces fuera del tabulador):
- * ellos ya tienen la portada entera en la lista recortada (`portadaEnHtml`).
+ * Con elementos neutros (`div`) donde la página usa `header`, `main`, `section` o
+ * `article`, y fuera de los lectores de pantalla (`aria-hidden`, y sus enlaces fuera del
+ * tabulador): la portada que leen ellos, con sus puntos de referencia (un solo `main`), es
+ * la lista recortada (`portadaEnHtml`). Los títulos sí son `h3`/`p`: su tamaño y su margen
+ * salen de ahí.
  *
  * Nada si la apertura no abre con foto (sin foto, o con un short): ahí React la pinta
  * como antes. `fila` es la de la API; `idioma`, el de la página.
@@ -375,16 +378,16 @@ export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {})
   return [
     `<div class="se-publico se-portada-anticipo" aria-hidden="true">`,
     `<div class="se-ticker se-ticker--hueco"></div>`,
-    `<header class="se-header"><div class="se-container se-header__inner"></div></header>`,
-    `<div class="se-contenido"><main class="se-blog se-portada"><section class="se-plana">`,
+    `<div class="se-header"><div class="se-container se-header__inner"></div></div>`,
+    `<div class="se-contenido"><div class="se-blog se-portada"><div class="se-plana">`,
     `<div class="se-container"><p class="se-plana__fecha"><time>${escapar(fechaDeEdicion(ahora, idioma))}</time></p></div>`,
     `<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div>`,
-    `<div class="se-plana__centro"><article class="se-plana__principal">`,
+    `<div class="se-plana__centro"><div class="se-plana__principal">`,
     `<div class="se-plana__foto"><a class="se-plana__media" href="${ruta}" tabindex="-1">${img}</a></div>`,
     `<div class="se-plana__texto"><h3 class="se-plana__titulo${fila.format === "informe" ? " se-plana__titulo--a-fondo" : ""}">`,
     `<a href="${ruta}" tabindex="-1">${textoDelTitulo}</a></h3>`,
     resumen ? `<p class="se-plana__resumen">${escapar(resumen)}</p>` : "",
-    `</div></article></div></div></section></main></div></div>`,
+    `</div></div></div></div></div></div></div></div>`,
   ].join("");
 };
 

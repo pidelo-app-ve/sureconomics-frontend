@@ -27,9 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # La versión de Node sale de `.nvmrc` (22): la misma que pide `engines` en
+      # package.json, que es lo que lee Vercel. Node 20 quedó sin soporte en abril de
+      # 2026 y Vite 7 pide 20.19+ o 22.12+.
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
           cache: npm
 
       # `npm ci` y no `npm install`: instala exactamente lo que dice el lockfile y falla

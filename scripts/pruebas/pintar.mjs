@@ -22,6 +22,8 @@
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
+/** Las mismas opciones `future` que el router del sitio (`routes.jsx`). */
+const FUTURO = { v7_relativeSplatPath: true };
 import "../../src/i18n/diccionarios.js";
 import { cargarIdioma, fijarIdioma, idiomaDeRuta } from "../../src/i18n/motor.js";
 import { ProveedorIdioma } from "../../src/i18n/ProveedorIdioma.jsx";
@@ -48,7 +50,7 @@ export const pintarEn = async (direccion, patron, elemento) => {
   };
   try {
     const router = createElement(RouterProvider, {
-      router: createMemoryRouter([rama("/", "es"), rama("/en", "en")], { initialEntries: [direccion] }),
+      router: createMemoryRouter([rama("/", "es"), rama("/en", "en")], { initialEntries: [direccion], future: FUTURO }),
     });
     const html = renderToString(PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), router));
     if (avisos.length) throw new Error(`React se quejó al pintar ${direccion}: ${avisos.join(" | ")}`);

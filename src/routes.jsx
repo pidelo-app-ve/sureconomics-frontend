@@ -228,4 +228,12 @@ export const router = createBrowserRouter([
             },
         ],
     },
-]);
+], {
+    // El paso a React Router 7, uno a uno (ver su guía «Upgrading from v6»): cada
+    // opción enciende ya en la 6 algo que en la 7 es lo normal.
+    future: {
+        // Un enlace relativo (`to="."`, `to="../x"`) dentro de una ruta `*` se resuelve
+        // desde la dirección entera, no desde el padre. Aquí no hay ninguno.
+        v7_relativeSplatPath: true,
+    },
+});

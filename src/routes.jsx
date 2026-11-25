@@ -235,5 +235,8 @@ export const router = createBrowserRouter([
         // Un enlace relativo (`to="."`, `to="../x"`) dentro de una ruta `*` se resuelve
         // desde la dirección entera, no desde el padre. Aquí no hay ninguno.
         v7_relativeSplatPath: true,
+        // Los «fetchers» (useFetcher) se quedan vivos hasta que terminan aunque el
+        // componente que los creó desaparezca. Aquí no se usa ninguno.
+        v7_fetcherPersist: true,
     },
 });

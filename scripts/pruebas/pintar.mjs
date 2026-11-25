@@ -23,7 +23,7 @@ import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 /** Las mismas opciones `future` que el router del sitio (`routes.jsx`). */
-const FUTURO = { v7_relativeSplatPath: true };
+const FUTURO = { v7_relativeSplatPath: true, v7_fetcherPersist: true };
 import "../../src/i18n/diccionarios.js";
 import { cargarIdioma, fijarIdioma, idiomaDeRuta } from "../../src/i18n/motor.js";
 import { ProveedorIdioma } from "../../src/i18n/ProveedorIdioma.jsx";

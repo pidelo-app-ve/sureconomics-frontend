@@ -4,7 +4,7 @@ import { elegirApertura, precargarApertura } from "../components/home/PrimeraPla
 import { textoDeBusqueda } from "../lib/contentFilter";
 import { FORMATO_META, piezasFromApi } from "../lib/pieza";
 import { trasLaFoto } from "../lib/trasLaFoto";
-import { getPieces } from "../services/publicContentService";
+import { getPieces, getPortadaDelHtml, soltarPortadaDelHtml } from "../services/publicContentService";
 
 /**
  * Every published piece of one format, or of all of them.
@@ -175,6 +175,9 @@ const pedirPortada = async (primera, vigente = () => true, { aplazar = false, al
   return { filas, total: p1.total, truncated: p1.pages > MAX_PAGES, faltan: Math.max(0, entera - filas.length), incompleta };
 };
 
+/** Lo que se pinta de la primera página mientras llega el resto. */
+const pintable = (p1) => ({ filas: p1.filas, total: p1.total ?? p1.filas.length, truncated: (p1.pages || 1) > MAX_PAGES });
+
 /** La lista entera: la primera página y las siguientes, a la vez y por detrás. */
 const pedirLasCinco = async (primera, filtro) => {
   const pages = primera.pages || 1;
@@ -207,9 +210,16 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
   const primeraEnPantalla = useRef(null);
   // Lo último pintado, para saber en el efecto si se está escribiendo sobre una lista.
   const pintado = useRef(null);
+  // La primera página de la portada, si vino con el HTML (`api/portada.js`): se pinta en el
+  // primer render, sin pedirla y sin pasar por «Cargando…»; lo demás se pide detrás, como
+  // siempre. Si es vieja (la portada de antes que sirve el borde si la función falla, o un
+  // reloj adelantado), se pinta igual y se pide la de ahora, que la reemplaza al llegar: lo
+  // que ya se ve no desaparece. Se lee al montar y vale una vez (ver `soltarPortadaDelHtml`).
+  const [delHtml] = useState(() => (portada ? getPortadaDelHtml() : null));
   const [state, setState] = useState(() => {
     const previo = guardadoPara(portada, entera);
     if (previo) return deGuardado(previo);
+    if (delHtml) return { ...pintable(delHtml), status: "success", faltan: null, error: null, de: "portada", buscando: false };
     return { status: "loading", filas: [], total: 0, truncated: false, faltan: 0, error: null, de: null, buscando: false };
   });
 
@@ -242,16 +252,22 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       // pinta. Antes la portada esperaba las cinco, una detrás de otra, para enseñar
       // las veintitantas piezas de arriba que ya venían en la primera.
       const reusada = !portada && !busca && primeraEnPantalla.current;
-      const primera = (reusada ? Promise.resolve(reusada) : pedirPagina(filtro, 1)).then((p1) => {
+      const yaVino = portada ? delHtml : null;
+      const sirve = yaVino && !yaVino.vieja ? yaVino : null;
+      const primera = (reusada || sirve ? Promise.resolve(reusada || sirve) : pedirPagina(filtro, 1)).then((p1) => {
+        if (alive && yaVino) soltarPortadaDelHtml();
         if (alive && portada) {
-          primeraEnPantalla.current = { ...p1, en: Date.now() };
+          // La del HTML es tan vieja como el HTML: cuenta desde que se armó, no desde ahora.
+          primeraEnPantalla.current = { ...p1, en: p1 === sirve ? sirve.generada : Date.now() };
           // La foto de la apertura, pedida ya: antes de que React pinte la portada entera.
           precargarApertura(piezasFromApi(p1.filas));
         }
         if (alive) {
-          const pinta = { filas: p1.filas, total: p1.total ?? p1.filas.length, truncated: (p1.pages || 1) > MAX_PAGES };
+          // La vieja del HTML se reemplaza por la de ahora en cuanto llega.
           setState((s) =>
-            sigue(s) ? s : { ...pinta, status: "success", faltan: portada ? null : 0, error: null, de: clave, buscando: false },
+            sigue(s) && !yaVino?.vieja
+              ? s
+              : { ...pintable(p1), status: "success", faltan: portada ? null : 0, error: null, de: clave, buscando: false },
           );
         }
         return p1;
@@ -271,7 +287,7 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       // Las búsquedas no se guardan: cada una es una entrada nueva y el guardado no se
       // vaciaría nunca (el servidor ya las guarda un minuto).
       if (!lista.incompleta && !busca) {
-        guardado.set(clave, { ...lista, de: clave, primera: portada ? primeraEnPantalla.current : null, en: reusada ? reusada.en : Date.now() });
+        guardado.set(clave, { ...lista, de: clave, primera: portada ? primeraEnPantalla.current : null, en: reusada ? reusada.en : sirve ? sirve.generada : Date.now() });
       }
       setState({ ...lista, status: "success", error: null, de: clave, buscando: false });
     };
@@ -297,7 +313,7 @@ export const usePieces = ({ format, educational, q, portada = false, aplazar = f
       alive = false;
       clearTimeout(espera);
     };
-  }, [clave, entera, base, busca, portada, format, educational, aplazar]);
+  }, [clave, entera, base, busca, portada, format, educational, aplazar, delHtml]);
 
   // `lang` en las dependencias aunque no se use dentro: es lo que hace que las piezas
   // se vuelvan a convertir cuando cambia el idioma (`piezaFromApi` lo lee del motor).

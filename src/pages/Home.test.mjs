@@ -14,6 +14,9 @@ import { sustituir } from "../../scripts/pruebas/dobles.mjs";
 import { pintarEn, textoDe } from "../../scripts/pruebas/pintar.mjs";
 import { cargarIdioma, traducir } from "../i18n/motor.js";
 import { piezasFromApi } from "../lib/pieza.js";
+import { aperturaEnHtml, loQuePintaLaPortada, recientesDeLaPortada } from "../../api/portada.js";
+import { paraLaApertura } from "../lib/apertura.js";
+import { primeraPlanaDe } from "../lib/bloquesDePortada.js";
 
 const PIEZAS = "src/hooks/usePieces.js";
 const TEMAS = "src/hooks/useTaxonomy.js";
@@ -217,5 +220,121 @@ describe("con datos", () => {
     assert.ok(cuenta, "falta «Cargar más»");
     assert.match(textoDe(cuenta), /11/);
     assert.match(textoDe(cuenta), /296/);
+  });
+});
+
+/*
+ * La apertura que trae el HTML de la portada (`aperturaEnHtml`, en `api/portada.js`) se ve
+ * antes de que llegue React, que la reemplaza al montar. Si no es la misma que pinta la
+ * página (otras clases, otra foto, otra talla, otro texto), el relevo salta a la vista.
+ */
+describe("la apertura del HTML es la que pinta React", () => {
+  /**
+   * De un trozo de HTML: las clases de cada caja, de fuera adentro, hasta la foto. Última
+   * hora cuenta como una caja (lo de dentro lo compara `UltimaHoraColumna.html.test.mjs`).
+   */
+  const cajas = (html) => {
+    const desde = html.indexOf('class="se-plana"');
+    let trozo = html.slice(desde, html.indexOf("se-artcard__img", desde));
+    const uh = trozo.indexOf('class="se-plana__uh"');
+    if (uh !== -1) {
+      const abre = trozo.lastIndexOf("<", uh);
+      trozo = `${trozo.slice(0, abre)}<div class="se-plana__uh">${trozo.slice(trozo.lastIndexOf("<", trozo.indexOf('class="se-plana__centro"')))}`;
+    }
+    return [...trozo.matchAll(/<(div|section|article|a)\b[^>]*class="([^"]+)"/g)].map((m) => m[2]);
+  };
+  /** Los atributos de la foto de la apertura, con los nombres en minúsculas (React escribe `srcSet`). */
+  const foto = (html) => {
+    const etiqueta = /<img [^>]*class="se-artcard__img"[^>]*>/.exec(html.slice(html.indexOf("se-plana__principal")))?.[0] ?? "";
+    return Object.fromEntries([...etiqueta.matchAll(/([a-zA-Z-]+)="([^"]*)"/g)].map(([, k, v]) => [k.toLowerCase(), v.replace(/;$/, "")]));
+  };
+  const texto = (html, clase) => {
+    const resto = html.slice(html.indexOf("se-plana__principal"));
+    const desde = resto.search(new RegExp(`<(h3|p) class="${clase}[ "]`));
+    if (desde === -1) return null;
+    const etiqueta = resto.slice(desde + 1, resto.indexOf(" ", desde));
+    const trozo = resto.slice(desde, resto.indexOf(`</${etiqueta}>`, desde));
+    return textoDe(trozo).replace(/\s+/g, " ").trim();
+  };
+  const AHORA = Date.parse("2026-11-18T13:00:00Z");
+  const apertura = (extra = {}) => ({
+    id: 1,
+    slug: "la-que-manda",
+    format: "noticia",
+    title: 'El "BCV" & los <bancos>',
+    excerpt: "<p>Primera l&iacute;nea&nbsp;con &amp; y &quot;comillas&quot;</p><p>Segunda &#39;línea&#39;.</p>",
+    published_at: "2026-11-18T12:00:00Z",
+    image_asset: { url: "/media/image/2026/11/la-foto-1a2b3c4d5e6f.jpg", width: 1536, height: 1024 },
+    imagen_foco: "30,70",
+    topics: [{ id: 1, slug: "economia", name: "Economía" }],
+    ...extra,
+  });
+
+  // Detrás, seis noticias más viejas y sin foto: tres bajo la apertura y tres en Última hora.
+  const detras = [2, 3, 4, 5, 6, 7].map((id) => ({
+    id,
+    slug: `detras-${id}`,
+    format: "noticia",
+    title: `Detrás ${id}`,
+    excerpt: "",
+    published_at: `2026-11-17T1${id}:00:00Z`,
+    topics: [],
+  }));
+  const fijada = { en_portada: true, destacada_hasta: "2099-01-01T00:00:00Z" };
+
+  for (const [nombre, fila, direccion] of [
+    ["en español, con encuadre y entidades en la entradilla", apertura(), "/"],
+    ["un informe fijado (titular «a fondo») sin encuadre", apertura({ format: "informe", imagen_foco: null, unit: "Estudios", ...fijada }), "/"],
+    ["en /en, traducida", apertura({ en_ingles: true, title_en: "The <BCV> & banks", excerpt_en: "<p>An English lead.</p>" }), "/en"],
+    ["en /en, solo en español (con su marca «ES»)", apertura(), "/en"],
+  ]) {
+    test(nombre, async () => {
+      conPiezas([fila, ...detras]);
+      const react = await abrir(direccion);
+      assert.match(react, /<section class="se-plana__uh"/);
+      // Última hora, con las que no están arriba (las tres primeras de detrás van bajo la apertura).
+      const ultimaHora = { items: [], recientes: detras.slice(3) };
+      const previa = aperturaEnHtml(fila, { idioma: direccion === "/en" ? "en" : "es", ahora: AHORA, ultimaHora });
+      assert.ok(previa, "el HTML no trae la apertura");
+      assert.deepEqual(cajas(previa), cajas(react));
+      assert.deepEqual(foto(previa), foto(react));
+      assert.equal(texto(previa, "se-plana__titulo"), texto(react, "se-plana__titulo"));
+      assert.equal(texto(previa, "se-plana__resumen"), texto(react, "se-plana__resumen"));
+    });
+  }
+
+  // De ellas saca Última hora sus noticias cuando no hay titulares del día: si el HTML
+  // eligiera otras, la columna (y la foto, debajo en el teléfono) cambiaría al montar.
+  test("las «recientes» de Última hora: las mismas que elige Home", () => {
+    const ahora = Date.now();
+    const hace = (h) => new Date(ahora - h * 3600_000).toISOString();
+    const conFoto = { image_asset: { url: "/media/image/2026/11/f.jpg", width: 1536 } };
+    for (const [caso, filas] of [
+      ["la más reciente con foto", [1, 2, 3, 4, 5, 6].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id) }))],
+      ["la más reciente sin foto cede a otra", [
+        { ...apertura(), id: 1, image_asset: null, published_at: hace(1) },
+        ...[2, 3, 4, 5].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id), ...conFoto })),
+      ]],
+      ["una fijada de otro formato", [
+        ...[1, 2, 3, 4, 5].map((id) => ({ ...apertura(), id, slug: `n-${id}`, published_at: hace(id) })),
+        { ...apertura({ format: "informe", unit: "Estudios", ...fijada }), id: 9, slug: "informe", published_at: hace(30) },
+      ]],
+      ["mezcla de formatos", [1, 2, 3, 4, 5, 6, 7].map((id) => ({ ...apertura(), id, slug: `p-${id}`, published_at: hace(id), format: id % 2 ? "noticia" : "articulo" }))],
+    ]) {
+      const piezas = piezasFromApi(filas);
+      const { enApertura } = primeraPlanaDe(piezas, false);
+      const deHome = piezas.filter((p) => !enApertura.has(p.id)).map((p) => p.id);
+      const { plana } = loQuePintaLaPortada(filas.map(paraLaApertura), ahora);
+      const delHtml = recientesDeLaPortada(filas, plana).map((f) => String(f.id));
+      assert.deepEqual(delHtml, deHome, caso);
+    }
+  });
+
+  test("la marca «ES» de /en, la misma etiqueta", async () => {
+    const fila = apertura();
+    conPiezas([fila]);
+    const react = await abrir("/en");
+    const marca = (html) => /<abbr class="se-marca-idioma"[^>]*>[^<]*<\/abbr>/.exec(html.slice(html.indexOf("se-plana__titulo")))?.[0];
+    assert.equal(marca(aperturaEnHtml(fila, { idioma: "en", ahora: AHORA })), marca(react));
   });
 });

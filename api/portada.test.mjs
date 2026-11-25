@@ -17,6 +17,7 @@ import handler, {
   ORDEN_DE_SECCIONES,
   TEXTOS,
   armarPortada,
+  fechaDeEdicion,
   loQuePintaLaPortada,
   rutaDeFormato,
   titularDe,
@@ -91,6 +92,14 @@ const raiz = (html) => {
   const desde = html.indexOf('<div id="root">');
   const hasta = html.indexOf("</div><script", desde);
   return desde === -1 ? "" : html.slice(desde + '<div id="root">'.length, hasta);
+};
+
+/** Un bloque de datos (`#se-portada`, `#se-ultima-hora`), leído como lo lee la página; o nulo. */
+const bloque = (html, id = "se-portada") => {
+  const desde = html.indexOf(`<script type="application/json" id="${id}">`);
+  if (desde === -1) return null;
+  const inicio = html.indexOf(">", desde) + 1;
+  return JSON.parse(html.slice(inicio, html.indexOf("</script>", inicio)));
 };
 
 const fichas = (html) =>
@@ -183,6 +192,16 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
     /animation:se-portada-previa 0s linear 9s forwards/.test(h) && /@keyframes se-portada-previa\{to\{width:auto;height:auto;[^}]*clip-path:none/.test(h));
   check("la aplicación sigue ahí", h.includes('src="/assets/index-abc123.js"'));
 
+  // Los datos: la respuesta del quiosco entera, para que la página no la vuelva a pedir.
+  const datos = bloque(h);
+  check("el bloque de datos, uno y detrás de #root (no en la <head>)",
+    contar(h, /id="se-portada"/g) === 1 && h.indexOf('id="se-portada"') > h.indexOf('<div id="root">') &&
+      h.includes('</div><script type="application/json" id="se-portada">') && h.indexOf('id="se-portada"') < h.indexOf('src="/assets/index-abc123.js"'));
+  check("dice qué lectura contesta: la de la portada", datos?.lectura === "/posts?page=1&limit=100", datos?.lectura);
+  check("y cuándo se armó (la página no usa uno viejo)", Math.abs(Date.parse(datos?.generada) - Date.now()) < 60_000, datos?.generada);
+  check("con la respuesta tal cual llegó (filas y meta)",
+    datos?.respuesta?.data?.length === MUCHAS.length && datos.respuesta.data[0].slug === MUCHAS[0].slug && datos.respuesta.meta?.pages === 1);
+
   // La precarga: el mismo srcset y sizes que pinta `CardMedia` en la apertura.
   const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);
   const precargas = contar(h, /<link rel="preload" as="image"/g);
@@ -207,6 +226,67 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
       lista.itemListElement[0].position === 1);
 });
 
+// —— 1b. Los titulares de Última hora, también dentro ——
+console.log("Última hora, dentro del HTML");
+{
+  const titulares = { data: { items: [{ id: 7, title: "Un titular </script>", published_at: fecha(0) }], version: 12 }, success: true };
+  const pedidas = [];
+  const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  /** `tardaUh`/`tardaPortada`: lo que tarda cada una en contestar, en ms. */
+  const conUltimaHora = (respuesta, { tardaUh = 0, tardaPortada = 20 } = {}) => fetchCon({
+    api: async (url) => {
+      pedidas.push(String(url));
+      if (String(url).includes("/datos/headlines")) {
+        await espera(tardaUh);
+        return respuesta();
+      }
+      await espera(tardaPortada);
+      return { ok: true, status: 200, json: async () => ({ data: MUCHAS, meta: { total: MUCHAS.length, pages: 1 } }) };
+    },
+  });
+  for (const idioma of ["es", "en"]) {
+    pedidas.length = 0;
+    await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares })), async () => {
+      const res = respuestaFalsa();
+      await handler({ query: idioma === "en" ? { lang: "en" } : {} }, res);
+      const uh = bloque(res.body, "se-ultima-hora");
+      check(`${idioma}: los pide al quiosco, en su idioma`,
+        pedidas.includes(`https://www.sureconomics.com/datos/headlines?lang=${idioma}&limit=40`), pedidas.join(" "));
+      check(`${idioma}: van en su bloque, detrás de los de la portada`,
+        uh?.lectura === `/headlines?lang=${idioma}&limit=40` && uh.respuesta?.data?.version === 12 &&
+          res.body.indexOf('id="se-ultima-hora"') > res.body.indexOf('id="se-portada"'));
+      check(`${idioma}: escapados como los otros`, uh?.respuesta?.data?.items?.[0]?.title === "Un titular </script>" &&
+        !res.body.includes("Un titular </script>"));
+    });
+  }
+  // Después de la portada se espera a Última hora un margen corto (250 ms): si llega en él,
+  // va dentro (la columna no cambia al montar); si no, la página sale sin ella y sin esperar más.
+  for (const [nombre, tardaUh, conElla] of [["100 ms después", 100, true], ["800 ms después", 800, false]]) {
+    await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares }), { tardaUh, tardaPortada: 0 }), async () => {
+      const res = respuestaFalsa();
+      const inicio = Date.now();
+      await handler({ query: {} }, res);
+      const tardo = Date.now() - inicio;
+      check(`si llega ${nombre} que la portada: ${conElla ? "se espera y va dentro" : "sale sin ella, sin esperar más del margen"}`,
+        res.code === 200 && bloque(res.body)?.respuesta && res.body.includes('id="se-ultima-hora"') === conElla &&
+          (conElla ? tardo >= 90 : tardo < 400), `${tardo} ms`);
+    });
+  }
+  for (const [nombre, respuesta] of [
+    ["no contestan", () => { throw new Error("timeout"); }],
+    ["contestan 502", () => ({ ok: false, status: 502, json: async () => ({}) })],
+    ["contestan otra cosa", () => ({ ok: true, status: 200, json: async () => ({ data: [] }) })],
+  ]) {
+    await conFetch(conUltimaHora(respuesta), async () => {
+      const res = respuestaFalsa();
+      await handler({ query: {} }, res);
+      check(`si ${nombre}: la portada sale igual, con sus datos y sin los de Última hora`,
+        res.code === 200 && res.headers["X-Pieza-Meta"] === "portada" && bloque(res.body)?.respuesta &&
+          !res.body.includes('id="se-ultima-hora"'));
+    });
+  }
+}
+
 // —— 2. La API caída ——
 console.log("la API caída");
 for (const [nombre, api, motivo] of [
@@ -223,6 +303,8 @@ for (const [nombre, api, motivo] of [
       res.body.includes(`<title>${TEXTOS.es.titulo}</title>`) && res.body.includes('rel="canonical" href="https://www.sureconomics.com/"'));
     check(`${nombre}: #root vacío, sin precarga ni estilo`,
       res.body.includes('<div id="root"></div>') && !res.body.includes("preload\" as=\"image") && !res.body.includes("se-portada-previa"));
+    check(`${nombre}: sin bloques de datos (la página pide como siempre)`,
+      !res.body.includes('id="se-portada"') && !res.body.includes('id="se-ultima-hora"'));
     check(`${nombre}: guardada poco`, res.headers["Cache-Control"] === "public, s-maxage=30");
     check(`${nombre}: dice por qué`, res.headers["X-Pieza-Meta"] === `portada-sin-datos-${motivo}`, res.headers["X-Pieza-Meta"]);
   });
@@ -243,6 +325,100 @@ for (const [nombre, opciones] of [
     await handler({ query: { lang: "en" } }, en);
     check(`${nombre}: /en a /en?_s=1`, en.code === 307 && en.location === "/en?_s=1", `${en.code} ${en.location}`);
   });
+}
+
+// —— 3b. La apertura a la vista (A-0, 25-nov-2026) ——
+//
+// Que sea la misma que pinta React lo vigila `src/pages/Home.test.mjs`, que pinta la página
+// de verdad (aquí no se puede: esto corre en Node sin JSX).
+console.log("la apertura, a la vista antes de React");
+{
+  const h = armarPortada(SHELL, { filas: MUCHAS, ahora: HORA });
+  const dentro = raiz(h);
+  const desde = dentro.indexOf('<div class="se-publico se-portada-anticipo" aria-hidden="true">');
+  const anticipo = dentro.slice(desde);
+  check("va en #root, detrás de la lista recortada y fuera de ella",
+    desde > 0 && dentro.startsWith('<div class="se-portada-previa">') && dentro.indexOf("</footer></div>") < desde);
+  check("una sola vez", contar(h, /se-portada-anticipo"/g) === 1);
+  check("guarda el sitio de la cinta y la cabecera, con sus clases",
+    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><div class="se-header"><div class="se-container se-header__inner"></div></div>'));
+  // Sin titulares del día, Última hora enseña las noticias que no están arriba, como React.
+  check("Última hora, pintada encima de la apertura: las noticias que no están arriba, sin la nota de la IA",
+    anticipo.includes('<div class="se-container se-plana__rejilla"><div class="se-plana__uh"><h2 class="se-plana__uh-cabeza">') &&
+      anticipo.indexOf('se-plana__uh-titulo" href="/noticias/pieza-5"') > 0 && anticipo.indexOf('pieza-5') < anticipo.indexOf('se-plana__centro') &&
+      contar(anticipo.slice(0, anticipo.indexOf('se-plana__centro')), /se-plana__uh-item"/g) === 6 && !anticipo.includes('se-plana__uh-nota'));
+  check("un solo <main> (el de la lista) y ningún <header>: lo de la vista va en elementos neutros",
+    contar(dentro, /<main\b/g) === 1 && contar(dentro, /<header\b/g) === 0 && contar(dentro, /<(section|article)\b/g) === contar(dentro.slice(0, desde), /<(section|article)\b/g));
+  check("con la fecha de la edición (hora de Caracas)",
+    anticipo.includes('<p class="se-plana__fecha"><time>miércoles, 18 de noviembre de 2026</time></p>'));
+  const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);
+  check("la foto de la apertura: la que se precarga, con prioridad",
+    anticipo.includes(`<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" srcset="${srcset}" sizes="${SIZES_PRINCIPAL}" alt="" loading="eager" fetchpriority="high" decoding="async" />`) &&
+      h.includes(`imagesrcset="${srcset}" imagesizes="${SIZES_PRINCIPAL}"`));
+  check("titular y entradilla de la que manda, enlazados a la pieza y fuera del tabulador",
+    anticipo.includes('<h3 class="se-plana__titulo"><a href="/noticias/pieza-1" tabindex="-1">Titular número 1</a></h3><p class="se-plana__resumen">Entradilla de la pieza 1.</p>'));
+  check("solo la apertura: ni las de debajo ni las secciones", !anticipo.includes("Titular número 2") && !anticipo.includes("se-plana__otras"));
+  check("si React no llega, a los 9 s se pliega y deja la lista",
+    /\.se-portada-anticipo\{animation:se-portada-anticipo 0s linear 9s forwards\}/.test(h) &&
+      /@keyframes se-portada-anticipo\{to\{height:0;overflow:hidden\}\}/.test(h));
+  check("sin alto fijo para Última hora: mide lo que mida su contenido", !h.includes("se-plana__uh{height"));
+
+  // Con titulares del día: los titulares, con su hora y la nota de la IA, y escapados.
+  const ahoraUh = HORA;
+  const items = [
+    { id: 3, title: "Más viejo <b>", published_at: new Date(ahoraUh - 3 * 3600_000).toISOString() },
+    { id: 4, title: "Fijado", pinned: true, published_at: new Date(ahoraUh - 5 * 3600_000).toISOString() },
+    { id: 5, title: "Recién & \"salido\"", published_at: new Date(ahoraUh - 12 * 60_000).toISOString() },
+  ];
+  const conUh = armarPortada(SHELL, { filas: MUCHAS, ultimaHora: { data: { items, version: 3 } }, ahora: ahoraUh });
+  const uh = conUh.slice(conUh.indexOf('<div class="se-plana__uh">'), conUh.indexOf('<div class="se-plana__centro">'));
+  const orden = ["Fijado", "Recién", "Más viejo"].map((x) => uh.indexOf(x));
+  check("con titulares: en el orden de la página (lo fijado arriba, luego lo más reciente)", orden.every((x, i) => x > 0 && (i === 0 || x > orden[i - 1])));
+  check("con su hora: «12 min» en rojo (y «Hace 12 min» para quien la oye) y la de Caracas",
+    uh.includes('se-plana__uh-hora se-plana__uh-hora--fresca"') && uh.includes('<span class="se-sr-only">Hace 12 min</span><span aria-hidden="true">12 min</span>') &&
+      uh.includes('datetime="2026-11-18T09:00:00.000Z">5:00</time>'), uh.slice(0, 900));
+  check("escapados", uh.includes("Más viejo &lt;b&gt;") && uh.includes("Recién &amp; &quot;salido&quot;"));
+  check("con la nota de la IA; el punto no late (lo primero es lo fijado, de hace 5 h)",
+    uh.includes('<p class="se-plana__uh-nota">Redactado automáticamente') && uh.includes('<span class="se-plana__uh-punto"></span>'));
+  check("enlaces y botones fuera del tabulador", !/<(a|button)\b(?![^>]*tabindex="-1")[^>]*>/.test(uh));
+  const viejos = armarPortada(SHELL, {
+    filas: MUCHAS,
+    ultimaHora: { data: { items: [{ id: 9, title: "De anteayer", published_at: new Date(ahoraUh - 50 * 3600_000).toISOString() }] } },
+    ahora: ahoraUh,
+  });
+  check("titulares de más de un día: las noticias, como la página", !viejos.includes("De anteayer") && viejos.includes('se-plana__uh-titulo" href="/noticias/pieza-5"'));
+
+  const encuadrada = armarPortada(SHELL, { filas: [fila(1, { imagen_foco: "30,70" })], ahora: HORA });
+  check("con el encuadre de la redacción", encuadrada.includes('<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" style="object-position:30% 70%" srcset='));
+  const informe = armarPortada(SHELL, {
+    filas: [fila(1, { format: "informe", en_portada: true, destacada_hasta: new Date(HORA + 3600_000).toISOString() })],
+    ahora: HORA,
+  });
+  check("un informe, con su titular «a fondo»", informe.includes('<h3 class="se-plana__titulo se-plana__titulo--a-fondo"><a href="/informes/pieza-1"'));
+  const sinEntradilla = armarPortada(SHELL, { filas: [fila(1, { excerpt: "" })], ahora: HORA });
+  check("sin entradilla, sin párrafo vacío", sinEntradilla.includes(`class="se-publico se-portada-anticipo"`) && !sinEntradilla.includes("se-plana__resumen"));
+
+  const sinFoto = armarPortada(SHELL, { filas: [fila(1, { image_asset: null }), fila(2, { image_asset: null })], ahora: HORA });
+  check("apertura sin foto: nada a la vista (React la pinta como antes)", !sinFoto.includes(`class="se-publico se-portada-anticipo"`) && sinFoto.includes("se-portada-previa"));
+  const short = armarPortada(SHELL, { filas: [fila(1, { video_asset: { url: "https://www.youtube.com/shorts/abcdefghijk" } })], ahora: HORA });
+  check("abre con un short: nada a la vista", !short.includes(`class="se-publico se-portada-anticipo"`));
+  const ajena = armarPortada(SHELL, { filas: [fila(1, { format: "otro" }), fila(2, { format: "otro" })], ahora: HORA });
+  check("una apertura que no se puede enlazar: nada a la vista", !ajena.includes(`class="se-publico se-portada-anticipo"`));
+
+  const en = armarPortada(SHELL, { filas: MUCHAS, idioma: "en", ahora: HORA });
+  check("en /en, la que solo está en español lleva su «ES», como en la página",
+    en.includes('<a href="/en/noticias/pieza-1" tabindex="-1"><span lang="es">Titular número 1</span> <abbr class="se-marca-idioma" title="In Spanish only">ES</abbr></a>'));
+  check("y la fecha en inglés", en.includes("<time>Wednesday, November 18, 2026</time>"));
+  const traducida = armarPortada(SHELL, {
+    filas: [fila(1, { en_ingles: true, title_en: "The <BCV> & banks", excerpt_en: "<p>An English lead.</p>" })],
+    idioma: "en",
+    ahora: HORA,
+  });
+  check("la traducida, en inglés y escapada",
+    traducida.includes('tabindex="-1">The &lt;BCV&gt; &amp; banks</a></h3><p class="se-plana__resumen">An English lead.</p>'));
+  check("fechaDeEdicion: en Caracas ya es otro día a las 4 de la mañana UTC... o no",
+    fechaDeEdicion(Date.parse("2026-11-19T03:59:00Z")) === "miércoles, 18 de noviembre de 2026" &&
+      fechaDeEdicion(Date.parse("2026-11-19T04:00:00Z")) === "jueves, 19 de noviembre de 2026");
 }
 
 // —— 4. La apertura ——
@@ -375,7 +551,11 @@ console.log("titulares con caracteres raros");
   const h = armarPortada(SHELL, { filas: [malo, fila(2)], ahora: HORA });
   const dentro = raiz(h);
   check("ningún <script> nuevo fuera de los suyos", contar(h, /<script/g) === 3, String(contar(h, /<script/g)));
-  check("ningún manejador ni etiqueta de la API", !/onclick|onerror|<img|<b>/i.test(h));
+  check("ningún manejador ni etiqueta de la API", !/onclick|onerror|<b>/i.test(h) && !/<img(?! class="se-artcard__img")/.test(h));
+  const anticipo = h.slice(h.indexOf('class="se-publico se-portada-anticipo"'));
+  check("en la apertura a la vista, el titular escapado",
+    anticipo.includes('tabindex="-1">&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt; &quot;comillas&quot; &amp; &lt;b&gt;negrita&lt;/b&gt;'));
+  check("y su entradilla, sin la etiqueta de la API", anticipo.includes('<p class="se-plana__resumen">Entradilla con</p>'));
   check("el titular, escapado", dentro.includes("&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt; &quot;comillas&quot; &amp; &lt;b&gt;negrita&lt;/b&gt;"));
   check("los $ llegan tal cual (reemplazo por función)", dentro.includes("US$&amp;nbsp;36 $&amp; $' $$"));
   check("el slug, codificado en el enlace", dentro.includes('href="/noticias/pieza-%22%3E%3Cscript%3Ealert(4)%3C%2Fscript%3E"'));
@@ -383,6 +563,20 @@ console.log("titulares con caracteres raros");
   const barra = String.fromCharCode(92);
   check("en la ficha JSON, < escapado", json.includes(`${barra}u003c/script>`) && !json.slice(0, json.indexOf("</script>")).includes("<"));
   check("la ficha se puede leer", fichas(h)[1]?.["@graph"]?.[1]?.itemListElement?.[0]?.name?.startsWith("</script>"));
+}
+
+console.log("titulares con caracteres raros, en el bloque de datos");
+{
+  const titulo = '</script><script>alert(1)</script> "comillas" & <!-- x --> US$&nbsp;36 $& \u2028fin';
+  const malo = fila(1, { title: titulo });
+  const respuesta = { data: [malo, fila(2)], meta: { total: 2, pages: 1 } };
+  const h = armarPortada(SHELL, { filas: respuesta.data, respuesta, ahora: HORA });
+  const crudo = h.slice(h.indexOf('id="se-portada">'), h.indexOf("</script>", h.indexOf('id="se-portada">')));
+  const barra = String.fromCharCode(92);
+  check("ningún < sin escapar dentro del bloque (ni </script> ni <!--)", !crudo.slice('id="se-portada">'.length).includes("<"));
+  check("el < va escapado, como en la ficha", crudo.includes(`${barra}u003c/script>`));
+  check("un solo cierre: el bloque no se corta", contar(h, /<script/g) === 4, String(contar(h, /<script/g)));
+  check("se lee igual que llegó (comillas, &, $ y separadores incluidos)", bloque(h)?.respuesta?.data?.[0]?.title === titulo);
 }
 
 console.log("entidades del editor");
@@ -397,7 +591,11 @@ console.log("entidades del editor");
   const dentro = raiz(h);
   check("en el HTML, una sola vez escapadas (sin &amp;amp;)",
     dentro.includes("<p>P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &amp;lt;img&amp;gt;</p>"), dentro.slice(0, 400));
-  check("y sin abrir etiquetas", !/<script>alert|<img/.test(h));
+  check("y sin abrir etiquetas", !/<script>alert/.test(h) && !/<img(?! class="se-artcard__img")/.test(h));
+  // La apertura a la vista dice lo mismo que dirá React (`textoLlano` de `lib/`, que deshace
+  // `&amp;` antes que `&lt;`): «<img>» como texto, escapado al escribirlo.
+  check("en la apertura a la vista, como texto",
+    h.includes('<p class="se-plana__resumen">P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &lt;img&gt;</p>'));
 }
 
 // —— 6. /en ——
@@ -477,7 +675,15 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
         t.apertura === portada.apertura.apertura &&
         t.recientes === portada.apertura.loMasReciente &&
         t.alPunto === comun.nav.alPunto);
+    const siempre = leer(`../src/i18n/${idioma}/siempre.json`).titulares;
+    check(`${idioma}: los de Última hora, iguales a src/i18n`,
+      t.ultimaHora === siempre.tarjeta.etiqueta && t.todo === siempre.pestanas.todo && t.misTemas === siempre.pestanas.misTemas &&
+        t.todaLaUltimaHora === portada.plana.todaLaUltimaHora && t.notaIa === siempre.tarjeta.notaIa &&
+        t.ahoraMismo === siempre.hace.ahora && t.minutos === siempre.hace.corto && t.haceMinutos === siempre.hace.minutos);
   }
+  const comunEn = leer("../src/i18n/en/comun.json");
+  check("en: la marca «ES» de TituloDePieza, igual a src/i18n",
+    TEXTOS.en.marcaEspanol === comunEn.idioma.marcaEspanol && TEXTOS.en.marcaEspanolTitulo === comunEn.idioma.marcaEspanolTitulo);
 }
 
 // Que la página use la misma regla y la misma precarga (no una copia).

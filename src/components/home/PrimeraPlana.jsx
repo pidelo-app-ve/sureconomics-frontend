@@ -56,6 +56,15 @@ const SALIDA_MS = 900;
 /** Cuántas monedas caben en la columna derecha sin alargarla más que el centro. */
 const MONEDAS = 6;
 
+/**
+ * Si la foto de la apertura ya se veía al montar: la pinta el HTML de la portada
+ * (`aperturaEnHtml`, en `api/portada.js`) con su barrido de entrada, antes de que llegue el
+ * JavaScript. Se mira en el primer render, cuando ese HTML todavía está en `#root` (React lo
+ * reemplaza al terminarlo). Sin esto, al montar la foto se volvía a barrer encima de sí misma.
+ */
+const seVeiaAntesDeMontar = () =>
+  typeof document !== "undefined" && Boolean(document.querySelector(".se-portada-anticipo"));
+
 /** Si la apertura abre con un short en vertical (`AperturaShort`) y no con su foto. */
 const abreConShort = (pieza, rota) => !rota && esShort(pieza?.videoUrl);
 
@@ -181,6 +190,7 @@ Opinion.propTypes = {
 export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial = null, analisis = [], recientes = [] }) => {
   const { t, lang } = useIdioma();
   const [hoyIso] = useState(() => new Date().toISOString());
+  const [yaSeVeia] = useState(seVeiaAntesDeMontar);
   const monedas = useMonedas(MONEDAS);
   const conjunto = principal ? [principal, ...secundarias] : [];
   const { indice, saliente, rota, pausado, alternarPausa, eventos } = useRotacion(conjunto, {
@@ -263,7 +273,7 @@ export const PrimeraPlana = ({ principal, secundarias, fijada = false, editorial
               <Enlace
                 key={actual.id}
                 to={rutaDePieza(actual)}
-                className={`se-plana__media${cruzando ? " se-plana__media--entra" : ""}`}
+                className={`se-plana__media${cruzando ? " se-plana__media--entra" : yaSeVeia ? " se-plana__media--quieta" : ""}`}
                 aria-hidden="true"
                 tabIndex={-1}
               >

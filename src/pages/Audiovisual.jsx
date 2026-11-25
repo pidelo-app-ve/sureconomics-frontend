@@ -24,6 +24,7 @@ import {
   EspacioPublicitario,
   useEspacios,
 } from "../features/publicidad";
+import "../styles/listados.css";
 
 /**
  * «Al punto»: los videos del canal de YouTube (nov-2026) y, si la redacción publica

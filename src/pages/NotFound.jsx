@@ -4,6 +4,7 @@ import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
 import { UltimaHoraColumna } from "../features/titulares";
+import "./notFound.css";
 
 // La 404 no es una página que se visite a propósito: el juego se descarga solo si
 // alguien llega aquí, y convierte un enlace roto en un minuto agradable.

@@ -1849,26 +1849,6 @@
   }
 }
 
-/* Cards */
-.se-card {
-  background: transparent;
-  border: none;
-}
-
-.se-card__body {
-  display: flex;
-  flex-direction: column;
-  padding: 24px 28px 28px;
-}
-
-.se-card__excerpt {
-  margin: 0 0 var(--se-space-sm);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* Share buttons */
 .se-share {
   display: inline-flex;
@@ -2279,21 +2259,6 @@
 }
 
 /* —— Contacto —— */
-.se-contact {
-  /* Retheme shared `.se-contact-form` primitives for dark glass */
-  --se-form-surface: #ffffff;
-  --se-form-border: rgba(var(--se-tinte), 0.12);
-  --se-form-border-strong: rgba(var(--se-tinte), 0.18);
-  --se-form-text: rgba(var(--se-tinte), 0.92);
-  --se-form-muted: rgba(var(--se-tinte), 0.68);
-  --se-form-placeholder: rgba(var(--se-tinte), 0.42);
-  --se-form-focus: var(--color-accent);
-  --se-form-focus-glow: rgba(185, 83, 42, 0.22);
-  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
-     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
-     paleta y encima se leia mal. */
-  --se-form-invalid: #8f3a17;
-}
 
 .se-contact .se-form-control {
   background-color: rgba(255, 255, 255, 0.05);
@@ -2302,55 +2267,14 @@
   box-shadow: inset 0 1px 0 rgba(var(--se-tinte), 0.08);
 }
 
-.se-contact .se-form-control:hover:not(:disabled):not(:focus) {
-  border-color: rgba(var(--se-tinte), 0.22);
-  background-color: rgba(255, 255, 255, 0.065);
-}
-
-.se-contact .se-form-label {
-  font-family: var(--se-font-ui);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.se-contact__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1rem, 3vw, 1.75rem);
-}
-
-@media (min-width: 980px) {
-  .se-contact__grid {
-    /* 1.1 contra 0.9 dejaba las dos columnas casi iguales -- 600 y 491 px -- y eso
-       era defendible cuando al lado habia tres bloques de datos. Ahora hay dos
-       tarjetas cortas, y dos columnas del mismo peso hacen que el formulario, que es
-       a lo que se viene, no se lea como lo principal. */
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    align-items: start;
-  }
-}
-
 /* --- Contacto: el aire de arriba ----------------------------------------- */
 /*
    El hero cerraba con 100 px y la seccion abria con 96: casi 200 px de nada entre el
    lead y el formulario, con la pagina pidiendo desplazarse para ver a que ha venido.
    Y el titular a 104 px es escala de portada, no de una pagina de una sola palabra. */
 
-.se-contact__hero {
-  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
-}
 .se-contact .se-section {
   padding-top: clamp(1.75rem, 3.5vw, 2.75rem);
-}
-.se-contact .se-heading-hero {
-  font-size: clamp(2.75rem, 6vw, 4.25rem);
-}
-.se-contact .se-institutional-hero .se-text-lead {
-  max-width: 46ch;
-}
-
-.se-contact__panel {
-  animation: se-page-rise 0.6s var(--se-suite-ease) both;
 }
 
 .se-contact__form {
@@ -2360,107 +2284,6 @@
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-
-.se-contact__status {
-  min-height: 1px;
-}
-
-.se-contact__banner {
-  margin: 0 0 0.5rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  background: rgba(34, 197, 94, 0.12);
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-contact__banner--loading {
-  border-color: rgba(var(--se-tinte), 0.18);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(var(--se-tinte), 0.82);
-}
-
-.se-contact__banner--error {
-  border-color: rgba(185, 83, 42, 0.32);
-  background: rgba(185, 83, 42, 0.16);
-  color: #ffd6dc;
-}
-
-.se-contact__aside {
-  display: grid;
-  gap: clamp(1rem, 2.5vw, 1.35rem);
-  animation: se-page-rise 0.6s var(--se-suite-ease) both;
-  animation-delay: 120ms;
-}
-
-/* --- Contacto: la columna de al lado ------------------------------------- */
-
-.se-contact__tarjeta {
-  display: grid;
-  gap: 0.6rem;
-  padding: clamp(1.15rem, 2.4vw, 1.5rem);
-  border: 1px solid var(--color-hairline);
-  border-radius: 14px;
-  background: #fff;
-}
-.se-contact__tarjeta-titulo {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
-}
-.se-contact__tarjeta-texto {
-  margin: 0;
-  font-family: var(--se-font-ui);
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--color-slate);
-}
-.se-contact__correo {
-  font-family: var(--se-font-label);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  text-decoration: none;
-  overflow-wrap: anywhere;
-}
-.se-contact__correo:hover { text-decoration: underline; }
-
-/* Los dos caminos. Toda la fila es el enlace y no solo el titulo: un destino de
-   44 px de alto se acierta con el pulgar; una palabra subrayada, no. */
-.se-contact__camino {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--color-hairline);
-  border-radius: 10px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.se-contact__camino:hover {
-  border-color: var(--color-accent);
-  background: rgba(185, 83, 42, 0.04);
-}
-.se-contact__camino:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.se-contact__camino-titulo {
-  font-family: var(--se-font-label);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--color-ink);
-}
-.se-contact__camino-texto {
-  font-family: var(--se-font-ui);
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--color-slate-2);
 }
 
 /* --- El aviso de un campo ------------------------------------------------ */
@@ -2479,11 +2302,6 @@
 }
 .se-form-field--mal .se-form-control:focus-visible {
   outline-color: #c0522f;
-}
-
-.se-contact .se-contact-block__sub,
-.se-contact .se-contact-block__email-name {
-  color: rgba(var(--se-tinte), 0.62);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2514,82 +2332,14 @@
   color: rgba(var(--se-tinte), 0.72);
 }
 
-.se-articles__hero {
-  padding-top: clamp(2.25rem, 5vw, 3.25rem);
-}
-
 /* Flush with the container, so the kicker, the title and the filter bar below
    all start on the same vertical line as the header logo. Centring this block
    inside the container is what used to indent the heading away from everything
    else on the page. */
-.se-articles__head {
-  margin: 0 0 var(--se-space-xl);
-  animation: se-page-rise 0.6s var(--se-suite-ease, cubic-bezier(0.4, 0, 0.2, 1)) both;
-}
-
-.se-articles__title {
-  margin: 0;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.9rem, 4.2vw, 3.2rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.06;
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-articles__lead {
-  margin-top: 0.9rem;
-  /* The 980px half keeps the lead wrapping exactly where it did before the
-     block stopped being centred — only the indent went away, not the measure. */
-  max-width: min(980px, 80ch);
-}
 
 .se-heading-section--small {
   font-size: var(--se-text-h3);
   margin: 0;
-}
-
-/* Reports */
-
-.se-heading-card--small {
-  font-size: var(--se-text-body);
-}
-
-/* Services + contact */
-.se-contact-block {
-  border: 1px solid var(--se-border);
-  background: var(--se-white);
-  border-radius: 14px;
-  padding: var(--se-space-md);
-}
-
-.se-contact-block__title {
-  font-family: var(--se-font-heading);
-  font-size: var(--se-text-h3);
-  margin-bottom: var(--se-space-xs);
-}
-
-.se-contact-block__sub {
-  margin-top: var(--se-space-sm);
-  font-family: var(--se-font-ui);
-  font-size: var(--se-text-small);
-  color: var(--se-gray-700);
-}
-
-.se-contact-block__emails {
-  margin-top: var(--se-space-xs);
-  display: grid;
-  gap: var(--se-space-xs);
-}
-
-.se-contact-block__email-name {
-  font-family: var(--se-font-ui);
-  font-size: var(--se-text-small);
-  color: var(--se-gray-700);
-}
-
-.se-card--service {
-  border-radius: 14px;
 }
 
 /* —— Forms (contrast-forward, card-style stack + toolbar variant) —— */
@@ -2813,59 +2563,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   border-radius: 2px;
 }
 
-@keyframes se-image-field-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes se-adm-backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Sin el `translateX(-50%)`, que ya no hace falta al centrar con flex -- y que ademas
-   dejaba un `transform` puesto al terminar, convirtiendo la superficie en el bloque
-   contenedor de cualquier `position: fixed` de dentro.
-   El desplazamiento baja de 10px a 4px y sube un pelin de escala: a 10px el dialogo
-   entraba dando un salto que se lee como un tiron, sobre todo en el modal grande. */
-@keyframes se-adm-dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes se-admin-outlet-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes se-admin-surface-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .se-admin-main__outlet,
   .se-admin-nav-link,
@@ -2880,17 +2577,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   }
 }
 
-@keyframes se-adm-submission-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .se-admin-submission-detail__status-banner {
   margin: 0;
 }
@@ -2902,17 +2588,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   font-size: var(--se-text-caption);
   color: rgba(var(--se-tinte), 0.58);
   margin-top: var(--se-space-xs);
-}
-
-@keyframes se-adm-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .se-comments {
@@ -2971,60 +2646,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   margin-right: 0;
   margin-bottom: var(--se-space-md);
   width: 100%;
-}
-
-/* Mobile responsiveness: remove desktop constraints, allow full-width pages */
-@media (max-width: 959px) {
-
-  .se-reader-dash__page {
-    max-width: none;
-    width: 100%;
-  }
-}
-
-.se-reader-dash__page {
-  position: relative;
-  z-index: 2;
-  margin: 0 auto;
-}
-
-.se-reader-page-head {
-  margin-bottom: 1.35rem;
-}
-
-.se-reader-page-title {
-  font-family: var(--se-font-heading);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.se-reader-page-lead {
-  color: rgba(26, 26, 26, 0.58);
-}
-
-.se-reader-backlink {
-  font-weight: 600;
-}
-
-.se-reader-card {
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(26, 26, 26, 0.08);
-}
-
-.se-reader-card:focus-within {
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-}
-
-.se-reader-card--form {
-  padding: 0;
-  overflow: hidden;
-}
-
-.se-contact-form--reader {
-  margin-top: 0;
-  border-radius: 0;
-  border: none;
-  box-shadow: none;
 }
 
 /* ==========================================================================
@@ -3170,266 +2791,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
    The hero already ends in 100px of padding and shares the section background, so
    the explorer section adds no top gap of its own. */
 .se-explorer-section { padding-top: 0; }
-
-.se-explorer {
-  border: 1px solid rgba(var(--se-tinte), 0.12);
-  border-radius: 14px;
-  padding: var(--se-space-md);
-  /* Verde Cardin plano, igual que la cabecera. El radial cobrizo se descartó por
-     lo mismo: el cobrizo es acento, y aquí ya lo lleva el filo izquierdo. */
-  background: var(--marca-verde);
-  color: #ffffff;
-  /* Sin sombra ni animación de entrada: una pastilla verde
-     flotando bajo una cabecera verde se leía como panel de control. */
-  /* La animación de entrada deja un `transform` puesto —termina con `both`— y un
-     elemento transformado es su propio contexto de apilamiento. Eso encerraba el
-     `z-index: 40` del panel desplegable dentro del filtro, así que las tarjetas
-     que vienen después le pintaban encima. Con esto el filtro entero se apila por
-     delante y el panel vuelve a poder salirse. */
-  position: relative;
-  z-index: 30;
-}
-
-.se-explorer__n {
-  color: #ffffff;
-}
-
-.se-explorer__bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--se-space-sm);
-  align-items: center;
-}
-
-/* The search field is the one element that should absorb spare width. */
-.se-explorer__field {
-  position: relative;
-  flex: 1 1 240px;
-  min-width: 0;
-}
-
-/* La lupa vive dentro del campo, a la izquierda del texto. `pointer-events: none`
-   para que el clic caiga en el campo y no en el dibujo. */
-.se-explorer__lupa {
-  position: absolute;
-  left: 13px;
-  top: 50%;
-  width: 16px;
-  height: 16px;
-  transform: translateY(-50%);
-  color: rgba(255, 255, 255, 0.6);
-  pointer-events: none;
-  transition: color 0.18s ease;
-}
-
-.se-explorer__field:focus-within .se-explorer__lupa { color: #ffffff; }
-
-/* El campo y los disparadores van sobre la franja verde: blanco translucido y
-   texto blanco. Estaba en dos bloques que se pisaban (este y otro unas dos mil
-   lineas mas abajo); ahora vive solo aqui. */
-.se-explorer__search {
-  width: 100%;
-  padding: 11px 14px 11px 38px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-family: var(--sans);
-  font-size: 14px;
-  transition: border-color 0.18s ease, background 0.18s ease;
-}
-
-.se-explorer__search::placeholder { color: rgba(255, 255, 255, 0.72); }
-
-.se-explorer__sel { position: relative; flex: 0 0 auto; }
-
-.se-explorer__btn {
-  display: inline-flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 170px;
-  padding: 11px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-family: var(--sans);
-  font-size: 14px;
-  transition: border-color 0.18s ease, background 0.18s ease;
-}
-
-.se-explorer__search:focus,
-.se-explorer__btn:hover,
-.se-explorer__btn:focus-visible {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.5);
-  outline: none;
-}
-
-/* Un anillo de verdad para el teclado. El cambio de borde de arriba, de 0,22 a 0,5
-   de blanco, no se distinguia a simple vista; el blanco sobre el verde oscuro, si. */
-.se-explorer__search:focus-visible,
-.se-explorer__btn:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-/* Filled = this axis has a selection; on = its panel is open. */
-.se-explorer__btn--filled { border-color: rgba(185, 83, 42, 0.55); }
-
-/* Abierto: el mismo realce que al pasar el ratón. Relleno cobrizo no: con la opción
-   elegida y la pastilla ya en cobre, el disparador también en cobre era demasiado. */
-.se-explorer__btn--on {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.se-explorer__caret { font-size: 11px; opacity: 0.7; }
-
-.se-explorer__panel {
-  position: absolute;
-  z-index: 40;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 300px;
-  max-height: 340px;
-  overflow-y: auto;
-  padding: 6px;
-  border: 1px solid rgba(var(--se-tinte), 0.18);
-  border-radius: 12px;
-  background: #f2f2f0;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
-}
-
-.se-explorer__opt {
-  display: flex;
-  width: 100%;
-  gap: 14px;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 9px 11px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--color-cream);
-  font-family: var(--sans);
-  font-size: 14px;
-  text-align: left;
-  transition: background 0.14s ease;
-}
-
-.se-explorer__opt:hover { background: rgba(255, 255, 255, 0.07); }
-
-.se-explorer__opt--on {
-  background: var(--color-accent);
-  color: var(--color-cream);
-}
-
-.se-explorer__opt--region { font-weight: 600; }
-
-.se-explorer__opt--child {
-  padding-left: 28px;
-  font-size: 13.5px;
-  color: var(--color-slate);
-}
-
-.se-explorer__opt--child.se-explorer__opt--on { color: var(--color-cream); }
-
-.se-explorer__group { border-top: 1px solid rgba(var(--se-tinte), 0.07); }
-.se-explorer__group:first-of-type { border-top: 0; }
-
-.se-explorer__n {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--color-slate-2);
-  font-variant-numeric: tabular-nums;
-}
-
-.se-explorer__opt--on .se-explorer__n { color: rgba(var(--se-tinte), 0.78); }
-
-.se-explorer__none {
-  margin: 0;
-  padding: 12px 11px;
-  font-size: 13px;
-  color: var(--color-slate-2);
-}
-
-.se-explorer__total {
-  margin-left: auto;
-  font-family: var(--se-font-label);
-  font-size: 13px;
-  color: var(--color-slate);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.se-explorer__total strong {
-  font-family: var(--mono);
-  color: var(--color-cream);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.se-explorer__clear {
-  flex: 0 0 auto;
-  padding: 10px 14px;
-  border: 1px solid rgba(var(--se-tinte), 0.22);
-  border-radius: 10px;
-  background: transparent;
-  color: var(--color-slate);
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: color 0.18s ease, border-color 0.18s ease;
-}
-
-.se-explorer__clear:hover {
-  color: var(--color-cream);
-  border-color: var(--color-accent);
-}
-
-.se-explorer__active {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--se-space-xs);
-  align-items: center;
-  margin-top: var(--se-space-sm);
-  padding-top: var(--se-space-sm);
-  border-top: 1px solid rgba(var(--se-tinte), 0.1);
-}
-
-.se-explorer__chip {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 13px;
-  border: 1px solid var(--color-accent);
-  border-radius: 999px;
-  background: var(--color-accent);
-  color: var(--color-cream);
-  font-size: 13px;
-}
-
-.se-explorer__chip span { opacity: 0.75; }
-.se-explorer__chip:hover span { opacity: 1; }
-
-/* Results below the explorer on a listing page. */
-.se-listing { margin-top: var(--se-space-2xl); }
-
-@media (max-width: 860px) {
-  .se-explorer__total { margin-left: 0; }
-  .se-explorer__sel { flex: 1 1 160px; }
-  .se-explorer__btn { width: 100%; min-width: 0; }
-}
-
-@media (max-width: 640px) {
-  .se-explorer { padding: var(--se-space-sm); }
-  .se-explorer__field { flex-basis: 100%; }
-  .se-explorer__panel { min-width: 0; width: 100%; }
-  .se-explorer__clear { flex: 1 1 auto; }
-}
 
 /* —— Encabezado compartido de los bloques de formato —— */
 .se-format__head {
@@ -3861,7 +3222,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   object-fit: cover;
 }
 
-
 .se-doccard__title {
   margin: 0;
   font-size: 18px;
@@ -3926,16 +3286,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 
 .se-piece__crumbs a { color: var(--color-slate); text-decoration: none; }
 .se-piece__crumbs a:hover { color: var(--color-accent); }
-
-.se-piece__kicker {
-  margin: 0 0 0.6rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 
 .se-piece__title {
   margin: 0;
@@ -4274,35 +3624,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   font-size: 0.75rem;
 }
 
-/* —— Collaborator format choice ——
-   This one lives on the reader dashboard, which is light, so it uses the public
-   tokens on purpose. */
-.se-submission-formats {
-  flex-wrap: wrap;
-}
-
-.se-submission-format {
-  flex: 1 1 13rem;
-  border: 1px solid var(--color-hairline);
-}
-
-.se-submission-format:hover {
-  border-color: var(--color-accent);
-}
-
-.se-submission-format:has(input:checked) {
-  border-color: var(--color-accent);
-  box-shadow: inset 0 0 0 1px var(--color-accent);
-}
-
-.se-submission-format input {
-  accent-color: var(--color-accent);
-}
-
-.se-submission-format em {
-  color: var(--color-slate-2);
-}
-
 /* A place inherited from the tree rather than tagged on the piece. Same control,
    quieter, because it is context: the newsroom chose "Venezuela", the region and
    the continent come with it. */
@@ -4326,56 +3647,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   margin: 0.9rem 0 0;
   font-size: 0.85rem;
   color: var(--color-accent);
-}
-
-/* —— Lo que va dentro del filtro ——
-   Va al final de la hoja a propósito. Las reglas de cada pieza del explorador
-   están repartidas más arriba y pintan con `--se-tinte`, que en página clara es
-   negro; sobre la franja verde eso deja el control entero ilegible. Un bloque
-   acotado al contenedor y colocado después gana por orden, sin tocar catorce
-   reglas una por una ni inflarles la especificidad.
-
-   El panel desplegable queda fuera: se dibuja sobre papel, no sobre el verde. */
-.se-explorer__total,
-.se-explorer__none,
-.se-explorer__caret {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.se-explorer__sel,
-.se-explorer__total strong {
-  color: #ffffff;
-}
-
-/* El conteo aparece en dos superficies distintas: en la barra verde y dentro del
-   panel desplegable, que se dibuja sobre papel. Ponerlo blanco a secas lo hacía
-   desaparecer en el panel, que es donde más se lee. */
-.se-explorer__bar .se-explorer__n {
-  color: #ffffff;
-}
-
-.se-explorer__panel .se-explorer__n {
-  color: var(--se-gray-500);
-}
-
-/* En la opción elegida el fondo es cobre: la cifra va en el color de su texto. */
-.se-explorer__panel .se-explorer__opt--on .se-explorer__n {
-  color: inherit;
-  opacity: 0.85;
-}
-
-/* El campo y los disparadores (`__search`, `__btn`) se pintan en su bloque de
-   origen, junto a `.se-explorer__bar`: aqui habia una copia que los pisaba. */
-
-.se-explorer__chip,
-.se-explorer__clear {
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-}
-
-.se-explorer__chip:hover,
-.se-explorer__clear:hover {
-  background: rgba(255, 255, 255, 0.12);
 }
 
 /* —— Lo que va dentro del cajón del menú móvil ——
@@ -5555,13 +4826,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-@keyframes se-aud-girar {
-  to { transform: rotate(360deg); }
-}
-@keyframes se-aud-latido {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
-}
 
 /* El acuse de guardado. Se apaga solo: uno que se queda puesto deja de
    significar nada a los diez segundos -- no se sabe si es de este cambio o del
@@ -6238,12 +5502,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   .se-ad-barra__titular { display: none; }
 }
 
-.se-admin-pub__anunciante-cuerpo,
-.se-admin-pub__campana-cuerpo {
-  padding: 0 1.1rem 1.1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
-}
-
 /* --- El retrato --- */
 
 .se-retrato {
@@ -6373,102 +5631,11 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   .se-piece__idioma { transition: none; }
 }
 
-/* --- El puente: las clases viejas del área de lector --- */
-
-.se-reader-dash__page {
-  display: grid;
-  gap: 1.75rem;
-  max-width: 56rem;
-  padding: clamp(1.25rem, 3vw, 2rem);
-}
-
-.se-reader-page-title {
-  margin: 0 0 0.4rem;
-  font-size: clamp(1.6rem, 3.6vw, 2.1rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--color-ink);
-}
-.se-reader-page-lead {
-  margin: 0;
-  max-width: 62ch;
-  font-family: var(--se-font-ui);
-  font-size: 0.93rem;
-  line-height: 1.6;
-  color: var(--color-slate);
-}
-
-.se-reader-card {
-  padding: clamp(1.1rem, 2.5vw, 1.6rem);
-  border: 1px solid var(--color-hairline);
-  border-radius: 14px;
-  background: #fff;
-}
-
 /* --- El formulario de envío --- */
 
 /* El `fieldset` trae borde propio del navegador y la `legend` lo atraviesa: eso
    era la raya que cruzaba «Qué está enviando». Sin borde y sin relleno, la
    leyenda vuelve a ser un rótulo. */
-/* El borde del `fieldset` y su leyenda se resuelven donde se definen, mas
-   arriba: una regla suelta aqui pierde por especificidad y es codigo muerto. */
-
-.se-submission-formats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: 0.75rem;
-}
-.se-submission-format {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--color-hairline);
-  border-radius: 11px;
-  background: #fff;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.se-submission-format:hover { border-color: rgba(var(--se-tinte), 0.28); }
-/* El elegido, con el acento. Antes el texto de la opción marcada se aclaraba
-   hasta casi desaparecer, que es lo contrario de lo que hace falta. */
-.se-submission-format:has(input:checked) {
-  border-color: var(--color-accent);
-  background: rgba(185, 83, 42, 0.05);
-}
-.se-submission-format:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.se-submission-format input { margin-top: 0.2rem; accent-color: var(--color-accent); }
-.se-submission-format span { display: block; min-width: 0; }
-.se-submission-format strong {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-ink);
-}
-.se-submission-format em {
-  display: block;
-  margin-top: 0.15rem;
-  font-family: var(--se-font-ui);
-  font-size: 0.8rem;
-  font-style: normal;
-  line-height: 1.45;
-  color: var(--color-slate-2);
-}
-
-@keyframes se-hoja-sube {
-  from {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
 
 /* ————————————————————————————————————————————————————————————————————————————
    «Al punto»: entrevistas y podcast en una sola página (`/audiovisual`)
@@ -6483,13 +5650,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 /* —— El título, como el botón de la cabecera pero en grande ——
    El nombre con el punto rojo de grabación delante, con el mismo latido de dos
    segundos (`se-alpunto-latido`, definido con el botón), dentro de la columna. */
-.se-alpunto__titulo {
-  --se-rec: #e5322d;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  line-height: 1;
-}
 
 .se-alpunto__rec {
   /* El halo de 4 px nace en el borde: radio 0,18em entre 0,18em + 4 px. */
@@ -6515,12 +5675,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
    Botones y no enlaces, porque cambian una vista dentro de la misma página; el
    estado se anuncia con `aria-pressed`. Pestañas de texto, como las secciones de un
    diario: la elegida, subrayada en tinta. 44 px de alto, el mínimo táctil. */
-.se-alpunto__seg {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0 1.5rem;
-  margin: calc(-1 * var(--se-space-md)) 0 var(--se-space-xl);
-}
 
 .se-alpunto__seg-btn {
   min-height: 44px;
@@ -6535,40 +5689,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   color: var(--color-slate);
   cursor: pointer;
   transition: color 0.18s ease, border-color 0.18s ease;
-}
-
-.se-alpunto__seg-btn:hover {
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-alpunto__seg-btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.se-alpunto__seg-btn--on,
-.se-alpunto__seg-btn--on:hover {
-  border-bottom-color: var(--color-ink);
-  color: var(--color-ink);
-}
-
-/* —— Encabezados de las dos secciones —— */
-.se-alpunto__h2 {
-  margin: 0 0 var(--se-space-md);
-  padding-top: 10px;
-  border-top: 2px solid var(--color-ink);
-  font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
-  line-height: 1.1;
-  color: var(--se-black);
-}
-
-.se-alpunto__ultimo {
-  margin-top: var(--se-space-2xl);
-}
-
-/* La rejilla ya trae su margen superior por `.se-listing`. */
-.se-alpunto__lista {
-  scroll-margin-top: var(--se-space-lg);
 }
 
 /* —— El hero «Lo último» ——
@@ -6893,10 +6013,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
     grid-template-columns: 1fr;
   }
 
-  .se-alpunto__seg {
-    display: flex;
-  }
-
   .se-alpunto__seg-btn {
     flex: 0 0 auto;
   }
@@ -7152,37 +6268,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   }
 }
 
-.se-explorer-section--primera .se-explorer {
-  /* 52 a la derecha: el sitio del botón de cerrar, que va encima del marco. */
-  padding: 10px 52px 10px 12px;
-  border-width: 0 0 1px;
-  border-color: rgba(0, 51, 24, 0.9);
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.se-explorer-section--primera .se-explorer__search,
-.se-explorer-section--primera .se-explorer__btn {
-  padding-top: 8px;
-  padding-bottom: 8px;
-}
-
-@media (max-width: 640px) {
-  .se-explorer-section--primera .se-explorer__bar {
-    gap: 8px;
-  }
-
-  .se-explorer-section--primera .se-explorer__field {
-    flex: 1 1 100%;
-  }
-
-  /* Tema y Dónde comparten renglón: dos renglones en vez de tres. */
-  .se-explorer-section--primera .se-explorer__sel {
-    flex: 1 1 calc(50% - 4px);
-    min-width: 0;
-  }
-}
-
 /* ═══ Accesibilidad y apaisado: lo que la auditoría midió en la pieza y la portada ═══
    Al final de la hoja a propósito: varias de estas reglas tienen que ganar por orden
    a las de cada componente, que se escribieron antes con la misma especificidad. */
@@ -7283,356 +6368,6 @@ html {
     grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
     gap: var(--se-space-lg);
   }
-}
-
-/* ═══ INVITACION AL BOLETIN ═══════════════════════════════════════════
-   Ventana en medio de la pantalla sobre una capa oscura: la redaccion la quiso
-   visible, no en una esquina. La caja es la del aviso de cookies -- papel, filete
-   de hairline, 14 px de radio -- y el cintillo, el titulo y el boton son los del
-   boletin de la portada. Las reglas de cuando sale estan en
-   `features/boletin/utils.js`; el foco y el teclado, en el componente. */
-
-.se-invitacion {
-  position: fixed;
-  inset: 0;
-  /* Sobre todo, menu movil incluido (1001): mientras esta abierta es lo unico que
-     se puede tocar. El aviso de cookies no compite: la invitacion no existe hasta
-     que se contesta. */
-  z-index: 1100;
-  display: grid;
-  place-items: center;
-  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  /* El verde de la marca, casi negro, y no un negro neutro: la pagina de detras se
-     sigue intuyendo como el mismo sitio. */
-  background: rgba(0, 26, 12, 0.58);
-  animation: se-invitacion-fondo 200ms ease-out both;
-}
-
-/* Entrada: la capa se funde y la ventana crece un poco desde casi su tamano, nunca
-   desde cero, con un ease-out fuerte -- lo que se ve es que llega rapido y se posa.
-   Por debajo de 300 ms: es una interrupcion, no un espectaculo. */
-@keyframes se-invitacion-fondo {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes se-invitacion-entra {
-  from { opacity: 0; transform: translateY(8px) scale(0.96); }
-  to { opacity: 1; transform: none; }
-}
-
-.se-invitacion__caja {
-  position: relative;
-  /* Recorta la barra de cuenta atrás del acierto a las esquinas redondas. */
-  overflow: hidden;
-  width: min(440px, 100%);
-  padding: 1.75rem 1.75rem 1.6rem;
-  border: 1px solid var(--color-hairline);
-  border-radius: 14px;
-  background: var(--color-paper);
-  box-shadow: 0 24px 60px rgba(0, 26, 12, 0.32);
-  animation: se-invitacion-entra 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-.se-invitacion__cerrar {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  /* 44 px de area aunque el aspa se vea pequena: cerrar en un movil no puede ser
-     cuestion de punteria. */
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--color-slate-2);
-  font-size: 0.95rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.se-invitacion__cerrar:hover { color: var(--color-ink); background: var(--se-offwhite); }
-
-.se-invitacion__kicker {
-  margin: 0 2.25rem 0.55rem 0;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
-
-.se-invitacion__titulo {
-  margin: 0 0 0.55rem;
-  font-family: var(--se-font-heading);
-  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.85rem);
-  text-wrap: balance;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  color: var(--color-ink);
-}
-
-.se-invitacion__texto {
-  margin: 0 0 1.15rem;
-  font-family: var(--se-font-ui);
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--color-slate-2);
-}
-
-.se-invitacion__form { margin: 0; }
-
-.se-invitacion__label {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(var(--se-tinte), 0.62);
-}
-
-.se-invitacion__input {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid rgba(var(--se-tinte), 0.18);
-  border-radius: 10px;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--se-font-ui);
-  font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.se-invitacion__input::placeholder { color: rgba(var(--se-tinte), 0.5); }
-.se-invitacion__input:focus-visible {
-  outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(185, 83, 42, 0.18);
-}
-.se-invitacion__input[aria-invalid="true"] { border-color: rgba(185, 83, 42, 0.6); }
-
-.se-invitacion__acciones {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 0.7rem;
-}
-
-.se-invitacion__btn {
-  flex: 1 1 auto;
-  min-height: 44px;
-  padding: 0 1rem;
-  border: 1px solid var(--marca-verde);
-  border-radius: 10px;
-  background: var(--marca-verde);
-  color: #ffffff;
-  font-family: var(--se-font-label);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  transition: background 0.18s ease, transform 140ms ease-out;
-}
-.se-invitacion__btn:hover { background: #00250f; }
-.se-invitacion__btn:active:not(:disabled) { transform: scale(0.98); }
-.se-invitacion__btn:disabled { opacity: 0.72; cursor: progress; }
-
-/* «Ahora no» es un boton de texto: ni escondido ni del mismo peso que el de
-   suscribirse -- rechazar una invitacion no es rechazar un consentimiento. */
-.se-invitacion__luego {
-  flex: 0 0 auto;
-  min-height: 44px;
-  padding: 0 0.6rem;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--color-slate-2);
-  font-family: var(--se-font-label);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.se-invitacion__luego:hover { color: var(--color-ink); }
-
-.se-invitacion__cerrar:focus-visible,
-.se-invitacion__btn:focus-visible,
-.se-invitacion__luego:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-/* El error, con los colores del boletin de la portada: en el filete y el relleno,
-   nunca en las letras. */
-.se-invitacion__error {
-  margin: 0.6rem 0 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
-  color: rgba(var(--se-tinte), 0.92);
-  font-family: var(--se-font-ui);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-.se-invitacion__error {
-  border: 1px solid rgba(185, 83, 42, 0.32);
-  background: rgba(185, 83, 42, 0.1);
-}
-
-/* —— El acierto ——
-   Se vive una vez, asi que puede celebrar, pero con la voz del sitio: nada de
-   rebotes ni confeti. El sello verde llega desde casi su tamano con un ease-out
-   fuerte, la marca se dibuja dentro, un anillo se expande y se apaga detras, y el
-   texto entra escalonado. Todo termina antes de 900 ms; luego la barra de abajo se
-   vacia, lineal, mientras la ventana se despide sola. */
-.se-invitacion__exito {
-  display: grid;
-  justify-items: center;
-  padding: 0.6rem 0.5rem 0.9rem;
-  text-align: center;
-  outline: none;
-}
-
-.se-invitacion__sello {
-  position: relative;
-  display: block;
-  width: 68px;
-  height: 68px;
-  margin-bottom: 1rem;
-  animation: se-exito-sello 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-/* El anillo que se expande una vez detras del sello: el «hecho» se ve de reojo. */
-.se-invitacion__sello::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid var(--marca-verde);
-  opacity: 0;
-  animation: se-exito-anillo 900ms cubic-bezier(0.23, 1, 0.32, 1) 180ms both;
-}
-
-.se-invitacion__sello svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.se-invitacion__sello-aro { fill: var(--marca-verde); }
-
-.se-invitacion__sello-marca {
-  fill: none;
-  stroke: #ffffff;
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  /* Largo del trazo: la marca se dibuja de punta a punta, no aparece entera. */
-  stroke-dasharray: 34;
-  stroke-dashoffset: 34;
-  animation: se-exito-marca 380ms cubic-bezier(0.65, 0, 0.35, 1) 260ms forwards;
-}
-
-.se-invitacion__exito .se-invitacion__titulo,
-.se-invitacion__exito .se-invitacion__texto,
-.se-invitacion__nota {
-  animation: se-exito-texto 320ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-.se-invitacion__exito .se-invitacion__titulo { animation-delay: 380ms; }
-.se-invitacion__exito .se-invitacion__texto { animation-delay: 440ms; }
-.se-invitacion__nota { animation-delay: 500ms; }
-
-.se-invitacion__texto--exito {
-  max-width: 32ch;
-  margin-bottom: 0.5rem;
-  color: var(--color-ink);
-}
-
-/* El correo, en la letra de datos: es una direccion, no prosa, y asi se lee
-   exacta. Corta donde haga falta para que uno largo no desborde en el telefono. */
-.se-invitacion__correo {
-  font-family: var(--mono);
-  font-size: 0.86em;
-  overflow-wrap: anywhere;
-}
-
-.se-invitacion__nota {
-  margin: 0;
-  max-width: 34ch;
-  font-family: var(--se-font-ui);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-slate-2);
-}
-
-/* La cuenta atras: una barra cobriza al pie de la ventana que se vacia en lo que
-   tarda en cerrarse. Dice «esto se va solo» sin un numero que lea nadie. */
-.se-invitacion__cuenta {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3px;
-  background: var(--color-accent);
-  transform-origin: left center;
-  animation: se-exito-cuenta linear both;
-}
-
-@keyframes se-exito-sello {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes se-exito-anillo {
-  0% { opacity: 0.45; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.55); }
-}
-
-@keyframes se-exito-marca {
-  to { stroke-dashoffset: 0; }
-}
-
-@keyframes se-exito-texto {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes se-exito-cuenta {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
-}
-
-/* En el telefono, la misma ventana centrada con 16 px de margen; algo menos de
-   relleno para que el boton no quede bajo el pulgar del teclado. */
-@media (max-width: 699px) {
-  .se-invitacion__caja { padding: 1.4rem 1.25rem 1.25rem; }
-}
-
-@media (pointer: coarse) {
-  .se-invitacion__luego { padding: 0 0.9rem; }
-}
-
-/* Con movimiento reducido la ventana no crece ni sube: solo aparece, fundida. El
-   acierto, igual: la marca ya dibujada, sin anillo, el texto quieto, y la barra no
-   se mueve -- la ventana se cierra sola de todos modos. */
-@media (prefers-reduced-motion: reduce) {
-  .se-invitacion__caja { animation: se-invitacion-fondo 160ms ease-out both; }
-  .se-invitacion__btn:active:not(:disabled) { transform: none; }
-  .se-invitacion__sello,
-  .se-invitacion__exito .se-invitacion__titulo,
-  .se-invitacion__exito .se-invitacion__texto,
-  .se-invitacion__nota { animation: se-invitacion-fondo 160ms ease-out both; }
-  .se-invitacion__sello::after { animation: none; }
-  .se-invitacion__sello-marca { animation: none; stroke-dashoffset: 0; }
-  .se-invitacion__cuenta { display: none; }
 }
 
 /* ─── Patrocinio compacto («Patrocinado por [marca]») ──────────────────────────
@@ -8037,30 +6772,6 @@ html {
   line-height: 1.5;
   color: var(--color-slate-2);
   text-wrap: pretty;
-}
-
-@keyframes se-insertar-asoma {
-  from { opacity: 0; transform: scale(0.6); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes se-insertar-menu {
-  from { opacity: 0; transform: translate(-6px, -50%); }
-  to { opacity: 1; transform: translate(0, -50%); }
-}
-
-@keyframes se-figura-giro {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes se-imgdlg-pulso {
-  from { opacity: 0.55; }
-  to { opacity: 1; }
-}
-
-@keyframes se-previa-entra {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
 }
 
 /* —— Cloudflare Turnstile ——
@@ -9353,212 +8064,6 @@ html {
   background: var(--papel);
 }
 
-.se-publico .se-articles__title {
-  font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
-  line-height: 1.05;
-  color: var(--tinta);
-}
-
-/* —— El buscador de los listados: el índice de un diario ——
-   La búsqueda es una línea de titular: se escribe en la serif, a tamaño de título,
-   sobre un filete que se vuelve verde al enfocar. Debajo, los filtros se leen como
-   una frase: «Tema · Dónde · 24 resultados». El de la portada sigue colgando verde
-   del mástil (`.se-explorer-section--primera`). */
-.se-publico .se-articles .se-explorer {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--tinta);
-}
-
-.se-publico .se-articles .se-explorer__bar {
-  gap: 10px 22px;
-  align-items: baseline;
-}
-
-.se-publico .se-articles .se-explorer__field {
-  flex: 1 1 100%;
-}
-
-.se-publico .se-articles .se-explorer__lupa {
-  left: 0;
-  width: 26px;
-  height: 26px;
-  color: var(--tinta);
-}
-
-.se-publico .se-articles .se-explorer__field:focus-within .se-explorer__lupa {
-  color: var(--marca-verde);
-}
-
-.se-publico .se-articles .se-explorer__search {
-  padding: 10px 0 12px 40px;
-  border: 0;
-  border-bottom: 2px solid var(--tinta);
-  border-radius: 0;
-  background:
-    linear-gradient(var(--marca-verde), var(--marca-verde)) left bottom / 0% 2px no-repeat,
-    transparent;
-  color: var(--tinta);
-  font-family: var(--titular);
-  font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  transition: background-size 420ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.se-publico .se-articles .se-explorer__search::placeholder {
-  color: var(--color-slate-2);
-  font-style: italic;
-}
-
-.se-publico .se-articles .se-explorer__search:focus {
-  background-size: 100% 2px, auto;
-  border-color: var(--tinta);
-  outline: none;
-}
-
-.se-publico .se-articles .se-explorer__search:focus-visible {
-  outline: none;
-}
-
-/* Los filtros, en frase: texto con su flecha, sin caja. */
-.se-publico .se-articles .se-explorer__btn {
-  min-width: 0;
-  min-height: 44px;
-  gap: 6px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--tinta);
-  font-family: var(--se-font-ui);
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: var(--filete-fuerte);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 5px;
-}
-
-.se-publico .se-articles .se-explorer__btn:hover,
-.se-publico .se-articles .se-explorer__btn--on {
-  border: 0;
-  background: transparent;
-  text-decoration-color: var(--tinta);
-}
-
-.se-publico .se-articles .se-explorer__btn--filled {
-  color: var(--marca-verde);
-  text-decoration-color: var(--marca-verde);
-}
-
-.se-publico .se-articles .se-explorer__btn:focus-visible {
-  outline: 2px solid var(--marca-verde);
-  outline-offset: 3px;
-}
-
-.se-publico .se-articles .se-explorer__caret {
-  color: var(--color-slate);
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.se-publico .se-articles .se-explorer__btn--on .se-explorer__caret {
-  transform: rotate(180deg);
-}
-
-.se-publico .se-articles .se-explorer__total {
-  margin-left: 0;
-  color: var(--color-slate);
-  font-size: 0.9375rem;
-}
-
-.se-publico .se-articles .se-explorer__total::before {
-  content: "·";
-  margin-right: 22px;
-  color: var(--filete-fuerte);
-}
-
-.se-publico .se-articles .se-explorer__total strong {
-  font-family: var(--cifras);
-  font-size: 1rem;
-  color: var(--tinta);
-}
-
-/* La cifra entra de abajo cuando cambia: el filtro respondió. */
-.se-explorer__cifra {
-  display: inline-block;
-  animation: se-explorer-cifra 360ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-@keyframes se-explorer-cifra {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-explorer__cifra { animation: none; }
-  .se-publico .se-articles .se-explorer__search { transition: none; }
-}
-
-.se-publico .se-articles .se-explorer__clear {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--marca-rojo);
-  font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.se-publico .se-articles .se-explorer__clear:hover {
-  background: transparent;
-  color: var(--tinta);
-}
-
-.se-publico .se-articles .se-explorer__active {
-  margin-top: 6px;
-  padding-top: 0;
-  border-top: 0;
-}
-
-.se-publico .se-articles .se-explorer__chip {
-  padding: 4px 10px;
-  border: 1px solid var(--tinta);
-  border-radius: 0;
-  background: transparent;
-  color: var(--tinta);
-  font-size: 0.875rem;
-}
-
-.se-publico .se-articles .se-explorer__chip:hover {
-  background: var(--tinta);
-  color: #ffffff;
-}
-
-.se-publico .se-explorer__panel {
-  border-radius: 0;
-  border-color: var(--tinta);
-  border-top-width: 2px;
-  background: var(--papel);
-  box-shadow: 0 12px 28px -12px rgba(17, 24, 39, 0.35);
-}
-
-.se-publico .se-explorer__opt {
-  border-radius: 0;
-}
-
-.se-publico .se-explorer__panel .se-explorer__opt--on {
-  background: var(--tinta);
-  color: #ffffff;
-}
-
 /* —— Botones y campos de la parte pública: sin mayúsculas, sin elevarse, rectos —— */
 .se-publico .se-btn {
   text-transform: none;
@@ -9599,14 +8104,6 @@ html {
   box-shadow: none;
 }
 
-.se-publico .se-card--service {
-  border-top-width: 1px;
-}
-
-.se-publico .se-contact__tarjeta:first-child {
-  border-left: 0;
-}
-
 .se-publico .se-contact__tarjeta-titulo,
 .se-publico .se-contact-form fieldset.se-form-field legend,
 .se-reader-dash .se-contact-form fieldset.se-form-field legend {
@@ -9625,50 +8122,6 @@ html {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-}
-
-.se-publico .se-contact__camino {
-  padding: 12px 0;
-  border: 0;
-  border-top: 1px solid var(--filete);
-  border-radius: 0;
-}
-
-.se-publico .se-contact__camino:hover {
-  background: transparent;
-}
-
-.se-publico .se-contact__camino-titulo {
-  font-family: var(--titular);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
-/* —— Cuenta: entrar y registrarse, sin caja flotante —— */
-.se-publico .se-entrada__caja {
-  padding: 14px 0 0;
-  border: 0;
-  border-top: 2px solid var(--tinta);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-/* —— Lo importante de hoy: rótulos de sección en la serif —— La regla la lleva el
-   rótulo; la sección ya no, o salían dos líneas seguidas. */
-.se-publico .se-res-seccion {
-  padding-top: 0;
-  border-top: 0;
-}
-
-.se-publico .se-res-seccion__titulo {
-  padding-top: 10px;
-  border-top: 2px solid var(--tinta);
-  font-family: var(--titular);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 /* —— Los juegos fuera de la portada (/juegos y el final de cada pieza) ——
@@ -9786,13 +8239,6 @@ html {
   border-radius: 2px;
 }
 
-/* —— Consultoría: los servicios al filo del filete, con un enlace y no una barra ——
-   Seis botones cobrizos a todo el ancho, uno por servicio, eran la pantalla de una
-   aplicación. */
-.se-publico .se-card--service .se-card__body {
-  padding: 0;
-}
-
 /* —— Papel en todas las vistas: `.se-blog` pintaba blanco (Cookies) y la banda de
    Educación, un gris frío —— */
 .se-publico .se-blog,
@@ -9836,15 +8282,6 @@ html {
 .se-publico main h1:not(.se-sr-only):not(.se-piece__title):not(.se-about__title):not(.se-uh-seccion__titulo) {
   font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
   line-height: 1.05;
-}
-
-/* —— Consultoría: títulos de servicio y de bloque en la serif —— */
-.se-publico .se-consulting__service-card :is(h2, h3),
-.se-publico .se-contact-block__title {
-  font-family: var(--titular);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 /* La barra de lectura: se llena con el desplazamiento, sin JavaScript. La usan las
@@ -10050,146 +8487,11 @@ html {
   border: 1px solid var(--marca-verde);
 }
 
-/* —— La invitación al boletín: un cupón de suscripción —— Como el que traía el
-   periódico para recortar: la línea de corte alrededor, la fecha sobre una regla
-   doble, el nombre del boletín en la serif y el correo escrito sobre una raya. Llega
-   un punto torcida y se asienta, como los recortes. */
-.se-publico .se-invitacion {
-  background: rgba(17, 24, 39, 0.56);
-}
-
-.se-publico .se-invitacion__caja {
-  width: min(480px, 100%);
-  padding: clamp(1.75rem, 4vw, 2.25rem) clamp(1.5rem, 4vw, 2.25rem) clamp(1.5rem, 3.5vw, 2rem);
-  border: 0;
-  background: #fdfbf7;
-  outline: 1px dashed rgba(17, 24, 39, 0.55);
-  outline-offset: -10px;
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.08), 0 28px 60px rgba(17, 24, 39, 0.3);
-  animation: se-cupon-entra 380ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-@keyframes se-cupon-entra {
-  from { opacity: 0; transform: translateY(14px) rotate(-1.4deg); }
-  to { opacity: 1; transform: none; }
-}
-
-.se-publico .se-invitacion__cerrar {
-  top: 14px;
-  right: 14px;
-  color: var(--tinta);
-}
-
-.se-publico .se-invitacion__cerrar:hover {
-  background: rgba(17, 24, 39, 0.06);
-}
-
-/* La fecha del boletín, sobre la regla doble de las cabeceras. */
-.se-publico .se-invitacion__kicker {
-  margin: 0;
-  padding: 0 2.75rem 8px 0;
-  border-bottom: 3px double var(--tinta);
-  font-family: var(--cifras);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--tinta);
-}
-
-.se-publico .se-invitacion__titulo {
-  margin: 14px 0 10px;
-  font-family: var(--titular);
-  font-size: clamp(2rem, 1.5rem + 2vw, 2.625rem);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1;
-  color: var(--tinta);
-}
-
-.se-publico .se-invitacion__texto {
-  margin-bottom: 1.5rem;
-  font-family: var(--titular);
-  font-size: 1.0625rem;
-  line-height: 1.5;
-  color: var(--tinta);
-}
-
-.se-publico .se-invitacion__label {
-  margin-bottom: 2px;
-  font-family: var(--se-font-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--color-slate);
-}
-
 /* El correo, escrito sobre una raya: como el buscador de los listados. */
-.se-publico .se-invitacion__input {
-  min-height: 48px;
-  padding: 6px 0;
-  border: 0;
-  border-bottom: 2px solid var(--tinta);
-  background: transparent;
-  font-family: var(--titular);
-  font-size: 1.25rem;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.se-publico .se-invitacion__input:focus-visible {
-  border-color: var(--marca-verde);
-  box-shadow: 0 2px 0 var(--marca-verde);
-}
-
-.se-publico .se-invitacion__input[aria-invalid="true"] {
-  border-color: var(--marca-rojo);
-}
-
-.se-publico .se-invitacion__acciones {
-  gap: 1rem;
-  margin-top: 1.25rem;
-}
-
-.se-publico .se-invitacion__btn {
-  min-height: 48px;
-  font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-}
-
-.se-publico .se-invitacion__luego {
-  color: var(--tinta);
-  text-decoration: underline;
-  text-decoration-color: var(--filete-fuerte);
-  text-underline-offset: 3px;
-}
-
-.se-publico .se-invitacion__error {
-  border: 0;
-  border-left: 0;
-  border-top: 1px solid var(--marca-rojo);
-  background: transparent;
-  padding: 8px 0 0;
-  color: var(--marca-rojo);
-}
-
-.se-publico .se-invitacion__exito .se-invitacion__titulo {
-  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem);
-}
-
-.se-publico .se-invitacion__texto--exito {
-  font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-}
-
-.se-publico .se-invitacion__cuenta {
-  background: var(--marca-verde);
-}
 
 @media (prefers-reduced-motion: reduce) {
   .se-publico .se-cookies { animation: none; }
-  .se-publico .se-invitacion__caja { animation: se-invitacion-fondo 160ms ease-out both; }
+
 }
 
 /* ═══ El cajón del buscador de la portada: el índice, en blanco sobre el verde ═══
@@ -10204,231 +8506,6 @@ html {
   border-bottom: 1px solid rgba(255, 255, 255, 0.14);
 }
 
-.se-publico .se-explorer-section--primera .se-explorer {
-  padding: clamp(18px, 2.4vw, 28px) 0 clamp(16px, 2vw, 22px);
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__bar {
-  gap: 6px 22px;
-  align-items: baseline;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__field {
-  flex: 1 1 100%;
-  /* El sitio del aspa, solo en el renglón de la búsqueda. */
-  padding-right: 60px;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__lupa {
-  left: 0;
-  width: 26px;
-  height: 26px;
-  margin-top: -3px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__search {
-  min-height: 0;
-  padding: 6px 0 12px 42px;
-  border: 0;
-  border-radius: 0;
-  background:
-    linear-gradient(#ffffff, #ffffff) left bottom / 100% 2px no-repeat,
-    transparent;
-  color: #ffffff;
-  font-family: var(--titular);
-  font-size: clamp(1.625rem, 1.1rem + 1.8vw, 2.75rem);
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  box-shadow: none;
-  animation: se-cajon-raya 620ms cubic-bezier(0.23, 1, 0.32, 1) 120ms both;
-}
-
-@keyframes se-cajon-raya {
-  from { background-size: 0% 2px, auto; }
-  to { background-size: 100% 2px, auto; }
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__search::placeholder {
-  color: rgba(255, 255, 255, 0.55);
-  font-style: italic;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__search:focus,
-.se-publico .se-explorer-section--primera .se-explorer__search:focus-visible {
-  outline: none;
-  border: 0;
-  box-shadow: 0 2px 0 rgba(255, 255, 255, 0.45);
-}
-
-/* Los filtros, en frase. */
-.se-publico .se-explorer-section--primera .se-explorer__btn {
-  min-width: 0;
-  min-height: 40px;
-  gap: 6px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: #ffffff;
-  font-family: var(--se-font-ui);
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 5px;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__btn:hover,
-.se-publico .se-explorer-section--primera .se-explorer__btn--on,
-.se-publico .se-explorer-section--primera .se-explorer__btn--filled {
-  border: 0;
-  background: transparent;
-  text-decoration-color: #ffffff;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__btn:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 3px;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__caret {
-  color: rgba(255, 255, 255, 0.7);
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__btn--on .se-explorer__caret {
-  transform: rotate(180deg);
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__total {
-  margin-left: 0;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.9375rem;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__total::before {
-  content: "·";
-  margin-right: 22px;
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__total strong {
-  font-family: var(--cifras);
-  font-size: 1rem;
-  color: #ffffff;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__clear {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: #ffffff;
-  font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.5);
-  text-underline-offset: 4px;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__clear:hover {
-  background: transparent;
-  text-decoration-color: #ffffff;
-}
-
-/* —— Lo más tratado —— */
-.se-explorer__rapidos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px 18px;
-  margin-top: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.se-explorer__rapidos-rotulo {
-  font-family: var(--titular);
-  font-size: 0.9375rem;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.se-explorer__rapido {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  min-height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #ffffff;
-  font-family: var(--se-font-ui);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 6px;
-  cursor: pointer;
-  transition: text-decoration-color 160ms ease, opacity 160ms ease;
-  animation: se-cajon-tema 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  animation-delay: calc(260ms + var(--i, 0) * 45ms);
-}
-
-@keyframes se-cajon-tema {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
-
-.se-explorer__rapido:hover {
-  text-decoration-color: rgba(255, 255, 255, 0.5);
-}
-
-.se-explorer__rapido--on {
-  text-decoration-color: #ffffff;
-}
-
-/* Sin piezas con lo escrito: atenuado por el color y no por la opacidad, que la
-   animación de entrada deja fijada. */
-.se-explorer__rapido--vacio:not(.se-explorer__rapido--on),
-.se-explorer__rapido--vacio:not(.se-explorer__rapido--on) .se-explorer__rapido-n {
-  color: rgba(255, 255, 255, 0.42);
-}
-
-.se-explorer__rapido:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 3px;
-}
-
-.se-explorer__rapido-n {
-  font-family: var(--cifras);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* Las fichas de lo elegido, en blanco hueco. */
-.se-publico .se-explorer-section--primera .se-explorer__active {
-  margin-top: 10px;
-  padding-top: 0;
-  border-top: 0;
-}
-
-.se-publico .se-explorer-section--primera .se-explorer__chip {
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 0;
-  background: transparent;
-  color: #ffffff;
-}
-
 /* El aspa, arriba a la derecha, a la altura de la búsqueda. */
 .se-publico .se-explorer-section--primera .se-explorer-section__cerrar {
   top: clamp(20px, 2.6vw, 34px);
@@ -10438,62 +8515,6 @@ html {
   height: 40px;
   border-color: rgba(255, 255, 255, 0.4);
   border-radius: 0;
-}
-
-/* En el teléfono: la búsqueda a todo el ancho, los dos filtros en un renglón y lo más
-   tratado en una fila que se desliza, como la cinta. */
-@media (max-width: 640px) {
-  .se-publico .se-explorer-section--primera .se-explorer__field {
-    padding-right: 52px;
-  }
-
-  .se-publico .se-explorer-section--primera .se-explorer__bar {
-    position: relative;
-    gap: 4px 14px;
-  }
-
-  .se-publico .se-explorer-section--primera .se-explorer__total::before {
-    margin-right: 14px;
-  }
-
-  .se-publico .se-explorer-section--primera .se-explorer__sel {
-    position: static;
-    flex: 0 0 auto;
-  }
-
-  /* El desplegable, a lo ancho de la barra y no del botón: medía lo que «Dónde», 66 px. */
-  .se-publico .se-explorer-section--primera .se-explorer__panel {
-    left: 0;
-    right: 0;
-    width: auto;
-  }
-
-  .se-explorer__rapidos {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    margin-right: calc(-1 * var(--se-content-gutter));
-    padding-right: var(--se-content-gutter);
-    scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
-  }
-
-  .se-explorer__rapidos::-webkit-scrollbar {
-    display: none;
-  }
-
-  .se-explorer__rapido,
-  .se-explorer__rapidos-rotulo {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .se-publico .se-explorer-section--primera .se-explorer__search,
-  .se-explorer__rapido {
-    animation: none;
-  }
 }
 
 /* ═══ El papel que cambia ═══
@@ -10941,73 +8962,6 @@ html {
 }
 
 /* ═══ La página que no está ═══ */
-.se-404__rejilla {
-  display: grid;
-  gap: clamp(2rem, 5vw, 4rem);
-}
-
-@media (min-width: 900px) {
-  .se-404__rejilla {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-    align-items: start;
-  }
-}
-
-.se-404__aviso {
-  padding-top: 12px;
-  border-top: 3px double var(--tinta);
-}
-
-.se-404__cifra {
-  margin: 0;
-  font-family: var(--cifras);
-  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--filete-fuerte);
-}
-
-.se-404__titulo {
-  margin: 8px 0 12px;
-  font-family: var(--titular);
-  font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.025em;
-  color: var(--tinta);
-}
-
-.se-404__texto {
-  max-width: 34em;
-  margin: 0;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: var(--color-slate);
-}
-
-.se-404__salidas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.se-404__pausa {
-  padding-top: 0;
-}
-
-.se-404__pausa-caja {
-  max-width: 560px;
-}
-
-.se-404__pausa-texto {
-  margin: 0 0 1rem;
-  font-family: var(--titular);
-  font-size: 1.0625rem;
-  font-style: italic;
-  color: var(--color-slate);
-}
 
 @media (max-width: 700px) {
   .se-publico .se-noticias__lista {
@@ -11043,7 +8997,6 @@ html {
 .se-ad-tanda:last-child {
   margin-top: clamp(24px, 3vw, 36px);
 }
-
 
 /* ═══ «Añádanos en Google» ═══ El botón de fuente preferida de Google, con la letra y el
    filete del periódico. Al final de la pieza, una línea que dice qué gana el lector y

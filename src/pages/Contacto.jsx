@@ -9,6 +9,7 @@ import { useClaveIdempotente } from "../hooks/useClaveIdempotente";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 import { CampoDeFormulario as Campo } from "../components/comun/CampoDeFormulario";
 import { errorDeContacto } from "../lib/formularioDeContacto";
+import "./contacto.css";
 
 /** El id de cada control, para llevar el foco al primero que falle. */
 const ID_DE_CAMPO = {

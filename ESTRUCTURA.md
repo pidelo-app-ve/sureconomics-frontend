@@ -75,6 +75,14 @@ un tope que solo baja.
   junto a `FichaDeMoneda.jsx`), y lo común en `src/styles/` y `src/index.css`. Ojo: el
   orden en que entran las hojas en el CSS construido depende del orden de las
   importaciones; al mover un archivo, se comprueba que el `dist/` no cambia.
+- **CSS de una página que se carga aparte:** lo que solo pinta una página o un componente
+  perezoso (`import()`) va en la hoja de ese componente, no en `styles/blog.css`: la hoja
+  de entrada bloquea el primer pintado de todas las páginas. Ojo: esa hoja llega después
+  de toda la de entrada y se queda puesta al navegar, así que gana los empates de
+  especificidad. Una regla que hoy pierde frente a otra posterior de la entrada (un
+  estado `:focus`, otra clase del mismo elemento) se queda en `blog.css`. Ejemplos:
+  `components/home/contentExplorer.css` (el buscador), `features/boletin/invitacionAlBoletin.css`,
+  `pages/contacto.css`, `styles/listados.css`.
 
 ## Pruebas
 

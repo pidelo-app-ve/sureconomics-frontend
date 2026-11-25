@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { EVENTO_CONSENTIMIENTO, consentimiento } from "../analitica";
+import { cargarUnaVez } from "../../lib/cargarUnaVez";
 import {
   ESPERA_MS,
   debeInvitar,
@@ -54,7 +55,10 @@ import {
 /** Cuándo se cargó el sitio. Al evaluarse el módulo y no al montar: es la visita, no el componente. */
 const INICIO_VISITA = Date.now();
 
-const cargarVentana = () => import("./InvitacionAlBoletinAbierta");
+// Una sola carga compartida entre la precarga y la apertura: la ventana trae su hoja, y una
+// segunda llamada al `import()` mientras la hoja sigue bajando la pintaría sin estilos (ver
+// `cargarUnaVez`).
+const cargarVentana = cargarUnaVez(() => import("./InvitacionAlBoletinAbierta"));
 // Si no llega (sin red, o una versión nueva del sitio, que recarga la página), no hay invitación.
 const Ventana = lazy(() =>
   cargarVentana()

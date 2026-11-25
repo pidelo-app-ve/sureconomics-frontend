@@ -4,6 +4,199 @@
  * zona cuando se abre. Solo hay reglas cuyos selectores exigen clases que aparecen
  * únicamente en esa zona. Lo que usen también las páginas públicas va en blog.css.
  */
+
+/* —— Lo que quedaba en blog.css (noviembre de 2026) ——
+   El formulario de propuestas (formatos), la página del lector (título, entradilla,
+   tarjeta, vuelta atrás) y la caja de entrar. Van delante de las reglas de esta hoja,
+   como iban antes: las de abajo les siguen ganando con la misma especificidad. */
+
+/* Mobile responsiveness: remove desktop constraints, allow full-width pages */
+
+@media (max-width: 959px) {
+
+  .se-reader-dash__page {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.se-reader-dash__page {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+}
+
+.se-reader-page-head {
+  margin-bottom: 1.35rem;
+}
+
+.se-reader-page-title {
+  font-family: var(--se-font-heading);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.se-reader-page-lead {
+  color: rgba(26, 26, 26, 0.58);
+}
+
+.se-reader-backlink {
+  font-weight: 600;
+}
+
+.se-reader-card {
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(26, 26, 26, 0.08);
+}
+
+.se-reader-card:focus-within {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+.se-reader-card--form {
+  padding: 0;
+  overflow: hidden;
+}
+
+.se-contact-form--reader {
+  margin-top: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* —— Collaborator format choice ——
+   This one lives on the reader dashboard, which is light, so it uses the public
+   tokens on purpose. */
+
+.se-submission-formats {
+  flex-wrap: wrap;
+}
+
+.se-submission-format {
+  flex: 1 1 13rem;
+  border: 1px solid var(--color-hairline);
+}
+
+.se-submission-format:hover {
+  border-color: var(--color-accent);
+}
+
+.se-submission-format:has(input:checked) {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.se-submission-format input {
+  accent-color: var(--color-accent);
+}
+
+.se-submission-format em {
+  color: var(--color-slate-2);
+}
+
+/* --- El puente: las clases viejas del área de lector --- */
+
+.se-reader-dash__page {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 56rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.se-reader-page-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.6rem, 3.6vw, 2.1rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.se-reader-page-lead {
+  margin: 0;
+  max-width: 62ch;
+  font-family: var(--se-font-ui);
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+.se-reader-card {
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+}
+
+/* El borde del `fieldset` y su leyenda se resuelven donde se definen, mas
+   arriba: una regla suelta aqui pierde por especificidad y es codigo muerto. */
+
+.se-submission-formats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem;
+}
+
+.se-submission-format {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 11px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.se-submission-format:hover { border-color: rgba(var(--se-tinte), 0.28); }
+
+/* El elegido, con el acento. Antes el texto de la opción marcada se aclaraba
+   hasta casi desaparecer, que es lo contrario de lo que hace falta. */
+
+.se-submission-format:has(input:checked) {
+  border-color: var(--color-accent);
+  background: rgba(185, 83, 42, 0.05);
+}
+
+.se-submission-format:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.se-submission-format input { margin-top: 0.2rem; accent-color: var(--color-accent); }
+
+.se-submission-format span { display: block; min-width: 0; }
+
+.se-submission-format strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.se-submission-format em {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--se-font-ui);
+  font-size: 0.8rem;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--color-slate-2);
+}
+
+/* —— Cuenta: entrar y registrarse, sin caja flotante —— */
+
+.se-publico .se-entrada__caja {
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 2px solid var(--tinta);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Admin (CMS) — login unchanged shell */
 .se-admin-login__shell {
   min-height: 100vh;

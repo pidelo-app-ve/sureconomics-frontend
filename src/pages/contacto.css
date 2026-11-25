@@ -1,0 +1,208 @@
+/* ═══ Contacto (`/contacto`) ═══
+   El formulario, sus avisos y la columna de al lado (el correo y los dos caminos).
+
+   Vivía en `blog.css`, que bloquea el primer pintado de cada página; aquí llega con la
+   propia página, que ya se carga aparte. Los bloques están tal cual y en el mismo orden
+   que tenían allí. Las reglas que comparte con Consultoría (`.se-consulting, .se-contact`)
+   y las que perderían frente a una de `blog.css` siguen allí.
+
+   Ojo con la cascada: esta hoja entra DESPUÉS de toda la hoja de entrada y se queda
+   puesta al navegar. Una regla de aquí gana a una de allí con la misma especificidad:
+   todo lo que se escriba aquí lleva una clase de estas páginas, y nada de allí puede
+   contar con corregir algo de aquí. */
+
+.se-contact {
+  /* Retheme shared `.se-contact-form` primitives for dark glass */
+  --se-form-surface: #ffffff;
+  --se-form-border: rgba(var(--se-tinte), 0.12);
+  --se-form-border-strong: rgba(var(--se-tinte), 0.18);
+  --se-form-text: rgba(var(--se-tinte), 0.92);
+  --se-form-muted: rgba(var(--se-tinte), 0.68);
+  --se-form-placeholder: rgba(var(--se-tinte), 0.42);
+  --se-form-focus: var(--color-accent);
+  --se-form-focus-glow: rgba(185, 83, 42, 0.22);
+  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
+     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
+     paleta y encima se leia mal. */
+  --se-form-invalid: #8f3a17;
+}
+
+.se-contact .se-form-control:hover:not(:disabled):not(:focus) {
+  border-color: rgba(var(--se-tinte), 0.22);
+  background-color: rgba(255, 255, 255, 0.065);
+}
+
+.se-contact .se-form-label {
+  font-family: var(--se-font-ui);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.se-contact__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1rem, 3vw, 1.75rem);
+}
+
+@media (min-width: 980px) {
+  .se-contact__grid {
+    /* 1.1 contra 0.9 dejaba las dos columnas casi iguales -- 600 y 491 px -- y eso
+       era defendible cuando al lado habia tres bloques de datos. Ahora hay dos
+       tarjetas cortas, y dos columnas del mismo peso hacen que el formulario, que es
+       a lo que se viene, no se lea como lo principal. */
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.se-contact__hero {
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.se-contact .se-heading-hero {
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+}
+
+.se-contact .se-institutional-hero .se-text-lead {
+  max-width: 46ch;
+}
+
+.se-contact__panel {
+  animation: se-page-rise 0.6s var(--se-suite-ease) both;
+}
+
+.se-contact__status {
+  min-height: 1px;
+}
+
+.se-contact__banner {
+  margin: 0 0 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+  color: rgba(var(--se-tinte), 0.92);
+}
+
+.se-contact__banner--loading {
+  border-color: rgba(var(--se-tinte), 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(var(--se-tinte), 0.82);
+}
+
+.se-contact__banner--error {
+  border-color: rgba(185, 83, 42, 0.32);
+  background: rgba(185, 83, 42, 0.16);
+  color: #ffd6dc;
+}
+
+.se-contact__aside {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.35rem);
+  animation: se-page-rise 0.6s var(--se-suite-ease) both;
+  animation-delay: 120ms;
+}
+
+/* --- Contacto: la columna de al lado ------------------------------------- */
+
+.se-contact__tarjeta {
+  display: grid;
+  gap: 0.6rem;
+  padding: clamp(1.15rem, 2.4vw, 1.5rem);
+  border: 1px solid var(--color-hairline);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.se-contact__tarjeta-titulo {
+  margin: 0;
+  font-family: var(--se-font-label);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-slate-2);
+}
+
+.se-contact__tarjeta-texto {
+  margin: 0;
+  font-family: var(--se-font-ui);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.se-contact__correo {
+  font-family: var(--se-font-label);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.se-contact__correo:hover { text-decoration: underline; }
+
+/* Los dos caminos. Toda la fila es el enlace y no solo el titulo: un destino de
+   44 px de alto se acierta con el pulgar; una palabra subrayada, no. */
+
+.se-contact__camino {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-hairline);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.se-contact__camino:hover {
+  border-color: var(--color-accent);
+  background: rgba(185, 83, 42, 0.04);
+}
+
+.se-contact__camino:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.se-contact__camino-titulo {
+  font-family: var(--se-font-label);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.se-contact__camino-texto {
+  font-family: var(--se-font-ui);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-slate-2);
+}
+
+.se-contact .se-contact-block__sub,
+.se-contact .se-contact-block__email-name {
+  color: rgba(var(--se-tinte), 0.62);
+}
+
+.se-publico .se-contact__tarjeta:first-child {
+  border-left: 0;
+}
+
+.se-publico .se-contact__camino {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--filete);
+  border-radius: 0;
+}
+
+.se-publico .se-contact__camino:hover {
+  background: transparent;
+}
+
+.se-publico .se-contact__camino-titulo {
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}

@@ -1,0 +1,78 @@
+/* ═══ La página que no existe (`NotFound`) ═══
+   La cifra, el aviso, las salidas y la caja del juego.
+
+   Vivía en `blog.css`, que bloquea el primer pintado de cada página; aquí llega con la
+   propia página, que ya se carga aparte. Tal cual y en el mismo orden que tenía allí.
+
+   Ojo con la cascada: esta hoja entra DESPUÉS de toda la hoja de entrada y se queda
+   puesta al navegar. Una regla de aquí gana a una de allí con la misma especificidad:
+   todo lo que se escriba aquí lleva una clase de estas páginas, y nada de allí puede
+   contar con corregir algo de aquí. */
+
+.se-404__rejilla {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+@media (min-width: 900px) {
+  .se-404__rejilla {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    align-items: start;
+  }
+}
+
+.se-404__aviso {
+  padding-top: 12px;
+  border-top: 3px double var(--tinta);
+}
+
+.se-404__cifra {
+  margin: 0;
+  font-family: var(--cifras);
+  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--filete-fuerte);
+}
+
+.se-404__titulo {
+  margin: 8px 0 12px;
+  font-family: var(--titular);
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--tinta);
+}
+
+.se-404__texto {
+  max-width: 34em;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--color-slate);
+}
+
+.se-404__salidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.se-404__pausa {
+  padding-top: 0;
+}
+
+.se-404__pausa-caja {
+  max-width: 560px;
+}
+
+.se-404__pausa-texto {
+  margin: 0 0 1rem;
+  font-family: var(--titular);
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--color-slate);
+}

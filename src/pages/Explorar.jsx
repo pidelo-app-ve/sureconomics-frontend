@@ -19,6 +19,7 @@ import { applyFilter } from "../lib/contentFilter";
 import { usePieces } from "../hooks/usePieces";
 import { useTaxonomy } from "../hooks/useTaxonomy";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
+import "../styles/listados.css";
 
 /**
  * Cross-format results — the way in that doesn't start by choosing a format.

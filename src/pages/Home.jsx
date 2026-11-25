@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavegar } from "../components/Enlace";
-import { NewsletterBlock } from "../components/blog";
+import { NewsletterBlock } from "../features/boletin";
 import { BRAND, PARTNERS } from "../config/sitio";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { useIdioma } from "../i18n/ProveedorIdioma";

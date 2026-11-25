@@ -95,12 +95,12 @@ const FACHADAS = {
     importadores: ["src/components/home/LugarYFecha.jsx"],
   },
   "src/lib/analitica.js": {
-    quita: "analitica, cuando la barra de la publicidad, useVistaPrevia y newsletterService importen de " +
+    quita: "analitica, cuando la barra de la publicidad, useVistaPrevia y la api del boletín importen de " +
       "features/analitica (por la puerta se reordena index-*.js)",
     importadores: [
       "src/features/publicidad/components/BarraPublicitaria.jsx",
       "src/hooks/useVistaPrevia.js",
-      "src/services/newsletterService.js",
+      "src/features/boletin/api.js",
     ],
   },
 };

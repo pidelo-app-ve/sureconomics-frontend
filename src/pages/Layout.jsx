@@ -6,7 +6,7 @@ import { BarraInferior } from "../components/BarraInferior"
 import { EnRedes } from "../components/EnRedes"
 import { MarketTicker } from "../components/home"
 import { AvisoDeCookies } from "../features/analitica"
-import { InvitacionAlBoletin } from "../components/InvitacionAlBoletin"
+import { InvitacionAlBoletin } from "../features/boletin"
 import { BarraPublicitaria, ProveedorDePublicidad } from "../features/publicidad"
 import { AvisoDeRuta } from "../components/AvisoDeRuta"
 import { useIdioma } from "../i18n/ProveedorIdioma"
@@ -82,7 +82,7 @@ export const Layout = () => {
                 <AvisoDeCookies />
                 {/* Solo en el marco publico: /entorno va fuera de este Layout y el
                     panel y la cuenta tienen el suyo. Nace cerrada y decide sola
-                    cuando salir; ver `lib/invitacionBoletin.js`. */}
+                    cuando salir; ver `features/boletin/utils.js`. */}
                 <InvitacionAlBoletin />
                 <AvisoDeRuta destinoId={CONTENIDO_ID} />
                 </div>

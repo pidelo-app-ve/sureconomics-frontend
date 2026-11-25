@@ -1,14 +1,14 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { useAdminToast } from "../../../context/AdminToastContext";
+import { useAdminToast } from "../../../../context/AdminToastContext";
 import {
   actualizarNumero,
   enviarLote,
   enviarPrueba,
   reenviarNumero,
   verNumero,
-} from "../../../services/adminBoletinService";
-import { leerDestino, guardarDestino, lunesLargo, fecha, hoyIso } from "./datosDelBoletin";
+} from "../api";
+import { leerDestino, guardarDestino, lunesLargo, fecha, hoyIso } from "../utils";
 
 // ------------------------------------------------------------------ el envío
 export const Envio = ({

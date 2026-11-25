@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
-import { marcarSuscrito } from "../../lib/invitacionBoletin";
-import { subscribeToNewsletter } from "../../services/newsletterService";
-import { ESPACIOS, EspacioPublicitario } from "../../features/publicidad";
+import { marcarSuscrito } from "./utils";
+import { subscribeToNewsletter } from "./api";
+import { ESPACIOS, EspacioPublicitario } from "../publicidad";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**

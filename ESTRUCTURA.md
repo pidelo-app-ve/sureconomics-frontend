@@ -11,8 +11,8 @@ un tope que solo baja.
   Es donde va el código nuevo.
 - **Vieja, que se va vaciando:** `src/components`, `src/pages`, `src/lib`, `src/hooks`,
   `src/services` y `src/styles`, ordenadas por tipo de archivo. Cuando se toca un tema a
-  fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica y
-  publicidad), y lo que queda en la zona vieja entra por su puerta.
+  fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica,
+  publicidad y el boletín), y lo que queda en la zona vieja entra por su puerta.
 - **Compartida, por debajo de todo:** `src/api/` (el cliente HTTP) y `src/config/` (los
   datos fijos del sitio). No importan nada del sitio ni del panel: son los demás los que
   las usan.
@@ -25,6 +25,7 @@ un tope que solo baja.
 | Titulares en caliente («Última hora») | `src/features/titulares` |
 | Audiencia y cookies (aviso, `/cookies`, panel «Audiencia») | `src/features/analitica` |
 | Publicidad (huecos, barra, patrocinios, panel) | `src/features/publicidad` |
+| Boletín «Entorno en Viñetas» (alta, invitación, baja, `/entorno`, panel de números y suscriptores) | `src/features/boletin` |
 | Portada | `pages/Home.jsx`, `components/home` |
 | Pieza (artículo, video, informe) | `pages/Pieza.jsx`, `components/piece`, `lib/pieza.js` |
 | Listados y búsqueda | `pages/Articulos.jsx`, `Audiovisual.jsx`, `Explorar.jsx` |
@@ -33,7 +34,7 @@ un tope que solo baja.
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
 | Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `components/admin/PaginasDeLaLista.jsx` |
-| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
+| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad y el boletín viven en `features/*/guia.js` |
 | Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
 | Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |
@@ -82,7 +83,7 @@ Dos archivos de la zona vieja reexportan algo de un feature para quien aún lo i
 de allí. La prueba solo deja importarlas a los de su lista (`FACHADAS`); lo nuevo entra
 por la puerta del feature.
 
-- `src/lib/analitica.js` (la medición): la usan la vista previa, el servicio del boletín y
+- `src/lib/analitica.js` (la medición): la usan la vista previa, la api del boletín y
   la barra de la publicidad. Se cargan antes que el aviso de cookies; por la puerta, Vite
   reordenaría el paquete principal (mismo código, otro orden).
 - `src/hooks/useHeadlines.js` (`haceCuanto`): la usa la fecha de cada pieza en la

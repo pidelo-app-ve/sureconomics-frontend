@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import { recorridoBoletin } from "../../../lib/guias/guiaBoletin";
-import { lunesLargo, fecha } from "./datosDelBoletin";
+import { recorridoBoletin } from "../../../../lib/guias/guiaBoletin";
+import { lunesLargo, fecha } from "../utils";
 import { Estado } from "./Estado";
 
 const { ancla } = recorridoBoletin;

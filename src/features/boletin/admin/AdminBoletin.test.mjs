@@ -16,7 +16,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 import PropTypes from "prop-types";
-import { sustituir } from "../../../scripts/pruebas/dobles.mjs";
+import { sustituir } from "../../../../scripts/pruebas/dobles.mjs";
 
 const EditorDeTexto = ({ value, onChange, disabled }) =>
   createElement("textarea", { "aria-label": "Introducción", value, disabled, onChange: (e) => onChange(e.target.value) });
@@ -25,7 +25,7 @@ EditorDeTexto.propTypes = { value: PropTypes.string, onChange: PropTypes.func.is
 sustituir({ "src/components/editor/RichTextEditor.jsx": { RichTextEditor: EditorDeTexto } });
 
 const { pintar, pantalla, fireEvent, waitFor, within, asentar, servidor, grabada } = await import(
-  "../../../scripts/pruebas/dom.mjs"
+  "../../../../scripts/pruebas/dom.mjs"
 );
 const { AdminBoletin } = await import("./AdminBoletin.jsx");
 

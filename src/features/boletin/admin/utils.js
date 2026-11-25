@@ -1,5 +1,7 @@
-
-
+/**
+ * Lo de un número del boletín que no es React ni red: sus estados, el correo de la
+ * prueba que se recuerda en este equipo y cómo se escriben sus fechas.
+ */
 export const ESTADOS = {
   draft: { texto: "Borrador", tono: "borrador" },
   ready: { texto: "Activo", tono: "listo" },

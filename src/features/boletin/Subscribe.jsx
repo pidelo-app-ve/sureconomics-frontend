@@ -1,8 +1,8 @@
-import "../styles/institucional.css";
-import { BRAND } from "../config/sitio";
-import { Enlace } from "../components/Enlace";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
+import "../../styles/institucional.css";
+import { BRAND } from "../../config/sitio";
+import { Enlace } from "../../components/Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 
 const BENEFICIOS = ["beneficio1", "beneficio2", "beneficio3", "beneficio4", "beneficio5"];
 

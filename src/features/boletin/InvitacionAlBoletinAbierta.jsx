@@ -1,9 +1,9 @@
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { marcarSuscrito, registrarCierre } from "../lib/invitacionBoletin";
-import { subscribeToNewsletter } from "../services/newsletterService";
-import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { marcarSuscrito, registrarCierre } from "./utils";
+import { subscribeToNewsletter } from "./api";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**
  * La invitación al boletín, abierta: la ventana, el formulario y el foco. Baja aparte;

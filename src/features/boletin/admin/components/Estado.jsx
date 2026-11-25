@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { ESTADOS } from "./datosDelBoletin";
+import { ESTADOS } from "../utils";
 
 export const Estado = ({ status }) => {
   const e = ESTADOS[status] ?? { texto: status, tono: "borrador" };

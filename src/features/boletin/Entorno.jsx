@@ -1,12 +1,12 @@
-import "../styles/institucional.css";
+import "../../styles/institucional.css";
 import { useState } from "react";
-import { BRAND } from "../config/sitio";
-import { Enlace } from "../components/Enlace";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
-import { marcarSuscrito } from "../lib/invitacionBoletin";
-import { subscribeToNewsletter } from "../services/newsletterService";
-import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
+import { BRAND } from "../../config/sitio";
+import { Enlace } from "../../components/Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
+import { marcarSuscrito } from "./utils";
+import { subscribeToNewsletter } from "./api";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
 
 /**
  * `/entorno`: la puerta de entrada al boletín desde el perfil de Instagram.

@@ -1,10 +1,10 @@
 import PropTypes from "prop-types";
 import { useRef, useState } from "react";
-import { ModalDelPanel } from "../ModalDelPanel";
-import { SelectorDeBiblioteca } from "../SelectorDeBiblioteca";
-import { useAdminToast } from "../../../context/AdminToastContext";
-import { anadirPagina, ordenarPaginas, quitarPagina } from "../../../services/adminBoletinService";
-import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../services/adminMediaService";
+import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
+import { SelectorDeBiblioteca } from "../../../../components/admin/SelectorDeBiblioteca";
+import { useAdminToast } from "../../../../context/AdminToastContext";
+import { anadirPagina, ordenarPaginas, quitarPagina } from "../api";
+import { ACCEPTED_IMAGE_MIME, uploadAdminMediaImage } from "../../../../services/adminMediaService";
 
 // ------------------------------------------------------------------ las páginas
 export const Paginas = ({ numero, bloqueado, correr, onCambio }) => {

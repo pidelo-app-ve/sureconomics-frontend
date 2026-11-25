@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { unsubscribeFromNewsletter, volverAlBoletin } from "../services/newsletterService";
-import { BRAND } from "../config/sitio";
-import { Enlace } from "../components/Enlace";
-import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useMetaPagina } from "../i18n/useMetaPagina";
+import { unsubscribeFromNewsletter, volverAlBoletin } from "./api";
+import { BRAND } from "../../config/sitio";
+import { Enlace } from "../../components/Enlace";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useMetaPagina } from "../../i18n/useMetaPagina";
 
 /**
  * Darse de baja del boletín.

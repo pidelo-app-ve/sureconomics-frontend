@@ -10,10 +10,10 @@ import assert from "node:assert/strict";
 import { createElement } from "react";
 
 const { pintar, pantalla, fireEvent, waitFor, within, asentar, pasar, servidor, grabada } = await import(
-  "../../../scripts/pruebas/dom.mjs"
+  "../../../../scripts/pruebas/dom.mjs"
 );
 const { AdminNewsletterList } = await import("./AdminNewsletterList.jsx");
-const { ESPERA_DEL_BUSCADOR_MS: ESPERA } = await import("../../lib/listasDelPanel.js");
+const { ESPERA_DEL_BUSCADOR_MS: ESPERA } = await import("../../../lib/listasDelPanel.js");
 
 const LISTA = "/admin/newsletter";
 const ROL = grabada("panel/entrar-editor.json").data.role;

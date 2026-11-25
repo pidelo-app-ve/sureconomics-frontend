@@ -1,6 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { EVENTO_CONSENTIMIENTO, consentimiento } from "../features/analitica";
+import { EVENTO_CONSENTIMIENTO, consentimiento } from "../analitica";
 import {
   ESPERA_MS,
   debeInvitar,
@@ -10,7 +10,7 @@ import {
   leerInvitacion,
   rutaExcluida,
   yaSuscrito,
-} from "../lib/invitacionBoletin";
+} from "./utils";
 
 /**
  * La invitación al boletín: una ventana en medio de la pantalla, sobre una capa oscura,
@@ -18,7 +18,7 @@ import {
  *
  * Es el cuarto formulario del boletín en el sitio -- portada, pie, `/entorno` y éste --
  * y el único que no espera a que lo busquen. Por eso tiene más reglas para callarse que
- * para salir; todas están en `lib/invitacionBoletin.js`, que es donde se prueban. Aquí
+ * para salir; todas están en `features/boletin/utils.js`, que es donde se prueban. Aquí
  * sólo se mide lo que esas reglas necesitan -- páginas vistas, tiempo, cuánto se bajó --
  * y se pinta.
  *

@@ -7287,7 +7287,7 @@ html {
    visible, no en una esquina. La caja es la del aviso de cookies -- papel, filete
    de hairline, 14 px de radio -- y el cintillo, el titulo y el boton son los del
    boletin de la portada. Las reglas de cuando sale estan en
-   `lib/invitacionBoletin.js`; el foco y el teclado, en el componente. */
+   `features/boletin/utils.js`; el foco y el teclado, en el componente. */
 
 .se-invitacion {
   position: fixed;
@@ -9961,7 +9961,7 @@ html {
 }
 
 /* ═══ Lo que aparece solo: el aviso de cookies y la invitación al boletín ═══
-   Las reglas de cuándo salen no cambian (`lib/invitacionBoletin.js`, `AvisoDeCookies`);
+   Las reglas de cuándo salen no cambian (`features/boletin/utils.js`, `AvisoDeCookies`);
    cambia cómo se ven, que era lo único que quedaba del sitio de antes. */
 
 /* —— El aviso de cookies: una franja al pie, a todo el ancho —— Filete de tinta arriba

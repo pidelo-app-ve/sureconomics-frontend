@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { ModalDelPanel } from "../../components/admin/ModalDelPanel";
-import { useAdminToast } from "../../context/AdminToastContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
-import { adminErrorMessage } from "../../lib/adminErrorMessage";
+import { ModalDelPanel } from "../../../components/admin/ModalDelPanel";
+import { useAdminToast } from "../../../context/AdminToastContext";
+import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import {
   crearNumero,
   listarLunes,
   listarNumeros,
   verNumero,
-} from "../../services/adminBoletinService";
-import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
-import { recorridoBoletin } from "../../lib/guias/guiaBoletin";
-import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
-import { LoadingState } from "../../components/content";
-import { lunesLargo } from "../../components/admin/boletin/datosDelBoletin";
-import { Listado } from "../../components/admin/boletin/Listado";
-import { Editor } from "../../components/admin/boletin/Editor";
+} from "./api";
+import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
+import { recorridoBoletin } from "../../../lib/guias/guiaBoletin";
+import { CabeceraDePagina } from "../../../components/admin/CabeceraDePagina";
+import { LoadingState } from "../../../components/content";
+import { lunesLargo } from "./utils";
+import { Listado } from "./components/Listado";
+import { Editor } from "./components/Editor";
 
 const { ancla } = recorridoBoletin;
 

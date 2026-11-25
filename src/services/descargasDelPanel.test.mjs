@@ -1,7 +1,7 @@
 /**
  * Las dos descargas del panel que no son JSON: el informe de «Audiencia» en Excel
  * (`features/analitica/admin/api.js`) y la lista del boletín en CSV
- * (`newsletterService.js`). `npm test`.
+ * (`features/boletin/admin/api.js`). `npm test`.
  *
  * Fija lo que hacen hoy (23-nov-2026): una petición mínima por `adminRequest` (que
  * renueva el token si hace falta), y después los bytes con la cabecera de sesión, que un
@@ -10,7 +10,7 @@
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { descargarInforme } from "../features/analitica/admin/api.js";
-import { downloadNewsletterCsv } from "./newsletterService.js";
+import { downloadNewsletterCsv } from "../features/boletin/admin/api.js";
 
 const API = "https://api.prueba.invalid";
 

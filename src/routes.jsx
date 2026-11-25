@@ -43,8 +43,8 @@ const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => asyn
  */
 const rutasPublicas = (lang) => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
-    // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
-    { path: "entorno", lazy: pagina(() => import("./pages/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
+    // cabecera ni menú, una sola cosa que hacer. Ver `features/boletin/Entorno.jsx`.
+    { path: "entorno", lazy: pagina(() => import("./features/boletin/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
     // El Analista está EN PAUSA (octubre de 2026): la dirección lleva a /juegos, en el
     // idioma de la página, y el juego no se descarga. La página, el servicio y el panel
     // del ranking siguen en su sitio. Para volver a encenderlo, cambiar esta línea por
@@ -58,10 +58,10 @@ const rutasPublicas = (lang) => [
         errorElement: <RouteError />,
         children: [
             { index: true, element: <Home /> },
-            { path: "suscribirse", lazy: pagina(() => import("./pages/Subscribe"), "Subscribe", { zonas: ["boletin"], lang }) },
+            { path: "suscribirse", lazy: pagina(() => import("./features/boletin/Subscribe"), "Subscribe", { zonas: ["boletin"], lang }) },
             // A donde apunta el enlace de baja de cada boletin. Sin sesion: el
             // token de la direccion es la unica credencial. Ver `BoletinBaja`.
-            { path: "boletin/baja", lazy: pagina(() => import("./pages/BoletinBaja"), "BoletinBaja", { zonas: ["boletin"], lang }) },
+            { path: "boletin/baja", lazy: pagina(() => import("./features/boletin/BoletinBaja"), "BoletinBaja", { zonas: ["boletin"], lang }) },
             { path: "quienes-somos", lazy: pagina(() => import("./pages/QuienesSomos"), "QuienesSomos", { zonas: ["paginas"], lang }) },
             { path: "articulos", lazy: pagina(() => import("./pages/Articulos"), "Articulos", { zonas: ["listados"], lang }) },
             { path: "informes", lazy: pagina(() => import("./pages/Informes"), "Informes", { zonas: ["listados"], lang }) },
@@ -206,10 +206,10 @@ export const router = createBrowserRouter([
                     // Lo que la redacción debería mirar hoy: los avisos y lo que se avisaría ahora.
                     { path: "avisos", lazy: pagina(() => import("./pages/admin/AdminAvisos"), "AdminAvisos") },
                     { path: "resumen", lazy: pagina(() => import("./pages/admin/AdminResumen"), "AdminResumen") },
-                    { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
+                    { path: "boletin", lazy: pagina(() => import("./features/boletin/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.
-                    { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin", { zonas: ["cuenta"] }) },
+                    { path: "boletin/numeros", lazy: pagina(() => import("./features/boletin/admin/AdminBoletin"), "AdminBoletin", { zonas: ["cuenta"] }) },
                     { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList", { zonas: ["cuenta"] }) },
                     { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail", { zonas: ["cuenta"] }) },
                     // Era una página con una sola casilla; ahora es un interruptor en Propuestas.

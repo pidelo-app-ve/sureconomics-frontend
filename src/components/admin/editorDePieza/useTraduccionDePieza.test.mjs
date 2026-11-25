@@ -5,7 +5,7 @@
  * mientras espera, el inglés en el formulario al final, el aviso de cada error, y que al
  * cerrar la pieza (o abrir otra) se deja de preguntar y no se pisa nada. `npm test`.
  */
-import { test, beforeEach } from "node:test";
+import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 const almacen = () => {
@@ -54,6 +54,9 @@ const empezar = (m) =>
  * El gancho montado como en el editor: `m.form` es el formulario del «padre» (lo cambia
  * `setForm`), `m.avisos` lo que salió en los avisos, `m.h` lo que devuelve el gancho.
  */
+/** Los montados que una prueba no llegó a desmontar (falló, o se le acabó el tiempo). */
+const montados = new Set();
+
 const montar = async ({ piezaId = 7 } = {}) => {
   const m = { form: { ...FORMULARIO }, avisos: [] };
   const g = await montarGancho((props) =>
@@ -71,7 +74,11 @@ const montar = async ({ piezaId = 7 } = {}) => {
   { piezaId });
   Object.defineProperty(m, "h", { get: () => g.valor });
   m.pintar = g.pintar;
-  m.desmontar = g.desmontar;
+  m.desmontar = async () => {
+    montados.delete(m);
+    await g.desmontar();
+  };
+  montados.add(m);
   await hasta(() => m.h.traductorDisponible, "el botón de traducir");
   return m;
 };
@@ -84,6 +91,14 @@ beforeEach(() => {
   servidor.contestar("GET", "/admin/posts/traducir", { success: true, data: { disponible: true, modelo: "claude" } });
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   servidor.contestar("GET", POR_SU_ID, grabada("traducciones/sigue.json"));
+});
+
+// Al acabar cada prueba, pase lo que pase: desmontar (corta la espera) y sin servidor. Si
+// no, una traducción que no respetara el tope seguiría preguntando y `node --test` no
+// terminaría nunca.
+afterEach(async () => {
+  for (const m of [...montados]) await m.desmontar();
+  servidor.reiniciar();
 });
 
 test("202 y luego 200: «traduciendo» mientras espera, y el inglés al final", LIMITE, async () => {

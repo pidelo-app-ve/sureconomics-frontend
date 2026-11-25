@@ -129,8 +129,8 @@ export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}${RUTA_DEL_QU
 export const ultimaHoraUrl = (idioma) => `${SITIO}${RUTA_DEL_QUIOSCO}${ultimaHoraDeLaPortada(idioma)}`;
 
 /**
- * Lo que se esperan los de Última hora. Menos que los de la portada: son un extra, y sin
- * ellos la página sale igual (los pide al llegar, como antes).
+ * Lo más que puede durar la petición de Última hora (la página no la espera: ver el
+ * `handler`); pasado esto se corta, para no dejarla colgada.
  */
 const LIMITE_ULTIMA_HORA_MS = 1500;
 
@@ -706,11 +706,14 @@ export default async function handler(req, res) {
   const idioma = req.query?.lang === "en" ? "en" : "es";
   const rutaPropia = idioma === "en" ? "/en" : "/";
 
-  const [{ shell, fuente }, datos, ultimaHora] = await Promise.all([
-    leerShell(),
-    leerTitulares(),
-    leerUltimaHora(idioma),
-  ]);
+  // Última hora no retrasa la página: se usa si ya llegó cuando están el shell y la portada
+  // (los dos del quiosco, y suele ser la más ligera); si no, la página sale sin ella y la
+  // pide al llegar, como antes.
+  let ultimaHora = null;
+  leerUltimaHora(idioma).then((r) => {
+    ultimaHora = r;
+  });
+  const [{ shell, fuente }, datos] = await Promise.all([leerShell(), leerTitulares()]);
   res.setHeader("X-Shell", fuente);
 
   if (!esNuestroShell(shell)) {

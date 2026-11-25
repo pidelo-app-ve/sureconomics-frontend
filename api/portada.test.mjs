@@ -231,10 +231,16 @@ console.log("Última hora, dentro del HTML");
 {
   const titulares = { data: { items: [{ id: 7, title: "Un titular </script>", published_at: fecha(0) }], version: 12 }, success: true };
   const pedidas = [];
-  const conUltimaHora = (respuesta) => fetchCon({
+  const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  /** `tardaUh`/`tardaPortada`: lo que tarda cada una en contestar, en ms. */
+  const conUltimaHora = (respuesta, { tardaUh = 0, tardaPortada = 20 } = {}) => fetchCon({
     api: async (url) => {
       pedidas.push(String(url));
-      if (String(url).includes("/datos/headlines")) return respuesta();
+      if (String(url).includes("/datos/headlines")) {
+        await espera(tardaUh);
+        return respuesta();
+      }
+      await espera(tardaPortada);
       return { ok: true, status: 200, json: async () => ({ data: MUCHAS, meta: { total: MUCHAS.length, pages: 1 } }) };
     },
   });
@@ -253,6 +259,15 @@ console.log("Última hora, dentro del HTML");
         !res.body.includes("Un titular </script>"));
     });
   }
+  // Si llega después que la portada, no se la espera: la página sale ya, sin ella.
+  await conFetch(conUltimaHora(() => ({ ok: true, status: 200, json: async () => titulares }), { tardaUh: 300, tardaPortada: 0 }), async () => {
+    const res = respuestaFalsa();
+    const inicio = Date.now();
+    await handler({ query: {} }, res);
+    const tardo = Date.now() - inicio;
+    check("si llega después que la portada, no se espera: sale sin ella", res.code === 200 && tardo < 250 &&
+      bloque(res.body)?.respuesta && !res.body.includes('id="se-ultima-hora"'), `${tardo} ms`);
+  });
   for (const [nombre, respuesta] of [
     ["no contestan", () => { throw new Error("timeout"); }],
     ["contestan 502", () => ({ ok: false, status: 502, json: async () => ({}) })],

@@ -14,9 +14,26 @@ export const listaDeQuery = (valor) => {
   // (`useContentFilter`), y con `[valor]` un Set se escribía `[object Object]` en la
   // dirección, así que el patrocinio por tema o país nunca coincidía.
   const lista = valor instanceof Set ? [...valor] : Array.isArray(valor) ? valor : [valor];
-  const partes = lista.map((v) => String(v ?? "").trim()).filter(Boolean);
+  // Solo textos y números: cualquier otra cosa (un objeto, un `Set` que alguien convirtió
+  // en `{}` por el camino) se escribiría `[object Object]`. Mejor no mandar el filtro.
+  const partes = lista
+    .filter((v) => typeof v === "string" || typeof v === "number")
+    .map((v) => String(v).trim())
+    .filter(Boolean);
   return partes.length ? partes.join(",") : null;
 };
+
+/**
+ * La declaración de huecos de una vista (`useEspacios`), como texto: la clave con la que
+ * el gancho sabe si cambió algo, y lo que se recupera de ella para pedir los anuncios.
+ *
+ * Un `Set` (la selección del lector en los listados, `useContentFilter`) se escribe como
+ * lista. `JSON.stringify` a secas lo deja en `{}`: al recuperarlo ya no era la selección
+ * sino un objeto vacío, y la dirección salía con `tema=[object Object]` en /articulos e
+ * /informes aunque no hubiera ningún filtro puesto.
+ */
+export const claveDeEspacios = (espacios, contexto) =>
+  JSON.stringify({ espacios, contexto }, (_, v) => (v instanceof Set ? [...v] : v));
 
 /**
  * El contador de recargas de quien mira, para la escalera de publicidad.

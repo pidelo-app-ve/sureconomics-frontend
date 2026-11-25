@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useLocation } from "react-router-dom/dist";
 
 import { ESPACIOS, getEspacios } from "../api";
+import { claveDeEspacios } from "../utils";
 
 /**
  * Quién pide los anuncios de la página, y cuándo.
@@ -135,11 +136,9 @@ export const useEspacios = ({ espacios, contexto = {}, listo = true }) => {
   const { registrar } = useContext(PublicidadContexto);
 
   // La clave serializada y no los objetos: un `{}` nuevo en cada render dispararía el
-  // efecto en cada render, y con él una petición y una impresión por fotograma.
-  const clave = useMemo(
-    () => JSON.stringify({ espacios, contexto }),
-    [espacios, contexto],
-  );
+  // efecto en cada render, y con él una petición y una impresión por fotograma. Los
+  // `Set` del contexto (los filtros de los listados) se escriben como listas.
+  const clave = useMemo(() => claveDeEspacios(espacios, contexto), [espacios, contexto]);
 
   useEffect(() => {
     if (!listo) return;

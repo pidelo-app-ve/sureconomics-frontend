@@ -52,8 +52,9 @@ export default defineConfig(({ mode }) => {
             //
             // CSS: exactamente el listón de Vite 4.
             // JS: el mismo, salvo Chrome/Edge 91 en vez de 87-88. Con 87 esbuild
-            // reescribe cada `a?.b` a mano (Chrome < 91 tiene un fallo raro con el
-            // encadenado opcional) y eso solo engorda la entrada +1,2 KB gzip; Chrome
+            // reescribe cada `a?.b` a mano (Chrome 80-90 fallan con `f?.(...a, b)`,
+            // crbug.com/v8/11558; una regla de eslint.config.js prohíbe ese patrón)
+            // y eso solo engorda la entrada +1,2 KB gzip; Chrome
             // entiende `?.` desde la 80 y todo el JS sigue siendo ES2020. Para volver al
             // listón exacto de Vite 4 basta con poner 'edge88' y 'chrome87' aquí.
             target: ['es2020', 'edge91', 'firefox78', 'chrome91', 'safari14'],

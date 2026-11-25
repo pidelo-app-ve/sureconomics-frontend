@@ -46,7 +46,22 @@ export default [
       // ESLint 9 sacó estas tres de las recomendadas; ESLint 8 las tenía y se mantienen.
       // Las dos de formato están en desuso y desaparecen en ESLint 10: se irán cuando
       // el formato lo lleve Prettier (A-10 del plan 2026-11-23).
-      'no-inner-declarations': 'error',
+      // En ESLint 9 deja pasar funciones dentro de un `if` en los módulos
+      // (`blockScopedFunctions: 'allow'`); ESLint 8 las marcaba y así se sigue.
+      'no-inner-declarations': ['error', 'functions', { blockScopedFunctions: 'disallow' }],
+      // Chrome/Edge 80-90 (V8 8.0-9.0) fallan con un `...` que no es el último
+      // argumento de una llamada dentro de un encadenado opcional:
+      // `f?.(...a, b)` u `o?.m(...a, b)` (crbug.com/v8/11558). El `build.target`
+      // de vite.config.js deja `?.` sin reescribir para Chrome 91+: esta regla
+      // impide que ese patrón llegue al código.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ChainExpression CallExpression > SpreadElement:not(:last-child)',
+          message:
+            'Un `...` que no es el último argumento dentro de `?.` falla en Chrome 80-90 (crbug.com/v8/11558): ponlo el último o saca la llamada del encadenado.',
+        },
+      ],
       'no-extra-semi': 'error',
       'no-mixed-spaces-and-tabs': 'error',
       // Los espacios duros dentro de plantillas se permiten porque ahi son

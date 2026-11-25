@@ -47,11 +47,10 @@ for (const r of [...reales]) reales.push(r === "/" ? "/en" : `/en${r}`);
 reales.push("/admin", "/admin/login");
 for (const p of caminos(admin)) if (!p.startsWith("/")) reales.push(`/admin/${muestra(p)}`);
 
-console.log("cada ruta de src/routes.jsx va a la aplicación (también con barra final)");
+console.log("cada ruta de src/routes.jsx va a la aplicación (con barra final, ver más abajo)");
 check("se leyeron las rutas", reales.length > 100, `${reales.length}`);
 for (const r of reales) {
-  const conBarra = r.endsWith("/") ? r : `${r}/`;
-  check(r, aLaAplicacion(r) && aLaAplicacion(conBarra));
+  check(r, aLaAplicacion(r));
 }
 
 console.log("lo inventado no");
@@ -137,6 +136,51 @@ sirve("/recetas/una", "/api/no-encontrada");
 sirve("/en/Recetas", "/api/no-encontrada?lang=en");
 check("/articulo/ ya no redirige a ciegas a /articulos/ (era una cadena con las noticias)",
   !config.redirects.some((r) => r.source.startsWith("/articulo/")));
+
+// La barra final servía la aplicación vacía con 200: un «404 suave» que se podía indexar.
+// Ahora cada ruta con barra va a la misma sin ella con una 301, en un salto; las piezas,
+// por su función (`_barra=1`), que de paso corrige la sección si hace falta.
+console.log("con barra final: a la misma sin barra, en un salto");
+const esPieza = (r) => /^(?:\/en)?\/(?:noticias|articulos|editorial|entrevistas|informes|podcast|articulo)\/[^/]+$/.test(r);
+for (const r of reales) {
+  if (r === "/") continue;
+  const salto = primerSalto(`${r}/`);
+  // Si la dirección sin barra ya redirige (`/categoria/x`), con barra va al mismo destino.
+  const sinBarra = primerSalto(r);
+  const bien = esPieza(r)
+    ? /^\/api\/pieza\?.*(_barra=1|seccion=articulo&)/.test(salto.sirve ?? "")
+    : sinBarra.estado
+      ? salto.estado === sinBarra.estado && salto.destino === sinBarra.destino
+      : salto.estado === 301 && salto.destino === r;
+  check(`${r}/`, bien, JSON.stringify(salto));
+}
+const salta = (direccion, estado, destino) => {
+  const salto = primerSalto(direccion);
+  check(`${direccion} → ${estado} ${destino}`, salto.estado === estado && salto.destino === destino, JSON.stringify(salto));
+};
+salta("/informes/?pagina=2&utm_source=wa", 301, "/informes?pagina=2&utm_source=wa");
+salta("/en/articulos/?formato=noticias", 301, "/en/articulos?formato=noticias");
+salta("/en/", 301, "/en");
+salta("/cuenta/envios/12/editar/", 301, "/cuenta/envios/12/editar");
+salta("/resumen/2026-11-24/manana/", 301, "/resumen/2026-11-24/manana");
+// Las que ya redirigían con la barra siguen yendo directas a su destino: nada de cadenas.
+salta("/noticias/", 307, "/articulos?formato=noticias");
+salta("/en/podcast/", 307, "/en/audiovisual?ver=podcast");
+salta("/categoria/finanzas/", 308, "/explorar");
+sirve("/noticias/una-noticia/?utm_source=wa", "/api/pieza?seccion=noticias&slug=una-noticia&_barra=1&utm_source=wa");
+sirve("/en/informes/un-informe/", "/api/pieza?seccion=informes&slug=un-informe&lang=en&_barra=1");
+sirve("/Noticias/una-noticia/", "/api/pieza?seccion=Noticias&slug=una-noticia");
+sirve("/articulo/una-pieza-vieja/", "/api/pieza?seccion=articulo&slug=una-pieza-vieja");
+sirve("/en/articulo/una-pieza-vieja", "/api/pieza?seccion=articulo&slug=una-pieza-vieja&lang=en");
+// Lo que no se toca: la portada, las funciones, los datos, los archivos.
+for (const r of ["/", "/api/pieza/", "/datos/posts/", "/media/image/x/", "/assets/", "/.well-known/x/"]) {
+  check(`${r}: sin redirección de barra`, !primerSalto(r).estado, JSON.stringify(primerSalto(r)));
+}
+// Lo que no existe sigue sin existir: con barra, un salto y la 404 (y en un nombre de
+// sección inventado con mayúsculas, la 404 de la función sin saltos).
+salta("/esta-no-existe/", 301, "/esta-no-existe");
+check("/esta-no-existe sin barra: la 404", primerSalto("/esta-no-existe").sirve === "/api/no-encontrada");
+sirve("/Recetas/una/", "/api/pieza?seccion=Recetas&slug=una");
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

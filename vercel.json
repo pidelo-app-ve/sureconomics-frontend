@@ -13,7 +13,7 @@
             "permanent": true
         },
         {
-            "source": "/categoria/:slug",
+            "source": "/categoria/:slug{/}?",
             "destination": "/explorar",
             "permanent": true
         },
@@ -56,6 +56,11 @@
             "source": "/en/podcast{/}?",
             "destination": "/en/audiovisual?ver=podcast",
             "permanent": false
+        },
+        {
+            "source": "/:ruta((?!api/|datos/|media/|assets/|\\.well-known/)(?!(?:en/)?(?:noticias|articulos|editorial|entrevistas|informes|podcast|articulo|[A-Za-z]*[A-Z][A-Za-z]*)/[^/]+/$).+)/",
+            "destination": "/:ruta",
+            "statusCode": 301
         }
     ],
     "rewrites": [
@@ -128,7 +133,19 @@
             "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {
-            "source": "/articulo/:slug",
+            "source": "/en/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug/",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug&lang=en&_barra=1"
+        },
+        {
+            "source": "/:seccion(noticias|articulos|editorial|entrevistas|informes|podcast)/:slug/",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug&_barra=1"
+        },
+        {
+            "source": "/en/articulo/:slug{/}?",
+            "destination": "/api/pieza?seccion=articulo&slug=:slug&lang=en"
+        },
+        {
+            "source": "/articulo/:slug{/}?",
             "destination": "/api/pieza?seccion=articulo&slug=:slug"
         },
         {
@@ -212,11 +229,11 @@
             "destination": "/app.html"
         },
         {
-            "source": "/en/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug",
+            "source": "/en/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug{/}?",
             "destination": "/api/pieza?seccion=:seccion&slug=:slug&lang=en"
         },
         {
-            "source": "/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug",
+            "source": "/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug{/}?",
             "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {

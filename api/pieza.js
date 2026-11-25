@@ -82,9 +82,10 @@ export const SECCIONES_VIEJAS = { articulo: "articulos" };
 
 /**
  * Lo que `vercel.json` le añade a la consulta al mandar una pieza aquí. Al redirigir se
- * quita; lo demás (`utm_*`, `v`, …) es del lector y se conserva.
+ * quita; lo demás (`utm_*`, `v`, …) es del lector y se conserva. `_barra=1`: la dirección
+ * pedida acababa en `/` (`/noticias/<slug>/`), que la función no puede ver de otra manera.
  */
-const PARAMETROS_INTERNOS = ["seccion", "slug", "lang", "fecha", "edicion"];
+const PARAMETROS_INTERNOS = ["seccion", "slug", "lang", "fecha", "edicion", "_barra"];
 
 /**
  * La sección de la dirección buena de una pieza (`/noticias/<slug>`). Sale del formato de
@@ -514,8 +515,14 @@ export default async function handler(req, res) {
   // la buena con una 301, en un solo salto, con `/en` si lo traía y con la consulta del
   // lector (`?utm_source=…`). La página ya hacía lo mismo al cargar (`Pieza.jsx`), pero
   // eso solo lo ve quien ejecuta JavaScript, y con un 200 delante.
+  //
+  // Lo mismo con la barra final (`/noticias/<slug>/`): servía la aplicación vacía con 200,
+  // un «404 suave». Las demás direcciones con barra las redirige `vercel.json`; las de las
+  // piezas vienen aquí (`_barra=1`) para que una con barra *y* sección equivocada llegue a
+  // la buena en un salto y no en dos.
   const seccionBuena = seccionDeLaPieza(pieza, seccionNormal);
-  if (seccionPedida !== seccionBuena || slug !== slugHallado) {
+  const conBarra = query._barra === "1";
+  if (seccionPedida !== seccionBuena || slug !== slugHallado || conBarra) {
     res.setHeader("X-Pieza-Meta", "otra-direccion");
     // Poco tiempo en el navegador (`max-age`): una 301 sin él se guarda para siempre, y una
     // pieza que vuelve a cambiar de formato dejaría a ese lector dando vueltas.

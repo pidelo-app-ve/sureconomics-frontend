@@ -817,6 +817,20 @@ check("fotoDePortada: medidas raras no se ponen",
     const { res } = await pedir({ seccion: "informes", slug: "bolsas-caen" }, [{ ...NOTICIA, format: "otro" }]);
     check("formato desconocido: no se inventa otra dirección", res.code === 200 && !res.location, `${res.code} ${res.location}`);
   }
+  // La barra final (`/noticias/<slug>/`): antes, la aplicación vacía con 200, un «404
+  // suave». `vercel.json` la manda aquí con `_barra=1`.
+  {
+    const { res } = await pedir({ seccion: "noticias", slug: "bolsas-caen", _barra: "1", utm_source: "wa" });
+    check("barra final con consulta: 301 sin la barra y con la consulta",
+      res.code === 301 && res.location === "/noticias/bolsas-caen?utm_source=wa", `${res.code} ${res.location}`);
+    const doble = (await pedir({ seccion: "articulos", slug: "bolsas-caen", lang: "en", _barra: "1" })).res;
+    check("barra final y sección equivocada en /en: un solo salto a la buena",
+      doble.code === 301 && doble.location === "/en/noticias/bolsas-caen", doble.location);
+    const respaldo = (await pedir({ seccion: "noticias", slug: "bolsas-caen", _barra: "1", _s: "1" })).res;
+    check("barra final con el _s del respaldo: no lo arrastra", respaldo.location === "/noticias/bolsas-caen", respaldo.location);
+    const nada = (await pedir({ seccion: "noticias", slug: "no-existe", _barra: "1" })).res;
+    check("barra final de una pieza que no existe: 404, sin redirigir", nada.code === 404 && !nada.location, `${nada.code}`);
+  }
   {
     // Con versión en inglés, las dos direcciones buenas se declaran la una a la otra.
     const { res } = await pedir({ seccion: "noticias", slug: "bolsas-caen", lang: "en" },

@@ -2,7 +2,8 @@
  * Esperar a las hojas de estilos a medio bajar (`esperarHojas.js`). `npm test`.
  *
  * Lo que se vigila: que sin hojas pendientes no se espere nada, que con una a medio bajar
- * se espere a su `load` (o a su `error`), y que nunca se espere más del tope.
+ * se espere a su `load` (o a su `error`), que nunca se espere más del tope, y que una
+ * hoja colgada solo retrase una vez.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -51,6 +52,28 @@ test("nunca espera más del tope", async () => {
   assert.equal(await resuelta(espera), false);
   await new Promise((ok) => setTimeout(ok, 30));
   assert.equal(await resuelta(espera), true);
+});
+
+test("una hoja colgada retrasa una sola vez, y como mucho el tope", async () => {
+  const colgada = enlace({ cargada: false });
+  const doc = documento([colgada]);
+  const t0 = Date.now();
+  await esperarHojas({ doc, tope: 40 });
+  const primera = Date.now() - t0;
+  assert.ok(primera >= 35 && primera < 400, `la primera espera el tope: ${primera} ms`);
+  // La siguiente página ya no la espera: se dio por perdida.
+  assert.equal(await resuelta(esperarHojas({ doc, tope: 40 })), true);
+  // Y una hoja nueva que sigue bajando sí se espera.
+  const nueva = enlace({ cargada: false });
+  const espera = esperarHojas({ doc: documento([colgada, nueva]), tope: 1000 });
+  assert.equal(await resuelta(espera), false);
+  nueva.disparar("load");
+  assert.equal(await resuelta(espera), true);
+});
+
+test("el tope de serie es corto (una hoja colgada no puede parar la navegación)", async () => {
+  const { TOPE_HOJAS_MS } = await import("./esperarHojas.js");
+  assert.ok(TOPE_HOJAS_MS <= 3000, String(TOPE_HOJAS_MS));
 });
 
 test("sin document (en el servidor o en una prueba) no espera", async () => {

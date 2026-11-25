@@ -9,9 +9,17 @@
  * una hoja a medio bajar, esperan a que termine.
  *
  * Una hoja que falló (sin red) no se espera: se apunta al fallar. Y nunca se espera más de
- * `tope` ms: pasado ese tiempo la página se pinta como se pintaba antes de esto.
+ * `tope` ms: pasado ese tiempo la página se pinta como se pintaba antes de esto, y las hojas
+ * que seguían sin llegar se dan por perdidas. Así una hoja colgada (una red móvil que se
+ * queda a medias) retrasa un solo cambio de página, y como mucho el tope; sin apuntarla,
+ * cada cambio de página la volvía a esperar entero.
+ *
+ * Se esperan todas las pendientes, no solo las de la página que se abre: desde aquí no se
+ * sabe cuáles pide cada trozo (eso lo decide Vite al construir). Con el tope y el olvido,
+ * lo peor que hace una hoja ajena es un retraso de una vez.
  */
 
+/** Las hojas que ya no se esperan: fallaron, o agotaron el tope una vez. */
 const FALLIDAS = new WeakSet();
 if (typeof document !== "undefined") {
   // El `error` de un `<link>` no sube por el árbol: se escucha en la fase de captura.
@@ -24,8 +32,8 @@ if (typeof document !== "undefined") {
   );
 }
 
-/** Lo que se espera como mucho, en ms. */
-export const TOPE_HOJAS_MS = 8000;
+/** Lo que se espera como mucho, en ms: lo que tarda una hoja pequeña en una red lenta. */
+export const TOPE_HOJAS_MS = 2500;
 
 /**
  * @param {{ doc?: Document, tope?: number }} [opciones]  `doc`, para las pruebas
@@ -47,7 +55,13 @@ export const esperarHojas = ({ doc = typeof document === "undefined" ? null : do
   );
   let reloj;
   const tiempo = new Promise((listo) => {
-    reloj = setTimeout(listo, tope);
+    reloj = setTimeout(() => {
+      // Se acabó el tope: las que siguen sin llegar no se vuelven a esperar.
+      pendientes.forEach((enlace) => {
+        if (!enlace.sheet) FALLIDAS.add(enlace);
+      });
+      listo();
+    }, tope);
   });
   return Promise.race([Promise.all(llegadas), tiempo]).then(() => clearTimeout(reloj));
 };

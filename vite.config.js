@@ -42,7 +42,22 @@ export default defineConfig(({ mode }) => {
             },
         },
         build: {
-            outDir: 'dist'
+            outDir: 'dist',
+            // Navegadores a los que se apunta. Vite 4 traía por defecto 'modules'
+            // (Chrome/Edge 87-88, Firefox 78, Safari 14); Vite 7 lo sube a Chrome/Edge
+            // 107, Firefox 104 y Safari 16, y con eso el CSS perdía los prefijos
+            // `-webkit-appearance` y el desglose de `inset` que necesitan los iPhone con
+            // iOS 14-15: selectores y cajas se verían distintos. Subir el listón es una
+            // decisión aparte, no un efecto de actualizar Vite.
+            //
+            // CSS: exactamente el listón de Vite 4.
+            // JS: el mismo, salvo Chrome/Edge 91 en vez de 87-88. Con 87 esbuild
+            // reescribe cada `a?.b` a mano (Chrome < 91 tiene un fallo raro con el
+            // encadenado opcional) y eso solo engorda la entrada +1,2 KB gzip; Chrome
+            // entiende `?.` desde la 80 y todo el JS sigue siendo ES2020. Para volver al
+            // listón exacto de Vite 4 basta con poner 'edge88' y 'chrome87' aquí.
+            target: ['es2020', 'edge91', 'firefox78', 'chrome91', 'safari14'],
+            cssTarget: ['edge88', 'firefox78', 'chrome87', 'safari14'],
         }
     }
 })

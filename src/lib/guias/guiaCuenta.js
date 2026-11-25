@@ -7,11 +7,11 @@
  *
  * Los textos son claves de `cuenta.guias.cuenta.*` (la cuenta se lee en dos idiomas).
  *
- * Sus pasos viven con la cuenta del lector, en `features/cuenta/guides/cuenta.js`;
+ * Sus pasos viven con la cuenta del lector, en `features/cuenta/guia.js`;
  * aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_CUENTA } from "../../features/cuenta/guides/cuenta.js";
+import { PASOS_CUENTA } from "../../features/cuenta/guia.js";
 
 export { PASOS_CUENTA };
 

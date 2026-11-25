@@ -40,14 +40,13 @@
  *    una razón que no es de gusto:
  *    - `import()` de una página de un dominio desde `routes.jsx`: es la línea por la que
  *      Vite parte el código; por la puerta, la página viajaría con todo lo demás;
- *    - los pasos de las guías (`features/<tema>/guia.js`, o lo que haya en una carpeta
- *      `guides/` si un dominio llega a tener varias): son datos sin JSX, y las guías de
- *      `lib/guias/` los leen desde una prueba que corre en node, que no entiende el JSX
- *      que trae `index.js`;
+ *    - los pasos de las guías (`features/<tema>/guia.js`, con todas las del dominio si
+ *      tiene varias): son datos sin JSX, y las guías de `lib/guias/` los leen desde una
+ *      prueba que corre en node, que no entiende el JSX que trae `index.js`;
  *    - las fachadas de la mudanza (`FACHADAS`, con quién las quita). Cada fachada dice
  *      también quién la importa, y nadie más puede: el código nuevo entra por la puerta.
- * 5. Los pasos de las guías de un dominio son datos: solo importan otros pasos de guía
- *    (`guia.js` o `guides/*.js`) o un `.json`. Nada de componentes ni JSX (los lee node).
+ * 5. Los pasos de las guías de un dominio (`guia.js`) son datos: no importan nada. Nada
+ *    de componentes ni JSX (los lee node).
  * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
  *    comprobar: solo se admite en `routes.jsx`.
  *
@@ -238,10 +237,10 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   /** El `import()` de `routes.jsx` a una página del panel: así se carga aparte. */
   const lazyDelPanel = (ruta, destino, dinamico) =>
     dinamico && ruta === RUTAS && (dentroDe(destino, path.join(SRC, "pages", "admin")) || esPagina(destino));
-  /** Los pasos de una guía: `features/<tema>/guia.js` o lo que cuelgue de `features/<tema>/guides/`. */
+  /** Los pasos de las guías de un dominio: `features/<tema>/guia.js`. */
   const esGuia = (r) => {
     const d = dominioDe(r);
-    return Boolean(d) && (r === path.join(DOMINIOS, d, "guia.js") || dentroDe(r, path.join(DOMINIOS, d, "guides")));
+    return Boolean(d) && r === path.join(DOMINIOS, d, "guia.js");
   };
 
   const salida = [];
@@ -264,9 +263,8 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
         salida.push(`${donde}; src/config/ son datos: solo importa de src/config/`);
         continue;
       }
-      if (esGuia(ruta) && !((esGuia(destino) && destino.endsWith(".js")) ||
-        (destino.endsWith(".json") && path.basename(path.dirname(destino)) === "guides"))) {
-        salida.push(`${donde}; los pasos de una guía son datos: solo importan otros pasos de guía (guia.js, guides/)`);
+      if (esGuia(ruta)) {
+        salida.push(`${donde}; los pasos de una guía son datos: guia.js no importa nada`);
         continue;
       }
       const fachada = fachadas[relativa(destino)];
@@ -290,7 +288,7 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
         salida.push(`${donde}; de otro dominio, solo sus puertas (features/${otro}/index.js o admin/index.js)`);
       } else if (dinamico && ruta === RUTAS && esPagina(destino)) {
         continue;
-      } else if (esGuia(destino) && destino.endsWith(".js")) {
+      } else if (esGuia(destino)) {
         continue;
       } else {
         salida.push(`${donde}; desde fuera, solo sus puertas (features/${otro}/index.js o admin/index.js)`);
@@ -516,9 +514,8 @@ test("la prueba ve las trampas", () => {
     "src/features/b/admin/AdminB.jsx": [], //          una página del panel en la raíz de admin/
     "src/features/b/admin/Exportado.jsx": [],
     "src/features/b/guia.js": [
-      'import { MAS } from "./guides/mas.js";', //      bien: otros pasos de guía
       'import { T } from "./Tarjeta";', //              ✗ 5: una guía no importa componentes
-      'import datos from "./datos.json";', //           ✗ 5: un .json, solo de una carpeta guides/
+      'import datos from "./datos.json";', //           ✗ 5: ni un .json: no importa nada
     ],
     "src/features/b/components/Y.jsx": [],
     "src/features/b/admin/index.js": [
@@ -529,11 +526,6 @@ test("la prueba ve las trampas", () => {
     ],
     "src/features/b/pages/Pag.jsx": [],
     "src/features/b/admin/pages/Panel.jsx": [],
-    "src/features/b/guides/pasos.js": [
-      'import { MAS } from "./mas.js";', //             bien: datos de otra guía
-      'import { Y } from "../components/Y";', //        ✗ 5: una guía no importa componentes
-    ],
-    "src/features/b/guides/mas.js": [],
     "src/components/admin/X.jsx": [
       'import { Q } from "../../features/b/admin";', // bien: panel con panel
     ],
@@ -589,8 +581,7 @@ test("la prueba ve las trampas", () => {
       'const E = () => import("./features/b/admin/Exportado");', //     ✗ 2: la puerta del panel lo exporta
     ],
     "src/lib/guias/g.js": [
-      'import { pasos } from "../../features/b/guides/pasos.js";', // bien: datos de una guía
-      'import { PASOS } from "../../features/b/guia.js";', //         bien: también guia.js
+      'import { PASOS } from "../../features/b/guia.js";', //         bien: datos de una guía
     ],
     "src/lib/fachada.js": [
       'export { Y } from "../features/b/components/Y";', // bien: es una fachada
@@ -615,9 +606,8 @@ test("la prueba ve las trampas", () => {
       "src/features/a/components/X.jsx:4 src/features/a/admin/Panel.jsx",
       "src/features/a/components/X.jsx:5 src/features/a/admin/services/api.js",
       "src/features/a/index.js:2 src/features/a/admin/Panel.jsx",
-      "src/features/b/guia.js:2 src/features/b/Tarjeta.jsx",
-      "src/features/b/guia.js:3 src/features/b/datos.json",
-      "src/features/b/guides/pasos.js:2 src/features/b/components/Y.jsx",
+      "src/features/b/guia.js:1 src/features/b/Tarjeta.jsx",
+      "src/features/b/guia.js:2 src/features/b/datos.json",
       "src/pages/Home.jsx:2 src/features/b/admin/index.js",
       "src/pages/Home.jsx:3 src/features/b/components/Y.jsx",
       "src/pages/Home.jsx:4 src/components/admin/X.jsx",

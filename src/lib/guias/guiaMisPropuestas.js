@@ -8,11 +8,11 @@
  * `cuenta.guias.miPropuesta.*`; los estados, en `cuenta.guias.estados.*`, los mismos en
  * las dos.
  *
- * Sus pasos viven con la cuenta del lector, en `features/cuenta/guides/misPropuestas.js`;
+ * Sus pasos viven con la cuenta del lector, en `features/cuenta/guia.js`;
  * aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_MIS_PROPUESTAS, PASOS_MI_PROPUESTA } from "../../features/cuenta/guides/misPropuestas.js";
+import { PASOS_MIS_PROPUESTAS, PASOS_MI_PROPUESTA } from "../../features/cuenta/guia.js";
 
 export { PASOS_MIS_PROPUESTAS, PASOS_MI_PROPUESTA };
 

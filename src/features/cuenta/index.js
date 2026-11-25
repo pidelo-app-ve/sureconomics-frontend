@@ -19,7 +19,7 @@
  *   por aquí: si esta puerta las exportara, viajarían en el paquete de cada lector.
  * - `components/`: las piezas de esas páginas (campos, fuerza de la clave, botón de
  *   Google, retrato, la guarda de sesión y el formulario de una propuesta).
- * - `guides/`: los pasos de sus ocho guías (la bienvenida y una por página); se arman en
+ * - `guia.js`: los pasos de sus nueve guías (la bienvenida y una por página); se arman en
  *   `lib/guias/` (`guiaCuenta.js`, `guiaPerfil.js`…).
  *
  * Lo que **no** está aquí, a propósito: el almacén de la sesión y el cliente HTTP del

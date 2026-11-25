@@ -3,11 +3,11 @@
  * `[data-tour-mis-temas="…"]`. Textos en `cuenta.guias.misTemas.*`. El nombre no es
  * «temas»: ese es el de la guía de Temas del panel (`guiaTemas.js`).
  *
- * Sus pasos viven con la cuenta del lector, en `features/cuenta/guides/misTemas.js`;
+ * Sus pasos viven con la cuenta del lector, en `features/cuenta/guia.js`;
  * aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_MIS_TEMAS } from "../../features/cuenta/guides/misTemas.js";
+import { PASOS_MIS_TEMAS } from "../../features/cuenta/guia.js";
 
 export { PASOS_MIS_TEMAS };
 

@@ -109,9 +109,8 @@ const recorrer = (dir) => {
 recorrer(SRC);
 const publicos = archivos.filter((a) => !IGNORADOS.some((re) => re.test(a)));
 
-// Los pasos de una guía que viven con su feature (`features/<tema>/guia.js` o lo que
-// cuelga de `features/<tema>/guides/`): solo datos.
-const PASOS_EN_UNA_FEATURE = /[\\/]features[\\/][^\\/]+[\\/](?:guia\.js$|guides[\\/])/;
+// Los pasos de una guía que viven con su feature (`features/<tema>/guia.js`): solo datos.
+const PASOS_EN_UNA_FEATURE = /[\\/]features[\\/][^\\/]+[\\/]guia\.js$/;
 
 /** Las claves que nombra un archivo: directas y prefijos de las que se arman en tiempo de ejecución. */
 const clavesQueNombra = (codigo, archivo = "") => {

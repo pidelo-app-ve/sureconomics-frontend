@@ -4,11 +4,11 @@
  * sección lo cuenta la bienvenida (`guiaCuenta.js`, el «?» de arriba); esta explica lo
  * que hay en la propia página.
  *
- * Sus pasos viven con la cuenta del lector, en `features/cuenta/guides/miEspacio.js`;
+ * Sus pasos viven con la cuenta del lector, en `features/cuenta/guia.js`;
  * aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
-import { PASOS_MI_ESPACIO } from "../../features/cuenta/guides/miEspacio.js";
+import { PASOS_MI_ESPACIO } from "../../features/cuenta/guia.js";
 
 export { PASOS_MI_ESPACIO };
 

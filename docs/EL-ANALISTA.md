@@ -35,7 +35,7 @@ CORS, y comparte con el resto la sesión del lector, las cookies y la analítica
 | Backend `app/routes/analista.py`, `app/services/analista_service.py` | El ranking y la partida. |
 | Backend `app/routes/admin/analista.py` | La moderación. |
 
-El juego queda fuera del linter (`eslint.cjs`) a propósito: «arreglarlo» aquí haría chocar la
+El juego queda fuera del linter (`eslint.config.js`) a propósito: «arreglarlo» aquí haría chocar la
 próxima vez que se traiga.
 
 **Peso.** El juego va en su propio paquete: 1 MB, unos 325 KB comprimido. Solo se descarga al

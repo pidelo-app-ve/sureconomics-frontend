@@ -10,7 +10,7 @@
         "dev": "vite",
         "start": "vite",
         "build": "vite build && node scripts/shell-como-app.mjs",
-        "lint": "eslint -c eslint.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0 && node scripts/i18n-comprobar.mjs",
+        "lint": "eslint . --report-unused-disable-directives --max-warnings 0 && node scripts/i18n-comprobar.mjs",
         "test": "node --import ./scripts/pruebas/cargador-jsx.mjs --test",
         "preview": "vite preview",
         "test:og": "node api/pieza.test.mjs && node api/no-encontrada.test.mjs && node api/portada.test.mjs",
@@ -35,32 +35,33 @@
         "traer-analista": "node scripts/traer-el-analista.mjs"
     },
     "dependencies": {
-        "@tiptap/extension-link": "^3.32.2",
-        "@tiptap/extension-placeholder": "^3.32.2",
-        "@tiptap/pm": "^3.32.2",
-        "@tiptap/react": "^3.32.2",
-        "@tiptap/starter-kit": "^3.32.2",
+        "@tiptap/extension-link": "^3.35.0",
+        "@tiptap/extension-placeholder": "^3.35.0",
+        "@tiptap/pm": "^3.35.0",
+        "@tiptap/react": "^3.35.0",
+        "@tiptap/starter-kit": "^3.35.0",
         "prop-types": "^15.8.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-router-dom": "^6.30.6"
     },
     "devDependencies": {
+        "@eslint/js": "^9.39.5",
         "@happy-dom/global-registrator": "21.0.4",
         "@testing-library/dom": "10.4.2",
         "@testing-library/react": "16.3.3",
         "@types/react": "^18.2.18",
         "@types/react-dom": "^18.2.7",
-        "@vitejs/plugin-react": "^4.0.4",
-        "eslint": "^8.46.0",
-        "eslint-plugin-react": "^7.33.1",
-        "eslint-plugin-react-hooks": "^4.6.0",
-        "eslint-plugin-react-refresh": "^0.4.3",
-        "espree": "^9.6.1",
+        "@vitejs/plugin-react": "^5.2.0",
+        "eslint": "^9.39.5",
+        "eslint-plugin-react": "^7.37.5",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "espree": "^10.4.0",
+        "globals": "^17.14.0",
         "happy-dom": "21.0.4",
-        "vite": "^4.4.8"
+        "vite": "^7.3.8"
     },
     "engines": {
-        "node": ">=20.0.0"
+        "node": "24.x"
     }
 }

@@ -44,6 +44,15 @@
  * quita solo (una animación CSS, sin JavaScript) y el lector ve al menos los titulares
  * con sus enlaces, en vez de una página en blanco.
  *
+ * ## La apertura, a la vista (plan del 23-nov-2026, A-0)
+ *
+ * Lo que sí se copia es lo de arriba: la foto de la apertura, su titular y su entradilla
+ * (`aperturaEnHtml`), con las clases de la página y en sus cajas, guardando el sitio de lo
+ * que va encima (cinta, cabecera, fecha y Última hora). Es lo que Google mide como LCP en el
+ * teléfono, y antes no se veía hasta que el JavaScript llegaba y React pintaba (FCP de 4,4 s
+ * en el laboratorio del plan). Al montar, React la reemplaza por la misma: la foto ya está
+ * bajada y mide lo mismo, y `PrimeraPlana` no la vuelve a barrer.
+ *
  * ## Si algo falla
  *
  * Falla abierta, como las piezas. Sin datos de la API sale el shell con el título, la
@@ -77,10 +86,13 @@ import {
   AL_PUNTO,
   ANALISIS_EN_PLANA,
   PREVIEW,
+  SIZES_PRINCIPAL,
   elegirApertura,
   paraLaApertura,
   precargaDeLaApertura,
 } from "../src/lib/apertura.js";
+import { ANCHOS_DE_TARJETA, imagenAncho, imagenSrcSet, posicionDeFoco } from "../src/lib/fotoDePieza.js";
+import { textoLlano as resumenDeTarjeta } from "../src/lib/textoLlano.js";
 import { ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, RUTA_DEL_QUIOSCO } from "../src/api/quiosco.js";
 import {
   FORMAT_NAME,
@@ -117,6 +129,9 @@ export const ORDEN_DE_SECCIONES = ["noticia", "articulo", "editorial", "entrevis
 /** Cuándo se quita el recorte si React no ha montado (ver arriba). */
 const REVELAR_TRAS = "9s";
 
+/** Lo que mide Última hora encima de la apertura, en px (ver `ESTILO_PREVIO`). */
+const ALTO_DE_ULTIMA_HORA = { telefono: 287, tableta: 226 };
+
 /**
  * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor de la
  * página; la prueba (`portada.test.mjs`) vigila que digan lo mismo.
@@ -126,6 +141,9 @@ const REVELAR_TRAS = "9s";
  * - `apertura` y `recientes`: `portada.apertura.apertura` y `portada.apertura.loMasReciente`,
  *   el `<h2>` de la primera plana (con pieza fijada o sin ella).
  * - `alPunto`: `nav.alPunto`, la sección de entrevistas y podcast.
+ * - Solo en inglés, `marcaEspanol` y `marcaEspanolTitulo`: `idioma.marcaEspanol` y
+ *   `idioma.marcaEspanolTitulo`, la marca «ES» que lleva en `/en` el titular de una pieza
+ *   sin versión inglesa (`TituloDePieza`).
  */
 export const TEXTOS = {
   es: {
@@ -145,6 +163,8 @@ export const TEXTOS = {
     apertura: "Lead story",
     recientes: "Latest",
     alPunto: "Al punto",
+    marcaEspanol: "ES",
+    marcaEspanolTitulo: "In Spanish only",
   },
 };
 
@@ -283,6 +303,77 @@ export const portadaEnHtml = ({ plana, secciones, idioma = "es" }) => {
 };
 
 /**
+ * El día de la edición, como lo escribe `PrimeraPlana` bajo la cabecera («miércoles, 25 de
+ * noviembre de 2026»: la mayúscula la pone el CSS). En la hora de Caracas; la página usa
+ * la del lector, que para casi todos es la misma.
+ */
+export const fechaDeEdicion = (ahora, idioma = "es") =>
+  new Intl.DateTimeFormat(idioma === "en" ? "en-US" : "es", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    weekday: "long",
+    timeZone: "America/Caracas",
+  }).format(ahora);
+
+/**
+ * La apertura a la vista, antes de que llegue el JavaScript (plan del 23-nov-2026, A-0): la
+ * foto, que es lo que Google mide como LCP en el teléfono, el titular y la entradilla.
+ *
+ * Con las clases y dentro de las cajas de la página (`Layout`, `Home`, `PrimeraPlana`,
+ * `CardMedia`), para que cada cosa caiga donde la va a pintar React y el relevo no se
+ * note: la cinta y la cabecera van vacías, guardando su alto (la cinta, con la misma clase
+ * que usa mientras carga); la fecha de la edición, escrita; y Última hora, vacía, con el
+ * alto que suele tener (en el teléfono va encima de la apertura; ver `ESTILO_PREVIO`). La
+ * `<img>` es la de `CardMedia`: la misma dirección, el mismo `srcset` y el mismo `sizes`
+ * que la precarga, así que React encuentra la foto ya bajada y del mismo tamaño.
+ *
+ * Fuera de los lectores de pantalla (`aria-hidden`, y sus enlaces fuera del tabulador):
+ * ellos ya tienen la portada entera en la lista recortada (`portadaEnHtml`).
+ *
+ * Nada si la apertura no abre con foto (sin foto, o con un short): ahí React la pinta
+ * como antes. `fila` es la de la API; `idioma`, el de la página.
+ */
+export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {}) => {
+  const pieza = paraLaApertura(fila);
+  const titular = titularDe(fila, idioma);
+  if (!titular || !precargaDeLaApertura(pieza)) return "";
+  // Lo que hace `piezaFromApi` (`lib/pieza.js`): en `/en`, la versión inglesa si la tiene.
+  const enIngles = idioma === "en" && Boolean(fila.en_ingles);
+  const titulo = escapar((enIngles ? fila.title_en : fila.title) ?? "");
+  const resumen = resumenDeTarjeta(enIngles ? fila.excerpt_en || "" : fila.excerpt);
+  // `TituloDePieza`: en `/en`, la pieza que solo está en español lo avisa con «ES».
+  const t = TEXTOS[idioma];
+  const textoDelTitulo =
+    idioma === "en" && !fila.en_ingles
+      ? `<span lang="es">${titulo}</span> <abbr class="se-marca-idioma" title="${escapar(t.marcaEspanolTitulo)}">${escapar(t.marcaEspanol)}</abbr>`
+      : titulo;
+  const srcset = imagenSrcSet(pieza.imagenUrl, ANCHOS_DE_TARJETA, pieza.imagenAnchoOriginal);
+  const foco = posicionDeFoco(fila.imagen_foco);
+  // `CardMedia` con lo que le pasa `PrimeraPlana`: `ancho={1200}`, `SIZES_PRINCIPAL` y `prioridad`.
+  const img =
+    `<img class="se-artcard__img" src="${escapar(imagenAncho(pieza.imagenUrl, 1200))}"` +
+    (foco ? ` style="object-position:${escapar(foco)}"` : "") +
+    (srcset ? ` srcset="${escapar(srcset)}"` : "") +
+    ` sizes="${escapar(SIZES_PRINCIPAL)}" alt="" loading="eager" fetchpriority="high" decoding="async" />`;
+  const ruta = escapar(titular.ruta);
+  return [
+    `<div class="se-publico se-portada-anticipo" aria-hidden="true">`,
+    `<div class="se-ticker se-ticker--hueco"></div>`,
+    `<header class="se-header"><div class="se-container se-header__inner"></div></header>`,
+    `<div class="se-contenido"><main class="se-blog se-portada"><section class="se-plana">`,
+    `<div class="se-container"><p class="se-plana__fecha"><time>${escapar(fechaDeEdicion(ahora, idioma))}</time></p></div>`,
+    `<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div>`,
+    `<div class="se-plana__centro"><article class="se-plana__principal">`,
+    `<div class="se-plana__foto"><a class="se-plana__media" href="${ruta}" tabindex="-1">${img}</a></div>`,
+    `<div class="se-plana__texto"><h3 class="se-plana__titulo${fila.format === "informe" ? " se-plana__titulo--a-fondo" : ""}">`,
+    `<a href="${ruta}" tabindex="-1">${textoDelTitulo}</a></h3>`,
+    resumen ? `<p class="se-plana__resumen">${escapar(resumen)}</p>` : "",
+    `</div></article></div></div></section></main></div></div>`,
+  ].join("");
+};
+
+/**
  * El recorte del HTML previo y su salida de emergencia. En `<style>` porque una animación
  * no cabe en un atributo `style`; la política de seguridad (CSP) ya permite estilos en línea.
  *
@@ -291,6 +382,14 @@ export const portadaEnHtml = ({ plana, secciones, idioma = "es" }) => {
  * `auto` no se interpola): solo se ve si para entonces React no ha reemplazado el
  * contenido de `#root`, que es cuando hace falta. Un navegador que no anime algo de esto
  * se queda con la página como era antes, en blanco hasta que llega React.
+ *
+ * Y lo de la apertura a la vista (`aperturaEnHtml`), que solo existe en este HTML: por eso
+ * va aquí y no en las hojas del sitio.
+ * - A los `REVELAR_TRAS`, si React no llegó, se pliega y deja el sitio a la lista.
+ * - El alto de Última hora donde va encima de la apertura (hasta 959 px): lo que mide con
+ *   tres titulares y su nota, medido el 25-nov-2026 a 360-412 px (dos líneas cada uno) y a
+ *   768 (una). Es lo único que no se puede saber aquí (los titulares llegan después, de
+ *   otra lectura): si React pinta otro alto, la apertura se mueve esa diferencia al montar.
  */
 export const ESTILO_PREVIO =
   `<style>.se-portada-previa{position:absolute;top:0;left:0;width:1px;height:1px;margin:-1px;` +
@@ -298,7 +397,12 @@ export const ESTILO_PREVIO =
   `animation:se-portada-previa 0s linear ${REVELAR_TRAS} forwards}` +
   `.se-portada-previa main,.se-portada-previa footer{max-width:44rem;margin:0 auto;padding:1.5rem 1rem}` +
   `@keyframes se-portada-previa{to{width:auto;height:auto;margin:0;right:0;` +
-  `overflow:visible;clip-path:none;white-space:normal}}</style>`;
+  `overflow:visible;clip-path:none;white-space:normal}}` +
+  `.se-portada-anticipo{animation:se-portada-anticipo 0s linear ${REVELAR_TRAS} forwards}` +
+  `@keyframes se-portada-anticipo{to{height:0;overflow:hidden}}` +
+  `@media (max-width:759px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.telefono}px}}` +
+  `@media (min-width:760px) and (max-width:959px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.tableta}px}}` +
+  `</style>`;
 
 /** El `<link rel="preload">` de la foto de la apertura (o nada, si no hay que pedirla). */
 export const enlaceDePrecarga = (precarga) => {
@@ -427,7 +531,11 @@ export const armarPortada = (shell, { filas = [], respuesta = null, idioma = "es
     alternativas: { es: URL_ES, en: URL_EN },
     ficha: fichaDePortada({ url, idioma, titulares: todos }),
     cabecera,
-    html: todos.length ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) : null,
+    // La lista recortada (para buscadores y lectores de pantalla) y, a la vista, la apertura.
+    html: todos.length
+      ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) +
+        (principal ? aperturaEnHtml(porId.get(plana.principal.id), { idioma, ahora }) : "")
+      : null,
     cola: respuesta && validas.length ? bloqueDeDatos(respuesta) : "",
   });
 };

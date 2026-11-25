@@ -11,6 +11,8 @@
 import { formatearFecha, idiomaActual, tActual } from "../i18n/motor";
 import { enlaceWeb } from "./enlaces";
 import { posicionDeFoco } from "./fotoDePieza";
+// El resumen como texto: también lo usa `api/portada.js`, que no puede cargar este módulo.
+import { textoLlano } from "./textoLlano";
 
 // Las tallas y el encuadre de la foto viven en `fotoDePieza.js`, que también carga
 // `api/pieza.js`. Se reexportan aquí para que quien las usa no tenga que saberlo.
@@ -63,31 +65,6 @@ export const nombreTraducido = (fila) =>
 
 /** `2026-08-01T12:00:00Z` → `1 ago 2026` / `Aug 1, 2026`, the form the cards print. */
 export const fechaCorta = (iso) => formatearFecha(iso, "corta");
-
-/**
- * HTML -> texto llano.
- *
- * The summary is written in the rich editor, so it arrives as markup. A card
- * prints it inside a `<p>` as text, and React escapes markup — so without this a
- * teaser would read `<p>El banco…</p>` on the home page. A regex rather than
- * `DOMParser`, because this module is also loaded outside a browser by the
- * verification scripts.
- */
-export const textoLlano = (html) => {
-  if (!html) return "";
-  return html
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, String.fromCharCode(34))
-    .replace(/&#39;/gi, String.fromCharCode(39))
-    .replace(/\s+/g, " ")
-    .trim();
-};
 
 /** `1440` -> `24 min`. */
 export const duracionCorta = (seconds) => {

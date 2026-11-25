@@ -17,6 +17,7 @@ import handler, {
   ORDEN_DE_SECCIONES,
   TEXTOS,
   armarPortada,
+  fechaDeEdicion,
   loQuePintaLaPortada,
   rutaDeFormato,
   titularDe,
@@ -261,6 +262,71 @@ for (const [nombre, opciones] of [
   });
 }
 
+// —— 3b. La apertura a la vista (A-0, 25-nov-2026) ——
+//
+// Que sea la misma que pinta React lo vigila `src/pages/Home.test.mjs`, que pinta la página
+// de verdad (aquí no se puede: esto corre en Node sin JSX).
+console.log("la apertura, a la vista antes de React");
+{
+  const h = armarPortada(SHELL, { filas: MUCHAS, ahora: HORA });
+  const dentro = raiz(h);
+  const desde = dentro.indexOf('<div class="se-publico se-portada-anticipo" aria-hidden="true">');
+  const anticipo = dentro.slice(desde);
+  check("va en #root, detrás de la lista recortada y fuera de ella",
+    desde > 0 && dentro.startsWith('<div class="se-portada-previa">') && dentro.indexOf("</footer></div>") < desde);
+  check("una sola vez", contar(h, /se-portada-anticipo"/g) === 1);
+  check("guarda el sitio de la cinta, la cabecera y Última hora, con sus clases",
+    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><header class="se-header"><div class="se-container se-header__inner"></div></header>') &&
+      anticipo.includes('<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div><div class="se-plana__centro">'));
+  check("con la fecha de la edición (hora de Caracas)",
+    anticipo.includes('<p class="se-plana__fecha"><time>miércoles, 18 de noviembre de 2026</time></p>'));
+  const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);
+  check("la foto de la apertura: la que se precarga, con prioridad",
+    anticipo.includes(`<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" srcset="${srcset}" sizes="${SIZES_PRINCIPAL}" alt="" loading="eager" fetchpriority="high" decoding="async" />`) &&
+      h.includes(`imagesrcset="${srcset}" imagesizes="${SIZES_PRINCIPAL}"`));
+  check("titular y entradilla de la que manda, enlazados a la pieza y fuera del tabulador",
+    anticipo.includes('<h3 class="se-plana__titulo"><a href="/noticias/pieza-1" tabindex="-1">Titular número 1</a></h3><p class="se-plana__resumen">Entradilla de la pieza 1.</p>'));
+  check("solo la apertura: ni las de debajo ni las secciones", !anticipo.includes("Titular número 2") && !anticipo.includes("se-plana__otras"));
+  check("si React no llega, a los 9 s se pliega y deja la lista",
+    /\.se-portada-anticipo\{animation:se-portada-anticipo 0s linear 9s forwards\}/.test(h) &&
+      /@keyframes se-portada-anticipo\{to\{height:0;overflow:hidden\}\}/.test(h));
+  check("Última hora guarda su alto donde va encima (teléfono y tableta)",
+    /@media \(max-width:759px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h) &&
+      /@media \(min-width:760px\) and \(max-width:959px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h));
+
+  const encuadrada = armarPortada(SHELL, { filas: [fila(1, { imagen_foco: "30,70" })], ahora: HORA });
+  check("con el encuadre de la redacción", encuadrada.includes('<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" style="object-position:30% 70%" srcset='));
+  const informe = armarPortada(SHELL, {
+    filas: [fila(1, { format: "informe", en_portada: true, destacada_hasta: new Date(HORA + 3600_000).toISOString() })],
+    ahora: HORA,
+  });
+  check("un informe, con su titular «a fondo»", informe.includes('<h3 class="se-plana__titulo se-plana__titulo--a-fondo"><a href="/informes/pieza-1"'));
+  const sinEntradilla = armarPortada(SHELL, { filas: [fila(1, { excerpt: "" })], ahora: HORA });
+  check("sin entradilla, sin párrafo vacío", sinEntradilla.includes(`class="se-publico se-portada-anticipo"`) && !sinEntradilla.includes("se-plana__resumen"));
+
+  const sinFoto = armarPortada(SHELL, { filas: [fila(1, { image_asset: null }), fila(2, { image_asset: null })], ahora: HORA });
+  check("apertura sin foto: nada a la vista (React la pinta como antes)", !sinFoto.includes(`class="se-publico se-portada-anticipo"`) && sinFoto.includes("se-portada-previa"));
+  const short = armarPortada(SHELL, { filas: [fila(1, { video_asset: { url: "https://www.youtube.com/shorts/abcdefghijk" } })], ahora: HORA });
+  check("abre con un short: nada a la vista", !short.includes(`class="se-publico se-portada-anticipo"`));
+  const ajena = armarPortada(SHELL, { filas: [fila(1, { format: "otro" }), fila(2, { format: "otro" })], ahora: HORA });
+  check("una apertura que no se puede enlazar: nada a la vista", !ajena.includes(`class="se-publico se-portada-anticipo"`));
+
+  const en = armarPortada(SHELL, { filas: MUCHAS, idioma: "en", ahora: HORA });
+  check("en /en, la que solo está en español lleva su «ES», como en la página",
+    en.includes('<a href="/en/noticias/pieza-1" tabindex="-1"><span lang="es">Titular número 1</span> <abbr class="se-marca-idioma" title="In Spanish only">ES</abbr></a>'));
+  check("y la fecha en inglés", en.includes("<time>Wednesday, November 18, 2026</time>"));
+  const traducida = armarPortada(SHELL, {
+    filas: [fila(1, { en_ingles: true, title_en: "The <BCV> & banks", excerpt_en: "<p>An English lead.</p>" })],
+    idioma: "en",
+    ahora: HORA,
+  });
+  check("la traducida, en inglés y escapada",
+    traducida.includes('tabindex="-1">The &lt;BCV&gt; &amp; banks</a></h3><p class="se-plana__resumen">An English lead.</p>'));
+  check("fechaDeEdicion: en Caracas ya es otro día a las 4 de la mañana UTC... o no",
+    fechaDeEdicion(Date.parse("2026-11-19T03:59:00Z")) === "miércoles, 18 de noviembre de 2026" &&
+      fechaDeEdicion(Date.parse("2026-11-19T04:00:00Z")) === "jueves, 19 de noviembre de 2026");
+}
+
 // —— 4. La apertura ——
 console.log("la apertura y su foto");
 {
@@ -391,7 +457,11 @@ console.log("titulares con caracteres raros");
   const h = armarPortada(SHELL, { filas: [malo, fila(2)], ahora: HORA });
   const dentro = raiz(h);
   check("ningún <script> nuevo fuera de los suyos", contar(h, /<script/g) === 3, String(contar(h, /<script/g)));
-  check("ningún manejador ni etiqueta de la API", !/onclick|onerror|<img|<b>/i.test(h));
+  check("ningún manejador ni etiqueta de la API", !/onclick|onerror|<b>/i.test(h) && !/<img(?! class="se-artcard__img")/.test(h));
+  const anticipo = h.slice(h.indexOf('class="se-publico se-portada-anticipo"'));
+  check("en la apertura a la vista, el titular escapado",
+    anticipo.includes('tabindex="-1">&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt; &quot;comillas&quot; &amp; &lt;b&gt;negrita&lt;/b&gt;'));
+  check("y su entradilla, sin la etiqueta de la API", anticipo.includes('<p class="se-plana__resumen">Entradilla con</p>'));
   check("el titular, escapado", dentro.includes("&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt; &quot;comillas&quot; &amp; &lt;b&gt;negrita&lt;/b&gt;"));
   check("los $ llegan tal cual (reemplazo por función)", dentro.includes("US$&amp;nbsp;36 $&amp; $' $$"));
   check("el slug, codificado en el enlace", dentro.includes('href="/noticias/pieza-%22%3E%3Cscript%3Ealert(4)%3C%2Fscript%3E"'));
@@ -427,7 +497,11 @@ console.log("entidades del editor");
   const dentro = raiz(h);
   check("en el HTML, una sola vez escapadas (sin &amp;amp;)",
     dentro.includes("<p>P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &amp;lt;img&amp;gt;</p>"), dentro.slice(0, 400));
-  check("y sin abrir etiquetas", !/<script>alert|<img/.test(h));
+  check("y sin abrir etiquetas", !/<script>alert/.test(h) && !/<img(?! class="se-artcard__img")/.test(h));
+  // La apertura a la vista dice lo mismo que dirá React (`textoLlano` de `lib/`, que deshace
+  // `&amp;` antes que `&lt;`): «<img>» como texto, escapado al escribirlo.
+  check("en la apertura a la vista, como texto",
+    h.includes('<p class="se-plana__resumen">P&amp;G &lt;script&gt;alert(1)&lt;/script&gt; &lt;img&gt;</p>'));
 }
 
 // —— 6. /en ——
@@ -508,6 +582,9 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
         t.recientes === portada.apertura.loMasReciente &&
         t.alPunto === comun.nav.alPunto);
   }
+  const comunEn = leer("../src/i18n/en/comun.json");
+  check("en: la marca «ES» de TituloDePieza, igual a src/i18n",
+    TEXTOS.en.marcaEspanol === comunEn.idioma.marcaEspanol && TEXTOS.en.marcaEspanolTitulo === comunEn.idioma.marcaEspanolTitulo);
 }
 
 // Que la página use la misma regla y la misma precarga (no una copia).

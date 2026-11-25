@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { countForOption } from "../../lib/contentFilter";
+import "./contentExplorer.css";
 
 /**
  * Two-axis content explorer: topic and place, laid out as a horizontal bar.

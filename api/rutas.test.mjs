@@ -182,6 +182,24 @@ salta("/esta-no-existe/", 301, "/esta-no-existe");
 check("/esta-no-existe sin barra: la 404", primerSalto("/esta-no-existe").sirve === "/api/no-encontrada");
 sirve("/Recetas/una/", "/api/pieza?seccion=Recetas&slug=una");
 
+// Las páginas fijas en inglés (`/en/informes`) salían con `lang="es"`, sin canónica ni
+// `hreflang`: ahora pasan por `api/pagina.js`. Las mismas que su lista `PAGINAS`.
+console.log("las páginas fijas en inglés, por su función; las españolas, como estaban");
+const { PAGINAS } = await import("./pagina.js");
+const reglaEn = config.rewrites.find((r) => r.destination === "/api/pagina?ruta=:ruta&lang=en");
+const enLaRegla = new Set((reglaEn?.source.match(/^\/en\/:ruta\(([^)]+)\)$/)?.[1] ?? "").split("|"));
+check("la regla de vercel.json y PAGINAS son la misma lista",
+  enLaRegla.size === PAGINAS.size && [...PAGINAS].every((p) => enLaRegla.has(p)), [...enLaRegla].join(","));
+for (const p of PAGINAS) {
+  sirve(`/en/${p}`, `/api/pagina?ruta=${p}&lang=en`);
+  check(`/${p}: sigue en el archivo`, primerSalto(`/${p}`).sirve === "/app.html" || p === "entorno", JSON.stringify(primerSalto(`/${p}`)));
+}
+sirve("/en/articulos?formato=noticias", "/api/pagina?ruta=articulos&lang=en&formato=noticias");
+sirve("/en/informes?_s=1", "/app.html?_s=1");
+sirve("/en/cuenta/entrar", "/app.html");
+sirve("/en/ultima-hora", "/app.html");
+check("/entorno sigue con su tarjeta (api/pieza)", primerSalto("/entorno").sirve === "/api/pieza?seccion=entorno");
+
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);
   process.exit(1);

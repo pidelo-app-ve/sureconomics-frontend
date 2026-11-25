@@ -25,7 +25,7 @@ jobs:
     name: Linter y construcción
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # La versión de Node sale de `.nvmrc` (24): la misma que pide `engines` en
       # package.json, que es lo que lee Vercel (manda sobre el ajuste del panel, que

@@ -9,6 +9,98 @@
    misma especificidad, así que todo lo que se escriba aquí tiene que llevar una clase
    de estas páginas, y no puede contar con que una regla de `blog.css` la corrija. */
 
+/* —— Consultoría: lo que solo pinta /consultoria ——
+   Las tarjetas de servicio y el bloque de correos. Vivían en `blog.css` y van delante
+   de las reglas de esta hoja, como iban antes: las de abajo les siguen ganando con la
+   misma especificidad. */
+
+/* Cards */
+
+.se-card {
+  background: transparent;
+  border: none;
+}
+
+.se-card__body {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 28px 28px;
+}
+
+.se-card__excerpt {
+  margin: 0 0 var(--se-space-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Reports */
+
+.se-heading-card--small {
+  font-size: var(--se-text-body);
+}
+
+/* Services + contact */
+
+.se-contact-block {
+  border: 1px solid var(--se-border);
+  background: var(--se-white);
+  border-radius: 14px;
+  padding: var(--se-space-md);
+}
+
+.se-contact-block__title {
+  font-family: var(--se-font-heading);
+  font-size: var(--se-text-h3);
+  margin-bottom: var(--se-space-xs);
+}
+
+.se-contact-block__sub {
+  margin-top: var(--se-space-sm);
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: var(--se-gray-700);
+}
+
+.se-contact-block__emails {
+  margin-top: var(--se-space-xs);
+  display: grid;
+  gap: var(--se-space-xs);
+}
+
+.se-contact-block__email-name {
+  font-family: var(--se-font-ui);
+  font-size: var(--se-text-small);
+  color: var(--se-gray-700);
+}
+
+.se-card--service {
+  border-radius: 14px;
+}
+
+.se-publico .se-card--service {
+  border-top-width: 1px;
+}
+
+/* —— Consultoría: los servicios al filo del filete, con un enlace y no una barra ——
+   Seis botones cobrizos a todo el ancho, uno por servicio, eran la pantalla de una
+   aplicación. */
+
+.se-publico .se-card--service .se-card__body {
+  padding: 0;
+}
+
+/* —— Consultoría: títulos de servicio y de bloque en la serif —— */
+
+.se-publico .se-consulting__service-card :is(h2, h3),
+.se-publico .se-contact-block__title {
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 .se-two-col {
   display: grid;
   grid-template-columns: 1fr;

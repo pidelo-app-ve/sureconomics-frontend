@@ -3,6 +3,28 @@
  * una hoja de periódico: una columna estrecha, secciones con su filete y puntos cortos.
  */
 
+/* Vivían en `blog.css` (el rediseño de la parte pública, `.se-publico …`) y llegan ahora
+   con la página. Van delante de las reglas de esta hoja, como iban antes: las de abajo
+   les siguen ganando con la misma especificidad. */
+
+/* —— Lo importante de hoy: rótulos de sección en la serif —— La regla la lleva el
+   rótulo; la sección ya no, o salían dos líneas seguidas. */
+
+.se-publico .se-res-seccion {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.se-publico .se-res-seccion__titulo {
+  padding-top: 10px;
+  border-top: 2px solid var(--tinta);
+  font-family: var(--titular);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .se-res {
   padding-block: var(--se-space-xl, 2rem) var(--se-space-2xl, 3rem);
 }

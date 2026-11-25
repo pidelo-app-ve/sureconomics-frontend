@@ -1849,26 +1849,6 @@
   }
 }
 
-/* Cards */
-.se-card {
-  background: transparent;
-  border: none;
-}
-
-.se-card__body {
-  display: flex;
-  flex-direction: column;
-  padding: 24px 28px 28px;
-}
-
-.se-card__excerpt {
-  margin: 0 0 var(--se-space-sm);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* Share buttons */
 .se-share {
   display: inline-flex;
@@ -2279,21 +2259,6 @@
 }
 
 /* —— Contacto —— */
-.se-contact {
-  /* Retheme shared `.se-contact-form` primitives for dark glass */
-  --se-form-surface: #ffffff;
-  --se-form-border: rgba(var(--se-tinte), 0.12);
-  --se-form-border-strong: rgba(var(--se-tinte), 0.18);
-  --se-form-text: rgba(var(--se-tinte), 0.92);
-  --se-form-muted: rgba(var(--se-tinte), 0.68);
-  --se-form-placeholder: rgba(var(--se-tinte), 0.42);
-  --se-form-focus: var(--color-accent);
-  --se-form-focus-glow: rgba(185, 83, 42, 0.22);
-  /* Cobrizo de la marca, oscurecido para que el texto se lea sobre papel.
-     Era #8f3a17, un rosa fuerte del tema oscuro que en claro no es de la
-     paleta y encima se leia mal. */
-  --se-form-invalid: #8f3a17;
-}
 
 .se-contact .se-form-control {
   background-color: rgba(255, 255, 255, 0.05);
@@ -2302,55 +2267,14 @@
   box-shadow: inset 0 1px 0 rgba(var(--se-tinte), 0.08);
 }
 
-.se-contact .se-form-control:hover:not(:disabled):not(:focus) {
-  border-color: rgba(var(--se-tinte), 0.22);
-  background-color: rgba(255, 255, 255, 0.065);
-}
-
-.se-contact .se-form-label {
-  font-family: var(--se-font-ui);
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.se-contact__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1rem, 3vw, 1.75rem);
-}
-
-@media (min-width: 980px) {
-  .se-contact__grid {
-    /* 1.1 contra 0.9 dejaba las dos columnas casi iguales -- 600 y 491 px -- y eso
-       era defendible cuando al lado habia tres bloques de datos. Ahora hay dos
-       tarjetas cortas, y dos columnas del mismo peso hacen que el formulario, que es
-       a lo que se viene, no se lea como lo principal. */
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    align-items: start;
-  }
-}
-
 /* --- Contacto: el aire de arriba ----------------------------------------- */
 /*
    El hero cerraba con 100 px y la seccion abria con 96: casi 200 px de nada entre el
    lead y el formulario, con la pagina pidiendo desplazarse para ver a que ha venido.
    Y el titular a 104 px es escala de portada, no de una pagina de una sola palabra. */
 
-.se-contact__hero {
-  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
-}
 .se-contact .se-section {
   padding-top: clamp(1.75rem, 3.5vw, 2.75rem);
-}
-.se-contact .se-heading-hero {
-  font-size: clamp(2.75rem, 6vw, 4.25rem);
-}
-.se-contact .se-institutional-hero .se-text-lead {
-  max-width: 46ch;
-}
-
-.se-contact__panel {
-  animation: se-page-rise 0.6s var(--se-suite-ease) both;
 }
 
 .se-contact__form {
@@ -2360,107 +2284,6 @@
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-}
-
-.se-contact__status {
-  min-height: 1px;
-}
-
-.se-contact__banner {
-  margin: 0 0 0.5rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 12px;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  background: rgba(34, 197, 94, 0.12);
-  color: rgba(var(--se-tinte), 0.92);
-}
-
-.se-contact__banner--loading {
-  border-color: rgba(var(--se-tinte), 0.18);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(var(--se-tinte), 0.82);
-}
-
-.se-contact__banner--error {
-  border-color: rgba(185, 83, 42, 0.32);
-  background: rgba(185, 83, 42, 0.16);
-  color: #ffd6dc;
-}
-
-.se-contact__aside {
-  display: grid;
-  gap: clamp(1rem, 2.5vw, 1.35rem);
-  animation: se-page-rise 0.6s var(--se-suite-ease) both;
-  animation-delay: 120ms;
-}
-
-/* --- Contacto: la columna de al lado ------------------------------------- */
-
-.se-contact__tarjeta {
-  display: grid;
-  gap: 0.6rem;
-  padding: clamp(1.15rem, 2.4vw, 1.5rem);
-  border: 1px solid var(--color-hairline);
-  border-radius: 14px;
-  background: #fff;
-}
-.se-contact__tarjeta-titulo {
-  margin: 0;
-  font-family: var(--se-font-label);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-2);
-}
-.se-contact__tarjeta-texto {
-  margin: 0;
-  font-family: var(--se-font-ui);
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--color-slate);
-}
-.se-contact__correo {
-  font-family: var(--se-font-label);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  text-decoration: none;
-  overflow-wrap: anywhere;
-}
-.se-contact__correo:hover { text-decoration: underline; }
-
-/* Los dos caminos. Toda la fila es el enlace y no solo el titulo: un destino de
-   44 px de alto se acierta con el pulgar; una palabra subrayada, no. */
-.se-contact__camino {
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--color-hairline);
-  border-radius: 10px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-.se-contact__camino:hover {
-  border-color: var(--color-accent);
-  background: rgba(185, 83, 42, 0.04);
-}
-.se-contact__camino:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.se-contact__camino-titulo {
-  font-family: var(--se-font-label);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--color-ink);
-}
-.se-contact__camino-texto {
-  font-family: var(--se-font-ui);
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--color-slate-2);
 }
 
 /* --- El aviso de un campo ------------------------------------------------ */
@@ -2479,11 +2302,6 @@
 }
 .se-form-field--mal .se-form-control:focus-visible {
   outline-color: #c0522f;
-}
-
-.se-contact .se-contact-block__sub,
-.se-contact .se-contact-block__email-name {
-  color: rgba(var(--se-tinte), 0.62);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2547,49 +2365,6 @@
 .se-heading-section--small {
   font-size: var(--se-text-h3);
   margin: 0;
-}
-
-/* Reports */
-
-.se-heading-card--small {
-  font-size: var(--se-text-body);
-}
-
-/* Services + contact */
-.se-contact-block {
-  border: 1px solid var(--se-border);
-  background: var(--se-white);
-  border-radius: 14px;
-  padding: var(--se-space-md);
-}
-
-.se-contact-block__title {
-  font-family: var(--se-font-heading);
-  font-size: var(--se-text-h3);
-  margin-bottom: var(--se-space-xs);
-}
-
-.se-contact-block__sub {
-  margin-top: var(--se-space-sm);
-  font-family: var(--se-font-ui);
-  font-size: var(--se-text-small);
-  color: var(--se-gray-700);
-}
-
-.se-contact-block__emails {
-  margin-top: var(--se-space-xs);
-  display: grid;
-  gap: var(--se-space-xs);
-}
-
-.se-contact-block__email-name {
-  font-family: var(--se-font-ui);
-  font-size: var(--se-text-small);
-  color: var(--se-gray-700);
-}
-
-.se-card--service {
-  border-radius: 14px;
 }
 
 /* —— Forms (contrast-forward, card-style stack + toolbar variant) —— */
@@ -8710,14 +8485,6 @@ html {
   box-shadow: none;
 }
 
-.se-publico .se-card--service {
-  border-top-width: 1px;
-}
-
-.se-publico .se-contact__tarjeta:first-child {
-  border-left: 0;
-}
-
 .se-publico .se-contact__tarjeta-titulo,
 .se-publico .se-contact-form fieldset.se-form-field legend,
 .se-reader-dash .se-contact-form fieldset.se-form-field legend {
@@ -8738,23 +8505,6 @@ html {
   box-shadow: none;
 }
 
-.se-publico .se-contact__camino {
-  padding: 12px 0;
-  border: 0;
-  border-top: 1px solid var(--filete);
-  border-radius: 0;
-}
-
-.se-publico .se-contact__camino:hover {
-  background: transparent;
-}
-
-.se-publico .se-contact__camino-titulo {
-  font-family: var(--titular);
-  font-size: 1.0625rem;
-  font-weight: 600;
-}
-
 /* —— Cuenta: entrar y registrarse, sin caja flotante —— */
 .se-publico .se-entrada__caja {
   padding: 14px 0 0;
@@ -8763,23 +8513,6 @@ html {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-}
-
-/* —— Lo importante de hoy: rótulos de sección en la serif —— La regla la lleva el
-   rótulo; la sección ya no, o salían dos líneas seguidas. */
-.se-publico .se-res-seccion {
-  padding-top: 0;
-  border-top: 0;
-}
-
-.se-publico .se-res-seccion__titulo {
-  padding-top: 10px;
-  border-top: 2px solid var(--tinta);
-  font-family: var(--titular);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 /* —— Los juegos fuera de la portada (/juegos y el final de cada pieza) ——
@@ -8897,13 +8630,6 @@ html {
   border-radius: 2px;
 }
 
-/* —— Consultoría: los servicios al filo del filete, con un enlace y no una barra ——
-   Seis botones cobrizos a todo el ancho, uno por servicio, eran la pantalla de una
-   aplicación. */
-.se-publico .se-card--service .se-card__body {
-  padding: 0;
-}
-
 /* —— Papel en todas las vistas: `.se-blog` pintaba blanco (Cookies) y la banda de
    Educación, un gris frío —— */
 .se-publico .se-blog,
@@ -8947,15 +8673,6 @@ html {
 .se-publico main h1:not(.se-sr-only):not(.se-piece__title):not(.se-about__title):not(.se-uh-seccion__titulo) {
   font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem);
   line-height: 1.05;
-}
-
-/* —— Consultoría: títulos de servicio y de bloque en la serif —— */
-.se-publico .se-consulting__service-card :is(h2, h3),
-.se-publico .se-contact-block__title {
-  font-family: var(--titular);
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 /* La barra de lectura: se llena con el desplazamiento, sin JavaScript. La usan las
@@ -9636,73 +9353,6 @@ html {
 }
 
 /* ═══ La página que no está ═══ */
-.se-404__rejilla {
-  display: grid;
-  gap: clamp(2rem, 5vw, 4rem);
-}
-
-@media (min-width: 900px) {
-  .se-404__rejilla {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-    align-items: start;
-  }
-}
-
-.se-404__aviso {
-  padding-top: 12px;
-  border-top: 3px double var(--tinta);
-}
-
-.se-404__cifra {
-  margin: 0;
-  font-family: var(--cifras);
-  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.04em;
-  color: var(--filete-fuerte);
-}
-
-.se-404__titulo {
-  margin: 8px 0 12px;
-  font-family: var(--titular);
-  font-size: clamp(2rem, 1.4rem + 2.2vw, 3.25rem);
-  font-weight: 600;
-  line-height: 1.04;
-  letter-spacing: -0.025em;
-  color: var(--tinta);
-}
-
-.se-404__texto {
-  max-width: 34em;
-  margin: 0;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: var(--color-slate);
-}
-
-.se-404__salidas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.se-404__pausa {
-  padding-top: 0;
-}
-
-.se-404__pausa-caja {
-  max-width: 560px;
-}
-
-.se-404__pausa-texto {
-  margin: 0 0 1rem;
-  font-family: var(--titular);
-  font-size: 1.0625rem;
-  font-style: italic;
-  color: var(--color-slate);
-}
 
 @media (max-width: 700px) {
   .se-publico .se-noticias__lista {

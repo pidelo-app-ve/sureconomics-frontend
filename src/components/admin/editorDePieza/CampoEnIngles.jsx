@@ -43,12 +43,15 @@ export const CampoEnIngles = ({
                     className="se-btn se-btn--secondary"
                     onClick={traducir}
                     disabled={traduciendo}
+                    aria-busy={traduciendo}
                 >
                     {traduciendo ? "Traduciendo…" : "Traducir con Claude"}
                 </button>
-                <span className="se-admin-meta-hint">
-                    Traduce el título, el resumen y el cuerpo de arriba, aunque
-                    no estén guardados. Revisa el resultado y guarda la pieza.
+                {/* Puede tardar minutos (ver `useTraduccionDePieza`): mientras, se dice aquí. */}
+                <span className="se-admin-meta-hint" role="status">
+                    {traduciendo
+                        ? "Claude está traduciendo. Puede tardar un par de minutos: sigue aquí y el inglés aparecerá abajo. Si cierras la pieza, la traducción se pierde."
+                        : "Traduce el título, el resumen y el cuerpo de arriba, aunque no estén guardados. Revisa el resultado y guarda la pieza."}
                 </span>
             </div>
         </div>

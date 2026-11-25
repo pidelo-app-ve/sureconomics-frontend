@@ -71,16 +71,16 @@ test("202 y luego un error: el de la traducción, tal cual", async () => {
   assert.equal(preguntas().length, 2);
 });
 
-test("404 al preguntar: se interrumpió, que la vuelva a pedir", async () => {
+test("404 al preguntar: ya no está (reinicio u otra pestaña), que la vuelva a pedir", async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
   contestarPorOrden(grabada("traducciones/se-interrumpio.json"));
   const err = await traducirTextos(CAMPOS, RAPIDO).then(() => null, (e) => e);
   assert.equal(err.code, "translation_interrupted");
-  assert.equal(adminErrorMessage(err, "No se pudo traducir."), "La traducción se interrumpió. Vuelva a pedirla.");
+  assert.equal(adminErrorMessage(err, "No se pudo traducir."), "La traducción ya no está en el servidor: se reinició o se pidió otra (quizá en otra pestaña). Vuelva a pedirla.");
   assert.equal(preguntas().length, 1, "no sigue preguntando");
 });
 
-test("409: ya hay una traducción en marcha, y no se pregunta por nada", async () => {
+test("409: el texto del servidor, tal cual, y no se pregunta por nada", async () => {
   servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/ya-hay-una.json"));
   const err = await traducirTextos(CAMPOS, RAPIDO).then(() => null, (e) => e);
   assert.equal(err.code, "translation_in_progress");
@@ -95,12 +95,27 @@ test("tiempo agotado: deja de preguntar y lo dice", async () => {
   assert.equal(err.code, "translation_timeout");
   assert.equal(
     adminErrorMessage(err, "No se pudo traducir."),
-    "La traducción tarda más de 4 minutos. Espere un momento y vuelva a pedirla.",
+    "La traducción tarda más de 1 minuto. Espere un momento y vuelva a pedirla.",
   );
   const hechas = preguntas().length;
   assert.ok(hechas >= 1 && hechas <= 13, `preguntó ${hechas} veces en 60 ms, cada 5 ms`);
   await pausa(40);
   assert.equal(preguntas().length, hechas, "después ya no pregunta");
+});
+
+test("con el tope de siempre, el aviso dice sus 4 minutos", async () => {
+  servidor.contestar("POST", "/admin/traducciones", grabada("traducciones/en-marcha.json"));
+  const ahora = Date.now;
+  let vez = 0;
+  // La primera hora es la de empezar; la siguiente, 5 minutos después.
+  Date.now = () => ahora() + (vez++ === 0 ? 0 : 5 * 60 * 1000);
+  try {
+    const err = await traducirTextos(CAMPOS).then(() => null, (e) => e);
+    assert.equal(err.message, "La traducción tarda más de 4 minutos. Espere un momento y vuelva a pedirla.");
+    assert.equal(preguntas().length, 0);
+  } finally {
+    Date.now = ahora;
+  }
 });
 
 test("si se deja a medias (se cerró la pieza), deja de preguntar", async () => {

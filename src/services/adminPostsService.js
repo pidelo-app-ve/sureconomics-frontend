@@ -80,16 +80,22 @@ const TRADUCCION = "/admin/traducciones";
 /** Un error como los del panel (`adminErrorMessage` enseña el texto de los `translation_*`). */
 const errorDeTraduccion = (message, status, code) => Object.assign(new Error(message), { status, code });
 
-const YA_HAY_UNA = () =>
-    errorDeTraduccion("Ya hay una traducción en marcha. Espere a que termine.", 409, "translation_in_progress");
+// El servidor ya no la tiene: se reinició, o la misma cuenta pidió otra (en otra pestaña),
+// que ocupa su lugar.
 const SE_INTERRUMPIO = () =>
-    errorDeTraduccion("La traducción se interrumpió. Vuelva a pedirla.", 404, "translation_interrupted");
-const TARDA_DEMASIADO = () =>
     errorDeTraduccion(
-        "La traducción tarda más de 4 minutos. Espere un momento y vuelva a pedirla.",
+        "La traducción ya no está en el servidor: se reinició o se pidió otra (quizá en otra pestaña). Vuelva a pedirla.",
+        404,
+        "translation_interrupted",
+    );
+const TARDA_DEMASIADO = (topeMs) => {
+    const minutos = Math.max(1, Math.round(topeMs / 60000));
+    return errorDeTraduccion(
+        `La traducción tarda más de ${minutos} ${minutos === 1 ? "minuto" : "minutos"}. Espere un momento y vuelva a pedirla.`,
         504,
         "translation_timeout",
     );
+};
 
 /** `ms` de espera, o hasta que `signal` diga que se deja (entonces lanza un `AbortError`). */
 const esperar = (ms, signal) =>
@@ -115,6 +121,8 @@ const esperar = (ms, signal) =>
  * `POST /admin/traducciones` contesta con la traducción si la tiene en 8 s; si no, con
  * `{ en_marcha, id }`, y aquí se pregunta por ese id cada `cadaMs` hasta que llega la
  * traducción o su error, o hasta `topeMs`. `signal` corta la espera (al cerrar la pieza).
+ * Los errores llegan como los manda el servidor (el 409, `translation_in_progress`, ya
+ * con su texto), salvo el 404 al preguntar, que aquí se explica.
  *
  * La ruta vieja, `POST /admin/posts/traducir`, sigue en el backend para el bot de Saúl.
  *
@@ -124,22 +132,14 @@ const esperar = (ms, signal) =>
 export const traducirTextos = async (campos, opciones = {}) => {
     const { signal, cadaMs, topeMs } = { ...ESPERA_DE_LA_TRADUCCION, ...opciones };
     const empezo = Date.now();
-    let r;
-    try {
-        r = unwrapEntity(await adminRequest(TRADUCCION, { method: "POST", json: campos, signal }));
-    } catch (err) {
-        throw err?.status === 409 ? YA_HAY_UNA() : err;
-    }
+    let r = unwrapEntity(await adminRequest(TRADUCCION, { method: "POST", json: campos, signal }));
     while (r?.en_marcha) {
-        if (Date.now() - empezo >= topeMs) throw TARDA_DEMASIADO();
+        if (Date.now() - empezo >= topeMs) throw TARDA_DEMASIADO(topeMs);
         await esperar(cadaMs, signal);
         try {
             r = unwrapEntity(await adminRequest(`${TRADUCCION}/${encodeURIComponent(r.id)}`, { signal }));
         } catch (err) {
-            // 404: el servidor ya no la tiene (se reinició entretanto). 409: otra cuenta
-            // estaba traduciendo y esta no llegó a empezar.
-            if (err?.status === 404) throw SE_INTERRUMPIO();
-            throw err?.status === 409 ? YA_HAY_UNA() : err;
+            throw err?.status === 404 ? SE_INTERRUMPIO() : err;
         }
     }
     return r;

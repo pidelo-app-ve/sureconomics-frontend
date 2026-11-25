@@ -115,7 +115,7 @@ test("200 directo: el inglés sin preguntar por nada", async () => {
 
 for (const [caso, archivo, ruta, texto] of [
   ["409", "ya-hay-una", "POST", "Ya hay una traducción en marcha. Espere a que termine."],
-  ["404", "se-interrumpio", "GET", "La traducción se interrumpió. Vuelva a pedirla."],
+  ["404", "se-interrumpio", "GET", "La traducción ya no está en el servidor: se reinició o se pidió otra (quizá en otra pestaña). Vuelva a pedirla."],
   ["202 y luego error", "fallo", "GET", "No se pudo traducir: Claude contestó con un error (529)."],
 ]) {
   test(`${caso}: el aviso dice qué pasó, y el formulario queda como estaba`, async () => {
@@ -133,7 +133,7 @@ test("tiempo agotado: lo dice y el botón vuelve a estar listo", async () => {
   const m = await montar();
   await m.pintar({ espera: { cadaMs: 5, topeMs: 40 } });
   await act(() => m.h.traducir());
-  assert.deepEqual(m.avisos, [["mal", "La traducción tarda más de 4 minutos. Espere un momento y vuelva a pedirla."]]);
+  assert.deepEqual(m.avisos, [["mal", "La traducción tarda más de 1 minuto. Espere un momento y vuelva a pedirla."]]);
   assert.equal(m.h.traduciendo, false);
   assert.deepEqual(m.form, FORMULARIO);
   await m.desmontar();

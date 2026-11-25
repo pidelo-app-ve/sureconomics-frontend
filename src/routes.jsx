@@ -43,8 +43,8 @@ const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => asyn
  */
 const rutasPublicas = (lang) => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
-    // cabecera ni menú, una sola cosa que hacer. Ver `pages/Entorno.jsx`.
-    { path: "entorno", lazy: pagina(() => import("./pages/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
+    // cabecera ni menú, una sola cosa que hacer. Ver `features/boletin/Entorno.jsx`.
+    { path: "entorno", lazy: pagina(() => import("./features/boletin/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
     // El Analista está EN PAUSA (octubre de 2026): la dirección lleva a /juegos, en el
     // idioma de la página, y el juego no se descarga. La página, el servicio y el panel
     // del ranking siguen en su sitio. Para volver a encenderlo, cambiar esta línea por
@@ -58,10 +58,10 @@ const rutasPublicas = (lang) => [
         errorElement: <RouteError />,
         children: [
             { index: true, element: <Home /> },
-            { path: "suscribirse", lazy: pagina(() => import("./pages/Subscribe"), "Subscribe", { zonas: ["boletin"], lang }) },
+            { path: "suscribirse", lazy: pagina(() => import("./features/boletin/Subscribe"), "Subscribe", { zonas: ["boletin"], lang }) },
             // A donde apunta el enlace de baja de cada boletin. Sin sesion: el
             // token de la direccion es la unica credencial. Ver `BoletinBaja`.
-            { path: "boletin/baja", lazy: pagina(() => import("./pages/BoletinBaja"), "BoletinBaja", { zonas: ["boletin"], lang }) },
+            { path: "boletin/baja", lazy: pagina(() => import("./features/boletin/BoletinBaja"), "BoletinBaja", { zonas: ["boletin"], lang }) },
             { path: "quienes-somos", lazy: pagina(() => import("./pages/QuienesSomos"), "QuienesSomos", { zonas: ["paginas"], lang }) },
             { path: "articulos", lazy: pagina(() => import("./pages/Articulos"), "Articulos", { zonas: ["listados"], lang }) },
             { path: "informes", lazy: pagina(() => import("./pages/Informes"), "Informes", { zonas: ["listados"], lang }) },
@@ -116,30 +116,30 @@ const rutasPublicas = (lang) => [
             { path: "resumen/:fecha", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
             { path: "resumen/:fecha/:edicion", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
             { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
-            { path: "cuenta/entrar", lazy: pagina(() => import("./pages/cuenta/CuentaEntrar"), "CuentaEntrar", { zonas: ["cuenta"], lang }) },
-            { path: "cuenta/registro", lazy: pagina(() => import("./pages/cuenta/CuentaRegistro"), "CuentaRegistro", { zonas: ["cuenta"], lang }) },
-            { path: "cuenta/verificar-email", lazy: pagina(() => import("./pages/cuenta/CuentaVerificarEmail"), "CuentaVerificarEmail", { zonas: ["cuenta"], lang }) },
-            { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./pages/cuenta/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/entrar", lazy: pagina(() => import("./features/cuenta/pages/CuentaEntrar"), "CuentaEntrar", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/registro", lazy: pagina(() => import("./features/cuenta/pages/CuentaRegistro"), "CuentaRegistro", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/verificar-email", lazy: pagina(() => import("./features/cuenta/pages/CuentaVerificarEmail"), "CuentaVerificarEmail", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/solicitar-codigo", lazy: pagina(() => import("./features/cuenta/pages/CuentaSolicitarCodigo"), "CuentaSolicitarCodigo", { zonas: ["cuenta"], lang }) },
             // «¿Olvidó su contraseña?»: código por correo y contraseña nueva (equipo y lectores).
-            { path: "cuenta/recuperar", lazy: pagina(() => import("./pages/cuenta/CuentaRecuperar"), "CuentaRecuperar", { zonas: ["cuenta"], lang }) },
+            { path: "cuenta/recuperar", lazy: pagina(() => import("./features/cuenta/pages/CuentaRecuperar"), "CuentaRecuperar", { zonas: ["cuenta"], lang }) },
             // La 404 también se descarga al llegar a ella (y con ella, su juego).
             { path: "*", lazy: pagina(() => import("./pages/NotFound"), "NotFound", { zonas: ["juegos"], lang }) },
         ],
     },
     {
         path: "cuenta",
-        lazy: pagina(() => import("./pages/cuenta/CuentaDashboardLayout"), "CuentaDashboardLayout", { zonas: ["cuenta"], lang }),
+        lazy: pagina(() => import("./features/cuenta/pages/CuentaDashboardLayout"), "CuentaDashboardLayout", { zonas: ["cuenta"], lang }),
         children: [
-            { index: true, lazy: pagina(() => import("./pages/cuenta/CuentaDashboardHome"), "CuentaDashboardHome", { zonas: ["cuenta"], lang }) },
-            { path: "perfil", lazy: pagina(() => import("./pages/cuenta/CuentaPerfil"), "CuentaPerfil", { zonas: ["cuenta"], lang }) },
-            { path: "lo-mio", lazy: pagina(() => import("./pages/cuenta/CuentaLoMio"), "CuentaLoMio", { zonas: ["cuenta", "educacion"], lang }) },
-            { path: "marcadores", lazy: pagina(() => import("./pages/cuenta/CuentaMarcadores"), "CuentaMarcadores", { zonas: ["cuenta"], lang }) },
+            { index: true, lazy: pagina(() => import("./features/cuenta/pages/CuentaDashboardHome"), "CuentaDashboardHome", { zonas: ["cuenta"], lang }) },
+            { path: "perfil", lazy: pagina(() => import("./features/cuenta/pages/CuentaPerfil"), "CuentaPerfil", { zonas: ["cuenta"], lang }) },
+            { path: "lo-mio", lazy: pagina(() => import("./features/cuenta/pages/CuentaLoMio"), "CuentaLoMio", { zonas: ["cuenta", "educacion"], lang }) },
+            { path: "marcadores", lazy: pagina(() => import("./features/cuenta/pages/CuentaMarcadores"), "CuentaMarcadores", { zonas: ["cuenta"], lang }) },
             // Los temas que sigue y lo nuevo de ellos («Siga este tema»).
-            { path: "temas", lazy: pagina(() => import("./pages/cuenta/CuentaTemas"), "CuentaTemas", { zonas: ["cuenta"], lang }) },
-            { path: "envios", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosList"), "CuentaEnviosList", { zonas: ["cuenta"], lang }) },
-            { path: "envios/nuevo", lazy: pagina(() => import("./pages/cuenta/CuentaEnviosNuevo"), "CuentaEnviosNuevo", { zonas: ["cuenta"], lang }) },
-            { path: "envios/:id/editar", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioEditar"), "CuentaEnvioEditar", { zonas: ["cuenta"], lang }) },
-            { path: "envios/:id", lazy: pagina(() => import("./pages/cuenta/CuentaEnvioDetail"), "CuentaEnvioDetail", { zonas: ["cuenta"], lang }) },
+            { path: "temas", lazy: pagina(() => import("./features/cuenta/pages/CuentaTemas"), "CuentaTemas", { zonas: ["cuenta"], lang }) },
+            { path: "envios", lazy: pagina(() => import("./features/cuenta/pages/CuentaEnviosList"), "CuentaEnviosList", { zonas: ["cuenta"], lang }) },
+            { path: "envios/nuevo", lazy: pagina(() => import("./features/cuenta/pages/CuentaEnviosNuevo"), "CuentaEnviosNuevo", { zonas: ["cuenta"], lang }) },
+            { path: "envios/:id/editar", lazy: pagina(() => import("./features/cuenta/pages/CuentaEnvioEditar"), "CuentaEnvioEditar", { zonas: ["cuenta"], lang }) },
+            { path: "envios/:id", lazy: pagina(() => import("./features/cuenta/pages/CuentaEnvioDetail"), "CuentaEnvioDetail", { zonas: ["cuenta"], lang }) },
         ],
     },
 ];
@@ -206,10 +206,10 @@ export const router = createBrowserRouter([
                     // Lo que la redacción debería mirar hoy: los avisos y lo que se avisaría ahora.
                     { path: "avisos", lazy: pagina(() => import("./pages/admin/AdminAvisos"), "AdminAvisos") },
                     { path: "resumen", lazy: pagina(() => import("./pages/admin/AdminResumen"), "AdminResumen") },
-                    { path: "boletin", lazy: pagina(() => import("./pages/admin/AdminNewsletterList"), "AdminNewsletterList") },
+                    { path: "boletin", lazy: pagina(() => import("./features/boletin/admin/AdminNewsletterList"), "AdminNewsletterList") },
                     // Los numeros de "Entorno en Viñetas". La lista de suscriptores se
                     // queda en `boletin`, donde ya la buscaba la redaccion.
-                    { path: "boletin/numeros", lazy: pagina(() => import("./pages/admin/AdminBoletin"), "AdminBoletin", { zonas: ["cuenta"] }) },
+                    { path: "boletin/numeros", lazy: pagina(() => import("./features/boletin/admin/AdminBoletin"), "AdminBoletin", { zonas: ["cuenta"] }) },
                     { path: "submissions", lazy: pagina(() => import("./pages/admin/AdminSubmissionsList"), "AdminSubmissionsList", { zonas: ["cuenta"] }) },
                     { path: "submissions/:id", lazy: pagina(() => import("./pages/admin/AdminSubmissionDetail"), "AdminSubmissionDetail", { zonas: ["cuenta"] }) },
                     // Era una página con una sola casilla; ahora es un interruptor en Propuestas.

@@ -5,7 +5,7 @@ import { CardMedia } from "./CardMedia";
 import { rutaDePieza } from "../../lib/pieza";
 import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * Noticias en la portada: una lista densa a dos columnas con un carril al lado.

@@ -7,7 +7,7 @@ import { PRIMARY_NAV } from "../config/sitio";
 import { BRAND, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { Relojes, RelojesEnLista } from "./Relojes";
 import { useIdioma } from "../i18n/ProveedorIdioma";
-import { useUserAuth } from "../context/UserAuthContext";
+import { useUserAuth } from "../features/cuenta";
 
 const MENU_ID = "se-header-menu";
 

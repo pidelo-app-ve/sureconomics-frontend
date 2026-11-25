@@ -67,7 +67,7 @@ export const { act, fireEvent, waitFor, within, screen: pantalla } = rtl;
 // Una prueba que pasa no espera más; solo tarda más en fallar.
 rtl.configure({ asyncUtilTimeout: 5000 });
 
-const { UserAuthProvider } = await import("../../src/context/UserAuthContext.jsx");
+const { UserAuthProvider } = await import("../../src/features/cuenta/index.js");
 const { ProveedorDeMarcadores } = await import("../../src/context/MarcadoresContext.jsx");
 const { ProveedorDeTemasSeguidos } = await import("../../src/context/TemasSeguidosContext.jsx");
 const { ProveedorDePublicidad } = await import("../../src/features/publicidad/index.js");

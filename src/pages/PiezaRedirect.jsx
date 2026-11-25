@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Enlace, Redirigir } from "../components/Enlace";
-import { ErrorState, LoadingState } from "../components/content";
+import { ErrorState, LoadingState } from "../ui";
 import { rutaDePieza } from "../lib/pieza";
 import { useDelayedFlag } from "../hooks/useDelayedFlag";
 import { useIdioma } from "../i18n/ProveedorIdioma";

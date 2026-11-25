@@ -7,7 +7,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
 import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /** Artículos: image cards with a byline. Unlike Editorial, these are signed. */
 export const ArticleCardGrid = ({ items, espacioDeAnuncio, columnas = 3, principal = false }) => {

@@ -2,7 +2,7 @@ import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { rutaDePieza } from "../../lib/pieza";
 import PropTypes from "prop-types";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * «Lo más leído»: las piezas con más lectores distintos en los últimos siete días,

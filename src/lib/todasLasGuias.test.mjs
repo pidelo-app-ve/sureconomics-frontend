@@ -43,8 +43,8 @@ const ANCLAS_DINAMICAS = {
   // La lista a mano de cada red: `bloque("instagram")`, `bloque("x")`…
   "src/pages/admin/AdminRedes.jsx|red": ({ argumentos }) => argumentos("src/pages/admin/AdminRedes.jsx", "bloque"),
   // Cada enlace del menú de la cuenta trae su paso en `guia: "…"` (RAIL_NAV).
-  "src/pages/cuenta/CuentaDashboardLayout.jsx|guia": ({ propiedades }) =>
-    propiedades("src/pages/cuenta/CuentaDashboardLayout.jsx", "guia"),
+  "src/features/cuenta/pages/CuentaDashboardLayout.jsx|guia": ({ propiedades }) =>
+    propiedades("src/features/cuenta/pages/CuentaDashboardLayout.jsx", "guia"),
   // Cada bloque de Audiencia dice su paso en `parada="…"`.
   "src/features/analitica/admin/components/Piezas.jsx|parada": ({ atributos }) => atributos("parada"),
 };

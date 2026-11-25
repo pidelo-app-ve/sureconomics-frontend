@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { ModalDelPanel } from "../../components/admin/ModalDelPanel";
-import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../ui";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { applyPageMeta } from "../../lib/seo";
 import { adminRequest } from "../../lib/api";
 import { unwrapEntity } from "../../services/adminResponseUtils";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoLvbp } from "../../lib/guias/guiaLvbp";

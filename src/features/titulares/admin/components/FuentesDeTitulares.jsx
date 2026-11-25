@@ -6,7 +6,7 @@ import { adminErrorMessage } from "../../../../lib/adminErrorMessage";
 import { recorridoTitulares } from "../../../../lib/guias/guiaTitulares";
 import { unwrapEntity } from "../../../../services/adminResponseUtils";
 import { ModalDelPanel } from "../../../../components/admin/ModalDelPanel";
-import { Pagination } from "../../../../components/content";
+import { Pagination } from "../../../../ui";
 import { activarFuente, cambiarNivelDeFuente, silenciarFuente } from "../api";
 import {
   ESTADOS_DE_FUENTE,

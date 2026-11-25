@@ -9,7 +9,7 @@ import { router } from "./routes";  // Import the router configuration test
 // Registra el diccionario en español y deja preparado el inglés. Ver `i18n/motor.js`.
 import "./i18n/diccionarios";
 import { AuthProvider } from "./context/AuthContext";
-import { UserAuthProvider } from "./context/UserAuthContext";
+import { UserAuthProvider } from "./features/cuenta";
 import { ProveedorDeMarcadores } from "./context/MarcadoresContext";
 import { ProveedorDeTemasSeguidos } from "./context/TemasSeguidosContext";
 

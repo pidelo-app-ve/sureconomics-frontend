@@ -6,8 +6,7 @@ import { IconInstagram, IconTikTok, IconX } from "./icons/social";
 import { BRAND as MARCA, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useState } from "react";
-import { subscribeToNewsletter } from "../services/newsletterService";
-import { marcarSuscrito } from "../lib/invitacionBoletin";
+import { marcarSuscrito, subscribeToNewsletter } from "../features/boletin";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 import { AnadirEnGoogle } from "./comun/AnadirEnGoogle";
 

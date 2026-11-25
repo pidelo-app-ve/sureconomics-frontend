@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
-import { EmptyState, ErrorState, LoadingState } from "../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../ui";
 import { ContentExplorer } from "../components/home/ContentExplorer";
 import { CargarMas } from "../components/comun/CargarMas";
 import { enTandas } from "../lib/tandas";

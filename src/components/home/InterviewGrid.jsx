@@ -5,7 +5,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /** Entrevistas: video thumbnails with a play affordance and a duration. */
 export const InterviewGrid = ({ items }) => (

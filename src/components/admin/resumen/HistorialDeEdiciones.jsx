@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../content";
-import { PaginasDeLaLista } from "../PaginasDeLaLista";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../../ui";
+import { PaginasDeLaLista } from "../../../ui/admin/PaginasDeLaLista";
 import { useListaDelServidor } from "../../../hooks/useListaDelServidor";
 import { adminRequest } from "../../../lib/api";
 import { recorridoResumen } from "../../../lib/guias/guiaResumen";

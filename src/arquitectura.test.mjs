@@ -23,8 +23,11 @@
  *
  * Las reglas, en el orden en que se miran:
  *
- * 1. `src/ui/` (lo compartido: botones, tablas, diálogos) no importa **ningún** dominio,
- *    ni siquiera por su puerta: es el dominio el que usa `ui/`, no al revés.
+ * 1. `src/ui/` (lo compartido por tres temas o más: los estados de carga, error y vacío, la
+ *    paginación, el título de una pieza; y en `ui/admin/`, lo del panel: la confirmación y
+ *    las páginas de una lista) no importa **ningún** dominio, ni siquiera por su puerta, ni
+ *    ninguna página (`src/pages/`, también las del panel): son ellos los que usan `ui/`,
+ *    no al revés. `ui/admin/` es una carpeta del panel como las demás (regla 2).
  * 2. Nada que viva en una carpeta del panel se importa desde fuera de una carpeta del
  *    panel: ni el `admin/` de un dominio, ni un componente del panel que a su vez lo
  *    importe (la fuga indirecta). Tampoco desde el propio dominio: si `index.js` o un
@@ -37,14 +40,13 @@
  *    una razón que no es de gusto:
  *    - `import()` de una página de un dominio desde `routes.jsx`: es la línea por la que
  *      Vite parte el código; por la puerta, la página viajaría con todo lo demás;
- *    - los pasos de las guías (`features/<tema>/guia.js`, o lo que haya en una carpeta
- *      `guides/` si un dominio llega a tener varias): son datos sin JSX, y las guías de
- *      `lib/guias/` los leen desde una prueba que corre en node, que no entiende el JSX
- *      que trae `index.js`;
+ *    - los pasos de las guías (`features/<tema>/guia.js`, con todas las del dominio si
+ *      tiene varias): son datos sin JSX, y las guías de `lib/guias/` los leen desde una
+ *      prueba que corre en node, que no entiende el JSX que trae `index.js`;
  *    - las fachadas de la mudanza (`FACHADAS`, con quién las quita). Cada fachada dice
  *      también quién la importa, y nadie más puede: el código nuevo entra por la puerta.
- * 5. Los pasos de las guías de un dominio son datos: solo importan otros pasos de guía
- *    (`guia.js` o `guides/*.js`) o un `.json`. Nada de componentes ni JSX (los lee node).
+ * 5. Los pasos de las guías de un dominio (`guia.js`) son datos: no importan nada. Nada
+ *    de componentes ni JSX (los lee node).
  * 6. Un `import()` con una ruta calculada (una plantilla, una variable) no se puede
  *    comprobar: solo se admite en `routes.jsx`.
  *
@@ -95,12 +97,12 @@ const FACHADAS = {
     importadores: ["src/components/home/LugarYFecha.jsx"],
   },
   "src/lib/analitica.js": {
-    quita: "analitica, cuando la barra de la publicidad, useVistaPrevia y newsletterService importen de " +
+    quita: "analitica, cuando la barra de la publicidad, useVistaPrevia y la api del boletín importen de " +
       "features/analitica (por la puerta se reordena index-*.js)",
     importadores: [
       "src/features/publicidad/components/BarraPublicitaria.jsx",
       "src/hooks/useVistaPrevia.js",
-      "src/services/newsletterService.js",
+      "src/features/boletin/api.js",
     ],
   },
 };
@@ -113,10 +115,9 @@ const FACHADAS = {
 const FUGAS_CONOCIDAS = {
   "src/routes.jsx → src/components/admin/RequireAdmin.jsx":
     "la guarda de /admin, que va en la ruta y no en una página; la quita quien mude el panel (o la pase a src/app/)",
-  "src/hooks/useAdminConfirm.jsx → src/components/admin/AdminConfirmDialog.jsx":
-    "el diálogo de confirmar lo usan el panel y la cuenta; la quita quien cree src/ui/ (diálogos)",
-  "src/components/cuenta/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
-    "el recorte del retrato lo usan el panel y la cuenta del lector; la quita quien lo mude a src/ui/",
+  "src/features/cuenta/components/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
+    "el recorte del retrato lo usan el panel (el equipo) y la cuenta del lector: dos temas, y src/ui/ es para tres o " +
+      "más; la quita quien lo mude a src/ui/ (fuera de ui/admin/, que es del panel) cuando lo use un tercero",
 };
 
 /**
@@ -198,6 +199,7 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   const SRC = path.join(raiz, "src");
   const DOMINIOS = path.join(SRC, "features");
   const UI = path.join(SRC, "ui");
+  const PAGINAS = path.join(SRC, "pages");
   const API = path.join(SRC, "api");
   const I18N = path.join(SRC, "i18n");
   const CONFIG = path.join(SRC, "config");
@@ -235,10 +237,10 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   /** El `import()` de `routes.jsx` a una página del panel: así se carga aparte. */
   const lazyDelPanel = (ruta, destino, dinamico) =>
     dinamico && ruta === RUTAS && (dentroDe(destino, path.join(SRC, "pages", "admin")) || esPagina(destino));
-  /** Los pasos de una guía: `features/<tema>/guia.js` o lo que cuelgue de `features/<tema>/guides/`. */
+  /** Los pasos de las guías de un dominio: `features/<tema>/guia.js`. */
   const esGuia = (r) => {
     const d = dominioDe(r);
-    return Boolean(d) && (r === path.join(DOMINIOS, d, "guia.js") || dentroDe(r, path.join(DOMINIOS, d, "guides")));
+    return Boolean(d) && r === path.join(DOMINIOS, d, "guia.js");
   };
 
   const salida = [];
@@ -261,14 +263,17 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
         salida.push(`${donde}; src/config/ son datos: solo importa de src/config/`);
         continue;
       }
-      if (esGuia(ruta) && !((esGuia(destino) && destino.endsWith(".js")) ||
-        (destino.endsWith(".json") && path.basename(path.dirname(destino)) === "guides"))) {
-        salida.push(`${donde}; los pasos de una guía son datos: solo importan otros pasos de guía (guia.js, guides/)`);
+      if (esGuia(ruta)) {
+        salida.push(`${donde}; los pasos de una guía son datos: guia.js no importa nada`);
         continue;
       }
       const fachada = fachadas[relativa(destino)];
       if (fachada && !fachada.importadores.includes(rel)) {
         salida.push(`${donde}; una fachada solo la importan los de su lista (FACHADAS): lo nuevo entra por la puerta`);
+        continue;
+      }
+      if (dentroDe(ruta, UI) && dentroDe(destino, PAGINAS)) {
+        salida.push(`${donde}; ui/ no conoce las páginas (src/pages/, también las del panel): son ellas las que usan ui/`);
         continue;
       }
       const otro = dominioDe(destino);
@@ -283,7 +288,7 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
         salida.push(`${donde}; de otro dominio, solo sus puertas (features/${otro}/index.js o admin/index.js)`);
       } else if (dinamico && ruta === RUTAS && esPagina(destino)) {
         continue;
-      } else if (esGuia(destino) && destino.endsWith(".js")) {
+      } else if (esGuia(destino)) {
         continue;
       } else {
         salida.push(`${donde}; desde fuera, solo sus puertas (features/${otro}/index.js o admin/index.js)`);
@@ -509,9 +514,8 @@ test("la prueba ve las trampas", () => {
     "src/features/b/admin/AdminB.jsx": [], //          una página del panel en la raíz de admin/
     "src/features/b/admin/Exportado.jsx": [],
     "src/features/b/guia.js": [
-      'import { MAS } from "./guides/mas.js";', //      bien: otros pasos de guía
       'import { T } from "./Tarjeta";', //              ✗ 5: una guía no importa componentes
-      'import datos from "./datos.json";', //           ✗ 5: un .json, solo de una carpeta guides/
+      'import datos from "./datos.json";', //           ✗ 5: ni un .json: no importa nada
     ],
     "src/features/b/components/Y.jsx": [],
     "src/features/b/admin/index.js": [
@@ -522,16 +526,18 @@ test("la prueba ve las trampas", () => {
     ],
     "src/features/b/pages/Pag.jsx": [],
     "src/features/b/admin/pages/Panel.jsx": [],
-    "src/features/b/guides/pasos.js": [
-      'import { MAS } from "./mas.js";', //             bien: datos de otra guía
-      'import { Y } from "../components/Y";', //        ✗ 5: una guía no importa componentes
-    ],
-    "src/features/b/guides/mas.js": [],
     "src/components/admin/X.jsx": [
       'import { Q } from "../../features/b/admin";', // bien: panel con panel
     ],
     "src/ui/Boton.jsx": [
       'import { B } from "../features/b";', //         ✗ 1: ui no usa dominios, ni por la puerta
+      'import { H } from "../pages/Home";', //         ✗ 1: ni páginas
+      'import { t } from "../i18n/motor";', //         bien: los textos
+    ],
+    "src/ui/admin/Dialogo.jsx": [
+      'import { C } from "../../pages/admin/Cinta";', // ✗ 1: tampoco las del panel, aunque ui/admin/ sea panel
+      'import { Boton } from "../Boton";', //           bien: lo de ui/
+      'import { Q } from "../../features/b/admin";', // ✗ 1: ni el panel de un dominio
     ],
     "src/pages/admin/Cinta.jsx": [
       'import { Q } from "../../features/b/admin";', // bien
@@ -575,8 +581,7 @@ test("la prueba ve las trampas", () => {
       'const E = () => import("./features/b/admin/Exportado");', //     ✗ 2: la puerta del panel lo exporta
     ],
     "src/lib/guias/g.js": [
-      'import { pasos } from "../../features/b/guides/pasos.js";', // bien: datos de una guía
-      'import { PASOS } from "../../features/b/guia.js";', //         bien: también guia.js
+      'import { PASOS } from "../../features/b/guia.js";', //         bien: datos de una guía
     ],
     "src/lib/fachada.js": [
       'export { Y } from "../features/b/components/Y";', // bien: es una fachada
@@ -601,9 +606,8 @@ test("la prueba ve las trampas", () => {
       "src/features/a/components/X.jsx:4 src/features/a/admin/Panel.jsx",
       "src/features/a/components/X.jsx:5 src/features/a/admin/services/api.js",
       "src/features/a/index.js:2 src/features/a/admin/Panel.jsx",
-      "src/features/b/guia.js:2 src/features/b/Tarjeta.jsx",
-      "src/features/b/guia.js:3 src/features/b/datos.json",
-      "src/features/b/guides/pasos.js:2 src/features/b/components/Y.jsx",
+      "src/features/b/guia.js:1 src/features/b/Tarjeta.jsx",
+      "src/features/b/guia.js:2 src/features/b/datos.json",
       "src/pages/Home.jsx:2 src/features/b/admin/index.js",
       "src/pages/Home.jsx:3 src/features/b/components/Y.jsx",
       "src/pages/Home.jsx:4 src/components/admin/X.jsx",
@@ -616,6 +620,9 @@ test("la prueba ve las trampas", () => {
       "src/routes.jsx:5 src/pages/admin/Cinta.jsx",
       "src/routes.jsx:8 src/features/b/Tarjeta.jsx",
       "src/ui/Boton.jsx:1 src/features/b/index.js",
+      "src/ui/Boton.jsx:2 src/pages/Home.jsx",
+      "src/ui/admin/Dialogo.jsx:1 src/pages/admin/Cinta.jsx",
+      "src/ui/admin/Dialogo.jsx:3 src/features/b/admin/index.js",
     ]);
   } finally {
     rmSync(raiz, { recursive: true, force: true });

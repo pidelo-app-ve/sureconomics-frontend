@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listAdminSubmissions } from "../../services/adminSubmissionsService";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import {

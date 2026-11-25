@@ -1,0 +1,179 @@
+import { useRef, useState } from "react";
+import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
+import { marcarSuscrito } from "./utils";
+import { subscribeToNewsletter } from "./api";
+import { ESPACIOS, EspacioPublicitario } from "../publicidad";
+import { NO_PARECE_PERSONA, useVerificacionHumana } from "../../hooks/useVerificacionHumana";
+
+/**
+ * El bloque del boletín en la portada: «Entorno en Viñetas».
+ *
+ * Antes anunciaba "nuestro análisis" en abstracto y no hacía nada -- `handleSubmit`
+ * llamaba a `preventDefault` y ahí acababa. Ahora anuncia el producto que la redacción
+ * va a publicar los lunes por la mañana, y guarda la suscripción de verdad.
+ *
+ * Dos decisiones de diseño, las dos dentro de lo que ya existe en el sistema:
+ *
+ *   - **la etiqueta del campo se ve.** Estaba sólo en el `placeholder`, que desaparece al
+ *     escribir y deja al lector sin saber qué escribió -- y a un lector de pantalla sin
+ *     nada estable que anunciar;
+ *   - **el tratamiento del error va pegado al campo** con `aria-describedby`, no suelto
+ *     debajo del formulario.
+ *
+ * Sobre el trato: este bloque hablaba de "tú" -- "Recibe", "Suscríbete", "Puedes darte
+ * de baja" -- y era el único del sitio que lo hacía. Contadas las cadenas de la interfaz
+ * salen veintiocho formas de usted contra cuatro de tú, y las cuatro estaban aquí. Se
+ * alinea con el resto.
+ *
+ * El acierto no distingue si el correo ya estaba en la lista: el servidor contesta lo
+ * mismo en los dos casos para que nadie pueda averiguar quién está suscrito escribiendo
+ * direcciones, y decirlo aquí anularía esa protección desde el navegador.
+ */
+
+export const NewsletterBlock = () => {
+  const { t } = useIdioma();
+  // Cloudflare Turnstile: ver `hooks/useVerificacionHumana`.
+  const humano = useVerificacionHumana();
+  const sectionRef = useRef(null);
+  useRevealOnScroll(sectionRef);
+
+  const [email, setEmail] = useState("");
+  // El campo trampa. Una persona no lo ve; los rastreadores rellenan todo lo que
+  // encuentran, así que si llega con algo, el servidor lo descarta.
+  const [trampa, setTrampa] = useState("");
+  const [estado, setEstado] = useState({ status: "idle", mensaje: "" });
+
+  const enviando = estado.status === "loading";
+  const hayError = estado.status === "error";
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (enviando) return;
+    const correo = email.trim();
+    if (!correo) return;
+
+    setEstado({ status: "loading", mensaje: "" });
+    try {
+      const turnstile = await humano.pedirToken();
+      if (turnstile === null) throw Object.assign(new Error("turnstile"), { code: NO_PARECE_PERSONA });
+      await subscribeToNewsletter(correo, { turnstile, source: "home", honeypot: trampa });
+      humano.reiniciar();
+      // Quien ya está en la lista no tiene que ver la invitación flotante.
+      marcarSuscrito();
+      setEmail("");
+      setEstado({
+        status: "success",
+        mensaje: t("portada.boletin.ok"),
+      });
+    } catch (err) {
+      humano.reiniciar();
+      setEstado({
+        status: "error",
+        mensaje:
+          err?.code === NO_PARECE_PERSONA
+            ? t("comun.antiBots.noPaso")
+            : err?.status === 422
+            ? t("portada.boletin.correoIncompleto")
+            : err?.status === 429
+              ? t("portada.boletin.demasiadosIntentos")
+              : t("portada.boletin.fallo"),
+      });
+    }
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      id="boletin"
+      tabIndex={-1}
+      className="se-newsletter se-section se-reveal"
+      aria-labelledby="newsletter-title"
+    >
+      <div className="se-container">
+        <div className="se-newsletter__card">
+          <div className="se-newsletter__grid">
+            <div className="se-newsletter__copy">
+              <h2 id="newsletter-title" className="se-newsletter__title">
+                {t("portada.boletin.titulo")}
+              </h2>
+
+              <p className="se-newsletter__text">{t("portada.boletin.texto")}</p>
+
+              <form
+                onFocus={humano.activar}
+                className="se-newsletter__form"
+                onSubmit={handleSubmit}
+                aria-busy={enviando}
+                noValidate
+              >
+                <label htmlFor="newsletter-email" className="se-newsletter__label">
+                  {t("portada.boletin.suCorreo")}
+                </label>
+
+                <div className="se-newsletter__field">
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    className="se-newsletter__input"
+                    placeholder={t("portada.boletin.placeholder")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={enviando}
+                    required
+                    aria-invalid={hayError || undefined}
+                    /* Sólo cuando el error existe en el DOM: una referencia a un id que
+                       no está no se anuncia. */
+                    aria-describedby={hayError ? "newsletter-error" : undefined}
+                  />
+
+                  {/* Fuera del tabulador y de los lectores de pantalla: si una persona la
+                      rellenara sin querer, su suscripción se descartaría. */}
+                  <input
+                    type="text"
+                    name="website"
+                    className="se-sr-only"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    autoComplete="off"
+                    value={trampa}
+                    onChange={(e) => setTrampa(e.target.value)}
+                  />
+
+                  <button type="submit" className="se-newsletter__btn" disabled={enviando}>
+                    {enviando ? t("portada.boletin.enviando") : t("portada.boletin.unase")}
+                  </button>
+                </div>
+
+                {/* El error va aquí, dentro del formulario y debajo del campo al que se
+                    refiere. `role="alert"` para que se anuncie al aparecer. */}
+                {hayError ? (
+                  <p id="newsletter-error" className="se-newsletter__error" role="alert">
+                    {estado.mensaje}
+                  </p>
+                ) : null}
+                {humano.control}
+              </form>
+
+              {/* El acierto, aparte del formulario porque el formulario ya cumplió.
+                  `aria-live` y no `role="alert"`: es una confirmación, no una urgencia. */}
+              <div className="se-newsletter__status" aria-live="polite">
+                {estado.status === "success" ? (
+                  <p className="se-newsletter__ok">{estado.mensaje}</p>
+                ) : null}
+              </div>
+
+              {/* Formato D: el patrocinio del boletin. Va debajo del formulario y
+                  no encima del titulo: quien llega aqui viene a suscribirse, y lo
+                  primero que lea tiene que ser eso. Una linea, un logotipo, y la
+                  etiqueta de siempre. */}
+              <EspacioPublicitario espacio={ESPACIOS.BOLETIN} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};

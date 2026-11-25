@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { TEAM, claveDeFoto } from "../../config/equipo";
 import { BarraDeGuardar } from "../../components/admin/BarraDeGuardar";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
@@ -16,7 +16,7 @@ import { RecorteDeAvatar } from "../../components/admin/RecorteDeAvatar";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEquipo } from "../../lib/guias/guiaEquipo";
-import { LoadingState } from "../../components/content";
+import { LoadingState } from "../../ui";
 
 const ACCEPTED_MIME_SET = new Set(ACCEPTED_IMAGE_MIME.split(","));
 const formatMb = (bytes) => `${(bytes / (1024 * 1024)).toFixed(1)} MB`;

@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { Enlace, useNavegar } from "../components/Enlace";
-import { useUserAuth } from "../context/UserAuthContext";
+import { useUserAuth } from "../features/cuenta";
 import { AvisoDeCookies } from "../features/analitica";
 import { BRAND } from "../config/sitio";
 import { useIdioma } from "../i18n/ProveedorIdioma";

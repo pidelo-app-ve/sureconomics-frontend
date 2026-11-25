@@ -11,11 +11,17 @@ un tope que solo baja.
   Es donde va el código nuevo.
 - **Vieja, que se va vaciando:** `src/components`, `src/pages`, `src/lib`, `src/hooks`,
   `src/services` y `src/styles`, ordenadas por tipo de archivo. Cuando se toca un tema a
-  fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica y
-  publicidad), y lo que queda en la zona vieja entra por su puerta.
+  fondo, se muda a `src/features/` (como se hizo con monedas, titulares, analítica,
+  publicidad, el boletín y la cuenta del lector), y lo que queda en la zona vieja entra por su puerta.
 - **Compartida, por debajo de todo:** `src/api/` (el cliente HTTP) y `src/config/` (los
   datos fijos del sitio). No importan nada del sitio ni del panel: son los demás los que
   las usan.
+- **Componentes compartidos: `src/ui/`.** Lo que usan tres temas o más, sin lógica de
+  ninguno: cargando, error, vacío y la paginación (por `ui/index.js`), y el título de una
+  pieza (`ui/TituloDePieza.jsx`). Lo que solo usa el panel va en `ui/admin/` (la
+  confirmación, `useAdminConfirm.jsx`, y las páginas de una lista,
+  `PaginasDeLaLista.jsx`), que es una carpeta del panel como las demás: el sitio no la
+  puede importar. `ui/` no importa ninguna feature ni ninguna página.
 
 ## Tema → carpetas
 
@@ -25,15 +31,16 @@ un tope que solo baja.
 | Titulares en caliente («Última hora») | `src/features/titulares` |
 | Audiencia y cookies (aviso, `/cookies`, panel «Audiencia») | `src/features/analitica` |
 | Publicidad (huecos, barra, patrocinios, panel) | `src/features/publicidad` |
+| Boletín «Entorno en Viñetas» (alta, invitación, baja, `/entorno`, panel de números y suscriptores) | `src/features/boletin` |
 | Portada | `pages/Home.jsx`, `components/home` |
 | Pieza (artículo, video, informe) | `pages/Pieza.jsx`, `components/piece`, `lib/pieza.js` |
 | Listados y búsqueda | `pages/Articulos.jsx`, `Audiovisual.jsx`, `Explorar.jsx` |
-| Cuenta del lector | `pages/cuenta`, `components/cuenta` |
+| Cuenta del lector (entrar, registro, recuperar, `/cuenta/…`, la sesión del lector en React) | `src/features/cuenta` (su hoja sigue en `styles/cuenta.css`; el cliente y el almacén de la sesión, en `lib/userApi.js` y `lib/userAuthStorage.js`) |
 | Resumen diario | `pages/Resumen.jsx`, `services/resumenService.js`, `components/admin/resumen` |
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
-| Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `components/admin/PaginasDeLaLista.jsx` |
-| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de cuatro guías (monedas, titulares, audiencia y publicidad) viven en `features/*/guia.js` |
+| Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `ui/admin/PaginasDeLaLista.jsx` |
+| Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad, el boletín y la cuenta (sus nueve, en un solo archivo) viven en `features/*/guia.js` |
 | Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
 | Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |
@@ -82,11 +89,18 @@ Dos archivos de la zona vieja reexportan algo de un feature para quien aún lo i
 de allí. La prueba solo deja importarlas a los de su lista (`FACHADAS`); lo nuevo entra
 por la puerta del feature.
 
-- `src/lib/analitica.js` (la medición): la usan la vista previa, el servicio del boletín y
+- `src/lib/analitica.js` (la medición): la usan la vista previa, la api del boletín y
   la barra de la publicidad. Se cargan antes que el aviso de cookies; por la puerta, Vite
   reordenaría el paquete principal (mismo código, otro orden).
 - `src/hooks/useHeadlines.js` (`haceCuanto`): la usa la fecha de cada pieza en la
   portada. Por la puerta de titulares, su hoja de estilos entraría antes en el CSS.
+
+Ese reorden del JS es inocuo (mismo código, otro orden), pero mueve el tamaño
+comprimido: al mudar el boletín y la cuenta (nov-2026) la entrada bajó 334 B sin
+comprimir y subió 343 B en gzip y 13 B en brotli, porque Vite reordenó módulos dentro
+(y lista en sus cargas previas el trozo nuevo con las guías de la cuenta).
+Criterio: la entrada se mide en gzip, que es lo que baja el lector. Lo que sí obliga es
+el CSS: su orden cambia lo que se ve, y el `dist/` tiene que salir igual.
 
 ## Qué no se toca
 
@@ -109,5 +123,6 @@ por la puerta del feature.
 4. Si tiene panel, va en `admin/`. Si otra página del panel necesita algo de él, se le
    abre una segunda puerta, `admin/index.js` (ver `features/monedas/admin/index.js`):
    nunca por la puerta del sitio, que viaja en el paquete de cada lector.
-5. Entre features, solo por las puertas. `src/ui/` (lo compartido: botones, tablas,
-   diálogos), cuando exista, no importará features: son ellos los que lo usan.
+5. Entre features, solo por las puertas. Un componente que ya usan tres temas va a
+   `src/ui/` (o a `src/ui/admin/` si es solo del panel); `ui/` no importa features ni
+   páginas: son ellas las que lo usan.

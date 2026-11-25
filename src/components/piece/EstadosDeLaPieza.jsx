@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { Enlace } from "../Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { ErrorState, LoadingState } from "../content";
+import { ErrorState, LoadingState } from "../../ui";
 
 /**
  * Lo que enseña la página de una pieza (`pages/Pieza.jsx`) cuando no tiene pieza que

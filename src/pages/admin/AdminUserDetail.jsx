@@ -6,7 +6,7 @@ import {
   setAdminUserActive,
   setAdminUserCollabEnabled,
 } from "../../services/adminUsersService";
-import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../ui";
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";

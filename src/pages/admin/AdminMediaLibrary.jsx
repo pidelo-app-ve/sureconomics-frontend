@@ -13,10 +13,10 @@ import {
     uploadAdminMediaDocument,
     uploadAdminMediaImage,
 } from "../../services/adminMediaService";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useBuscadorConEspera } from "../../hooks/useBuscadorConEspera";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
@@ -25,7 +25,7 @@ import { paginaQueExiste } from "../../lib/listasDelPanel";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoArchivos } from "../../lib/guias/guiaArchivos";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
-import { PaginasDeLaLista } from "../../components/admin/PaginasDeLaLista";
+import { PaginasDeLaLista } from "../../ui/admin/PaginasDeLaLista";
 
 const { ancla } = recorridoArchivos;
 

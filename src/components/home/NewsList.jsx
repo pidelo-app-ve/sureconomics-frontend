@@ -6,7 +6,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { conAnuncio } from "./conAnuncio";
 import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * Noticias: image cards, like every other format now.

@@ -7,7 +7,7 @@ import { FORMATO_META, estiloDeFoto, imagenAncho, imagenSrcSet, nombreDeFormato,
 import { fondoDeTema } from "../../lib/tarjeta";
 import { SelloEducativo } from "./SelloEducativo";
 import { listaDePiezas, piezaShape } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * Las tarjetas de «Al punto», la página que junta entrevistas y podcast.

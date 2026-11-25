@@ -4,7 +4,7 @@ import { estiloDeFoto, rutaDePieza } from "../../lib/pieza";
 import { tallasHastaLaOriginal } from "../../lib/fotoDePieza";
 import { useFotoConRespaldo } from "../../hooks/useFotoConRespaldo";
 import { piezaShape } from "../home/piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 import { Recorte, Recortes } from "../comun/Recorte";
 
 /**

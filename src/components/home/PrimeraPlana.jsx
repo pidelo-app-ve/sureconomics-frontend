@@ -12,7 +12,7 @@ import { CintaMundial } from "./MarketTicker";
 import { AperturaMoneda, TablaDeMonedas, useMonedas } from "../../features/monedas";
 import { Retrato } from "../piece/PieceByline";
 import { listaDePiezas, piezaShape } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 import { IconoPausa } from "../comun/IconoPausa";
 import { UltimaHoraColumna } from "../../features/titulares";
 import { NuestroCanal } from "../canal/NuestroCanal";

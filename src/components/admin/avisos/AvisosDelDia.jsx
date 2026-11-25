@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Pagination } from "../../content";
-import { PaginasDeLaLista } from "../PaginasDeLaLista";
+import { Pagination } from "../../../ui";
+import { PaginasDeLaLista } from "../../../ui/admin/PaginasDeLaLista";
 import { ESTADOS_DE_AVISO, avisosALaVista } from "../../../lib/avisos";
 import { recorridoAvisos } from "../../../lib/guias/guiaAvisos";
 import { Aviso } from "./TarjetasDeAvisos";

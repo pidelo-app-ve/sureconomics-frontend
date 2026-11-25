@@ -1,17 +1,13 @@
 /**
- * La guía de «Mi perfil» (`pages/cuenta/CuentaPerfil.jsx`). Anclajes:
+ * La guía de «Mi perfil» (`features/cuenta/pages/CuentaPerfil.jsx`). Anclajes:
  * `[data-tour-perfil="…"]`. Textos en `cuenta.guias.perfil.*`.
+ *
+ * Sus pasos viven con la cuenta del lector, en `features/cuenta/guia.js`;
+ * aquí se arma la guía con ellos.
  */
 import { crearRecorrido } from "../recorridoVista.js";
+import { PASOS_PERFIL } from "../../features/cuenta/guia.js";
 
-export const PASOS_PERFIL = [
-  { titulo: "cuenta.guias.perfil.queHay.titulo", texto: "cuenta.guias.perfil.queHay.texto" },
-  { clave: "retrato", titulo: "cuenta.guias.perfil.retrato.titulo", texto: "cuenta.guias.perfil.retrato.texto" },
-  { clave: "nombre", titulo: "cuenta.guias.perfil.nombre.titulo", texto: "cuenta.guias.perfil.nombre.texto" },
-  { clave: "datos", titulo: "cuenta.guias.perfil.datos.titulo", texto: "cuenta.guias.perfil.datos.texto" },
-  { clave: "guardar", titulo: "cuenta.guias.perfil.guardar.titulo", texto: "cuenta.guias.perfil.guardar.texto" },
-  { clave: "sesiones", titulo: "cuenta.guias.perfil.sesiones.titulo", texto: "cuenta.guias.perfil.sesiones.texto" },
-  { clave: "guia", titulo: "cuenta.guias.perfil.guia.titulo", texto: "cuenta.guias.perfil.guia.texto" },
-];
+export { PASOS_PERFIL };
 
 export const recorridoPerfil = crearRecorrido("perfil", PASOS_PERFIL, { traducir: true });

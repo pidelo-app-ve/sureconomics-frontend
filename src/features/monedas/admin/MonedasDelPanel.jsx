@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { ErrorState, LoadingState } from "../../../components/content";
+import { ErrorState, LoadingState } from "../../../ui";
 import { useAdminToast } from "../../../context/AdminToastContext";
-import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import { porDolar } from "../utils";
 import { recorridoCinta } from "../../../lib/guias/guiaCinta";

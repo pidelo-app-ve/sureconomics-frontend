@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Enlace, useNavegar } from "../../components/Enlace";
-import { useUserAuth } from "../../context/UserAuthContext";
+import { useUserAuth } from "../cuenta";
 import { useTemasSeguidos } from "../../context/TemasSeguidosContext";
 import { getPiezasDeMisTemas } from "../../services/userMeService";
 import { useHeadlines } from "./useHeadlines";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
 import { rutaDePieza } from "../../lib/pieza";
-import { TituloDePieza } from "../../components/content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 import "./titulares.css";
 
 /**

@@ -4,7 +4,7 @@
  *
  * La usan tres que no pueden entrar por la puerta sin cambiar el JS construido: la vista
  * previa (`hooks/useVistaPrevia.js`), el servicio del boletín
- * (`services/newsletterService.js`) y la barra de la publicidad
+ * (`features/boletin/api.js`) y la barra de la publicidad
  * (`features/publicidad/components/BarraPublicitaria.jsx`). Los tres se cargan antes que
  * el aviso de cookies; por la puerta, la medición y el aviso entrarían antes en el
  * paquete principal y Vite reordenaría sus módulos (`index-*.js`: mismo CSS, otro orden

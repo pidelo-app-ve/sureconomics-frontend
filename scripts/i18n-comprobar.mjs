@@ -109,8 +109,11 @@ const recorrer = (dir) => {
 recorrer(SRC);
 const publicos = archivos.filter((a) => !IGNORADOS.some((re) => re.test(a)));
 
+// Los pasos de una guía que viven con su feature (`features/<tema>/guia.js`): solo datos.
+const PASOS_EN_UNA_FEATURE = /[\\/]features[\\/][^\\/]+[\\/]guia\.js$/;
+
 /** Las claves que nombra un archivo: directas y prefijos de las que se arman en tiempo de ejecución. */
-const clavesQueNombra = (codigo) => {
+const clavesQueNombra = (codigo, archivo = "") => {
   const directas = new Set();
   const prefijos = new Set();
   // Con comillas dobles o simples: `t('clave')` también es una clave.
@@ -119,8 +122,10 @@ const clavesQueNombra = (codigo) => {
   for (const m of codigo.matchAll(/labelKey:\s*(["'])([^"'\n]+)\1/g)) directas.add(m[2]);
   // Guías traducibles (`crearRecorrido(…, { traducir: true })`): `titulo`, `texto` y
   // `puntos` son claves. Solo cuenta lo que parece una clave (palabras con puntos, sin
-  // espacios): las guías del panel llevan el texto tal cual y no entran aquí.
-  if (codigo.includes("traducir: true")) {
+  // espacios): las guías del panel llevan el texto tal cual y no entran aquí. Los pasos
+  // que viven con su feature no llevan el `traducir` (lo pone su guía, en `lib/guias/`):
+  // se leen igual, con el mismo filtro.
+  if (codigo.includes("traducir: true") || PASOS_EN_UNA_FEATURE.test(archivo)) {
     for (const m of codigo.matchAll(/(?:titulo|texto):\s*"([a-z]\w*(?:\.\w+)+)"/g)) directas.add(m[1]);
     for (const lista of codigo.matchAll(/puntos:\s*\[([^\]]*)\]/g)) {
       for (const m of lista[1].matchAll(/"([a-z]\w*(?:\.\w+)+)"/g)) directas.add(m[1]);
@@ -132,7 +137,7 @@ const clavesQueNombra = (codigo) => {
 const usadas = new Set();
 const prefijosDinamicos = new Set();
 for (const archivo of publicos) {
-  const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"));
+  const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"), archivo);
   for (const k of directas) usadas.add(k);
   for (const p of prefijos) prefijosDinamicos.add(p);
 }
@@ -234,7 +239,7 @@ const todasLasClaves = Object.keys(es);
 const clavesCache = new Map();
 const clavesDe = (archivo) => {
   if (!clavesCache.has(archivo)) {
-    const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"));
+    const { directas, prefijos } = clavesQueNombra(readFileSync(archivo, "utf8"), archivo);
     const s = new Set([...directas].filter((k) => k in es));
     for (const p of prefijos) for (const k of todasLasClaves) if (k.startsWith(p)) s.add(k);
     clavesCache.set(archivo, s);

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useEffect, useMemo, useState } from "react";
 import { Enlace } from "../components/Enlace";
 import { CardMedia } from "../components/home/CardMedia";
-import { TituloDePieza } from "../components/content/TituloDePieza";
+import { TituloDePieza } from "../ui/TituloDePieza";
 import { Escudo, TarjetaJuego, useLvbp } from "../components/lvbp/MarcadorLvbp";
 import { ESPACIOS, PatrocinioCompacto, useEspacios, useHueco } from "../features/publicidad";
 import { BRAND } from "../config/sitio";

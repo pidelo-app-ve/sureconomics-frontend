@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { useAuth } from "../../context/AuthContext";
 import { applyPageMeta } from "../../lib/seo";
 import { listAdminCarreras, moderarCarrera } from "../../services/analistaService";

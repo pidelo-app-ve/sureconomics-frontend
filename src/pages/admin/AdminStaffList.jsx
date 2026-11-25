@@ -6,9 +6,9 @@ import {
   setAdminStaffActive,
   updateAdminStaffRole,
 } from "../../services/adminStaffService";
-import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";

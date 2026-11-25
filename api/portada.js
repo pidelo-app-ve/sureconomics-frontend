@@ -144,9 +144,6 @@ export const ORDEN_DE_SECCIONES = ["noticia", "articulo", "editorial", "entrevis
 /** Cuándo se quita el recorte si React no ha montado (ver arriba). */
 const REVELAR_TRAS = "9s";
 
-/** Lo que mide Última hora encima de la apertura, en px (ver `ESTILO_PREVIO`). */
-const ALTO_DE_ULTIMA_HORA = { telefono: 328, tableta: 250 };
-
 /**
  * Los textos, copiados de `src/i18n/` porque esta función corre en Node sin el motor de la
  * página; la prueba (`portada.test.mjs`) vigila que digan lo mismo.
@@ -156,6 +153,10 @@ const ALTO_DE_ULTIMA_HORA = { telefono: 328, tableta: 250 };
  * - `apertura` y `recientes`: `portada.apertura.apertura` y `portada.apertura.loMasReciente`,
  *   el `<h2>` de la primera plana (con pieza fijada o sin ella).
  * - `alPunto`: `nav.alPunto`, la sección de entrevistas y podcast.
+ * - De Última hora (`UltimaHoraColumna`): `ultimaHora` (`titulares.tarjeta.etiqueta`),
+ *   `todo` y `misTemas` (`titulares.pestanas.*`), `todaLaUltimaHora`
+ *   (`portada.plana.todaLaUltimaHora`), `notaIa` (`titulares.tarjeta.notaIa`) y la hora:
+ *   `ahoraMismo`, `minutos` y `haceMinutos` (`titulares.hace.ahora`, `.corto`, `.minutos`).
  * - Solo en inglés, `marcaEspanol` y `marcaEspanolTitulo`: `idioma.marcaEspanol` y
  *   `idioma.marcaEspanolTitulo`, la marca «ES» que lleva en `/en` el titular de una pieza
  *   sin versión inglesa (`TituloDePieza`).
@@ -169,6 +170,14 @@ export const TEXTOS = {
     apertura: "Apertura",
     recientes: "Lo más reciente",
     alPunto: "Al punto",
+    ultimaHora: "Última hora",
+    todo: "Todo",
+    misTemas: "Mis temas",
+    todaLaUltimaHora: "Toda la última hora",
+    notaIa: "Redactado automáticamente con IA a partir de fuentes de otros medios.",
+    ahoraMismo: "Ahora",
+    minutos: "{n} min",
+    haceMinutos: "Hace {n} min",
   },
   en: {
     titulo: "SurEconomics — Economics, markets and investing",
@@ -178,6 +187,14 @@ export const TEXTOS = {
     apertura: "Lead story",
     recientes: "Latest",
     alPunto: "Al punto",
+    ultimaHora: "Breaking",
+    todo: "All",
+    misTemas: "My topics",
+    todaLaUltimaHora: "All breaking news",
+    notaIa: "Written automatically with AI from other outlets' reporting.",
+    ahoraMismo: "Just now",
+    minutos: "{n} min",
+    haceMinutos: "{n} min ago",
     marcaEspanol: "ES",
     marcaEspanolTitulo: "In Spanish only",
   },
@@ -331,41 +348,131 @@ export const fechaDeEdicion = (ahora, idioma = "es") =>
     timeZone: "America/Caracas",
   }).format(ahora);
 
+/** El titular de una pieza como lo pinta `TituloDePieza`: en `/en`, la que solo está en español lo avisa con «ES». */
+const tituloDePieza = (fila, idioma) => {
+  const enIngles = idioma === "en" && Boolean(fila.en_ingles);
+  const titulo = escapar((enIngles ? fila.title_en : fila.title) ?? "");
+  if (idioma !== "en" || fila.en_ingles) return titulo;
+  const t = TEXTOS.en;
+  return `<span lang="es">${titulo}</span> <abbr class="se-marca-idioma" title="${escapar(t.marcaEspanolTitulo)}">${escapar(t.marcaEspanol)}</abbr>`;
+};
+
+/* —— Última hora, como `UltimaHoraColumna` (`features/titulares`) ——
+   Copia de su regla, porque aquella es un componente de React y esto corre en Node; la
+   vigila `src/features/titulares/UltimaHoraColumna.html.test.mjs`, que pinta las dos y
+   las compara. */
+
+/** Cuántas enseña la columna (`CUANTOS`); el CSS esconde las que no caben en el teléfono. */
+const EN_ULTIMA_HORA = 6;
+const UN_DIA_MS = 24 * 3600_000;
+const UNA_HORA_MS = 3600_000;
+const MEDIA_HORA_MS = 30 * 60_000;
+
+/** El orden de `useHeadlines`: lo fijado arriba y después lo más reciente. */
+const cuando = (i) => Date.parse(i?.published_at || "") || 0;
+const enSuOrden = (items) =>
+  [...items].sort((a, b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || cuando(b) - cuando(a));
+
+/** Un día de calendario en Caracas, para saber si algo es «de hoy». */
+const diaEnCaracas = (ms) => new Date(ms).toLocaleDateString("en-CA", { timeZone: "America/Caracas" });
+
+/**
+ * La hora de cada titular (`sello`): «12 min» la primera hora, «9:21» el resto del día y
+ * «4 nov» si no es de hoy. La página usa la hora del lector; aquí, la de Caracas: solo
+ * cambia el texto de la hora, que va en su columna de ancho fijo.
+ */
+const selloDe = (iso, idioma, ahora) => {
+  const ms = Date.parse(iso || "");
+  const t = TEXTOS[idioma];
+  if (!ms) return { visible: "" };
+  const pasado = Math.max(0, ahora - ms);
+  if (pasado < UNA_HORA_MS) {
+    const n = Math.floor(pasado / 60_000);
+    return n < 1
+      ? { visible: t.ahoraMismo, fresca: true }
+      : { visible: t.minutos.replace("{n}", n), leido: t.haceMinutos.replace("{n}", n), fresca: pasado < MEDIA_HORA_MS };
+  }
+  const hoy = diaEnCaracas(ahora) === diaEnCaracas(ms);
+  const opciones = hoy ? { hour: "numeric", minute: "2-digit" } : { day: "numeric", month: "short" };
+  const texto = new Intl.DateTimeFormat(idioma === "en" ? "en-US" : "es", { ...opciones, timeZone: "America/Caracas" }).format(ms);
+  return { visible: texto.replace(/\bsept\b/, "sep") };
+};
+
+/**
+ * La columna de Última hora tal como la pinta React al montar (pestaña «Todo», sin sesión):
+ * los titulares en caliente si el más reciente es del último día; si no, las noticias más
+ * recientes que no están arriba (`recientes`, filas de la API). Pintarla aquí y no solo
+ * guardar su sitio es lo que hace que la apertura, que en el teléfono va debajo, caiga
+ * donde la pondrá React, sea cual sea el largo de los titulares.
+ */
+export const ultimaHoraEnHtml = ({ items = [], recientes = [], idioma = "es", ahora = Date.now() }) => {
+  const t = TEXTOS[idioma];
+  const prefijo = idioma === "en" ? "/en" : "";
+  const titulares = enSuOrden(items.filter((i) => i && typeof i === "object")).slice(0, EN_ULTIMA_HORA);
+  const masReciente = titulares.reduce((max, i) => Math.max(max, cuando(i)), 0);
+  const hayTitulares = titulares.length > 0 && ahora - masReciente < UN_DIA_MS;
+  const filas = hayTitulares
+    ? titulares.map((i) => ({ iso: i.published_at, titulo: escapar(i.title), ruta: `${prefijo}/ultima-hora#t-${i.id}` }))
+    : recientes
+        .map((f) => ({ fila: f, titular: titularDe(f, idioma) }))
+        .filter((r) => r.titular)
+        .slice(0, EN_ULTIMA_HORA)
+        .map(({ fila, titular }) => ({ iso: fila.published_at, titulo: tituloDePieza(fila, idioma), ruta: titular.ruta }));
+  if (!filas.length) return "";
+  const enVivo = ahora - (Date.parse(filas[0].iso || "") || 0) < UNA_HORA_MS;
+  const lista = filas.map((f) => {
+    const s = selloDe(f.iso, idioma, ahora);
+    const hora = s.leido
+      ? `<span class="se-sr-only">${escapar(s.leido)}</span><span aria-hidden="true">${escapar(s.visible)}</span>`
+      : escapar(s.visible);
+    return (
+      `<li class="se-plana__uh-item"><time class="se-plana__uh-hora${s.fresca ? " se-plana__uh-hora--fresca" : ""}"` +
+      `${f.iso ? ` datetime="${escapar(f.iso)}"` : ""}>${hora}</time>` +
+      `<a class="se-plana__uh-titulo" href="${escapar(f.ruta)}" tabindex="-1">${f.titulo}</a></li>`
+    );
+  });
+  return [
+    `<div class="se-plana__uh"><h2 class="se-plana__uh-cabeza">`,
+    `<a href="${prefijo}/ultima-hora" class="se-plana__uh-pastilla" tabindex="-1">`,
+    `<span class="se-plana__uh-punto${enVivo ? " se-plana__uh-punto--vivo" : ""}"></span>${escapar(t.ultimaHora)}</a></h2>`,
+    `<div class="se-plana__uh-pestanas">`,
+    `<button type="button" class="se-plana__uh-pestana is-activa" tabindex="-1">${escapar(t.todo)}</button>`,
+    `<button type="button" class="se-plana__uh-pestana" tabindex="-1">${escapar(t.misTemas)}</button></div>`,
+    `<ol class="se-plana__uh-lista">${lista.join("")}</ol>`,
+    `<a class="se-plana__mas" href="${prefijo}/ultima-hora" tabindex="-1">${escapar(t.todaLaUltimaHora)}</a>`,
+    hayTitulares ? `<p class="se-plana__uh-nota">${escapar(t.notaIa)}</p>` : "",
+    `</div>`,
+  ].join("");
+};
+
 /**
  * La apertura a la vista, antes de que llegue el JavaScript (plan del 23-nov-2026, A-0): la
- * foto, que es lo que Google mide como LCP en el teléfono, el titular y la entradilla.
+ * foto, que es lo que Google mide como LCP en el teléfono, el titular y la entradilla, y
+ * encima Última hora (que en el teléfono va antes que ella).
  *
  * Con las clases y dentro de las cajas de la página (`Layout`, `Home`, `PrimeraPlana`,
- * `CardMedia`), para que cada cosa caiga donde la va a pintar React y el relevo no se
- * note: la cinta y la cabecera van vacías, guardando su alto (la cinta, con la misma clase
- * que usa mientras carga); la fecha de la edición, escrita; y Última hora, vacía, con el
- * alto que suele tener (en el teléfono va encima de la apertura; ver `ESTILO_PREVIO`). La
- * `<img>` es la de `CardMedia`: la misma dirección, el mismo `srcset` y el mismo `sizes`
+ * `CardMedia`, `UltimaHoraColumna`), para que cada cosa caiga donde la va a pintar React y
+ * el relevo no se note: la cinta y la cabecera van vacías, guardando su alto (la cinta, con
+ * la misma clase que usa mientras carga); la fecha de la edición y Última hora, escritas.
+ * La `<img>` es la de `CardMedia`: la misma dirección, el mismo `srcset` y el mismo `sizes`
  * que la precarga, así que React encuentra la foto ya bajada y del mismo tamaño.
  *
  * Con elementos neutros (`div`) donde la página usa `header`, `main`, `section` o
- * `article`, y fuera de los lectores de pantalla (`aria-hidden`, y sus enlaces fuera del
- * tabulador): la portada que leen ellos, con sus puntos de referencia (un solo `main`), es
- * la lista recortada (`portadaEnHtml`). Los títulos sí son `h3`/`p`: su tamaño y su margen
- * salen de ahí.
+ * `article`, y fuera de los lectores de pantalla (`aria-hidden`, y sus enlaces y botones
+ * fuera del tabulador): la portada que leen ellos, y sus puntos de referencia, es la lista
+ * recortada (`portadaEnHtml`). Los títulos sí son `h2`/`h3`: su tamaño y su margen salen de ahí.
  *
  * Nada si la apertura no abre con foto (sin foto, o con un short): ahí React la pinta
- * como antes. `fila` es la de la API; `idioma`, el de la página.
+ * como antes. `fila` es la de la API; `ultimaHora`, los titulares (`items`) y las filas
+ * que no están arriba (`recientes`), para la columna.
  */
-export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {}) => {
+export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now(), ultimaHora = {} } = {}) => {
   const pieza = paraLaApertura(fila);
   const titular = titularDe(fila, idioma);
   if (!titular || !precargaDeLaApertura(pieza)) return "";
   // Lo que hace `piezaFromApi` (`lib/pieza.js`): en `/en`, la versión inglesa si la tiene.
   const enIngles = idioma === "en" && Boolean(fila.en_ingles);
-  const titulo = escapar((enIngles ? fila.title_en : fila.title) ?? "");
   const resumen = resumenDeTarjeta(enIngles ? fila.excerpt_en || "" : fila.excerpt);
-  // `TituloDePieza`: en `/en`, la pieza que solo está en español lo avisa con «ES».
-  const t = TEXTOS[idioma];
-  const textoDelTitulo =
-    idioma === "en" && !fila.en_ingles
-      ? `<span lang="es">${titulo}</span> <abbr class="se-marca-idioma" title="${escapar(t.marcaEspanolTitulo)}">${escapar(t.marcaEspanol)}</abbr>`
-      : titulo;
   const srcset = imagenSrcSet(pieza.imagenUrl, ANCHOS_DE_TARJETA, pieza.imagenAnchoOriginal);
   const foco = posicionDeFoco(fila.imagen_foco);
   // `CardMedia` con lo que le pasa `PrimeraPlana`: `ancho={1200}`, `SIZES_PRINCIPAL` y `prioridad`.
@@ -381,11 +488,12 @@ export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {})
     `<div class="se-header"><div class="se-container se-header__inner"></div></div>`,
     `<div class="se-contenido"><div class="se-blog se-portada"><div class="se-plana">`,
     `<div class="se-container"><p class="se-plana__fecha"><time>${escapar(fechaDeEdicion(ahora, idioma))}</time></p></div>`,
-    `<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div>`,
+    `<div class="se-container se-plana__rejilla">`,
+    ultimaHoraEnHtml({ ...ultimaHora, idioma, ahora }),
     `<div class="se-plana__centro"><div class="se-plana__principal">`,
     `<div class="se-plana__foto"><a class="se-plana__media" href="${ruta}" tabindex="-1">${img}</a></div>`,
     `<div class="se-plana__texto"><h3 class="se-plana__titulo${fila.format === "informe" ? " se-plana__titulo--a-fondo" : ""}">`,
-    `<a href="${ruta}" tabindex="-1">${textoDelTitulo}</a></h3>`,
+    `<a href="${ruta}" tabindex="-1">${tituloDePieza(fila, idioma)}</a></h3>`,
     resumen ? `<p class="se-plana__resumen">${escapar(resumen)}</p>` : "",
     `</div></div></div></div></div></div></div></div>`,
   ].join("");
@@ -401,15 +509,9 @@ export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now() } = {})
  * contenido de `#root`, que es cuando hace falta. Un navegador que no anime algo de esto
  * se queda con la página como era antes, en blanco hasta que llega React.
  *
- * Y lo de la apertura a la vista (`aperturaEnHtml`), que solo existe en este HTML: por eso
- * va aquí y no en las hojas del sitio.
- * - A los `REVELAR_TRAS`, si React no llegó, se pliega y deja el sitio a la lista.
- * - El alto de Última hora donde va encima de la apertura (hasta 959 px): lo que mide con
- *   tres titulares y la nota de que los redacta una IA, medido el 25-nov-2026 a 360-412 px
- *   (dos líneas cada uno) y a 600-959 (una). Es lo único que no se pinta aquí: si React
- *   pinta otro alto (titulares de una o tres líneas, o ninguno del día y entonces las
- *   noticias, sin la nota), la apertura se mueve esa diferencia al montar. No cuenta para
- *   el CLS (React pone cajas nuevas, no mueve estas), pero se ve.
+ * Y la apertura a la vista (`aperturaEnHtml`), que solo existe en este HTML (por eso va aquí
+ * y no en las hojas del sitio): a los `REVELAR_TRAS`, si React no llegó, se pliega y deja
+ * el sitio a la lista.
  */
 export const ESTILO_PREVIO =
   `<style>.se-portada-previa{position:absolute;top:0;left:0;width:1px;height:1px;margin:-1px;` +
@@ -420,8 +522,6 @@ export const ESTILO_PREVIO =
   `overflow:visible;clip-path:none;white-space:normal}}` +
   `.se-portada-anticipo{animation:se-portada-anticipo 0s linear ${REVELAR_TRAS} forwards}` +
   `@keyframes se-portada-anticipo{to{height:0;overflow:hidden}}` +
-  `@media (max-width:599px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.telefono}px}}` +
-  `@media (min-width:600px) and (max-width:959px){.se-portada-anticipo .se-plana__uh{height:${ALTO_DE_ULTIMA_HORA.tableta}px}}` +
   `</style>`;
 
 /** El `<link rel="preload">` de la foto de la apertura (o nada, si no hay que pedirla). */
@@ -549,6 +649,14 @@ export const armarPortada = (
     }))
     .filter((s) => s.titulares.length);
 
+  // Última hora, como la pinta React al montar: los titulares si vinieron y, si no son del
+  // día, las piezas que no están arriba (las `recientes` de `Home`, en el orden de la API).
+  const arriba = new Set([plana?.principal, ...(plana?.secundarias ?? [])].filter(Boolean).map((p) => p.id));
+  const columna = {
+    items: Array.isArray(ultimaHora?.data?.items) ? ultimaHora.data.items : [],
+    recientes: validas.filter((f) => !arriba.has(String(f.id ?? ""))),
+  };
+
   const todos = [
     ...(planaHtml ? [planaHtml.principal, ...planaHtml.otras] : []),
     ...seccionesHtml.flatMap((s) => s.titulares),
@@ -576,7 +684,7 @@ export const armarPortada = (
     // La lista recortada (para buscadores y lectores de pantalla) y, a la vista, la apertura.
     html: todos.length
       ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) +
-        (principal ? aperturaEnHtml(porId.get(plana.principal.id), { idioma, ahora }) : "")
+        (principal ? aperturaEnHtml(porId.get(plana.principal.id), { idioma, ahora, ultimaHora: columna }) : "")
       : null,
     cola:
       respuesta && validas.length

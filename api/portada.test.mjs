@@ -321,9 +321,13 @@ console.log("la apertura, a la vista antes de React");
   check("va en #root, detrás de la lista recortada y fuera de ella",
     desde > 0 && dentro.startsWith('<div class="se-portada-previa">') && dentro.indexOf("</footer></div>") < desde);
   check("una sola vez", contar(h, /se-portada-anticipo"/g) === 1);
-  check("guarda el sitio de la cinta, la cabecera y Última hora, con sus clases",
-    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><div class="se-header"><div class="se-container se-header__inner"></div></div>') &&
-      anticipo.includes('<div class="se-container se-plana__rejilla"><div class="se-plana__uh"></div><div class="se-plana__centro">'));
+  check("guarda el sitio de la cinta y la cabecera, con sus clases",
+    anticipo.includes('<div class="se-ticker se-ticker--hueco"></div><div class="se-header"><div class="se-container se-header__inner"></div></div>'));
+  // Sin titulares del día, Última hora enseña las noticias que no están arriba, como React.
+  check("Última hora, pintada encima de la apertura: las noticias que no están arriba, sin la nota de la IA",
+    anticipo.includes('<div class="se-container se-plana__rejilla"><div class="se-plana__uh"><h2 class="se-plana__uh-cabeza">') &&
+      anticipo.indexOf('se-plana__uh-titulo" href="/noticias/pieza-5"') > 0 && anticipo.indexOf('pieza-5') < anticipo.indexOf('se-plana__centro') &&
+      contar(anticipo.slice(0, anticipo.indexOf('se-plana__centro')), /se-plana__uh-item"/g) === 6 && !anticipo.includes('se-plana__uh-nota'));
   check("un solo <main> (el de la lista) y ningún <header>: lo de la vista va en elementos neutros",
     contar(dentro, /<main\b/g) === 1 && contar(dentro, /<header\b/g) === 0 && contar(dentro, /<(section|article)\b/g) === contar(dentro.slice(0, desde), /<(section|article)\b/g));
   check("con la fecha de la edición (hora de Caracas)",
@@ -338,9 +342,32 @@ console.log("la apertura, a la vista antes de React");
   check("si React no llega, a los 9 s se pliega y deja la lista",
     /\.se-portada-anticipo\{animation:se-portada-anticipo 0s linear 9s forwards\}/.test(h) &&
       /@keyframes se-portada-anticipo\{to\{height:0;overflow:hidden\}\}/.test(h));
-  check("Última hora guarda su alto donde va encima (teléfono y tableta)",
-    /@media \(max-width:599px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h) &&
-      /@media \(min-width:600px\) and \(max-width:959px\)\{\.se-portada-anticipo \.se-plana__uh\{height:\d+px\}\}/.test(h));
+  check("sin alto fijo para Última hora: mide lo que mida su contenido", !h.includes("se-plana__uh{height"));
+
+  // Con titulares del día: los titulares, con su hora y la nota de la IA, y escapados.
+  const ahoraUh = HORA;
+  const items = [
+    { id: 3, title: "Más viejo <b>", published_at: new Date(ahoraUh - 3 * 3600_000).toISOString() },
+    { id: 4, title: "Fijado", pinned: true, published_at: new Date(ahoraUh - 5 * 3600_000).toISOString() },
+    { id: 5, title: "Recién & \"salido\"", published_at: new Date(ahoraUh - 12 * 60_000).toISOString() },
+  ];
+  const conUh = armarPortada(SHELL, { filas: MUCHAS, ultimaHora: { data: { items, version: 3 } }, ahora: ahoraUh });
+  const uh = conUh.slice(conUh.indexOf('<div class="se-plana__uh">'), conUh.indexOf('<div class="se-plana__centro">'));
+  const orden = ["Fijado", "Recién", "Más viejo"].map((x) => uh.indexOf(x));
+  check("con titulares: en el orden de la página (lo fijado arriba, luego lo más reciente)", orden.every((x, i) => x > 0 && (i === 0 || x > orden[i - 1])));
+  check("con su hora: «12 min» en rojo (y «Hace 12 min» para quien la oye) y la de Caracas",
+    uh.includes('se-plana__uh-hora se-plana__uh-hora--fresca"') && uh.includes('<span class="se-sr-only">Hace 12 min</span><span aria-hidden="true">12 min</span>') &&
+      uh.includes('datetime="2026-11-18T09:00:00.000Z">5:00</time>'), uh.slice(0, 900));
+  check("escapados", uh.includes("Más viejo &lt;b&gt;") && uh.includes("Recién &amp; &quot;salido&quot;"));
+  check("con la nota de la IA; el punto no late (lo primero es lo fijado, de hace 5 h)",
+    uh.includes('<p class="se-plana__uh-nota">Redactado automáticamente') && uh.includes('<span class="se-plana__uh-punto"></span>'));
+  check("enlaces y botones fuera del tabulador", !/<(a|button)\b(?![^>]*tabindex="-1")[^>]*>/.test(uh));
+  const viejos = armarPortada(SHELL, {
+    filas: MUCHAS,
+    ultimaHora: { data: { items: [{ id: 9, title: "De anteayer", published_at: new Date(ahoraUh - 50 * 3600_000).toISOString() }] } },
+    ahora: ahoraUh,
+  });
+  check("titulares de más de un día: las noticias, como la página", !viejos.includes("De anteayer") && viejos.includes('se-plana__uh-titulo" href="/noticias/pieza-5"'));
 
   const encuadrada = armarPortada(SHELL, { filas: [fila(1, { imagen_foco: "30,70" })], ahora: HORA });
   check("con el encuadre de la redacción", encuadrada.includes('<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" style="object-position:30% 70%" srcset='));
@@ -629,6 +656,11 @@ check("los datos, por el quiosco y con la clave de la portada", DATOS_URL === "h
         t.apertura === portada.apertura.apertura &&
         t.recientes === portada.apertura.loMasReciente &&
         t.alPunto === comun.nav.alPunto);
+    const siempre = leer(`../src/i18n/${idioma}/siempre.json`).titulares;
+    check(`${idioma}: los de Última hora, iguales a src/i18n`,
+      t.ultimaHora === siempre.tarjeta.etiqueta && t.todo === siempre.pestanas.todo && t.misTemas === siempre.pestanas.misTemas &&
+        t.todaLaUltimaHora === portada.plana.todaLaUltimaHora && t.notaIa === siempre.tarjeta.notaIa &&
+        t.ahoraMismo === siempre.hace.ahora && t.minutos === siempre.hace.corto && t.haceMinutos === siempre.hace.minutos);
   }
   const comunEn = leer("../src/i18n/en/comun.json");
   check("en: la marca «ES» de TituloDePieza, igual a src/i18n",

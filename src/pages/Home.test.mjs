@@ -229,13 +229,16 @@ describe("con datos", () => {
 describe("la apertura del HTML es la que pinta React", () => {
   /**
    * De un trozo de HTML: las clases de cada caja, de fuera adentro, hasta la foto. Última
-   * hora cuenta como una caja (en el HTML va vacía, guardando su sitio; ver `ESTILO_PREVIO`).
+   * hora cuenta como una caja (lo de dentro lo compara `UltimaHoraColumna.html.test.mjs`).
    */
   const cajas = (html) => {
     const desde = html.indexOf('class="se-plana"');
     let trozo = html.slice(desde, html.indexOf("se-artcard__img", desde));
-    const uh = trozo.indexOf('<section class="se-plana__uh"');
-    if (uh !== -1) trozo = `${trozo.slice(0, uh)}<div class="se-plana__uh">${trozo.slice(trozo.indexOf("</section>", uh))}`;
+    const uh = trozo.indexOf('class="se-plana__uh"');
+    if (uh !== -1) {
+      const abre = trozo.lastIndexOf("<", uh);
+      trozo = `${trozo.slice(0, abre)}<div class="se-plana__uh">${trozo.slice(trozo.lastIndexOf("<", trozo.indexOf('class="se-plana__centro"')))}`;
+    }
     return [...trozo.matchAll(/<(div|section|article|a)\b[^>]*class="([^"]+)"/g)].map((m) => m[2]);
   };
   /** Los atributos de la foto de la apertura, con los nombres en minúsculas (React escribe `srcSet`). */
@@ -287,7 +290,9 @@ describe("la apertura del HTML es la que pinta React", () => {
       conPiezas([fila, ...detras]);
       const react = await abrir(direccion);
       assert.match(react, /<section class="se-plana__uh"/);
-      const previa = aperturaEnHtml(fila, { idioma: direccion === "/en" ? "en" : "es", ahora: AHORA });
+      // Última hora, con las que no están arriba (las tres primeras de detrás van bajo la apertura).
+      const ultimaHora = { items: [], recientes: detras.slice(3) };
+      const previa = aperturaEnHtml(fila, { idioma: direccion === "/en" ? "en" : "es", ahora: AHORA, ultimaHora });
       assert.ok(previa, "el HTML no trae la apertura");
       assert.deepEqual(cajas(previa), cajas(react));
       assert.deepEqual(foto(previa), foto(react));

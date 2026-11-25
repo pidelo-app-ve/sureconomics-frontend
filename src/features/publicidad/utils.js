@@ -4,6 +4,8 @@
  * `utils.test.mjs` (`npm run test:publicidad`).
  */
 
+import { expandGeo } from "../../lib/contentFilter";
+
 /**
  * Una lista de valores (tema, país) tal como viaja en la dirección: `a,b,c`, o `null`
  * si no hay nada que mandar.
@@ -36,7 +38,9 @@ export const listaDeQuery = (valor) => {
  *
  * - Un tema se busca por su nombre en español y en inglés (`name`, `name_en`): vale el
  *   que esté puesto, aunque el lector cambie de idioma con el filtro elegido.
- * - Un lugar, por `slugPorNombre` (el árbol, en el idioma de la página).
+ * - Un lugar, por `slugPorNombre` (el árbol, en el idioma de la página). Una región o
+ *   un continente lleva además los slugs de todo lo que contiene («Andina» manda
+ *   `andina` y sus cinco países), sin repetir si el lector eligió también uno de ellos.
  * - «Todo» (la raíz del árbol, «Mundo») no es un país: en el filtro quiere decir «sin
  *   filtro», así que no se manda. Una campaña sin países ya sale en todas partes, y una
  *   con países solo debe salir a quien eligió uno de ellos.
@@ -45,11 +49,12 @@ export const listaDeQuery = (valor) => {
  *
  * @param {{temas?: Iterable<string>, geos?: Iterable<string>}} seleccion
  * @param {{topics?: Array<{slug: string, name?: string, name_en?: string}>,
- *   slugPorNombre?: Record<string, string>, geoTop?: string}} taxonomia lo de `useTaxonomy`
+ *   slugPorNombre?: Record<string, string>, ancestros?: Record<string, string[]>,
+ *   geoTop?: string}} taxonomia lo de `useTaxonomy`
  * @returns {{tema: string[], pais: string[]}}
  */
 export const contextoDeLaSeleccion = ({ temas, geos } = {}, taxonomia = {}) => {
-  const { topics = [], slugPorNombre = {}, geoTop } = taxonomia;
+  const { topics = [], slugPorNombre = {}, ancestros = {}, geoTop } = taxonomia;
 
   const slugDeTema = new Map();
   topics.forEach((t) => {
@@ -80,10 +85,24 @@ export const contextoDeLaSeleccion = ({ temas, geos } = {}, taxonomia = {}) => {
     return fuera;
   };
 
+  // Una región (o un continente) incluye sus países: quien elige «Andina» ve las piezas de
+  // Venezuela, así que también la campaña de Venezuela. Se manda el lugar elegido y todo
+  // lo que cuelga de él, con la misma regla que filtra el listado (`expandGeo`): un lugar
+  // está dentro de lo elegido si lo elegido es él mismo o uno de sus antepasados.
+  const arbol = { geoTop: geoTop ?? "", ancestros };
+  const conLoDeDentro = (elegido) => [
+    elegido,
+    ...Object.keys(slugPorNombre).filter((n) => n !== elegido && expandGeo([n], arbol).has(elegido)),
+  ];
+  const lugares = [];
+  for (const nombre of geos ?? []) {
+    if (typeof nombre === "string" && nombre !== geoTop) lugares.push(...conLoDeDentro(nombre));
+  }
+
   return {
     tema: aSlugs(temas, (n) => slugDeTema.get(n)),
     pais: aSlugs(
-      geos,
+      lugares,
       lugar,
       (n, slug) => n === geoTop || (slugDeLaRaiz !== undefined && slug === slugDeLaRaiz)
     ),

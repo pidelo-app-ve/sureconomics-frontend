@@ -48,12 +48,46 @@ const topics = [
   { slug: "mercados-e-inversion", name: "Mercados e Inversión", name_en: "Markets and Investment" },
   { slug: "empresas-y-negocios", name: "Empresas y Negocios" },
 ];
-const taxonomia = {
+// Una parte del árbol real (/places), con `slugPorNombre` y `ancestros` como los arma
+// `getPlaces`. «Antártida» es una región sin países, que el árbol real no tiene.
+const arbol = (filas) => ({
+  slugPorNombre: Object.fromEntries(filas.map(([nombre, slug]) => [nombre, slug])),
+  ancestros: Object.fromEntries(filas.map(([nombre, , arriba]) => [nombre, arriba])),
+});
+const americas = ["Las Américas", "Mundo"];
+const andina = ["Andina", ...americas];
+const lugaresEs = arbol([
+  ["Mundo", "mundo", []],
+  ["Las Américas", "las-americas", ["Mundo"]],
+  ["Región Norte", "region-norte", americas],
+  ["EE. UU.", "estados-unidos", ["Región Norte", ...americas]],
+  ["México", "mexico", ["Región Norte", ...americas]],
+  ["Andina", "andina", americas],
+  ["Bolivia", "bolivia", andina],
+  ["Colombia", "colombia", andina],
+  ["Ecuador", "ecuador", andina],
+  ["Perú", "peru", andina],
+  ["Venezuela", "venezuela", andina],
+  ["Asia", "asia", ["Mundo"]],
+  ["China", "china", ["Asia", "Mundo"]],
+  ["Antártida", "antartida", ["Mundo"]],
+]);
+const taxonomia = { topics, geoTop: "Mundo", ...lugaresEs };
+const americasEn = ["The Americas", "World"];
+const andinaEn = ["Andean", ...americasEn];
+const taxonomiaEn = {
   topics,
-  geoTop: "Mundo",
-  slugPorNombre: { Mundo: "mundo", "Las Américas": "las-americas", Andina: "andina", Venezuela: "venezuela", "EE. UU.": "estados-unidos" },
+  geoTop: "World",
+  ...arbol([
+    ["World", "mundo", []],
+    ["The Americas", "las-americas", ["World"]],
+    ["Andean", "andina", americasEn],
+    ["Peru", "peru", andinaEn],
+    ["Venezuela", "venezuela", andinaEn],
+    ["United States", "estados-unidos", ["North", ...americasEn]],
+  ]),
 };
-const taxonomiaEn = { ...taxonomia, geoTop: "World", slugPorNombre: { World: "mundo", Venezuela: "venezuela", "United States": "estados-unidos" } };
+const ANDINA = ["andina", "bolivia", "colombia", "ecuador", "peru", "venezuela"];
 const de = (temas, geos, tx = taxonomia) => contextoDeLaSeleccion({ temas: new Set(temas), geos: new Set(geos) }, tx);
 const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 // La dirección que acaba saliendo, por el mismo camino que `useEspacios` y `getEspacios`.
@@ -91,7 +125,26 @@ check("«Todo» en /en (World) tampoco", igual(r.pais, []), r);
 r = de([], ["Mundo", "Venezuela"]);
 check("«Todo» más un país: solo el país", igual(r.pais, ["venezuela"]), r);
 r = de([], ["Andina"]);
-check("una región va con su slug, como la eligió el lector", igual(r.pais, ["andina"]), r);
+check("una región sola: ella y sus cinco países", igual(r.pais, ANDINA), r);
+check("una región: en la dirección", direccion(r).pais === ANDINA.join(","), direccion(r));
+r = de([], ["Andina", "Venezuela"]);
+check("región más uno de sus países: sin repetir", igual(r.pais, ANDINA), r);
+r = de([], ["Venezuela", "Andina"]);
+check("el país antes que su región: el mismo conjunto", igual([...r.pais].sort(), [...ANDINA].sort()), r);
+r = de([], ["Andina", "China"]);
+check("región más un país de fuera: la unión", igual(r.pais, [...ANDINA, "china"]), r);
+r = de([], ["Antártida"]);
+check("una región vacía: solo ella", igual(r.pais, ["antartida"]), r);
+r = de([], ["Las Américas"]);
+check(
+  "un continente: sus regiones y los países de dentro",
+  igual(r.pais, ["las-americas", "region-norte", "estados-unidos", "mexico", ...ANDINA]),
+  r
+);
+r = de([], ["Andean"], taxonomiaEn);
+check("una región en /en (nombre en inglés)", igual(r.pais, ["andina", "peru", "venezuela"]), r);
+r = de([], ["Mundo", "Andina"]);
+check("«Todo» más una región: «Todo» sigue sin mandarse", igual(r.pais, ANDINA), r);
 r = de(["Tema que ya no existe", "Macroeconomía"], ["Atlántida"]);
 check("un tema sin slug no se manda (los demás sí)", igual(r.tema, ["macroeconomia"]), r);
 check("un lugar sin slug no se manda", igual(r.pais, []), r);

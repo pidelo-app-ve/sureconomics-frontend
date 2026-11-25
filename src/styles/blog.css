@@ -6016,6 +6016,9 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   margin-top: 1.1rem;
   border-color: rgba(255, 255, 255, 0.22);
 }
+/* Y la etiqueta en claro: el gris de siempre sobre el verde del boletín daba 3,2 de
+   contraste (hace falta 4,5); este blanco suave da 10,8. */
+.se-ad--boletin .se-ad__cinta-sello .se-ad__etiqueta { color: rgba(255, 255, 255, 0.78); }
 
 @media (max-width: 640px) {
   /* En el telefono la tira sale **entera**: el recuadro toma la forma del arte, 8:1.

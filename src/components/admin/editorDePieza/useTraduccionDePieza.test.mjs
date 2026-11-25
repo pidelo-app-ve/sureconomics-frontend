@@ -116,7 +116,17 @@ test("202 y luego 200: «traduciendo» mientras espera, y el inglés al final", 
   assert.equal(m.form.content_en, INGLES.content);
   assert.equal(m.form.traduccion_automatica, true);
   assert.equal(m.h.versionEn, 1, "los editores en inglés se vuelven a montar con lo nuevo");
-  assert.deepEqual(m.avisos, [["bien", "Traducción lista. Revísala y guarda la pieza."]]);
+  assert.deepEqual(m.avisos, [["bien", "Traducción lista. Revísela y guarde la pieza."]]);
+  await m.desmontar();
+});
+
+test("sin título o sin cuerpo en español: lo pide, de usted, y no traduce", LIMITE, async () => {
+  const m = await montar();
+  m.form = { ...FORMULARIO, content: "<p></p>" };
+  await m.pintar();
+  await act(() => m.h.traducir());
+  assert.deepEqual(m.avisos, [["mal", "Escriba primero el título y el cuerpo en español."]]);
+  assert.equal(servidor.a("/admin/traducciones").length, 0);
   await m.desmontar();
 });
 
@@ -225,7 +235,7 @@ test("de «nueva» a la pieza que se acaba de crear: sigue, y el inglés espera 
   assert.equal(m.form.title_en, INGLES.title, "y encima, el inglés");
   assert.equal(m.form.traduccion_automatica, true);
   assert.equal(m.h.traduciendo, false);
-  assert.deepEqual(m.avisos, [["bien", "Traducción lista. Revísala y guarda la pieza."]]);
+  assert.deepEqual(m.avisos, [["bien", "Traducción lista. Revísela y guarde la pieza."]]);
   await m.desmontar();
 });
 

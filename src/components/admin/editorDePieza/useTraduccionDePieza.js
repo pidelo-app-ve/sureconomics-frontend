@@ -73,7 +73,7 @@ export const useTraduccionDePieza = ({
         setRevisadaAhora(false);
         setVersionEn((v) => v + 1);
         setTraduciendo(false);
-        toastSuccess("Traducción lista. Revísala y guarda la pieza.", "En inglés");
+        toastSuccess("Traducción lista. Revísela y guarde la pieza.", "En inglés");
     };
     // La de este pintado, para el efecto de la carga (que no debe correr por otra cosa).
     const aplicarAhora = useRef(aplicar);
@@ -121,7 +121,7 @@ export const useTraduccionDePieza = ({
     // inglés marcado como automático. No guarda: la redacción revisa y guarda.
     const traducir = async () => {
         if (!form.title.trim() || !textoPlano(form.content)) {
-            toastError("Escribe primero el título y el cuerpo en español.", "En inglés");
+            toastError("Escriba primero el título y el cuerpo en español.", "En inglés");
             return;
         }
         const yaHayIngles =

@@ -49,7 +49,7 @@ export const CampoEnIngles = ({
                 {traduciendo ? null : (
                     <span className="se-admin-meta-hint">
                         Traduce el título, el resumen y el cuerpo de arriba, aunque
-                        no estén guardados. Revisa el resultado y guarda la pieza.
+                        no estén guardados. Revise el resultado y guarde la pieza.
                     </span>
                 )}
                 {/* Puede tardar minutos (ver `useTraduccionDePieza`): mientras, se dice aquí.

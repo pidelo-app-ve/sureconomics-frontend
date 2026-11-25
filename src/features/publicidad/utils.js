@@ -61,9 +61,11 @@ export const contextoDeLaSeleccion = ({ temas, geos } = {}, taxonomia = {}) => {
 
   // La raíz se reconoce por su nombre (lo que guarda el filtro) y, por si acaso, por su
   // slug: así «Mundo» no se cuela aunque llegara con otro nombre que también la nombre.
-  // `Object.hasOwn`: el mapa es un objeto, y sin esto un nombre como «constructor»
-  // devolvería una función en vez de nada.
-  const lugar = (nombre) => (Object.hasOwn(slugPorNombre, nombre) ? slugPorNombre[nombre] : undefined);
+  // Solo las claves propias: el mapa es un objeto, y sin esto un nombre como
+  // «constructor» devolvería una función en vez de nada. Con `hasOwnProperty.call` y no
+  // `Object.hasOwn`, que no existe en Safari 14 (ver la regla en `eslint.config.js`).
+  const lugar = (nombre) =>
+    Object.prototype.hasOwnProperty.call(slugPorNombre, nombre) ? slugPorNombre[nombre] : undefined;
   const slugDeLaRaiz = geoTop ? lugar(geoTop) : undefined;
 
   const aSlugs = (valores, slugDe, descartar = () => false) => {

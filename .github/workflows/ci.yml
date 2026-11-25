@@ -31,7 +31,7 @@ jobs:
       # package.json, que es lo que lee Vercel (manda sobre el ajuste del panel, que
       # también dice 24.x). Node 24 tiene soporte hasta abril de 2028; Vite 7 pide
       # 20.19+ o 22.12+.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm

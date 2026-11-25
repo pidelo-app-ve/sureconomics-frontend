@@ -96,8 +96,9 @@ por la puerta del feature.
   portada. Por la puerta de titulares, su hoja de estilos entraría antes en el CSS.
 
 Ese reorden del JS es inocuo (mismo código, otro orden), pero mueve el tamaño
-comprimido: al mudar el boletín y la cuenta (nov-2026) la entrada bajó 594 B sin
-comprimir y subió 318 B en gzip y 16 B en brotli, porque Vite reordenó módulos dentro.
+comprimido: al mudar el boletín y la cuenta (nov-2026) la entrada bajó 334 B sin
+comprimir y subió 343 B en gzip y 13 B en brotli, porque Vite reordenó módulos dentro
+(y lista en sus cargas previas el trozo nuevo con las guías de la cuenta).
 Criterio: la entrada se mide en gzip, que es lo que baja el lector. Lo que sí obliga es
 el CSS: su orden cambia lo que se ve, y el `dist/` tiene que salir igual.
 

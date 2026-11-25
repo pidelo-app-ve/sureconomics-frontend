@@ -32,7 +32,7 @@ un tope que solo baja.
 | Audiencia y cookies (aviso, `/cookies`, panel «Audiencia») | `src/features/analitica` |
 | Publicidad (huecos, barra, patrocinios, panel) | `src/features/publicidad` |
 | Boletín «Entorno en Viñetas» (alta, invitación, baja, `/entorno`, panel de números y suscriptores) | `src/features/boletin` |
-| Portada | `pages/Home.jsx`, `components/home` |
+| Portada | `pages/Home.jsx`, `components/home`; su HTML (la apertura a la vista y los datos de la primera carga), `api/portada.js` |
 | Pieza (artículo, video, informe) | `pages/Pieza.jsx`, `components/piece`, `lib/pieza.js` |
 | Listados y búsqueda | `pages/Articulos.jsx`, `Audiovisual.jsx`, `Explorar.jsx` |
 | Cuenta del lector (entrar, registro, recuperar, `/cuenta/…`, la sesión del lector en React) | `src/features/cuenta` (su hoja sigue en `styles/cuenta.css`; el cliente y el almacén de la sesión, en `lib/userApi.js` y `lib/userAuthStorage.js`) |
@@ -49,7 +49,8 @@ un tope que solo baja.
 
 - Todo pasa por `src/api/`: `nucleo.js` arma la dirección (la API o el quiosco), pone
   las cabeceras, lee el JSON y el error; `sesion.js` guarda y renueva la sesión;
-  `quiosco.js` dice qué lecturas salen por el borde; `archivoDelSitio.js` baja un archivo
+  `quiosco.js` dice qué lecturas salen por el borde y lee las que ya trae el HTML de la
+  portada (`leerDelHtml`); `archivoDelSitio.js` baja un archivo
   de este mismo sitio (`/media/…`, para el convertidor de imágenes del panel). Se entra por los envoltorios de
   siempre: `lib/api.js` (`adminRequest`, el panel), `lib/userApi.js` (`userRequest`,
   `userPublicRequest`…, el lector) y `services/apiClient.js` (`createApiClient`, lo

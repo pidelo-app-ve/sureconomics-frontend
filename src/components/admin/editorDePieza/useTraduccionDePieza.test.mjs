@@ -245,6 +245,27 @@ test("de «nueva» a OTRA pieza (el buscador, un aviso): se deja y no cae en ell
   await m.desmontar();
 });
 
+test("creada la 7, otra nueva, traducir y volver a la 7: no cae en la 7", LIMITE, async () => {
+  const m = await montar({ piezaId: null });
+  m.h.seCreo(7);
+  await m.pintar({ piezaId: 7 });
+  // «Crear pieza» en el menú: el mismo editor, otra vez en /posts/new.
+  await m.pintar({ piezaId: null });
+  await empezar(m);
+  await hasta(() => preguntas() >= 1, "la primera pregunta");
+  // Por el buscador, a la 7 (aceptando la guardia de salida): no es la que se estaba creando.
+  await m.pintar({ piezaId: 7 });
+  assert.equal(m.h.traduciendo, false);
+  const hechas = preguntas();
+  servidor.contestar("GET", POR_SU_ID, grabada("traducciones/lista.json"));
+  await esperar(50);
+  await cargarDelServidor(m, 1);
+  assert.equal(preguntas(), hechas, "ya no pregunta");
+  assert.equal(m.form.title_en, "");
+  assert.deepEqual(m.avisos, []);
+  await m.desmontar();
+});
+
 test("creada la 7 pero se salta a la 8: tampoco cae en ella", LIMITE, async () => {
   const m = await montar({ piezaId: null });
   await empezar(m);

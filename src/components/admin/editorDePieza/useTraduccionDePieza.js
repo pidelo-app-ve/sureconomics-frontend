@@ -82,12 +82,16 @@ export const useTraduccionDePieza = ({
     // Al cerrar el editor.
     useEffect(() => () => dejarDeEsperar(enCurso), []);
 
-    // Al cambiar de pieza sin cerrar el editor.
+    // Al cambiar de pieza sin cerrar el editor. El aviso de `seCreo` vale para este cambio
+    // y nada más: si no, crear la 7, empezar otra nueva y volver a la 7 por el buscador
+    // dejaría caer en la 7 la traducción de la nueva.
     useEffect(() => {
         const antes = piezaDeAntes.current;
         piezaDeAntes.current = piezaId;
+        const creada = piezaCreada.current;
+        piezaCreada.current = null;
         if (antes === piezaId || (!enCurso.current && !pendiente.current)) return;
-        if (antes == null && piezaId != null && piezaId === piezaCreada.current) {
+        if (antes == null && piezaId != null && piezaId === creada) {
             esperandoCarga.current = true;
             return;
         }

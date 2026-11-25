@@ -95,6 +95,12 @@ por la puerta del feature.
 - `src/hooks/useHeadlines.js` (`haceCuanto`): la usa la fecha de cada pieza en la
   portada. Por la puerta de titulares, su hoja de estilos entraría antes en el CSS.
 
+Ese reorden del JS es inocuo (mismo código, otro orden), pero mueve el tamaño
+comprimido: al mudar el boletín y la cuenta (nov-2026) la entrada bajó 594 B sin
+comprimir y subió 318 B en gzip y 16 B en brotli, porque Vite reordenó módulos dentro.
+Criterio: la entrada se mide en gzip, que es lo que baja el lector. Lo que sí obliga es
+el CSS: su orden cambia lo que se ve, y el `dist/` tiene que salir igual.
+
 ## Qué no se toca
 
 - `src/juegos/el-analista/el-analista.jsx`: el juego está en pausa y su código se trae

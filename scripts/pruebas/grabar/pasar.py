@@ -59,6 +59,13 @@ MAPA = {
     "usuarios-vacio": "lectores/lista-vacia.json",
     "suscriptores-pagina-1": "boletin/suscriptores-1.json",
     "suscriptores-buscar": "boletin/suscriptores-buscar.json",
+    "traduccion-hecha": "traducciones/hecha.json",
+    "traduccion-en-marcha": "traducciones/en-marcha.json",
+    "traduccion-sigue": "traducciones/sigue.json",
+    "traduccion-ya-hay-una": "traducciones/ya-hay-una.json",
+    "traduccion-lista": "traducciones/lista.json",
+    "traduccion-fallo": "traducciones/fallo.json",
+    "traduccion-se-interrumpio": "traducciones/se-interrumpio.json",
 }
 SOLO = set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None
 

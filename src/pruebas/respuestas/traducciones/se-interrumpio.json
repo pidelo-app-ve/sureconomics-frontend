@@ -1,0 +1,13 @@
+{
+  "_origen": "Grabada el 25-nov-2026 del backend (integracion-2026-11g, 4b97f61) con su cliente de pruebas: GET /admin/traducciones/de-antes-del-reinicio -> 404. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "estado": 404,
+    "cuerpo": {
+      "error": {
+        "code": "not_found",
+        "message": "La traducción se interrumpió (el servidor se reinició). Vuelva a pedirla."
+      },
+      "success": false
+    }
+  }
+}

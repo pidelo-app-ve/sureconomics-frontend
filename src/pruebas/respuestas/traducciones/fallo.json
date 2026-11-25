@@ -1,0 +1,13 @@
+{
+  "_origen": "Grabada el 25-nov-2026 del backend (integracion-2026-11g, 4b97f61) con su cliente de pruebas: GET /admin/traducciones/a5a52d631b864bf49eb6b996964997b7 -> 502. Cómo: scripts/pruebas/grabar/. (la IA contestó 529; el mensaje es el de traduccion_service)",
+  "respuesta": {
+    "estado": 502,
+    "cuerpo": {
+      "error": {
+        "code": "translation_failed",
+        "message": "No se pudo traducir: Claude contestó con un error (529)."
+      },
+      "success": false
+    }
+  }
+}

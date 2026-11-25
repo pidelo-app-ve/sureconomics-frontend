@@ -1,0 +1,11 @@
+{
+  "_origen": "Grabada el 25-nov-2026 del backend (integracion-2026-11g, 4b97f61) con su cliente de pruebas: POST /admin/traducciones -> 200. Cómo: scripts/pruebas/grabar/. enviado: {\"title\": \"El BCV sube la tasa de encaje\", \"excerpt\": \"<p>La medida rige desde el lunes.</p>\", \"content\": \"<p>El Banco Central de Venezuela subió la tasa de encaje legal.</p>\"}",
+  "respuesta": {
+    "data": {
+      "content": "<p>Venezuela's Central Bank raised the legal reserve requirement.</p>",
+      "excerpt": "<p>The measure takes effect on Monday.</p>",
+      "title": "The BCV raises the reserve requirement"
+    },
+    "success": true
+  }
+}

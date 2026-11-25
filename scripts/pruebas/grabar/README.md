@@ -38,6 +38,7 @@ npm test
 | `piezas` | `piezas/pieza`, `no-existe`; `sitio/formatos`, `temas`, `lugares`, `monedas`, `mas-leidas`, `titulares`, `publicidad-pieza` |
 | `portada` | `portada/piezas`, `canal`, `publicidad` |
 | `test_listas` | `resumen/ediciones-1`, `ediciones-2`, `ediciones-fallo`, `ediciones-vacio`; `lectores/lista-1`, `lista-2`, `lista-buscar`, `lista-desactivados`, `lista-vacia`; `boletin/suscriptores-1`, `suscriptores-buscar` |
+| `traducciones` | `traducciones/hecha`, `en-marcha`, `sigue`, `ya-hay-una`, `lista`, `fallo`, `se-interrumpio` |
 
 `boletin/lote-terminado.json` va **escrita a mano**: grabarla mandaría correos.
 

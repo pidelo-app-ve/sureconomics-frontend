@@ -1,0 +1,13 @@
+{
+  "_origen": "Grabada el 25-nov-2026 del backend (integracion-2026-11g, 4b97f61) con su cliente de pruebas: GET /admin/traducciones/3732cb6110144b8cbd473ffb43e17178 -> 202. Cómo: scripts/pruebas/grabar/.",
+  "respuesta": {
+    "estado": 202,
+    "cuerpo": {
+      "data": {
+        "en_marcha": true,
+        "id": "3732cb6110144b8cbd473ffb43e17178"
+      },
+      "success": true
+    }
+  }
+}

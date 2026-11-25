@@ -230,3 +230,88 @@ def test_listas(app, client):
         r = client.get(ruta, headers=h, query_string=consulta)
         assert r.status_code == 200, (ruta, r.json)
         _guardar(nombre, "GET", _consulta(ruta, consulta), r)
+
+
+def test_traducciones(app, client, monkeypatch):
+    """«Traducir con Claude» en el editor, en segundo plano (`/admin/traducciones`, 25-nov-2026):
+    lo que lee `traducirTextos`. La IA no se llama: se sustituye. Para el 202 la tarea se deja
+    «en marcha» a mano, como en `tests/test_traduccion.py` del backend, y después se corre con
+    el mismo `_correr` del servidor, que la cierra con su resultado o con su error."""
+    import threading
+
+    from app.services import traduccion_service
+    from app.utils import en_segundo_plano as fondo
+    from app.utils.errors import ApiError
+
+    def limpiar():
+        with fondo._mutex:
+            for nombre in [n for n in fondo._tareas if n.startswith("traduccion-editor:")]:
+                del fondo._tareas[nombre]
+
+    limpiar()
+    h = _entrar(client, "redaccion-traduce@example.test", "escritor")
+    app.config["ANTHROPIC_API_KEY"] = "sk-ant-prueba"
+    formulario = {"title": "El BCV sube la tasa de encaje", "excerpt": "<p>La medida rige desde el lunes.</p>",
+                  "content": "<p>El Banco Central de Venezuela subió la tasa de encaje legal.</p>"}
+    traduccion = {"title": "The BCV raises the reserve requirement",
+                  "excerpt": "<p>The measure takes effect on Monday.</p>",
+                  "content": "<p>Venezuela's Central Bank raised the legal reserve requirement.</p>"}
+    monkeypatch.setattr(traduccion_service, "_pedir_traduccion", lambda campos: dict(traduccion))
+    enviado = "enviado: " + json.dumps(formulario, ensure_ascii=False)
+    ruta = "/admin/traducciones"
+
+    # Termina en los 8 s: 200 con la traducción, como la ruta vieja.
+    r = client.post(ruta, headers=h, json=formulario)
+    assert r.status_code == 200, r.json
+    _guardar("traduccion-hecha", "POST", ruta, r, nota=enviado)
+
+    # Tarda más: la tarea queda en marcha y se pregunta por su id.
+    pendientes = {}
+
+    def tarda(nombre, trabajo, *, datos=None, **_):
+        pendientes[nombre] = trabajo
+        with fondo._mutex:
+            fondo._tareas[nombre] = {"estado": "en_marcha", "resultado": None, **(datos or {}),
+                                     "_hecho": threading.Event()}
+        return fondo.estado(nombre)
+
+    def terminar():
+        (nombre, trabajo), = pendientes.items()
+        pendientes.clear()
+        fondo._correr(app, nombre, trabajo, None)
+
+    monkeypatch.setattr(fondo, "ejecutar", tarda)
+    r = client.post(ruta, headers=h, json=formulario)
+    assert r.status_code == 202, r.json
+    pedido = r.json["data"]["id"]
+    _guardar("traduccion-en-marcha", "POST", ruta, r, nota=enviado + " (la IA tarda más de 8 s)")
+    r = client.get(f"{ruta}/{pedido}", headers=h)
+    assert r.status_code == 202, r.json
+    _guardar("traduccion-sigue", "GET", f"{ruta}/{pedido}", r)
+    r = client.post(ruta, headers=h, json=formulario)
+    assert r.status_code == 409, r.json
+    _guardar("traduccion-ya-hay-una", "POST", ruta, r, nota=enviado + " (con otra en marcha)")
+    terminar()
+    r = client.get(f"{ruta}/{pedido}", headers=h)
+    assert r.status_code == 200, r.json
+    _guardar("traduccion-lista", "GET", f"{ruta}/{pedido}", r)
+
+    # Tarda y después falla la IA: el error de la traducción, tal cual.
+    def falla(campos):
+        raise ApiError("translation_failed", "No se pudo traducir: Claude contestó con un error (529).", status=502)
+
+    monkeypatch.setattr(traduccion_service, "_pedir_traduccion", falla)
+    r = client.post(ruta, headers=h, json=formulario)
+    assert r.status_code == 202, r.json
+    pedido = r.json["data"]["id"]
+    terminar()
+    r = client.get(f"{ruta}/{pedido}", headers=h)
+    assert r.status_code == 502, r.json
+    _guardar("traduccion-fallo", "GET", f"{ruta}/{pedido}", r,
+             nota="(la IA contestó 529; el mensaje es el de traduccion_service)")
+
+    # Un id que el servidor ya no tiene (se reinició entretanto).
+    r = client.get(f"{ruta}/de-antes-del-reinicio", headers=h)
+    assert r.status_code == 404, r.json
+    _guardar("traduccion-se-interrumpio", "GET", f"{ruta}/de-antes-del-reinicio", r)
+    limpiar()

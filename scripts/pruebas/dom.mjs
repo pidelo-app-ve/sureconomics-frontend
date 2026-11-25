@@ -92,7 +92,7 @@ export const pintar = (elemento, { ruta = "/", patron = "*", rol = null, sitio =
     initialEntries: [ruta],
     future: FUTURO,
   });
-  const arbol = PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), createElement(RouterProvider, { router }));
+  const arbol = PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), createElement(RouterProvider, { router, future: { v7_startTransition: true } }));
   return { ...rtl.render(arbol), router };
 };
 

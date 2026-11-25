@@ -51,6 +51,7 @@ export const pintarEn = async (direccion, patron, elemento) => {
   try {
     const router = createElement(RouterProvider, {
       router: createMemoryRouter([rama("/", "es"), rama("/en", "en")], { initialEntries: [direccion], future: FUTURO }),
+      future: { v7_startTransition: true },
     });
     const html = renderToString(PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), router));
     if (avisos.length) throw new Error(`React se quejó al pintar ${direccion}: ${avisos.join(" | ")}`);

@@ -61,13 +61,18 @@ describe("Última hora con sus titulares dentro del HTML", () => {
       estados.push(e);
       return e;
     });
-    await esperar(0);
-    assert.equal(estados[0].status, "success");
-    // En el orden de siempre: lo más reciente arriba.
-    assert.deepEqual(estados[0].items.map((i) => i.title), ["Más nuevo", "Más viejo"]);
-    assert.deepEqual(pedidas, [["version"]]);
-    assert.equal(nodos.size, 0, "el bloque se usa una vez y se quita");
-    await g.desmontar();
+    // Desmontar pase lo que pase: si una comprobación falla, la prueba falla en vez de
+    // quedarse colgada con el reloj de la versión vivo.
+    try {
+      await esperar(0);
+      assert.equal(estados[0].status, "success");
+      // En el orden de siempre: lo más reciente arriba.
+      assert.deepEqual(estados[0].items.map((i) => i.title), ["Más nuevo", "Más viejo"]);
+      assert.deepEqual(pedidas, [["version"]]);
+      assert.equal(nodos.size, 0, "el bloque se usa una vez y se quita");
+    } finally {
+      await g.desmontar();
+    }
   });
 
   test("sin bloque de su idioma, pide la lista como siempre", async () => {

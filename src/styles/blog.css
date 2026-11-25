@@ -2569,53 +2569,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   }
 }
 
-@keyframes se-adm-backdrop-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Sin el `translateX(-50%)`, que ya no hace falta al centrar con flex -- y que ademas
-   dejaba un `transform` puesto al terminar, convirtiendo la superficie en el bloque
-   contenedor de cualquier `position: fixed` de dentro.
-   El desplazamiento baja de 10px a 4px y sube un pelin de escala: a 10px el dialogo
-   entraba dando un salto que se lee como un tiron, sobre todo en el modal grande. */
-@keyframes se-adm-dialog-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px) scale(0.99);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes se-admin-outlet-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes se-admin-surface-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .se-admin-main__outlet,
   .se-admin-nav-link,
@@ -2630,17 +2583,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   }
 }
 
-@keyframes se-adm-submission-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .se-admin-submission-detail__status-banner {
   margin: 0;
 }
@@ -2652,17 +2594,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   font-size: var(--se-text-caption);
   color: rgba(var(--se-tinte), 0.58);
   margin-top: var(--se-space-xs);
-}
-
-@keyframes se-adm-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .se-comments {
@@ -3361,16 +3292,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
 
 .se-piece__crumbs a { color: var(--color-slate); text-decoration: none; }
 .se-piece__crumbs a:hover { color: var(--color-accent); }
-
-.se-piece__kicker {
-  margin: 0 0 0.6rem;
-  font-family: var(--se-font-label);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-}
 
 .se-piece__title {
   margin: 0;
@@ -4911,13 +4832,6 @@ label.se-form-field:has(> input[type="checkbox"]) input[type="checkbox"] {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-@keyframes se-aud-girar {
-  to { transform: rotate(360deg); }
-}
-@keyframes se-aud-latido {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.8); }
-}
 
 /* El acuse de guardado. Se apaga solo: uno que se queda puesto deja de
    significar nada a los diez segundos -- no se sabe si es de este cambio o del
@@ -5594,12 +5508,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
   .se-ad-barra__titular { display: none; }
 }
 
-.se-admin-pub__anunciante-cuerpo,
-.se-admin-pub__campana-cuerpo {
-  padding: 0 1.1rem 1.1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.07);
-}
-
 /* --- El retrato --- */
 
 .se-retrato {
@@ -5734,17 +5642,6 @@ a.se-ad--montaje:hover { border-color: var(--color-accent); }
 /* El `fieldset` trae borde propio del navegador y la `legend` lo atraviesa: eso
    era la raya que cruzaba «Qué está enviando». Sin borde y sin relleno, la
    leyenda vuelve a ser un rótulo. */
-
-@keyframes se-hoja-sube {
-  from {
-    transform: translateY(24px);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
 
 /* ————————————————————————————————————————————————————————————————————————————
    «Al punto»: entrevistas y podcast en una sola página (`/audiovisual`)
@@ -6881,30 +6778,6 @@ html {
   line-height: 1.5;
   color: var(--color-slate-2);
   text-wrap: pretty;
-}
-
-@keyframes se-insertar-asoma {
-  from { opacity: 0; transform: scale(0.6); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes se-insertar-menu {
-  from { opacity: 0; transform: translate(-6px, -50%); }
-  to { opacity: 1; transform: translate(0, -50%); }
-}
-
-@keyframes se-figura-giro {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes se-imgdlg-pulso {
-  from { opacity: 0.55; }
-  to { opacity: 1; }
-}
-
-@keyframes se-previa-entra {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: none; }
 }
 
 /* —— Cloudflare Turnstile ——

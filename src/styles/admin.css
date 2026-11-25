@@ -4,6 +4,29 @@
  * zona cuando se abre. Solo hay reglas cuyos selectores exigen clases que aparecen
  * únicamente en esa zona. Lo que usen también las páginas públicas va en blog.css.
  */
+
+/* —— Lo que quedaba del panel en blog.css (noviembre de 2026) ——
+   El antetítulo de la vista previa de una pieza y el cuerpo de las tarjetas de
+   anunciante y de campaña. Van delante de las reglas de esta hoja, como iban antes:
+   las de abajo les siguen ganando con la misma especificidad. Al final de la hoja, los
+   catorce @keyframes que solo nombra el panel, que también viajaban en blog.css. */
+
+.se-piece__kicker {
+  margin: 0 0 0.6rem;
+  font-family: var(--se-font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.se-admin-pub__anunciante-cuerpo,
+.se-admin-pub__campana-cuerpo {
+  padding: 0 1.1rem 1.1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
 /* Horizontal filters / compact toolbars — no heavy card */
 .se-contact-form.se-contact-form--toolbar {
   flex-direction: row;
@@ -8406,4 +8429,117 @@
 .se-encuadre__detalle {
   font-size: 0.78rem;
   color: var(--adm-text-muted);
+}
+
+@keyframes se-adm-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Sin el `translateX(-50%)`, que ya no hace falta al centrar con flex -- y que ademas
+   dejaba un `transform` puesto al terminar, convirtiendo la superficie en el bloque
+   contenedor de cualquier `position: fixed` de dentro.
+   El desplazamiento baja de 10px a 4px y sube un pelin de escala: a 10px el dialogo
+   entraba dando un salto que se lee como un tiron, sobre todo en el modal grande. */
+@keyframes se-adm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes se-admin-outlet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes se-admin-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes se-adm-submission-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes se-adm-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes se-aud-girar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes se-aud-latido {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+@keyframes se-hoja-sube {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes se-insertar-asoma {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes se-insertar-menu {
+  from { opacity: 0; transform: translate(-6px, -50%); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+
+@keyframes se-figura-giro {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes se-imgdlg-pulso {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
+@keyframes se-previa-entra {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
 }

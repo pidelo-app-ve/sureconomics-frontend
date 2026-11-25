@@ -41,6 +41,7 @@ import {
     fechaDeCaracas,
     formToPayload,
     horaCorta,
+    idDeLaPieza,
     normalizarPieza,
     postToForm,
 } from "../../components/admin/editorDePieza/formulario";
@@ -130,11 +131,8 @@ export const AdminPostEditor = () => {
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
-    const numericPostId = useMemo(() => {
-        if (!postId) return null;
-        const n = Number(postId);
-        return Number.isFinite(n) ? n : postId;
-    }, [postId]);
+
+    const numericPostId = idDeLaPieza(postId);
     // La pieza abierta en el último pintado: la respuesta que llega tarde de otra no se
     // aplica aquí (ver `esOtraPieza` en `guardado.js`).
     const piezaAbierta = useRef(numericPostId);

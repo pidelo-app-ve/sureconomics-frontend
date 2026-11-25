@@ -13,6 +13,7 @@ import {
   destacadaHastaDe,
   emptyForm,
   fechaDeCaracas,
+  idDeLaPieza,
   formToPayload,
   hastaDeCaracas,
   isoToDateTimeLocal,
@@ -285,4 +286,11 @@ describe("los textos de ayuda", () => {
     assert.equal(nombreDeArchivo({}), "Adjunto");
     assert.equal(nombreDeArchivo({ original_filename: "a.pdf" }), "a.pdf");
   });
+});
+
+test("el id de la pieza: número si lo es, tal cual si no, y null sin él", () => {
+  assert.equal(idDeLaPieza("7"), 7);
+  assert.equal(idDeLaPieza("abc"), "abc");
+  assert.equal(idDeLaPieza(undefined), null);
+  assert.equal(idDeLaPieza(""), null);
 });

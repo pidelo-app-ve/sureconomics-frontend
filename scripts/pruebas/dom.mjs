@@ -56,7 +56,7 @@ await import("../../src/i18n/diccionarios.js");
 const { createElement } = await import("react");
 const { RouterProvider, createMemoryRouter } = await import("react-router-dom");
 /** Las mismas opciones `future` que el router del sitio (`routes.jsx`). */
-const FUTURO = { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true };
+const FUTURO = { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true };
 const rtl = await import("@testing-library/react");
 const { AuthProvider } = await import("../../src/context/AuthContext.jsx");
 const { AdminToastProvider } = await import("../../src/context/AdminToastContext.jsx");

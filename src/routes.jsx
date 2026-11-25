@@ -245,5 +245,8 @@ export const router = createBrowserRouter([
         // diccionario de /en, el código de una página perezosa). main.jsx monta React
         // solo con router.state.initialized, que sigue llegando igual.
         v7_partialHydration: true,
+        // Tras una «action» que falla, no se vuelven a pedir los datos de la página.
+        // El sitio no tiene «actions»: los formularios llaman a la API ellos mismos.
+        v7_skipActionErrorRevalidation: true,
     },
 });

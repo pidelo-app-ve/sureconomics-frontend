@@ -47,11 +47,10 @@ for (const r of [...reales]) reales.push(r === "/" ? "/en" : `/en${r}`);
 reales.push("/admin", "/admin/login");
 for (const p of caminos(admin)) if (!p.startsWith("/")) reales.push(`/admin/${muestra(p)}`);
 
-console.log("cada ruta de src/routes.jsx va a la aplicación (también con barra final)");
+console.log("cada ruta de src/routes.jsx va a la aplicación (con barra final, ver más abajo)");
 check("se leyeron las rutas", reales.length > 100, `${reales.length}`);
 for (const r of reales) {
-  const conBarra = r.endsWith("/") ? r : `${r}/`;
-  check(r, aLaAplicacion(r) && aLaAplicacion(conBarra));
+  check(r, aLaAplicacion(r));
 }
 
 console.log("lo inventado no");
@@ -79,6 +78,127 @@ check("/index.html redirige a /", config.redirects.some((r) => r.source === "/in
 check("el build deja app.html", /vite build && node scripts\/shell-como-app\.mjs/.test(leer("../package.json")));
 check("el shell viaja con las funciones", config.functions?.["api/*.js"]?.includeFiles === "dist/app.html");
 check("/noticias a su listado", config.redirects.some((r) => r.source === "/noticias{/}?" && r.destination === "/articulos?formato=noticias"));
+
+// —— El primer salto de una dirección, como lo da Vercel (25-nov-2026) ——
+//
+// Un simulador pequeño del borde: primero las redirecciones, en orden; después las
+// reescrituras, en orden, mirando `has`. Lee las reglas con nombre de `vercel.json`
+// (`/:seccion(noticias|…)/:slug`, `{/}?`) como lo hace Vercel (`path-to-regexp` con
+// `strict` y distinguiendo mayúsculas). Devuelve a dónde va la dirección en un salto: una
+// redirección (`estado` y `destino`) o lo que la sirve (`sirve`).
+const comoRegex = (fuente) =>
+  new RegExp(
+    `^${fuente
+      .replace(/\{\/\}\?/g, "/?")
+      .replace(/(?<!\?):(\w+)\(/g, "(?<$1>")
+      .replace(/(?<![?\w]):(\w+)(?![\w(])/g, "(?<$1>[^/#?]+?)")}$`
+  );
+const conParametros = (destino, grupos) =>
+  destino.replace(/:(\w+)\*?/g, (todo, nombre) => (grupos && nombre in grupos ? grupos[nombre] ?? "" : todo));
+const juntarConsulta = (destino, consulta) => {
+  if (!consulta) return destino;
+  return destino.includes("?") ? `${destino}&${consulta.slice(1)}` : `${destino}${consulta}`;
+};
+const primerSalto = (direccion) => {
+  const [camino, resto] = direccion.split("?");
+  const consulta = resto ? `?${resto}` : "";
+  const claves = [...new URLSearchParams(consulta).keys()];
+  for (const r of config.redirects) {
+    const m = comoRegex(r.source).exec(camino);
+    if (!m) continue;
+    const estado = r.statusCode ?? (r.permanent ? 308 : 307);
+    return { estado, destino: juntarConsulta(conParametros(r.destination, m.groups), consulta) };
+  }
+  for (const r of config.rewrites) {
+    const m = comoRegex(r.source).exec(camino);
+    if (!m) continue;
+    if (r.has && !r.has.every((h) => h.type === "query" && claves.includes(h.key))) continue;
+    return { sirve: juntarConsulta(conParametros(r.destination, m.groups), consulta) };
+  }
+  return { sirve: "404 de Vercel" };
+};
+
+console.log("una pieza en otra dirección llega a su función, que la manda a la buena");
+const sirve = (direccion, esperado) => {
+  const salto = primerSalto(direccion);
+  check(`${direccion} → ${esperado}`, salto.sirve === esperado, JSON.stringify(salto));
+};
+sirve("/articulos/una-noticia", "/api/pieza?seccion=articulos&slug=una-noticia");
+sirve("/en/editorial/una-noticia?utm_source=wa", "/api/pieza?seccion=editorial&slug=una-noticia&lang=en&utm_source=wa");
+sirve("/noticias/una-noticia?_s=1", "/app.html?_s=1");
+sirve("/articulo/una-pieza-vieja", "/api/pieza?seccion=articulo&slug=una-pieza-vieja");
+sirve("/Noticias/una-noticia", "/api/pieza?seccion=Noticias&slug=una-noticia");
+sirve("/en/NOTICIAS/una-noticia", "/api/pieza?seccion=NOTICIAS&slug=una-noticia&lang=en");
+sirve("/noticias/Una-Noticia", "/api/pieza?seccion=noticias&slug=Una-Noticia");
+// Con mayúsculas va a la función, que da la 404 si la sección no existe; sin ellas, la 404.
+sirve("/Recetas/una", "/api/pieza?seccion=Recetas&slug=una");
+sirve("/recetas/una", "/api/no-encontrada");
+sirve("/en/Recetas", "/api/no-encontrada?lang=en");
+check("/articulo/ ya no redirige a ciegas a /articulos/ (era una cadena con las noticias)",
+  !config.redirects.some((r) => r.source.startsWith("/articulo/")));
+
+// La barra final servía la aplicación vacía con 200: un «404 suave» que se podía indexar.
+// Ahora cada ruta con barra va a la misma sin ella con una 301, en un salto; las piezas,
+// por su función (`_barra=1`), que de paso corrige la sección si hace falta.
+console.log("con barra final: a la misma sin barra, en un salto");
+const esPieza = (r) => /^(?:\/en)?\/(?:noticias|articulos|editorial|entrevistas|informes|podcast|articulo)\/[^/]+$/.test(r);
+for (const r of reales) {
+  if (r === "/") continue;
+  const salto = primerSalto(`${r}/`);
+  // Si la dirección sin barra ya redirige (`/categoria/x`), con barra va al mismo destino.
+  const sinBarra = primerSalto(r);
+  const bien = esPieza(r)
+    ? /^\/api\/pieza\?.*(_barra=1|seccion=articulo&)/.test(salto.sirve ?? "")
+    : sinBarra.estado
+      ? salto.estado === sinBarra.estado && salto.destino === sinBarra.destino
+      : salto.estado === 301 && salto.destino === r;
+  check(`${r}/`, bien, JSON.stringify(salto));
+}
+const salta = (direccion, estado, destino) => {
+  const salto = primerSalto(direccion);
+  check(`${direccion} → ${estado} ${destino}`, salto.estado === estado && salto.destino === destino, JSON.stringify(salto));
+};
+salta("/informes/?pagina=2&utm_source=wa", 301, "/informes?pagina=2&utm_source=wa");
+salta("/en/articulos/?formato=noticias", 301, "/en/articulos?formato=noticias");
+salta("/en/", 301, "/en");
+salta("/cuenta/envios/12/editar/", 301, "/cuenta/envios/12/editar");
+salta("/resumen/2026-11-24/manana/", 301, "/resumen/2026-11-24/manana");
+// Las que ya redirigían con la barra siguen yendo directas a su destino: nada de cadenas.
+salta("/noticias/", 307, "/articulos?formato=noticias");
+salta("/en/podcast/", 307, "/en/audiovisual?ver=podcast");
+salta("/categoria/finanzas/", 308, "/explorar");
+sirve("/noticias/una-noticia/?utm_source=wa", "/api/pieza?seccion=noticias&slug=una-noticia&_barra=1&utm_source=wa");
+sirve("/en/informes/un-informe/", "/api/pieza?seccion=informes&slug=un-informe&lang=en&_barra=1");
+sirve("/Noticias/una-noticia/", "/api/pieza?seccion=Noticias&slug=una-noticia");
+sirve("/articulo/una-pieza-vieja/", "/api/pieza?seccion=articulo&slug=una-pieza-vieja");
+sirve("/en/articulo/una-pieza-vieja", "/api/pieza?seccion=articulo&slug=una-pieza-vieja&lang=en");
+// Lo que no se toca: la portada, las funciones, los datos, los archivos.
+for (const r of ["/", "/api/pieza/", "/datos/posts/", "/media/image/x/", "/assets/", "/.well-known/x/"]) {
+  check(`${r}: sin redirección de barra`, !primerSalto(r).estado, JSON.stringify(primerSalto(r)));
+}
+// Lo que no existe sigue sin existir: con barra, un salto y la 404 (y en un nombre de
+// sección inventado con mayúsculas, la 404 de la función sin saltos).
+salta("/esta-no-existe/", 301, "/esta-no-existe");
+check("/esta-no-existe sin barra: la 404", primerSalto("/esta-no-existe").sirve === "/api/no-encontrada");
+sirve("/Recetas/una/", "/api/pieza?seccion=Recetas&slug=una");
+
+// Las páginas fijas en inglés (`/en/informes`) salían con `lang="es"`, sin canónica ni
+// `hreflang`: ahora pasan por `api/pagina.js`. Las mismas que su lista `PAGINAS`.
+console.log("las páginas fijas en inglés, por su función; las españolas, como estaban");
+const { PAGINAS } = await import("./pagina.js");
+const reglaEn = config.rewrites.find((r) => r.destination === "/api/pagina?ruta=:ruta&lang=en");
+const enLaRegla = new Set((reglaEn?.source.match(/^\/en\/:ruta\(([^)]+)\)$/)?.[1] ?? "").split("|"));
+check("la regla de vercel.json y PAGINAS son la misma lista",
+  enLaRegla.size === PAGINAS.size && [...PAGINAS].every((p) => enLaRegla.has(p)), [...enLaRegla].join(","));
+for (const p of PAGINAS) {
+  sirve(`/en/${p}`, `/api/pagina?ruta=${p}&lang=en`);
+  check(`/${p}: sigue en el archivo`, primerSalto(`/${p}`).sirve === "/app.html" || p === "entorno", JSON.stringify(primerSalto(`/${p}`)));
+}
+sirve("/en/articulos?formato=noticias", "/api/pagina?ruta=articulos&lang=en&formato=noticias");
+sirve("/en/informes?_s=1", "/app.html?_s=1");
+sirve("/en/cuenta/entrar", "/app.html");
+sirve("/en/ultima-hora", "/app.html");
+check("/entorno sigue con su tarjeta (api/pieza)", primerSalto("/entorno").sirve === "/api/pieza?seccion=entorno");
 
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);

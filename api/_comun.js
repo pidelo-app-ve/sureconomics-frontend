@@ -65,6 +65,26 @@ export const SHELL_URL = process.env.SHELL_URL || `${SITIO}/app.html`;
  *  somewhere to send a request it cannot serve honestly. */
 export const SIN_META = "_s";
 
+/**
+ * La consulta (`?utm_source=…`) con la que llegó el lector, sin lo que `vercel.json` le
+ * añade a la función al reescribir (`seccion`, `slug`, `lang`, …) ni el `_s` del respaldo.
+ *
+ * Vercel junta en `req.query` las dos cosas: lo que puso la regla y lo que traía la
+ * dirección. Al redirigir hay que devolver solo lo segundo, para que el enlace que alguien
+ * compartió por WhatsApp con su `?utm_source=whatsapp` llegue con él a la dirección buena.
+ * Un valor repetido (`?a=1&a=2`) llega como lista y sale repetido, en su orden.
+ */
+export const consultaDelLector = (query = {}, internos = []) => {
+  const fuera = new Set([...internos, SIN_META]);
+  const params = new URLSearchParams();
+  for (const [clave, valor] of Object.entries(query ?? {})) {
+    if (fuera.has(clave) || valor === undefined || valor === null) continue;
+    for (const uno of [].concat(valor)) params.append(clave, String(uno));
+  }
+  const texto = params.toString();
+  return texto ? `?${texto}` : "";
+};
+
 /** URL section -> the format slug the API knows, and the shape of the piece. */
 export const SECCIONES = {
   noticias: "noticia",

@@ -1,7 +1,7 @@
 /**
  * Los mapas del sitio, con la API simulada. `node api/sitemap.test.mjs`, o `npm run test:sitemap`.
  */
-import handler, { enIngles, mapaCompleto, mapaDeNoticias, urlDe } from "./sitemap.js";
+import handler, { SECCION_DE, enIngles, mapaCompleto, mapaDeNoticias, urlDe } from "./sitemap.js";
 
 let fallos = 0;
 const check = (nombre, ok, detalle) => {
@@ -83,6 +83,36 @@ await conFetch(async () => { throw new Error("ECONNREFUSED"); }, async () => {
   await handler({ query: { tipo: "noticias" } }, res);
   check("API caída: 503 con Retry-After", res.code === 503 && res.headers["Retry-After"]);
 });
+
+// 6. Solo direcciones canónicas (25-nov-2026): las mismas a las que redirige `pieza.js`.
+// Revisado en producción ese día: 2.237 direcciones, ninguna con barra final, ninguna con
+// mayúsculas y cada pieza en la sección de su formato. Esto vigila que siga así.
+{
+  const { SECCION_DE_FORMATO } = await import("./_comun.js");
+  const { seccionDeLaPieza } = await import("./pieza.js");
+  check("sección por formato: la misma tabla que la redirección",
+    JSON.stringify(SECCION_DE) === JSON.stringify(SECCION_DE_FORMATO), JSON.stringify(SECCION_DE));
+  const variadas = ["noticia", "articulo", "editorial", "entrevista", "informe", "podcast"].map((format, i) => ({
+    ...pieza(i, 1), format, en_ingles: i % 2 === 0,
+  }));
+  const mapa = mapaCompleto([...variadas, { ...pieza(9, 1), format: "otro" }]);
+  const locs = [...mapa.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+  const caminos = locs.map((u) => new URL(u).pathname);
+  check("ninguna con barra final (salvo la portada)", caminos.every((c) => c === "/" || !c.endsWith("/")),
+    caminos.filter((c) => c !== "/" && c.endsWith("/")).join(" "));
+  check("ninguna con mayúsculas", caminos.every((c) => c === c.toLowerCase()));
+  check("ninguna repetida", new Set(locs).size === locs.length);
+  check("todas en www.sureconomics.com", locs.every((u) => u.startsWith("https://www.sureconomics.com/")));
+  check("un formato desconocido no entra (no hay dirección buena que dar)", !mapa.includes("pieza-9"));
+  const malas = variadas.filter((p) => {
+    const suyas = caminos.filter((c) => c.endsWith(`/${p.slug}`));
+    const buena = `/${seccionDeLaPieza(p, null)}/${p.slug}`;
+    return !suyas.length || suyas.some((c) => c !== buena && c !== `/en${buena}`);
+  });
+  check("cada pieza en la sección de su formato, la que da 200", malas.length === 0, malas.map((p) => p.format).join(","));
+  check("el de noticias, igual", [...mapaDeNoticias(variadas, AHORA).matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .every((m) => variadas.some((p) => m[1] === `https://www.sureconomics.com/${seccionDeLaPieza(p, null)}/${p.slug}`)));
+}
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");
 process.exit(fallos ? 1 : 0);

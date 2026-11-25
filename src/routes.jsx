@@ -238,5 +238,8 @@ export const router = createBrowserRouter([
         // Los «fetchers» (useFetcher) se quedan vivos hasta que terminan aunque el
         // componente que los creó desaparezca. Aquí no se usa ninguno.
         v7_fetcherPersist: true,
+        // useNavigation().formMethod en mayúsculas ("POST"). Solo se lee su .state
+        // (el aviso «Abriendo…» del panel), que no cambia.
+        v7_normalizeFormMethod: true,
     },
 });

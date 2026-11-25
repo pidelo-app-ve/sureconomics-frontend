@@ -363,10 +363,14 @@ export const etiquetas = ({
  *
  * `cabecera`: HTML propio para la `<head>`, ya escapado por quien lo arma (la portada pone
  * ahí la precarga de su foto). Va al final, después de las etiquetas.
+ *
+ * `cola`: HTML propio para justo detrás de `<div id="root">`, ya escapado (la portada pone
+ * ahí sus datos). Detrás y no en la `<head>`: lo que va antes del cuerpo retrasa lo
+ * primero que se pinta, y `#root` no lo necesita para pintarse.
  */
 export const inyectar = (
   shell,
-  { titulo, tituloDePestana = null, html, ficha, datos, noindex = false, idioma = "es", cabecera = "", ...resto }
+  { titulo, tituloDePestana = null, html, ficha, datos, noindex = false, idioma = "es", cabecera = "", cola = "", ...resto }
 ) => {
   // `titulo` va a las tarjetas de las redes; `tituloDePestana`, si viene, al `<title>`.
   const pestana = tituloDePestana || titulo;
@@ -413,7 +417,7 @@ export const inyectar = (
   const conIdioma =
     idioma === "es" ? conTitulo : conTitulo.replace(/<html lang="[^"]*">/i, `<html lang="${idioma}">`);
   const conCabecera = conIdioma.replace(/<\/head>/i, tal(`  ${bloque}\n  </head>`));
-  if (!html) return conCabecera;
+  if (!html && !cola) return conCabecera;
   // El shell trae `<div id="root"></div>` vacío: la página va dentro.
-  return conCabecera.replace(/<div id="root"><\/div>/i, tal(`<div id="root">${html}</div>`));
+  return conCabecera.replace(/<div id="root"><\/div>/i, tal(`<div id="root">${html ?? ""}</div>${cola}`));
 };

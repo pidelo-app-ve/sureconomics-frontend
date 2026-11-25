@@ -1,4 +1,6 @@
 import { createApiClient } from "./apiClient";
+import { desenvolverPublico } from "../api/nucleo.js";
+import { ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, leerDelHtml, soltarDelHtml } from "../api/quiosco.js";
 import { tActual } from "../i18n/motor";
 import { nombreTraducido, piezaFromApi, piezasFromApi } from "../lib/pieza";
 
@@ -168,6 +170,11 @@ export const getPieces = async ({
   const payload = await client().request("/posts", {
     query: { format, topic, place, q, educational, page, limit },
   });
+  return listado(payload);
+};
+
+/** Una respuesta de `/posts` (ya desenvuelta) como la leen las vistas. */
+const listado = (payload) => {
   const rows = payload && "data" in payload ? payload.data : payload;
   const meta = payload?.meta ?? null;
   return {
@@ -180,6 +187,21 @@ export const getPieces = async ({
     pages: meta?.pages ?? 1,
   };
 };
+
+/**
+ * La primera página de la portada, si vino dentro del HTML (`api/portada.js`, ver
+ * `leerDelHtml`): lo mismo que devolvería `getPieces({ page: 1, limit: 100 })`, sin
+ * pedirlo. Nula si no vino, no se puede leer o no trae piezas: entonces se pide.
+ */
+export const getPortadaDelHtml = () => {
+  const respuesta = leerDelHtml(ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA);
+  if (!respuesta) return null;
+  const lista = listado(desenvolverPublico(respuesta));
+  return lista.filas.length ? lista : null;
+};
+
+/** Ya usada: fuera del documento (ver `soltarDelHtml`). */
+export const soltarPortadaDelHtml = () => soltarDelHtml(ID_DE_LA_PORTADA);
 
 /**
  * Las piezas más leídas de los últimos `dias`, tal como las da la API (sin convertir):

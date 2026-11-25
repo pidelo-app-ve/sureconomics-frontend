@@ -34,6 +34,9 @@ sustituir({
       pedidas.push(peticion);
       return responder(peticion);
     },
+    // Sin primera página en el HTML: lo que pasa con ella, en `usePieces.portada.test.mjs`.
+    getPortadaDelHtml: () => null,
+    soltarPortadaDelHtml: () => {},
   },
 });
 

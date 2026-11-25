@@ -71,3 +71,53 @@ export const vaPorElQuiosco = (ruta, { method = "GET", headers = {}, enNavegador
   const limpia = String(ruta ?? "").split("?")[0];
   return LECTURAS_PUBLICAS.some((patron) => patron.test(limpia));
 };
+
+/* —— Lo que ya viene dentro del HTML ——
+
+   `api/portada.js` sirve la portada con la respuesta de su primera lectura dentro, en un
+   `<script type="application/json" id="se-portada">`: lo mismo que contestaría el quiosco,
+   para que la página no lo vuelva a pedir al cargar y pinte en cuanto llega el JavaScript
+   (plan del 23-nov-2026, B8). Igual que `se-pieza` en las piezas: un `<script>` de datos
+   no se ejecuta, así que la política de seguridad (CSP) no tiene que permitir scripts en
+   línea.
+
+   El bloque dice qué lectura contesta (`{ lectura, respuesta }`), y quien lo toma
+   comprueba que es la que iba a pedir. Si no está, es de otra lectura o no se puede leer,
+   se pide como siempre. */
+
+/**
+ * La lectura de la portada: la primera página del listado, sin filtros, escrita como la
+ * arma `getPieces` (`page` y después `limit`). Es también la clave del borde: la función
+ * la pide así para que la portada del navegador y la del servidor calienten la misma copia.
+ */
+export const LISTADO_DE_LA_PORTADA = "/posts?page=1&limit=100";
+
+/** Dónde viaja dentro del HTML de la portada. */
+export const ID_DE_LA_PORTADA = "se-portada";
+
+/**
+ * La respuesta que trajo el HTML para `lectura`, o nula. Solo lee: React, en modo
+ * estricto, prepara dos veces el estado inicial, y si se quitara aquí la segunda vez ya no
+ * estaría. Quien la usa la quita después con `soltarDelHtml`.
+ */
+export const leerDelHtml = (id, lectura) => {
+  try {
+    const nodo = typeof document === "undefined" ? null : document.getElementById(id);
+    const bloque = nodo ? JSON.parse(nodo.textContent || "null") : null;
+    return bloque?.lectura === lectura ? bloque.respuesta ?? null : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Quita del documento la que ya se usó. Vale una vez, al llegar: si el lector vuelve a la
+ * portada más tarde, sin recargar, se pide al quiosco y no se le enseña la de entonces.
+ */
+export const soltarDelHtml = (id) => {
+  try {
+    document.getElementById(id)?.remove();
+  } catch {
+    // Sin documento (Node): no hay nada que quitar.
+  }
+};

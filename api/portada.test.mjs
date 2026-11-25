@@ -93,6 +93,12 @@ const raiz = (html) => {
   return desde === -1 ? "" : html.slice(desde + '<div id="root">'.length, hasta);
 };
 
+/** El bloque de datos (`#se-portada`), leído como lo lee la página; o nulo si no está. */
+const bloque = (html) => {
+  const m = html.match(/<script type="application\/json" id="se-portada">([\s\S]*?)<\/script>/);
+  return m ? JSON.parse(m[1]) : null;
+};
+
 const fichas = (html) =>
   [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
 
@@ -183,6 +189,15 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
     /animation:se-portada-previa 0s linear 9s forwards/.test(h) && /@keyframes se-portada-previa\{to\{width:auto;height:auto;[^}]*clip-path:none/.test(h));
   check("la aplicación sigue ahí", h.includes('src="/assets/index-abc123.js"'));
 
+  // Los datos: la respuesta del quiosco entera, para que la página no la vuelva a pedir.
+  const datos = bloque(h);
+  check("el bloque de datos, uno y detrás de #root (no en la <head>)",
+    contar(h, /id="se-portada"/g) === 1 && h.indexOf('id="se-portada"') > h.indexOf('<div id="root">') &&
+      h.includes('</div><script type="application/json" id="se-portada">') && h.indexOf('id="se-portada"') < h.indexOf('src="/assets/index-abc123.js"'));
+  check("dice qué lectura contesta: la de la portada", datos?.lectura === "/posts?page=1&limit=100", datos?.lectura);
+  check("con la respuesta tal cual llegó (filas y meta)",
+    datos?.respuesta?.data?.length === MUCHAS.length && datos.respuesta.data[0].slug === MUCHAS[0].slug && datos.respuesta.meta?.pages === 1);
+
   // La precarga: el mismo srcset y sizes que pinta `CardMedia` en la apertura.
   const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);
   const precargas = contar(h, /<link rel="preload" as="image"/g);
@@ -223,6 +238,7 @@ for (const [nombre, api, motivo] of [
       res.body.includes(`<title>${TEXTOS.es.titulo}</title>`) && res.body.includes('rel="canonical" href="https://www.sureconomics.com/"'));
     check(`${nombre}: #root vacío, sin precarga ni estilo`,
       res.body.includes('<div id="root"></div>') && !res.body.includes("preload\" as=\"image") && !res.body.includes("se-portada-previa"));
+    check(`${nombre}: sin bloque de datos (la página pide como siempre)`, !res.body.includes('id="se-portada"'));
     check(`${nombre}: guardada poco`, res.headers["Cache-Control"] === "public, s-maxage=30");
     check(`${nombre}: dice por qué`, res.headers["X-Pieza-Meta"] === `portada-sin-datos-${motivo}`, res.headers["X-Pieza-Meta"]);
   });
@@ -383,6 +399,20 @@ console.log("titulares con caracteres raros");
   const barra = String.fromCharCode(92);
   check("en la ficha JSON, < escapado", json.includes(`${barra}u003c/script>`) && !json.slice(0, json.indexOf("</script>")).includes("<"));
   check("la ficha se puede leer", fichas(h)[1]?.["@graph"]?.[1]?.itemListElement?.[0]?.name?.startsWith("</script>"));
+}
+
+console.log("titulares con caracteres raros, en el bloque de datos");
+{
+  const titulo = '</script><script>alert(1)</script> "comillas" & <!-- x --> US$&nbsp;36 $& \u2028fin';
+  const malo = fila(1, { title: titulo });
+  const respuesta = { data: [malo, fila(2)], meta: { total: 2, pages: 1 } };
+  const h = armarPortada(SHELL, { filas: respuesta.data, respuesta, ahora: HORA });
+  const crudo = h.slice(h.indexOf('id="se-portada">'), h.indexOf("</script>", h.indexOf('id="se-portada">')));
+  const barra = String.fromCharCode(92);
+  check("ningún < sin escapar dentro del bloque (ni </script> ni <!--)", !crudo.slice('id="se-portada">'.length).includes("<"));
+  check("el < va escapado, como en la ficha", crudo.includes(`${barra}u003c/script>`));
+  check("un solo cierre: el bloque no se corta", contar(h, /<script/g) === 4, String(contar(h, /<script/g)));
+  check("se lee igual que llegó (comillas, &, $ y separadores incluidos)", bloque(h)?.respuesta?.data?.[0]?.title === titulo);
 }
 
 console.log("entidades del editor");

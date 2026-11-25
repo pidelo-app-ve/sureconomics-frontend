@@ -57,11 +57,16 @@
  * Vercel sirve los archivos antes de mirar las reescrituras, y con un `index.html` en
  * `dist/` la regla de `/` no se aplicaría nunca.
  *
+ * ## Los datos, dentro (plan del 23-nov-2026, B8)
+ *
+ * La respuesta del quiosco viaja entera detrás de `#root`, en un
+ * `<script type="application/json" id="se-portada">` (`bloqueDeDatos`), y `usePieces` la usa
+ * en vez de volver a pedirla, como hace `Pieza.jsx` con `#se-pieza`. Así React pinta la
+ * portada en cuanto llega el JavaScript, sin un viaje más de 33 KB detrás. Si el bloque no
+ * está (sin datos, o con `PORTADA_HTML=no`) o no se puede leer, la página pide como siempre.
+ *
  * ## Pendiente
  *
- * - Dejar la página 1 en un `<script type="application/json" id="se-portada">` para que
- *   `usePieces` no la vuelva a pedir, como hace `Pieza.jsx` con `#se-pieza`. Es lo que más
- *   adelantaría el LCP después de esto, pero toca `usePieces` y `Home`: otra tanda.
  * - `/?fbclid=…`, `/en?utm_…`: Vercel pasa la consulta de la dirección a la función, y
  *   cada consulta distinta puede ser otra copia en el borde (y otra llamada a la función).
  *   Igual que en las piezas; se deja así. Se ve en la vista previa: `/?a=1` y `/?a=2`, ¿el
@@ -76,6 +81,7 @@ import {
   paraLaApertura,
   precargaDeLaApertura,
 } from "../src/lib/apertura.js";
+import { ID_DE_LA_PORTADA, LISTADO_DE_LA_PORTADA, RUTA_DEL_QUIOSCO } from "../src/api/quiosco.js";
 import {
   FORMAT_NAME,
   IMAGEN_DE_MARCA,
@@ -89,16 +95,17 @@ import {
   esNuestroShell,
   fechaLarga,
   inyectar,
+  jsonEnScript,
   leerShell,
   textoLlano,
 } from "./_comun.js";
 
 /**
- * De dónde salen los titulares: el quiosco del dominio público, que el borde guarda. Con
- * `page` y `limit` en este orden, el mismo que arma la portada en el navegador
- * (`getPieces`): es la misma clave de caché.
+ * De dónde salen los titulares: el quiosco del dominio público, que el borde guarda. La
+ * lectura es la misma que hace la portada en el navegador (`LISTADO_DE_LA_PORTADA`,
+ * escrita como la arma `getPieces`): es la misma clave de caché.
  */
-export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}/datos/posts?page=1&limit=100`;
+export const DATOS_URL = process.env.PORTADA_DATOS_URL || `${SITIO}${RUTA_DEL_QUIOSCO}${LISTADO_DE_LA_PORTADA}`;
 
 /**
  * El orden de las secciones bajo la primera plana: el de `FORMATO_META` en
@@ -337,7 +344,10 @@ export const fichaDePortada = ({ url, idioma, titulares }) => {
   return { "@context": "https://schema.org", "@graph": [pagina, lista] };
 };
 
-/** Las filas de la primera página del listado, o un motivo si no llegaron. */
+/**
+ * Las filas de la primera página del listado y la respuesta entera (para el bloque de
+ * datos), o un motivo si no llegaron.
+ */
 const leerTitulares = async () => {
   try {
     const respuesta = await conDeadline(DATOS_URL, LIMITE_MS);
@@ -345,17 +355,29 @@ const leerTitulares = async () => {
     const cuerpo = await respuesta.json();
     const filas = Array.isArray(cuerpo) ? cuerpo : cuerpo?.data;
     if (!Array.isArray(filas)) return { motivo: "api-sin-lista" };
-    return { filas };
+    return { filas, respuesta: cuerpo };
   } catch {
     return { motivo: "api-sin-respuesta" };
   }
 };
 
 /**
- * La página entera a partir del shell y las filas (o sin filas). Separada del `handler`
- * para las pruebas.
+ * La respuesta del quiosco tal cual, para que la página no la vuelva a pedir al cargar
+ * (`getPortadaDelHtml`, en el navegador). Detrás de `#root`: la apertura se pinta sin
+ * esperar a estos datos, que son la mayor parte del HTML (unos 33 KB con brotli).
+ * `jsonEnScript` escapa el `<` (un titular con `</script>` no corta el bloque) y el
+ * bloque dice qué lectura contesta (ver `leerDelHtml` en `src/api/quiosco.js`).
  */
-export const armarPortada = (shell, { filas = [], idioma = "es", ahora = Date.now() } = {}) => {
+export const bloqueDeDatos = (respuesta) =>
+  `<script type="application/json" id="${ID_DE_LA_PORTADA}">` +
+  `${jsonEnScript({ lectura: LISTADO_DE_LA_PORTADA, respuesta })}</script>`;
+
+/**
+ * La página entera a partir del shell y las filas (o sin filas). Separada del `handler`
+ * para las pruebas. `respuesta`: lo que contestó el quiosco, entero, de donde salen las
+ * filas; sin ella (o sin filas) la página no lleva bloque de datos y pide como siempre.
+ */
+export const armarPortada = (shell, { filas = [], respuesta = null, idioma = "es", ahora = Date.now() } = {}) => {
   const t = TEXTOS[idioma];
   const url = idioma === "en" ? URL_EN : URL_ES;
 
@@ -406,6 +428,7 @@ export const armarPortada = (shell, { filas = [], idioma = "es", ahora = Date.no
     ficha: fichaDePortada({ url, idioma, titulares: todos }),
     cabecera,
     html: todos.length ? portadaEnHtml({ plana: planaHtml, secciones: seccionesHtml, idioma }) : null,
+    cola: respuesta && validas.length ? bloqueDeDatos(respuesta) : "",
   });
 };
 
@@ -456,5 +479,5 @@ export default async function handler(req, res) {
 
   res.setHeader("Cache-Control", CACHE_PORTADA);
   res.setHeader("X-Pieza-Meta", "portada");
-  res.status(200).send(armarPortada(shell, { filas: datos.filas, idioma }));
+  res.status(200).send(armarPortada(shell, { filas: datos.filas, respuesta: datos.respuesta, idioma }));
 }

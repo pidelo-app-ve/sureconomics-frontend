@@ -27,9 +27,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # La versión de Node sale de `.nvmrc` (22): la misma que pide `engines` en
-      # package.json, que es lo que lee Vercel. Node 20 quedó sin soporte en abril de
-      # 2026 y Vite 7 pide 20.19+ o 22.12+.
+      # La versión de Node sale de `.nvmrc` (24): la misma que pide `engines` en
+      # package.json, que es lo que lee Vercel (manda sobre el ajuste del panel, que
+      # también dice 24.x). Node 24 tiene soporte hasta abril de 2028; Vite 7 pide
+      # 20.19+ o 22.12+.
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

@@ -80,6 +80,64 @@ check("el build deja app.html", /vite build && node scripts\/shell-como-app\.mjs
 check("el shell viaja con las funciones", config.functions?.["api/*.js"]?.includeFiles === "dist/app.html");
 check("/noticias a su listado", config.redirects.some((r) => r.source === "/noticias{/}?" && r.destination === "/articulos?formato=noticias"));
 
+// —— El primer salto de una dirección, como lo da Vercel (25-nov-2026) ——
+//
+// Un simulador pequeño del borde: primero las redirecciones, en orden; después las
+// reescrituras, en orden, mirando `has`. Lee las reglas con nombre de `vercel.json`
+// (`/:seccion(noticias|…)/:slug`, `{/}?`) como lo hace Vercel (`path-to-regexp` con
+// `strict` y distinguiendo mayúsculas). Devuelve a dónde va la dirección en un salto: una
+// redirección (`estado` y `destino`) o lo que la sirve (`sirve`).
+const comoRegex = (fuente) =>
+  new RegExp(
+    `^${fuente
+      .replace(/\{\/\}\?/g, "/?")
+      .replace(/(?<!\?):(\w+)\(/g, "(?<$1>")
+      .replace(/(?<![?\w]):(\w+)(?![\w(])/g, "(?<$1>[^/#?]+?)")}$`
+  );
+const conParametros = (destino, grupos) =>
+  destino.replace(/:(\w+)\*?/g, (todo, nombre) => (grupos && nombre in grupos ? grupos[nombre] ?? "" : todo));
+const juntarConsulta = (destino, consulta) => {
+  if (!consulta) return destino;
+  return destino.includes("?") ? `${destino}&${consulta.slice(1)}` : `${destino}${consulta}`;
+};
+const primerSalto = (direccion) => {
+  const [camino, resto] = direccion.split("?");
+  const consulta = resto ? `?${resto}` : "";
+  const claves = [...new URLSearchParams(consulta).keys()];
+  for (const r of config.redirects) {
+    const m = comoRegex(r.source).exec(camino);
+    if (!m) continue;
+    const estado = r.statusCode ?? (r.permanent ? 308 : 307);
+    return { estado, destino: juntarConsulta(conParametros(r.destination, m.groups), consulta) };
+  }
+  for (const r of config.rewrites) {
+    const m = comoRegex(r.source).exec(camino);
+    if (!m) continue;
+    if (r.has && !r.has.every((h) => h.type === "query" && claves.includes(h.key))) continue;
+    return { sirve: juntarConsulta(conParametros(r.destination, m.groups), consulta) };
+  }
+  return { sirve: "404 de Vercel" };
+};
+
+console.log("una pieza en otra dirección llega a su función, que la manda a la buena");
+const sirve = (direccion, esperado) => {
+  const salto = primerSalto(direccion);
+  check(`${direccion} → ${esperado}`, salto.sirve === esperado, JSON.stringify(salto));
+};
+sirve("/articulos/una-noticia", "/api/pieza?seccion=articulos&slug=una-noticia");
+sirve("/en/editorial/una-noticia?utm_source=wa", "/api/pieza?seccion=editorial&slug=una-noticia&lang=en&utm_source=wa");
+sirve("/noticias/una-noticia?_s=1", "/app.html?_s=1");
+sirve("/articulo/una-pieza-vieja", "/api/pieza?seccion=articulo&slug=una-pieza-vieja");
+sirve("/Noticias/una-noticia", "/api/pieza?seccion=Noticias&slug=una-noticia");
+sirve("/en/NOTICIAS/una-noticia", "/api/pieza?seccion=NOTICIAS&slug=una-noticia&lang=en");
+sirve("/noticias/Una-Noticia", "/api/pieza?seccion=noticias&slug=Una-Noticia");
+// Con mayúsculas va a la función, que da la 404 si la sección no existe; sin ellas, la 404.
+sirve("/Recetas/una", "/api/pieza?seccion=Recetas&slug=una");
+sirve("/recetas/una", "/api/no-encontrada");
+sirve("/en/Recetas", "/api/no-encontrada?lang=en");
+check("/articulo/ ya no redirige a ciegas a /articulos/ (era una cadena con las noticias)",
+  !config.redirects.some((r) => r.source.startsWith("/articulo/")));
+
 if (fallos) {
   console.log(`\n${fallos} fallo(s)`);
   process.exit(1);

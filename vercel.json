@@ -13,11 +13,6 @@
             "permanent": true
         },
         {
-            "source": "/articulo/:slug",
-            "destination": "/articulos/:slug",
-            "permanent": true
-        },
-        {
             "source": "/categoria/:slug",
             "destination": "/explorar",
             "permanent": true
@@ -133,6 +128,10 @@
             "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {
+            "source": "/articulo/:slug",
+            "destination": "/api/pieza?seccion=articulo&slug=:slug"
+        },
+        {
             "source": "/entorno",
             "has": [
                 {
@@ -211,6 +210,14 @@
         {
             "source": "/((?!.*\\.[A-Za-z0-9]{1,8}$)admin(?:/.*)?)",
             "destination": "/app.html"
+        },
+        {
+            "source": "/en/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug&lang=en"
+        },
+        {
+            "source": "/:seccion([A-Za-z]*[A-Z][A-Za-z]*)/:slug",
+            "destination": "/api/pieza?seccion=:seccion&slug=:slug"
         },
         {
             "source": "/en/((?!.*\\.[A-Za-z0-9]{1,8}$).*)",

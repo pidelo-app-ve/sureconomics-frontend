@@ -56,9 +56,11 @@ import {
   LOGO,
   NOMBRE_DE_FORMATO,
   SECCIONES,
+  SECCION_DE_FORMATO,
   SIN_META,
   SITIO,
   conDeadline,
+  consultaDelLector,
   escapar,
   esNuestroShell,
   leerShell,
@@ -66,8 +68,31 @@ import {
   inyectar,
   textoLlano,
 } from "./_comun.js";
+// Una sección que no existe es la 404 del sitio, la misma que da cualquier otra dirección.
+import noEncontrada from "./no-encontrada.js";
 
 export { IMAGEN_DE_MARCA, esNuestroShell, inyectar };
+
+/**
+ * Las secciones de antes que todavía llegan en enlaces viejos: `/articulo/<slug>`, en
+ * singular, es la del sitio de antes del rediseño. Se buscan como la sección actual y la
+ * función redirige a la dirección de la pieza en un solo salto.
+ */
+export const SECCIONES_VIEJAS = { articulo: "articulos" };
+
+/**
+ * Lo que `vercel.json` le añade a la consulta al mandar una pieza aquí. Al redirigir se
+ * quita; lo demás (`utm_*`, `v`, …) es del lector y se conserva.
+ */
+const PARAMETROS_INTERNOS = ["seccion", "slug", "lang", "fecha", "edicion"];
+
+/**
+ * La sección de la dirección buena de una pieza (`/noticias/<slug>`). Sale del formato de
+ * la pieza, no de la dirección pedida: esa puede estar mal (un enlace viejo, una pieza que
+ * cambió de formato, una mano que la escribió). Un formato que esta función no conoce se
+ * queda con la sección pedida, como antes.
+ */
+export const seccionDeLaPieza = (pieza, pedida) => SECCION_DE_FORMATO[pieza?.format] ?? pedida;
 
 /**
  * `/entorno`, la puerta del boletín desde Instagram. No es una pieza, pero sí se comparte
@@ -299,17 +324,31 @@ export const piezaEnHtml = (pieza, { imagen, idioma = "es" }) => {
 };
 
 export default async function handler(req, res) {
-  const { seccion, slug, lang, fecha, edicion } = req.query ?? {};
+  const query = req.query ?? {};
+  const { seccion, slug, lang, fecha, edicion } = query;
   // `/en/noticias/x` llega aquí con `lang=en` (ver `vercel.json`).
   const pideIngles = lang === "en";
   const prefijo = pideIngles ? "/en" : "";
+  const esPieza = seccion !== "entorno" && seccion !== "resumen";
+  // La sección como llegó (`Noticias`, `articulo`) y la que es (`noticias`, `articulos`).
+  const seccionPedida = String(seccion ?? "");
+  const seccionMinuscula = seccionPedida.toLowerCase();
+  const seccionNormal = SECCIONES_VIEJAS[seccionMinuscula] ?? seccionMinuscula;
   /** La dirección propia de lo pedido, para volver a ella o declararla como canónica. */
   const rutaPropia =
     seccion === "entorno"
       ? "/entorno"
       : seccion === "resumen"
         ? `/resumen/${fecha ?? ""}/${edicion ?? ""}`
-        : `${prefijo}/${seccion ?? ""}${slug ? `/${slug}` : ""}`;
+        : `${prefijo}/${seccionNormal}${slug ? `/${slug}` : ""}`;
+
+  // Una sección que no es de piezas (`/Recetas/x`, o alguien llamando a `/api/pieza` a
+  // mano) es una dirección que no existe: la 404 del sitio, igual que las demás. Antes
+  // salía la aplicación con 200 y la canónica a la portada.
+  if (esPieza && (!SECCIONES[seccionNormal] || !slug || typeof slug !== "string")) {
+    await noEncontrada({ query: pideIngles ? { lang: "en" } : {} }, res);
+    return;
+  }
 
   /** Hand the request back to the static file. Used whenever we cannot produce
    *  the application's own HTML: one redirect, and the reader gets the page. */
@@ -422,18 +461,17 @@ export default async function handler(req, res) {
     return;
   }
 
-  const formato = SECCIONES[seccion];
-  if (!formato || !slug) {
-    seco("ruta-desconocida");
-    return;
-  }
-
   let pieza = null;
+  // El slug con el que la API la encontró: el pedido o, si traía mayúsculas, el mismo en
+  // minúsculas (los slugs se escriben siempre así, y la API distingue unas de otras).
+  let slugHallado = slug;
   try {
-    const respuesta = await conDeadline(
-      `${API}/posts/${encodeURIComponent(slug)}`,
-      LIMITE_MS
-    );
+    const buscar = (s) => conDeadline(`${API}/posts/${encodeURIComponent(s)}`, LIMITE_MS);
+    let respuesta = await buscar(slug);
+    if (respuesta.status === 404 && slug !== slug.toLowerCase()) {
+      slugHallado = slug.toLowerCase();
+      respuesta = await buscar(slugHallado);
+    }
     if (respuesta.status === 404) {
       // No hay pieza con ese nombre: un 404 de verdad, para que el buscador la olvide.
       // La página sigue siendo la aplicación, que dice «No encontramos esta pieza».
@@ -470,12 +508,32 @@ export default async function handler(req, res) {
     return;
   }
 
+  // ¿Es esta la dirección de la pieza? Una noticia abierta como `/articulos/<slug>` (o
+  // `/Noticias/<slug>`, o el `/articulo/<slug>` de antes) respondía 200 con la canónica
+  // apuntando a esa misma dirección equivocada: para Google, otra página igual. Ahora va a
+  // la buena con una 301, en un solo salto, con `/en` si lo traía y con la consulta del
+  // lector (`?utm_source=…`). La página ya hacía lo mismo al cargar (`Pieza.jsx`), pero
+  // eso solo lo ve quien ejecuta JavaScript, y con un 200 delante.
+  const seccionBuena = seccionDeLaPieza(pieza, seccionNormal);
+  if (seccionPedida !== seccionBuena || slug !== slugHallado) {
+    res.setHeader("X-Pieza-Meta", "otra-direccion");
+    // Poco tiempo en el navegador (`max-age`): una 301 sin él se guarda para siempre, y una
+    // pieza que vuelve a cambiar de formato dejaría a ese lector dando vueltas.
+    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=600, stale-while-revalidate=86400");
+    res.redirect(
+      301,
+      `${prefijo}/${seccionBuena}/${encodeURIComponent(slugHallado)}${consultaDelLector(query, PARAMETROS_INTERNOS)}`
+    );
+    return;
+  }
+
   // Las dos direcciones de la pieza. Con versión en inglés (`en_ingles`, la regla del
   // servidor), cada una es la canónica de sí misma y declara a la otra. Sin ella, `/en`
   // enseña el original en español: canónica al español y `noindex`, igual que la página
   // al cargar (ver `useMetaPagina`), para que un buscador no vea dos veces lo mismo.
-  const urlEs = `${SITIO}/${seccion}/${slug}`;
-  const urlEn = `${SITIO}/en/${seccion}/${slug}`;
+  // Siempre con la sección y el slug buenos, nunca los pedidos (aquí ya son los mismos).
+  const urlEs = `${SITIO}/${seccionBuena}/${slugHallado}`;
+  const urlEn = `${SITIO}/en/${seccionBuena}/${slugHallado}`;
   const tieneIngles = Boolean(pieza.en_ingles);
   const enIngles = pideIngles && tieneIngles;
   const idioma = enIngles ? "en" : "es";

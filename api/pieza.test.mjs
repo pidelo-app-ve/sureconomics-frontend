@@ -239,7 +239,7 @@ await conFetch(fetchNormal(CON_CUERPO), async () => {
 // Una firma de la redacción sale como el medio, no como una persona llamada «Redacción».
 await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Redacción SurEconomics" }), async () => {
   const res = respuestaFalsa();
-  await handler({ query: { seccion: "noticias", slug: "x" } }, res);
+  await handler({ query: { seccion: "articulos", slug: "x" } }, res);
   const ld = (res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
   check("la redacción firma como organización", JSON.parse(ld).author["@type"] === "Organization");
 });
@@ -248,7 +248,7 @@ await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Redacción SurEconomics" })
 // `byline`, y la ficha lo da como persona aunque su nombre recuerde a la redacción.
 await conFetch(fetchNormal({ ...CON_CUERPO, byline: "Ana Pérez", firma_de_colaborador: true }), async () => {
   const res = respuestaFalsa();
-  await handler({ query: { seccion: "noticias", slug: "x" } }, res);
+  await handler({ query: { seccion: "articulos", slug: "x" } }, res);
   const ld = JSON.parse((res.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1]);
   check("el colaborador firma como persona, con su nombre",
     ld.author["@type"] === "Person" && ld.author.name === "Ana Pérez", JSON.stringify(ld.author));
@@ -362,11 +362,16 @@ check("el shell propio se reconoce", esNuestroShell(SHELL));
 check("el de Vercel no", !esNuestroShell(LOGIN_DE_VERCEL));
 
 // —— 4. Una sección que no existe no inventa etiquetas ——
+// Es la 404 del sitio (`no-encontrada.js`): antes salía la aplicación con 200 y la
+// canónica a la portada (25-nov-2026).
 await conFetch(fetchNormal(PIEZA), async () => {
   const res = respuestaFalsa();
   await handler({ query: { seccion: "recetas", slug: "x" } }, res);
-  check("sección desconocida no inventa la pieza",
-    res.code === 200 && !res.body.includes("tripartita"), res.headers["X-Pieza-Meta"]);
+  check("sección desconocida: 404 de verdad, sin inventar la pieza",
+    res.code === 404 && !res.body.includes("tripartita") && res.headers["X-Pieza-Meta"] === "no-encontrada",
+    `${res.code} ${res.headers["X-Pieza-Meta"]}`);
+  check("sección desconocida: noindex y sin canónica",
+    res.body.includes('content="noindex, follow"') && !res.body.includes('rel="canonical"'));
 });
 
 // —— 5. Inyección de HTML por el título ——
@@ -720,6 +725,106 @@ check("fotoDePortada: medidas raras no se ponen",
   check("shell del archivo: a la red solo va la pieza", pedidas.length === 1 && !pedidas[0].endsWith("/app.html"), pedidas.join(" "));
   check("twitter:site en la tarjeta de la pieza", res.body.split('name="twitter:site" content="@Sur_economics"').length === 2);
   process.env.SHELL_ARCHIVO = "";
+}
+
+// —— Una sola dirección por pieza (25-nov-2026) ——
+//
+// Search Console: 224 páginas en «Google eligió otra canónica». Una noticia abierta como
+// `/articulos/<slug>` respondía 200 con la canónica a esa misma dirección equivocada: para
+// Google, dos páginas iguales que dicen ser la buena. Ahora la equivocada lleva a la
+// buena con una 301, en un salto, con `/en` y con la consulta del lector.
+{
+  const NOTICIA = { ...CON_CUERPO, slug: "bolsas-caen", format: "noticia" };
+  // La API de verdad: busca el slug exacto (distingue mayúsculas) y no conoce otros.
+  const api = (piezas) => {
+    const pedidas = [];
+    const impl = async (url) => {
+      const texto = String(url);
+      if (texto.endsWith("/app.html")) return { ok: true, status: 200, text: async () => SHELL };
+      pedidas.push(texto);
+      const slug = decodeURIComponent(texto.split("/posts/")[1] ?? "");
+      const pieza = piezas.find((p) => p.slug === slug);
+      return pieza
+        ? { ok: true, status: 200, json: async () => ({ data: pieza }) }
+        : { ok: false, status: 404, json: async () => ({}) };
+    };
+    return { impl, pedidas };
+  };
+  const pedir = async (query, piezas = [NOTICIA]) => {
+    const res = respuestaFalsa();
+    const { impl, pedidas } = api(piezas);
+    await conFetch(impl, () => handler({ query }, res));
+    return { res, pedidas };
+  };
+  const canonicaDe = (h) => (h.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
+
+  {
+    const { res } = await pedir({ seccion: "articulos", slug: "bolsas-caen" });
+    check("sección equivocada: 301 a la de su formato", res.code === 301 && res.location === "/noticias/bolsas-caen",
+      `${res.code} ${res.location}`);
+    check("sección equivocada: dice por qué", res.headers["X-Pieza-Meta"] === "otra-direccion");
+    check("sección equivocada: el navegador no la guarda para siempre", /max-age=3600/.test(res.headers["Cache-Control"]));
+  }
+  {
+    // El enlace que circula por WhatsApp: con su consulta, que llega entera a la buena.
+    const { res } = await pedir({ seccion: "editorial", slug: "bolsas-caen", utm_source: "whatsapp", v: "3" });
+    check("sección equivocada: conserva la consulta del lector",
+      res.location === "/noticias/bolsas-caen?utm_source=whatsapp&v=3", res.location);
+  }
+  {
+    const { res } = await pedir({ seccion: "articulos", slug: "bolsas-caen", lang: "en", a: ["1", "2"] });
+    check("/en con sección equivocada: 301 sin perder /en ni la consulta repetida",
+      res.code === 301 && res.location === "/en/noticias/bolsas-caen?a=1&a=2", res.location);
+  }
+  {
+    const { res } = await pedir({ seccion: "Noticias", slug: "bolsas-caen" });
+    check("sección con mayúsculas: 301 a la de siempre", res.code === 301 && res.location === "/noticias/bolsas-caen", res.location);
+    const en = (await pedir({ seccion: "NOTICIAS", slug: "bolsas-caen", lang: "en" })).res;
+    check("sección con mayúsculas en /en: 301 a /en/noticias", en.code === 301 && en.location === "/en/noticias/bolsas-caen", en.location);
+  }
+  {
+    const { res, pedidas } = await pedir({ seccion: "noticias", slug: "Bolsas-Caen" });
+    check("slug con mayúsculas: se busca en minúsculas y 301", res.code === 301 && res.location === "/noticias/bolsas-caen",
+      `${res.code} ${res.location}`);
+    check("slug con mayúsculas: dos preguntas a la API, la segunda en minúsculas",
+      pedidas.length === 2 && pedidas[1].endsWith("/posts/bolsas-caen"), pedidas.join(" "));
+  }
+  {
+    const { res } = await pedir({ seccion: "articulo", slug: "bolsas-caen" });
+    check("la dirección vieja /articulo/: un salto a la buena, no dos",
+      res.code === 301 && res.location === "/noticias/bolsas-caen", res.location);
+  }
+  {
+    const { res, pedidas } = await pedir({ seccion: "noticias", slug: "bolsas-caen", utm_source: "x" });
+    check("la dirección buena: 200, sin redirigir", res.code === 200 && !res.location, `${res.code}`);
+    check("la dirección buena: una sola pregunta a la API", pedidas.length === 1);
+    check("la dirección buena: canónica a sí misma, sin la consulta",
+      canonicaDe(res.body) === "https://www.sureconomics.com/noticias/bolsas-caen", canonicaDe(res.body));
+  }
+  {
+    const { res } = await pedir({ seccion: "articulos", slug: "no-existe" });
+    check("pieza que no existe en otra sección: 404, sin redirigir", res.code === 404 && !res.location, `${res.code}`);
+    const mayus = (await pedir({ seccion: "noticias", slug: "No-Existe" })).res;
+    check("slug con mayúsculas que no existe: 404", mayus.code === 404 && !mayus.location, `${mayus.code}`);
+  }
+  {
+    const { res, pedidas } = await pedir({ seccion: "Recetas", slug: "bolsas-caen", lang: "en" });
+    check("sección que no existe (con mayúsculas, en /en): 404 en inglés, sin preguntar a la API",
+      res.code === 404 && pedidas.length === 0 && res.body.includes("Page not found"), `${res.code} ${pedidas.length}`);
+  }
+  {
+    // Un formato que la función no conoce: se queda donde se pidió, como antes.
+    const { res } = await pedir({ seccion: "informes", slug: "bolsas-caen" }, [{ ...NOTICIA, format: "otro" }]);
+    check("formato desconocido: no se inventa otra dirección", res.code === 200 && !res.location, `${res.code} ${res.location}`);
+  }
+  {
+    // Con versión en inglés, las dos direcciones buenas se declaran la una a la otra.
+    const { res } = await pedir({ seccion: "noticias", slug: "bolsas-caen", lang: "en" },
+      [{ ...NOTICIA, en_ingles: true, title_en: "Stocks fall", content_en: "<p>Body.</p>" }]);
+    check("/en buena: 200 con canónica y hreflang de su sección",
+      res.code === 200 && canonicaDe(res.body) === "https://www.sureconomics.com/en/noticias/bolsas-caen" &&
+        res.body.includes('hreflang="es" href="https://www.sureconomics.com/noticias/bolsas-caen"'));
+  }
 }
 
 console.log(fallos ? `\n  ${fallos} fallo(s)` : "\n  todo verde");

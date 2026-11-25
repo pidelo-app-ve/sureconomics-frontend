@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
 import { applyPageMeta } from "../../lib/seo";

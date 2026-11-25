@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 const getMessage = (error, t) => {
   if (!error) return t("listados.estados.errorGenerico");

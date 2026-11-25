@@ -8,7 +8,7 @@ import { useHeadlines } from "./useHeadlines";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { formatearFecha } from "../../i18n/motor";
 import { rutaDePieza } from "../../lib/pieza";
-import { TituloDePieza } from "../../components/content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 import "./titulares.css";
 
 /**

@@ -16,13 +16,13 @@ import {
     unpublishAdminPost,
 } from "../../services/adminPostsService";
 import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
-import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../ui";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { ListaDeComprobacion } from "../../components/admin/ListaDeComprobacion";
 import { PiezaPublicada } from "../../components/admin/PiezaPublicada";
 import { useSugerenciasDeClasificacion } from "../../components/admin/SugerenciasDeClasificacion";
 import { applyPageMeta } from "../../lib/seo";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { useFlashMessage } from "../../hooks/useFlashMessage";
 import { useAuth } from "../../context/AuthContext";

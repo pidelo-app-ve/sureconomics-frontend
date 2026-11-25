@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 export const LoadingState = ({ title, description }) => {
   const { t } = useIdioma();

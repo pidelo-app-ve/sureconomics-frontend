@@ -20,7 +20,7 @@ import {
 } from "../../services/adminMediaService";
 import { subirVideoDeStream } from "../../lib/subirVideoDeStream";
 import { useClaveIdempotente } from "../../hooks/useClaveIdempotente";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import {
   getResumenEducacion,
@@ -40,7 +40,7 @@ import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoEducacion } from "../../lib/guias/guiaEducacion";
 import { esEditor } from "../../lib/menuDelPanel";
-import { LoadingState } from "../../components/content";
+import { LoadingState } from "../../ui";
 
 /**
  * El panel de Educacion: modulos, lecciones y su orden.

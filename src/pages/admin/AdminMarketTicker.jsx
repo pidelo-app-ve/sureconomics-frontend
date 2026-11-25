@@ -3,7 +3,7 @@ import {
     getAdminMarketTicker,
     putAdminMarketTicker,
 } from "../../services/marketTickerService";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { AdminFormFeedback } from "../../components/admin/AdminFormFeedback";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";

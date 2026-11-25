@@ -8,11 +8,11 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
-import { sustituir } from "../../scripts/pruebas/dobles.mjs";
+import { sustituir } from "../../../scripts/pruebas/dobles.mjs";
 
 let dialogo = null;
 sustituir({
-  "src/components/admin/AdminConfirmDialog.jsx": {
+  "src/ui/admin/AdminConfirmDialog.jsx": {
     AdminConfirmDialog: (props) => {
       dialogo = props;
       return null;
@@ -20,9 +20,9 @@ sustituir({
   },
 });
 
-const { montarGancho, act } = await import("../../scripts/pruebas/montar.mjs");
+const { montarGancho, act } = await import("../../../scripts/pruebas/montar.mjs");
 const { useAdminConfirm } = await import("./useAdminConfirm.jsx");
-const { eliminarPieza } = await import("../components/admin/editorDePieza/guardado.js");
+const { eliminarPieza } = await import("../../components/admin/editorDePieza/guardado.js");
 
 /** En qué quedó una promesa sin esperarla: `"pendiente"` o su valor. */
 const estadoDe = async (promesa) => {

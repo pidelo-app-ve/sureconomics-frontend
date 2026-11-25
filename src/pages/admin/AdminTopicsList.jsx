@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { listAdminTopics, patchAdminTopic } from "../../services/adminTaxonomyService";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { useAdminToast } from "../../context/AdminToastContext";

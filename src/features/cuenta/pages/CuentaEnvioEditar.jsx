@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Enlace, useNavegar } from "../../../components/Enlace";
 import { useUserAuth } from "../UserAuthContext";
-import { ErrorState, LoadingState } from "../../../components/content";
+import { ErrorState, LoadingState } from "../../../ui";
 import { SubmissionForm, normalizarPropuesta } from "../components/SubmissionForm";
 import { BRAND } from "../../../config/sitio";
 import { useIdioma } from "../../../i18n/ProveedorIdioma";

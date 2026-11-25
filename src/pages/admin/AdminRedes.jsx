@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { BarraDeGuardar } from "../../components/admin/BarraDeGuardar";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useGuardiaDeSalida } from "../../hooks/useGuardiaDeSalida";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { haceCuanto } from "../../lib/haceCuanto";
@@ -20,7 +20,7 @@ import {
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoRedes } from "../../lib/guias/guiaRedes";
-import { LoadingState } from "../../components/content";
+import { LoadingState } from "../../ui";
 
 /**
  * «En redes»: qué publicaciones se destacan al pie de todas las vistas.

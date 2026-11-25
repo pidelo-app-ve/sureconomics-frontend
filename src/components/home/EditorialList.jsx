@@ -7,7 +7,7 @@ import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
 import { conAnuncio } from "./conAnuncio";
 import { EspacioPublicitario, useHayAnuncio } from "../../features/publicidad";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * Editorial: the outlet's own position, with no personal byline.

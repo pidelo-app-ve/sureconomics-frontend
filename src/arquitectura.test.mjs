@@ -23,8 +23,11 @@
  *
  * Las reglas, en el orden en que se miran:
  *
- * 1. `src/ui/` (lo compartido: botones, tablas, diálogos) no importa **ningún** dominio,
- *    ni siquiera por su puerta: es el dominio el que usa `ui/`, no al revés.
+ * 1. `src/ui/` (lo compartido por tres temas o más: los estados de carga, error y vacío, la
+ *    paginación, el título de una pieza; y en `ui/admin/`, lo del panel: la confirmación y
+ *    las páginas de una lista) no importa **ningún** dominio, ni siquiera por su puerta, ni
+ *    ninguna página (`src/pages/`, también las del panel): son ellos los que usan `ui/`,
+ *    no al revés. `ui/admin/` es una carpeta del panel como las demás (regla 2).
  * 2. Nada que viva en una carpeta del panel se importa desde fuera de una carpeta del
  *    panel: ni el `admin/` de un dominio, ni un componente del panel que a su vez lo
  *    importe (la fuga indirecta). Tampoco desde el propio dominio: si `index.js` o un
@@ -113,10 +116,9 @@ const FACHADAS = {
 const FUGAS_CONOCIDAS = {
   "src/routes.jsx → src/components/admin/RequireAdmin.jsx":
     "la guarda de /admin, que va en la ruta y no en una página; la quita quien mude el panel (o la pase a src/app/)",
-  "src/hooks/useAdminConfirm.jsx → src/components/admin/AdminConfirmDialog.jsx":
-    "el diálogo de confirmar lo usan el panel y la cuenta; la quita quien cree src/ui/ (diálogos)",
   "src/features/cuenta/components/RetratoDelLector.jsx → src/components/admin/RecorteDeAvatar.jsx":
-    "el recorte del retrato lo usan el panel y la cuenta del lector; la quita quien lo mude a src/ui/",
+    "el recorte del retrato lo usan el panel (el equipo) y la cuenta del lector: dos temas, y src/ui/ es para tres o " +
+      "más; la quita quien lo mude a src/ui/ (fuera de ui/admin/, que es del panel) cuando lo use un tercero",
 };
 
 /**
@@ -198,6 +200,7 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
   const SRC = path.join(raiz, "src");
   const DOMINIOS = path.join(SRC, "features");
   const UI = path.join(SRC, "ui");
+  const PAGINAS = path.join(SRC, "pages");
   const API = path.join(SRC, "api");
   const I18N = path.join(SRC, "i18n");
   const CONFIG = path.join(SRC, "config");
@@ -269,6 +272,10 @@ export const faltas = (raiz = RAIZ, fachadas = FACHADAS, fugas = FUGAS_CONOCIDAS
       const fachada = fachadas[relativa(destino)];
       if (fachada && !fachada.importadores.includes(rel)) {
         salida.push(`${donde}; una fachada solo la importan los de su lista (FACHADAS): lo nuevo entra por la puerta`);
+        continue;
+      }
+      if (dentroDe(ruta, UI) && dentroDe(destino, PAGINAS)) {
+        salida.push(`${donde}; ui/ no conoce las páginas (src/pages/, también las del panel): son ellas las que usan ui/`);
         continue;
       }
       const otro = dominioDe(destino);
@@ -532,6 +539,13 @@ test("la prueba ve las trampas", () => {
     ],
     "src/ui/Boton.jsx": [
       'import { B } from "../features/b";', //         ✗ 1: ui no usa dominios, ni por la puerta
+      'import { H } from "../pages/Home";', //         ✗ 1: ni páginas
+      'import { t } from "../i18n/motor";', //         bien: los textos
+    ],
+    "src/ui/admin/Dialogo.jsx": [
+      'import { C } from "../../pages/admin/Cinta";', // ✗ 1: tampoco las del panel, aunque ui/admin/ sea panel
+      'import { Boton } from "../Boton";', //           bien: lo de ui/
+      'import { Q } from "../../features/b/admin";', // ✗ 1: ni el panel de un dominio
     ],
     "src/pages/admin/Cinta.jsx": [
       'import { Q } from "../../features/b/admin";', // bien
@@ -616,6 +630,9 @@ test("la prueba ve las trampas", () => {
       "src/routes.jsx:5 src/pages/admin/Cinta.jsx",
       "src/routes.jsx:8 src/features/b/Tarjeta.jsx",
       "src/ui/Boton.jsx:1 src/features/b/index.js",
+      "src/ui/Boton.jsx:2 src/pages/Home.jsx",
+      "src/ui/admin/Dialogo.jsx:1 src/pages/admin/Cinta.jsx",
+      "src/ui/admin/Dialogo.jsx:3 src/features/b/admin/index.js",
     ]);
   } finally {
     rmSync(raiz, { recursive: true, force: true });

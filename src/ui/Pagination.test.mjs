@@ -10,7 +10,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createElement } from "react";
 
-const { pintar, pantalla, fireEvent, within } = await import("../../../scripts/pruebas/dom.mjs");
+const { pintar, pantalla, fireEvent, within } = await import("../../scripts/pruebas/dom.mjs");
 const { Pagination } = await import("./Pagination.jsx");
 
 /** La paginación en `page` de `totalPages`; devuelve las páginas que pidió cada clic. */

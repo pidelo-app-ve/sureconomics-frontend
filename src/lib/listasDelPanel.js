@@ -5,7 +5,7 @@
  * día de hoy en Caracas. Con su prueba al lado (`listasDelPanel.test.mjs`).
  *
  * Lo que va con React está en `hooks/useBuscadorConEspera.js`,
- * `hooks/useListaDelServidor.js` y `components/admin/PaginasDeLaLista.jsx`.
+ * `hooks/useListaDelServidor.js` y `ui/admin/PaginasDeLaLista.jsx`.
  */
 
 /** Cuánto espera un buscador del panel a que se deje de escribir antes de pedir. */

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AdminConfirmDialog } from "../components/admin/AdminConfirmDialog";
+import { AdminConfirmDialog } from "./AdminConfirmDialog";
 
 /**
  * @typedef {{

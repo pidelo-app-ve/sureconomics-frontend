@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 /**
  * El titular de una pieza en una tarjeta o una lista, en el idioma en que está.

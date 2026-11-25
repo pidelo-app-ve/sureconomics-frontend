@@ -6,7 +6,7 @@ import { BRAND, PARTNERS } from "../config/sitio";
 import { PartnersLogoCloud } from "../components/institutional/PartnersLogoCloud";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../i18n/useMetaPagina";
-import { EmptyState, ErrorState, LoadingState } from "../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../ui";
 import { PrimeraPlana } from "../components/home/PrimeraPlana";
 import { PASO, anunciosDeTanda as anunciosDeTandaDe, bloquesDePortada, primeraPlanaDe } from "../lib/bloquesDePortada";
 import { PausaPortada } from "../components/home/PausaPortada";

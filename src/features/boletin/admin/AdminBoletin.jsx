@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ModalDelPanel } from "../../../components/admin/ModalDelPanel";
 import { useAdminToast } from "../../../context/AdminToastContext";
-import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";
 import {
   crearNumero,
@@ -12,7 +12,7 @@ import {
 import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 import { recorridoBoletin } from "../../../lib/guias/guiaBoletin";
 import { CabeceraDePagina } from "../../../components/admin/CabeceraDePagina";
-import { LoadingState } from "../../../components/content";
+import { LoadingState } from "../../../ui";
 import { lunesLargo } from "./utils";
 import { Listado } from "./components/Listado";
 import { Editor } from "./components/Editor";

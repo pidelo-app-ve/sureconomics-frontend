@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { adminRequest } from "../../lib/api";
 import { recorridoResumen } from "../../lib/guias/guiaResumen";

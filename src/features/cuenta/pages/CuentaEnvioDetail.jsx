@@ -7,7 +7,7 @@ import { useIdioma } from "../../../i18n/ProveedorIdioma";
 import { useMetaPagina } from "../../../i18n/useMetaPagina";
 import { formatSubmissionDate, submissionStatusLabel } from "../../../lib/submissionDisplay";
 import * as userMeService from "../../../services/userMeService";
-import { ErrorState, LoadingState, Pagination } from "../../../components/content";
+import { ErrorState, LoadingState, Pagination } from "../../../ui";
 import { useFlashMessage } from "../../../hooks/useFlashMessage";
 import { BotonGuia, RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 import { recorridoMiPropuesta } from "../../../lib/guias/guiaMisPropuestas";

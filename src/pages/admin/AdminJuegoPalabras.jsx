@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ModalDelPanel } from "../../components/admin/ModalDelPanel";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
@@ -12,7 +12,7 @@ import {
     listAdminPalabras,
     patchAdminPalabra,
 } from "../../services/adminClaveService";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoLaClave } from "../../lib/guias/guiaLaClave";

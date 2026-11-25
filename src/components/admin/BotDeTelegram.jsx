@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useCallback, useEffect, useState } from "react";
 import { useAdminToast } from "../../context/AdminToastContext";
 import { useAuth } from "../../context/AuthContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { estadoDePersona, lineaDelBot, lineaDeQuienRecibe } from "../../lib/avisos";
 import {

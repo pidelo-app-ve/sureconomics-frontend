@@ -7,7 +7,7 @@ import {
 } from "../../lib/adminSubmissionAuthor";
 import { applyAdminSubmissionWorkflow, getAdminSubmission } from "../../services/adminSubmissionsService";
 import { getAdminUser } from "../../services/adminUsersService";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import {
@@ -21,7 +21,7 @@ import {
   listAdminSubmissionNotes,
   patchAdminSubmissionNote,
 } from "../../services/adminSubmissionNotesService";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { useAuth } from "../../context/AuthContext";
 import { enlaceWeb } from "../../lib/enlaces";
 import { BotonGuia, RecorridoVista } from "../../components/recorrido/RecorridoVista";

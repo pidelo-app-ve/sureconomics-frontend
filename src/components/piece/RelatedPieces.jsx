@@ -3,7 +3,7 @@ import { geoPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "../home/piezaShape";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * "También te puede interesar": pieces sharing a topic or a place.

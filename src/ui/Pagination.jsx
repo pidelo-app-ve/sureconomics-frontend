@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import { PAGE_GAP, buildPageRange, clampPage } from "../../lib/pageRange";
-import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { PAGE_GAP, buildPageRange, clampPage } from "../lib/pageRange";
+import { useIdioma } from "../i18n/ProveedorIdioma";
 
 /**
  * `compacta`: solo «Anterior» y «Siguiente», pequeños y sin aire, para ponerla encima de

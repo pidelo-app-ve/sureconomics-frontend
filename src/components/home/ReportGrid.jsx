@@ -5,7 +5,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 import { Recorte, Recortes } from "../comun/Recorte";
 
 /**

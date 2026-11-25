@@ -16,6 +16,12 @@ un tope que solo baja.
 - **Compartida, por debajo de todo:** `src/api/` (el cliente HTTP) y `src/config/` (los
   datos fijos del sitio). No importan nada del sitio ni del panel: son los demás los que
   las usan.
+- **Componentes compartidos: `src/ui/`.** Lo que usan tres temas o más, sin lógica de
+  ninguno: cargando, error, vacío y la paginación (por `ui/index.js`), y el título de una
+  pieza (`ui/TituloDePieza.jsx`). Lo que solo usa el panel va en `ui/admin/` (la
+  confirmación, `useAdminConfirm.jsx`, y las páginas de una lista,
+  `PaginasDeLaLista.jsx`), que es una carpeta del panel como las demás: el sitio no la
+  puede importar. `ui/` no importa ninguna feature ni ninguna página.
 
 ## Tema → carpetas
 
@@ -33,7 +39,7 @@ un tope que solo baja.
 | Resumen diario | `pages/Resumen.jsx`, `services/resumenService.js`, `components/admin/resumen` |
 | Juegos (Vuela guacamaya, La Clave) | `src/juegos` |
 | El panel (`/admin`) | `pages/admin`, `components/admin` (y el `admin/` de cada feature) |
-| Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `components/admin/PaginasDeLaLista.jsx` |
+| Lo común de las listas del panel (buscador con espera, páginas, turno) | `lib/listasDelPanel.js`, `hooks/useBuscadorConEspera.js`, `hooks/useListaDelServidor.js`, `ui/admin/PaginasDeLaLista.jsx` |
 | Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad y el boletín viven en `features/*/guia.js`, y los de las ocho de la cuenta, en `features/cuenta/guides/` |
 | Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
@@ -110,5 +116,6 @@ por la puerta del feature.
 4. Si tiene panel, va en `admin/`. Si otra página del panel necesita algo de él, se le
    abre una segunda puerta, `admin/index.js` (ver `features/monedas/admin/index.js`):
    nunca por la puerta del sitio, que viaja en el paquete de cada lector.
-5. Entre features, solo por las puertas. `src/ui/` (lo compartido: botones, tablas,
-   diálogos), cuando exista, no importará features: son ellos los que lo usan.
+5. Entre features, solo por las puertas. Un componente que ya usan tres temas va a
+   `src/ui/` (o a `src/ui/admin/` si es solo del panel); `ui/` no importa features ni
+   páginas: son ellas las que lo usan.

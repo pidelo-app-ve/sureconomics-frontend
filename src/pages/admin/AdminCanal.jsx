@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { useAdminToast } from "../../context/AdminToastContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { recorridoCanal } from "../../lib/guias/guiaCanal";
 import { haceCuanto } from "../../lib/haceCuanto";

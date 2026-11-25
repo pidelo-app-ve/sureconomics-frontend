@@ -4,7 +4,7 @@ import { CardMedia } from "./CardMedia";
 import { geoPrincipal, temaPrincipal } from "../../lib/contentFilter";
 import { nombreDeFormato, rutaDePieza } from "../../lib/pieza";
 import { listaDePiezas } from "./piezaShape";
-import { TituloDePieza } from "../content/TituloDePieza";
+import { TituloDePieza } from "../../ui/TituloDePieza";
 
 /**
  * Podcast: charlas cortas para escuchar. La misma forma de tarjeta que Editorial --

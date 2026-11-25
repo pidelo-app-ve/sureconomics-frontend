@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Pagination } from "../content";
+import { Pagination } from "../Pagination";
 import { lineaDePaginas } from "../../lib/listasDelPanel";
 
 /**

@@ -8,7 +8,7 @@ import { useMasLeidas } from "../../hooks/useMasLeidas";
 import { lineaDelPunto, rutaInterna } from "../../lib/resumen";
 import { getResumen } from "../../services/resumenService";
 import { BRAND } from "../../config/sitio";
-import { EmptyState, ErrorState, LoadingState } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState } from "../../ui";
 import { haceCuanto, useHeadlines } from "./useHeadlines";
 import { formatearFecha } from "../../i18n/motor";
 import { nuevosEn, queHacer } from "./utils";

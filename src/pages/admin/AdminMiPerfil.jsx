@@ -6,9 +6,9 @@ import {
   getAdminMe,
   updateAdminMe,
 } from "../../services/adminMeService";
-import { ErrorState, LoadingState } from "../../components/content";
+import { ErrorState, LoadingState } from "../../ui";
 import { useAuth } from "../../context/AuthContext";
-import { useAdminConfirm } from "../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../ui/admin/useAdminConfirm";
 import { dispatchAdminAuthSync } from "../../lib/api";
 import { adminErrorMessage } from "../../lib/adminErrorMessage";
 import { persistAuth } from "../../lib/authStorage";

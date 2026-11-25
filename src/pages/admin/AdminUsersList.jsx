@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { listAdminUsers } from "../../services/adminUsersService";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../ui";
 import { applyPageMeta } from "../../lib/seo";
 import { adminPick } from "../../lib/adminPick";
 import { puedeEnviarPropuestas } from "../../lib/adminUserDetailDisplay";
@@ -11,7 +11,7 @@ import { useBuscadorConEspera } from "../../hooks/useBuscadorConEspera";
 import { useListaDelServidor } from "../../hooks/useListaDelServidor";
 import { CabeceraDePagina } from "../../components/admin/CabeceraDePagina";
 import { FiltrosDeUsuarios } from "../../components/admin/FiltrosDeUsuarios";
-import { PaginasDeLaLista } from "../../components/admin/PaginasDeLaLista";
+import { PaginasDeLaLista } from "../../ui/admin/PaginasDeLaLista";
 import { RecorridoVista } from "../../components/recorrido/RecorridoVista";
 import { recorridoUsuarios } from "../../lib/guias/guiaUsuarios";
 

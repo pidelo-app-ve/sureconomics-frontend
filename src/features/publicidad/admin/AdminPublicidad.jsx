@@ -4,7 +4,7 @@ import { RecorridoVista } from "../../../components/recorrido/RecorridoVista";
 import { recorridoPublicidad } from "../../../lib/guias/guiaPublicidad";
 import { applyPageMeta } from "../../../lib/seo";
 import { useAdminToast } from "../../../context/AdminToastContext";
-import { useAdminConfirm } from "../../../hooks/useAdminConfirm";
+import { useAdminConfirm } from "../../../ui/admin/useAdminConfirm";
 import { useConfirmacionDeGuardado } from "../../../hooks/useConfirmacionDeGuardado";
 import { AsistenteDeAnuncio } from "./components/AsistenteDeAnuncio";
 import { adminErrorMessage } from "../../../lib/adminErrorMessage";

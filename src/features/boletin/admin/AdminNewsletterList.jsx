@@ -3,11 +3,11 @@ import {
   downloadNewsletterCsv,
   listNewsletterSubscribers,
 } from "./api";
-import { EmptyState, ErrorState, LoadingState, Pagination } from "../../../components/content";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../../ui";
 import { applyPageMeta } from "../../../lib/seo";
 import { useAuth } from "../../../context/AuthContext";
 import { CabeceraDePagina } from "../../../components/admin/CabeceraDePagina";
-import { PaginasDeLaLista } from "../../../components/admin/PaginasDeLaLista";
+import { PaginasDeLaLista } from "../../../ui/admin/PaginasDeLaLista";
 import { FiltrosDeSuscriptores } from "./components/FiltrosDeSuscriptores";
 import { useBuscadorConEspera } from "../../../hooks/useBuscadorConEspera";
 import { useListaDelServidor } from "../../../hooks/useListaDelServidor";

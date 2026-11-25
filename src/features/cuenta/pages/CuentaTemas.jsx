@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Enlace } from "../../../components/Enlace";
 import { BotonDeSeguirTema } from "../../../components/content/BotonDeSeguirTema";
-import { TituloDePieza } from "../../../components/content/TituloDePieza";
+import { TituloDePieza } from "../../../ui/TituloDePieza";
 import { useTemasSeguidos } from "../../../context/TemasSeguidosContext";
 import { useUserAuth } from "../UserAuthContext";
 import { BRAND } from "../../../config/sitio";

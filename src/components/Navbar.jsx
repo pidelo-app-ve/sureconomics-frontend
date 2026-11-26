@@ -8,6 +8,7 @@ import { BRAND, BRAND_PUBLIC_LOGO } from "../brand/publicBrandLogos";
 import { Relojes, RelojesEnLista } from "./Relojes";
 import { useIdioma } from "../i18n/ProveedorIdioma";
 import { useUserAuth } from "../features/cuenta";
+import { prefiereQuieto } from "../lib/movimiento";
 
 const MENU_ID = "se-header-menu";
 
@@ -18,6 +19,23 @@ const LOGO_WEBP = BRAND.lockupNegativoTallas;
 /** Lo ancho que se ve el logo de la barra: 24 px de alto hasta 759, 26 entre 1100 y 1365
  *  y hasta 34 en el resto (`.se-header__logo`), con la proporción del archivo (900x117). */
 const SIZES_LOGO = "(max-width: 759px) 185px, (min-width: 1100px) and (max-width: 1365px) 200px, 262px";
+
+/**
+ * El logo estando ya en la portada (`/` o `/en`, sin consulta): sube arriba en vez de
+ * navegar. Navegar a la misma página la volvía a pintar entera para dejarla igual, y en el
+ * teléfono eso se notaba en el toque. Suave, salvo si el lector pidió menos movimiento.
+ *
+ * Con consulta (`?buscar=1`, el buscador abierto) sí navega: el logo es la vuelta a la
+ * portada limpia. Con un ancla (`#boletin`) navega también, para quitarla de la dirección,
+ * y sube igual (la ruta no cambia, así que nadie más lo haría). Un clic con Ctrl, Cmd o
+ * Mayúsculas, o con otro botón, es abrir en otra pestaña: no se toca.
+ */
+const subirSiEsLaPortada = (e, location) => {
+  if (sinPrefijo(location.pathname) !== "/" || location.search) return;
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (!location.hash) e.preventDefault();
+  window.scrollTo({ top: 0, behavior: prefiereQuieto() ? "auto" : "smooth" });
+};
 
 /** Lo que se puede tabular dentro del cajón: el mismo criterio que el cuadro de TikTok. */
 const FOCALES =
@@ -378,7 +396,7 @@ export const Navbar = () => {
           to="/"
           className="se-header__brand"
           aria-label={t("nav.marcaInicio")}
-          onClick={closeMenu}
+          onClick={(e) => { closeMenu(); subirSiEsLaPortada(e, location); }}
         >
           {/* La marca entera también en el teléfono: sin el reloj en la barra cabe a
               24 px de alto, y la versión comprimida («Sur E») se leía como un logo roto. */}

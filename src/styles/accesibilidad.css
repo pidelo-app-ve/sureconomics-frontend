@@ -39,6 +39,30 @@
   .se-saltar { transition: transform 0.15s ease-out; }
 }
 
+/* —— El anillo del foco en los enlaces (E-26, WCAG 2.4.7) ——
+   Los botones ya llevan el suyo, pero los enlaces sin regla propia (la marca, los de la
+   cabecera, los titulares, «Toda la última hora») se quedaban con el del navegador: un
+   contorno oscuro de 1 px, que sobre el verde de la cabecera no se ve (1,35:1). Ahora,
+   dos píxeles del color del propio texto, que ya está elegido para leerse sobre su
+   fondo: blanco sobre el verde (14,1:1), tinta sobre el papel. Solo con teclado
+   (`:focus-visible`): un clic con el ratón no lo enciende.
+   Pesa poco a propósito (un elemento y una pseudoclase): cualquier regla de un
+   componente que ya dibuje su foco (`.se-link:focus-visible`, los de la cabecera…) gana
+   a esta y se queda como estaba. */
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* En la cabecera, blanco siempre: su fondo es el verde (también el del cajón del menú) y
+   no todos sus enlaces tienen el texto blanco. La marca es una imagen y su `color` es la
+   tinta del sitio (#111827): con `currentColor` su anillo salía oscuro sobre verde,
+   medido en Edge el 26-nov-2026. `:where()` no suma peso: esta regla pesa lo mismo que
+   la de arriba, gana por ir después, y las reglas propias de la cabecera siguen ganando. */
+:where(.se-header) a:focus-visible {
+  outline-color: #ffffff;
+}
+
 /* El envoltorio del contenido recibe el foco por programa -- al saltar y al cambiar
    de ruta --, nunca tabulando. Un recuadro alrededor de la pagina entera no le dice
    nada a nadie, asi que solo aqui se quita el contorno. */

@@ -2262,7 +2262,8 @@
 
 .se-contact .se-form-control {
   background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(var(--se-tinte), 0.16);
+  /* Era negro al 16 %: 1,45:1, el campo casi no se veía (E-17). */
+  border-color: var(--se-form-control-border);
   color: rgba(var(--se-tinte), 0.92);
   box-shadow: inset 0 1px 0 rgba(var(--se-tinte), 0.08);
 }
@@ -2347,6 +2348,12 @@
   --se-form-surface: #ffffff;
   --se-form-border: #b4bcc8;
   --se-form-border-strong: #8b95a8;
+  /* El borde de la caja donde se escribe (E-17, WCAG 1.4.11): tiene que verse a 3:1
+     contra lo que la rodea. #8b8478 da 3,70:1 sobre blanco y 3,49:1 sobre el papel;
+     el #b4bcc8 de arriba daba 1,91. Los demás bordes (la tarjeta del formulario, los
+     grupos) siguen con `--se-form-border`: son adorno, no dicen dónde escribir. */
+  --se-form-control-border: #8b8478;
+  --se-form-control-border-hover: #5f5a52;
   --se-form-text: #111827;
   --se-form-muted: #4b5563;
   --se-form-placeholder: #6b7280;
@@ -2408,7 +2415,7 @@
   width: 100%;
   min-height: 2.75rem;
   padding: 0.65rem 0.85rem;
-  border: 1.5px solid var(--se-form-border);
+  border: 1.5px solid var(--se-form-control-border);
   border-radius: 12px;
   background: var(--se-form-surface);
   font-family: var(--se-font-ui);
@@ -2430,7 +2437,7 @@
 }
 
 .se-form-control:hover:not(:disabled):not(:focus) {
-  border-color: var(--se-form-border-strong);
+  border-color: var(--se-form-control-border-hover);
 }
 
 .se-form-control:focus {
@@ -7709,9 +7716,11 @@ html {
   color: #ffffff;
 }
 
-/* El formulario del boletín (en las páginas que no son la portada), sobre verde. */
+/* El formulario del boletín (en las páginas que no son la portada), sobre verde.
+   El borde, blanco al 55 %: al 30 % daba 2,36-2,62:1 contra el verde y el fondo del
+   campo, y no se veía dónde escribir (E-17); así da 5,06-5,62:1. */
 .se-footer__newsletter-input {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.55);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.18);
   color: #ffffff;
@@ -7720,6 +7729,12 @@ html {
 
 .se-footer__newsletter-input::placeholder {
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* Al pasar el ratón, más claro y no más oscuro: la regla de arriba del archivo es de
+   cuando el pie era papel, y sobre el verde el borde casi desaparecía. */
+.se-footer__newsletter-input:hover:not(:disabled):not(:focus) {
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
 .se-footer__newsletter-btn {

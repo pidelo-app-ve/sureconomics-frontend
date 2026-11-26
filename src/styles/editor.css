@@ -17,7 +17,8 @@
   --rte-divider: color-mix(in srgb, var(--se-form-text) 14%, transparent);
   --rte-toolbar-bg: color-mix(in srgb, var(--se-form-surface) 92%, var(--se-form-text) 4%);
 
-  border: 1.5px solid var(--se-form-border);
+  /* La caja del texto es un campo más: su borde, el de los campos (E-17). */
+  border: 1.5px solid var(--se-form-control-border, var(--se-form-border));
   border-radius: 12px;
   background: var(--se-form-surface);
   overflow: hidden;

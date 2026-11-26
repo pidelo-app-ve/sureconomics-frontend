@@ -4,6 +4,8 @@
  * `utils.test.mjs` (`npm run test:publicidad`).
  */
 
+import { expandGeo } from "../../lib/contentFilter";
+
 /**
  * Una lista de valores (tema, país) tal como viaja en la dirección: `a,b,c`, o `null`
  * si no hay nada que mandar.
@@ -21,6 +23,90 @@ export const listaDeQuery = (valor) => {
     .map((v) => String(v).trim())
     .filter(Boolean);
   return partes.length ? partes.join(",") : null;
+};
+
+/**
+ * Lo que el lector eligió en el filtro de un listado, dicho como lo entiende el servidor:
+ * por **slug**, igual que una pieza (`pieza.temaSlugs`, `pieza.geoSlugs`).
+ *
+ * El filtro guarda **nombres** (los que se ven en los botones: «Macroeconomía», y en
+ * `/en` el nombre en inglés si la redacción lo puso), y las campañas guardan sus temas y
+ * países por slug (el panel, `DondeSale`). El servidor compara texto con texto (solo pasa
+ * todo a minúsculas), así que el nombre solo casaba por suerte, cuando en minúsculas es
+ * igual al slug («Venezuela»). «Mercados e Inversión», «Perú» o «EE. UU.» no casaban
+ * nunca, y en `/en` menos: una campaña de un tema no salía en los listados.
+ *
+ * - Un tema se busca por su nombre en español y en inglés (`name`, `name_en`): vale el
+ *   que esté puesto, aunque el lector cambie de idioma con el filtro elegido.
+ * - Un lugar, por `slugPorNombre` (el árbol, en el idioma de la página). Una región o
+ *   un continente lleva además los slugs de todo lo que contiene («Andina» manda
+ *   `andina` y sus cinco países), sin repetir si el lector eligió también uno de ellos.
+ * - «Todo» (la raíz del árbol, «Mundo») no es un país: en el filtro quiere decir «sin
+ *   filtro», así que no se manda. Una campaña sin países ya sale en todas partes, y una
+ *   con países solo debe salir a quien eligió uno de ellos.
+ * - Un nombre sin slug conocido (el árbol aún no llegó, un tema que ya no existe) no se
+ *   manda: un nombre no casa con ninguna campaña, y mandarlo solo ensuciaría la dirección.
+ *
+ * @param {{temas?: Iterable<string>, geos?: Iterable<string>}} seleccion
+ * @param {{topics?: Array<{slug: string, name?: string, name_en?: string}>,
+ *   slugPorNombre?: Record<string, string>, ancestros?: Record<string, string[]>,
+ *   geoTop?: string}} taxonomia lo de `useTaxonomy`
+ * @returns {{tema: string[], pais: string[]}}
+ */
+export const contextoDeLaSeleccion = ({ temas, geos } = {}, taxonomia = {}) => {
+  const { topics = [], slugPorNombre = {}, ancestros = {}, geoTop } = taxonomia;
+
+  const slugDeTema = new Map();
+  topics.forEach((t) => {
+    if (!t?.slug) return;
+    [t.name, t.name_en].forEach((nombre) => {
+      if (nombre && !slugDeTema.has(nombre)) slugDeTema.set(nombre, t.slug);
+    });
+  });
+
+  // La raíz se reconoce por su nombre (lo que guarda el filtro) y, por si acaso, por su
+  // slug: así «Mundo» no se cuela aunque llegara con otro nombre que también la nombre.
+  // Solo las claves propias: el mapa es un objeto, y sin esto un nombre como
+  // «constructor» devolvería una función en vez de nada. Con `hasOwnProperty.call` y no
+  // `Object.hasOwn`, que no existe en Safari 14 (ver la regla en `eslint.config.js`).
+  const lugar = (nombre) =>
+    Object.prototype.hasOwnProperty.call(slugPorNombre, nombre) ? slugPorNombre[nombre] : undefined;
+  const slugDeLaRaiz = geoTop ? lugar(geoTop) : undefined;
+
+  const aSlugs = (valores, slugDe, descartar = () => false) => {
+    const fuera = [];
+    for (const nombre of valores ?? []) {
+      if (typeof nombre !== "string") continue;
+      const slug = slugDe(nombre);
+      if (typeof slug === "string" && slug && !descartar(nombre, slug) && !fuera.includes(slug)) {
+        fuera.push(slug);
+      }
+    }
+    return fuera;
+  };
+
+  // Una región (o un continente) incluye sus países: quien elige «Andina» ve las piezas de
+  // Venezuela, así que también la campaña de Venezuela. Se manda el lugar elegido y todo
+  // lo que cuelga de él, con la misma regla que filtra el listado (`expandGeo`): un lugar
+  // está dentro de lo elegido si lo elegido es él mismo o uno de sus antepasados.
+  const arbol = { geoTop: geoTop ?? "", ancestros };
+  const conLoDeDentro = (elegido) => [
+    elegido,
+    ...Object.keys(slugPorNombre).filter((n) => n !== elegido && expandGeo([n], arbol).has(elegido)),
+  ];
+  const lugares = [];
+  for (const nombre of geos ?? []) {
+    if (typeof nombre === "string" && nombre !== geoTop) lugares.push(...conLoDeDentro(nombre));
+  }
+
+  return {
+    tema: aSlugs(temas, (n) => slugDeTema.get(n)),
+    pais: aSlugs(
+      lugares,
+      lugar,
+      (n, slug) => n === geoTop || (slugDeLaRaiz !== undefined && slug === slugDeLaRaiz)
+    ),
+  };
 };
 
 /**

@@ -28,6 +28,7 @@ import {
   ESPACIOS,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
+  contextoDeLaSeleccion,
   useEspacios,
 } from "../features/publicidad";
 import "../styles/listados.css";
@@ -127,9 +128,12 @@ export const FormatListing = ({ formatoApi }) => {
   // El patrocinio de tema/pais (formato C) solo tiene sentido con el filtro puesto:
   // lo que se vende es aparecer delante de quien ya dijo que le interesa ese tema.
   // Por eso los temas y paises del contexto salen de la seleccion y no del listado.
+  // Van por slug, como los de una pieza: la seleccion guarda nombres y las campanas,
+  // slugs (ver `contextoDeLaSeleccion`).
+  const { tema, pais } = contextoDeLaSeleccion({ temas, geos }, taxonomy);
   useEspacios({
     espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.LISTADO_PATROCINIO, ESPACIOS.LISTADO_NATIVO],
-    contexto: { seccion: formatoApi, formato: formatoApi, tema: temas, pais: geos },
+    contexto: { seccion: formatoApi, formato: formatoApi, tema, pais },
     listo: status === "success",
   });
 

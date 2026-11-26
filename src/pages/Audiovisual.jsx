@@ -22,6 +22,7 @@ import {
   ESPACIOS,
   ESPACIOS_DE_SITIO,
   EspacioPublicitario,
+  contextoDeLaSeleccion,
   useEspacios,
 } from "../features/publicidad";
 import "../styles/listados.css";
@@ -198,14 +199,13 @@ export const Audiovisual = () => {
 
   // Los mismos huecos que un listado por formato, con el mismo criterio: el contexto
   // sale de la vista y de la selección, así que se espera al contenido. Los temas y
-  // países van como `Set`, igual que en los listados: `useEspacios` los hace listas.
+  // países van por slug, igual que en los listados (`contextoDeLaSeleccion`).
   useEspacios({
     espacios: [...ESPACIOS_DE_SITIO, ESPACIOS.LISTADO_PATROCINIO, ESPACIOS.LISTADO_NATIVO],
     contexto: {
       seccion: "audiovisual",
       formato: vista.formatoApi ?? undefined,
-      tema: temas,
-      pais: geos,
+      ...contextoDeLaSeleccion({ temas, geos }, taxonomy),
     },
     listo: status === "success",
   });

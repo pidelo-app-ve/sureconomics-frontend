@@ -62,6 +62,18 @@ export default [
             'Un `...` que no es el último argumento dentro de `?.` falla en Chrome 80-90 (crbug.com/v8/11558): ponlo el último o saca la llamada del encadenado.',
         },
       ],
+      // `build.target` (vite.config.js) llega a Safari 14 y Chrome 91 por los iPhone con
+      // iOS 14-15, y esbuild no añade lo que le falte al navegador: `Object.hasOwn`
+      // (Chrome 93, Safari 15.4, Firefox 92) lanzaría un TypeError en esos teléfonos.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Object',
+          property: 'hasOwn',
+          message:
+            '`Object.hasOwn` no existe en Safari 14 ni en Chrome 91 (build.target): usa `Object.prototype.hasOwnProperty.call(obj, clave)`.',
+        },
+      ],
       'no-extra-semi': 'error',
       'no-mixed-spaces-and-tabs': 'error',
       // Los espacios duros dentro de plantillas se permiten porque ahi son

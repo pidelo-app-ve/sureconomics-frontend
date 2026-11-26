@@ -21,7 +21,7 @@
  * - `useRotacion.js`: el carrusel de cada hueco y el aviso de cada pieza vista.
  * - Lógica sin React ni red, con sus pruebas al lado: cómo salen las vistas en lotes
  *   (`envioDeVistos.js`, `npm run test:lotes`); el contador de recargas y los filtros en
- *   la dirección (`utils.js`, `npm run test:publicidad`); y cómo reconocer los artes de
+ *   la dirección, por slug (`utils.js`, `npm run test:publicidad`); y cómo reconocer los artes de
  *   teléfono que armaba el panel, ya retirados (`arteTelefono.js`).
  * - `admin/`: el panel «Publicidad» (`/admin/publicidad`): su página (`admin/AdminPublicidad.jsx`), las
  *   tarjetas de anunciantes y campañas, el asistente, el mural, las plazas fijas y el mapa
@@ -54,3 +54,4 @@ export {
   useHueco,
 } from "./components/ProveedorDePublicidad";
 export { ESPACIOS } from "./api";
+export { contextoDeLaSeleccion } from "./utils";

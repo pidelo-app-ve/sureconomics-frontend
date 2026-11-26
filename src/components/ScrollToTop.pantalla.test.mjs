@@ -107,3 +107,28 @@ test("atrás a una entrada sin altura apuntada: arriba, como una página nueva",
   assert.equal(router.state.location.pathname, "/noticias/una");
   assert.equal(window.scrollY, 0);
 });
+
+test("mientras la página vuelve corta (los datos aún no llegan), no se pisa la altura buena", async () => {
+  // Como el navegador: no se puede bajar más de lo que mide la página.
+  let y = 0;
+  let alto = 6000;
+  Object.defineProperty(window, "scrollY", { configurable: true, get: () => y });
+  window.scrollTo = (a, b) => {
+    y = Math.min(typeof a === "object" ? a.top : b, Math.max(0, alto - 800));
+  };
+  const { router } = pintar(createElement(ScrollToTop, null, createElement(Pagina)), { ruta: "/" });
+  y = 2600;
+  window.dispatchEvent(new window.Event("pointerdown"));
+  await navegar(router, "/noticias/una");
+  // Vuelve con la portada aún «cargando»: la altura se recorta y el navegador avisa del desplazamiento.
+  alto = 1400;
+  await navegar(router, -1);
+  assert.equal(window.scrollY, 600);
+  window.dispatchEvent(new window.Event("scroll"));
+  await new Promise((r) => setTimeout(r, 250));
+  // Otra vez adelante y atrás, ya con la portada entera: vuelve a 2600, no a 600.
+  await navegar(router, 1);
+  alto = 6000;
+  await navegar(router, -1);
+  assert.equal(window.scrollY, 2600);
+});

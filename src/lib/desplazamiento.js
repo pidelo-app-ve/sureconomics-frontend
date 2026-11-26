@@ -18,8 +18,13 @@
  *
  * `restaurar` lleva la página a la altura apuntada y la mantiene ahí mientras crece (los
  * datos de la portada llegan después, las fotos se abren hueco…): cada vez que cambia el
- * alto del contenido vuelve a ponerla en su sitio. Para en cuanto el lector toca, gira la
+ * alto del marco de la página vuelve a ponerla en su sitio. Para en cuanto el lector toca, gira la
  * rueda o pulsa una tecla (manda él), y como mucho a los `TOPE_RESTAURAR_MS`.
+ *
+ * Mientras tanto, sin el anclaje de desplazamiento del navegador (`overflow-anchor`): al
+ * crecer la portada por encima de lo que se ve (con la página aún corta, el pie), Chrome
+ * la desplazaba para dejar el pie quieto, y lo hacía después de que avisara el vigía de
+ * tamaño: medido en Edge, el lector acababa al final de la portada y no donde estaba.
  *
  * Sin importaciones, para probarlo con `node` solo (`desplazamiento.test.mjs`).
  */
@@ -31,10 +36,20 @@ const CLAVE = "se-desplazamiento";
 export const MAXIMO = 50;
 
 /** Lo más que se sostiene la posición mientras la página termina de pintarse. */
-export const TOPE_RESTAURAR_MS = 4000;
+export const TOPE_RESTAURAR_MS = 8000;
 
 /** Lo que hace el lector cuando quiere moverse él: a partir de ahí, manda él. */
 const GESTOS = ["wheel", "touchstart", "pointerdown", "keydown"];
+
+/**
+ * La clave de una entrada del historial. Las que crea el router traen la suya; las que
+ * crea el navegador por su cuenta (la primera de la carga, o un `<a href="#ancla">`) no
+ * traen ninguna y React Router las llama todas `default`: con su dirección al lado, la
+ * portada y la portada con un ancla no comparten altura (medido en Edge: el ancla del
+ * boletín acababa en el pie, con la altura de la portada sin ancla).
+ */
+export const claveDe = (location) =>
+  location.key === "default" ? `default:${location.pathname}${location.search}${location.hash}` : location.key;
 
 /** Las posiciones guardadas (`Map` de clave → altura), o ninguna si no se pueden leer. */
 export const leerPosiciones = (almacen = globalThis.sessionStorage) => {
@@ -79,24 +94,33 @@ export const cargaQueRestaura = (ventana = globalThis.window) => {
 /**
  * Lleva la página a `y` y la sostiene ahí mientras el contenido cambia de alto. Devuelve
  * con qué soltarla antes (la limpieza del efecto, al cambiar otra vez de página).
+ * `alSoltar` avisa cuando deja de sostenerla, por lo que sea.
  */
-export const restaurar = (y, { ventana = globalThis.window, tope = TOPE_RESTAURAR_MS } = {}) => {
+export const restaurar = (y, { ventana = globalThis.window, tope = TOPE_RESTAURAR_MS, alSoltar = null } = {}) => {
   const ir = () => {
     if (Math.abs((ventana.scrollY ?? 0) - y) > 1) ventana.scrollTo(0, y);
   };
+  const raiz = ventana.document?.documentElement;
+  const anclaje = raiz?.style.overflowAnchor ?? "";
+  if (raiz) raiz.style.overflowAnchor = "none";
   ir();
   let hecho = false;
   let vigia = null;
   const soltar = () => {
     if (hecho) return;
     hecho = true;
+    if (raiz) raiz.style.overflowAnchor = anclaje;
     vigia?.disconnect();
     clearTimeout(reloj);
     GESTOS.forEach((gesto) => ventana.removeEventListener(gesto, soltar, true));
+    alSoltar?.();
   };
   const reloj = setTimeout(soltar, tope);
   GESTOS.forEach((gesto) => ventana.addEventListener(gesto, soltar, { capture: true, passive: true }));
-  const contenido = ventana.document?.getElementById("root") ?? ventana.document?.body;
+  // El marco de la página (lo primero dentro de `#root`) y no `#root`, que mide una pantalla
+  // (`index.css`) y el contenido lo desborda: su tamaño no cambia nunca.
+  const raizDeReact = ventana.document?.getElementById("root");
+  const contenido = raizDeReact?.firstElementChild ?? raizDeReact ?? ventana.document?.body;
   if (typeof ventana.ResizeObserver === "function" && contenido) {
     vigia = new ventana.ResizeObserver(ir);
     vigia.observe(contenido);

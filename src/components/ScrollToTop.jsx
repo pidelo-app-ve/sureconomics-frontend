@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {
   apuntar,
   cargaQueRestaura,
+  claveDe,
   guardarPosiciones,
   leerPosiciones,
   restaurar,
@@ -41,8 +42,11 @@ const ScrollToTop = ({ children }) => {
   const location = useLocation();
   const tipo = useNavigationType();
   const prevLocation = useRef(null);
-  // La entrada del historial que se está viendo.
-  const clave = useRef(location.key);
+  // La entrada del historial que se está viendo, y si se está sosteniendo su altura
+  // (`restaurar`): mientras tanto no se apunta, porque con la página aún corta lo que se
+  // leería es la altura recortada y no la buena.
+  const clave = useRef(claveDe(location));
+  const sosteniendo = useRef(false);
   if (!posiciones) posiciones = leerPosiciones();
 
   // Apuntar dónde está el lector: al tocar o teclear (antes de que un enlace cambie de
@@ -52,7 +56,9 @@ const ScrollToTop = ({ children }) => {
     const historial = window.history;
     const antes = historial.scrollRestoration;
     historial.scrollRestoration = "manual";
-    const ahora = () => apuntar(posiciones, clave.current, window.scrollY);
+    const ahora = () => {
+      if (!sosteniendo.current) apuntar(posiciones, clave.current, window.scrollY);
+    };
     let espera = null;
     const alDesplazar = () => {
       const deEsta = clave.current;
@@ -84,17 +90,21 @@ const ScrollToTop = ({ children }) => {
   useLayoutEffect(() => {
     const previa = prevLocation.current;
     prevLocation.current = location;
-    clave.current = location.key;
-    const guardada = posiciones.get(location.key);
+    clave.current = claveDe(location);
+    const guardada = posiciones.get(clave.current);
+    const volver = () => {
+      sosteniendo.current = true;
+      return restaurar(guardada, { alSoltar: () => (sosteniendo.current = false) });
+    };
     // La primera página desde que se cargó el sitio: solo si se recargó o se volvió a ella
     // desde otro sitio (un enlace abierto de nuevo llega arriba). `previa === location`:
     // el segundo pase del modo estricto, que es la misma.
     if (!yaHuboUnaPagina || previa === location) {
       yaHuboUnaPagina = true;
-      return tipo === "POP" && guardada !== undefined && cargaQueRestaura() ? restaurar(guardada) : undefined;
+      return tipo === "POP" && guardada !== undefined && cargaQueRestaura() ? volver() : undefined;
     }
     guardarPosiciones(posiciones);
-    if (tipo === "POP" && guardada !== undefined) return restaurar(guardada);
+    if (tipo === "POP" && guardada !== undefined) return volver();
     // Sin la de antes (el marco se acaba de volver a montar), es otra página.
     if (location.pathname !== previa?.pathname) window.scrollTo(0, 0);
     return undefined;

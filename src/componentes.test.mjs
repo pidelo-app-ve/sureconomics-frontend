@@ -55,7 +55,7 @@ const TOPES = {
   "src/pages/admin/AdminSubmissionDetail.jsx#AdminSubmissionDetail": 646,
   "src/pages/admin/AdminPostsList.jsx#AdminPostsList": 596,
   "src/features/publicidad/admin/components/AsistenteDeAnuncio.jsx#AsistenteDeAnuncio": 598,
-  "src/pages/admin/AdminPostEditor.jsx#AdminPostEditor": 564,
+  "src/pages/admin/AdminPostEditor.jsx#AdminPostEditor": 561,
   "src/features/analitica/admin/AdminAnalitica.jsx#AdminAnalitica": 464,
   "src/pages/admin/AdminJuegoPalabras.jsx#AdminJuegoPalabras": 458,
   "src/features/titulares/admin/AdminTitulares.jsx#AdminTitulares": 418,

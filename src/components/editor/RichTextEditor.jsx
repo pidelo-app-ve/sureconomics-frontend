@@ -123,24 +123,29 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled, extensi
 
   return (
     <div className={`se-richtext${className ? ` ${className}` : ""}`}>
+      {/* De solo lectura (`disabled`), la barra entera apagada: con `editable: false` el
+          teclado no escribe, pero un botón sí cambiaría el texto (toggleBold().run()). */}
       <div className="se-richtext__toolbar" role="toolbar" aria-label={t("cuenta.editor.barra")}>
         <ToolbarButton
           label={<strong>B</strong>}
           title={t("cuenta.editor.negrita")}
           isActive={editor.isActive("bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}
+          disabled={disabled}
         />
         <ToolbarButton
           label={<em>I</em>}
           title={t("cuenta.editor.cursiva")}
           isActive={editor.isActive("italic")}
           onClick={() => editor.chain().focus().toggleItalic().run()}
+          disabled={disabled}
         />
         <ToolbarButton
           label={<s>S</s>}
           title={t("cuenta.editor.tachado")}
           isActive={editor.isActive("strike")}
           onClick={() => editor.chain().focus().toggleStrike().run()}
+          disabled={disabled}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
@@ -148,12 +153,14 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled, extensi
           title={t("cuenta.editor.titulo")}
           isActive={editor.isActive("heading", { level: 2 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          disabled={disabled}
         />
         <ToolbarButton
           label="H3"
           title={t("cuenta.editor.subtitulo")}
           isActive={editor.isActive("heading", { level: 3 })}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          disabled={disabled}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
@@ -161,18 +168,21 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled, extensi
           title={t("cuenta.editor.listaVinetas")}
           isActive={editor.isActive("bulletList")}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
+          disabled={disabled}
         />
         <ToolbarButton
           label={t("cuenta.editor.listaNumeradaEtiqueta")}
           title={t("cuenta.editor.listaNumerada")}
           isActive={editor.isActive("orderedList")}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          disabled={disabled}
         />
         <ToolbarButton
           label="❝❞"
           title={t("cuenta.editor.cita")}
           isActive={editor.isActive("blockquote")}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          disabled={disabled}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
@@ -180,19 +190,20 @@ export const RichTextEditor = ({ value, onChange, placeholder, disabled, extensi
           title={t("cuenta.editor.enlace")}
           isActive={editor.isActive("link")}
           onClick={() => setLinkDialogOpen(true)}
+          disabled={disabled}
         />
         <span className="se-richtext__divider" aria-hidden="true" />
         <ToolbarButton
           label="↺"
           title={t("cuenta.editor.deshacer")}
           onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
+          disabled={disabled || !editor.can().undo()}
         />
         <ToolbarButton
           label="↻"
           title={t("cuenta.editor.rehacer")}
           onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
+          disabled={disabled || !editor.can().redo()}
         />
       </div>
       <EditorContent editor={editor} className="se-richtext__content" />

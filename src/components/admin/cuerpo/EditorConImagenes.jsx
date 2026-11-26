@@ -82,13 +82,16 @@ export const EditorConImagenes = ({ value, onChange, placeholder, disabled, subi
     >
       {(editor) => (
         <>
-          <InsertarEnLinea
-            editor={editor}
-            onImagen={(pos) => {
-              setAviso("");
-              setDialogo({ modo: "insertar", pos });
-            }}
-          />
+          {/* De solo lectura, ni el «+» ni la ventana de la foto: insertarían igual. */}
+          {disabled ? null : (
+            <InsertarEnLinea
+              editor={editor}
+              onImagen={(pos) => {
+                setAviso("");
+                setDialogo({ modo: "insertar", pos });
+              }}
+            />
+          )}
           {aviso ? (
             <p className="se-richtext__aviso" role="alert">
               {aviso}
@@ -98,7 +101,7 @@ export const EditorConImagenes = ({ value, onChange, placeholder, disabled, subi
             </p>
           ) : null}
           <DialogoDeImagen
-            abierto={Boolean(dialogo)}
+            abierto={Boolean(dialogo) && !disabled}
             inicial={dialogo?.attrs ?? null}
             subir={subirAtributos}
             onCerrar={() => {

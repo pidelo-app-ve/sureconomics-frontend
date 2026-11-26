@@ -249,6 +249,13 @@ export const comparable = (f) =>
         excerpt_en: sinParrafosVacios(f?.excerpt_en),
     });
 
+/** El id de la pieza de la dirección (`:postId`): un número si lo es, `null` sin él. */
+export const idDeLaPieza = (postId) => {
+    if (!postId) return null;
+    const n = Number(postId);
+    return Number.isFinite(n) ? n : postId;
+};
+
 /** Lo mismo que `comparable`, como objeto: el borrador local compara con esto. */
 export const normalizarPieza = (f) => (f ? JSON.parse(comparable(f)) : f);
 

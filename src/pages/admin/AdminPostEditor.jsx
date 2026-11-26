@@ -41,6 +41,7 @@ import {
     fechaDeCaracas,
     formToPayload,
     horaCorta,
+    idDeLaPieza,
     normalizarPieza,
     postToForm,
 } from "../../components/admin/editorDePieza/formulario";
@@ -130,19 +131,15 @@ export const AdminPostEditor = () => {
     const { confirm, ConfirmDialog } = useAdminConfirm();
     const flash = useFlashMessage();
     const { toastSuccess, toastError } = useAdminToast();
-    // «Traducir con Claude»: ver `useTraduccionDePieza`.
-    const { traductorDisponible, traduciendo, versionEn, revisadaAhora, setRevisadaAhora, traducir } =
-        useTraduccionDePieza({ form, setForm, confirm, toastSuccess, toastError });
 
-    const numericPostId = useMemo(() => {
-        if (!postId) return null;
-        const n = Number(postId);
-        return Number.isFinite(n) ? n : postId;
-    }, [postId]);
+    const numericPostId = idDeLaPieza(postId);
     // La pieza abierta en el último pintado: la respuesta que llega tarde de otra no se
     // aplica aquí (ver `esOtraPieza` en `guardado.js`).
     const piezaAbierta = useRef(numericPostId);
     piezaAbierta.current = numericPostId;
+    // «Traducir con Claude» (en segundo plano; se deja si se abre otra pieza): ver `useTraduccionDePieza`.
+    const { traductorDisponible, traduciendo, versionEn, revisadaAhora, setRevisadaAhora, traducir, seCreo } =
+        useTraduccionDePieza({ form, setForm, confirm, toastSuccess, toastError, piezaId: numericPostId, apertura });
 
     const loadPost = useCallback(async () => {
         if (isCreate || !numericPostId) {
@@ -278,6 +275,7 @@ export const AdminPostEditor = () => {
         label: currentFormat?.name ?? "La pieza",
         enMarcha,
         claveDeCreacion,
+        alCrear: seCreo,
         createAdminPost,
         patchAdminPost,
         deleteAdminPost,

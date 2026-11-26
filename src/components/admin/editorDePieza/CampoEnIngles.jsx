@@ -46,9 +46,18 @@ export const CampoEnIngles = ({
                 >
                     {traduciendo ? "Traduciendo…" : "Traducir con Claude"}
                 </button>
-                <span className="se-admin-meta-hint">
-                    Traduce el título, el resumen y el cuerpo de arriba, aunque
-                    no estén guardados. Revisa el resultado y guarda la pieza.
+                {traduciendo ? null : (
+                    <span className="se-admin-meta-hint">
+                        Traduce el título, el resumen y el cuerpo de arriba, aunque
+                        no estén guardados. Revise el resultado y guarde la pieza.
+                    </span>
+                )}
+                {/* Puede tardar minutos (ver `useTraduccionDePieza`): mientras, se dice aquí.
+                    Vacío el resto del tiempo, para que al acabar no se lea nada de más. */}
+                <span className="se-admin-meta-hint" role="status">
+                    {traduciendo
+                        ? "Claude está traduciendo. Puede tardar un par de minutos; el inglés aparecerá abajo y, mientras tanto, esos campos no se pueden editar. Si cierra la pieza, la traducción se pierde."
+                        : ""}
                 </span>
             </div>
         </div>
@@ -58,68 +67,77 @@ export const CampoEnIngles = ({
             {estadoIngles.aviso}
         </p>
     ) : null}
-    <label className="se-form-field" htmlFor="post-title-en">
-        <span className="se-form-label">Título en inglés</span>
-        <input
-            id="post-title-en"
-            className="se-form-control"
-            value={form.title_en}
-            onChange={handleChange("title_en")}
-            maxLength={500}
-        />
-    </label>
-    <div className="se-form-field se-form-field--brief" key={`resumen-en-${versionEn}`}>
-        <span className="se-form-label">
-            {form.format === "editorial" ? "Entradilla en inglés" : "Resumen en inglés"} (opcional)
-        </span>
-        <RichTextEditor
-            value={form.excerpt_en}
-            onChange={(html) => setForm((prev) => ({ ...prev, excerpt_en: html }))}
-        />
-        <span className="se-admin-meta-hint">
-            El texto corto que va debajo del título y en las tarjetas de la
-            portada en inglés.
-        </span>
-    </div>
-    <div className="se-form-field se-editor-cuerpo" key={`cuerpo-en-${versionEn}`}>
-        <span className="se-form-label">Cuerpo en inglés</span>
-        {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
-            <EditorConImagenes
-                value={form.content_en}
-                onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
-                subir={subirFotoDePieza}
+    {/* Mientras Claude traduce, los campos en inglés no se tocan: lo que llegue los
+        reemplaza, y lo escrito entretanto se perdería sin aviso. */}
+    <div aria-busy={traduciendo}>
+        <label className="se-form-field" htmlFor="post-title-en">
+            <span className="se-form-label">Título en inglés</span>
+            <input
+                id="post-title-en"
+                className="se-form-control"
+                value={form.title_en}
+                onChange={handleChange("title_en")}
+                maxLength={500}
+                readOnly={traduciendo}
             />
-        ) : (
-            <RichTextEditor
-                value={form.content_en}
-                onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
-            />
-        )}
-    </div>
-    {/* Solo cuando la traducción vino de Claude: una escrita a mano ya
-        está revisada por quien la escribió. */}
-    {form.traduccion_automatica || revisadaAhora ? (
-        <label className="se-form-field se-acceso" htmlFor="post-traduccion-revisada">
-            <span className="se-acceso__fila">
-                <input
-                    id="post-traduccion-revisada"
-                    type="checkbox"
-                    checked={!form.traduccion_automatica}
-                    onChange={(e) => {
-                        setRevisadaAhora(true);
-                        setForm((prev) => ({ ...prev, traduccion_automatica: !e.target.checked }));
-                    }}
-                />
-                <span className="se-form-label se-acceso__titulo">
-                    Ya revisé la traducción automática
-                </span>
-            </span>
-            <span className="se-admin-meta-hint">
-                Mientras no se marque, la página en inglés avisa al lector de
-                que es una traducción automática sin revisar.
-            </span>
         </label>
-    ) : null}
+        <div className="se-form-field se-form-field--brief" key={`resumen-en-${versionEn}`}>
+            <span className="se-form-label">
+                {form.format === "editorial" ? "Entradilla en inglés" : "Resumen en inglés"} (opcional)
+            </span>
+            <RichTextEditor
+                value={form.excerpt_en}
+                onChange={(html) => setForm((prev) => ({ ...prev, excerpt_en: html }))}
+                disabled={traduciendo}
+            />
+            <span className="se-admin-meta-hint">
+                El texto corto que va debajo del título y en las tarjetas de la
+                portada en inglés.
+            </span>
+        </div>
+        <div className="se-form-field se-editor-cuerpo" key={`cuerpo-en-${versionEn}`}>
+            <span className="se-form-label">Cuerpo en inglés</span>
+            {FORMATOS_CON_FOTOS_EN_EL_CUERPO.has(form.format) ? (
+                <EditorConImagenes
+                    value={form.content_en}
+                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
+                    subir={subirFotoDePieza}
+                    disabled={traduciendo}
+                />
+            ) : (
+                <RichTextEditor
+                    value={form.content_en}
+                    onChange={(html) => setForm((prev) => ({ ...prev, content_en: html }))}
+                    disabled={traduciendo}
+                />
+            )}
+        </div>
+        {/* Solo cuando la traducción vino de Claude: una escrita a mano ya
+            está revisada por quien la escribió. */}
+        {form.traduccion_automatica || revisadaAhora ? (
+            <label className="se-form-field se-acceso" htmlFor="post-traduccion-revisada">
+                <span className="se-acceso__fila">
+                    <input
+                        id="post-traduccion-revisada"
+                        type="checkbox"
+                        checked={!form.traduccion_automatica}
+                        disabled={traduciendo}
+                        onChange={(e) => {
+                            setRevisadaAhora(true);
+                            setForm((prev) => ({ ...prev, traduccion_automatica: !e.target.checked }));
+                        }}
+                    />
+                    <span className="se-form-label se-acceso__titulo">
+                        Ya revisé la traducción automática
+                    </span>
+                </span>
+                <span className="se-admin-meta-hint">
+                    Mientras no se marque, la página en inglés avisa al lector de
+                    que es una traducción automática sin revisar.
+                </span>
+            </label>
+        ) : null}
+    </div>
     </CampoMovil>
 );
 

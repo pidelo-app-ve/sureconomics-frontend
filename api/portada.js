@@ -51,7 +51,8 @@
  * que va encima (cinta, cabecera, fecha y Última hora). Es lo que Google mide como LCP en el
  * teléfono, y antes no se veía hasta que el JavaScript llegaba y React pintaba (FCP de 4,4 s
  * en el laboratorio del plan). Al montar, React la reemplaza por la misma: la foto ya está
- * bajada y mide lo mismo, y `PrimeraPlana` no la vuelve a barrer.
+ * bajada y mide lo mismo. Ni aquí ni al montar se barre (`se-plana__media--quieta`): se ve
+ * entera desde el primer pintado.
  *
  * ## Si algo falla
  *
@@ -511,7 +512,10 @@ export const aperturaEnHtml = (fila, { idioma = "es", ahora = Date.now(), ultima
     `<div class="se-container se-plana__rejilla">`,
     ultimaHoraEnHtml({ ...ultimaHora, idioma, ahora }),
     `<div class="se-plana__centro"><div class="se-plana__principal">`,
-    `<div class="se-plana__foto"><a class="se-plana__media" href="${ruta}" tabindex="-1">${img}</a></div>`,
+    // `--quieta`: sin el barrido de entrada de la página. La foto se ve entera desde el
+    // primer pintado, que es el que cuenta como LCP (con el barrido empieza tapada, y el
+    // navegador la daba por pintada más tarde: medido, de 100 a 500 ms).
+    `<div class="se-plana__foto"><a class="se-plana__media se-plana__media--quieta" href="${ruta}" tabindex="-1">${img}</a></div>`,
     `<div class="se-plana__texto"><h3 class="se-plana__titulo${fila.format === "informe" ? " se-plana__titulo--a-fondo" : ""}">`,
     `<a href="${ruta}" tabindex="-1">${tituloDePieza(fila, idioma)}</a></h3>`,
     resumen ? `<p class="se-plana__resumen">${escapar(resumen)}</p>` : "",

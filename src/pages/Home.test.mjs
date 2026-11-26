@@ -296,7 +296,12 @@ describe("la apertura del HTML es la que pinta React", () => {
       const ultimaHora = { items: [], recientes: detras.slice(3) };
       const previa = aperturaEnHtml(fila, { idioma: direccion === "/en" ? "en" : "es", ahora: AHORA, ultimaHora });
       assert.ok(previa, "el HTML no trae la apertura");
-      assert.deepEqual(cajas(previa), cajas(react));
+      // La foto del HTML va quieta (`se-plana__media--quieta`, sin el barrido de entrada), y
+      // React también la pinta así al montar sobre ese HTML (`seVeiaAntesDeMontar`, en
+      // `PrimeraPlana`). Aquí React pinta sin DOM y sin el HTML delante, así que sin ella.
+      assert.ok(cajas(previa).includes("se-plana__media se-plana__media--quieta"));
+      const sinQuieta = (lista) => lista.map((c) => c.replace(" se-plana__media--quieta", ""));
+      assert.deepEqual(sinQuieta(cajas(previa)), cajas(react));
       assert.deepEqual(foto(previa), foto(react));
       assert.equal(texto(previa, "se-plana__titulo"), texto(react, "se-plana__titulo"));
       assert.equal(texto(previa, "se-plana__resumen"), texto(react, "se-plana__resumen"));

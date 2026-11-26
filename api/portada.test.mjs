@@ -352,6 +352,8 @@ console.log("la apertura, a la vista antes de React");
   check("con la fecha de la edición (hora de Caracas)",
     anticipo.includes('<p class="se-plana__fecha"><time>miércoles, 18 de noviembre de 2026</time></p>'));
   const srcset = imagenSrcSet("/media/image/2026/11/foto-1.jpg", ANCHOS_DE_TARJETA, 1536);
+  check("la foto, quieta: sin el barrido de entrada, entera desde el primer pintado (el LCP)",
+    anticipo.includes('<div class="se-plana__foto"><a class="se-plana__media se-plana__media--quieta" href="/noticias/pieza-1" tabindex="-1"><img '));
   check("la foto de la apertura: la que se precarga, con prioridad",
     anticipo.includes(`<img class="se-artcard__img" src="/media/image/2026/11/foto-1.jpg" srcset="${srcset}" sizes="${SIZES_PRINCIPAL}" alt="" loading="eager" fetchpriority="high" decoding="async" />`) &&
       h.includes(`imagesrcset="${srcset}" imagesizes="${SIZES_PRINCIPAL}"`));

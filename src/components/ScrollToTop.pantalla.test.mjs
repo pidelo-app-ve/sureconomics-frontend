@@ -47,3 +47,63 @@ test("si solo cambia la consulta (un filtro, una página de la lista), no se mue
   await navegar(router, "/explorar?tema=Petr%C3%B3leo");
   assert.deepEqual(orden, ["efecto /explorar?tema=Petr%C3%B3leo"]);
 });
+
+/* —— Atrás y adelante (arreglo del 26-nov-2026) —— */
+
+/** Una ventana con altura: `scrollTo` la mueve y `scrollY` la lee, como en el navegador. */
+const conAltura = () => {
+  let y = 0;
+  Object.defineProperty(window, "scrollY", { configurable: true, get: () => y });
+  window.scrollTo = (a, b) => {
+    y = typeof a === "object" ? a.top : b;
+    orden.push(`a ${y}`);
+  };
+  /** El lector baja hasta `hasta` y toca algo (un enlace): queda apuntado. */
+  return (hasta) => {
+    y = hasta;
+    window.dispatchEvent(new window.Event("pointerdown"));
+  };
+};
+
+test("atrás devuelve la altura de la portada; adelante, la de la pieza; varias veces", async () => {
+  const bajar = conAltura();
+  const { router } = pintar(createElement(ScrollToTop, null, createElement(Pagina)), { ruta: "/" });
+  bajar(1500);
+  await navegar(router, "/noticias/una");
+  assert.equal(window.scrollY, 0, "la pieza empieza arriba");
+  bajar(420);
+  await navegar(router, -1);
+  assert.equal(router.state.location.pathname, "/");
+  assert.equal(window.scrollY, 1500, "la portada, donde estaba");
+  await navegar(router, 1);
+  assert.equal(window.scrollY, 420, "la pieza, donde se dejó");
+  for (let i = 0; i < 3; i++) {
+    await navegar(router, -1);
+    assert.equal(window.scrollY, 1500);
+    await navegar(router, 1);
+    assert.equal(window.scrollY, 420);
+  }
+});
+
+test("volver a la portada con un enlace (no con atrás) la abre arriba", async () => {
+  const bajar = conAltura();
+  const { router } = pintar(createElement(ScrollToTop, null, createElement(Pagina)), { ruta: "/" });
+  bajar(1500);
+  await navegar(router, "/noticias/una");
+  bajar(300);
+  await navegar(router, "/");
+  assert.equal(window.scrollY, 0);
+});
+
+test("atrás a una entrada sin altura apuntada: arriba, como una página nueva", async () => {
+  conAltura();
+  const { router } = pintar(createElement(ScrollToTop, null, createElement(Pagina)), {
+    ruta: "/",
+  });
+  // En la primera pieza no se apunta nada (ni toque ni desplazamiento): sin altura que restaurar.
+  await navegar(router, "/noticias/una");
+  await navegar(router, "/noticias/dos");
+  await navegar(router, -1);
+  assert.equal(router.state.location.pathname, "/noticias/una");
+  assert.equal(window.scrollY, 0);
+});

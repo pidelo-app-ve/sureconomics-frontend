@@ -7536,6 +7536,17 @@ html {
   transform-origin: left top;
 }
 
+/* El marco de TradingView (`CintaMundial`), con las medidas que le daba su script: todo
+   el ancho y los 84 px que pide en `compact`. Sin borde: su fondo es transparente y deja
+   ver el verde de la cinta o el papel de la primera plana. */
+.se-ticker__mundo-marco {
+  display: block;
+  width: 100%;
+  height: 84px;
+  border: 0;
+  user-select: none;
+}
+
 /* La atribución de TradingView, que sus condiciones exigen, encima del borde derecho. */
 .se-ticker .se-ticker__mundo-credito {
   position: absolute;

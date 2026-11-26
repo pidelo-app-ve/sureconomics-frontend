@@ -53,7 +53,7 @@ import { tocaLatido, trocearEventos } from "../../lib/lotesDeEnvio";
  * entera sin tocar nada mas, que es lo que hace falta el dia que haya que pararla.
  *
  * Lo que este interruptor **no** gobierna son los terceros que el sitio carga por otros
- * motivos -- el guion de TradingView en la cinta de mercado, los iframes de video de
+ * motivos -- el marco de TradingView en la cinta de mercado, los iframes de video de
  * TikTok, YouTube y Vimeo --, que siguen cargandose se acepte o no. Ver
  * `docs/POLITICA-COOKIES-PENDIENTE.md` de este repositorio.
  */

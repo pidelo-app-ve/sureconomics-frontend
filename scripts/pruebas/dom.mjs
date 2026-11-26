@@ -55,6 +55,8 @@ export { grabada } from "./servidor.mjs";
 await import("../../src/i18n/diccionarios.js");
 const { createElement } = await import("react");
 const { RouterProvider, createMemoryRouter } = await import("react-router-dom");
+/** Las mismas opciones `future` que el router del sitio (`routes.jsx`). */
+const FUTURO = { v7_relativeSplatPath: true, v7_fetcherPersist: true, v7_normalizeFormMethod: true, v7_partialHydration: true, v7_skipActionErrorRevalidation: true };
 const rtl = await import("@testing-library/react");
 const { AuthProvider } = await import("../../src/context/AuthContext.jsx");
 const { AdminToastProvider } = await import("../../src/context/AdminToastContext.jsx");
@@ -88,8 +90,9 @@ export const pintar = (elemento, { ruta = "/", patron = "*", rol = null, sitio =
   const pagina = sitio ? createElement(ProveedorDePublicidad, null, elemento) : elemento;
   const router = createMemoryRouter([{ path: patron, element: pagina }, { path: "*", element: null }], {
     initialEntries: [ruta],
+    future: FUTURO,
   });
-  const arbol = PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), createElement(RouterProvider, { router }));
+  const arbol = PROVEEDORES.reduceRight((dentro, Proveedor) => createElement(Proveedor, null, dentro), createElement(RouterProvider, { router, future: { v7_startTransition: true } }));
   return { ...rtl.render(arbol), router };
 };
 

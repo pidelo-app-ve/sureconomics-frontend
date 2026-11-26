@@ -228,4 +228,25 @@ export const router = createBrowserRouter([
             },
         ],
     },
-]);
+], {
+    // El paso a React Router 7, uno a uno (ver su guía «Upgrading from v6»): cada
+    // opción enciende ya en la 6 algo que en la 7 es lo normal.
+    future: {
+        // Un enlace relativo (`to="."`, `to="../x"`) dentro de una ruta `*` se resuelve
+        // desde la dirección entera, no desde el padre. Aquí no hay ninguno.
+        v7_relativeSplatPath: true,
+        // Los «fetchers» (useFetcher) se quedan vivos hasta que terminan aunque el
+        // componente que los creó desaparezca. Aquí no se usa ninguno.
+        v7_fetcherPersist: true,
+        // useNavigation().formMethod en mayúsculas ("POST"). Solo se lee su .state
+        // (el aviso «Abriendo…» del panel), que no cambia.
+        v7_normalizeFormMethod: true,
+        // Cómo arranca el router cuando la primera página aún espera algo (el
+        // diccionario de /en, el código de una página perezosa). main.jsx monta React
+        // solo con router.state.initialized, que sigue llegando igual.
+        v7_partialHydration: true,
+        // Tras una «action» que falla, no se vuelven a pedir los datos de la página.
+        // El sitio no tiene «actions»: los formularios llaman a la API ellos mismos.
+        v7_skipActionErrorRevalidation: true,
+    },
+});

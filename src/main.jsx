@@ -29,7 +29,10 @@ const Main = () => {
                 <UserAuthProvider>
                     <ProveedorDeMarcadores>
                         <ProveedorDeTemasSeguidos>
-                            <RouterProvider router={router} />
+                            {/* Como en React Router 7: cada cambio de página va dentro de
+                                `startTransition`, y React deja la página de antes a la vista
+                                mientras prepara la nueva. */}
+                            <RouterProvider router={router} future={{ v7_startTransition: true }} />
                         </ProveedorDeTemasSeguidos>
                     </ProveedorDeMarcadores>
                 </UserAuthProvider>

@@ -10,6 +10,23 @@ import { marcarSuscrito, subscribeToNewsletter } from "../features/boletin";
 import { NO_PARECE_PERSONA, useVerificacionHumana } from "../hooks/useVerificacionHumana";
 import { AnadirEnGoogle } from "./comun/AnadirEnGoogle";
 
+/**
+ * «Ir al boletín», en la portada: al bloque `#boletin` (`NewsletterBlock`), como el
+ * «Saltar al contenido» de `Layout`: sin escribir el ancla en la dirección. Con el ancla
+ * escrita, el navegador creaba una entrada de historial que el router tomaba por un
+ * «atrás» y la pantalla podía acabar en otro sitio (en el pie, medido en Edge el
+ * 26-nov-2026). El bloque queda arriba, entero a la vista, y con el foco (`tabIndex=-1`),
+ * para que el tabulador siga desde él. El `href` se queda: si el bloque aún no está, o
+ * si el lector abre el enlace en otra pestaña, hace lo de siempre.
+ */
+const irAlBoletin = (e) => {
+  const bloque = document.getElementById("boletin");
+  if (!bloque || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  bloque.scrollIntoView({ block: "start" });
+  bloque.focus({ preventScroll: true });
+};
+
 /** Un icono por cuenta. Una red sin icono aquí no se pinta: mejor que falte a que
  *  salga un hueco con el nombre suelto rompiendo la fila. */
 const ICONO_RED = {
@@ -182,8 +199,8 @@ export const Footer = () => {
             <div className="se-footer__contact-title">{t("pie.boletin")}</div>
             <p className="se-footer__newsletter-text">{t("pie.boletinTexto")}</p>
             {enPortada ? (
-              // Un `a` y no `Enlace`: es un ancla de la misma página, no una ruta.
-              <a className="se-footer__link" href="#boletin">
+              // Un `a` y no `Enlace`: es un bloque de la misma página, no una ruta.
+              <a className="se-footer__link" href="#boletin" onClick={irAlBoletin}>
                 {t("pie.irAlBoletin")}
               </a>
             ) : (

@@ -46,6 +46,10 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Vercel Web Analytics y Speed Insights: sin cookies; los sirve Vercel desde el propio dominio
+         (/_vercel/…), así que la CSP ('self') ya los deja pasar. Se van con la mudanza al VPS. -->
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
     <!-- Cloudflare Web Analytics: sin cookies; el token es público (va en cada página). -->
     <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "9e9ce1440d7447a999abdcc82a4a90d2"}'></script>
   </body>

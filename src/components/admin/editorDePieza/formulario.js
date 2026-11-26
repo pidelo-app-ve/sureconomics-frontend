@@ -335,6 +335,15 @@ export const postToForm = (post) => {
     };
 };
 
+/**
+ * Vacío es «bórralo». El servidor lee una clave que no viene como «déjalo como está»
+ * (`piezas/edicion.py`, `_copiar_campos`), así que mandar `undefined` -- que se cae del
+ * JSON -- dejaba el valor viejo: se borraba el cargo de un entrevistado, se guardaba, el
+ * aviso decía «guardado» y el cargo volvía (M-44). Estos campos aceptan `null` al crear
+ * y al editar (`PostCreateSchema` y `PostUpdateSchema`).
+ */
+const vacioEsNulo = (valor) => String(valor ?? "").trim() || null;
+
 export const formToPayload = (form) => {
     let publishedAtValue;
     if (form.published_at && String(form.published_at).trim()) {
@@ -345,12 +354,18 @@ export const formToPayload = (form) => {
         format: form.format.trim() || undefined,
         title: form.title.trim() || undefined,
         slug: form.slug.trim() || undefined,
-        excerpt: form.excerpt.trim() || undefined,
+        // Vacía va como "" y no como nula: al editar, el servidor no admite `null` en la
+        // entradilla (y lo vacío lo guarda igual, como ""). Así también se puede quitar.
+        excerpt: (form.excerpt ?? "").trim(),
+        // El cuerpo no: un `undefined` aquí solo impide vaciarlo, y mandarlo vacío por
+        // error borraría una pieza entera.
         content: form.content.trim() || undefined,
-        meta_title: form.meta_title.trim() || undefined,
-        meta_description: form.meta_description.trim() || undefined,
-        canonical_url: form.canonical_url.trim() || undefined,
-        featured_image_url: form.featured_image_url.trim() || undefined,
+        // Los del SEO, la dirección canónica y la imagen por URL de antes de la
+        // biblioteca: vacíos, nulos (ver `vacioEsNulo`). Con esto funciona «Quitarla».
+        meta_title: vacioEsNulo(form.meta_title),
+        meta_description: vacioEsNulo(form.meta_description),
+        canonical_url: vacioEsNulo(form.canonical_url),
+        featured_image_url: vacioEsNulo(form.featured_image_url),
         status: form.status.trim() || undefined,
         published_at: publishedAtValue,
         // Sent even when blank so clearing a byline actually clears it.
@@ -360,9 +375,11 @@ export const formToPayload = (form) => {
         sources: (form.sources ?? [])
             .map((f) => ({ name: (f.name ?? "").trim(), url: (f.url ?? "").trim() || undefined }))
             .filter((f) => f.name),
-        interviewee: form.interviewee.trim() || undefined,
-        interviewee_role: form.interviewee_role.trim() || undefined,
-        unit: form.unit.trim() || undefined,
+        // Se mandan en cualquier formato, como los trajo la pieza: el servidor no los
+        // borra al cambiar de formato, y aquí tampoco.
+        interviewee: vacioEsNulo(form.interviewee),
+        interviewee_role: vacioEsNulo(form.interviewee_role),
+        unit: vacioEsNulo(form.unit),
     };
     // Sent even when empty: clearing every topic is a real edit, and `undefined`
     // would read as "leave them alone".

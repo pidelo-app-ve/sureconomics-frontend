@@ -156,10 +156,15 @@ describe("de la API al formulario", () => {
 describe("lo que se manda al guardar", () => {
   test("un formulario vacío no manda texto vacío, pero sí lo que borra", () => {
     const p = formToPayload(emptyForm());
-    for (const k of ["format", "title", "slug", "excerpt", "content", "meta_title", "interviewee", "unit"]) {
+    // Lo que no puede quedar vacío (o no se deja vaciar por error): no va.
+    for (const k of ["format", "title", "slug", "content"]) {
       assert.equal(k in p, false, `${k} no debería ir`);
     }
     // Lo que sí va aunque esté vacío: es como se quita.
+    for (const k of ["meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
+      assert.equal(p[k], null, k);
+    }
+    assert.equal(p.excerpt, "");
     assert.equal(p.byline, null);
     assert.deepEqual(p.sources, []);
     assert.deepEqual(p.topic_ids, []);
@@ -201,6 +206,73 @@ describe("lo que se manda al guardar", () => {
   test("caracteres raros: emojis, eñes, escritura RTL y etiquetas pasan tal cual", () => {
     const titulo = "💸 Dólar «sube» — ñ — مرحبا <script>x</script>";
     assert.equal(formToPayload(form({ title: titulo })).title, titulo);
+  });
+
+  // M-44 (auditoría del 28-oct-2026): vaciar un campo y guardar no lo vaciaba. Se mandaba
+  // `undefined`, que se cae del JSON, y el servidor lee la clave que falta como «déjalo
+  // como está»: el valor viejo volvía al formulario con el aviso de «guardado».
+  test("vaciar un campo de una pieza que lo tenía manda el vacío, no lo omite (M-44)", () => {
+    const post = {
+      id: 9,
+      format: "entrevista",
+      title: "Una entrevista",
+      slug: "una-entrevista",
+      excerpt: "<p>Resumen</p>",
+      content: "<p>Cuerpo</p>",
+      meta_title: "Título SEO",
+      meta_description: "Descripción para compartir",
+      canonical_url: "https://otro.medio/entrevista",
+      featured_image_url: "https://cdn.ejemplo/vieja.jpg",
+      interviewee: "Ana Pérez",
+      interviewee_role: "Cargo equivocado",
+      unit: "Unidad vieja",
+      status: "draft",
+    };
+    const vaciado = {
+      ...postToForm(post),
+      excerpt: "",
+      meta_title: "",
+      meta_description: "   ",
+      canonical_url: "",
+      // «Quitarla», la imagen por URL de antes de la biblioteca (`GrupoArchivos.jsx`).
+      featured_image_url: "",
+      interviewee: "",
+      interviewee_role: "",
+      unit: " ",
+    };
+    const p = formToPayload(vaciado);
+    for (const k of ["meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
+      assert.ok(k in p, `${k} tiene que ir`);
+      assert.equal(p[k], null, k);
+    }
+    // La entradilla no admite nulo al editar: va vacía.
+    assert.equal(p.excerpt, "");
+    // Viaja en el JSON, que es lo que llega al servidor.
+    const enviado = JSON.parse(JSON.stringify(p));
+    assert.equal(enviado.interviewee_role, null);
+    assert.equal(enviado.featured_image_url, null);
+  });
+
+  test("lo que no se toca se manda tal cual, para no pisar nada (M-44)", () => {
+    const post = {
+      format: "entrevista",
+      title: "T",
+      meta_title: "  Título SEO ",
+      canonical_url: "https://otro.medio/x",
+      interviewee: "Ana Pérez",
+      interviewee_role: "Ministra",
+      unit: "BCV",
+    };
+    const p = formToPayload(postToForm(post));
+    assert.equal(p.meta_title, "Título SEO");
+    assert.equal(p.canonical_url, "https://otro.medio/x");
+    assert.equal(p.interviewee, "Ana Pérez");
+    assert.equal(p.interviewee_role, "Ministra");
+    assert.equal(p.unit, "BCV");
+  });
+
+  test("el cuerpo vacío sigue sin mandarse: vaciarlo por error borraría la pieza", () => {
+    assert.equal("content" in formToPayload(form({ content: "   " })), false);
   });
 
   test("la versión en inglés: vacía es nula, es decir «sin inglés»", () => {

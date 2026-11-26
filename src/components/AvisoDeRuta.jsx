@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
+import { trasElPintado } from "../lib/trasElPintado";
 
 /**
  * Cuenta los cambios de pagina a quien no los ve.
@@ -23,6 +24,12 @@ import PropTypes from "prop-types";
  *
  * **No toca el desplazamiento.** El foco se pone con `preventScroll`: de subir arriba
  * ya se encarga `ScrollToTop`, y dos sitios decidiendo el scroll acaban peleandose.
+ *
+ * **No retrasa la pagina nueva.** Mover el foco obliga al navegador a maquetar en ese
+ * momento la pagina entera que acaba de llegar, y hecho dentro del cambio de ruta era cerca
+ * del 40 % de lo que tardaba en verse (medido en el telefono del laboratorio, nov-2026). Va
+ * justo despues de que se pinte (`trasElPintado`): unos milisegundos mas tarde para quien
+ * usa un lector de pantalla, que no los nota, y la pagina se ve antes para todos.
  */
 /** Lo que un lector diria de un encabezado: su texto, o el `alt` si es un logotipo. */
 const nombreDe = (el) => {
@@ -63,14 +70,6 @@ export const AvisoDeRuta = ({ destinoId }) => {
     anterior.current = pathname;
     if (!huboGesto.current) return undefined;
 
-    const destino = document.getElementById(destinoId);
-    const activo = document.activeElement;
-    // Si la pagina nueva ya puso el foco en algo suyo -- un campo con `autoFocus` --,
-    // esa decision es mejor que la nuestra y se respeta.
-    const yaDentro =
-      destino && activo && activo !== destino && activo !== document.body && destino.contains(activo);
-    if (destino && !yaDentro) destino.focus({ preventScroll: true });
-
     // Se vacia y se vuelve a llenar: dos paginas con el mismo titulo seguidas no se
     // anunciarian, porque la region viva solo habla cuando su texto cambia. La espera
     // es para que la pagina haya puesto ya su titulo; las que lo ponen al llegar sus
@@ -79,14 +78,30 @@ export const AvisoDeRuta = ({ destinoId }) => {
     // Si el titulo no cambio -- hay vistas que aun no ponen el suyo y heredan el de la
     // anterior --, se lee el `h1` de la pagina nueva: anunciar el titulo viejo diria que
     // no se ha movido nada.
-    const tituloAntes = tituloPrevio.current;
     setMensaje("");
-    const t = window.setTimeout(() => {
-      const titulo = document.title;
-      const h1 = nombreDe(destino?.querySelector("h1"));
-      setMensaje(titulo !== tituloAntes || !h1 ? titulo : h1);
-    }, 500);
-    return () => window.clearTimeout(t);
+    // El de la pagina que se deja (apuntado en el gesto), ya: otro toque antes del pintado
+    // lo cambiaria.
+    const tituloAntes = tituloPrevio.current;
+    let anuncio = null;
+    // El foco y el aviso, despues de que se vea la pagina nueva (ver arriba).
+    const cancelar = trasElPintado(() => {
+      const destino = document.getElementById(destinoId);
+      const activo = document.activeElement;
+      // Si la pagina nueva ya puso el foco en algo suyo -- un campo con `autoFocus` --,
+      // esa decision es mejor que la nuestra y se respeta.
+      const yaDentro =
+        destino && activo && activo !== destino && activo !== document.body && destino.contains(activo);
+      if (destino && !yaDentro) destino.focus({ preventScroll: true });
+      anuncio = window.setTimeout(() => {
+        const titulo = document.title;
+        const h1 = nombreDe(destino?.querySelector("h1"));
+        setMensaje(titulo !== tituloAntes || !h1 ? titulo : h1);
+      }, 500);
+    });
+    return () => {
+      cancelar();
+      window.clearTimeout(anuncio);
+    };
   }, [pathname, destinoId]);
 
   return (

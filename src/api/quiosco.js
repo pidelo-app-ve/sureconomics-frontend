@@ -107,8 +107,9 @@ export const ultimaHoraDeLaPortada = (lang) => `/headlines?lang=${lang}&limit=40
 export const ID_DE_ULTIMA_HORA = "se-ultima-hora";
 
 /**
- * Hasta cuándo es nuevo lo que trae el HTML. El borde guarda la portada medio minuto, y uno
- * más mientras la renueva; pero si la función fallara, sirve la de antes hasta un día
+ * Hasta cuándo es nuevo lo que trae el HTML. El borde guarda la portada medio minuto, y la
+ * sigue sirviendo mientras la renueva hasta completar esto mismo (`CACHE_PORTADA`, en
+ * `api/portada.js`, sale de aquí); pero si la función fallara, sirve la de antes hasta un día
  * (`stale-if-error`). Con solo los datos de entonces la página se quedaría en la portada de
  * ayer: más viejo que esto, quien lo usa pide además el de ahora. Diez minutos y no dos,
  * por los relojes de los teléfonos, que no siempre van en hora (con uno adelantado, el

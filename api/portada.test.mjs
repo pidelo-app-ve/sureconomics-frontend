@@ -13,6 +13,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import handler, {
+  CACHE_PORTADA,
   DATOS_URL,
   ORDEN_DE_SECCIONES,
   TEXTOS,
@@ -32,6 +33,7 @@ import {
   precargaDeLaApertura,
 } from "../src/lib/apertura.js";
 import { ANCHOS_DE_TARJETA, imagenSrcSet } from "../src/lib/fotoDePieza.js";
+import { VIGENCIA_EN_EL_HTML_MS } from "../src/api/quiosco.js";
 import { anchoDeSizes, tallaElegida } from "../scripts/pruebas/anchoDeSizes.mjs";
 
 // El shell viaja con la función (`dist/app.html`). Aquí, sin archivo: cada prueba decide
@@ -142,8 +144,13 @@ await conFetch(fetchCon({ datos: MUCHAS }), async () => {
   const dentro = raiz(h);
   check("responde 200", res.code === 200);
   check("HTML", res.headers["Content-Type"] === "text/html; charset=utf-8");
-  check("guardada como el listado",
-    res.headers["Cache-Control"] === "public, s-maxage=30, stale-while-revalidate=60, stale-if-error=86400", res.headers["Cache-Control"]);
+  check("guardada medio minuto nueva y, mientras se renueva, hasta diez minutos en total",
+    res.headers["Cache-Control"] === "public, s-maxage=30, stale-while-revalidate=570, stale-if-error=86400", res.headers["Cache-Control"]);
+  // Lo más vieja que el borde la sirve (sin fallos) es lo que la página da por nuevo su
+  // bloque de datos: si no, pintaría uno viejo y lo volvería a pedir en cada visita así.
+  const [, nueva, renueva] = CACHE_PORTADA.match(/s-maxage=(\d+), stale-while-revalidate=(\d+)/).map(Number);
+  check("y nunca más vieja que la vigencia del bloque de datos",
+    (nueva + renueva) * 1000 === VIGENCIA_EN_EL_HTML_MS, `${nueva}+${renueva}`);
   check("marca portada", res.headers["X-Pieza-Meta"] === "portada");
   check("dice de dónde salió el shell", res.headers["X-Shell"] === "red", res.headers["X-Shell"]);
   check("un solo <title>, el de la portada",

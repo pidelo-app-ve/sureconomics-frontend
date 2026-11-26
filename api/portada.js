@@ -99,6 +99,7 @@ import {
   ID_DE_ULTIMA_HORA,
   LISTADO_DE_LA_PORTADA,
   RUTA_DEL_QUIOSCO,
+  VIGENCIA_EN_EL_HTML_MS,
   ultimaHoraDeLaPortada,
 } from "../src/api/quiosco.js";
 import {
@@ -728,11 +729,27 @@ export const armarPortada = (
 };
 
 /**
- * Lo mismo que guarda el borde para el listado (`/posts`, en el backend): medio minuto, un
- * minuto más sirviendo la anterior mientras se renueva, y un día si la función fallara. Una
- * noticia nueva sale aquí tan pronto como en el quiosco.
+ * Cuánto guarda el borde la portada.
+ *
+ * - **Medio minuto nueva** (`s-maxage`), como el listado del quiosco (`/posts`): con
+ *   lectores llegando, una noticia nueva sale aquí tan pronto como allí.
+ * - **Hasta diez minutos en total sirviendo la anterior** mientras se renueva por detrás
+ *   (`stale-while-revalidate`). Era un minuto, y con el tráfico de hoy casi todas las
+ *   visitas llegaban pasado ese minuto: esperaban a que la función pidiera los titulares y
+ *   armara la página (y la primera, a que arrancara). Ahora el que llega tras un rato quieto
+ *   recibe al momento la última que se armó, y es su visita la que la renueva para el
+ *   siguiente. La contrapartida: ese lector puede ver una portada de hasta diez minutos;
+ *   nunca más vieja.
+ * - **Diez minutos justos, a propósito:** es lo que la página da por nuevo el bloque de
+ *   datos que viaja dentro (`VIGENCIA_EN_EL_HTML_MS`, en `src/api/quiosco.js`). Así casi
+ *   nunca pinta uno que tenga que volver a pedir, y si alguna vez le llega uno más viejo
+ *   (un reloj del teléfono adelantado, la copia del quiosco que la función leyó ya tenía su
+ *   minuto), lo pinta igual y pide el de ahora por detrás, como siempre.
+ * - **Un día** si la función fallara (`stale-if-error`).
  */
-const CACHE_PORTADA = "public, s-maxage=30, stale-while-revalidate=60, stale-if-error=86400";
+const NUEVA_S = 30;
+export const CACHE_PORTADA =
+  `public, s-maxage=${NUEVA_S}, stale-while-revalidate=${VIGENCIA_EN_EL_HTML_MS / 1000 - NUEVA_S}, stale-if-error=86400`;
 
 export default async function handler(req, res) {
   // `/` llega sin nada y `/en` con `lang=en` (los dos por `vercel.json`).

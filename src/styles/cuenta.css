@@ -1173,10 +1173,12 @@
 }
 
 .se-campo__caja { position: relative; display: flex; }
+/* El borde, el de los campos de todo el sitio (E-17): el filete (#ddd8cc) daba 1,42:1 sobre
+   blanco y no se veía dónde escribir. Ver `--se-form-control-border` en `blog.css`. */
 .se-campo__input {
   width: 100%;
   padding: 0.7rem 0.85rem;
-  border: 1px solid var(--color-hairline);
+  border: 1px solid var(--se-form-control-border);
   border-radius: 2px;
   background: #fff;
   font-family: var(--se-font-ui);

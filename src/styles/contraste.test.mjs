@@ -18,6 +18,7 @@ const hoja = (ruta) => readFileSync(new URL(ruta, import.meta.url), "utf8").repl
 const BLOG = hoja("./blog.css");
 const ADMIN = hoja("./admin.css");
 const CONTACTO = hoja("../pages/contacto.css");
+const CUENTA = hoja("./cuenta.css");
 const EDITOR = hoja("./editor.css");
 const ACCESIBILIDAD = hoja("./accesibilidad.css");
 
@@ -98,6 +99,13 @@ test("contacto usa el borde de los campos, no su negro al 16 % (E-17)", () => {
     regla(CONTACTO, ".se-contact .se-form-control:hover:not(:disabled):not(:focus)")["border-color"],
     "var(--se-form-control-border-hover)"
   );
+});
+
+test("los campos de la cuenta y de la entrada del equipo usan el borde de los campos (E-17)", () => {
+  // Era el filete del papel, #ddd8cc: 1,42:1 sobre el blanco del campo.
+  assert.ok(minimoContra("#ddd8cc", BLANCO, []) < 3);
+  assert.equal(regla(CUENTA, ".se-campo__input").border, "1px solid var(--se-form-control-border)");
+  assert.ok(minimoContra(regla(BLOG, ":root")["--se-form-control-border"], BLANCO, [PAPEL]) >= 3);
 });
 
 test("los campos del panel: 3:1 sobre blanco y sobre el lienzo (E-17)", () => {

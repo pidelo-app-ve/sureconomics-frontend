@@ -132,3 +132,24 @@ test("mientras la página vuelve corta (los datos aún no llegan), no se pisa la
   await navegar(router, -1);
   assert.equal(window.scrollY, 2600);
 });
+
+test("con la invitación abierta (bloqueo en <html>) no se apunta la altura falsa; con el menú (en <body>), sí", async () => {
+  const bajar = conAltura();
+  const { router } = pintar(createElement(ScrollToTop, null, createElement(Pagina)), { ruta: "/" });
+  bajar(6049);
+  // Se abre la invitación: con <html> bloqueado, el navegador da otra cifra.
+  document.documentElement.style.overflow = "hidden";
+  bajar(610);
+  await navegar(router, "/noticias/una");
+  document.documentElement.style.overflow = "";
+  await navegar(router, -1);
+  assert.equal(window.scrollY, 6049, "la de antes de abrirse, no la falsa");
+  // El menú del teléfono bloquea <body>: la altura sigue siendo la buena y se apunta.
+  await navegar(router, 1);
+  document.body.style.overflow = "hidden";
+  bajar(420);
+  document.body.style.overflow = "";
+  await navegar(router, -1);
+  await navegar(router, 1);
+  assert.equal(window.scrollY, 420);
+});

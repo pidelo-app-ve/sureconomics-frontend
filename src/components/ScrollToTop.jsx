@@ -3,6 +3,7 @@ import { useLocation, useNavigationType } from "react-router-dom";
 import PropTypes from "prop-types";
 import {
   apuntar,
+  bloqueoEnHtml,
   cargaQueRestaura,
   claveDe,
   guardarPosiciones,
@@ -56,8 +57,10 @@ const ScrollToTop = ({ children }) => {
     const historial = window.history;
     const antes = historial.scrollRestoration;
     historial.scrollRestoration = "manual";
+    // Ni mientras se sostiene una altura ni con la invitación al boletín abierta (bloquea
+    // `<html>`, y entonces `scrollY` no es la altura del lector): ver `bloqueoEnHtml`.
     const ahora = () => {
-      if (!sosteniendo.current) apuntar(posiciones, clave.current, window.scrollY);
+      if (!sosteniendo.current && !bloqueoEnHtml()) apuntar(posiciones, clave.current, window.scrollY);
     };
     let espera = null;
     const alDesplazar = () => {

@@ -113,12 +113,21 @@ export const cargaQueRestaura = (ventana = globalThis.window) => {
  * Si la página no se puede desplazar ahora: `<html>` o `<body>` con `overflow: hidden` (una
  * ventana abierta encima). El `overflow-x: hidden` que lleva siempre `body` no cuenta.
  */
-export const desplazamientoBloqueado = (ventana = globalThis.window) => {
+export const desplazamientoBloqueado = (ventana = globalThis.window) =>
+  bloqueado(ventana, ventana?.document?.documentElement) || bloqueado(ventana, ventana?.document?.body);
+
+/**
+ * Si el bloqueo está en `<html>` (la invitación al boletín, `InvitacionAlBoletinAbierta`).
+ * Ahí `scrollY` deja de decir dónde está el lector (medido en Edge: está en 6049 y se lee
+ * 610), así que no se apunta. Con el de `<body>` (el menú del teléfono) `scrollY` sigue
+ * siendo la altura de verdad y sí se apunta: es lo que devuelve «adelante» a una pieza.
+ */
+export const bloqueoEnHtml = (ventana = globalThis.window) => bloqueado(ventana, ventana?.document?.documentElement);
+
+/** `el` con `overflow: hidden` (en su estilo o calculado en vertical). */
+const bloqueado = (ventana, el) => {
   try {
-    const doc = ventana?.document;
-    return [doc?.documentElement, doc?.body].some(
-      (el) => el && (el.style?.overflow === "hidden" || ventana.getComputedStyle?.(el)?.overflowY === "hidden")
-    );
+    return Boolean(el) && (el.style?.overflow === "hidden" || ventana.getComputedStyle?.(el)?.overflowY === "hidden");
   } catch {
     return false;
   }

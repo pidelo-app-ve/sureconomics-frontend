@@ -11,6 +11,7 @@ import {
   apuntar,
   cargaQueRestaura,
   claveDe,
+  bloqueoEnHtml,
   desplazamientoBloqueado,
   guardarPosiciones,
   leerPosiciones,
@@ -197,6 +198,17 @@ test("desplazamientoBloqueado: overflow hidden en html o body; el overflow-x de 
   // `overflow-x: hidden` en body: el navegador calcula `overflow-y: auto`.
   assert.equal(desplazamientoBloqueado(con({}, { calculado: "auto" })), false);
   assert.equal(desplazamientoBloqueado(undefined), false);
+});
+
+test("bloqueoEnHtml: solo el de <html> (la invitación), no el de <body> (el menú)", () => {
+  const con = (html, body) => ({
+    document: { documentElement: { style: {}, ...html }, body: { style: {}, ...body } },
+    getComputedStyle: (el) => ({ overflowY: el.calculado ?? "visible" }),
+  });
+  assert.equal(bloqueoEnHtml(con({ style: { overflow: "hidden" } }, {})), true);
+  assert.equal(bloqueoEnHtml(con({}, { style: { overflow: "hidden" } })), false);
+  assert.equal(desplazamientoBloqueado(con({}, { style: { overflow: "hidden" } })), true, "para restaurar, los dos bloquean");
+  assert.equal(bloqueoEnHtml(undefined), false);
 });
 
 test("restaurar: sin ResizeObserver, al menos el primer intento", () => {

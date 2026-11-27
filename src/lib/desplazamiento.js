@@ -60,10 +60,19 @@ const GESTOS = ["wheel", "touchstart", "pointerdown", "keydown"];
 export const claveDe = (location) =>
   location.key === "default" ? `default:${location.pathname}${location.search}${location.hash}` : location.key;
 
+/**
+ * El almacén: el que se pase o, si no, el de la pestaña. Se pide dentro del `try` de quien
+ * lo usa, nunca como valor por omisión de un parámetro: con las cookies bloqueadas (o en
+ * algún modo privado) solo tocar `sessionStorage` lanza un `SecurityError`, y fuera del
+ * `try` rompía el pintado de `ScrollToTop`. Sin almacén, «atrás» funciona igual hasta que
+ * se recargue.
+ */
+const deLaSesion = (almacen) => (almacen === undefined ? globalThis.sessionStorage : almacen);
+
 /** Las posiciones guardadas (`Map` de clave → altura), o ninguna si no se pueden leer. */
-export const leerPosiciones = (almacen = globalThis.sessionStorage) => {
+export const leerPosiciones = (almacen) => {
   try {
-    const lista = JSON.parse(almacen?.getItem(CLAVE) ?? "[]");
+    const lista = JSON.parse(deLaSesion(almacen)?.getItem(CLAVE) ?? "[]");
     return new Map(Array.isArray(lista) ? lista.filter(([, y]) => Number.isFinite(y)) : []);
   } catch {
     return new Map();
@@ -78,9 +87,9 @@ export const apuntar = (posiciones, clave, y) => {
 };
 
 /** Las guarda; si el almacén no deja (modo privado, lleno), se quedan en memoria. */
-export const guardarPosiciones = (posiciones, almacen = globalThis.sessionStorage) => {
+export const guardarPosiciones = (posiciones, almacen) => {
   try {
-    almacen?.setItem(CLAVE, JSON.stringify([...posiciones]));
+    deLaSesion(almacen)?.setItem(CLAVE, JSON.stringify([...posiciones]));
   } catch {
     /* Sin almacén, la vuelta atrás funciona igual mientras no se recargue. */
   }

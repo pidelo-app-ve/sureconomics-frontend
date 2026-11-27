@@ -238,6 +238,23 @@ test("claveDe: la del router tal cual; las del navegador (`default`), con su dir
   assert.equal(claveDe({ key: "default", pathname: "/en", search: "?buscar=1", hash: "" }), "default:/en?buscar=1");
 });
 
+test("con el almacén de la sesión bloqueado (tocarlo lanza), ni leer ni guardar rompen nada", () => {
+  const antes = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage");
+  Object.defineProperty(globalThis, "sessionStorage", {
+    configurable: true,
+    get() {
+      throw new Error("SecurityError: el acceso al almacén está bloqueado");
+    },
+  });
+  try {
+    assert.equal(leerPosiciones().size, 0);
+    guardarPosiciones(new Map([["a", 1]]));
+  } finally {
+    if (antes) Object.defineProperty(globalThis, "sessionStorage", antes);
+    else delete globalThis.sessionStorage;
+  }
+});
+
 test("cargaQueRestaura: solo una recarga o un atrás/adelante desde fuera", () => {
   const con = (type) => ({ performance: { getEntriesByType: () => [{ type }] } });
   assert.equal(cargaQueRestaura(con("reload")), true);

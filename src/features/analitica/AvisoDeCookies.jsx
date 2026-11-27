@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Enlace } from "../../components/Enlace";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
+import { trasElPintado } from "../../lib/trasElPintado";
 import {
   MEDICION_HABILITADA,
   aceptado,
@@ -77,12 +78,21 @@ export const AvisoDeCookies = () => {
   }, [pathname]);
 
   const responder = useCallback((respuesta) => {
-    // Se cuenta la respuesta -- las dos -- en un contador diario sin identificador: ver
-    // `contarDecision`. Aqui y no en `decidir`, porque esto es la unica vez que se
-    // *pregunta*; lo que se cambie despues desde `/cookies` es otra pregunta. La barra
-    // desaparece con la respuesta, asi que el clic no puede repetirse.
-    contarDecision(respuesta);
-    setDecision(decidir(respuesta));
+    // Primero se va la barra, y lo demas despues de que se vea irse (`trasElPintado`):
+    // guardar la respuesta, arrancar la medicion y avisar a la publicidad (`decidir`), y
+    // contarla. Todo junto dentro del toque eran de 232 a 400 ms en el telefono del
+    // laboratorio (nov-2026) con la barra todavia en pantalla. La barra no vuelve: se
+    // pinta con lo que se contesto (la misma cuenta que hace `decidir`) y el clic no puede
+    // repetirse. Si el lector cambia de pestaña justo entonces, la respuesta se guarda
+    // igual, como mucho un segundo despues (la reserva de `trasElPintado`).
+    setDecision(respuesta === "si" ? "si" : "no");
+    trasElPintado(() => {
+      // Se cuenta la respuesta -- las dos -- en un contador diario sin identificador: ver
+      // `contarDecision`. Aqui y no en `decidir`, porque esto es la unica vez que se
+      // *pregunta*; lo que se cambie despues desde `/cookies` es otra pregunta.
+      contarDecision(respuesta);
+      decidir(respuesta);
+    });
   }, []);
 
   const visible = MEDICION_HABILITADA && !decision;
@@ -95,6 +105,10 @@ export const AvisoDeCookies = () => {
   // de letra y con el texto, y una cifra fija se queda corta en cuanto algo de eso se
   // mueve. La primera medida la da el `ResizeObserver` al observar, con el diseño ya
   // hecho: medir aquí mismo, recién puesta la clase, obligaba a recalcularlo a destiempo.
+  //
+  // Al irse la barra, la reserva se quita después del pintado: cambiar el estilo de `<html>`
+  // obliga a recalcular el de toda la página, y hecho dentro del toque retrasaba que la
+  // barra desapareciera.
   useEffect(() => {
     if (!visible) return undefined;
     const raiz = document.documentElement;
@@ -112,8 +126,10 @@ export const AvisoDeCookies = () => {
     }
     return () => {
       vigia?.disconnect();
-      raiz.classList.remove("se-con-aviso-cookies");
-      raiz.style.removeProperty("--se-aviso-cookies-alto");
+      trasElPintado(() => {
+        raiz.classList.remove("se-con-aviso-cookies");
+        raiz.style.removeProperty("--se-aviso-cookies-alto");
+      });
     };
   }, [visible]);
 

@@ -43,6 +43,7 @@ un tope que solo baja.
 | Guías («Guía» de cada página) | `lib/guias`, `lib/recorridoVista.js`, `components/recorrido`; los pasos de las guías de monedas, titulares, audiencia, publicidad, el boletín y la cuenta (sus nueve, en un solo archivo) viven en `features/*/guia.js` |
 | Llamadas al servidor (lo común) | `src/api/`: el núcleo (`nucleo.js`), la sesión (`sesion.js`), el quiosco y los archivos del propio sitio (`archivoDelSitio.js`). Se entra por los envoltorios de siempre: `lib/api.js` (panel), `lib/userApi.js` (lector), `services/apiClient.js` (lo público) |
 | Datos fijos del sitio (marca, menú, aliadas, contacto, redes, consultoría) | `src/config/sitio.js`; el equipo de «Quiénes somos», aparte, en `src/config/equipo.js` (no viaja en el paquete de cada lector) |
+| Arranque y desplazamiento (cuándo monta React sin quitarle el LCP a la foto del HTML, «atrás» a la misma altura, lo que espera a después del pintado) | `main.jsx` y `lib/fotoDelHtml.js`; `components/ScrollToTop.jsx` y `lib/desplazamiento.js`; `lib/trasElPintado.js` |
 | Vista previa para redes y sitemap (Vercel) | `api/` de la raíz (no confundir con `src/api/`, el cliente) |
 
 ## Llamadas al servidor

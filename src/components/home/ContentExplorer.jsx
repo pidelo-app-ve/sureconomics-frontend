@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useIdioma } from "../../i18n/ProveedorIdioma";
 import { countForOption } from "../../lib/contentFilter";
@@ -13,7 +13,66 @@ import "./contentExplorer.css";
  *
  * Format is deliberately absent: it comes from the header menu, and inside a
  * format page these two axes narrow without leaving the format.
+ *
+ * **El botón responde al momento; la lista, justo después.** Filtrar es volver a pintar
+ * la página entera (en el teléfono, de 176 a 464 ms por toque, nov-2026), y hecho dentro
+ * del toque, el botón no cambiaba hasta que terminaba. Ahora el toque solo enciende la
+ * opción (`pulsado`: lo que se ve encendido mientras la página aplica el cambio) y la
+ * página lo recibe dentro de `startTransition`: React pinta primero el botón y prepara la
+ * lista nueva sin bloquear la pantalla. En cuanto la página la tiene, `pulsado` se olvida
+ * y vuelve a mandar ella: no es una segunda copia, solo el eco del dedo. Las cifras de
+ * cada opción son siempre las de la página (`useCuentas`), las mismas que la lista.
+ * Mientras dura el eco, las cifras y la lista se atenúan un poco (`se-explorer--pendiente`,
+ * en `contentExplorer.css`): son todavía las de antes y no deben parecer las del botón nuevo.
  */
+
+/**
+ * Las cifras de cada opción para la selección de la página, guardadas mientras esa
+ * selección no cambie: el toque que solo enciende un botón no las vuelve a contar.
+ *
+ * The tree travels inside the selection so `countForOption` expands a region to
+ * its countries the same way the result list does. Without it an option would
+ * count zero for a region while the page showed matches under it.
+ *
+ * «Lo más tratado»: los temas con más piezas, contados sin filtro, para que el orden
+ * no salte mientras se escribe. La cifra que se ve sí es la de ahora: dice cuántas
+ * quedan de ese tema con lo escrito.
+ */
+const useCuentas = ({ pieces, temas, geos, query, geoTop, regiones, ancestros, temasDisponibles, rapidos }) => {
+  // Las páginas pasan la lista de temas recién hecha en cada pintado: manda su contenido.
+  const claveDeTemas = temasDisponibles.join("\n");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const temasFijos = useMemo(() => temasDisponibles, [claveDeTemas]);
+  return useMemo(() => {
+    const selection = { temas, geos, query, tree: { geoTop, regiones, ancestros } };
+    const contadas = new Map();
+    const count = (axis, value) => {
+      const clave = `${axis}:${value}`;
+      if (!contadas.has(clave)) contadas.set(clave, countForOption(pieces, axis, value, selection));
+      return contadas.get(clave);
+    };
+    const topicOptions = temasFijos.map((t) => ({ value: t, n: count("tema", t) })).filter((o) => o.n > 0);
+    const sinFiltro = { temas: new Set(), geos: new Set(), query: "", tree: selection.tree };
+    const masTratados = rapidos
+      ? temasFijos
+          .map((v) => ({ value: v, base: countForOption(pieces, "tema", v, sinFiltro) }))
+          .filter((o) => o.base > 0)
+          .sort((a, b) => b.base - a.base)
+          .slice(0, rapidos)
+          .map((o) => ({ ...o, n: count("tema", o.value) }))
+      : [];
+    return { count, topicOptions, masTratados };
+  }, [pieces, temas, geos, query, geoTop, regiones, ancestros, temasFijos, rapidos]);
+};
+/**
+ * Si lo pulsado ya es, en contenido, la selección de la página. Hace falta además de mirar
+ * si cambió el objeto: en `/explorar`, pulsar una opción y quitarla antes de que termine
+ * el filtrado deja la misma dirección, el router devuelve la misma selección y el eco (y
+ * la atenuación de la lista) se quedaba puesto para siempre.
+ */
+const mismos = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+const yaAplicado = (pulsado, temas, geos) => mismos(pulsado.temas, temas) && mismos(pulsado.geos, geos);
+
 /** La flecha de los desplegables: dibujada, no un carácter. */
 const Flecha = () => (
   <svg className="se-explorer__caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">
@@ -43,6 +102,15 @@ export const ContentExplorer = ({
 }) => {
   const { t } = useIdioma();
   const [open, setOpen] = useState(null);
+  // Lo que el lector acaba de pulsar, hasta que la página lo aplica (ver arriba).
+  const [pulsado, setPulsado] = useState(null);
+  const [deLaPagina, setDeLaPagina] = useState({ temas, geos });
+  if (deLaPagina.temas !== temas || deLaPagina.geos !== geos || (pulsado && yaAplicado(pulsado, temas, geos))) {
+    setDeLaPagina({ temas, geos });
+    setPulsado(null);
+  }
+  const visto = pulsado ?? { temas, geos };
+  const { count, topicOptions, masTratados } = useCuentas({ pieces, temas, geos, query, geoTop, regiones, ancestros, temasDisponibles, rapidos });
   const rootRef = useRef(null);
   const campoRef = useRef(null);
 
@@ -79,18 +147,17 @@ export const ContentExplorer = ({
     };
   }, [open]);
 
-  // The tree travels inside the selection so `countForOption` expands a region to
-  // its countries the same way the result list does. Without it an option would
-  // count zero for a region while the page showed matches under it.
-  const selection = { temas, geos, query, tree: { geoTop, regiones, ancestros } };
-  const count = (axis, value) => countForOption(pieces, axis, value, selection);
+  // Se enciende ya y la página filtra en una transición: ver arriba.
+  const elegir = (seleccion) => {
+    setPulsado(seleccion);
+    startTransition(() => onChange(seleccion));
+  };
 
   const toggle = (axis, value) => {
-    const current = axis === "tema" ? temas : geos;
-    const next = new Set(current);
+    const next = new Set(axis === "tema" ? visto.temas : visto.geos);
     if (next.has(value)) next.delete(value);
     else next.add(value);
-    onChange(axis === "tema" ? { temas: next, geos } : { temas, geos: next });
+    elegir(axis === "tema" ? { temas: next, geos: visto.geos } : { temas: visto.temas, geos: next });
   };
 
   // Tabular fuera del desplegable lo cierra: un panel abierto que ya no tiene el foco
@@ -121,7 +188,7 @@ export const ContentExplorer = ({
   };
 
   const clearAll = () => {
-    onChange({ temas: new Set(), geos: new Set() });
+    elegir({ temas: new Set(), geos: new Set() });
     onQueryChange?.("");
     setOpen(null);
   };
@@ -133,28 +200,11 @@ export const ContentExplorer = ({
   };
 
   const active = [
-    ...[...temas].map((v) => ["tema", v]),
-    ...[...geos].map((v) => ["geo", v]),
+    ...[...visto.temas].map((v) => ["tema", v]),
+    ...[...visto.geos].map((v) => ["geo", v]),
   ];
 
-  const topicOptions = temasDisponibles.map((t) => ({ value: t, n: count("tema", t) })).filter(
-    (o) => o.n > 0
-  );
-
   const hasSelection = active.length > 0 || Boolean((query ?? "").trim());
-
-  // «Lo más tratado»: los temas con más piezas, contados sin filtro, para que el orden
-  // no salte mientras se escribe. La cifra que se ve sí es la de ahora: dice cuántas
-  // quedan de ese tema con lo escrito.
-  const sinFiltro = { temas: new Set(), geos: new Set(), query: "", tree: selection.tree };
-  const masTratados = rapidos
-    ? temasDisponibles
-        .map((v) => ({ value: v, base: countForOption(pieces, "tema", v, sinFiltro) }))
-        .filter((o) => o.base > 0)
-        .sort((a, b) => b.base - a.base)
-        .slice(0, rapidos)
-        .map((o) => ({ ...o, n: count("tema", o.value) }))
-    : [];
 
   // El alcance va dentro del campo y no en un rotulo aparte: "Filtros / en todo el
   // sitio" nombraba lo que los propios controles ya dicen, y dejaba la busqueda --
@@ -164,7 +214,7 @@ export const ContentExplorer = ({
     : t("comun.buscar");
 
   return (
-    <div className="se-explorer" ref={rootRef}>
+    <div className={`se-explorer${pulsado ? " se-explorer--pendiente" : ""}`} ref={rootRef}>
       <div className="se-explorer__bar">
         {onQueryChange ? (
           <div className="se-explorer__field">
@@ -199,12 +249,12 @@ export const ContentExplorer = ({
             type="button"
             aria-controls={open === "tema" ? "explorer-panel-tema" : undefined}
             className={`se-explorer__btn${open === "tema" ? " se-explorer__btn--on" : ""}${
-              temas.size ? " se-explorer__btn--filled" : ""
+              visto.temas.size ? " se-explorer__btn--filled" : ""
             }`}
             onClick={() => setOpen(open === "tema" ? null : "tema")}
             aria-expanded={open === "tema"}
           >
-            <span>{label(temas, t("portada.explorador.tema"))}</span>
+            <span>{label(visto.temas, t("portada.explorador.tema"))}</span>
             <Flecha />
           </button>
           {open === "tema" ? (
@@ -223,8 +273,8 @@ export const ContentExplorer = ({
                   <button
                     type="button"
                     key={o.value}
-                    aria-pressed={temas.has(o.value)}
-                    className={`se-explorer__opt${temas.has(o.value) ? " se-explorer__opt--on" : ""}`}
+                    aria-pressed={visto.temas.has(o.value)}
+                    className={`se-explorer__opt${visto.temas.has(o.value) ? " se-explorer__opt--on" : ""}`}
                     onClick={() => toggle("tema", o.value)}
                   >
                     <span>{o.value}</span>
@@ -244,12 +294,12 @@ export const ContentExplorer = ({
             type="button"
             aria-controls={open === "geo" ? "explorer-panel-geo" : undefined}
             className={`se-explorer__btn${open === "geo" ? " se-explorer__btn--on" : ""}${
-              geos.size ? " se-explorer__btn--filled" : ""
+              visto.geos.size ? " se-explorer__btn--filled" : ""
             }`}
             onClick={() => setOpen(open === "geo" ? null : "geo")}
             aria-expanded={open === "geo"}
           >
-            <span>{label(geos, t("portada.explorador.donde"))}</span>
+            <span>{label(visto.geos, t("portada.explorador.donde"))}</span>
             <Flecha />
           </button>
           {open === "geo" ? (
@@ -262,8 +312,8 @@ export const ContentExplorer = ({
             >
               <button
                 type="button"
-                aria-pressed={geos.has(geoTop)}
-                className={`se-explorer__opt${geos.has(geoTop) ? " se-explorer__opt--on" : ""}`}
+                aria-pressed={visto.geos.has(geoTop)}
+                className={`se-explorer__opt${visto.geos.has(geoTop) ? " se-explorer__opt--on" : ""}`}
                 onClick={() => toggle("geo", geoTop)}
               >
                 <span>{t("portada.explorador.todo")}</span>
@@ -281,9 +331,9 @@ export const ContentExplorer = ({
                     <button
                       type="button"
                       key={continente}
-                      aria-pressed={geos.has(continente)}
+                      aria-pressed={visto.geos.has(continente)}
                       className={`se-explorer__opt se-explorer__opt--region${
-                        geos.has(continente) ? " se-explorer__opt--on" : ""
+                        visto.geos.has(continente) ? " se-explorer__opt--on" : ""
                       }`}
                       onClick={() => toggle("geo", continente)}
                     >
@@ -300,9 +350,9 @@ export const ContentExplorer = ({
                   <div key={region} className="se-explorer__group">
                     <button
                       type="button"
-                      aria-pressed={geos.has(region)}
+                      aria-pressed={visto.geos.has(region)}
                       className={`se-explorer__opt se-explorer__opt--region${
-                        geos.has(region) ? " se-explorer__opt--on" : ""
+                        visto.geos.has(region) ? " se-explorer__opt--on" : ""
                       }`}
                       onClick={() => toggle("geo", region)}
                     >
@@ -316,9 +366,9 @@ export const ContentExplorer = ({
                         <button
                           type="button"
                           key={pais}
-                          aria-pressed={geos.has(pais)}
+                          aria-pressed={visto.geos.has(pais)}
                           className={`se-explorer__opt se-explorer__opt--child${
-                            geos.has(pais) ? " se-explorer__opt--on" : ""
+                            visto.geos.has(pais) ? " se-explorer__opt--on" : ""
                           }`}
                           onClick={() => toggle("geo", pais)}
                         >
@@ -355,8 +405,8 @@ export const ContentExplorer = ({
             <button
               type="button"
               key={o.value}
-              aria-pressed={temas.has(o.value)}
-              className={`se-explorer__rapido${temas.has(o.value) ? " se-explorer__rapido--on" : ""}${
+              aria-pressed={visto.temas.has(o.value)}
+              className={`se-explorer__rapido${visto.temas.has(o.value) ? " se-explorer__rapido--on" : ""}${
                 o.n ? "" : " se-explorer__rapido--vacio"
               }`}
               style={{ "--i": i }}

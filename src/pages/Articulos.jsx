@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { useSearchParams } from "react-router-dom";
+import { useNavigationType, useSearchParams } from "react-router-dom";
 import { BRAND } from "../config/sitio";
 import { Redirigir } from "../components/Enlace";
 import { useIdioma } from "../i18n/ProveedorIdioma";
@@ -93,9 +93,13 @@ export const FormatListing = ({ formatoApi }) => {
   // Every format shares the `/articulos` path, so the app's ScrollToTop — which
   // watches the pathname — never fires when the reader moves between them. This
   // subtree is keyed by format, so its mount *is* "a new view was entered", and a
-  // new view starts at the top.
+  // new view starts at the top. Salvo al volver con «atrás»: ahí ScrollToTop ya la dejó
+  // donde estaba el lector.
+  const tipoDeNavegacion = useNavigationType();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (tipoDeNavegacion !== "POP") window.scrollTo(0, 0);
+    // Al montar y no más: es la entrada en la vista.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Page four of the old result set means nothing in the new one, so any change to

@@ -46,8 +46,10 @@ const pagina = (cargar, nombre, { zonas = [], lang = IDIOMA_BASE } = {}) => asyn
  * `/index.html`. Lo que no está en esa lista responde 404 desde el borde
  * (`api/no-encontrada.js`): la página se seguiría viendo, pero el buscador la olvidaría.
  * `npm run test:rutas` lo comprueba.
+ *
+ * Exportadas para las pruebas (`routes.pantalla.test.mjs`).
  */
-const rutasPublicas = (lang) => [
+export const rutasPublicas = (lang) => [
     // La puerta del boletín desde Instagram. Fuera de `Layout` a propósito: sin
     // cabecera ni menú, una sola cosa que hacer. Ver `features/boletin/Entorno.jsx`.
     { path: "entorno", lazy: pagina(() => import("./features/boletin/Entorno"), "Entorno", { zonas: ["boletin"], lang }), errorElement: <RouteError /> },
@@ -90,9 +92,10 @@ const rutasPublicas = (lang) => [
             // Those addresses are indexed and shared, so they redirect to wherever
             // the piece sits now instead of 404ing. Same for "categoria/<slug>":
             // categories no longer exist, and the nearest thing a reader wanted is
-            // the cross-format explorer.
+            // the cross-format explorer. En su idioma (`Redirigir`): `/en/categoria/x`
+            // iba a `/explorar` en español.
             { path: "articulo/:slug", lazy: pagina(() => import("./pages/PiezaRedirect"), "PiezaRedirect", { lang }) },
-            { path: "categoria/:slug", element: <Navigate to="/explorar" replace /> },
+            { path: "categoria/:slug", element: <Redirigir to="/explorar" replace /> },
             // One detail page for all six formats; the format sits in the path so
             // the URL reads as what it is.
             { path: "noticias/:slug", element: <Pieza /> },

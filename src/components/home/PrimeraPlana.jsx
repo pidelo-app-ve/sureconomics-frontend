@@ -58,9 +58,9 @@ const MONEDAS = 6;
 
 /**
  * Si la foto de la apertura ya se veía al montar: la pinta el HTML de la portada
- * (`aperturaEnHtml`, en `api/portada.js`) con su barrido de entrada, antes de que llegue el
+ * (`aperturaEnHtml`, en `api/portada.js`), quieta y entera, antes de que llegue el
  * JavaScript. Se mira en el primer render, cuando ese HTML todavía está en `#root` (React lo
- * reemplaza al terminarlo). Sin esto, al montar la foto se volvía a barrer encima de sí misma.
+ * reemplaza al terminarlo). Sin esto, al montar la foto se barría encima de sí misma.
  */
 const seVeiaAntesDeMontar = () =>
   typeof document !== "undefined" && Boolean(document.querySelector(".se-portada-anticipo"));

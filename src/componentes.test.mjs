@@ -62,7 +62,7 @@ const TOPES = {
   "src/components/Navbar.jsx#Navbar": 426,
   "src/pages/Home.jsx#Home": 385,
   "src/components/admin/AssetField.jsx#AssetField": 382,
-  "src/components/home/ContentExplorer.jsx#ContentExplorer": 367,
+  "src/components/home/ContentExplorer.jsx#ContentExplorer": 358,
   "src/pages/admin/AdminEducacion.jsx#TarjetaDeModulo": 359,
   "src/pages/Pieza.jsx#Pieza": 357,
   "src/pages/admin/AdminCommentsList.jsx#AdminCommentsList": 351,

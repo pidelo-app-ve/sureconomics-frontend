@@ -156,14 +156,12 @@ describe("de la API al formulario", () => {
 describe("lo que se manda al guardar", () => {
   test("un formulario vacío no manda texto vacío, pero sí lo que borra", () => {
     const p = formToPayload(emptyForm());
-    // Lo que no puede quedar vacío (o no se deja vaciar por error): no va.
-    for (const k of ["format", "title", "slug", "content"]) {
+    // Lo que no puede quedar vacío (o no se deja vaciar por error): no va. Tampoco lo que
+    // se quita con `null`: en una pieza nueva no hay nada que quitar (ver M-44, abajo).
+    for (const k of ["format", "title", "slug", "content", "meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
       assert.equal(k in p, false, `${k} no debería ir`);
     }
     // Lo que sí va aunque esté vacío: es como se quita.
-    for (const k of ["meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
-      assert.equal(p[k], null, k);
-    }
     assert.equal(p.excerpt, "");
     assert.equal(p.byline, null);
     assert.deepEqual(p.sources, []);
@@ -228,8 +226,9 @@ describe("lo que se manda al guardar", () => {
       unit: "Unidad vieja",
       status: "draft",
     };
+    const base = postToForm(post);
     const vaciado = {
-      ...postToForm(post),
+      ...base,
       excerpt: "",
       meta_title: "",
       meta_description: "   ",
@@ -240,7 +239,7 @@ describe("lo que se manda al guardar", () => {
       interviewee_role: "",
       unit: " ",
     };
-    const p = formToPayload(vaciado);
+    const p = formToPayload(vaciado, base);
     for (const k of ["meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
       assert.ok(k in p, `${k} tiene que ir`);
       assert.equal(p[k], null, k);
@@ -251,6 +250,24 @@ describe("lo que se manda al guardar", () => {
     const enviado = JSON.parse(JSON.stringify(p));
     assert.equal(enviado.interviewee_role, null);
     assert.equal(enviado.featured_image_url, null);
+  });
+
+  // La carrera con el reloj del SEO (revisión del 26-nov-2026): se publica una pieza sin
+  // meta título y quien edita se queda en la pantalla. El reloj (`seo_service.py`) le pone
+  // el SEO en el servidor. Luego se guarda otra cosa sin recargar: el formulario y su base
+  // siguen con el SEO vacío. Mandar `null` lo borraba, y el servidor lo tomaba por un
+  // cambio de una persona (`seo_automatico=False`). Vacío en los dos: no se manda.
+  test("vacío que ya estaba vacío no se manda: lo que puso el servidor se queda (reloj del SEO)", () => {
+    const base = postToForm({ id: 9, format: "noticia", title: "T", content: "<p>C</p>", status: "published" });
+    assert.equal(base.meta_title, "");
+    const otraCosa = { ...base, title: "T corregido" };
+    const p = formToPayload(otraCosa, base);
+    for (const k of ["meta_title", "meta_description", "canonical_url", "featured_image_url", "interviewee", "interviewee_role", "unit"]) {
+      assert.equal(k in p, false, `${k} no debería ir`);
+    }
+    assert.equal(p.title, "T corregido");
+    // Y si quien edita sí lo escribe, va.
+    assert.equal(formToPayload({ ...otraCosa, meta_title: "Mío" }, base).meta_title, "Mío");
   });
 
   test("lo que no se toca se manda tal cual, para no pisar nada (M-44)", () => {

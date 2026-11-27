@@ -310,7 +310,7 @@ export const AdminPostEditor = () => {
     // principal de un borrador listo, y publicar la versión de antes sería una trampa.
     const guardarYPublicar = async (id) => {
         if (hayCambios(form, base)) {
-            await patchAdminPost(id, formToPayload(form));
+            await patchAdminPost(id, formToPayload(form, base));
         }
         return publishAdminPost(id);
     };

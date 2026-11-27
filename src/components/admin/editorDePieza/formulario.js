@@ -336,15 +336,32 @@ export const postToForm = (post) => {
 };
 
 /**
- * Vacío es «bórralo». El servidor lee una clave que no viene como «déjalo como está»
- * (`piezas/edicion.py`, `_copiar_campos`), así que mandar `undefined` -- que se cae del
- * JSON -- dejaba el valor viejo: se borraba el cargo de un entrevistado, se guardaba, el
- * aviso decía «guardado» y el cargo volvía (M-44). Estos campos aceptan `null` al crear
- * y al editar (`PostCreateSchema` y `PostUpdateSchema`).
+ * Lo que se manda de un campo de texto que se puede quitar, mirando también cómo estaba
+ * al abrir o al guardar por última vez (`base`, lo guardado):
+ *
+ * - con texto, el texto;
+ * - vacío y **la base lo tenía**: `null`, que es «bórralo». El servidor lee una clave que
+ *   no viene como «déjalo como está» (`piezas/edicion.py`, `_copiar_campos`), así que
+ *   mandar `undefined` -- que se cae del JSON -- dejaba el valor viejo: se borraba el
+ *   cargo de un entrevistado, se guardaba, el aviso decía «guardado» y el cargo volvía
+ *   (M-44). Estos campos aceptan `null` al crear y al editar;
+ * - vacío y **la base también**: no se manda. Quien edita no borró nada, y lo que el
+ *   servidor haya puesto mientras tanto se queda. Es el caso del reloj del SEO
+ *   (`seo_service.py`): se publica una pieza sin meta título, el reloj se lo pone, y un
+ *   guardado posterior sin recargar mandaba `null`. El servidor lo leía como un cambio de
+ *   una persona (`piezas/campos.py`, `_apply_seo`): dejaba el SEO vacío y lo marcaba
+ *   como escrito a mano.
+ *
+ * Sin `base` (una pieza nueva) no hay nada que borrar: vacío no se manda.
  */
-const vacioEsNulo = (valor) => String(valor ?? "").trim() || null;
+const textoQuitable = (form, base, campo) => {
+    const valor = String(form[campo] ?? "").trim();
+    if (valor) return valor;
+    return String(base?.[campo] ?? "").trim() ? null : undefined;
+};
 
-export const formToPayload = (form) => {
+/** `base`: lo guardado (ver `textoQuitable`). */
+export const formToPayload = (form, base = null) => {
     let publishedAtValue;
     if (form.published_at && String(form.published_at).trim()) {
         publishedAtValue = caracasToIso(String(form.published_at).trim());
@@ -361,11 +378,11 @@ export const formToPayload = (form) => {
         // error borraría una pieza entera.
         content: form.content.trim() || undefined,
         // Los del SEO, la dirección canónica y la imagen por URL de antes de la
-        // biblioteca: vacíos, nulos (ver `vacioEsNulo`). Con esto funciona «Quitarla».
-        meta_title: vacioEsNulo(form.meta_title),
-        meta_description: vacioEsNulo(form.meta_description),
-        canonical_url: vacioEsNulo(form.canonical_url),
-        featured_image_url: vacioEsNulo(form.featured_image_url),
+        // biblioteca: vaciados, nulos (ver `textoQuitable`). Así funciona «Quitarla».
+        meta_title: textoQuitable(form, base, "meta_title"),
+        meta_description: textoQuitable(form, base, "meta_description"),
+        canonical_url: textoQuitable(form, base, "canonical_url"),
+        featured_image_url: textoQuitable(form, base, "featured_image_url"),
         status: form.status.trim() || undefined,
         published_at: publishedAtValue,
         // Sent even when blank so clearing a byline actually clears it.
@@ -377,9 +394,9 @@ export const formToPayload = (form) => {
             .filter((f) => f.name),
         // Se mandan en cualquier formato, como los trajo la pieza: el servidor no los
         // borra al cambiar de formato, y aquí tampoco.
-        interviewee: vacioEsNulo(form.interviewee),
-        interviewee_role: vacioEsNulo(form.interviewee_role),
-        unit: vacioEsNulo(form.unit),
+        interviewee: textoQuitable(form, base, "interviewee"),
+        interviewee_role: textoQuitable(form, base, "interviewee_role"),
+        unit: textoQuitable(form, base, "unit"),
     };
     // Sent even when empty: clearing every topic is a real edit, and `undefined`
     // would read as "leave them alone".

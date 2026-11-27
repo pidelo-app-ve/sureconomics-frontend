@@ -220,6 +220,29 @@
   font-weight: 700;
 }
 
+/* Mientras la página aplica un filtro recién pulsado (el eco `pulsado` de ContentExplorer):
+   las cifras y la lista son todavía las de antes, así que se atenúan un poco para que no
+   parezcan las del botón nuevo. Solo opacidad, nada se mueve; con un respiro de 80 ms,
+   para que un filtro rápido no parpadee. La lista, con `:has()`: las secciones de la página
+   que no llevan el buscador (portada, /explorar) o la lista que va en la misma sección que
+   él (/articulos, /audiovisual). Donde el navegador no entienda `:has()`, no se atenúa. */
+.se-explorer--pendiente .se-explorer__total,
+.se-explorer--pendiente .se-explorer__n,
+main:has(.se-explorer--pendiente) > section:not(:has(.se-explorer)),
+section:has(.se-explorer--pendiente) .se-listing {
+  opacity: 0.55;
+  transition: opacity 120ms ease 80ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-explorer--pendiente .se-explorer__total,
+  .se-explorer--pendiente .se-explorer__n,
+  main:has(.se-explorer--pendiente) > section:not(:has(.se-explorer)),
+  section:has(.se-explorer--pendiente) .se-listing {
+    transition: none;
+  }
+}
+
 .se-explorer__clear {
   flex: 0 0 auto;
   padding: 10px 14px;

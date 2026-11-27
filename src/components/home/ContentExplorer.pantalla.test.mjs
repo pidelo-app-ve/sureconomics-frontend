@@ -63,6 +63,7 @@ const empezar = ({ aplicar = true } = {}) => {
 test("al pulsar, la opción se enciende y la página recibe la selección", async () => {
   empezar();
   await act(async () => fireEvent.click(opcion("Petróleo")));
+  assert.ok(!document.querySelector(".se-explorer").classList.contains("se-explorer--pendiente"), "ya aplicada: nada atenuado");
   assert.equal(opcion("Petróleo").getAttribute("aria-pressed"), "true");
   assert.deepEqual(vistas, [{ temas: ["Petróleo"], geos: [] }]);
   assert.ok(ficha("Petróleo"), "y su ficha para quitarlo");
@@ -73,6 +74,11 @@ test("el botón se enciende aunque la página aún no lo haya aplicado", async (
   await act(async () => fireEvent.click(opcion("Inflación")));
   assert.equal(opcion("Inflación").getAttribute("aria-pressed"), "true");
   assert.ok(opcion("Inflación").classList.contains("se-explorer__opt--on"));
+  // Y mientras la página no lo aplica, el buscador lo dice (las cifras y la lista se atenúan).
+  const raiz = document.querySelector(".se-explorer");
+  assert.ok(raiz.classList.contains("se-explorer--pendiente"));
+  await act(async () => fijar({ temas: new Set(["Inflación"]), geos: new Set() }));
+  assert.ok(!raiz.classList.contains("se-explorer--pendiente"), "aplicado: vuelve a como estaba");
   // El rótulo del desplegable también.
   assert.ok(pantalla.getByRole("button", { name: /Inflación/, expanded: true }));
 });

@@ -22,6 +22,8 @@ import "./contentExplorer.css";
  * lista nueva sin bloquear la pantalla. En cuanto la página la tiene, `pulsado` se olvida
  * y vuelve a mandar ella: no es una segunda copia, solo el eco del dedo. Las cifras de
  * cada opción son siempre las de la página (`useCuentas`), las mismas que la lista.
+ * Mientras dura el eco, las cifras y la lista se atenúan un poco (`se-explorer--pendiente`,
+ * en `contentExplorer.css`): son todavía las de antes y no deben parecer las del botón nuevo.
  */
 
 /**
@@ -203,7 +205,7 @@ export const ContentExplorer = ({
     : t("comun.buscar");
 
   return (
-    <div className="se-explorer" ref={rootRef}>
+    <div className={`se-explorer${pulsado ? " se-explorer--pendiente" : ""}`} ref={rootRef}>
       <div className="se-explorer__bar">
         {onQueryChange ? (
           <div className="se-explorer__field">

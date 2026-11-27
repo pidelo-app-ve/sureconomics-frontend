@@ -21,6 +21,15 @@
  * alto del marco de la página vuelve a ponerla en su sitio. Para en cuanto el lector toca, gira la
  * rueda o pulsa una tecla (manda él), y como mucho a los `TOPE_RESTAURAR_MS`.
  *
+ * **Con la página bloqueada, espera.** Una ventana encima (la invitación al boletín, el menú
+ * del teléfono) pone `overflow: hidden` en `<html>` o en `<body>`: la página deja de poder
+ * desplazarse y cualquier `scrollTo` se queda corto (medido en Edge: 2400 pedidos, 562
+ * dados, y el lector se quedaba ahí al cerrarla). Mientras dure, `restaurar` no mueve nada,
+ * no la sueltan ni los gestos (los de dentro de la ventana no son del lector con la página)
+ * ni el tope; al desbloquearse, la vuelve a poner en su sitio. Y quien mide cuánto se ha
+ * leído (la propia invitación) no cuenta lo que se desplaza mientras se restaura
+ * (`restaurando`): eso no lo ha leído nadie.
+ *
  * Mientras tanto, sin el anclaje de desplazamiento del navegador (`overflow-anchor`): al
  * crecer la portada por encima de lo que se ve (con la página aún corta, el pie), Chrome
  * la desplazaba para dejar el pie quieto, y lo hacía después de que avisara el vigía de
@@ -92,31 +101,80 @@ export const cargaQueRestaura = (ventana = globalThis.window) => {
 };
 
 /**
+ * Si la página no se puede desplazar ahora: `<html>` o `<body>` con `overflow: hidden` (una
+ * ventana abierta encima). El `overflow-x: hidden` que lleva siempre `body` no cuenta.
+ */
+export const desplazamientoBloqueado = (ventana = globalThis.window) => {
+  try {
+    const doc = ventana?.document;
+    return [doc?.documentElement, doc?.body].some(
+      (el) => el && (el.style?.overflow === "hidden" || ventana.getComputedStyle?.(el)?.overflowY === "hidden")
+    );
+  } catch {
+    return false;
+  }
+};
+
+/** Cuántas restauraciones siguen sosteniendo su altura (una, como mucho, en la práctica). */
+let activas = 0;
+
+/** Si ahora mismo se está restaurando una altura: lo que se desplace no lo hizo el lector. */
+export const restaurando = () => activas > 0;
+
+/**
  * Lleva la página a `y` y la sostiene ahí mientras el contenido cambia de alto. Devuelve
  * con qué soltarla antes (la limpieza del efecto, al cambiar otra vez de página).
  * `alSoltar` avisa cuando deja de sostenerla, por lo que sea.
  */
 export const restaurar = (y, { ventana = globalThis.window, tope = TOPE_RESTAURAR_MS, alSoltar = null } = {}) => {
+  // Si estaba bloqueada la última vez que se miró: al dejar de estarlo, se vuelve a `y`.
+  let estabaBloqueada = false;
   const ir = () => {
+    estabaBloqueada = desplazamientoBloqueado(ventana);
+    if (estabaBloqueada) return;
     if (Math.abs((ventana.scrollY ?? 0) - y) > 1) ventana.scrollTo(0, y);
   };
   const raiz = ventana.document?.documentElement;
   const anclaje = raiz?.style.overflowAnchor ?? "";
   if (raiz) raiz.style.overflowAnchor = "none";
+  activas += 1;
   ir();
   let hecho = false;
   let vigia = null;
+  let bloqueo = null;
+  let reloj = null;
   const soltar = () => {
     if (hecho) return;
     hecho = true;
+    activas -= 1;
     if (raiz) raiz.style.overflowAnchor = anclaje;
     vigia?.disconnect();
+    bloqueo?.disconnect();
     clearTimeout(reloj);
-    GESTOS.forEach((gesto) => ventana.removeEventListener(gesto, soltar, true));
+    GESTOS.forEach((gesto) => ventana.removeEventListener(gesto, alGesto, true));
     alSoltar?.();
   };
-  const reloj = setTimeout(soltar, tope);
-  GESTOS.forEach((gesto) => ventana.addEventListener(gesto, soltar, { capture: true, passive: true }));
+  // El tope no corre mientras la página está bloqueada: se vuelve a mirar después.
+  const armarReloj = () => {
+    clearTimeout(reloj);
+    reloj = setTimeout(() => (desplazamientoBloqueado(ventana) ? armarReloj() : soltar()), tope);
+  };
+  const alGesto = () => {
+    if (!desplazamientoBloqueado(ventana)) soltar();
+  };
+  armarReloj();
+  GESTOS.forEach((gesto) => ventana.addEventListener(gesto, alGesto, { capture: true, passive: true }));
+  // Al cerrarse la ventana de encima (cambia el estilo o la clase de `<html>` o `<body>`).
+  if (typeof ventana.MutationObserver === "function" && raiz) {
+    bloqueo = new ventana.MutationObserver(() => {
+      if (!estabaBloqueada) return;
+      ir();
+      if (!estabaBloqueada) armarReloj();
+    });
+    for (const el of [raiz, ventana.document.body].filter(Boolean)) {
+      bloqueo.observe(el, { attributes: true, attributeFilter: ["style", "class"] });
+    }
+  }
   // El marco de la página (lo primero dentro de `#root`) y no `#root`, que mide una pantalla
   // (`index.css`) y el contenido lo desborda: su tamaño no cambia nunca.
   const raizDeReact = ventana.document?.getElementById("root");

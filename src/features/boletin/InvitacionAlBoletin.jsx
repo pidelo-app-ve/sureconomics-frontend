@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router-dom";
 import { EVENTO_CONSENTIMIENTO, consentimiento } from "../analitica";
 import { cargarUnaVez } from "../../lib/cargarUnaVez";
+import { restaurando } from "../../lib/desplazamiento";
 import {
   ESPERA_MS,
   debeInvitar,
@@ -120,6 +121,9 @@ export const InvitacionAlBoletin = () => {
     let pendiente = false;
     const alBajar = () => {
       if (pendiente) return;
+      // Lo que se mueve mientras «atrás» devuelve la página a su altura no lo ha leído
+      // nadie: contarlo abría la invitación encima de la restauración (ver `restaurando`).
+      if (restaurando()) return;
       pendiente = true;
       window.requestAnimationFrame(() => {
         pendiente = false;

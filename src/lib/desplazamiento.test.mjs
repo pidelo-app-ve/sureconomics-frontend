@@ -11,8 +11,10 @@ import {
   apuntar,
   cargaQueRestaura,
   claveDe,
+  desplazamientoBloqueado,
   guardarPosiciones,
   leerPosiciones,
+  restaurando,
   restaurar,
 } from "./desplazamiento.js";
 
@@ -127,6 +129,74 @@ test("restaurar: al tope deja de sostenerla, y avisa una vez", async (t) => {
   assert.ok(v.vigias[0].desconectado);
   v.crecer(6000);
   assert.equal(v.scrollY, 100);
+});
+
+/** Una ventana que se puede bloquear (como la invitación al boletín: `overflow: hidden` en `<html>`). */
+const bloqueable = (alto) => {
+  const v = ventanaDePrueba({ alto });
+  v.document.body.style = { overflow: "" };
+  const vigiasDeEstilo = [];
+  v.MutationObserver = class {
+    constructor(avisar) {
+      this.avisar = avisar;
+      this.desconectado = false;
+      vigiasDeEstilo.push(this);
+    }
+    observe() {}
+    disconnect() {
+      this.desconectado = true;
+    }
+  };
+  /** Abre o cierra la ventana de encima: el navegador avisa del cambio de estilo. */
+  v.bloquear = (si) => {
+    v.document.documentElement.style.overflow = si ? "hidden" : "";
+    vigiasDeEstilo.filter((x) => !x.desconectado).forEach((x) => x.avisar([]));
+  };
+  return v;
+};
+
+test("restaurar: con una ventana encima (página bloqueada) espera, y al cerrarse la lleva a su sitio", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const v = bloqueable(900);
+  restaurar(2400, { ventana: v });
+  assert.equal(v.scrollY, 100);
+  // Se abre la invitación: la página ya no baja; la portada termina de crecer debajo.
+  v.bloquear(true);
+  const llamadas = v.llamadas;
+  v.crecer(6000);
+  assert.equal(v.llamadas, llamadas, "con la página bloqueada no se mueve nada");
+  // Los toques dentro de la ventana y el tope no la sueltan.
+  v.disparar("pointerdown");
+  v.disparar("keydown");
+  t.mock.timers.tick(TOPE_RESTAURAR_MS * 3);
+  assert.equal(restaurando(), true);
+  // Se cierra: vuelve a su sitio, y sigue sostenida hasta el siguiente gesto.
+  v.bloquear(false);
+  assert.equal(v.scrollY, 2400);
+  v.disparar("touchstart");
+  assert.equal(restaurando(), false);
+});
+
+test("restaurando: solo mientras se sostiene una altura", () => {
+  const v = ventanaDePrueba({ alto: 900 });
+  assert.equal(restaurando(), false);
+  const soltar = restaurar(2400, { ventana: v });
+  assert.equal(restaurando(), true);
+  soltar();
+  soltar();
+  assert.equal(restaurando(), false, "soltar dos veces no descuenta dos");
+});
+
+test("desplazamientoBloqueado: overflow hidden en html o body; el overflow-x de body no cuenta", () => {
+  const con = (html, body) => ({
+    document: { documentElement: { style: {}, ...html }, body: { style: {}, ...body } },
+    getComputedStyle: (el) => ({ overflowY: el.calculado ?? "visible" }),
+  });
+  assert.equal(desplazamientoBloqueado(con({ style: { overflow: "hidden" } }, {})), true);
+  assert.equal(desplazamientoBloqueado(con({}, { calculado: "hidden" })), true);
+  // `overflow-x: hidden` en body: el navegador calcula `overflow-y: auto`.
+  assert.equal(desplazamientoBloqueado(con({}, { calculado: "auto" })), false);
+  assert.equal(desplazamientoBloqueado(undefined), false);
 });
 
 test("restaurar: sin ResizeObserver, al menos el primer intento", () => {

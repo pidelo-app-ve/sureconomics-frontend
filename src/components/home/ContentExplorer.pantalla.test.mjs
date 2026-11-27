@@ -95,6 +95,18 @@ test("dos toques antes de que la página aplique nada: la página recibe los dos
   assert.deepEqual(vistas.at(-1), { temas: ["Inflación"], geos: [] });
 });
 
+test("pulsar y quitar antes de que la página aplique nada (misma selección): no se queda atenuado", async () => {
+  // Como /explorar: la dirección final es la misma y la página devuelve el mismo objeto.
+  empezar({ aplicar: false });
+  await act(async () => fireEvent.click(opcion("Petróleo")));
+  const raiz = document.querySelector(".se-explorer");
+  assert.ok(raiz.classList.contains("se-explorer--pendiente"));
+  await act(async () => fireEvent.click(opcion("Petróleo")));
+  assert.deepEqual(vistas.at(-1), { temas: [], geos: [] });
+  assert.ok(!raiz.classList.contains("se-explorer--pendiente"), "ya coincide con la página");
+  assert.equal(opcion("Petróleo").getAttribute("aria-pressed"), "false");
+});
+
 test("si la página cambia la selección por su cuenta (limpiar, atrás), manda la página", async () => {
   empezar({ aplicar: false });
   await act(async () => fireEvent.click(opcion("Petróleo")));

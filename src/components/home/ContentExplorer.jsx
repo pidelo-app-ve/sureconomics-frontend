@@ -64,6 +64,15 @@ const useCuentas = ({ pieces, temas, geos, query, geoTop, regiones, ancestros, t
     return { count, topicOptions, masTratados };
   }, [pieces, temas, geos, query, geoTop, regiones, ancestros, temasFijos, rapidos]);
 };
+/**
+ * Si lo pulsado ya es, en contenido, la selección de la página. Hace falta además de mirar
+ * si cambió el objeto: en `/explorar`, pulsar una opción y quitarla antes de que termine
+ * el filtrado deja la misma dirección, el router devuelve la misma selección y el eco (y
+ * la atenuación de la lista) se quedaba puesto para siempre.
+ */
+const mismos = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+const yaAplicado = (pulsado, temas, geos) => mismos(pulsado.temas, temas) && mismos(pulsado.geos, geos);
+
 /** La flecha de los desplegables: dibujada, no un carácter. */
 const Flecha = () => (
   <svg className="se-explorer__caret" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">
@@ -96,7 +105,7 @@ export const ContentExplorer = ({
   // Lo que el lector acaba de pulsar, hasta que la página lo aplica (ver arriba).
   const [pulsado, setPulsado] = useState(null);
   const [deLaPagina, setDeLaPagina] = useState({ temas, geos });
-  if (deLaPagina.temas !== temas || deLaPagina.geos !== geos) {
+  if (deLaPagina.temas !== temas || deLaPagina.geos !== geos || (pulsado && yaAplicado(pulsado, temas, geos))) {
     setDeLaPagina({ temas, geos });
     setPulsado(null);
   }

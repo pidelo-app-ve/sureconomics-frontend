@@ -71,6 +71,28 @@ La frase nueva es cierta. La vieja no lo era.
 tras el consentimiento. Lo segundo mantiene la promesa intacta pero deja la cinta de
 mercado en blanco a quien rechace, que es una decisión de producto y no técnica.
 
+**Lo que cambió el 26-nov-2026 (C-04 y D-22 de la auditoría del 17-nov).** Ya no se mete
+el script de `s3.tradingview.com` en la página: `MarketTicker.jsx` monta un marco propio
+que apunta directo a `www.tradingview-widget.com`, y la CSP ya no deja cargar scripts de
+TradingView. Lo que eso arregla y lo que no:
+
+- **Arregla:** el código de TradingView ya no corre en nuestro origen, así que no puede
+  leer la sesión del equipo ni nada de la página (seguridad, C-04). Y el marco lleva
+  `credentialless`: en Chrome y Edge arranca con un cajón de cookies de usar y tirar que
+  se vacía al cerrar la página, así que el identificador de Snowplow (`_sp_id`) ya no
+  dura de una visita a otra. Firefox y Safari no conocen `credentialless`, pero aíslan o
+  bloquean por su cuenta las cookies de terceros.
+- **No arregla:** el marco se sigue pidiendo sin esperar al «Aceptar» (al primer gesto o
+  a los seis segundos), así que TradingView sigue recibiendo la IP del visitante y, en
+  Chrome, puede guardar cookies dentro de su marco mientras dura la página. Para el
+  abogado: si eso ya pide consentimiento (art. 22.2 LSSI) o basta con declararlo en la
+  tabla, y si la frase del aviso puede quedarse.
+- **Medido** en Edge sin ventana, perfil nuevo, compilación local (26-nov-2026): ninguna
+  cookie de TradingView, ni antes ni después del cambio, ni antes ni después de
+  «Aceptar»; dentro del marco, `document.cookie` vacío y ninguna llamada a
+  `snowplow-pixel.tradingview.com`. Las tres cookies de arriba las vio PageSpeed (Chrome)
+  el 16-nov; en Edge no salen.
+
 ## 2. Los vídeos incrustados son terceros
 
 El sitio monta iframes de `tiktok.com` (bloque «En redes»), `player.vimeo.com` y

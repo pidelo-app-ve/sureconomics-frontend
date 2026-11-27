@@ -28,7 +28,7 @@
 }
 
 .se-contact .se-form-control:hover:not(:disabled):not(:focus) {
-  border-color: rgba(var(--se-tinte), 0.22);
+  border-color: var(--se-form-control-border-hover);
   background-color: rgba(255, 255, 255, 0.065);
 }
 

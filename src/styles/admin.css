@@ -124,6 +124,10 @@
   --se-form-surface: #ffffff;
   --se-form-border: rgba(0, 0, 0, 0.16);
   --se-form-border-strong: rgba(0, 0, 0, 0.26);
+  /* Los campos (E-17): negro al 45 % da 3,35:1 sobre blanco y 3,12:1 sobre el lienzo;
+     al 16 % daba 1,45. Ver `--se-form-control-border` en `blog.css`. */
+  --se-form-control-border: rgba(0, 0, 0, 0.45);
+  --se-form-control-border-hover: rgba(0, 0, 0, 0.6);
   --se-form-text: rgba(0, 0, 0, 0.9);
   --se-form-muted: rgba(0, 0, 0, 0.7);
   --se-form-placeholder: rgba(0, 0, 0, 0.42);
@@ -189,13 +193,13 @@
 
 .se-admin-app .se-form-control {
   background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(var(--se-tinte), 0.16);
+  border-color: var(--se-form-control-border);
   color: rgba(var(--se-tinte), 0.9);
   box-shadow: inset 0 1px 0 rgba(var(--se-tinte), 0.08);
 }
 
 .se-admin-app .se-form-control:hover:not(:disabled):not(:focus) {
-  border-color: rgba(var(--se-tinte), 0.22);
+  border-color: var(--se-form-control-border-hover);
   background-color: rgba(255, 255, 255, 0.065);
 }
 

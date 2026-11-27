@@ -189,7 +189,7 @@ export const guardarPieza = ({ publicar = false } = {}, d) =>
     d.setSaveState({ status: "loading", message: "" });
     d.setActionState({ status: "idle", message: "", kind: "" });
     try {
-      const payload = formToPayload(d.form);
+      const payload = formToPayload(d.form, d.base);
       if (publicar) payload.status = "published";
       if (d.isCreate) {
         const created = await d.createAdminPost(payload, d.claveDeCreacion());

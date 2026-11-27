@@ -124,7 +124,9 @@ export const rutasPublicas = (lang) => [
             { path: "resumen", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
             { path: "resumen/:fecha", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
             { path: "resumen/:fecha/:edicion", lazy: pagina(() => import("./pages/Resumen"), "Resumen", { zonas: ["resumen"], lang }) },
-            { path: "backoffice", element: <Navigate to="/cuenta/entrar" replace /> },
+            // La vieja puerta del equipo. En su idioma (`Redirigir`): `/en/backoffice` iba a
+            // `/cuenta/entrar` en español.
+            { path: "backoffice", element: <Redirigir to="/cuenta/entrar" replace /> },
             { path: "cuenta/entrar", lazy: pagina(() => import("./features/cuenta/pages/CuentaEntrar"), "CuentaEntrar", { zonas: ["cuenta"], lang }) },
             { path: "cuenta/registro", lazy: pagina(() => import("./features/cuenta/pages/CuentaRegistro"), "CuentaRegistro", { zonas: ["cuenta"], lang }) },
             { path: "cuenta/verificar-email", lazy: pagina(() => import("./features/cuenta/pages/CuentaVerificarEmail"), "CuentaVerificarEmail", { zonas: ["cuenta"], lang }) },
